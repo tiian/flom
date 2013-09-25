@@ -143,7 +143,7 @@ extern "C" {
      * @param out_stream IN destination standard I/O stream
      */
     void flom_trace_hex_data(const char *prefix, const byte_t *data,
-                             flom_word_t size, FILE *out_stream);
+                             size_t size, FILE *out_stream);
 
 
       
@@ -156,7 +156,7 @@ extern "C" {
      * @param out_stream IN destination standard I/O stream
      */
     void flom_trace_text_data(const char *prefix, const byte_t *data,
-                              flom_word_t size, FILE *out_stream);
+                              size_t size, FILE *out_stream);
 
 
 

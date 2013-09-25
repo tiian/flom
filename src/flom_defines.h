@@ -181,17 +181,6 @@
 
 
 
-/* This is necessary for xid.formatID serialization */
-#if (SIZEOF_LONG_INT == 4)
-# define FLOM_SERIALIZED_LONG_INT 10
-#elif (SIZEOF_LONG_INT == 8)
-# define FLOM_SERIALIZED_LONG_INT 20
-#else
-# error "Unable to determine serialized length of a long int"
-#endif
-
-
-
 #define FLOM_PATH_SEPARATOR '/'
 
 
@@ -217,6 +206,13 @@ extern "C" {
 
 
       
+    /**
+     * A byte is the fundamental I/O unit
+     */
+    typedef uint8_t byte_t;
+    
+  
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

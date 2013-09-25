@@ -101,9 +101,9 @@ void flom_trace(const char *fmt, ...)
 
 
 void flom_trace_hex_data(const char *prefix, const byte_t *data,
-                         flom_word_t size, FILE *out_stream)
+                         size_t size, FILE *out_stream)
 {
-    flom_word_t i;
+    size_t i;
     struct tm broken_time;
     struct timeval tv;
     
@@ -132,9 +132,9 @@ void flom_trace_hex_data(const char *prefix, const byte_t *data,
 
 
 void flom_trace_text_data(const char *prefix, const byte_t *data,
-                          flom_word_t size, FILE *out_stream)
+                          size_t size, FILE *out_stream)
 {
-    flom_word_t i;
+    size_t i;
     struct tm broken_time;
     struct timeval tv;
     
