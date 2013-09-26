@@ -40,7 +40,7 @@ then
 	AC_MSG_ERROR([it seems glib-2.0 is not configured with pkg-config])
 else
 	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0)"
-	LDFLAGS_GLIB="$($PKG_CONFIG --libs glib-2.0)"
+	LDFLAGS="$LDFLAGS $($PKG_CONFIG --libs glib-2.0) $($PKG_CONFIG --libs gthread-2.0)"
 	AC_MSG_RESULT([yes])
 fi
 

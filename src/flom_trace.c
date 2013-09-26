@@ -52,6 +52,11 @@ int flom_trace_initialized = FALSE;
 
 unsigned long flom_trace_mask = 0;
 
+/**
+ * This mutex is used to avoid contention (bad output) on trace file
+ */
+GStaticMutex flom_trace_mutex = G_STATIC_MUTEX_INIT;
+
 
 
 /**
@@ -59,6 +64,11 @@ unsigned long flom_trace_mask = 0;
  */
 void flom_trace_init(void)
 {
+    /* initialize thread system if necessary */
+    if (!g_thread_supported ()) g_thread_init(NULL);
+
+    /* lock the mutex */
+    g_static_mutex_lock(&flom_trace_mutex);
     if (!flom_trace_initialized) {
         /* retrieve environemnt variable */
         if (getenv(FLOM_TRACE_MASK_ENV_VAR) != NULL)
@@ -68,6 +78,8 @@ void flom_trace_init(void)
             flom_trace_mask = 0x0;
         flom_trace_initialized = TRUE;
     }
+    /* remove the lock from mutex */
+    g_static_mutex_unlock(&flom_trace_mutex);
 }
 
 
@@ -83,15 +95,20 @@ void flom_trace(const char *fmt, ...)
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
 
+    /* lock the mutex */
+    g_static_mutex_lock(&flom_trace_mutex);
     /* default header */
     fprintf(stderr,
-            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d ["  PID_T_FORMAT "] ",
+            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [" PID_T_FORMAT
+            "/%p] ",
             broken_time.tm_year + 1900, broken_time.tm_mon + 1,
             broken_time.tm_mday, broken_time.tm_hour,
             broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
-            getpid());
+            getpid(), g_thread_self());
     /* custom message */
     vfprintf(stderr, fmt, args);
+    /* remove the lock from mutex */
+    g_static_mutex_unlock(&flom_trace_mutex);
 #else
 # error "vfprintf is necessary for flom_trace function!"
 #endif
@@ -111,19 +128,24 @@ void flom_trace_hex_data(const char *prefix, const byte_t *data,
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
 
+    /* lock the mutex */
+    g_static_mutex_lock(&flom_trace_mutex);
     /* default header */
     fprintf(out_stream,
-            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [" PID_T_FORMAT "] %s",
+            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [" PID_T_FORMAT
+            "/%p] %s",
             broken_time.tm_year + 1900, broken_time.tm_mon + 1,
             broken_time.tm_mday, broken_time.tm_hour,
             broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
-            getpid(), prefix);
+            getpid(), g_thread_self(), prefix);
     /* dump data */
     for (i = 0; i < size; ++i) {
         fprintf(out_stream, "%02x ", (data[i] & 0xff));
     } /* for (i = 0; i < size; ++i) */
     /* close trace record */
     fprintf(out_stream, "\n");
+    /* remove the lock from mutex */
+    g_static_mutex_unlock(&flom_trace_mutex);
 #else
 # error "vfprintf is necessary for flom_trace_hex_data function!"
 #endif
@@ -142,14 +164,16 @@ void flom_trace_text_data(const char *prefix, const byte_t *data,
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
 
+    /* lock the mutex */
+    g_static_mutex_lock(&flom_trace_mutex);
     /* default header */
     fprintf(out_stream,
             "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d ["
-            PID_T_FORMAT "] %s",
+            PID_T_FORMAT "/%p] %s",
             broken_time.tm_year + 1900, broken_time.tm_mon + 1,
             broken_time.tm_mday, broken_time.tm_hour,
             broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
-            getpid(), prefix);
+            getpid(), g_thread_self(), prefix);
     /* dump data */
     for (i = 0; i < size; ++i) {
         if (data[i] >= (byte_t)' ' && data[i] < (byte_t)0x80)
@@ -159,6 +183,8 @@ void flom_trace_text_data(const char *prefix, const byte_t *data,
     } /* for (i = 0; i < size; ++i) */
     /* close trace record */
     fprintf(out_stream, "\n");
+    /* remove the lock from mutex */
+    g_static_mutex_unlock(&flom_trace_mutex);
 #else
 # error "vfprintf is necessary for flom_trace_hex_data function!"
 #endif

@@ -16,7 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with FLOM.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdio.h>
+#include <config.h>
+
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 
 
 
@@ -27,12 +34,46 @@
 #define FLOM_TRACE_MODULE FLOM_TRACE_MOD_GENERIC
 
 
+static gboolean print_version = FALSE;
+static gchar **command_argv = NULL;
+/* command line options */
+static GOptionEntry entries[] =
+{
+    { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
+    { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
+    { NULL }
+};
+
+
 
 int main (int argc, char *argv[])
 {
+    GError *error = NULL;
+    GOptionContext *option_context;
+    int i;
+    
     FLOM_TRACE_INIT;
-        
+
+    option_context = g_option_context_new("-- command to execute");
+    g_option_context_add_main_entries(option_context, entries, NULL);
+    if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
+        g_print("option parsing failed: %s\n", error->message);
+        exit(1);
+    }
+    g_option_context_free(option_context);
+
+    if (command_argv != NULL) {
+        guint i, num;
+        num = g_strv_length (command_argv);
+        for (i = 0; i < num; ++i) {
+            g_print ("argv[%u]: %s\n", i, command_argv[i]);
+        }
+        g_strfreev (command_argv);
+        command_argv = NULL;
+    }
+    
 	printf("Hello world\n");
     FLOM_TRACE(("this is a trace\n"));
+    FLOM_TRACE(("another message\n"));
 	return 0;
 }

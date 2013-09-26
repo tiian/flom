@@ -3747,7 +3747,7 @@ then
 	as_fn_error "it seems glib-2.0 is not configured with pkg-config" "$LINENO" 5
 else
 	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0)"
-	LDFLAGS_GLIB="$($PKG_CONFIG --libs glib-2.0)"
+	LDFLAGS="$LDFLAGS $($PKG_CONFIG --libs glib-2.0) $($PKG_CONFIG --libs gthread-2.0)"
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 fi
