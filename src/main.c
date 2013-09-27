@@ -27,11 +27,13 @@
 
 
 
+#define FLOM_TRACE_MODULE FLOM_TRACE_MOD_GENERIC
+
+
+
+#include "flom_exec.h"
 #include "flom_trace.h"
 
-
-
-#define FLOM_TRACE_MODULE FLOM_TRACE_MOD_GENERIC
 
 
 static gboolean print_version = FALSE;
@@ -68,12 +70,12 @@ int main (int argc, char *argv[])
         for (i = 0; i < num; ++i) {
             g_print ("argv[%u]: %s\n", i, command_argv[i]);
         }
-        g_strfreev (command_argv);
-        command_argv = NULL;
     }
+
+    flom_exec(command_argv);
     
-	printf("Hello world\n");
-    FLOM_TRACE(("this is a trace\n"));
-    FLOM_TRACE(("another message\n"));
+    g_strfreev (command_argv);
+    command_argv = NULL;
+    
 	return 0;
 }

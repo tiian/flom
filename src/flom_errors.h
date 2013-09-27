@@ -1,0 +1,494 @@
+/*
+ * Copyright (c) 2009-2012, Christian Ferrari <tiian@users.sourceforge.net>
+ * All rights reserved.
+ *
+ * This file is part of FLOM.
+ *
+ * FLOM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * FLOM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FLOM.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#ifndef FLOM_ERRORS_H
+# define FLOM_ERRORS_H
+
+#include <config.h>
+
+
+
+#ifdef HAVE_ERRNO_H
+# include <errno.h>
+#endif /* HAVE_ERRNO_H */
+
+
+
+#include <flom_defines.h>
+
+
+
+/*********************************************************
+ *                                                       *
+ * REASON / RETURN CODES                                 *
+ *                                                       *
+ *********************************************************/
+
+
+
+/**
+ * Object not found
+#define FLOM_RC_OBJ_NOT_FOUND                   +1
+ */
+/**
+ * The container is empty
+#define FLOM_RC_EMPTY_CONTAINER                 +2
+ */
+/**
+ * An operation that can not be performed and can safely bypassed has been
+ * requested: the program can go on as no operation was requested
+#define FLOM_RC_BYPASSED_OPERATION              +3
+ */
+/**
+ * Peer has closed TCP/IP connection
+#define FLOM_RC_CONNECTION_CLOSED               +4
+ */
+/**
+ * A truncation occurred because the destination is smaller then the source
+#define FLOM_RC_TRUNCATION_OCCURRED             +5
+ */
+/**
+ * This thread of control should recover some recovery pending transactions
+#define FLOM_RC_RECOVERY_PENDING_TX             +6
+ */
+/**
+ * The digest of the flomc config file changed -> the client config file
+ * changed
+#define FLOM_RC_FLOMC_CONF_CHANGED              +7
+ */
+/**
+ * The thread is serving the client must be switched to a different one
+#define FLOM_RC_THREAD_SWITCH                   +8
+ */
+/**
+ * Shutdown must be performed
+#define FLOM_RC_ASKED_SHUTDOWN                  +9
+ */
+/**
+ * Only maintenance mode is allowed
+#define FLOM_RC_MAINTENANCE_MODE               +10
+ */
+
+
+
+/**
+ * Successfully completion
+ */
+#define FLOM_RC_OK                               0
+
+
+
+/**
+ * Internal error: unrecoverable status!
+ */
+#define FLOM_RC_INTERNAL_ERROR                  -1
+/**
+ * A parameter passed to a function is OUT OF RANGE
+#define FLOM_RC_OUT_OF_RANGE                    -2
+ */
+/**
+ * Configuration file is broken
+#define FLOM_RC_CONFIG_ERROR                    -3
+ */
+/**
+ * Unespected network event
+#define FLOM_RC_NETWORK_EVENT_ERROR             -4
+ */
+/**
+ * A passed object/option/arg is NULL and it can NOT be inferred from a default
+ * value
+#define FLOM_RC_NULL_OBJECT                     -5
+ */
+/**
+ * The container is full and can NOT store more elements
+#define FLOM_RC_CONTAINER_FULL                  -6
+ */
+/**
+ * The process has been stopped to avoid a buffer overflow
+#define FLOM_RC_BUFFER_OVERFLOW                 -7
+ */
+/**
+ * A NOT initialized object has been passed to a method/function
+#define FLOM_RC_OBJ_NOT_INITIALIZED             -8
+ */
+/**
+ * A corrupted object has been passed to a function
+#define FLOM_RC_OBJ_CORRUPTED                   -9
+ */
+/**
+ * Status files are corrupted and the server can not start-up
+#define FLOM_RC_CORRUPTED_STATUS_FILE          -10
+ */
+/**
+ * A specified option is not valid for method and/or object status
+#define FLOM_RC_INVALID_OPTION                 -11
+ */
+/**
+ * A routine has been invoked in an improper context
+#define FLOM_RC_PROTOCOL_ERROR                 -12
+ */
+/**
+ * The status (value of any properties) of an object is invalid due to a bug
+ * located elsewhere (a complex "internal error" condition)
+#define FLOM_RC_INVALID_STATUS                 -13
+ */
+/**
+ * Too many resource managers
+#define FLOM_RC_TOO_MANY_RSRMGRS               -14
+ */
+/**
+ * The number of chars of the prefix of the XML message 
+#define FLOM_RC_INVALID_PREFIX_SIZE            -15
+ */
+/**
+ * The XML message is empty and can not be processed
+#define FLOM_RC_EMPTY_XML_MSG                  -16
+ */
+/**
+ * The XML message is malformed and can not be processed
+#define FLOM_RC_MALFORMED_XML_MSG              -17
+ */
+/**
+ * The length of the XML message differs from prefix 
+#define FLOM_RC_INVALID_LENGTH_XML_MSG         -18
+ */
+/**
+ * The XML message is malformed and can not be processed
+#define FLOM_RC_PROPERTY_INVALID_VALUE         -19
+ */
+/**
+ * The XML contains a tag is not known or is in the wrong place
+#define FLOM_RC_XML_UNRECOGNIZED_TAG           -20
+ */
+/**
+ * An operation is referring to asynchronous mode that is not yet implemented
+#define FLOM_RC_ASYNC_NOT_IMPLEMENTED          -21
+ */
+/**
+ * The specified option might be valid, but it's not (yet) supported by FLOM
+#define FLOM_RC_UNSUPPORTED_OPTION             -22
+ */
+/**
+ * A specified file can not be opened because it does not exist
+#define FLOM_RC_FILE_NOT_EXISTS                -23
+ */
+/**
+ * A transaction can not be recovered
+#define FLOM_RC_ABORTED_RECOVERY               -24
+ */
+/**
+ * Client/server recovery configuration do not match 
+#define FLOM_RC_RECOVERY_INFO_MISMATCH         -25
+ */
+/**
+ * A malformed XID has been discovered
+#define FLOM_RC_MALFORMED_XID                  -26
+ */
+
+
+/**
+ * The client status is unknown due to a previous TX_FAIL
+#define FLOM_RC_TX_FAIL                        -97
+ */
+/**
+ * Generic error for an TX error (an TX return code not equal TX_OK)
+#define FLOM_RC_TX_ERROR                       -98
+ */
+/**
+ * Generic error for an XA error (an XA return code not equal XA_OK)
+#define FLOM_RC_XA_ERROR                       -99
+ */
+
+/**
+ * "malloc"/"g_malloc" function error
+#define FLOM_RC_MALLOC_ERROR                  -100
+ */
+/**
+ * "realloc" function error
+#define FLOM_RC_REALLOC_ERROR                 -101
+ */
+/**
+ * "strdup" function error
+#define FLOM_RC_STRDUP_ERROR                  -102
+ */
+/**
+ * "poll" function error
+#define FLOM_RC_POLL_ERROR                   -108
+ */
+/**
+ * "pipe" function error
+#define FLOM_RC_PIPE_ERROR                   -109
+ */
+/**
+ * "open" function error
+#define FLOM_RC_OPEN_ERROR                   -110
+ */
+/**
+ * "close" function error
+#define FLOM_RC_CLOSE_ERROR                  -111
+ */
+/**
+ * "truncate" function error
+#define FLOM_RC_TRUNCATE_ERROR               -112
+ */
+/**
+ * "write" function error
+#define FLOM_RC_WRITE_ERROR                  -113
+ */
+/**
+ * "fread" function error
+#define FLOM_RC_READ_ERROR                   -114
+ */
+/**
+ * "pathconf" function error
+#define FLOM_RC_PATHCONF_ERROR               -115
+ */
+/**
+ * "realpath" function error
+#define FLOM_RC_REALPATH_ERROR               -116
+ */
+/**
+ * "fopen" function error
+#define FLOM_RC_FOPEN_ERROR                  -117
+ */
+/**
+ * "fclose" function error
+#define FLOM_RC_FCLOSE_ERROR                 -118
+ */
+/**
+ * "fgets" function/macro error
+#define FLOM_RC_FGETS_ERROR                  -119
+ */
+/**
+ * "fdatasync" function error
+define FLOM_RC_FDATASYNC_ERROR               -118
+ */
+/**
+ * "fputc"/"putc" function/macro error
+define FLOM_RC_FPUTC_ERROR                   -119
+ */
+/**
+ * "ftruncate" function error
+define FLOM_RC_FTRUNCATE_ERROR               -121
+ */
+/**
+ * "fileno" function error
+define FLOM_RC_FILENO_ERROR                  -122
+ */
+/**
+ * "rename" function error
+define FLOM_RC_RENAME_ERROR                  -123
+ */
+/**
+ * "stat" function error
+#define FLOM_RC_STAT_ERROR                    -122
+ */
+/**
+ * "fstat" function error
+#define FLOM_RC_FSTAT_ERROR                   -123
+ */
+/**
+ * "mmap" function error
+#define FLOM_RC_MMAP_ERROR                    -124
+ */
+/**
+ * "munmap" function error
+#define FLOM_RC_MUNMAP_ERROR                  -125
+ */
+/**
+ * "msync" function error
+#define FLOM_RC_MSYNC_ERROR                   -126
+ */
+
+/**
+ * "vsnprintf" function error
+define FLOM_RC_VSNPRINTF_ERROR               -125
+ */
+/**
+ * "times" function error
+define FLOM_RC_TIMES_ERROR                   -126
+ */
+/**
+ * "uuid_parse" function error
+#define FLOM_RC_UUID_PARSE_ERROR              -127
+ */
+/**
+ * "localtime/localtime_r" function error
+#define FLOM_RC_LOCALTIME_ERROR               -128
+ */
+/**
+ * "gettimeofday" function error
+#define FLOM_RC_GETTIMEOFDAY_ERROR            -129
+ */
+/**
+ * "unlink" function error
+define FLOM_RC_UNLINK_ERROR                  -129
+ */
+/**
+ * "socket" function error
+#define FLOM_RC_SOCKET_ERROR                   -130
+ */
+/**
+ * "setsockopt" function error
+#define FLOM_RC_SETSOCKOPT_ERROR               -131
+ */
+/**
+ * "getsockopt" function error
+#define FLOM_RC_GETSOCKOPT_ERROR               -132
+ */
+/**
+ * "bind" function error
+#define FLOM_RC_BIND_ERROR                     -133
+ */
+/**
+ * "listen" function error
+#define FLOM_RC_LISTEN_ERROR                   -134
+ */
+/**
+ * "accept" function error
+#define FLOM_RC_ACCEPT_ERROR                   -135
+ */
+/**
+ * "shutdown" function error
+#define FLOM_RC_SHUTDOWN_ERROR                 -136
+ */
+/**
+ * "getaddrinfo" function error
+#define FLOM_RC_GETADDRINFO_ERROR              -137
+ */
+/**
+ * "connect" function error
+#define FLOM_RC_CONNECT_ERROR                  -138
+ */
+/**
+ * "recv" function error
+#define FLOM_RC_SEND_ERROR                     -139
+ */
+/**
+ * "recv" function error
+#define FLOM_RC_RECV_ERROR                     -140
+ */
+/**
+ * "getsockname" function error
+#define FLOM_RC_GETSOCKNAME_ERROR              -141
+ */
+/**
+ * "getsockname" function error
+#define FLOM_RC_GETPEERNAME_ERROR              -142
+ */
+/**
+ * "pthread_create" function error
+#define FLOM_RC_PTHREAD_CREATE_ERROR           -150
+ */
+/**
+ * "pthread_mutex_lock" function error
+#define FLOM_RC_PTHREAD_MUTEX_LOCK_ERROR       -151
+ */
+/**
+ * "pthread_mutex_unlock" function error
+#define FLOM_RC_PTHREAD_MUTEX_UNLOCK_ERROR     -152
+ */
+/**
+ * "pthread_rwlock_wrlock" function error
+#define FLOM_RC_PTHREAD_RWLOCK_WRLOCK_ERROR    -153
+ */
+/**
+ * "pthread_rwlock_rlock" function error
+#define FLOM_RC_PTHREAD_RWLOCK_RDLOCK_ERROR    -154
+ */
+/**
+ * "pthread_rwlock_unlock" function error
+#define FLOM_RC_PTHREAD_RWLOCK_UNLOCK_ERROR    -155
+ */
+/**
+ * "xmlReadFile" function error
+#define FLOM_RC_XML_READ_FILE_ERROR            -200
+ */
+/**
+ * "xmlReadDoc" function error
+#define FLOM_RC_XML_READ_DOC_ERROR             -201
+ */
+/**
+ * "xmlReadMemory" function error
+#define FLOM_RC_XML_READ_MEMORY_ERROR          -202
+ */
+/**
+ * "xmlDocGetRootElement" function error
+#define FLOM_RC_XML_DOC_GET_ROOT_ELEMENT_ERROR -203
+ */
+/**
+ * "xmlCharStrdup" function error
+#define FLOM_RC_XML_CHAR_STRDUP_ERROR          -204
+ */
+/**
+ * "xmlStrdup" function error
+#define FLOM_RC_XML_STRDUP_ERROR               -205
+ */
+/**
+ * A glib function returned a NULL pointer; the function is not documented as
+ * returnig NULL. This is basically an internal error
+#define FLOM_RC_G_RETURNED_NULL                -300
+ */
+/**
+ * "g_module_open" function error
+#define FLOM_RC_G_MODULE_OPEN_ERROR            -301
+ */
+/**
+ * "g_module_close" function error
+#define FLOM_RC_G_MODULE_CLOSE_ERROR           -302
+ */
+/**
+ * "g_module_symbol" function error
+#define FLOM_RC_G_MODULE_SYMBOL_ERROR          -303
+ */
+/**
+ * "g_checksum_new" function error
+#define FLOM_RC_G_CHECKSUM_NEW_ERROR           -304
+ */
+/**
+ * "g_checksum_get_string" function error
+#define FLOM_RC_G_CHECKSUM_GET_STRING_ERROR    -305
+ */
+
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
+
+      /**
+       * <B>PUBLIC METHOD</B><BR>
+       * Retrieve the description associated to a return/reason code
+       * @param ret_cod IN return/reason code of the desired description
+       * @return a const string containing a description of reason code
+       */
+      const char *flom_strerror(int ret_cod);
+      
+      
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+
+
+#endif /* FLOM_ERRORS_H */
+
+

@@ -52,6 +52,11 @@
  */
 #define FLOM_TRACE_MOD_GENERIC            0x00000001
 
+/**
+ * trace module for fork & exec functions
+ */
+#define FLOM_TRACE_MOD_EXEC               0x00000002
+
 
 
 /**
