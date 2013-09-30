@@ -58,6 +58,8 @@ const char *flom_strerror(int ret_cod)
             return "OK: no error";
         case FLOM_RC_INTERNAL_ERROR:
             return "ERROR: internal error / unexpected condition / code bug";
+        case FLOM_RC_NULL_OBJECT:
+            return "ERROR: an argument is null";
             /*
         case FLOM_RC_OUT_OF_RANGE:
             return "ERROR: an argument is out of range";
@@ -65,8 +67,6 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: configuration file is broken";
         case FLOM_RC_NETWORK_EVENT_ERROR:
             return "ERROR: an unespected network event raised";
-        case FLOM_RC_NULL_OBJECT:
-            return "ERROR: an argument is null";
         case FLOM_RC_CONTAINER_FULL:
             return "ERROR: the container is full and cannot store more "
                 "elements";
@@ -125,9 +125,13 @@ const char *flom_strerror(int ret_cod)
                 "not equal TX_OK)";
         case FLOM_RC_XA_ERROR:
             return "ERROR: an XA function returned an unexpcted return code";
+            */
+        case FLOM_RC_FORK_ERROR:
+            return "ERROR: 'fork' function returned an error condition";
         case FLOM_RC_MALLOC_ERROR:
             return "ERROR: 'malloc'/'g_malloc' function returned an error "
                 "condition";
+            /*
         case FLOM_RC_REALLOC_ERROR:
             return "ERROR: 'realloc' function returned an error condition";
         case FLOM_RC_STRDUP_ERROR:

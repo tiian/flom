@@ -33,20 +33,65 @@
 #define FLOM_TRACE_MODULE   FLOM_TRACE_MOD_EXEC
 
 
-int flom_exec(gchar **command_argv)
+int flom_exec(gchar **const command_argv)
 {
-    enum Exception { NONE } excp;
+    enum Exception { COMMAND_ARGV_IS_NULL
+                     , FORK_ERROR
+                     , MALLOC_ERROR
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_exec\n"));
     TRY {
-        /* fork */
+        pid_t pid;
 
-        /* execv */
+        if (NULL == command_argv) {
+            FLOM_TRACE(("flom_exec: command_argv cannot be NULL\n"));
+            THROW(COMMAND_ARGV_IS_NULL);
+        }
+        
+        /* fork */
+        if (-1 == (pid = fork())) {
+            THROW(FORK_ERROR);
+        } else if (0 == pid) {
+            /* child process, preparing for execv... */
+            const char *file = command_argv[0];
+            char **argv;
+            guint i, num;
+            num = g_strv_length(command_argv);
+            for (i=0; i<num; ++i)
+                FLOM_TRACE(("flom_exec/child: command_argv[%u]='%s'\n",
+                            i, command_argv[i]));
+            if (NULL == (argv = (char **)malloc((num+1) * sizeof(char *))))
+                THROW(MALLOC_ERROR);
+            for (i=0; i<num-1; ++i) {
+                argv[i] = command_argv[i+1];
+            }
+            argv[num] = NULL;
+            FLOM_TRACE(("flom_exec: file='%s'\n", file));
+            for (i=0; i<num; ++i)
+                FLOM_TRACE(("flom_exec: argv[%u]='%s'\n", i, argv[i]));
+            /* restart from here */
+            g_error("this is child process...\n");
+            /* execv */
+        } else {
+            /* father process */
+            FLOM_TRACE(("flom_exec: child pid=" PID_T_FORMAT "\n", pid));
+            sleep(5);
+        }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case COMMAND_ARGV_IS_NULL:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case FORK_ERROR:
+                ret_cod = FLOM_RC_FORK_ERROR;
+                break;
+            case MALLOC_ERROR:
+                ret_cod = FLOM_RC_MALLOC_ERROR;
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;

@@ -51,7 +51,7 @@ extern "C" {
      * @param parsed argv as prepared by g_option_context_parse
      * @return a reason code
      */
-    int flom_exec(gchar **command_argv);
+    int flom_exec(gchar **const command_argv);
 
     
 

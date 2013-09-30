@@ -98,6 +98,11 @@
  */
 #define FLOM_RC_INTERNAL_ERROR                  -1
 /**
+ * A passed object/option/arg is NULL and it can NOT be inferred from a default
+ * value
+ */
+#define FLOM_RC_NULL_OBJECT                     -2
+/**
  * A parameter passed to a function is OUT OF RANGE
 #define FLOM_RC_OUT_OF_RANGE                    -2
  */
@@ -108,11 +113,6 @@
 /**
  * Unespected network event
 #define FLOM_RC_NETWORK_EVENT_ERROR             -4
- */
-/**
- * A passed object/option/arg is NULL and it can NOT be inferred from a default
- * value
-#define FLOM_RC_NULL_OBJECT                     -5
  */
 /**
  * The container is full and can NOT store more elements
@@ -215,9 +215,13 @@
  */
 
 /**
- * "malloc"/"g_malloc" function error
-#define FLOM_RC_MALLOC_ERROR                  -100
+ * "fork" function error
  */
+#define FLOM_RC_FORK_ERROR                     -100
+/**
+ * "malloc"/"g_malloc" function error
+ */
+#define FLOM_RC_MALLOC_ERROR                   -101
 /**
  * "realloc" function error
 #define FLOM_RC_REALLOC_ERROR                 -101
