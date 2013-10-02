@@ -55,7 +55,7 @@ int flom_exec(gchar **const command_argv)
             THROW(FORK_ERROR);
         } else if (0 == pid) {
             /* child process, preparing for execv... */
-            const char *file = command_argv[0];
+            const char *path = command_argv[0];
             char **argv;
             guint i, num;
             num = g_strv_length(command_argv);
@@ -68,16 +68,16 @@ int flom_exec(gchar **const command_argv)
                 argv[i] = command_argv[i+1];
             }
             argv[num] = NULL;
-            FLOM_TRACE(("flom_exec: file='%s'\n", file));
-            for (i=0; i<num; ++i)
+            FLOM_TRACE(("flom_exec: path='%s'\n", path));
+            for (i=0; i<num-1; ++i)
                 FLOM_TRACE(("flom_exec: argv[%u]='%s'\n", i, argv[i]));
-            /* restart from here */
-            g_error("this is child process...\n");
             /* execv */
+            if (-1 == execv(path, argv)) {
+                FLOM_TRACE(("flom_exec/execv/errno=%d\n", errno));
+            }
         } else {
             /* father process */
             FLOM_TRACE(("flom_exec: child pid=" PID_T_FORMAT "\n", pid));
-            sleep(5);
         }
         
         THROW(NONE);
