@@ -33,6 +33,13 @@
 
 
 
+/**
+ * Default exit status when FLOM is unable to execute the command
+ */
+#define FLOM_ES_UNABLE_TO_EXECUTE_COMMAND   3
+
+
+
 /*********************************************************
  *                                                       *
  * REASON / RETURN CODES                                 *
@@ -215,13 +222,21 @@
  */
 
 /**
+ * "execvp" function error
+ */
+#define FLOM_RC_EXECVP_ERROR                   -100
+/**
  * "fork" function error
  */
-#define FLOM_RC_FORK_ERROR                     -100
+#define FLOM_RC_FORK_ERROR                     -101
 /**
  * "malloc"/"g_malloc" function error
  */
-#define FLOM_RC_MALLOC_ERROR                   -101
+#define FLOM_RC_MALLOC_ERROR                   -102
+/**
+ * "wait" function error
+ */
+#define FLOM_RC_WAIT_ERROR                     -103
 /**
  * "realloc" function error
 #define FLOM_RC_REALLOC_ERROR                 -101

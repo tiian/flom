@@ -128,9 +128,13 @@ const char *flom_strerror(int ret_cod)
             */
         case FLOM_RC_FORK_ERROR:
             return "ERROR: 'fork' function returned an error condition";
+        case FLOM_RC_EXECVP_ERROR:
+            return "ERROR: 'execvp' function returned an error condition";
         case FLOM_RC_MALLOC_ERROR:
             return "ERROR: 'malloc'/'g_malloc' function returned an error "
                 "condition";
+        case FLOM_RC_WAIT_ERROR:
+            return "ERROR: 'wait' function returned an error condition";
             /*
         case FLOM_RC_REALLOC_ERROR:
             return "ERROR: 'realloc' function returned an error condition";

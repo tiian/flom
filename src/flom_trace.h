@@ -57,6 +57,11 @@
  */
 #define FLOM_TRACE_MOD_EXEC               0x00000002
 
+/**
+ * trace module for connect functions
+ */
+#define FLOM_TRACE_MOD_CONNECT            0x00000004
+
 
 
 /**

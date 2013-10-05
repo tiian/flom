@@ -16,16 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with FLOM.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef FLOM_EXEC_H
-# define FLOM_EXEC_H
+#ifndef CONNECT_H
+# define CONNECT_H
 
 
 
 #include <config.h>
-
-#ifdef HAVE_GLIB_H
-# include <glib.h>
-#endif
 
 
 
@@ -36,7 +32,7 @@
 #else
 # undef FLOM_TRACE_MODULE_SAVE
 #endif /* FLOM_TRACE_MODULE */
-#define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_EXEC
+#define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_CONNECT
 
 
 
@@ -45,16 +41,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-
-    /**
-     * Exec the child process
-     * @param command_argv IN parsed argv as prepared by g_option_context_parse
-     * @param child_status OUT child exit status
-     * @return a reason code
-     */
-    int flom_exec(gchar **const command_argv, int *child_status);
-
-    
 
 #ifdef __cplusplus
 }
@@ -71,4 +57,4 @@ extern "C" {
 
 
 
-#endif /* FLOM_EXEC_H */
+#endif /* CONNECT_H */

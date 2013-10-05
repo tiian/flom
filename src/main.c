@@ -52,7 +52,7 @@ int main (int argc, char *argv[])
 {
     GError *error = NULL;
     GOptionContext *option_context;
-    int i;
+    int child_status = 0;
     
     FLOM_TRACE_INIT;
 
@@ -64,6 +64,7 @@ int main (int argc, char *argv[])
     }
     g_option_context_free(option_context);
 
+    /* @@@ remove me
     if (command_argv != NULL) {
         guint i, num;
         num = g_strv_length (command_argv);
@@ -71,11 +72,12 @@ int main (int argc, char *argv[])
             g_print ("argv[%u]: %s\n", i, command_argv[i]);
         }
     }
-
-    flom_exec(command_argv);
+    */
+    
+    flom_exec(command_argv, &child_status);
     
     g_strfreev (command_argv);
     command_argv = NULL;
     
-	return 0;
+	return child_status;
 }
