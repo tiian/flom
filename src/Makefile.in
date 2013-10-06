@@ -45,8 +45,9 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_flom_OBJECTS = main.$(OBJEXT) flom_connect.$(OBJEXT) \
-	flom_errors.$(OBJEXT) flom_exec.$(OBJEXT) flom_trace.$(OBJEXT)
+am_flom_OBJECTS = main.$(OBJEXT) flom_config.$(OBJEXT) \
+	flom_connect.$(OBJEXT) flom_errors.$(OBJEXT) \
+	flom_exec.$(OBJEXT) flom_trace.$(OBJEXT)
 flom_OBJECTS = $(am_flom_OBJECTS)
 flom_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -163,7 +164,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CFLAGS = -Wall
-flom_SOURCES = main.c flom_connect.c flom_errors.c flom_exec.c flom_trace.c
+flom_SOURCES = main.c flom_config.c flom_connect.c flom_errors.c flom_exec.c \
+	flom_trace.c
+
 all: all-am
 
 .SUFFIXES:
@@ -245,6 +248,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_connect.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_errors.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_exec.Po@am__quote@

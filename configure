@@ -4541,7 +4541,7 @@ fi
 
 done
 
-for ac_header in sys/inttypes.h sys/time.h sys/types.h sys/wait.h
+for ac_header in sys/inttypes.h sys/time.h sys/types.h sys/un.h sys/wait.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -4638,6 +4638,16 @@ if test "x$ac_cv_type_uintptr_t" = x""yes; then :
 
 cat >>confdefs.h <<_ACEOF
 #define HAVE_UINTPTR_T 1
+_ACEOF
+
+
+fi
+
+ac_fn_c_check_type "$LINENO" "struct sockaddr_un" "ac_cv_type_struct_sockaddr_un" "$ac_includes_default"
+if test "x$ac_cv_type_struct_sockaddr_un" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_SOCKADDR_UN 1
 _ACEOF
 
 

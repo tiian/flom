@@ -53,14 +53,19 @@
 #define FLOM_TRACE_MOD_GENERIC            0x00000001
 
 /**
+ * trace module for config functions
+ */
+#define FLOM_TRACE_MOD_CONFIG             0x00000002
+
+/**
  * trace module for fork & exec functions
  */
-#define FLOM_TRACE_MOD_EXEC               0x00000002
+#define FLOM_TRACE_MOD_EXEC               0x00000004
 
 /**
  * trace module for connect functions
  */
-#define FLOM_TRACE_MOD_CONNECT            0x00000004
+#define FLOM_TRACE_MOD_CONNECT            0x00000008
 
 
 
