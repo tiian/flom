@@ -20,6 +20,15 @@
 
 
 
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+
+
+
 #include "flom_config.h"
 
 
@@ -29,3 +38,12 @@
 # undef FLOM_TRACE_MODULE
 #endif /* FLOM_TRACE_MODULE */
 #define FLOM_TRACE_MODULE   FLOM_TRACE_MOD_CONFIG
+
+
+
+void flom_config_reset(flom_config_t *config)
+{
+    /* set UNIX socket name */
+    snprintf(config->local_socket_path_name, LOCAL_SOCKET_SIZE,
+             "/tmp/flom/%s", getlogin());
+}

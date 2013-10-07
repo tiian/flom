@@ -40,13 +40,20 @@
 #endif /* FLOM_TRACE_MODULE */
 #define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_CONFIG
 
-/* @@@  restart from here! */
 
-struct sockaddr_un foo;
 
+#define LOCAL_SOCKET_SIZE sizeof(((struct sockaddr_un *)NULL)->sun_path)
+
+/**
+ * This struct contains all the values necessary for configuration
+ */
 struct flom_config {
-    char local_socket_path_name[sizeof(foo.sun_path)];
+    /**
+     * Path of UNIX socket using for local connection
+     */
+    char local_socket_path_name[LOCAL_SOCKET_SIZE];
 };
+typedef struct flom_config flom_config_t;
 
 
 
@@ -54,6 +61,14 @@ struct flom_config {
 extern "C" {
 #endif /* __cplusplus */
 
+
+
+    /**
+     * Set config to system default
+     * @param config OUT config object
+     */
+    void flom_config_reset(flom_config_t *config);
+    
 
 
 #ifdef __cplusplus

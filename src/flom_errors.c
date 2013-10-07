@@ -126,6 +126,8 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_XA_ERROR:
             return "ERROR: an XA function returned an unexpcted return code";
             */
+        case FLOM_RC_CONNECT_ERROR:
+            return "ERROR: 'connect' function returned an error condition";
         case FLOM_RC_FORK_ERROR:
             return "ERROR: 'fork' function returned an error condition";
         case FLOM_RC_EXECVP_ERROR:
@@ -133,6 +135,8 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_MALLOC_ERROR:
             return "ERROR: 'malloc'/'g_malloc' function returned an error "
                 "condition";
+        case FLOM_RC_SOCKET_ERROR:
+            return "ERROR: 'socket' function returned an error condition";
         case FLOM_RC_WAIT_ERROR:
             return "ERROR: 'wait' function returned an error condition";
             /*
@@ -216,8 +220,6 @@ const char *flom_strerror(int ret_cod)
               return "ERROR: 'unlink' function returned an error condition";
             */
             /*
-        case FLOM_RC_SOCKET_ERROR:
-            return "ERROR: 'socket' function returned an error condition";
         case FLOM_RC_SETSOCKOPT_ERROR:
             return "ERROR: 'setsockopt' function returned an error condition";
         case FLOM_RC_GETSOCKOPT_ERROR:
@@ -232,8 +234,6 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'shutdown' function returned an error condition";
         case FLOM_RC_GETADDRINFO_ERROR:
             return "ERROR: 'getaddrinfo' function returned an error condition";
-        case FLOM_RC_CONNECT_ERROR:
-            return "ERROR: 'connect' function returned an error condition";
         case FLOM_RC_SEND_ERROR:
             return "ERROR: 'send' function returned an error condition";
         case FLOM_RC_RECV_ERROR:

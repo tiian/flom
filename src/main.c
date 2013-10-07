@@ -31,6 +31,8 @@
 
 
 
+#include "flom_config.h"
+#include "flom_connect.h"
 #include "flom_exec.h"
 #include "flom_trace.h"
 
@@ -53,6 +55,8 @@ int main (int argc, char *argv[])
     GError *error = NULL;
     GOptionContext *option_context;
     int child_status = 0;
+
+    flom_config_t config;
     
     FLOM_TRACE_INIT;
 
@@ -73,6 +77,9 @@ int main (int argc, char *argv[])
         }
     }
     */
+
+    flom_config_reset(&config);
+    flom_connect(&config);
     
     flom_exec(command_argv, &child_status);
     

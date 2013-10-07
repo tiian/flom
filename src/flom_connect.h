@@ -25,6 +25,10 @@
 
 
 
+#include "flom_config.h"
+
+
+
 /* save old FLOM_TRACE_MODULE and set a new value */
 #ifdef FLOM_TRACE_MODULE
 # define FLOM_TRACE_MODULE_SAVE FLOM_TRACE_MODULE
@@ -40,6 +44,15 @@
 extern "C" {
 #endif /* __cplusplus */
 
+
+
+    /**
+     * Try to connect to lock daemon
+     * @param config IN configuration object
+     * @result a reason code
+     */
+    int flom_connect(const flom_config_t *config);
+    
 
 
 #ifdef __cplusplus
