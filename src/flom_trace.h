@@ -67,6 +67,11 @@
  */
 #define FLOM_TRACE_MOD_CONNECT            0x00000008
 
+/**
+ * trace module for daemon functions
+ */
+#define FLOM_TRACE_MOD_DAEMON             0x00000010
+
 
 
 /**

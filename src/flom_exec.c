@@ -94,7 +94,8 @@ int flom_exec(gchar **const command_argv, int *child_status)
             pid_t child_pid;
             
             /* father process */
-            FLOM_TRACE(("flom_exec-father: child pid=" PID_T_FORMAT "\n", pid));
+            FLOM_TRACE(("flom_exec-father: child pid=" PID_T_FORMAT "\n",
+                        pid));
             /* waiting child termination */
             FLOM_TRACE(("flom_exec-father: waiting child termination\n"));
             if (-1 == (child_pid = wait(&status)))

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with FLOM.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef FLOM_CONFIG_H
-# define FLOM_CONFIG_H
+#ifndef FLOM_DAEMON_H
+# define FLOM_DAEMON_H
 
 
 
@@ -25,12 +25,7 @@
 
 
 
-#ifdef HAVE_SYS_UN_H
-# include <sys/un.h>
-#endif
-
-
-
+#include "flom_config.h"
 #include "flom_trace.h"
 
 
@@ -42,26 +37,7 @@
 #else
 # undef FLOM_TRACE_MODULE_SAVE
 #endif /* FLOM_TRACE_MODULE */
-#define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_CONFIG
-
-
-
-#define LOCAL_SOCKET_SIZE sizeof(((struct sockaddr_un *)NULL)->sun_path)
-
-/**
- * This struct contains all the values necessary for configuration
- */
-struct flom_config {
-    /**
-     * Path of UNIX socket using for local connection
-     */
-    char local_socket_path_name[LOCAL_SOCKET_SIZE];
-    /**
-     * Name of the file must be used to write trace messages
-     */
-    char const *trace_file;
-};
-typedef struct flom_config flom_config_t;
+#define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_DAEMON
 
 
 
@@ -72,22 +48,14 @@ extern "C" {
 
 
     /**
-     * Set config to system default
-     * @param config OUT config object
+     * Create a lock daemon
+     * @param config IN configuration object
+     * @result a reason code
      */
-    void flom_config_reset(flom_config_t *config);
+    int flom_daemon(const flom_config_t *config);
     
 
-    
-    /**
-     * Set trace_file in config object
-     */
-    static inline void flom_config_set_trace_file(
-        flom_config_t *config, const char *trace_file) {
-        config->trace_file = trace_file; }
 
-
-    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
@@ -103,4 +71,4 @@ extern "C" {
 
 
 
-#endif /* FLOM_CONFIG_H */
+#endif /* FLOM_DAEMON_H */

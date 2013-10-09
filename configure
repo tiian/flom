@@ -4527,7 +4527,7 @@ fi
 
 done
 
-for ac_header in stdarg.h stdint.h stdio.h stdlib.h string.h
+for ac_header in stdarg.h stdint.h stdio.h stdlib.h string.h syslog.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -4541,7 +4541,7 @@ fi
 
 done
 
-for ac_header in sys/inttypes.h sys/socket.h
+for ac_header in sys/inttypes.h sys/stat.h sys/socket.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"

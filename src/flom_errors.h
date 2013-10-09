@@ -222,29 +222,41 @@
  */
 
 /**
+ * "chdir" function error
+ */
+#define FLOM_RC_CHDIR_ERROR                    -100
+/**
  * "connect" function error
  */
-#define FLOM_RC_CONNECT_ERROR                  -100
+#define FLOM_RC_CONNECT_ERROR                  -101
 /**
  * "execvp" function error
  */
-#define FLOM_RC_EXECVP_ERROR                   -101
+#define FLOM_RC_EXECVP_ERROR                   -102
 /**
  * "fork" function error
  */
-#define FLOM_RC_FORK_ERROR                     -102
+#define FLOM_RC_FORK_ERROR                     -103
 /**
  * "malloc"/"g_malloc" function error
  */
-#define FLOM_RC_MALLOC_ERROR                   -103
+#define FLOM_RC_MALLOC_ERROR                   -104
+/**
+ * "signal" function error
+ */
+#define FLOM_RC_SIGNAL_ERROR                   -105
+/**
+ * "setsid" function error
+ */
+#define FLOM_RC_SETSID_ERROR                   -106
 /**
  * "socket" function error
  */
-#define FLOM_RC_SOCKET_ERROR                   -104
+#define FLOM_RC_SOCKET_ERROR                   -107
 /**
  * "wait" function error
  */
-#define FLOM_RC_WAIT_ERROR                     -105
+#define FLOM_RC_WAIT_ERROR                     -108
 /**
  * "realloc" function error
 #define FLOM_RC_REALLOC_ERROR                 -101

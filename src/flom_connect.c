@@ -30,6 +30,7 @@
 
 
 #include "flom_connect.h"
+#include "flom_daemon.h"
 #include "flom_errors.h"
 #include "flom_trace.h"
 
@@ -46,6 +47,7 @@
 int flom_connect(const flom_config_t *config)
 {
     enum Exception { SOCKET_ERROR
+                     , DAEMON_ERROR
                      , CONNECT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -68,6 +70,8 @@ int flom_connect(const flom_config_t *config)
             if (ENOENT == errno) {
                 FLOM_TRACE(("flom_connect: ENOENT\n"));
                 /* daemon is not active, starting it... @@@ */
+                if (FLOM_RC_OK != (ret_cod = flom_daemon(config)))
+                    THROW(DAEMON_ERROR);
             } else {
                 THROW(CONNECT_ERROR);
             }
@@ -80,6 +84,8 @@ int flom_connect(const flom_config_t *config)
                 break;
             case CONNECT_ERROR:
                 ret_cod = FLOM_RC_CONNECT_ERROR;
+                break;
+            case DAEMON_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

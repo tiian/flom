@@ -126,6 +126,8 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_XA_ERROR:
             return "ERROR: an XA function returned an unexpcted return code";
             */
+        case FLOM_RC_CHDIR_ERROR:
+            return "ERROR: 'chdir' function returned an error condition";
         case FLOM_RC_CONNECT_ERROR:
             return "ERROR: 'connect' function returned an error condition";
         case FLOM_RC_FORK_ERROR:
@@ -135,6 +137,10 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_MALLOC_ERROR:
             return "ERROR: 'malloc'/'g_malloc' function returned an error "
                 "condition";
+        case FLOM_RC_SETSID_ERROR:
+            return "ERROR: 'setsid' function returned an error condition";
+        case FLOM_RC_SIGNAL_ERROR:
+            return "ERROR: 'signal' function returned an error condition";
         case FLOM_RC_SOCKET_ERROR:
             return "ERROR: 'socket' function returned an error condition";
         case FLOM_RC_WAIT_ERROR:

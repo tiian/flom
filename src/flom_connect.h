@@ -26,6 +26,7 @@
 
 
 #include "flom_config.h"
+#include "flom_trace.h"
 
 
 

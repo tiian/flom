@@ -39,11 +39,13 @@
 
 
 static gboolean print_version = FALSE;
+static char *trace_file = NULL;
 static gchar **command_argv = NULL;
 /* command line options */
 static GOptionEntry entries[] =
 {
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
+    { "trace-file", 't', 0, G_OPTION_ARG_STRING, &trace_file, "Specify trace file name", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
     { NULL }
 };
@@ -79,6 +81,12 @@ int main (int argc, char *argv[])
     */
 
     flom_config_reset(&config);
+    flom_config_set_trace_file(&config, trace_file);
+    if (NULL != config->trace_file) {
+        FILE *dummy;
+        dummy = freopen(config->trace_file, "w", stderr);
+    }
+    
     flom_connect(&config);
     
     flom_exec(command_argv, &child_status);

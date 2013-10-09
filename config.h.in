@@ -36,6 +36,9 @@
 /* Define to 1 if the system has the type `struct sockaddr_un'. */
 #undef HAVE_STRUCT_SOCKADDR_UN
 
+/* Define to 1 if you have the <syslog.h> header file. */
+#undef HAVE_SYSLOG_H
+
 /* Define to 1 if you have the <sys/inttypes.h> header file. */
 #undef HAVE_SYS_INTTYPES_H
 
