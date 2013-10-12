@@ -128,6 +128,8 @@ const char *flom_strerror(int ret_cod)
             */
         case FLOM_RC_CHDIR_ERROR:
             return "ERROR: 'chdir' function returned an error condition";
+        case FLOM_RC_CLOSE_ERROR:
+            return "ERROR: 'close' function returned an error condition";
         case FLOM_RC_CONNECT_ERROR:
             return "ERROR: 'connect' function returned an error condition";
         case FLOM_RC_FORK_ERROR:
@@ -137,6 +139,10 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_MALLOC_ERROR:
             return "ERROR: 'malloc'/'g_malloc' function returned an error "
                 "condition";
+        case FLOM_RC_PIPE_ERROR:
+            return "ERROR: 'pipe' function returned an error condition";
+        case FLOM_RC_READ_ERROR:
+            return "ERROR: 'read' function returned an error condition";
         case FLOM_RC_SETSID_ERROR:
             return "ERROR: 'setsid' function returned an error condition";
         case FLOM_RC_SIGNAL_ERROR:
@@ -145,6 +151,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'socket' function returned an error condition";
         case FLOM_RC_WAIT_ERROR:
             return "ERROR: 'wait' function returned an error condition";
+        case FLOM_RC_WRITE_ERROR:
+            return "ERROR: 'write' function returned an error condition";
             /*
         case FLOM_RC_REALLOC_ERROR:
             return "ERROR: 'realloc' function returned an error condition";
@@ -152,18 +160,10 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'strdup' function returned an error condition";
         case FLOM_RC_POLL_ERROR:
             return "ERROR: 'poll' function returned an error condition";
-        case FLOM_RC_PIPE_ERROR:
-            return "ERROR: 'pipe' function returned an error condition";
         case FLOM_RC_OPEN_ERROR:
             return "ERROR: 'open' function returned an error condition";
-        case FLOM_RC_CLOSE_ERROR:
-            return "ERROR: 'close' function returned an error condition";
         case FLOM_RC_TRUNCATE_ERROR:
             return "ERROR: 'truncate' function returned an error condition";
-        case FLOM_RC_WRITE_ERROR:
-            return "ERROR: 'write' function returned an error condition";
-        case FLOM_RC_READ_ERROR:
-            return "ERROR: 'read' function returned an error condition";
         case FLOM_RC_PATHCONF_ERROR:
             return "ERROR: 'pathconf' function returned an error condition";
         case FLOM_RC_REALPATH_ERROR:

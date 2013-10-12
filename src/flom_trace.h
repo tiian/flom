@@ -94,7 +94,7 @@ extern unsigned long flom_trace_mask;
  * only if _TRACE macro is defined
  */
 #ifdef _TRACE
-# define FLOM_TRACE_INIT flom_trace_init()
+# define FLOM_TRACE_INIT(a) flom_trace_init(a)
 #else
 # define FLOM_TRACE_INIT
 #endif
@@ -140,8 +140,10 @@ extern "C" {
     /**
      * This method MUST be called BEFORE first log call to avoid lock
      * contention in multithread environments
+     * @param file_name IN name of the file must be used for trace or NULL
+     *                     for stderr
      */
-    void flom_trace_init(void);
+    void flom_trace_init(const char *file_name);
     
 
     

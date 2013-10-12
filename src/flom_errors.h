@@ -226,37 +226,53 @@
  */
 #define FLOM_RC_CHDIR_ERROR                    -100
 /**
+ * "close" function error
+ */
+#define FLOM_RC_CLOSE_ERROR                    -101
+/**
  * "connect" function error
  */
-#define FLOM_RC_CONNECT_ERROR                  -101
+#define FLOM_RC_CONNECT_ERROR                  -102
 /**
  * "execvp" function error
  */
-#define FLOM_RC_EXECVP_ERROR                   -102
+#define FLOM_RC_EXECVP_ERROR                   -103
 /**
  * "fork" function error
  */
-#define FLOM_RC_FORK_ERROR                     -103
+#define FLOM_RC_FORK_ERROR                     -104
 /**
  * "malloc"/"g_malloc" function error
  */
-#define FLOM_RC_MALLOC_ERROR                   -104
+#define FLOM_RC_MALLOC_ERROR                   -105
+/**
+ * "pipe" function error
+ */
+#define FLOM_RC_PIPE_ERROR                     -106
+/**
+ * "read" function error
+ */
+#define FLOM_RC_READ_ERROR                     -107
 /**
  * "signal" function error
  */
-#define FLOM_RC_SIGNAL_ERROR                   -105
+#define FLOM_RC_SIGNAL_ERROR                   -108
 /**
  * "setsid" function error
  */
-#define FLOM_RC_SETSID_ERROR                   -106
+#define FLOM_RC_SETSID_ERROR                   -109
 /**
  * "socket" function error
  */
-#define FLOM_RC_SOCKET_ERROR                   -107
+#define FLOM_RC_SOCKET_ERROR                   -110
 /**
  * "wait" function error
  */
-#define FLOM_RC_WAIT_ERROR                     -108
+#define FLOM_RC_WAIT_ERROR                     -111
+/**
+ * "write" function error
+ */
+#define FLOM_RC_WRITE_ERROR                    -112
 /**
  * "realloc" function error
 #define FLOM_RC_REALLOC_ERROR                 -101
@@ -270,28 +286,12 @@
 #define FLOM_RC_POLL_ERROR                   -108
  */
 /**
- * "pipe" function error
-#define FLOM_RC_PIPE_ERROR                   -109
- */
-/**
  * "open" function error
 #define FLOM_RC_OPEN_ERROR                   -110
  */
 /**
- * "close" function error
-#define FLOM_RC_CLOSE_ERROR                  -111
- */
-/**
  * "truncate" function error
 #define FLOM_RC_TRUNCATE_ERROR               -112
- */
-/**
- * "write" function error
-#define FLOM_RC_WRITE_ERROR                  -113
- */
-/**
- * "fread" function error
-#define FLOM_RC_READ_ERROR                   -114
  */
 /**
  * "pathconf" function error

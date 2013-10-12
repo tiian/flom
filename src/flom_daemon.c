@@ -54,26 +54,39 @@
 
 int flom_daemon(const flom_config_t *config)
 {
-    enum Exception { FORK_ERROR
+    enum Exception { PIPE_ERROR
+                     , FORK_ERROR
                      , WAIT_ERROR
                      , CHILD_PID_ERROR
+                     , READ_ERROR
+                     , CLOSE_ERROR
                      , FORK_ERROR2
                      , SETSID_ERROR
                      , SIGNAL_ERROR
                      , FORK_ERROR3
                      , CHDIR_ERROR
+                     , WRITE_ERROR
+                     , CLOSE_ERROR2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    int pipefd[2];
     
     FLOM_TRACE(("flom_daemon\n"));
     TRY {
         pid_t pid;
+
+        /* creating a communication pipe to understand when the daemon is
+           ready to run */
+        if (-1 == pipe(pipefd))
+            THROW(PIPE_ERROR);
+        FLOM_TRACE(("flom_daemon: pipefd[0]=%d, pipefd[1]=%d\n",
+                    pipefd[0], pipefd[1]));
         
         /* creating a child process */
         if (-1 == (pid = fork())) {
             THROW(FORK_ERROR);
         } else if (0 != pid) {
-            int status;
+            int status, daemon_rc = 0;
             pid_t child_pid;
             /* father process */
             FLOM_TRACE(("flom_daemon: started child process pid=" PID_T_FORMAT
@@ -88,10 +101,19 @@ int flom_daemon(const flom_config_t *config)
                             "\n", pid, child_pid));
                 THROW(CHILD_PID_ERROR);
             }
+            /* waiting the daemon is up and running */
+            FLOM_TRACE(("flom_daemon: waiting daemon reason code...\n"));
+            if (sizeof(daemon_rc) != read(pipefd[0], &daemon_rc,
+                                          sizeof(daemon_rc)))
+                THROW(READ_ERROR);
+            FLOM_TRACE(("flom_daemon: daemon_rc=%d\n", daemon_rc));
+            /* closing pipe (father) */
+            if (-1 == close(pipefd[0] || -1 == close(pipefd[1])))
+                THROW(CLOSE_ERROR);
         } else {
             pid_t pid;
             int i;
-            FILE *dummy;
+            int daemon_rc = FLOM_RC_OK;
             
             /* child process, now daemonizing... */
             FLOM_TRACE(("flom_daemon: daemonizing... fork()\n"));
@@ -115,21 +137,35 @@ int flom_daemon(const flom_config_t *config)
                 THROW(CHDIR_ERROR);
             FLOM_TRACE(("flom_daemon: daemonizing... umask()\n"));
             umask(0);
-            FLOM_TRACE(("flom_daemon: daemonizing... close(0..63)\n"));
-            for (i = 0; i < 64; ++i) close(i);
-            if (NULL != config->trace_file)
-                dummy = freopen(config->trace_file, "a", stderr);
-            else
-                dummy = freopen("/dev/null", "a", stderr);
+            FLOM_TRACE(("flom_daemon: daemonizing... close()\n"));
+            /* close all but 2 (stderr) if trace_file and communication pipe */
+            for (i = 0; i < 64; ++i)
+                if (pipefd[0] != i && pipefd[1] != i)
+                    close(i);
+
+            if (NULL != config->trace_file) {
+                FLOM_TRACE_INIT(config->trace_file);
+            }
             openlog("flom", LOG_PID, LOG_DAEMON);
             syslog(LOG_NOTICE, "flom daemon activated!");
             FLOM_TRACE(("flom_daemon: now daemonized!\n"));
-            /* @@@ restart from here!!! */
+            /* @@@ open server socket now! */
+            
+            /* sending reason code to father process */
+            if (sizeof(daemon_rc) != write(pipefd[1], &daemon_rc,
+                                           sizeof(daemon_rc)))
+                THROW(WRITE_ERROR);
+            /* closing pipe (child) */
+            if (-1 == close(pipefd[0] || -1 == close(pipefd[1])))
+                THROW(CLOSE_ERROR2);
             exit(0);
         }
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PIPE_ERROR:
+                ret_cod = FLOM_RC_PIPE_ERROR;
+                break;
             case FORK_ERROR:
                 ret_cod = FLOM_RC_FORK_ERROR;
                 break;
@@ -138,6 +174,12 @@ int flom_daemon(const flom_config_t *config)
                 break;
             case CHILD_PID_ERROR:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
+                break;
+            case READ_ERROR:
+                ret_cod = FLOM_RC_READ_ERROR;
+                break;
+            case CLOSE_ERROR:
+                ret_cod = FLOM_RC_CLOSE_ERROR;
                 break;
             case FORK_ERROR2:
                 ret_cod = FLOM_RC_FORK_ERROR;
@@ -153,6 +195,12 @@ int flom_daemon(const flom_config_t *config)
                 break;
             case CHDIR_ERROR:
                 ret_cod = FLOM_RC_CHDIR_ERROR;
+                break;
+            case WRITE_ERROR:
+                ret_cod = FLOM_RC_WRITE_ERROR;
+                break;
+            case CLOSE_ERROR2:
+                ret_cod = FLOM_RC_CLOSE_ERROR;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

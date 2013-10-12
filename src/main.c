@@ -60,8 +60,8 @@ int main (int argc, char *argv[])
 
     flom_config_t config;
     
-    FLOM_TRACE_INIT;
-
+    FLOM_TRACE_INIT(NULL);
+    
     option_context = g_option_context_new("-- command to execute");
     g_option_context_add_main_entries(option_context, entries, NULL);
     if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
@@ -70,23 +70,9 @@ int main (int argc, char *argv[])
     }
     g_option_context_free(option_context);
 
-    /* @@@ remove me
-    if (command_argv != NULL) {
-        guint i, num;
-        num = g_strv_length (command_argv);
-        for (i = 0; i < num; ++i) {
-            g_print ("argv[%u]: %s\n", i, command_argv[i]);
-        }
-    }
-    */
-
     flom_config_reset(&config);
     flom_config_set_trace_file(&config, trace_file);
-    if (NULL != config->trace_file) {
-        FILE *dummy;
-        dummy = freopen(config->trace_file, "w", stderr);
-    }
-    
+
     flom_connect(&config);
     
     flom_exec(command_argv, &child_status);

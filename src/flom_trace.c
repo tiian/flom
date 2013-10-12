@@ -52,6 +52,9 @@ int flom_trace_initialized = FALSE;
 
 unsigned long flom_trace_mask = 0;
 
+FILE *trace_file = NULL;
+
+
 /**
  * This mutex is used to avoid contention (bad output) on trace file
  */
@@ -62,7 +65,7 @@ GStaticMutex flom_trace_mutex = G_STATIC_MUTEX_INIT;
 /**
  * Initialize the library when the library is loaded.
  */
-void flom_trace_init(void)
+void flom_trace_init(const char *filename)
 {
     /* initialize thread system if necessary */
     if (!g_thread_supported ()) g_thread_init(NULL);
@@ -76,6 +79,8 @@ void flom_trace_init(void)
                 getenv(FLOM_TRACE_MASK_ENV_VAR), NULL, 0);
         else
             flom_trace_mask = 0x0;
+        if (NULL == (trace_file = fopen(filename, "w")))
+            trace_file = stderr;
         flom_trace_initialized = TRUE;
     }
     /* remove the lock from mutex */
@@ -98,7 +103,7 @@ void flom_trace(const char *fmt, ...)
     /* lock the mutex */
     g_static_mutex_lock(&flom_trace_mutex);
     /* default header */
-    fprintf(stderr,
+    fprintf(trace_file,
             "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [" PID_T_FORMAT
             "/%p] ",
             broken_time.tm_year + 1900, broken_time.tm_mon + 1,
@@ -106,7 +111,7 @@ void flom_trace(const char *fmt, ...)
             broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
             getpid(), g_thread_self());
     /* custom message */
-    vfprintf(stderr, fmt, args);
+    vfprintf(trace_file, fmt, args);
     /* remove the lock from mutex */
     g_static_mutex_unlock(&flom_trace_mutex);
 #else
