@@ -45,7 +45,7 @@ static gchar **command_argv = NULL;
 static GOptionEntry entries[] =
 {
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
-    { "trace-file", 't', 0, G_OPTION_ARG_STRING, &trace_file, "Specify trace file name", NULL },
+    { "trace-file", 't', 0, G_OPTION_ARG_STRING, &trace_file, "Specify daemon trace file name (absolute path required)", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
     { NULL }
 };
@@ -60,7 +60,7 @@ int main (int argc, char *argv[])
 
     flom_config_t config;
     
-    FLOM_TRACE_INIT(NULL);
+    FLOM_TRACE_INIT;
     
     option_context = g_option_context_new("-- command to execute");
     g_option_context_add_main_entries(option_context, entries, NULL);

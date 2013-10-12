@@ -66,10 +66,10 @@ int flom_daemon(const flom_config_t *config)
                      , FORK_ERROR3
                      , CHDIR_ERROR
                      , WRITE_ERROR
-                     , CLOSE_ERROR2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int pipefd[2];
+    int daemon = FALSE;
     
     FLOM_TRACE(("flom_daemon\n"));
     TRY {
@@ -114,7 +114,8 @@ int flom_daemon(const flom_config_t *config)
             pid_t pid;
             int i;
             int daemon_rc = FLOM_RC_OK;
-            
+
+            daemon = TRUE;
             /* child process, now daemonizing... */
             FLOM_TRACE(("flom_daemon: daemonizing... fork()\n"));
             if (-1 == (pid = fork())) {
@@ -140,15 +141,14 @@ int flom_daemon(const flom_config_t *config)
             FLOM_TRACE(("flom_daemon: daemonizing... close()\n"));
             /* close all but 2 (stderr) if trace_file and communication pipe */
             for (i = 0; i < 64; ++i)
-                if (pipefd[0] != i && pipefd[1] != i)
+                if (i != pipefd[0] && i != pipefd[1])
                     close(i);
 
-            if (NULL != config->trace_file) {
-                FLOM_TRACE_INIT(config->trace_file);
-            }
             openlog("flom", LOG_PID, LOG_DAEMON);
             syslog(LOG_NOTICE, "flom daemon activated!");
+            FLOM_TRACE_REOPEN(config->trace_file);
             FLOM_TRACE(("flom_daemon: now daemonized!\n"));
+            syslog(LOG_NOTICE, "flom_daemon: completed!");
             /* @@@ open server socket now! */
             
             /* sending reason code to father process */
@@ -156,8 +156,8 @@ int flom_daemon(const flom_config_t *config)
                                            sizeof(daemon_rc)))
                 THROW(WRITE_ERROR);
             /* closing pipe (child) */
-            if (-1 == close(pipefd[0] || -1 == close(pipefd[1])))
-                THROW(CLOSE_ERROR2);
+            close(pipefd[0]);
+            close(pipefd[1]);
             exit(0);
         }
         THROW(NONE);
@@ -199,9 +199,6 @@ int flom_daemon(const flom_config_t *config)
             case WRITE_ERROR:
                 ret_cod = FLOM_RC_WRITE_ERROR;
                 break;
-            case CLOSE_ERROR2:
-                ret_cod = FLOM_RC_CLOSE_ERROR;
-                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -211,6 +208,9 @@ int flom_daemon(const flom_config_t *config)
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_daemon/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    if (daemon)
+        syslog(LOG_NOTICE, "flom_daemon/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno);
     return ret_cod;
 }
 

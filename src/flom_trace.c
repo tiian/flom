@@ -42,6 +42,12 @@
 # include <glib.h>
 #endif
 
+#ifdef HAVE_SYSLOG_H
+/* @@@ remove these, they are useless */
+# include <syslog.h>
+# include <errno.h>
+#endif
+
 
 
 #include "flom_trace.h"
@@ -65,7 +71,7 @@ GStaticMutex flom_trace_mutex = G_STATIC_MUTEX_INIT;
 /**
  * Initialize the library when the library is loaded.
  */
-void flom_trace_init(const char *filename)
+void flom_trace_init(void)
 {
     /* initialize thread system if necessary */
     if (!g_thread_supported ()) g_thread_init(NULL);
@@ -79,12 +85,27 @@ void flom_trace_init(const char *filename)
                 getenv(FLOM_TRACE_MASK_ENV_VAR), NULL, 0);
         else
             flom_trace_mask = 0x0;
-        if (NULL == (trace_file = fopen(filename, "w")))
-            trace_file = stderr;
+        trace_file = stderr;
         flom_trace_initialized = TRUE;
     }
     /* remove the lock from mutex */
     g_static_mutex_unlock(&flom_trace_mutex);
+}
+
+
+
+void flom_trace_reopen(const char *file_name)
+{
+    FILE *tmp_trace_file;
+    syslog(LOG_NOTICE, "flom_trace_reopen: file_name='%s', trace_file=%p",
+           file_name, trace_file);
+    if (NULL != file_name) {
+        tmp_trace_file = fopen(file_name, "w");
+        if (NULL != tmp_trace_file)
+            trace_file = tmp_trace_file;
+    }
+    syslog(LOG_NOTICE, "flom_trace_reopen: trace_file=%p, errno=%d",
+           trace_file, errno);
 }
 
 
