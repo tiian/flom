@@ -59,7 +59,6 @@ int flom_daemon(const flom_config_t *config)
                      , WAIT_ERROR
                      , CHILD_PID_ERROR
                      , READ_ERROR
-                     , CLOSE_ERROR
                      , FORK_ERROR2
                      , SETSID_ERROR
                      , SIGNAL_ERROR
@@ -108,8 +107,8 @@ int flom_daemon(const flom_config_t *config)
                 THROW(READ_ERROR);
             FLOM_TRACE(("flom_daemon: daemon_rc=%d\n", daemon_rc));
             /* closing pipe (father) */
-            if (-1 == close(pipefd[0] || -1 == close(pipefd[1])))
-                THROW(CLOSE_ERROR);
+            close(pipefd[0]);
+            close(pipefd[1]);
         } else {
             pid_t pid;
             int i;
@@ -139,15 +138,17 @@ int flom_daemon(const flom_config_t *config)
             FLOM_TRACE(("flom_daemon: daemonizing... umask()\n"));
             umask(0);
             FLOM_TRACE(("flom_daemon: daemonizing... close()\n"));
-            /* close all but 2 (stderr) if trace_file and communication pipe */
+            /* close all but communication pipe */
             for (i = 0; i < 64; ++i)
                 if (i != pipefd[0] && i != pipefd[1])
                     close(i);
 
             openlog("flom", LOG_PID, LOG_DAEMON);
             syslog(LOG_NOTICE, "flom daemon activated!");
+
             FLOM_TRACE_REOPEN(config->trace_file);
             FLOM_TRACE(("flom_daemon: now daemonized!\n"));
+
             syslog(LOG_NOTICE, "flom_daemon: completed!");
             /* @@@ open server socket now! */
             
@@ -178,9 +179,6 @@ int flom_daemon(const flom_config_t *config)
             case READ_ERROR:
                 ret_cod = FLOM_RC_READ_ERROR;
                 break;
-            case CLOSE_ERROR:
-                ret_cod = FLOM_RC_CLOSE_ERROR;
-                break;
             case FORK_ERROR2:
                 ret_cod = FLOM_RC_FORK_ERROR;
                 break;
@@ -208,9 +206,6 @@ int flom_daemon(const flom_config_t *config)
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_daemon/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    if (daemon)
-        syslog(LOG_NOTICE, "flom_daemon/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno);
     return ret_cod;
 }
 

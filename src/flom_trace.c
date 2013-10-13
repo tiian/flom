@@ -42,12 +42,6 @@
 # include <glib.h>
 #endif
 
-#ifdef HAVE_SYSLOG_H
-/* @@@ remove these, they are useless */
-# include <syslog.h>
-# include <errno.h>
-#endif
-
 
 
 #include "flom_trace.h"
@@ -97,15 +91,11 @@ void flom_trace_init(void)
 void flom_trace_reopen(const char *file_name)
 {
     FILE *tmp_trace_file;
-    syslog(LOG_NOTICE, "flom_trace_reopen: file_name='%s', trace_file=%p",
-           file_name, trace_file);
     if (NULL != file_name) {
         tmp_trace_file = fopen(file_name, "w");
         if (NULL != tmp_trace_file)
             trace_file = tmp_trace_file;
     }
-    syslog(LOG_NOTICE, "flom_trace_reopen: trace_file=%p, errno=%d",
-           trace_file, errno);
 }
 
 
