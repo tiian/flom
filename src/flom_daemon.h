@@ -55,6 +55,17 @@ extern "C" {
     int flom_daemon(const flom_config_t *config);
     
 
+    
+    /**
+     * Create a listen socket to serve the clients
+     * @param config IN configuration object
+     * @param listenfd OUT listening file descriptor
+     * @resul a reason code
+     */
+    int flom_listen(const flom_config_t *config,
+                    int *listenfd);
+
+    
 
 #ifdef __cplusplus
 }

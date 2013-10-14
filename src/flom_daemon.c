@@ -24,6 +24,9 @@
 #ifdef HAVE_SYSLOG_H
 # include <syslog.h>
 #endif
+#ifdef HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#endif
 #ifdef HAVE_SYS_STAT_H
 # include <sys/stat.h>
 #endif
@@ -59,16 +62,19 @@ int flom_daemon(const flom_config_t *config)
                      , WAIT_ERROR
                      , CHILD_PID_ERROR
                      , READ_ERROR
+                     , DAEMON_NOT_OK
                      , FORK_ERROR2
                      , SETSID_ERROR
                      , SIGNAL_ERROR
                      , FORK_ERROR3
                      , CHDIR_ERROR
                      , WRITE_ERROR
+                     , FLOM_LISTEN_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int pipefd[2];
     int daemon = FALSE;
+    int daemon_rc = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_daemon\n"));
     TRY {
@@ -85,7 +91,7 @@ int flom_daemon(const flom_config_t *config)
         if (-1 == (pid = fork())) {
             THROW(FORK_ERROR);
         } else if (0 != pid) {
-            int status, daemon_rc = 0;
+            int status;
             pid_t child_pid;
             /* father process */
             FLOM_TRACE(("flom_daemon: started child process pid=" PID_T_FORMAT
@@ -109,10 +115,13 @@ int flom_daemon(const flom_config_t *config)
             /* closing pipe (father) */
             close(pipefd[0]);
             close(pipefd[1]);
+            if (FLOM_RC_OK != daemon_rc)
+                THROW(DAEMON_NOT_OK);
         } else {
             pid_t pid;
             int i;
             int daemon_rc = FLOM_RC_OK;
+            int listenfd = 0;
 
             daemon = TRUE;
             /* child process, now daemonizing... */
@@ -149,8 +158,8 @@ int flom_daemon(const flom_config_t *config)
             FLOM_TRACE_REOPEN(config->trace_file);
             FLOM_TRACE(("flom_daemon: now daemonized!\n"));
 
-            syslog(LOG_NOTICE, "flom_daemon: completed!");
-            /* @@@ open server socket now! */
+            /* activate service */
+            daemon_rc = flom_listen(config, &listenfd);
             
             /* sending reason code to father process */
             if (sizeof(daemon_rc) != write(pipefd[1], &daemon_rc,
@@ -159,6 +168,11 @@ int flom_daemon(const flom_config_t *config)
             /* closing pipe (child) */
             close(pipefd[0]);
             close(pipefd[1]);
+
+            if (FLOM_RC_OK != daemon_rc)
+                THROW(FLOM_LISTEN_ERROR);
+            
+            syslog(LOG_NOTICE, "flom_daemon: completed!");
             exit(0);
         }
         THROW(NONE);
@@ -179,6 +193,9 @@ int flom_daemon(const flom_config_t *config)
             case READ_ERROR:
                 ret_cod = FLOM_RC_READ_ERROR;
                 break;
+            case DAEMON_NOT_OK:
+                ret_cod = daemon_rc;
+                break;
             case FORK_ERROR2:
                 ret_cod = FLOM_RC_FORK_ERROR;
                 break;
@@ -197,6 +214,8 @@ int flom_daemon(const flom_config_t *config)
             case WRITE_ERROR:
                 ret_cod = FLOM_RC_WRITE_ERROR;
                 break;
+            case FLOM_LISTEN_ERROR:
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -210,4 +229,59 @@ int flom_daemon(const flom_config_t *config)
 }
 
 
+
+int flom_listen(const flom_config_t *config,
+                int *listenfd)
+{
+    enum Exception { SOCKET_ERROR
+                     , UNLINK_ERROR
+                     , BIND_ERROR
+                     , LISTEN_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    int fd = 0;
+    
+    FLOM_TRACE(("flom_listen\n"));
+    TRY {
+        struct sockaddr_un servaddr;
+            
+        if (-1 == (fd = socket(AF_LOCAL, SOCK_STREAM, 0)))
+            THROW(SOCKET_ERROR);
+        if (-1 == unlink(config->local_socket_path_name) &&
+            ENOENT != errno)
+            THROW(UNLINK_ERROR);
+        memset(&servaddr, 0, sizeof(servaddr));
+        servaddr.sun_family = AF_LOCAL;
+        strcpy(servaddr.sun_path, config->local_socket_path_name);
+        if (-1 == bind(fd, (struct sockaddr *) &servaddr, sizeof(servaddr)))
+            THROW(BIND_ERROR);
+        if (-1 ==listen(fd, 100))
+            THROW(LISTEN_ERROR);
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case SOCKET_ERROR:
+                ret_cod = FLOM_RC_SOCKET_ERROR;
+                break;
+            case UNLINK_ERROR:
+                ret_cod = FLOM_RC_UNLINK_ERROR;
+                break;
+            case BIND_ERROR:
+                ret_cod = FLOM_RC_BIND_ERROR;
+                break;
+            case LISTEN_ERROR:
+                ret_cod = FLOM_RC_LISTEN_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_listen/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
 

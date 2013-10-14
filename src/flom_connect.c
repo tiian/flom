@@ -67,8 +67,9 @@ int flom_connect(const flom_config_t *config)
         strcpy(servaddr.sun_path, config->local_socket_path_name);
         if (-1 == connect(sockfd, (struct sockaddr *)&servaddr,
                           sizeof(servaddr))) {
-            if (ENOENT == errno) {
-                FLOM_TRACE(("flom_connect: ENOENT\n"));
+            if (ENOENT == errno || ECONNREFUSED == errno) {
+                FLOM_TRACE(("flom_connect: connection failed, activating "
+                            "a new daemon\n"));
                 /* daemon is not active, starting it... @@@ */
                 if (FLOM_RC_OK != (ret_cod = flom_daemon(config)))
                     THROW(DAEMON_ERROR);

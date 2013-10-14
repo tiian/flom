@@ -126,6 +126,8 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_XA_ERROR:
             return "ERROR: an XA function returned an unexpcted return code";
             */
+        case FLOM_RC_BIND_ERROR:
+            return "ERROR: 'bind' function returned an error condition";
         case FLOM_RC_CHDIR_ERROR:
             return "ERROR: 'chdir' function returned an error condition";
         case FLOM_RC_CLOSE_ERROR:
@@ -136,6 +138,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'fork' function returned an error condition";
         case FLOM_RC_EXECVP_ERROR:
             return "ERROR: 'execvp' function returned an error condition";
+        case FLOM_RC_LISTEN_ERROR:
+            return "ERROR: 'listen' function returned an error condition";
         case FLOM_RC_MALLOC_ERROR:
             return "ERROR: 'malloc'/'g_malloc' function returned an error "
                 "condition";
@@ -149,6 +153,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'signal' function returned an error condition";
         case FLOM_RC_SOCKET_ERROR:
             return "ERROR: 'socket' function returned an error condition";
+        case FLOM_RC_UNLINK_ERROR:
+            return "ERROR: 'unlink' function returned an error condition";
         case FLOM_RC_WAIT_ERROR:
             return "ERROR: 'wait' function returned an error condition";
         case FLOM_RC_WRITE_ERROR:
@@ -222,18 +228,12 @@ const char *flom_strerror(int ret_cod)
                 "condition";
             */
             /*
-              case FLOM_RC_UNLINK_ERROR:
-              return "ERROR: 'unlink' function returned an error condition";
             */
             /*
         case FLOM_RC_SETSOCKOPT_ERROR:
             return "ERROR: 'setsockopt' function returned an error condition";
         case FLOM_RC_GETSOCKOPT_ERROR:
             return "ERROR: 'getsockopt' function returned an error condition";
-        case FLOM_RC_BIND_ERROR:
-            return "ERROR: 'bind' function returned an error condition";
-        case FLOM_RC_LISTEN_ERROR:
-            return "ERROR: 'listen' function returned an error condition";
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";
         case FLOM_RC_SHUTDOWN_ERROR:

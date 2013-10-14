@@ -33,6 +33,7 @@
 
 #include "flom_config.h"
 #include "flom_connect.h"
+#include "flom_errors.h"
 #include "flom_exec.h"
 #include "flom_trace.h"
 
@@ -57,6 +58,7 @@ int main (int argc, char *argv[])
     GError *error = NULL;
     GOptionContext *option_context;
     int child_status = 0;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     flom_config_t config;
     
@@ -73,9 +75,15 @@ int main (int argc, char *argv[])
     flom_config_reset(&config);
     flom_config_set_trace_file(&config, trace_file);
 
-    flom_connect(&config);
+    if (FLOM_RC_OK != (ret_cod = flom_connect(&config))) {
+        g_print("flom_connect: ret_cod=%d\n", ret_cod);
+        exit(1);
+    }
     
-    flom_exec(command_argv, &child_status);
+    if (FLOM_RC_OK != (ret_cod = flom_exec(command_argv, &child_status))) {
+        g_print("flom_exec: ret_cod=%d\n", ret_cod);
+        exit(1);
+    }
     
     g_strfreev (command_argv);
     command_argv = NULL;
