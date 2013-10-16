@@ -60,6 +60,11 @@ struct flom_config {
      * Name of the file must be used to write trace messages
      */
     char const *trace_file;
+    /**
+     * After idle_time milliseconds without new incoming requests, the daemon
+     * will terminate activity
+     */
+    int idle_time;
 };
 typedef struct flom_config flom_config_t;
 

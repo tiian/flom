@@ -105,10 +105,18 @@
  */
 #define FLOM_RC_INTERNAL_ERROR                  -1
 /**
+ * Flom was not able to start a new daemon and/or connect to it
+ */
+#define FLOM_RC_DAEMON_NOT_STARTED              -2
+/**
+ * Unespected network event
+ */
+#define FLOM_RC_NETWORK_EVENT_ERROR             -3
+/**
  * A passed object/option/arg is NULL and it can NOT be inferred from a default
  * value
  */
-#define FLOM_RC_NULL_OBJECT                     -2
+#define FLOM_RC_NULL_OBJECT                     -4
 /**
  * A parameter passed to a function is OUT OF RANGE
 #define FLOM_RC_OUT_OF_RANGE                    -2
@@ -116,10 +124,6 @@
 /**
  * Configuration file is broken
 #define FLOM_RC_CONFIG_ERROR                    -3
- */
-/**
- * Unespected network event
-#define FLOM_RC_NETWORK_EVENT_ERROR             -4
  */
 /**
  * The container is full and can NOT store more elements
@@ -222,69 +226,77 @@
  */
 
 /**
+ * "accept" function error
+ */
+#define FLOM_RC_ACCEPT_ERROR                   -100
+/**
  * "bind" function error
  */
-#define FLOM_RC_BIND_ERROR                     -100
+#define FLOM_RC_BIND_ERROR                     -101
 /**
  * "chdir" function error
  */
-#define FLOM_RC_CHDIR_ERROR                    -101
+#define FLOM_RC_CHDIR_ERROR                    -102
 /**
  * "close" function error
  */
-#define FLOM_RC_CLOSE_ERROR                    -102
+#define FLOM_RC_CLOSE_ERROR                    -103
 /**
  * "connect" function error
  */
-#define FLOM_RC_CONNECT_ERROR                  -103
+#define FLOM_RC_CONNECT_ERROR                  -104
 /**
  * "execvp" function error
  */
-#define FLOM_RC_EXECVP_ERROR                   -104
+#define FLOM_RC_EXECVP_ERROR                   -105
 /**
  * "fork" function error
  */
-#define FLOM_RC_FORK_ERROR                     -105
+#define FLOM_RC_FORK_ERROR                     -106
 /**
  * "listen" function error
  */
-#define FLOM_RC_LISTEN_ERROR                   -106
+#define FLOM_RC_LISTEN_ERROR                   -107
 /**
  * "malloc"/"g_malloc" function error
  */
-#define FLOM_RC_MALLOC_ERROR                   -107
+#define FLOM_RC_MALLOC_ERROR                   -108
 /**
  * "pipe" function error
  */
-#define FLOM_RC_PIPE_ERROR                     -108
+#define FLOM_RC_PIPE_ERROR                     -109
+/**
+ * "poll" function error
+ */
+#define FLOM_RC_POLL_ERROR                     -110
 /**
  * "read" function error
  */
-#define FLOM_RC_READ_ERROR                     -109
+#define FLOM_RC_READ_ERROR                     -111
 /**
  * "signal" function error
  */
-#define FLOM_RC_SIGNAL_ERROR                   -110
+#define FLOM_RC_SIGNAL_ERROR                   -112
 /**
  * "setsid" function error
  */
-#define FLOM_RC_SETSID_ERROR                   -111
+#define FLOM_RC_SETSID_ERROR                   -113
 /**
  * "socket" function error
  */
-#define FLOM_RC_SOCKET_ERROR                   -112
+#define FLOM_RC_SOCKET_ERROR                   -114
 /**
  * "unlink" function error
  */
-#define FLOM_RC_UNLINK_ERROR                   -113
+#define FLOM_RC_UNLINK_ERROR                   -115
 /**
  * "wait" function error
  */
-#define FLOM_RC_WAIT_ERROR                     -114
+#define FLOM_RC_WAIT_ERROR                     -116
 /**
  * "write" function error
  */
-#define FLOM_RC_WRITE_ERROR                    -115
+#define FLOM_RC_WRITE_ERROR                    -117
 /**
  * "realloc" function error
 #define FLOM_RC_REALLOC_ERROR                 -101
@@ -292,10 +304,6 @@
 /**
  * "strdup" function error
 #define FLOM_RC_STRDUP_ERROR                  -102
- */
-/**
- * "poll" function error
-#define FLOM_RC_POLL_ERROR                   -108
  */
 /**
  * "open" function error
@@ -393,10 +401,6 @@ define FLOM_RC_TIMES_ERROR                   -126
 /**
  * "getsockopt" function error
 #define FLOM_RC_GETSOCKOPT_ERROR               -132
- */
-/**
- * "accept" function error
-#define FLOM_RC_ACCEPT_ERROR                   -135
  */
 /**
  * "shutdown" function error

@@ -47,4 +47,5 @@ void flom_config_reset(flom_config_t *config)
     snprintf(config->local_socket_path_name, LOCAL_SOCKET_SIZE,
              "/tmp/flom-%s", getlogin());
     config->trace_file = NULL;
+    config->idle_time = 5000; /* milliseconds */
 }

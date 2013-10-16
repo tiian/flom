@@ -59,11 +59,32 @@ extern "C" {
     /**
      * Create a listen socket to serve the clients
      * @param config IN configuration object
-     * @param listenfd OUT listening file descriptor
-     * @resul a reason code
+     * @param listenfd OUT listening socket file descriptor
+     * @result a reason code
      */
     int flom_listen(const flom_config_t *config,
                     int *listenfd);
+
+
+
+    /**
+     * Clean-up the listen socket before daemon termination
+     * @param config IN configuration object
+     * @param listenfd IN listening socket file descriptor
+     * @result a reason code     
+     */
+    int flom_listen_clean(const flom_config_t *config, int listenfd);
+
+
+    
+    /**
+     * Possible infinite accept loop: every incoming connection will be
+     * processed; after idle time, it will leave
+     * @param config IN configuration object
+     * @param listenfd IN listening socket file descriptor
+     * @result a reason code
+     */
+    int flom_accept_loop(const flom_config_t *config, int listenfd);
 
     
 

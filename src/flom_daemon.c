@@ -21,6 +21,9 @@
 
 
 #include <stdio.h>
+#ifdef HAVE_POLL_H
+# include <poll.h>
+#endif
 #ifdef HAVE_SYSLOG_H
 # include <syslog.h>
 #endif
@@ -70,6 +73,7 @@ int flom_daemon(const flom_config_t *config)
                      , CHDIR_ERROR
                      , WRITE_ERROR
                      , FLOM_LISTEN_ERROR
+                     , FLOM_ACCEPT_LOOP_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int pipefd[2];
@@ -123,6 +127,7 @@ int flom_daemon(const flom_config_t *config)
             int daemon_rc = FLOM_RC_OK;
             int listenfd = 0;
 
+            /* switch state to daemonized */
             daemon = TRUE;
             /* child process, now daemonizing... */
             FLOM_TRACE(("flom_daemon: daemonizing... fork()\n"));
@@ -168,12 +173,15 @@ int flom_daemon(const flom_config_t *config)
             /* closing pipe (child) */
             close(pipefd[0]);
             close(pipefd[1]);
-
+            /* checking flom_listed reason code */
             if (FLOM_RC_OK != daemon_rc)
                 THROW(FLOM_LISTEN_ERROR);
             
-            syslog(LOG_NOTICE, "flom_daemon: completed!");
-            exit(0);
+            syslog(LOG_NOTICE, "flom_daemon: activated!");
+            if (FLOM_RC_OK != (ret_cod = flom_accept_loop(config, listenfd)))
+                THROW(FLOM_ACCEPT_LOOP_ERROR);
+            syslog(LOG_NOTICE, "flom_daemon: exiting");
+            flom_listen_clean(config, listenfd);
         }
         THROW(NONE);
     } CATCH {
@@ -215,6 +223,9 @@ int flom_daemon(const flom_config_t *config)
                 ret_cod = FLOM_RC_WRITE_ERROR;
                 break;
             case FLOM_LISTEN_ERROR:
+                ret_cod = daemon_rc;
+                break;
+            case FLOM_ACCEPT_LOOP_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -225,6 +236,9 @@ int flom_daemon(const flom_config_t *config)
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_daemon/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    /* the function must not return control if in daemonized state */
+    if (daemon)
+        exit(0);
     return ret_cod;
 }
 
@@ -258,6 +272,7 @@ int flom_listen(const flom_config_t *config,
             THROW(BIND_ERROR);
         if (-1 ==listen(fd, 100))
             THROW(LISTEN_ERROR);
+        *listenfd = fd;
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -285,3 +300,121 @@ int flom_listen(const flom_config_t *config,
     return ret_cod;
 }
 
+
+
+int flom_listen_clean(const flom_config_t *config,
+                      int listenfd)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_listen_clean\n"));
+    TRY {
+        if (-1 == close(listenfd)) {
+            FLOM_TRACE(("flom_listen_clean: close errno=%d\n", errno));
+        }
+        if (-1 == unlink(config->local_socket_path_name)) {
+            FLOM_TRACE(("flom_listen_clean: unlink errno=%d\n", errno));
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_listen_clean/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+int flom_accept_loop(const flom_config_t *config, int listenfd)
+{
+    enum Exception { POLL_ERROR
+                     , NETWORK_ERROR
+                     , ACCEPT_ERROR
+                     , INTERNAL_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_accept_loop\n"));
+    TRY {
+        struct pollfd poll_array[1];
+        int ready_fd;
+        int loop = TRUE;
+
+        while (loop) {
+            poll_array[0].fd = listenfd;
+            poll_array[0].events = POLLIN;
+            ready_fd = poll(poll_array, 1, config->idle_time);
+            FLOM_TRACE(("flom_accept_loop: ready_fd=%d\n", ready_fd));
+            switch (ready_fd) {
+                case -1:
+                    THROW(POLL_ERROR);
+                    break;
+                case 0:
+                    /* time out */
+                    FLOM_TRACE(("flom_accept_loop: idle time exceeded %d "
+                                "milliseconds, leaving...\n",
+                                config->idle_time));
+                    loop = FALSE;
+                    break;
+                case 1:
+                    /* possible incoming client */
+                    FLOM_TRACE(("flom_accept_loop: POLLIN=%d, POLLERR=%d, "
+                                "POLLHUP=%d, POLLNVAL=%d\n",
+                                poll_array[0].revents & POLLIN,
+                                poll_array[0].revents & POLLERR,
+                                poll_array[0].revents & POLLHUP,
+                                poll_array[0].revents & POLLNVAL));
+                    if (poll_array[0].revents &
+                        (POLLERR | POLLHUP | POLLNVAL))
+                        THROW(NETWORK_ERROR);
+                    if (poll_array[0].revents & POLLIN) {
+                        int conn_fd;
+                        struct sockaddr_un cliaddr;
+                        socklen_t clilen;
+                        if (-1 == (conn_fd = accept(
+                                       listenfd, (struct sockaddr *)&cliaddr,
+                                       &clilen)))
+                            THROW(ACCEPT_ERROR);
+                        FLOM_TRACE(("flom_accept_loop: new client connected "
+                                    "with fd=%d\n", conn_fd));
+                        /* @@@ */
+                    }
+                    break;
+                default:
+                    THROW(INTERNAL_ERROR);
+            }
+        } /* while (loop) */
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case POLL_ERROR:
+                ret_cod = FLOM_RC_POLL_ERROR;
+                break;
+            case ACCEPT_ERROR:
+                ret_cod = FLOM_RC_ACCEPT_ERROR;
+                break;
+            case NETWORK_ERROR:
+                ret_cod = FLOM_RC_NETWORK_EVENT_ERROR;
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_accept_loop/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}

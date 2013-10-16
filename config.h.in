@@ -15,6 +15,9 @@
 /* Define to 1 if the system has the type `pid_t'. */
 #undef HAVE_PID_T
 
+/* Define to 1 if you have the <poll.h> header file. */
+#undef HAVE_POLL_H
+
 /* Define to 1 if you have the <stdarg.h> header file. */
 #undef HAVE_STDARG_H
 

@@ -48,6 +48,7 @@ int flom_connect(const flom_config_t *config)
 {
     enum Exception { SOCKET_ERROR
                      , DAEMON_ERROR
+                     , DAEMON_NOT_STARTED
                      , CONNECT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -70,9 +71,15 @@ int flom_connect(const flom_config_t *config)
             if (ENOENT == errno || ECONNREFUSED == errno) {
                 FLOM_TRACE(("flom_connect: connection failed, activating "
                             "a new daemon\n"));
-                /* daemon is not active, starting it... @@@ */
+                /* daemon is not active, starting it... */
                 if (FLOM_RC_OK != (ret_cod = flom_daemon(config)))
                     THROW(DAEMON_ERROR);
+                /* trying to connect again... */
+                if (-1 == connect(sockfd, (struct sockaddr *)&servaddr,
+                                  sizeof(servaddr)))
+                    THROW(DAEMON_NOT_STARTED);
+                FLOM_TRACE(("flom_connect: connected to flom daemon\n"));
+                /* @@@ */
             } else {
                 THROW(CONNECT_ERROR);
             }
@@ -87,6 +94,9 @@ int flom_connect(const flom_config_t *config)
                 ret_cod = FLOM_RC_CONNECT_ERROR;
                 break;
             case DAEMON_ERROR:
+                break;
+            case DAEMON_NOT_STARTED:
+                ret_cod = FLOM_RC_DAEMON_NOT_STARTED;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

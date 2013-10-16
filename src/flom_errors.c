@@ -58,15 +58,18 @@ const char *flom_strerror(int ret_cod)
             return "OK: no error";
         case FLOM_RC_INTERNAL_ERROR:
             return "ERROR: internal error / unexpected condition / code bug";
+        case FLOM_RC_DAEMON_NOT_STARTED:
+            return "ERROR: flom command was not able to start a new daemon "
+                "and/or connect to it";
         case FLOM_RC_NULL_OBJECT:
             return "ERROR: an argument is null";
+        case FLOM_RC_NETWORK_EVENT_ERROR:
+            return "ERROR: an unespected network event raised";
             /*
         case FLOM_RC_OUT_OF_RANGE:
             return "ERROR: an argument is out of range";
         case FLOM_RC_CONFIG_ERROR:
             return "ERROR: configuration file is broken";
-        case FLOM_RC_NETWORK_EVENT_ERROR:
-            return "ERROR: an unespected network event raised";
         case FLOM_RC_CONTAINER_FULL:
             return "ERROR: the container is full and cannot store more "
                 "elements";
@@ -145,6 +148,8 @@ const char *flom_strerror(int ret_cod)
                 "condition";
         case FLOM_RC_PIPE_ERROR:
             return "ERROR: 'pipe' function returned an error condition";
+        case FLOM_RC_POLL_ERROR:
+            return "ERROR: 'poll' function returned an error condition";
         case FLOM_RC_READ_ERROR:
             return "ERROR: 'read' function returned an error condition";
         case FLOM_RC_SETSID_ERROR:
@@ -164,8 +169,6 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'realloc' function returned an error condition";
         case FLOM_RC_STRDUP_ERROR:
             return "ERROR: 'strdup' function returned an error condition";
-        case FLOM_RC_POLL_ERROR:
-            return "ERROR: 'poll' function returned an error condition";
         case FLOM_RC_OPEN_ERROR:
             return "ERROR: 'open' function returned an error condition";
         case FLOM_RC_TRUNCATE_ERROR:
