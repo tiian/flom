@@ -45,6 +45,7 @@
 
 
 
+#include "flom_conns.h"
 #include "flom_daemon.h"
 #include "flom_errors.h"
 
@@ -347,7 +348,10 @@ int flom_accept_loop(const flom_config_t *config, int listenfd)
         struct pollfd poll_array[1];
         int ready_fd;
         int loop = TRUE;
-
+        flom_conns_t fc;
+        /* @@@ */
+        flom_conns_init(&fc);
+        
         while (loop) {
             poll_array[0].fd = listenfd;
             poll_array[0].events = POLLIN;

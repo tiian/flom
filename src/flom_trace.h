@@ -72,6 +72,11 @@
  */
 #define FLOM_TRACE_MOD_DAEMON             0x00000010
 
+/**
+ * trace module for conns (utility) functions
+ */
+#define FLOM_TRACE_MOD_CONNS              0x00000020
+
 
 
 /**
