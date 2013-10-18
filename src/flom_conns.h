@@ -54,7 +54,19 @@
 
 
 
+/**
+ * Default allocation size for @ref flom_conns_t objects
+ */
 #define FLOM_CONNS_DEFAULT_ALLOCATION  10
+/**
+ * Expansion allocation step
+ */
+#define FLOM_CONNS_STEP_ALLOCATION     1.2
+/**
+ * Null file descriptor
+ */
+#define NULL_FD   -1
+
 
 
 /**
@@ -64,7 +76,7 @@ struct flom_addr_s {
     /**
      * Client address len
      */
-    socklen_t clilen;
+    socklen_t addr_len;
     union {
         /**
          * Client addresses for AF_UNIX connections
@@ -86,11 +98,11 @@ struct flom_conns_s {
     /**
      * Number of allocated connections
      */
-    int allocated;
+    nfds_t allocated;
     /**
      * Number of used connections
      */
-    int used;
+    nfds_t used;
     /**
      * Array used for poll function
      */
@@ -119,12 +131,83 @@ extern "C" {
 
     /**
      * Initialize a new object
-     * @param fc IN/OUT object to be initialized
-     * @reason a reason code
+     * @param conns IN/OUT object to be initialized
+     * @param domain IN socket domain for all the connections managed by this
+     *                  object
+     * @return a reason code
      */
-    int flom_conns_init(flom_conns_t *fc);
+    int flom_conns_init(flom_conns_t *conns, int domain);
 
 
+
+    /**
+     * Add a new connection
+     * @param conns IN/OUT connections object
+     * @param fd IN file descriptor
+     * @param domain IN socket domain
+     * @param addr_len IN lenght of address
+     * @param sa IN address
+     * @return a reason code
+     */
+    int flom_conns_add(flom_conns_t *conns, int fd,
+                       socklen_t addr_len, const struct sockaddr *sa);
+
+
+
+    /**
+     * Return the number of active connections managed by the object
+     * @param conns IN connections object
+     * @return the number of active connections
+     */
+    static inline nfds_t flom_conns_get_used(const flom_conns_t *conns) {
+        return conns->used;
+    }
+
+    
+
+    /**
+     * Return a file descriptor associated to a connection
+     * @param conns IN connections object
+     * @param id IN identificator (position in array) of the connection
+     * @return the associated file descriptor or @ref NULL_FD if any error
+     *         happens
+     */
+    static inline int flom_conns_get_fd(const flom_conns_t *conns, int id) {
+        if (id < conns->used)
+            return conns->fds[id].fd;
+        else
+            return NULL_FD;
+    }
+
+
+
+    /**
+     * @return the fds array to be used with poll function
+     */
+    static inline struct pollfd *flom_conns_get_fds(flom_conns_t *conns) {
+        return conns->fds;
+    }
+
+
+    
+    /**
+     * Set events field for every connection in the object
+     * @param conns IN/OUT connections object
+     * @param events IN new value for every events field
+     * @return a reason code
+     */
+    int flom_conns_set_events(flom_conns_t *conns, short events);
+    
+
+
+    /**
+     * Expand object size
+     * @param conns IN/OUT connections object
+     * @return a reason code
+     */
+    int flom_conns_expand(flom_conns_t *conns);
+
+    
     
 #ifdef __cplusplus
 }

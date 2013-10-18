@@ -118,6 +118,14 @@
  */
 #define FLOM_RC_NULL_OBJECT                     -4
 /**
+ * A specified option is not valid for method and/or object status
+ */
+#define FLOM_RC_INVALID_OPTION                  -5
+/**
+ * A corrupted object has been passed to a function
+ */
+#define FLOM_RC_OBJ_CORRUPTED                   -6
+/**
  * A parameter passed to a function is OUT OF RANGE
 #define FLOM_RC_OUT_OF_RANGE                    -2
  */
@@ -138,16 +146,8 @@
 #define FLOM_RC_OBJ_NOT_INITIALIZED             -8
  */
 /**
- * A corrupted object has been passed to a function
-#define FLOM_RC_OBJ_CORRUPTED                   -9
- */
-/**
  * Status files are corrupted and the server can not start-up
 #define FLOM_RC_CORRUPTED_STATUS_FILE          -10
- */
-/**
- * A specified option is not valid for method and/or object status
-#define FLOM_RC_INVALID_OPTION                 -11
  */
 /**
  * A routine has been invoked in an improper context
