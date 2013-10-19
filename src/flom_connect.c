@@ -80,6 +80,7 @@ int flom_connect(const flom_config_t *config)
                     THROW(DAEMON_NOT_STARTED);
                 FLOM_TRACE(("flom_connect: connected to flom daemon\n"));
                 /* @@@ */
+                sleep(10);
             } else {
                 THROW(CONNECT_ERROR);
             }

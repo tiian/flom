@@ -349,6 +349,7 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
                      , POLL_ERROR
                      , NETWORK_ERROR
                      , ACCEPT_ERROR
+                     , CONNS_ADD_ERROR
                      , INTERNAL_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -361,50 +362,62 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
         if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(conns, POLLIN)))
             THROW(CONNS_SET_EVENTS_ERROR);
         while (loop) {
+            nfds_t i, n;
             struct pollfd *fds;
             ready_fd = poll(flom_conns_get_fds(conns),
                             flom_conns_get_used(conns),
                             config->idle_time);
             FLOM_TRACE(("flom_accept_loop: ready_fd=%d\n", ready_fd));
-            switch (ready_fd) {
-                case -1:
-                    THROW(POLL_ERROR);
-                    break;
-                case 0:
-                    /* time out */
-                    FLOM_TRACE(("flom_accept_loop: idle time exceeded %d "
-                                "milliseconds, leaving...\n",
-                                config->idle_time));
+            /* error on poll function */
+            if (0 > ready_fd)
+                THROW(POLL_ERROR);
+            /* poll exited due to time out */
+            if (0 == ready_fd) {
+                FLOM_TRACE(("flom_accept_loop: idle time exceeded %d "
+                            "milliseconds\n",
+                            config->idle_time));
+                if (1 == flom_conns_get_used(conns)) {
+                    FLOM_TRACE(("flom_accept_loop: only listener connection "
+                                "is active, exiting...\n"));
                     loop = FALSE;
-                    break;
-                case 1:
-                    /* possible incoming client */
-                    fds = flom_conns_get_fds(conns);
-                    FLOM_TRACE(("flom_accept_loop: POLLIN=%d, POLLERR=%d, "
-                                "POLLHUP=%d, POLLNVAL=%d\n",
-                                fds[0].revents & POLLIN,
-                                fds[0].revents & POLLERR,
-                                fds[0].revents & POLLHUP,
-                                fds[0].revents & POLLNVAL));
-                    if (fds[0].revents &
-                        (POLLERR | POLLHUP | POLLNVAL))
-                        THROW(NETWORK_ERROR);
-                    if (fds[0].revents & POLLIN) {
+                }
+                continue;
+            }
+            /* scanning file descriptors */
+            n = flom_conns_get_used(conns);
+            for (i=0; i<n; ++i) {
+                fds = flom_conns_get_fds(conns);
+                FLOM_TRACE(("flom_accept_loop: i=%d, POLLIN=%d, POLLERR=%d, "
+                            "POLLHUP=%d, POLLNVAL=%d\n", i,
+                            fds[i].revents & POLLIN,
+                            fds[i].revents & POLLERR,
+                            fds[i].revents & POLLHUP,
+                            fds[i].revents & POLLNVAL));
+                if (fds[i].revents &
+                    (POLLERR | POLLHUP | POLLNVAL))
+                    THROW(NETWORK_ERROR);
+                if (fds[i].revents & POLLIN) {
+                    if (0 == i) {
+                        /* it's a new connection */
                         int conn_fd;
                         struct sockaddr_un cliaddr;
                         socklen_t clilen;
                         if (-1 == (conn_fd = accept(
-                                       fds[0].fd, (struct sockaddr *)&cliaddr,
+                                       fds[i].fd, (struct sockaddr *)&cliaddr,
                                        &clilen)))
                             THROW(ACCEPT_ERROR);
                         FLOM_TRACE(("flom_accept_loop: new client connected "
                                     "with fd=%d\n", conn_fd));
+                        if (FLOM_RC_OK != (ret_cod = flom_conns_add(
+                                               conns, conn_fd, clilen,
+                                               (struct sockaddr *)&cliaddr)))
+                            THROW(CONNS_ADD_ERROR);
+                    } else {
+                        /* it's data from an existing connection */
                         /* @@@ */
                     }
-                    break;
-                default:
-                    THROW(INTERNAL_ERROR);
-            }
+                }
+            } /* for (i... */
         } /* while (loop) */
         THROW(NONE);
     } CATCH {
@@ -416,6 +429,8 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
                 break;
             case ACCEPT_ERROR:
                 ret_cod = FLOM_RC_ACCEPT_ERROR;
+                break;
+            case CONNS_ADD_ERROR:
                 break;
             case NETWORK_ERROR:
                 ret_cod = FLOM_RC_NETWORK_EVENT_ERROR;
