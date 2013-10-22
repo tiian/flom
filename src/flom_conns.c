@@ -247,3 +247,83 @@ int flom_conns_expand(flom_conns_t *conns)
     return ret_cod;
 }
 
+
+
+int flom_conns_close_fd(flom_conns_t *conns, nfds_t id)
+{
+    enum Exception { OUT_OF_RANGE
+                     , CLOSE_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_conns_close_fd\n"));
+    TRY {
+        FLOM_TRACE(("flom_conns_close: closing connection id=%d with fd=%d\n",
+                    id, conns->fds[id].fd));
+        if (id < 0 || id >= conns->used)
+            THROW(OUT_OF_RANGE);
+        if (0 != close(conns->fds[id].fd))
+            THROW(CLOSE_ERROR);
+        conns->fds[id].fd = NULL_FD;
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OUT_OF_RANGE:
+                ret_cod = FLOM_RC_OUT_OF_RANGE;
+                break;
+            case CLOSE_ERROR:
+                ret_cod = FLOM_RC_CLOSE_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_conns_close_fd/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_conns_clean(flom_conns_t *conns)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_conns_clean\n"));
+    TRY {
+        nfds_t i=0;
+        while (i<conns->used) {
+            nfds_t last = conns->used-1;
+            FLOM_TRACE(("flom_conns_clean: i=%d, fd=%d %s\n",
+                        i, conns->fds[i].fd,
+                       NULL_FD == conns->fds[i].fd ? "(removing...)" : ""));
+            if (NULL_FD == conns->fds[i].fd) {
+                if (i != last) {
+                    /* moving last connection to this position */
+                    conns->fds[i] = conns->fds[last];
+                    conns->addr[i] = conns->addr[last];
+                }
+                conns->used--;
+            } else i++;
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_conns_clean/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

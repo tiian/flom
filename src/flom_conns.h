@@ -79,6 +79,10 @@ struct flom_addr_s {
     socklen_t addr_len;
     union {
         /**
+         * Client addressed for generic connections
+         */
+        struct sockaddr    sa;
+        /**
          * Client addresses for AF_UNIX connections
          */
         struct sockaddr_un saun;
@@ -206,6 +210,27 @@ extern "C" {
      * @return a reason code
      */
     int flom_conns_expand(flom_conns_t *conns);
+
+    
+    
+    /**
+     * Close a file descriptor and set it to @ref NULL_FD; use
+     * @ref flom_conns_clean to remove the connections associated to closed
+     * file descriptors
+     * @param conns IN/OUT connections object
+     * @param id IN connection must be closed
+     * @return a reason code
+     */
+    int flom_conns_close_fd(flom_conns_t *conns, nfds_t id);
+
+    
+
+    /**
+     * Remove connections with invalid (closed) file descriptor
+     * @param conns IN/OUT connections object
+     * @return a reason code
+     */
+    int flom_conns_clean(flom_conns_t *conns);
 
     
     

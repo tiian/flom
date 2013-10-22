@@ -40,6 +40,8 @@
 #define FLOM_TRACE_MODULE   FLOM_TRACE_MOD_CONFIG
 
 
+const char *DEFAULT_RESOURCE_NAME = "_RESOURCE";
+
 
 void flom_config_reset(flom_config_t *config)
 {
@@ -48,4 +50,5 @@ void flom_config_reset(flom_config_t *config)
              "/tmp/flom-%s", getlogin());
     config->trace_file = NULL;
     config->idle_time = 5000; /* milliseconds */
+    config->resource_name = DEFAULT_RESOURCE_NAME;
 }

@@ -48,6 +48,9 @@
 
 #define LOCAL_SOCKET_SIZE sizeof(((struct sockaddr_un *)NULL)->sun_path)
 
+
+extern const char *DEFAULT_RESOURCE_NAME;
+
 /**
  * This struct contains all the values necessary for configuration
  */
@@ -65,6 +68,10 @@ struct flom_config {
      * will terminate activity
      */
     int idle_time;
+    /**
+     * Name of the resource must be locked
+     */
+    char const *resource_name;
 };
 typedef struct flom_config flom_config_t;
 

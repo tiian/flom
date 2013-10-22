@@ -345,11 +345,12 @@ int flom_listen_clean(const flom_config_t *config,
 
 int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
 {
-    enum Exception { CONNS_SET_EVENTS_ERROR
+    enum Exception { CONNS_CLEAN_ERROR
+                     , CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
+                     , ACCEPT_LOOP_POLLIN_ERROR
+                     , CONNS_CLOSE_ERROR
                      , NETWORK_ERROR
-                     , ACCEPT_ERROR
-                     , CONNS_ADD_ERROR
                      , INTERNAL_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -359,11 +360,13 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
         int ready_fd;
         int loop = TRUE;
 
-        if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(conns, POLLIN)))
-            THROW(CONNS_SET_EVENTS_ERROR);
         while (loop) {
             nfds_t i, n;
             struct pollfd *fds;
+            if (FLOM_RC_OK != (ret_cod = flom_conns_clean(conns)))
+                THROW(CONNS_CLEAN_ERROR);
+            if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(conns, POLLIN)))
+                THROW(CONNS_SET_EVENTS_ERROR);
             ready_fd = poll(flom_conns_get_fds(conns),
                             flom_conns_get_used(conns),
                             config->idle_time);
@@ -387,50 +390,42 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
             n = flom_conns_get_used(conns);
             for (i=0; i<n; ++i) {
                 fds = flom_conns_get_fds(conns);
-                FLOM_TRACE(("flom_accept_loop: i=%d, POLLIN=%d, POLLERR=%d, "
-                            "POLLHUP=%d, POLLNVAL=%d\n", i,
+                FLOM_TRACE(("flom_accept_loop: i=%d, fd=%d, POLLIN=%d, "
+                            "POLLERR=%d, POLLHUP=%d, POLLNVAL=%d\n", i,
+                            fds[i].fd,
                             fds[i].revents & POLLIN,
                             fds[i].revents & POLLERR,
                             fds[i].revents & POLLHUP,
                             fds[i].revents & POLLNVAL));
+                if (fds[i].revents & POLLIN) {
+                    if (FLOM_RC_OK != (ret_cod = flom_accept_loop_pollin(
+                                           conns, i)))
+                        THROW(ACCEPT_LOOP_POLLIN_ERROR);
+                }
+                if ((fds[i].revents & POLLHUP) && (0 != i)) {
+                    FLOM_TRACE(("flom_accept_loop: client %i disconnected "
+                                "before categorization!\n", i));
+                    if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
+                                           conns, i)))
+                        THROW(CONNS_CLOSE_ERROR);                       
+                    continue;
+                }
                 if (fds[i].revents &
                     (POLLERR | POLLHUP | POLLNVAL))
                     THROW(NETWORK_ERROR);
-                if (fds[i].revents & POLLIN) {
-                    if (0 == i) {
-                        /* it's a new connection */
-                        int conn_fd;
-                        struct sockaddr_un cliaddr;
-                        socklen_t clilen;
-                        if (-1 == (conn_fd = accept(
-                                       fds[i].fd, (struct sockaddr *)&cliaddr,
-                                       &clilen)))
-                            THROW(ACCEPT_ERROR);
-                        FLOM_TRACE(("flom_accept_loop: new client connected "
-                                    "with fd=%d\n", conn_fd));
-                        if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                                               conns, conn_fd, clilen,
-                                               (struct sockaddr *)&cliaddr)))
-                            THROW(CONNS_ADD_ERROR);
-                    } else {
-                        /* it's data from an existing connection */
-                        /* @@@ */
-                    }
-                }
             } /* for (i... */
         } /* while (loop) */
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CONNS_CLEAN_ERROR:
             case CONNS_SET_EVENTS_ERROR:
                 break;
             case POLL_ERROR:
                 ret_cod = FLOM_RC_POLL_ERROR;
                 break;
-            case ACCEPT_ERROR:
-                ret_cod = FLOM_RC_ACCEPT_ERROR;
-                break;
-            case CONNS_ADD_ERROR:
+            case ACCEPT_LOOP_POLLIN_ERROR:
+            case CONNS_CLOSE_ERROR:
                 break;
             case NETWORK_ERROR:
                 ret_cod = FLOM_RC_NETWORK_EVENT_ERROR;
@@ -446,6 +441,62 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
         } /* switch (excp) */
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_accept_loop/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
+{
+    enum Exception { ACCEPT_ERROR
+                     , CONNS_ADD_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_accept_loop_pollin\n"));
+    TRY {
+        struct pollfd *fds = flom_conns_get_fds(conns);
+        FLOM_TRACE(("flom_accept_loop_pollin: id=%d, fd=%d\n",
+                    i, fds[i].fd));
+        if (0 == i) {
+            /* it's a new connection */
+            int conn_fd;
+            struct sockaddr cliaddr;
+            socklen_t clilen = sizeof(cliaddr);
+            if (-1 == (conn_fd = accept(
+                           fds[i].fd, &cliaddr, &clilen)))
+                THROW(ACCEPT_ERROR);
+            FLOM_TRACE(("flom_accept_loop_pollin: new client connected "
+                        "with fd=%d\n", conn_fd));
+            if (FLOM_RC_OK != (ret_cod = flom_conns_add(
+                                   conns, conn_fd, clilen, &cliaddr)))
+                THROW(CONNS_ADD_ERROR);
+        } else {
+            char buffer[1024];
+            /* it's data from an existing connection */
+            /* @@@ */
+            read(fds[i].fd, buffer, sizeof(buffer));
+            FLOM_TRACE(("flom_accept_loop_pollin: received '%s' from client\n",
+                        buffer));
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case ACCEPT_ERROR:
+                ret_cod = FLOM_RC_ACCEPT_ERROR;
+                break;
+            case CONNS_ADD_ERROR:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_accept_loop_pollin/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

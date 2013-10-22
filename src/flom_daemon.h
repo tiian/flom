@@ -89,6 +89,17 @@ extern "C" {
     int flom_accept_loop(const flom_config_t *config,
                          flom_conns_t *conns);
 
+
+    
+
+    /**
+     * Manager POLLIN event received from listener daemon
+     * @param conns IN/OUT connections object
+     * @param id IN connection id
+     * @return a reason code
+     */
+    int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id);
+
     
 
 #ifdef __cplusplus

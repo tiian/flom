@@ -56,6 +56,16 @@ extern "C" {
     
 
 
+    /**
+     * Send lock command to the daemon
+     * @param config IN configuration object
+     * @param fd IN socket file descriptor
+     * @return a reason code
+     */
+    int flom_connect_lock(const flom_config_t *config, int fd);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

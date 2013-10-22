@@ -127,8 +127,8 @@
 #define FLOM_RC_OBJ_CORRUPTED                   -6
 /**
  * A parameter passed to a function is OUT OF RANGE
-#define FLOM_RC_OUT_OF_RANGE                    -2
  */
+#define FLOM_RC_OUT_OF_RANGE                    -7
 /**
  * Configuration file is broken
 #define FLOM_RC_CONFIG_ERROR                    -3

@@ -49,6 +49,7 @@ int flom_connect(const flom_config_t *config)
     enum Exception { SOCKET_ERROR
                      , DAEMON_ERROR
                      , DAEMON_NOT_STARTED
+                     , CONNECT_LOCK_ERROR
                      , CONNECT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -79,8 +80,9 @@ int flom_connect(const flom_config_t *config)
                                   sizeof(servaddr)))
                     THROW(DAEMON_NOT_STARTED);
                 FLOM_TRACE(("flom_connect: connected to flom daemon\n"));
-                /* @@@ */
-                sleep(10);
+                /* sending lock command */
+                if (FLOM_RC_OK != (ret_cod = flom_connect_lock(config, sockfd)))
+                    THROW(CONNECT_LOCK_ERROR);
             } else {
                 THROW(CONNECT_ERROR);
             }
@@ -91,13 +93,15 @@ int flom_connect(const flom_config_t *config)
             case SOCKET_ERROR:
                 ret_cod = FLOM_RC_SOCKET_ERROR;
                 break;
-            case CONNECT_ERROR:
-                ret_cod = FLOM_RC_CONNECT_ERROR;
-                break;
             case DAEMON_ERROR:
                 break;
             case DAEMON_NOT_STARTED:
                 ret_cod = FLOM_RC_DAEMON_NOT_STARTED;
+                break;
+            case CONNECT_ERROR:
+                ret_cod = FLOM_RC_CONNECT_ERROR;
+                break;
+            case CONNECT_LOCK_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -110,3 +114,41 @@ int flom_connect(const flom_config_t *config)
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int flom_connect_lock(const flom_config_t *config, int fd)
+{
+    enum Exception { WRITE_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_connect_lock\n"));
+    TRY {
+        char buffer[1024];
+        ssize_t sent;
+        snprintf(buffer, sizeof(buffer), "XL %s", config->resource_name);
+        FLOM_TRACE(("flom_connect_lock: sending command '%s'\n", buffer));
+        sent = write(fd, buffer, strlen(buffer));
+        if (sent != strlen(buffer))
+            THROW(WRITE_ERROR);
+        /* @@@ */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case WRITE_ERROR:
+                ret_cod = FLOM_RC_WRITE_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_connect_lock/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
