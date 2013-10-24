@@ -49,6 +49,10 @@
 
 
 /**
+ * Peer has closed socket while expecting data
+ */
+#define FLOM_RC_CONNECTION_CLOSED               +1
+/**
  * Object not found
 #define FLOM_RC_OBJ_NOT_FOUND                   +1
  */
@@ -60,10 +64,6 @@
  * An operation that can not be performed and can safely bypassed has been
  * requested: the program can go on as no operation was requested
 #define FLOM_RC_BYPASSED_OPERATION              +3
- */
-/**
- * Peer has closed TCP/IP connection
-#define FLOM_RC_CONNECTION_CLOSED               +4
  */
 /**
  * A truncation occurred because the destination is smaller then the source
@@ -130,16 +130,24 @@
  */
 #define FLOM_RC_OUT_OF_RANGE                    -7
 /**
+ * The number of chars of the prefix of the message 
+ */
+#define FLOM_RC_INVALID_PREFIX_SIZE             -8
+/**
+ * The process has been stopped to avoid a buffer overflow
+ */
+#define FLOM_RC_BUFFER_OVERFLOW                 -9
+/**
+ * The length of the message differs from prefix 
+ */
+#define FLOM_RC_INVALID_MSG_LENGTH             -10
+/**
  * Configuration file is broken
 #define FLOM_RC_CONFIG_ERROR                    -3
  */
 /**
  * The container is full and can NOT store more elements
 #define FLOM_RC_CONTAINER_FULL                  -6
- */
-/**
- * The process has been stopped to avoid a buffer overflow
-#define FLOM_RC_BUFFER_OVERFLOW                 -7
  */
 /**
  * A NOT initialized object has been passed to a method/function
@@ -163,20 +171,12 @@
 #define FLOM_RC_TOO_MANY_RSRMGRS               -14
  */
 /**
- * The number of chars of the prefix of the XML message 
-#define FLOM_RC_INVALID_PREFIX_SIZE            -15
- */
-/**
  * The XML message is empty and can not be processed
 #define FLOM_RC_EMPTY_XML_MSG                  -16
  */
 /**
  * The XML message is malformed and can not be processed
 #define FLOM_RC_MALFORMED_XML_MSG              -17
- */
-/**
- * The length of the XML message differs from prefix 
-#define FLOM_RC_INVALID_LENGTH_XML_MSG         -18
  */
 /**
  * The XML message is malformed and can not be processed
@@ -274,29 +274,37 @@
  */
 #define FLOM_RC_READ_ERROR                     -111
 /**
+ * "recv" function error
+ */
+#define FLOM_RC_RECV_ERROR                     -112
+/**
  * "signal" function error
  */
-#define FLOM_RC_SIGNAL_ERROR                   -112
+#define FLOM_RC_SIGNAL_ERROR                   -113
+/**
+ * "send" function error
+ */
+#define FLOM_RC_SEND_ERROR                     -114
 /**
  * "setsid" function error
  */
-#define FLOM_RC_SETSID_ERROR                   -113
+#define FLOM_RC_SETSID_ERROR                   -115
 /**
  * "socket" function error
  */
-#define FLOM_RC_SOCKET_ERROR                   -114
+#define FLOM_RC_SOCKET_ERROR                   -116
 /**
  * "unlink" function error
  */
-#define FLOM_RC_UNLINK_ERROR                   -115
+#define FLOM_RC_UNLINK_ERROR                   -117
 /**
  * "wait" function error
  */
-#define FLOM_RC_WAIT_ERROR                     -116
+#define FLOM_RC_WAIT_ERROR                     -118
 /**
  * "write" function error
  */
-#define FLOM_RC_WRITE_ERROR                    -117
+#define FLOM_RC_WRITE_ERROR                    -119
 /**
  * "realloc" function error
 #define FLOM_RC_REALLOC_ERROR                 -101
@@ -409,14 +417,6 @@ define FLOM_RC_TIMES_ERROR                   -126
 /**
  * "getaddrinfo" function error
 #define FLOM_RC_GETADDRINFO_ERROR              -137
- */
-/**
- * "recv" function error
-#define FLOM_RC_SEND_ERROR                     -139
- */
-/**
- * "recv" function error
-#define FLOM_RC_RECV_ERROR                     -140
  */
 /**
  * "getsockname" function error

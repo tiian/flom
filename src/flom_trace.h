@@ -77,6 +77,11 @@
  */
 #define FLOM_TRACE_MOD_CONNS              0x00000020
 
+/**
+ * trace module for parser functions
+ */
+#define FLOM_TRACE_MOD_PARSER             0x00000040
+
 
 
 /**

@@ -44,8 +44,6 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_TRUNCATION_OCCURRED:
             return "WARNING: a truncation occurred because the destination "
                 "is smaller then the source";
-        case FLOM_RC_CONNECTION_CLOSED:
-            return "WARNING: peer has closed TCP/IP connection";
         case FLOM_RC_BYPASSED_OPERATION:
             return "WARNING: operation was not performed because it can "
                 "not be requested";
@@ -54,6 +52,8 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_OBJ_NOT_FOUND:
             return "WARNING: object not found";
 */
+        case FLOM_RC_CONNECTION_CLOSED:
+            return "WARNING: peer has closed socket connection";
         case FLOM_RC_OK:
             return "OK: no error";
         case FLOM_RC_INTERNAL_ERROR:
@@ -65,6 +65,14 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: an argument is null";
         case FLOM_RC_NETWORK_EVENT_ERROR:
             return "ERROR: an unespected network event raised";
+        case FLOM_RC_INVALID_PREFIX_SIZE:
+            return "ERROR: the number of chars of the prefix of the "
+                "message is wrong";
+        case FLOM_RC_BUFFER_OVERFLOW:
+            return "ERROR: the process has been stopped to avoid a buffer "
+                "overflow";
+        case FLOM_RC_INVALID_MSG_LENGTH:
+            return "ERROR: the length of the message differs from prefix";
             /*
         case FLOM_RC_OUT_OF_RANGE:
             return "ERROR: an argument is out of range";
@@ -73,9 +81,6 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_CONTAINER_FULL:
             return "ERROR: the container is full and cannot store more "
                 "elements";
-        case FLOM_RC_BUFFER_OVERFLOW:
-            return "ERROR: the process has been stopped to avoid a buffer "
-                "overflow";
         case FLOM_RC_OBJ_NOT_INITIALIZED:
             return "ERROR: object is not initialized";
         case  FLOM_RC_OBJ_CORRUPTED:
@@ -90,16 +95,11 @@ const char *flom_strerror(int ret_cod)
                   return "ERROR: invalid object status";
         case FLOM_RC_TOO_MANY_RSRMGRS:
             return "ERROR: too many resource managers";
-        case FLOM_RC_INVALID_PREFIX_SIZE:
-            return "ERROR: the number of chars of the prefix of the XML "
-                "message";
         case FLOM_RC_EMPTY_XML_MSG:
             return "ERROR: the XML message is empty";
         case FLOM_RC_MALFORMED_XML_MSG:
             return "ERROR: the XML message is malformed and cannot be "
                 "interpreted";
-        case FLOM_RC_INVALID_LENGTH_XML_MSG:
-            return "ERROR: the length of the XML message differs from prefix";
         case FLOM_RC_PROPERTY_INVALID_VALUE:
             return "ERROR: a value of a property is invalid";
         case FLOM_RC_XML_UNRECOGNIZED_TAG:
@@ -152,6 +152,10 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'poll' function returned an error condition";
         case FLOM_RC_READ_ERROR:
             return "ERROR: 'read' function returned an error condition";
+        case FLOM_RC_RECV_ERROR:
+            return "ERROR: 'recv' function returned an error condition";
+        case FLOM_RC_SEND_ERROR:
+            return "ERROR: 'send' function returned an error condition";
         case FLOM_RC_SETSID_ERROR:
             return "ERROR: 'setsid' function returned an error condition";
         case FLOM_RC_SIGNAL_ERROR:
@@ -243,10 +247,6 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'shutdown' function returned an error condition";
         case FLOM_RC_GETADDRINFO_ERROR:
             return "ERROR: 'getaddrinfo' function returned an error condition";
-        case FLOM_RC_SEND_ERROR:
-            return "ERROR: 'send' function returned an error condition";
-        case FLOM_RC_RECV_ERROR:
-            return "ERROR: 'recv' function returned an error condition";
         case FLOM_RC_GETSOCKNAME_ERROR:
             return "ERROR: 'getsockname' function returned an error condition";
         case FLOM_RC_GETPEERNAME_ERROR:

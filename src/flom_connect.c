@@ -127,7 +127,7 @@ int flom_connect_lock(const flom_config_t *config, int fd)
     TRY {
         char buffer[1024];
         ssize_t sent;
-        snprintf(buffer, sizeof(buffer), "XL %s", config->resource_name);
+        snprintf(buffer, sizeof(buffer), "005XL %s", config->resource_name);
         FLOM_TRACE(("flom_connect_lock: sending command '%s'\n", buffer));
         sent = write(fd, buffer, strlen(buffer));
         if (sent != strlen(buffer))
