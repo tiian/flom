@@ -73,14 +73,16 @@ const char *flom_strerror(int ret_cod)
                 "overflow";
         case FLOM_RC_INVALID_MSG_LENGTH:
             return "ERROR: the length of the message differs from prefix";
+        case FLOM_RC_INVALID_PROPERTY_VALUE:
+            return "ERROR: a value of a property is invalid";
+        case FLOM_RC_CONTAINER_FULL:
+            return "ERROR: the container is full and cannot store more "
+                "elements";
             /*
         case FLOM_RC_OUT_OF_RANGE:
             return "ERROR: an argument is out of range";
         case FLOM_RC_CONFIG_ERROR:
             return "ERROR: configuration file is broken";
-        case FLOM_RC_CONTAINER_FULL:
-            return "ERROR: the container is full and cannot store more "
-                "elements";
         case FLOM_RC_OBJ_NOT_INITIALIZED:
             return "ERROR: object is not initialized";
         case  FLOM_RC_OBJ_CORRUPTED:
@@ -100,8 +102,6 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_MALFORMED_XML_MSG:
             return "ERROR: the XML message is malformed and cannot be "
                 "interpreted";
-        case FLOM_RC_PROPERTY_INVALID_VALUE:
-            return "ERROR: a value of a property is invalid";
         case FLOM_RC_XML_UNRECOGNIZED_TAG:
             return "ERROR: the XML contains a tag is not known or is "
                 "in the wrong place";
@@ -141,6 +141,10 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'fork' function returned an error condition";
         case FLOM_RC_EXECVP_ERROR:
             return "ERROR: 'execvp' function returned an error condition";
+        case FLOM_RC_GETSOCKOPT_ERROR:
+            return "ERROR: 'getsockopt' function returned an error condition";
+        case FLOM_RC_G_STRDUP_ERROR:
+            return "ERROR: 'g_strdup' function returned an error condition";
         case FLOM_RC_LISTEN_ERROR:
             return "ERROR: 'listen' function returned an error condition";
         case FLOM_RC_MALLOC_ERROR:
@@ -171,8 +175,6 @@ const char *flom_strerror(int ret_cod)
             /*
         case FLOM_RC_REALLOC_ERROR:
             return "ERROR: 'realloc' function returned an error condition";
-        case FLOM_RC_STRDUP_ERROR:
-            return "ERROR: 'strdup' function returned an error condition";
         case FLOM_RC_OPEN_ERROR:
             return "ERROR: 'open' function returned an error condition";
         case FLOM_RC_TRUNCATE_ERROR:
@@ -239,8 +241,6 @@ const char *flom_strerror(int ret_cod)
             /*
         case FLOM_RC_SETSOCKOPT_ERROR:
             return "ERROR: 'setsockopt' function returned an error condition";
-        case FLOM_RC_GETSOCKOPT_ERROR:
-            return "ERROR: 'getsockopt' function returned an error condition";
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";
         case FLOM_RC_SHUTDOWN_ERROR:

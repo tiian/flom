@@ -32,6 +32,7 @@
 #include "flom_connect.h"
 #include "flom_daemon.h"
 #include "flom_errors.h"
+#include "flom_msg.h"
 #include "flom_trace.h"
 
 
@@ -119,14 +120,27 @@ int flom_connect(const flom_config_t *config)
 
 int flom_connect_lock(const flom_config_t *config, int fd)
 {
-    enum Exception { WRITE_ERROR
+    enum Exception { G_STRDUP_ERROR
+                     , WRITE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_connect_lock\n"));
     TRY {
+        struct flom_msg_s msg;
         char buffer[1024];
         ssize_t sent;
+
+        msg.header.level = FLOM_MSG_LEVEL;
+        msg.header.pvs.verb = FLOM_MSG_VERB_LOCK;
+        msg.header.pvs.step = FLOM_MSG_STEP_INCR;
+
+        if (NULL == (msg.body.lock_8.resource.name =
+                     g_strdup(config->resource_name)))
+            THROW(G_STRDUP_ERROR);
+        msg.body.lock_8.resource.type = FLOM_MSG_LOCK_TYPE_EX;
+        msg.body.lock_8.resource.wait = TRUE;
+        
         snprintf(buffer, sizeof(buffer), "005XL %s", config->resource_name);
         FLOM_TRACE(("flom_connect_lock: sending command '%s'\n", buffer));
         sent = write(fd, buffer, strlen(buffer));
@@ -137,6 +151,9 @@ int flom_connect_lock(const flom_config_t *config, int fd)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
             case WRITE_ERROR:
                 ret_cod = FLOM_RC_WRITE_ERROR;
                 break;

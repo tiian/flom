@@ -28,6 +28,12 @@
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
 
 
 
@@ -82,17 +88,60 @@
 
 
 /**
+ * Lock type NL = null lock
+ */
+#define FLOM_MSG_LOCK_TYPE_NL   0
+/**
+ * Lock type CR = concurrent read
+ */
+#define FLOM_MSG_LOCK_TYPE_CR   1
+/**
+ * Lock type CW = concurrent write
+ */
+#define FLOM_MSG_LOCK_TYPE_CW   2
+/**
+ * Lock type CR = protected read (shared lock)
+ */
+#define FLOM_MSG_LOCK_TYPE_PR   3
+/**
+ * Lock type CR = protected write (update lock)
+ */
+#define FLOM_MSG_LOCK_TYPE_PW   4
+/**
+ * Lock type EX = exclusive lock
+ */
+#define FLOM_MSG_LOCK_TYPE_EX   5
+
+
+
+/**
  * Label used to specify initial XML header
  */
 extern const gchar *FLOM_MSG_HEADER;
+/**
+ * Label used to specify "level" property
+ */
+extern const gchar *FLOM_MSG_PROP_LEVEL;
 /**
  * Label used to specify "name" property
  */
 extern const gchar *FLOM_MSG_PROP_NAME;
 /**
+ * Label used to specify "rcp" property
+ */
+extern const gchar *FLOM_MSG_PROP_RC;
+/**
+ * Label used to specify "step" property
+ */
+extern const gchar *FLOM_MSG_PROP_STEP;
+/**
  * Label used to specify "type" property
  */
 extern const gchar *FLOM_MSG_PROP_TYPE;
+/**
+ * Label used to specify "verb" property
+ */
+extern const gchar *FLOM_MSG_PROP_VERB;
 /**
  * Label used to specify "wait" property
  */
@@ -204,6 +253,75 @@ struct flom_msg_body_lock_24_s {
 
 
 
+/**
+ * Convenience struct for @ref flom_msg_body_unlock_8_s
+ */
+struct flom_msg_body_unlock_8_resource_s {
+    /**
+     * name of the resource to lock
+     */
+    gchar     *name;
+};
+
+    
+
+/**
+ * Message body for verb "unlock", step "8"
+ */
+struct flom_msg_body_unlock_8_s {
+    struct flom_msg_body_unlock_8_resource_s   resource;
+};
+
+
+
+/**
+ * Message body for verb "ping", step "8"
+ */
+struct flom_msg_body_ping_8_s {
+    /**
+     * ping verb does not need to carry anything
+     */
+    int   dummy_field;
+};
+
+
+
+/**
+ * Message body for verb "ping", step "16"
+ */
+struct flom_msg_body_ping_16_s {
+    /**
+     * ping verb does not need to carry anything
+     */
+    int   dummy_field;
+};
+
+
+
+/**
+ * This structure maps the messages flowing between FLOM client and
+ * FLOM server (daemon). The struct is not used for the transmission over the
+ * network, but only inside the client and the server.
+ * This is a "fake" object; it's defined and used in the hope of simplicity
+ */
+struct flom_msg_s {
+    /**
+     * Message header, common to all messages
+     */
+    struct flom_msg_header_s                   header;
+    /**
+     * Message body, it depends from header
+     */
+    union {
+        struct flom_msg_body_lock_8_s         lock_8;
+        struct flom_msg_body_lock_16_s        lock_16;
+        struct flom_msg_body_lock_24_s        lock_24;
+        struct flom_msg_body_unlock_8_s       unlock_8;
+        struct flom_msg_body_ping_8_s         ping_8;
+        struct flom_msg_body_ping_16_s        ping_16;
+    } body;
+};
+
 
 
 #ifdef __cplusplus
@@ -212,6 +330,212 @@ extern "C" {
 
 
 
+    /**
+     * Initialize an empty message
+     * @param msg IN/OUT message must be initialized
+     */
+    static inline void flom_msg_init(struct flom_msg_s *msg) {
+        memset(msg, 0, sizeof(struct flom_msg_s));
+    }
+    
+
+
+    /**
+     * Retrieve the first XML message from a TCP/IP socket (file descriptor)
+     * @param fd IN file descriptor associated to the TCP/IP socket
+     * @param buf OUT buffer will be used to store the XML message
+     * @param buf_size IN size of buf
+     * @param read_bytes OUT number of bytes read, XML message length
+     * @return a reason code
+     */
+    int flom_msg_retrieve(int fd,
+                          char *buf, size_t buf_size,
+                          ssize_t *read_bytes);
+
+
+
+    /**
+     * Send a message to a TCP/IP socket (file descriptor)
+     * @param fd IN file descriptor associated to the TCP/IP socket
+     * @param buf IN buffer will be used to store the XML message
+     * @param buf_size IN size of buf
+     * @return a reason code
+     */
+    int flom_msg_send(int fd, const char *buf, size_t buf_size);
+
+    
+    
+    /**
+     * Free all the dynamically allocated strings previously allocated by
+     * @ref flom_msg_deserialize using xmlGetProp method
+     * @param msg IN/OUT the message must be massaged
+     * @return a reason code
+     */
+    int flom_msg_free(struct flom_msg_s *msg);
+
+
+
+    /**
+     * Serialize a message struct to an XML buffer for external transmission
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param buffer_len IN the space allocated for buffer
+     * @param msg_len OUT number of chars used in buffer for serializing msg
+     * @return a reason code
+     */
+    int flom_msg_serialize(const struct flom_msg_s *msg,
+                           char *buffer, size_t buffer_len,
+                           size_t *msg_len);
+
+
+    
+    /**
+     * Serialize the "lock_8" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
+
+
+    
+    /**
+     * Serialize the "lock_16" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int flom_msg_serialize_lock_16(const struct flom_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
+
+
+    
+    /**
+     * Serialize the "lock_24" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int flom_msg_serialize_lock_24(const struct flom_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
+
+
+    
+    /**
+     * Serialize the "unlock_8" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int flom_msg_serialize_unlock_8(const struct flom_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
+
+
+    
+    /**
+     * Serialize the "ping_8" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int flom_msg_serialize_ping_8(const struct flom_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
+
+
+    
+    /**
+     * Serialize the "ping_16" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int flom_msg_serialize_ping_16(const struct flom_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
+
+
+
+    /**
+     * Display the content of a message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int flom_msg_trace(const struct flom_msg_s *msg);
+
+    
+    
+    /**
+     * Display the content of a lock message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int flom_msg_trace_lock(const struct flom_msg_s *msg);
+
+    
+    
+    /**
+     * Display the content of an unlock message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int flom_msg_trace_unlock(const struct flom_msg_s *msg);
+
+    
+    
+    /**
+     * Display the content of a ping message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int flom_msg_trace_ping(const struct flom_msg_s *msg);
+
+    
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
@@ -228,881 +552,3 @@ extern "C" {
 
 
 #endif /* MSG_H */
-
-
-
-/*
- * Copyright (c) 2009-2012, Christian Ferrari <tiian@users.sourceforge.net>
- * All rights reserved.
- *
- * This file is part of LIXA.
- *
- * LIXA is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as published
- * by the Free Software Foundation.
- *
- * LIXA is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with LIXA.  If not, see <http://www.gnu.org/licenses/>.
- */
-#ifndef LIXA_XML_MSG_H
-# define LIXA_XML_MSG_H
-
-
-
-#include <config.h>
-
-
-
-#ifdef HAVE_LIBXML_TREE_H
-# include <libxml/tree.h>
-#endif
-#ifdef HAVE_LIBXML_PARSER_H
-# include <libxml/parser.h>
-#endif
-#ifdef HAVE_GLIB_H
-# include <glib.h>
-#endif
-
-
-
-#include <lixa_config.h>
-#include <xa.h>
-
-
-
-/* save old LIXA_TRACE_MODULE and set a new value */
-#ifdef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE_SAVE LIXA_TRACE_MODULE
-# undef LIXA_TRACE_MODULE
-#else
-# undef LIXA_TRACE_MODULE_SAVE
-#endif /* LIXA_TRACE_MODULE */
-#define LIXA_TRACE_MODULE      LIXA_TRACE_MOD_COMMON_XML_MSG
-
-
-
-
-
-
-
-/**
- * Control thread status
- */
-struct lixa_msg_body_open_24_conthr_s {
-    /**
-     * State of the control thread
-     */
-    int                       txstate;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_open_24_s
- */
-struct lixa_msg_body_open_24_xa_open_execs_s {
-    /**
-     * rmid parameter as passed to xa_open routine
-     */
-    int             rmid;
-    /**
-     * xa_info parameter as passed to xa_open routine
-     */
-    xmlChar        *xa_info;
-    /**
-     * flags parameter as passed to xa_open routine
-     */
-    long            flags;
-    /**
-     * return code of xa_open routine
-     */
-    int             rc;
-    /**
-     * the new resource manager state after xa_open execution
-     */
-    int             r_state;
-};
-
-
-
-/**
- * Message body for verb "open", step "24"
- */
-struct lixa_msg_body_open_24_s {
-    /**
-     * Control thread information
-     */
-    struct lixa_msg_body_open_24_conthr_s   conthr;
-    /**
-     * Parameters and return value of xa_open executions
-     */
-    GArray                                 *xa_open_execs;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_open_8_s
- */
-struct lixa_msg_body_close_8_rsrmgr_s {
-    /**
-     * rmid parameter as passed to xa_close routine
-     */
-    int        rmid;
-};
-
-    
-
-/**
- * Message body for verb "close", step "8"
- */
-struct lixa_msg_body_close_8_s {
-    GArray                   *rsrmgrs;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_start_8_s
- */
-struct lixa_msg_body_start_8_conthr_s {
-    /**
-     * Transaction id
-     */
-    XID   xid;
-};
-
-    
-
-/**
- * Convenience struct for @ref lixa_msg_body_start_8_s
- */
-struct lixa_msg_body_start_8_rsrmgr_s {
-    /**
-     * rmid parameter as passed to xa_start routine
-     */
-    int        rmid;
-};
-
-    
-
-/**
- * Message body for verb "start", step "8"
- */
-struct lixa_msg_body_start_8_s {
-    struct lixa_msg_body_start_8_conthr_s   conthr;
-    GArray                                 *rsrmgrs;
-};
-
-
-
-/**
- * Message body for verb "start", step "16"
- */
-struct lixa_msg_body_start_16_s {
-    struct lixa_msg_body_answer_s   answer;
-};
-
-
-
-/**
- * Control thread status
- */
-struct lixa_msg_body_start_24_conthr_s {
-    /**
-     * State of the control thread
-     */
-    int                       txstate;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_start_24_s
- * xid is not stored in this structure because it was already stored by the
- * server after receiving step 8 message, see @ref lixa_msg_body_start_8_s
- */
-struct lixa_msg_body_start_24_xa_start_execs_s {
-    /**
-     * rmid parameter as passed to xa_start routine
-     */
-    int             rmid;
-    /**
-     * flags parameter as passed to xa_start routine
-     */
-    long            flags;
-    /**
-     * return code of xa_start routine
-     */
-    int             rc;
-    /**
-     * the new transaction branch association state associated to the resource
-     * manager after xa_start execution
-     */
-    int             td_state;
-    /**
-     * the new transaction branch state associated to the resource
-     * manager after xa_start execution
-     */
-    int             s_state;
-};
-
-
-
-/**
- * Message body for verb "start", step "24"
- */
-struct lixa_msg_body_start_24_s {
-    /**
-     * Control thread information
-     */
-    struct lixa_msg_body_start_24_conthr_s   conthr;
-    /**
-     * Parameters and return value of xa_start executions
-     */
-    GArray                                  *xa_start_execs;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_end_8_s
- */
-struct lixa_msg_body_end_8_conthr_s {
-    /**
-     * TRUE = commit
-     * FALSE = rollback
-     */
-    int   commit;
-};
-
-    
-
-/**
- * Convenience struct for @ref lixa_msg_body_end_8_s
- * xid is not stored in this structure because it was already stored by the
- * server after receiving step 8 message, see @ref lixa_msg_body_end_8_s
- */
-struct lixa_msg_body_end_8_xa_end_execs_s {
-    /**
-     * rmid parameter as passed to xa_end routine
-     */
-    int             rmid;
-    /**
-     * flags parameter as passed to xa_end routine
-     */
-    long            flags;
-    /**
-     * return code of xa_end routine
-     */
-    int             rc;
-    /**
-     * the new transaction branch association state associated to the resource
-     * manager after xa_end execution
-     */
-    int             td_state;
-    /**
-     * the new transaction branch state associated to the resource
-     * manager after xa_end execution
-     */
-    int             s_state;
-};
-
-
-
-/**
- * Message body for verb "end", step "8"
- */
-struct lixa_msg_body_end_8_s {
-    /**
-     * Control thread information
-     */
-    struct lixa_msg_body_end_8_conthr_s      conthr;
-    /**
-     * Parameters and return value of xa_end executions
-     */
-    GArray                                  *xa_end_execs;
-};
-
-
-
-/**
- * Message body for verb "end", step "16"
- */
-struct lixa_msg_body_end_16_s {
-    struct lixa_msg_body_answer_s            answer;
-};
-
-
-
-/**
- * Control thread status
- */
-struct lixa_msg_body_prepare_8_conthr_s {
-    /**
-     * TRUE = commit
-     * FALSE = rollback
-     */
-    int   commit;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_prepare_8_s
- * xid is not stored in this structure because it was already stored by the
- * server after receiving step 8 message, see @ref lixa_msg_body_prepare_8_s
- */
-struct lixa_msg_body_prepare_8_xa_prepare_execs_s {
-    /**
-     * rmid parameter as passed to xa_prepare routine
-     */
-    int             rmid;
-    /**
-     * flags parameter as passed to xa_prepare routine
-     */
-    long            flags;
-    /**
-     * return code of xa_prepare routine
-     */
-    int             rc;
-    /**
-     * the new transaction branch state associated to the resource
-     * manager after xa_prepare execution
-     */
-    int             s_state;
-    /**
-     * the new transaction branch association state associated to the resource
-     * manager after xa_prepare execution
-     */
-    int             td_state;
-};
-
-
-
-/**
- * Message body for verb "prepare", step "8"
- */
-struct lixa_msg_body_prepare_8_s {
-    /**
-     * Control thread information
-     */
-    struct lixa_msg_body_prepare_8_conthr_s   conthr;
-    /**
-     * Parameters and return value of xa_prepare executions
-     */
-    GArray                                   *xa_prepare_execs;
-};
-
-
-
-/**
- * Message body for verb "prepare", step "16"
- */
-struct lixa_msg_body_prepare_16_s {
-    struct lixa_msg_body_answer_s   answer;
-};
-
-
-
-/**
- * Control thread status
- */
-struct lixa_msg_body_commit_8_conthr_s {
-    /**
-     * TRUE = yes
-     * FALSE = no
-     */
-    int   finished;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_commit_8_s
- * xid is not stored in this structure because it was already stored by the
- * server after receiving step 8 message, see @ref lixa_msg_body_commit_8_s
- */
-struct lixa_msg_body_commit_8_xa_commit_execs_s {
-    /**
-     * rmid parameter as passed to xa_commit routine
-     */
-    int             rmid;
-    /**
-     * flags parameter as passed to xa_commit routine
-     */
-    long            flags;
-    /**
-     * return code of xa_commit routine
-     */
-    int             rc;
-    /**
-     * the new resource manager state after xa_commit execution
-     */
-    int             r_state;
-    /**
-     * the new transaction branch state after xa_commit execution
-     */
-    int             s_state;
-};
-
-
-
-/**
- * Message body for verb "commit", step "8"
- */
-struct lixa_msg_body_commit_8_s {
-    /**
-     * Control thread information
-     */
-    struct lixa_msg_body_commit_8_conthr_s    conthr;
-    /**
-     * Parameters and return value of xa_commit executions
-     */
-    GArray                                   *xa_commit_execs;
-};
-
-
-
-/**
- * Control thread status
- */
-struct lixa_msg_body_rollback_8_conthr_s {
-    /**
-     * TRUE = yes
-     * FALSE = no
-     */
-    int   finished;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_rollback_8_s
- * xid is not stored in this structure because it was already stored by the
- * server after receiving step 8 message, see @ref lixa_msg_body_rollback_8_s
- */
-struct lixa_msg_body_rollback_8_xa_rollback_execs_s {
-    /**
-     * rmid parameter as passed to xa_rollback routine
-     */
-    int             rmid;
-    /**
-     * flags parameter as passed to xa_rollback routine
-     */
-    long            flags;
-    /**
-     * return code of xa_rollback routine
-     */
-    int             rc;
-    /**
-     * the new resource manager state after xa_rollback execution
-     */
-    int             r_state;
-    /**
-     * the new transaction branch state after xa_rollback execution
-     */
-    int             s_state;
-};
-
-
-
-/**
- * Message body for verb "rollback", step "8"
- */
-struct lixa_msg_body_rollback_8_s {
-    /**
-     * Control thread information
-     */
-    struct lixa_msg_body_rollback_8_conthr_s    conthr;
-    /**
-     * Parameters and return value of xa_rollback executions
-     */
-    GArray                                     *xa_rollback_execs;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_qrcvr_8_s
- */
-struct lixa_msg_body_qrcvr_8_client_s {
-    xmlChar           *job;
-    md5_digest_hex_t   config_digest;
-};
-
-    
-
-/**
- * Message body for verb "qrcvr", step "8"
- */
-struct lixa_msg_body_qrcvr_8_s {
-    struct lixa_msg_body_qrcvr_8_client_s client;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_qrcvr_16_client_s
- */
-struct lixa_msg_body_qrcvr_16_state_s {
-    /**
-     * Boolean: did the transaction finish?
-     */
-    int      finished;
-    /**
-     * Client TX state
-     */
-    int      txstate;
-    /**
-     * Boolean: did the transaction asked commit?
-     */
-    int      will_commit;
-    /**
-     * Boolean: did the transaction asked rollback?
-     */
-    int      will_rollback;
-    /**
-     * Transaction id
-     */
-    XID      xid;
-};
-
-    
-
-/**
- * Convenience struct for @ref lixa_msg_body_qrcvr_16_s
- */
-struct lixa_msg_body_qrcvr_16_rsrmgr_s {
-    /**
-     * rmid parameter as passed to xa_close routine
-     */
-    int        rmid;
-    /**
-     * next expected verb at crash time
-     */
-    int        next_verb;
-    /**
-     * the resource manager state at crash time
-     */
-    int        r_state;
-    /**
-     * the transaction branch state at crash time
-     */
-    int        s_state;
-    /**
-     * the transaction branch association state associated to the resource
-     * manager at crash time
-     */
-    int        td_state;
-};
-
-    
-
-/**
- * Convenience struct for @ref lixa_msg_body_qrcvr_16_s
- */
-struct lixa_msg_body_qrcvr_16_client_s {
-    xmlChar                                 *job;
-    md5_digest_hex_t                         config_digest;
-    struct lixa_msg_verb_step_s              last_verb_step;
-    struct lixa_msg_body_qrcvr_16_state_s    state;
-};
-
-    
-
-/**
- * Message body for verb "qrcvr", step "16"
- */
-struct lixa_msg_body_qrcvr_16_s {
-    struct lixa_msg_body_answer_s            answer;
-    struct lixa_msg_body_qrcvr_16_client_s   client;
-    GArray                                  *rsrmgrs;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_qrcvr_24_s
- */
-struct lixa_msg_body_qrcvr_24_recovery_s {
-    /**
-     * Boolean: TRUE -> attempted recovery failed;
-     */
-    int                                      failed;
-    /**
-     * Boolean: TRUE -> attempted xa_commit; FALSE -> attempted xa_rollback
-     */
-    int                                      commit;
-};
-
-    
-
-/**
- * Convenience struct for @ref lixa_msg_body_qrcvr_24_s
- */
-struct lixa_msg_body_qrcvr_24_rsrmgr_s {
-    /**
-     * rmid parameter as passed to xa_close routine
-     */
-    int                                      rmid;
-    /**
-     * xa_rollback / xa_commit return code
-     */
-    int                                      rc;
-};
-
-    
-
-/**
- * Message body for verb "qrcvr", step "24"
- */
-struct lixa_msg_body_qrcvr_24_s {
-    struct lixa_msg_body_qrcvr_24_recovery_s recovery;
-    GArray                                  *rsrmgrs;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_reg_8_s
- */
-struct lixa_msg_body_reg_8_ax_reg_exec_s {
-    /**
-     * rmid parameter as passed to xa_rollback routine
-     */
-    int             rmid;
-    /**
-     * flags parameter as passed to xa_rollback routine
-     */
-    long            flags;
-    /**
-     * return code of ax_reg routine
-     */
-    int             rc;
-    /**
-     * the new transaction branch association state after ax_reg execution
-     */
-    int             td_state;
-    /**
-     * the new transaction branch state after ax_reg execution
-     */
-    int             s_state;
-};
-
-
-
-/**
- * Message body for verb "reg", step "8"
- */
-struct lixa_msg_body_reg_8_s {
-    /**
-     * Parameters and return value of ax_reg executions
-     */
-    struct lixa_msg_body_reg_8_ax_reg_exec_s   ax_reg_exec;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_unreg_8_s
- */
-struct lixa_msg_body_unreg_8_ax_unreg_exec_s {
-    /**
-     * rmid parameter as passed to xa_rollback routine
-     */
-    int             rmid;
-    /**
-     * flags parameter as passed to xa_rollback routine
-     */
-    long            flags;
-    /**
-     * return code of ax_reg routine
-     */
-    int             rc;
-    /**
-     * the new transaction branch association state after ax_reg execution
-     */
-    int             td_state;
-};
-
-
-
-/**
- * Message body for verb "unreg", step "8"
- */
-struct lixa_msg_body_unreg_8_s {
-    /**
-     * Parameters and return value of ax_unreg executions
-     */
-    struct lixa_msg_body_unreg_8_ax_unreg_exec_s   ax_unreg_exec;
-};
-
-
-
-/**
- * Control thread status
- */
-struct lixa_msg_body_forget_8_conthr_s {
-    /**
-     * TRUE = yes
-     * FALSE = no
-     */
-    int   finished;
-};
-
-
-
-/**
- * Convenience struct for @ref lixa_msg_body_forget_8_s
- * xid is not stored in this structure because it was already stored by the
- * server after receiving step 8 message, see @ref lixa_msg_body_forget_8_s
- */
-struct lixa_msg_body_forget_8_xa_forget_execs_s {
-    /**
-     * rmid parameter as passed to xa_forget routine
-     */
-    int             rmid;
-    /**
-     * flags parameter as passed to xa_forget routine
-     */
-    long            flags;
-    /**
-     * return code of xa_forget routine
-     */
-    int             rc;
-    /**
-     * the new transaction branch state after xa_forget execution
-     */
-    int             s_state;
-};
-
-
-
-/**
- * Message body for verb "forget", step "8"
- */
-struct lixa_msg_body_forget_8_s {
-    /**
-     * Control thread information
-     */
-    struct lixa_msg_body_forget_8_conthr_s    conthr;
-    /**
-     * Parameters and return value of xa_forget executions
-     */
-    GArray                                   *xa_forget_execs;
-};
-
-
-
-/**
- * This structure maps the messages flowing between LIXA client (lixac) and
- * LIXA server (lixad). The struct is not used for the transmission over the
- * network, but only inside the client and the server.
- * This is a "fake" object; it's defined and used in the hope of simplicity
- */
-struct lixa_msg_s {
-    /**
-     * Message header, common to all messages
-     */
-    struct lixa_msg_header_s                   header;
-    /**
-     * Message body, it depends from header
-     */
-    union {
-        struct lixa_msg_body_open_8_s          open_8;
-        struct lixa_msg_body_open_16_s         open_16;
-        struct lixa_msg_body_open_24_s         open_24;
-        struct lixa_msg_body_close_8_s         close_8;
-        struct lixa_msg_body_start_8_s         start_8;
-        struct lixa_msg_body_start_16_s        start_16;
-        struct lixa_msg_body_start_24_s        start_24;
-        struct lixa_msg_body_end_8_s           end_8;
-        struct lixa_msg_body_end_16_s          end_16;
-        struct lixa_msg_body_prepare_8_s       prepare_8;
-        struct lixa_msg_body_prepare_16_s      prepare_16;
-        struct lixa_msg_body_commit_8_s        commit_8;
-        struct lixa_msg_body_rollback_8_s      rollback_8;
-        struct lixa_msg_body_qrcvr_8_s         qrcvr_8;
-        struct lixa_msg_body_qrcvr_16_s        qrcvr_16;
-        struct lixa_msg_body_qrcvr_24_s        qrcvr_24;
-        struct lixa_msg_body_reg_8_s           reg_8;
-        struct lixa_msg_body_unreg_8_s         unreg_8;
-        struct lixa_msg_body_forget_8_s        forget_8;
-    } body;
-};
-
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-
-
-    /**
-     * Initialize an empty message
-     * @param msg IN/OUT message must be initialized
-     */
-    static inline void lixa_msg_init(struct lixa_msg_s *msg) {
-        memset(msg, 0, sizeof(struct lixa_msg_s));
-    }
-    
-
-
-    /**
-     * Retrieve the first XML message from a TCP/IP socket (file descriptor)
-     * @param fd IN file descriptor associated to the TCP/IP socket
-     * @param buf OUT buffer will be used to store the XML message
-     * @param buf_size IN size of buf
-     * @param read_bytes OUT number of bytes read, XML message length
-     * @return a reason code
-     */
-    int lixa_msg_retrieve(int fd,
-                          char *buf, size_t buf_size,
-                          ssize_t *read_bytes);
-
-
-
-    /**
-     * Send a message to a TCP/IP socket (file descriptor)
-     * @param fd IN file descriptor associated to the TCP/IP socket
-     * @param buf IN buffer will be used to store the XML message
-     * @param buf_size IN size of buf
-     * @return a reason code
-     */
-    int lixa_msg_send(int fd, const char *buf, size_t buf_size);
-
-    
-    
-    /**
-     * Free all the dynamically allocated strings previously allocated by
-     * @ref lixa_msg_deserialize using xmlGetProp method
-     * @param msg IN/OUT the message must be massaged
-     * @return a reason code
-     */
-    int lixa_msg_free(struct lixa_msg_s *msg);
-
-
-    
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-
-
-/* restore old value of LIXA_TRACE_MODULE */
-#ifdef LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE
-# define LIXA_TRACE_MODULE LIXA_TRACE_MODULE_SAVE
-# undef LIXA_TRACE_MODULE_SAVE
-#endif /* LIXA_TRACE_MODULE_SAVE */
-
-
-
-#endif /* LIXA_XML_MSG_H */
