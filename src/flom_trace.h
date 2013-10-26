@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2013, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of FLOM.
@@ -81,6 +81,11 @@
  * trace module for parser functions
  */
 #define FLOM_TRACE_MOD_PARSER             0x00000040
+
+/**
+ * trace module for messages functions
+ */
+#define FLOM_TRACE_MOD_MSG                0x00000080
 
 
 

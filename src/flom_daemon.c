@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2013, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of FLOM.
@@ -509,3 +509,27 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
     return ret_cod;
 }
 
+
+
+int flom_msg_compose(char *buf, size_t buf_size, ssize_t *write_bytes)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_msg_compose\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_msg_compose/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}

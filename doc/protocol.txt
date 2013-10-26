@@ -1,0 +1,95 @@
+This file contains documentation related to the FLOM client/server protocol
+
+The protocol is based on XML messages exchange.
+No validation is performed against XML.
+XML parsing is "static": only expected tags/attributes are searched and
+retrieved.
+XML generation is "static": from a composite struct, a serialization function
+is able to understand the struct, generates the resulting XML document.
+The usage of XML is possibly not strictly compliant with standards; it's used
+as a serialization/deserialization tool to avoid portability nightmares and
+cross platform issues (server is big endian, client is little endian or server
+is ASCII, client is EBCDIC...).
+
+Every message must have two distinctive fields in the header:
+- level: the level of implemented protocol
+- verb: the operation correlated to the data contained in the XML document
+- step: the progress inside the operation
+
+This documentations contains: state tables for transitions of client/server
+messages and some message samples.
+
+***************************************************************************
+
+verb=1 (lock)
+
+  level: message level, version
+  verb:  lock -> 1
+  step:  8, 16, 24
+  type:  0 = NL null lock
+         1 = CR concurrent read
+         2 = CW concurrent write
+         3 = PR/SH (protected read/shared lock)
+         4 = PW/UP (protected write/update lock)
+         5 = EX exclusive lock
+  wait:  0 = no wait
+         1 = wait if the resource can not be locked
+
+  client->server message (ask for a lock)
+  <msg level="1" verb="1" step="8">
+    <resource name="_RESOURCE" type="5" wait="1">
+  </msg>
+
+  server -> client message (answer: lock obtained/not obtained/wait)
+  <msg level="1" verb="1" step="16">
+    <answer rc="0/..."/>
+  </msg>
+
+  server -> client message (answer: lock obtained)
+  <msg level="1" verb="1" step="24">
+    <answer rc="0/..."/>
+  </msg>
+
+  
+
+client 			 server		description
+verb=1,step=8 -->			ask for a lock
+		<-- verb=1,step=16	the lock can be aquired, not acquired
+		    			or queued
+		<-- verb=1,step=24	the lock can be aquired or not acquired
+		    			if there was a previous queued answer
+
+***************************************************************************
+
+verb=2 (unlock)
+
+  level: message level, version
+  verb:  unlock -> 2
+  step:  8
+
+  client->server message (async assertion)
+  <msg verb="2" step="8">
+    <resource name="_RESOURCE">
+  </msg>
+
+client 			 server		description
+verb=2,step=8 -->			send the unlocked resource
+
+***************************************************************************
+
+verb=3 (ping)
+
+  level: message level, version
+  verb:  ping -> 3
+  step:  8, 16
+
+  server->client message (are you alive?)
+  <msg level="1" verb="3" step="8">
+  </msg>
+
+  client -> server message (I'am alive)
+  <msg level="1" verb="3" step="16">
+  </msg>
+
+***************************************************************************
+

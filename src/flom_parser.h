@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2012, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2013, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of FLOM.
@@ -25,6 +25,10 @@
 
 
 
+#include "flom_msg.h"
+
+
+
 /* save old FLOM_TRACE_MODULE and set a new value */
 #ifdef FLOM_TRACE_MODULE
 # define FLOM_TRACE_MODULE_SAVE FLOM_TRACE_MODULE
@@ -33,13 +37,6 @@
 # undef FLOM_TRACE_MODULE_SAVE
 #endif /* FLOM_TRACE_MODULE */
 #define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_PARSER
-
-
-
-/**
- * Number of digits prefix of a message
- */
-#define FLOM_MSG_PREFIX_DIGITS  3
 
 
 
@@ -63,6 +60,18 @@ extern "C" {
 
 
 
+    /**
+     * Compose a message that must be sent over the socket
+     * @param buf IN/OUT buffer will be used to store the message
+     * @param buf_size IN size of the buffer
+     * @param write_bytes OUT number of bytes used inside buffer to store the
+     *                        message
+     * @return a reason code
+     */
+    int flom_msg_compose(char *buf, size_t buf_size, ssize_t *write_bytes);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
