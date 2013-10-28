@@ -115,6 +115,10 @@
 
 
 
+/**
+ * Format must be used in *printf family function to print a "size_t"
+ * value
+ */
 #if SIZEOF_SIZE_T == SIZEOF_INT
 # define SIZE_T_FORMAT "%u"
 #elif SIZEOF_SIZE_T == SIZEOF_LONG_INT
@@ -123,6 +127,22 @@
 # define SIZE_T_FORMAT "%llu"
 #else
 # error Unable to determine sizeof(size_t)
+#endif
+
+
+
+/**
+ * Format must be used in *printf family function to print a "ssize_t"
+ * value
+ */
+#if SIZEOF_SSIZE_T == SIZEOF_INT
+# define SSIZE_T_FORMAT "%d"
+#elif SSIZEOF_SIZE_T == SIZEOF_LONG_INT
+# define SSIZE_T_FORMAT "%ld"
+#elif SSIZEOF_SIZE_T == SIZEOF_LONG_LONG_INT
+# define SSIZE_T_FORMAT "%lld"
+#else
+# error Unable to determine sizeof(ssize_t)
 #endif
 
 
@@ -166,10 +186,6 @@
 #else
 # error Unable to determine sizeof(uintptr_t)
 #endif
-
-
-
-#define SSIZE_T_FORMAT "%ld"
 
 
 

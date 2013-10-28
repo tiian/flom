@@ -121,7 +121,8 @@ int flom_connect(const flom_config_t *config)
 int flom_connect_lock(const flom_config_t *config, int fd)
 {
     enum Exception { G_STRDUP_ERROR
-                     , WRITE_ERROR
+                     , MSG_SERIALIZE_ERROR
+                     , MSG_SEND_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -129,7 +130,7 @@ int flom_connect_lock(const flom_config_t *config, int fd)
     TRY {
         struct flom_msg_s msg;
         char buffer[1024];
-        ssize_t sent;
+        size_t to_send;
 
         msg.header.level = FLOM_MSG_LEVEL;
         msg.header.pvs.verb = FLOM_MSG_VERB_LOCK;
@@ -140,13 +141,14 @@ int flom_connect_lock(const flom_config_t *config, int fd)
             THROW(G_STRDUP_ERROR);
         msg.body.lock_8.resource.type = FLOM_MSG_LOCK_TYPE_EX;
         msg.body.lock_8.resource.wait = TRUE;
-        
-        snprintf(buffer, sizeof(buffer), "005XL %s", config->resource_name);
-        FLOM_TRACE(("flom_connect_lock: sending command '%s'\n", buffer));
-        sent = write(fd, buffer, strlen(buffer));
-        if (sent != strlen(buffer))
-            THROW(WRITE_ERROR);
-        /* @@@ */
+
+        if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
+                               &msg, buffer, sizeof(buffer), &to_send)))
+            THROW(MSG_SERIALIZE_ERROR);
+
+        if (FLOM_RC_OK != (ret_cod = flom_msg_send(
+                               fd, buffer, to_send)))
+            THROW(MSG_SEND_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -154,8 +156,8 @@ int flom_connect_lock(const flom_config_t *config, int fd)
             case G_STRDUP_ERROR:
                 ret_cod = FLOM_RC_G_STRDUP_ERROR;
                 break;
-            case WRITE_ERROR:
-                ret_cod = FLOM_RC_WRITE_ERROR;
+            case MSG_SERIALIZE_ERROR:
+            case MSG_SEND_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

@@ -170,7 +170,6 @@ int flom_msg_send(int fd, const char *buf, size_t buf_size)
                         "(rc=%d,errno=%d)\n", fd, rc, errno));
             THROW(CONNECTION_CLOSED);
         }
-
         FLOM_TRACE(("flom_msg_send: sending " SIZE_T_FORMAT
                     " bytes to the server (fd=%d)...\n", buf_size, fd));
         wrote_bytes = send(fd, buf, buf_size, 0);
@@ -871,3 +870,92 @@ int flom_msg_trace_ping(const struct flom_msg_s *msg)
 
 
     
+int flom_msg_deserialize(char *buffer, size_t buffer_len,
+                         struct flom_msg_s *msg)
+{
+    enum Exception { G_MARKUP_PARSE_CONTEXT_PARSE_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_msg_deserialize\n"));
+    TRY {
+        GMarkupParser parser = {
+            flom_msg_deserialize_start_element,
+            flom_msg_deserialize_end_element,
+            flom_msg_deserialize_text,
+            NULL, NULL };
+        GMarkupParseContext *context = g_markup_parse_context_new (
+            &parser, 0, NULL, NULL);
+        
+        FLOM_TRACE(("flom_msg_deserialize: deserializing message |%*.*s|\n",
+                    buffer_len, buffer_len, buffer));
+        
+        if (FALSE == g_markup_parse_context_parse(
+                context, buffer, buffer_len, NULL))
+            THROW(G_MARKUP_PARSE_CONTEXT_PARSE_ERROR);
+        g_markup_parse_context_free (context);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_MARKUP_PARSE_CONTEXT_PARSE_ERROR:
+                ret_cod = FLOM_RC_G_MARKUP_PARSE_CONTEXT_PARSE_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_msg_deserialize/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+void flom_msg_deserialize_start_element(
+    GMarkupParseContext *context,
+    const gchar         *element_name,
+    const gchar        **attribute_names,
+    const gchar        **attribute_values,
+    gpointer             user_data,
+    GError             **error)
+{
+    const gchar **name_cursor = attribute_names;
+    const gchar **value_cursor = attribute_values;
+
+    FLOM_TRACE(("flom_msg_deserialize_start_element: element_name='%s'\n",
+                element_name));
+    while (*name_cursor) {
+        FLOM_TRACE(("flom_msg_deserialize_start_element: name_cursor='%s' "
+                    "value_cursor='%s'\n", *name_cursor, *value_cursor));
+
+        name_cursor++;
+        value_cursor++;
+    }
+}
+
+
+
+void flom_msg_deserialize_text(GMarkupParseContext *context,
+                               const gchar         *text,
+                               gsize                text_len,
+                               gpointer             user_data,
+                               GError             **error)
+{
+    FLOM_TRACE(("flom_msg_deserialize_text: text='%*s'\n",
+                text_len, text));
+}
+
+
+
+void flom_msg_deserialize_end_element(GMarkupParseContext *context,
+                                      const gchar         *element_name,
+                                      gpointer             user_data,
+                                      GError             **error)
+{
+    FLOM_TRACE(("flom_msg_deserialize_end_element: element_name='%s'\n",
+                element_name));
+}

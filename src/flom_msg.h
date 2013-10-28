@@ -536,6 +536,53 @@ extern "C" {
 
     
     
+    /**
+     * Deserialize a serialized buffer to a message struct
+     * @param buffer IN/OUT the buffer that's containing the serialized object
+     *                  (it does not have to be null terminated)
+     * @param buffer_len IN number of significative bytes of buffer
+     * @param msg OUT the object after deserialization
+     * @return a reason code
+     */
+    int flom_msg_deserialize(char *buffer, size_t buffer_len,
+                             struct flom_msg_s *msg);
+
+
+
+    /**
+     * GMarkupParser start_element callback function
+     */
+    void flom_msg_deserialize_start_element(
+        GMarkupParseContext *context,
+        const gchar         *element_name,
+        const gchar        **attribute_names,
+        const gchar        **attribute_values,
+        gpointer             user_data,
+        GError             **error);
+
+    
+
+    /**
+     * GMarkupParser end_element callback function
+     */
+    void flom_msg_deserialize_end_element(GMarkupParseContext *context,
+                                          const gchar         *element_name,
+                                          gpointer             user_data,
+                                          GError             **error);
+
+    
+
+    /**
+     * GMarkupParser text callback function
+     */
+    void flom_msg_deserialize_text(GMarkupParseContext *context,
+                                   const gchar         *text,
+                                   gsize                text_len,
+                                   gpointer             user_data,
+                                   GError             **error);
+
+    
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
