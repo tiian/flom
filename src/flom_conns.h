@@ -43,6 +43,10 @@
 
 
 
+#include "flom_msg.h"
+
+
+
 /* save old FLOM_TRACE_MODULE and set a new value */
 #ifdef FLOM_TRACE_MODULE
 # define FLOM_TRACE_MODULE_SAVE FLOM_TRACE_MODULE
@@ -61,7 +65,7 @@
 /**
  * Expansion allocation step
  */
-#define FLOM_CONNS_STEP_ALLOCATION     1.2
+#define FLOM_CONNS_PERCENT_ALLOCATION  20
 /**
  * Null file descriptor
  */
@@ -70,9 +74,9 @@
 
 
 /**
- * A structured object used to store addresses
+ * A structured object used to store connection data
  */
-struct flom_addr_s {
+struct flom_conn_data_s {
     /**
      * Client address len
      */
@@ -91,6 +95,10 @@ struct flom_addr_s {
          */
         struct sockaddr_in sain;
     };
+    /**
+     * Last received message
+     */
+    struct flom_msg_s      msg;
 };
 
 
@@ -116,9 +124,9 @@ struct flom_conns_s {
      */
     int domain;
     /**
-     * Array of addresses
+     * Array of connection data
      */
-    struct flom_addr_s *addr;
+    struct flom_conn_data_s *cd;
 };
     
 
@@ -170,7 +178,7 @@ extern "C" {
     
 
     /**
-     * Return a file descriptor associated to a connection
+     * Return the file descriptor associated to a connection
      * @param conns IN connections object
      * @param id IN identificator (position in array) of the connection
      * @return the associated file descriptor or @ref NULL_FD if any error
@@ -193,7 +201,23 @@ extern "C" {
     }
 
 
+
+    /**
+     * Return the message associated to a connection
+     * @param conns IN connections object
+     * @param id IN identificator (position in array) of the connection
+     * @return the associated message or NULL if any error happens
+     */
+    static inline struct flom_msg_s *flom_conns_get_msg(
+        flom_conns_t *conns, int id) {
+        if (id < conns->used)
+            return &(conns->cd[id].msg);
+        else
+            return NULL;
+    }
+
     
+        
     /**
      * Set events field for every connection in the object
      * @param conns IN/OUT connections object

@@ -885,7 +885,7 @@ int flom_msg_deserialize(char *buffer, size_t buffer_len,
             flom_msg_deserialize_text,
             NULL, NULL };
         GMarkupParseContext *context = g_markup_parse_context_new (
-            &parser, 0, NULL, NULL);
+            &parser, 0, (gpointer)msg, NULL);
         
         FLOM_TRACE(("flom_msg_deserialize: deserializing message |%*.*s|\n",
                     buffer_len, buffer_len, buffer));
@@ -923,15 +923,39 @@ void flom_msg_deserialize_start_element(
     gpointer             user_data,
     GError             **error)
 {
+    enum {dummy_tag, msg_tag, resource_tag} tag_type = dummy_tag;
+    /* deserialized message */
+    struct flom_msg_s *msg = (struct flom_msg_s *)user_data;
+    
     const gchar **name_cursor = attribute_names;
     const gchar **value_cursor = attribute_values;
 
     FLOM_TRACE(("flom_msg_deserialize_start_element: element_name='%s'\n",
                 element_name));
+    if (!strcmp(element_name, FLOM_MSG_TAG_MSG))
+        tag_type = msg_tag;
+    else if (!strcmp(element_name, FLOM_MSG_TAG_RESOURCE))
+        tag_type = resource_tag;
     while (*name_cursor) {
         FLOM_TRACE(("flom_msg_deserialize_start_element: name_cursor='%s' "
                     "value_cursor='%s'\n", *name_cursor, *value_cursor));
-
+        switch (tag_type) {
+            case msg_tag:
+                if (!strcmp(*name_cursor, FLOM_MSG_PROP_LEVEL))
+                    msg->header.level = strtol(*value_cursor, NULL, 10);
+                else if (!strcmp(*name_cursor, FLOM_MSG_PROP_VERB))
+                    msg->header.pvs.verb = strtol(*value_cursor, NULL, 10);
+                else if (!strcmp(*name_cursor, FLOM_MSG_PROP_STEP))
+                    msg->header.pvs.step = strtol(*value_cursor, NULL, 10);
+                break;
+            case resource_tag:
+                if (!strcmp(*name_cursor, FLOM_MSG_PROP_NAME))
+                    ; /* @@@ implement me!!! */
+                break;
+            default:
+                FLOM_TRACE(("flom_msg_deserialize_start_element: ERROR, "
+                            "tag_type=%d\n", tag_type));
+        }
         name_cursor++;
         value_cursor++;
     }

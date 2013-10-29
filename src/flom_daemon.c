@@ -453,6 +453,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
     enum Exception { ACCEPT_ERROR
                      , CONNS_ADD_ERROR
                      , MSG_RETRIEVE_ERROR
+                     , CONNS_GET_MSG_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -478,18 +479,19 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
         } else {
             char buffer[1024];
             ssize_t read_bytes;
-            struct flom_msg_s msg;
+            struct flom_msg_s *msg;
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
                                    fds[i].fd, buffer, sizeof(buffer),
                                    &read_bytes)))
                 THROW(MSG_RETRIEVE_ERROR);
 
+            if (NULL == (msg = flom_conns_get_msg(conns, i)))
+                THROW(CONNS_GET_MSG_ERROR);
+            
             if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
-                                   buffer, read_bytes, &msg)))
+                                   buffer, read_bytes, msg)))
                 THROW(MSG_DESERIALIZE_ERROR);
-            FLOM_TRACE(("flom_accept_loop_pollin: received '%*.*s' from "
-                        "client\n", read_bytes, read_bytes, buffer));
             /* @@@ */
         }
         
@@ -503,6 +505,9 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
                 break;
             case MSG_RETRIEVE_ERROR:
             case MSG_DESERIALIZE_ERROR:
+                break;
+            case CONNS_GET_MSG_ERROR:
+                ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

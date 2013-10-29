@@ -51,7 +51,7 @@ int flom_conns_init(flom_conns_t *conns, int domain)
         conns->used = 0;
         conns->fds = NULL;
         conns->domain = domain;
-        conns->addr = NULL;
+        conns->cd = NULL;
         /* allocate with default size */
         if (NULL == (tmp = malloc(sizeof(struct pollfd) *
                                   FLOM_CONNS_DEFAULT_ALLOCATION)))
@@ -62,13 +62,13 @@ int flom_conns_init(flom_conns_t *conns, int domain)
         conns->fds = (struct pollfd *)tmp;
         for (i=0; i<FLOM_CONNS_DEFAULT_ALLOCATION; ++i)
             conns->fds[i].fd = NULL_FD;
-        if (NULL == (tmp = malloc(sizeof(struct flom_addr_s) *
+        if (NULL == (tmp = malloc(sizeof(struct flom_conn_data_s) *
                                   FLOM_CONNS_DEFAULT_ALLOCATION)))
             THROW(MALLOC_ERROR2);
         /* reset the content of the array */
-        memset(tmp, 0, sizeof(struct flom_addr_s) *
+        memset(tmp, 0, sizeof(struct flom_conn_data_s) *
                FLOM_CONNS_DEFAULT_ALLOCATION);
-        conns->addr = (struct flom_addr_s *)tmp;
+        conns->cd = (struct flom_conn_data_s *)tmp;
         conns->allocated = FLOM_CONNS_DEFAULT_ALLOCATION;
         THROW(NONE);
     } CATCH {
@@ -110,17 +110,19 @@ int flom_conns_add(flom_conns_t *conns, int fd,
         conns->fds[conns->used].fd = fd;
         conns->fds[conns->used].events = 0;
         conns->fds[conns->used].revents = 0;
-        conns->addr[conns->used].addr_len = addr_len;
+        conns->cd[conns->used].addr_len = addr_len;
         switch (conns->domain) {
             case AF_UNIX:
-                conns->addr[conns->used].saun = *((struct sockaddr_un *)sa);
+                conns->cd[conns->used].saun = *((struct sockaddr_un *)sa);
                 break;
             case AF_INET:
-                conns->addr[conns->used].sain = *((struct sockaddr_in *)sa);
+                conns->cd[conns->used].sain = *((struct sockaddr_in *)sa);
                 break;
             default:
                 THROW(INVALID_DOMAIN);
         }
+        /* reset the associated message */
+        flom_msg_init(&(conns->cd[conns->used].msg));
         conns->used++;
         
         THROW(NONE);
@@ -197,7 +199,7 @@ int flom_conns_expand(flom_conns_t *conns)
         void *tmp;
         nfds_t i;
         nfds_t new_allocated =
-            conns->allocated * FLOM_CONNS_STEP_ALLOCATION + 1;
+            conns->allocated * (100 + FLOM_CONNS_PERCENT_ALLOCATION) / 100  + 1;
         if (conns->allocated >= new_allocated) {
             FLOM_TRACE(("flom_conns_expand: conns->allocated=%d, "
                         "new_allocated=%d\n", conns->allocated, new_allocated));
@@ -214,13 +216,14 @@ int flom_conns_expand(flom_conns_t *conns)
         conns->fds = (struct pollfd *)tmp;
         for (i=conns->allocated; i<new_allocated; ++i)
             conns->fds[i].fd = NULL_FD;
-        if (NULL == (tmp = realloc(conns->addr, sizeof(struct flom_addr_s) *
+        if (NULL == (tmp = realloc(conns->cd, sizeof(struct flom_conn_data_s) *
                                    new_allocated)))
             THROW(MALLOC_ERROR2);
         /* reset the content of the new allocated memory */
-        memset(tmp + conns->allocated * sizeof(struct flom_addr_s), 0,
-               (new_allocated - conns->allocated) * sizeof(struct flom_addr_s));
-        conns->addr = (struct flom_addr_s *)tmp;
+        memset(tmp + conns->allocated * sizeof(struct flom_conn_data_s), 0,
+               (new_allocated - conns->allocated) *
+               sizeof(struct flom_conn_data_s));
+        conns->cd = (struct flom_conn_data_s *)tmp;
         conns->allocated = new_allocated;
         
         THROW(NONE);
@@ -306,7 +309,7 @@ int flom_conns_clean(flom_conns_t *conns)
                 if (i != last) {
                     /* moving last connection to this position */
                     conns->fds[i] = conns->fds[last];
-                    conns->addr[i] = conns->addr[last];
+                    conns->cd[i] = conns->cd[last];
                 }
                 conns->used--;
             } else i++;
