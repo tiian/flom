@@ -701,8 +701,8 @@ int flom_msg_trace(const struct flom_msg_s *msg)
     
     FLOM_TRACE(("flom_msg_trace\n"));
     TRY {
-        FLOM_TRACE(("flom_msg_trace: header[level=%d,pvs.verb=%d,"
-                    "pvs.step=%d]\n",
+        FLOM_TRACE(("flom_msg_trace: state=%d,header[level=%d,pvs.verb=%d,"
+                    "pvs.step=%d]\n", msg->state,
                     msg->header.level, msg->header.pvs.verb,
                     msg->header.pvs.step));
         switch (msg->header.pvs.verb) {
@@ -761,6 +761,7 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
                             msg->body.lock_8.resource.name,
                             msg->body.lock_8.resource.type,
                             msg->body.lock_8.resource.wait));
+                break;
             case 16:
                 FLOM_TRACE(("flom_msg_trace_lock: body[answer["
                             "rc=%d]]\n",
@@ -923,6 +924,13 @@ void flom_msg_deserialize_start_element(
     gpointer             user_data,
     GError             **error)
 {
+    enum Exception { ALREADY_INVALID
+                     , G_STRDUP_ERROR
+                     , INVALID_PROPERTY1
+                     , INVALID_PROPERTY2
+                     , TAG_TYPE_ERROR
+                     , NONE } excp;
+    
     enum {dummy_tag, msg_tag, resource_tag} tag_type = dummy_tag;
     /* deserialized message */
     struct flom_msg_s *msg = (struct flom_msg_s *)user_data;
@@ -930,35 +938,104 @@ void flom_msg_deserialize_start_element(
     const gchar **name_cursor = attribute_names;
     const gchar **value_cursor = attribute_values;
 
-    FLOM_TRACE(("flom_msg_deserialize_start_element: element_name='%s'\n",
-                element_name));
-    if (!strcmp(element_name, FLOM_MSG_TAG_MSG))
-        tag_type = msg_tag;
-    else if (!strcmp(element_name, FLOM_MSG_TAG_RESOURCE))
-        tag_type = resource_tag;
-    while (*name_cursor) {
-        FLOM_TRACE(("flom_msg_deserialize_start_element: name_cursor='%s' "
-                    "value_cursor='%s'\n", *name_cursor, *value_cursor));
-        switch (tag_type) {
-            case msg_tag:
-                if (!strcmp(*name_cursor, FLOM_MSG_PROP_LEVEL))
-                    msg->header.level = strtol(*value_cursor, NULL, 10);
-                else if (!strcmp(*name_cursor, FLOM_MSG_PROP_VERB))
-                    msg->header.pvs.verb = strtol(*value_cursor, NULL, 10);
-                else if (!strcmp(*name_cursor, FLOM_MSG_PROP_STEP))
-                    msg->header.pvs.step = strtol(*value_cursor, NULL, 10);
+    FLOM_TRACE(("flom_msg_deserialize_start_element\n"));
+    TRY {
+        if (FLOM_MSG_STATE_INVALID == msg->state) {
+            FLOM_TRACE(("flom_msg_deserialize_start_element: message already "
+                        "marked as invalid, leaving...\n"));
+            THROW(ALREADY_INVALID);
+        } else if (FLOM_MSG_STATE_INITIALIZED == msg->state)
+            msg->state = FLOM_MSG_STATE_PARSING;
+    
+        FLOM_TRACE(("flom_msg_deserialize_start_element: element_name='%s'\n",
+                    element_name));
+        if (!strcmp(element_name, FLOM_MSG_TAG_MSG))
+            tag_type = msg_tag;
+        else if (!strcmp(element_name, FLOM_MSG_TAG_RESOURCE))
+            tag_type = resource_tag;
+        while (*name_cursor) {
+            FLOM_TRACE(("flom_msg_deserialize_start_element: name_cursor='%s' "
+                        "value_cursor='%s'\n", *name_cursor, *value_cursor));
+            switch (tag_type) {
+                case msg_tag:
+                    if (!strcmp(*name_cursor, FLOM_MSG_PROP_LEVEL))
+                        msg->header.level = strtol(*value_cursor, NULL, 10);
+                    else if (!strcmp(*name_cursor, FLOM_MSG_PROP_VERB))
+                        msg->header.pvs.verb = strtol(*value_cursor, NULL, 10);
+                    else if (!strcmp(*name_cursor, FLOM_MSG_PROP_STEP))
+                        msg->header.pvs.step = strtol(*value_cursor, NULL, 10);
+                    break;
+                case resource_tag:
+                    /* check if this tag is OK for the current message */
+                    if ((FLOM_MSG_VERB_LOCK == msg->header.pvs.verb &&
+                         FLOM_MSG_STEP_INCR == msg->header.pvs.step) ||
+                        (FLOM_MSG_VERB_UNLOCK == msg->header.pvs.verb &&
+                         FLOM_MSG_STEP_INCR == msg->header.pvs.step)) {
+                        if (!strcmp(*name_cursor, FLOM_MSG_PROP_NAME)) {
+                            gchar *tmp = g_strdup(*value_cursor);
+                            if (NULL == tmp) {
+                                FLOM_TRACE(("flom_msg_deserialize_start_"
+                                            "element: unable to duplicate "
+                                            "*name_cursor\n"));
+                                THROW(G_STRDUP_ERROR);
+                            }
+                            if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb)
+                                msg->body.lock_8.resource.name = tmp;
+                            else
+                                msg->body.unlock_8.resource.name = tmp;
+                        } else if (!strcmp(*name_cursor, FLOM_MSG_PROP_TYPE)) {
+                            if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb)
+                                msg->body.lock_8.resource.type =
+                                    strtol(*value_cursor, NULL, 10);
+                            else {
+                                FLOM_TRACE(("flom_msg_deserialize_start_"
+                                            "element: property '%s' is not "
+                                            "valid for verb '%s'\n",
+                                            *name_cursor, element_name));
+                                THROW(INVALID_PROPERTY1);
+                            }
+                        } else if (!strcmp(*name_cursor, FLOM_MSG_PROP_WAIT)) {
+                            if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb)
+                                msg->body.lock_8.resource.wait =
+                                    strtol(*value_cursor, NULL, 10);
+                            else {
+                                FLOM_TRACE(("flom_msg_deserialize_start_"
+                                            "element: property '%s' is not "
+                                            "valid for verb '%s'\n",
+                                            *name_cursor, element_name));
+                                THROW(INVALID_PROPERTY2);
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    FLOM_TRACE(("flom_msg_deserialize_start_element: ERROR, "
+                                "tag_type=%d\n", tag_type));
+                    THROW(TAG_TYPE_ERROR);
+            }
+            name_cursor++;
+            value_cursor++;
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case ALREADY_INVALID:
                 break;
-            case resource_tag:
-                if (!strcmp(*name_cursor, FLOM_MSG_PROP_NAME))
-                    ; /* @@@ implement me!!! */
+            case G_STRDUP_ERROR:
+            case INVALID_PROPERTY1:
+            case INVALID_PROPERTY2:
+            case TAG_TYPE_ERROR:
+                msg->state = FLOM_MSG_STATE_INVALID;
+                break;
+            case NONE:
                 break;
             default:
-                FLOM_TRACE(("flom_msg_deserialize_start_element: ERROR, "
-                            "tag_type=%d\n", tag_type));
-        }
-        name_cursor++;
-        value_cursor++;
-    }
+                msg->state = FLOM_MSG_STATE_INVALID;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_msg_deserialize_start_element/excp=%d/"
+                "msg->state=%d\n", excp, msg->state));
 }
 
 
@@ -980,6 +1057,64 @@ void flom_msg_deserialize_end_element(GMarkupParseContext *context,
                                       gpointer             user_data,
                                       GError             **error)
 {
-    FLOM_TRACE(("flom_msg_deserialize_end_element: element_name='%s'\n",
-                element_name));
+    enum Exception { ALREADY_INVALID
+                     , ALREADY_READY
+                     , ONLY_INITIALIZED
+                     , INTERNAL_ERROR
+                     , NONE } excp;
+    /* deserialized message */
+    struct flom_msg_s *msg = (struct flom_msg_s *)user_data;
+    
+    FLOM_TRACE(("flom_msg_deserialize_end_element\n"));
+    TRY {
+        FLOM_TRACE(("flom_msg_deserialize_end_element: element_name='%s'\n",
+                    element_name));
+
+        switch (msg->state) {
+            case FLOM_MSG_STATE_INVALID:
+                FLOM_TRACE(("flom_msg_deserialize_start_element: message "
+                            "already marked as invalid, leaving...\n"));
+                THROW(ALREADY_INVALID);
+                break;
+            case FLOM_MSG_STATE_READY:
+                FLOM_TRACE(("flom_msg_deserialize_start_element: message is "
+                            "already in ready state, skipping...\n"));
+                THROW(ALREADY_READY);
+                break;
+            case FLOM_MSG_STATE_INITIALIZED:
+                FLOM_TRACE(("flom_msg_deserialize_start_element: message is "
+                            "in only initialized, this is an error\n"));
+                THROW(ONLY_INITIALIZED);
+                break;
+            case FLOM_MSG_STATE_PARSING: /* OK, this is the right state */
+                break;
+            default: /* this is an internal code error */
+                FLOM_TRACE(("flom_msg_deserialize_start_element: internal "
+                            "error, this point should never be reached\n"));
+                THROW(INTERNAL_ERROR);
+                break;
+        } /* switch (msg->state) */
+            
+        if (!strcmp(element_name, FLOM_MSG_TAG_MSG)) {
+            msg->state = FLOM_MSG_STATE_READY;
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case ALREADY_INVALID:
+            case ALREADY_READY:
+                break;
+            case ONLY_INITIALIZED:
+            case INTERNAL_ERROR:
+                msg->state = FLOM_MSG_STATE_INVALID;
+                break;
+            case NONE:
+                break;
+            default:
+                msg->state = FLOM_MSG_STATE_INVALID;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_msg_deserialize_end_element/excp=%d/"
+                "msg->state=%d\n", excp, msg->state));
 }

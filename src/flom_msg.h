@@ -57,11 +57,38 @@
  * Number of digits prefix of a message
  */
 #define FLOM_MSG_PREFIX_DIGITS  3
+
+
+
+/**
+ * The message has been initialized, but the values are not ready to be
+ * read
+ */
+#define FLOM_MSG_STATE_INITIALIZED     0
+/**
+ * The parser is filling the message fields, but the values are not ready to
+ * be read
+ */
+#define FLOM_MSG_STATE_PARSING         1
+/**
+ * The parser completed its job and the values are ready to be read
+ */
+#define FLOM_MSG_STATE_READY           2
+/**
+ * An error occurred and the content of the messafe is INVALID
+ */
+#define FLOM_MSG_STATE_INVALID         3
+
+
+
 /**
  * Current protocol level; it's used to recognize incompatible client/server
  * configuration at run-time
  */
-#define FLOM_MSG_LEVEL          0
+#define FLOM_MSG_LEVEL           0
+
+
+
 /**
  * Id reserved for a null message: do NOT change this value because it
  * would break the @ref flom_msg_init behavior
@@ -306,9 +333,13 @@ struct flom_msg_body_ping_16_s {
  */
 struct flom_msg_s {
     /**
+     * Message state
+     */
+    int                                       state;
+    /**
      * Message header, common to all messages
      */
-    struct flom_msg_header_s                   header;
+    struct flom_msg_header_s                  header;
     /**
      * Message body, it depends from header
      */

@@ -489,9 +489,11 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
             if (NULL == (msg = flom_conns_get_msg(conns, i)))
                 THROW(CONNS_GET_MSG_ERROR);
             
+            flom_msg_trace(msg);
             if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
                                    buffer, read_bytes, msg)))
                 THROW(MSG_DESERIALIZE_ERROR);
+            flom_msg_trace(msg);
             /* @@@ */
         }
         
