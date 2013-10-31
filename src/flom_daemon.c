@@ -454,6 +454,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
                      , CONNS_ADD_ERROR
                      , MSG_RETRIEVE_ERROR
                      , CONNS_GET_MSG_ERROR
+                     , CONNS_GET_GMPC_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -477,9 +478,10 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
                                    conns, conn_fd, clilen, &cliaddr)))
                 THROW(CONNS_ADD_ERROR);
         } else {
-            char buffer[1024];
+            char buffer[FLOM_MSG_BUFFER_SIZE];
             ssize_t read_bytes;
             struct flom_msg_s *msg;
+            GMarkupParseContext *gmpc;
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
                                    fds[i].fd, buffer, sizeof(buffer),
@@ -488,10 +490,13 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
 
             if (NULL == (msg = flom_conns_get_msg(conns, i)))
                 THROW(CONNS_GET_MSG_ERROR);
+
+            if (NULL == (gmpc = flom_conns_get_gmpc(conns, i)))
+                THROW(CONNS_GET_GMPC_ERROR);
             
             flom_msg_trace(msg);
             if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
-                                   buffer, read_bytes, msg)))
+                                   buffer, read_bytes, msg, gmpc)))
                 THROW(MSG_DESERIALIZE_ERROR);
             flom_msg_trace(msg);
             /* @@@ */
@@ -509,6 +514,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
             case MSG_DESERIALIZE_ERROR:
                 break;
             case CONNS_GET_MSG_ERROR:
+            case CONNS_GET_GMPC_ERROR:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
             case NONE:
@@ -522,31 +528,3 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
-
-
-
-int flom_msg_compose(char *buf, size_t buf_size, ssize_t *write_bytes)
-{
-    enum Exception { NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
-    FLOM_TRACE(("flom_msg_compose\n"));
-    TRY {
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("flom_msg_compose/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-

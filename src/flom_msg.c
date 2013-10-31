@@ -57,79 +57,35 @@ const gchar *FLOM_MSG_TAG_RESOURCE        = (gchar *)"resource";
 
 
 
+GMarkupParser flom_msg_parser = {
+    flom_msg_deserialize_start_element,
+    flom_msg_deserialize_end_element,
+    flom_msg_deserialize_text,
+    NULL, NULL };
+
+
+
 int flom_msg_retrieve(int fd,
                       char *buf, size_t buf_size,
                       ssize_t *read_bytes)
 {
-    enum Exception { RECV_ERROR1
-                     , CONNECTION_CLOSED
-                     , INVALID_PREFIX_SIZE
-                     , BUFFER_OVERFLOW
-                     , RECV_ERROR2
-                     , INVALID_MSG_LENGTH
+    enum Exception { RECV_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_msg_retrieve\n"));
     TRY {
-        char prefix[FLOM_MSG_PREFIX_DIGITS+1];
-        ssize_t to_read = 0;
-
-        /* read the prefix to determine message size */
-        if (0 > (*read_bytes = recv(
-                     fd, prefix, FLOM_MSG_PREFIX_DIGITS, 0))) {
-            THROW(RECV_ERROR1);
-        } else if (*read_bytes == 0) {
-            THROW(CONNECTION_CLOSED);
-        } else if (*read_bytes != FLOM_MSG_PREFIX_DIGITS) {
-            /* retrieve message size */
-            FLOM_TRACE(("flom_msg_retrieve: peer sent "
-                        SSIZE_T_FORMAT " bytes, expected %d bytes for "
-                        "message prefix\n", read_bytes,
-                        FLOM_MSG_PREFIX_DIGITS));
-            THROW(INVALID_PREFIX_SIZE);
-        } else {
-            prefix[FLOM_MSG_PREFIX_DIGITS] = '\0';
-            to_read = strtol(prefix, NULL, 10);
-            FLOM_TRACE(("flom_msg_retrieve: message prefix "
-                        "is '%s' (" SSIZE_T_FORMAT ")\n", prefix, to_read));
-        }
-
-        if (to_read > buf_size)
-            THROW(BUFFER_OVERFLOW);
-        
-        if (0 > (*read_bytes = recv(fd, buf, to_read, 0)))
-            THROW(RECV_ERROR2);
+        if (0 > (*read_bytes = recv(fd, buf, buf_size, 0)))
+            THROW(RECV_ERROR);
         
         FLOM_TRACE(("flom_msg_retrieve: fd = %d returned "
                     SSIZE_T_FORMAT " bytes\n", fd, *read_bytes));
-        if (to_read != *read_bytes) {
-            FLOM_TRACE(("flom_msg_retrieve: expected " SSIZE_T_FORMAT
-                        " bytes, received " SSIZE_T_FORMAT " bytes\n",
-                        to_read, *read_bytes));
-            THROW(INVALID_MSG_LENGTH);
-        }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case RECV_ERROR1:
+            case RECV_ERROR:
                 ret_cod = FLOM_RC_RECV_ERROR;
-                break;
-            case CONNECTION_CLOSED:
-                ret_cod = FLOM_RC_CONNECTION_CLOSED;
-                break;
-            case INVALID_PREFIX_SIZE:
-                ret_cod = FLOM_RC_INVALID_PREFIX_SIZE;
-                break;
-            case BUFFER_OVERFLOW:
-                ret_cod = FLOM_RC_BUFFER_OVERFLOW;
-                break;
-            case RECV_ERROR2:
-                ret_cod = FLOM_RC_RECV_ERROR;
-                break;
-            case INVALID_MSG_LENGTH:
-                ret_cod = FLOM_RC_INVALID_MSG_LENGTH;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -309,15 +265,11 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
 
     int used_chars = 0;
     size_t free_chars = buffer_len, offset = 0;
-    char prefix[FLOM_MSG_PREFIX_DIGITS + 1];
     
     FLOM_TRACE(("flom_msg_serialize\n"));
     TRY {
-        /* reserving space for prefix size */
-        free_chars -= FLOM_MSG_PREFIX_DIGITS;
-        offset += FLOM_MSG_PREFIX_DIGITS;
         /* <xml ... > */
-        used_chars = snprintf(buffer + offset, free_chars,
+        used_chars = snprintf(buffer, free_chars,
                               "%s version=\"1.0\" encoding=\"UTF-8\" ?>",
                               FLOM_MSG_HEADER);
         if (used_chars >= free_chars)
@@ -411,13 +363,6 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
         free_chars -= used_chars;
         offset += used_chars;
 
-        /* writing prefix size at buffer head */
-        snprintf(prefix, sizeof(prefix), "%*.*d",
-                 FLOM_MSG_PREFIX_DIGITS,
-                 FLOM_MSG_PREFIX_DIGITS,
-                 (int)(offset - FLOM_MSG_PREFIX_DIGITS));
-        strncpy(buffer, prefix, FLOM_MSG_PREFIX_DIGITS);
-        
         *msg_len = offset;
         
         FLOM_TRACE(("flom_msg_serialize: serialized message is |%*.*s|\n",
@@ -706,6 +651,8 @@ int flom_msg_trace(const struct flom_msg_s *msg)
                     msg->header.level, msg->header.pvs.verb,
                     msg->header.pvs.step));
         switch (msg->header.pvs.verb) {
+            case FLOM_MSG_VERB_NULL: /* null verb, skipping... */
+                break;
             case FLOM_MSG_VERB_LOCK: /* lock */
                 if (FLOM_RC_OK != (ret_cod = flom_msg_trace_lock(msg)))
                     THROW(TRACE_LOCK_ERROR);
@@ -758,7 +705,8 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
             case 8:
                 FLOM_TRACE(("flom_msg_trace_lock: body[resource["
                             "name='%s',type=%d,wait=%d]]\n",
-                            msg->body.lock_8.resource.name,
+                            msg->body.lock_8.resource.name != NULL ?
+                            msg->body.lock_8.resource.name : "",
                             msg->body.lock_8.resource.type,
                             msg->body.lock_8.resource.wait));
                 break;
@@ -807,8 +755,9 @@ int flom_msg_trace_unlock(const struct flom_msg_s *msg)
         switch (msg->header.pvs.step) {
             case 8:
                 FLOM_TRACE(("flom_msg_trace_unlock: body[resource["
-                            "name='%s',type=%d,wait=%d]]\n",
-                            msg->body.unlock_8.resource.name));
+                            "name='%s']]\n",
+                            msg->body.unlock_8.resource.name != NULL ?
+                            msg->body.unlock_8.resource.name : ""));
             default:
                 THROW(INVALID_STEP);
         }
@@ -872,7 +821,8 @@ int flom_msg_trace_ping(const struct flom_msg_s *msg)
 
     
 int flom_msg_deserialize(char *buffer, size_t buffer_len,
-                         struct flom_msg_s *msg)
+                         struct flom_msg_s *msg,
+                         GMarkupParseContext *gmpc)
 {
     enum Exception { G_MARKUP_PARSE_CONTEXT_PARSE_ERROR
                      , NONE } excp;
@@ -880,21 +830,12 @@ int flom_msg_deserialize(char *buffer, size_t buffer_len,
     
     FLOM_TRACE(("flom_msg_deserialize\n"));
     TRY {
-        GMarkupParser parser = {
-            flom_msg_deserialize_start_element,
-            flom_msg_deserialize_end_element,
-            flom_msg_deserialize_text,
-            NULL, NULL };
-        GMarkupParseContext *context = g_markup_parse_context_new (
-            &parser, 0, (gpointer)msg, NULL);
-        
         FLOM_TRACE(("flom_msg_deserialize: deserializing message |%*.*s|\n",
                     buffer_len, buffer_len, buffer));
         
         if (FALSE == g_markup_parse_context_parse(
-                context, buffer, buffer_len, NULL))
+                gmpc, buffer, buffer_len, NULL))
             THROW(G_MARKUP_PARSE_CONTEXT_PARSE_ERROR);
-        g_markup_parse_context_free (context);
         
         THROW(NONE);
     } CATCH {

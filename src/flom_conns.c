@@ -98,6 +98,8 @@ int flom_conns_add(flom_conns_t *conns, int fd,
 {
     enum Exception { CONNS_EXPAND_ERROR
                      , INVALID_DOMAIN
+                     , MALLOC_ERROR
+                     , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -122,7 +124,15 @@ int flom_conns_add(flom_conns_t *conns, int fd,
                 THROW(INVALID_DOMAIN);
         }
         /* reset the associated message */
-        flom_msg_init(&(conns->cd[conns->used].msg));
+        if (NULL == (conns->cd[conns->used].msg =
+                     malloc(sizeof(struct flom_msg_s))))
+            THROW(MALLOC_ERROR);
+        flom_msg_init(conns->cd[conns->used].msg);
+        /* initialize the associated parser */
+        conns->cd[conns->used].gmpc = g_markup_parse_context_new (
+            &flom_msg_parser, 0, (gpointer)(conns->cd[conns->used].msg), NULL);
+        if (NULL == conns->cd[conns->used].gmpc)
+            THROW(G_MARKUP_PARSE_CONTEXT_NEW_ERROR);
         conns->used++;
         
         THROW(NONE);
@@ -132,6 +142,12 @@ int flom_conns_add(flom_conns_t *conns, int fd,
                 break;
             case INVALID_DOMAIN:
                 ret_cod = FLOM_RC_OBJ_CORRUPTED;
+                break;
+            case MALLOC_ERROR:
+                ret_cod = FLOM_RC_MALLOC_ERROR;
+                break;
+            case G_MARKUP_PARSE_CONTEXT_NEW_ERROR:
+                ret_cod = FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -306,6 +322,16 @@ int flom_conns_clean(flom_conns_t *conns)
                         i, conns->fds[i].fd,
                        NULL_FD == conns->fds[i].fd ? "(removing...)" : ""));
             if (NULL_FD == conns->fds[i].fd) {
+                /* removing message object */
+                if (NULL != conns->cd[i].msg) {
+                    free(conns->cd[i].msg);
+                    conns->cd[i].msg = NULL;
+                }
+                /* removing parser object */
+                if (NULL != conns->cd[i].gmpc) {
+                    g_markup_parse_context_free(conns->cd[i].gmpc);
+                    conns->cd[i].gmpc = NULL;
+                }
                 if (i != last) {
                     /* moving last connection to this position */
                     conns->fds[i] = conns->fds[last];

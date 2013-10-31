@@ -98,7 +98,11 @@ struct flom_conn_data_s {
     /**
      * Last received message
      */
-    struct flom_msg_s      msg;
+    struct flom_msg_s     *msg;
+    /**
+     * GMarkup Parser context
+     */
+    GMarkupParseContext   *gmpc;
 };
 
 
@@ -211,13 +215,29 @@ extern "C" {
     static inline struct flom_msg_s *flom_conns_get_msg(
         flom_conns_t *conns, int id) {
         if (id < conns->used)
-            return &(conns->cd[id].msg);
+            return conns->cd[id].msg;
         else
             return NULL;
     }
 
+
+
+    /**
+     * Return the GMarkupParseContext associated to a connection
+     * @param conns IN connections object
+     * @param id IN identificator (position in array) of the connection
+     * @return the associated GMarkupParseContext or NULL if any error happens
+     */
+    static inline GMarkupParseContext *flom_conns_get_gmpc(        
+        flom_conns_t *conns, int id) {
+        if (id < conns->used)
+            return conns->cd[id].gmpc;
+        else
+            return NULL;
+    }
+
+
     
-        
     /**
      * Set events field for every connection in the object
      * @param conns IN/OUT connections object

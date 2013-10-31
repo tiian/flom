@@ -52,11 +52,7 @@
  * Default buffer size for XML messages (used for serialization/
  * deserialization)
  **/
-#define FLOM_MSG_BUFFER_SIZE 512
-/**
- * Number of digits prefix of a message
- */
-#define FLOM_MSG_PREFIX_DIGITS  3
+#define FLOM_MSG_BUFFER_SIZE        512
 
 
 
@@ -185,6 +181,13 @@ extern const gchar *FLOM_MSG_TAG_MSG;
  * Label used to specify "resource" tag
  */
 extern const gchar *FLOM_MSG_TAG_RESOURCE;
+
+
+
+/**
+ * A static object used by g_markup functions
+ */
+extern GMarkupParser flom_msg_parser;
 
 
 
@@ -573,10 +576,12 @@ extern "C" {
      *                  (it does not have to be null terminated)
      * @param buffer_len IN number of significative bytes of buffer
      * @param msg OUT the object after deserialization
+     * @param gmpc IN/OUT GMarkup parser context
      * @return a reason code
      */
     int flom_msg_deserialize(char *buffer, size_t buffer_len,
-                             struct flom_msg_s *msg);
+                             struct flom_msg_s *msg,
+                             GMarkupParseContext *gmpc);
 
 
 

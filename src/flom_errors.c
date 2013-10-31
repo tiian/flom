@@ -143,6 +143,9 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'execvp' function returned an error condition";
         case FLOM_RC_GETSOCKOPT_ERROR:
             return "ERROR: 'getsockopt' function returned an error condition";
+        case FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR:
+            return "ERROR: 'g_markup_parse_context_new' function returned "
+                "an error condition";
         case FLOM_RC_G_MARKUP_PARSE_CONTEXT_PARSE_ERROR:
             return "ERROR: 'g_markup_parse_context_parse' function returned "
                 "an error condition";
