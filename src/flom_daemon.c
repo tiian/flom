@@ -48,6 +48,7 @@
 #include "flom_conns.h"
 #include "flom_daemon.h"
 #include "flom_errors.h"
+#include "flom_locker.h"
 #include "flom_msg.h"
 
 
@@ -360,6 +361,8 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
     TRY {
         int ready_fd;
         int loop = TRUE;
+        GPtrArray *lockers = g_ptr_array_new_with_free_func(
+            (GDestroyNotify)flom_locker_destroy);
 
         while (loop) {
             nfds_t i, n;
@@ -400,7 +403,7 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
                             fds[i].revents & POLLNVAL));
                 if (fds[i].revents & POLLIN) {
                     if (FLOM_RC_OK != (ret_cod = flom_accept_loop_pollin(
-                                           conns, i)))
+                                           conns, i, lockers)))
                         THROW(ACCEPT_LOOP_POLLIN_ERROR);
                 }
                 if ((fds[i].revents & POLLHUP) && (0 != i)) {
@@ -448,7 +451,8 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
 
 
 
-int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
+int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i,
+                            GPtrArray *lockers)
 {
     enum Exception { ACCEPT_ERROR
                      , CONNS_ADD_ERROR
@@ -456,6 +460,8 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
                      , CONNS_GET_MSG_ERROR
                      , CONNS_GET_GMPC_ERROR
                      , MSG_DESERIALIZE_ERROR
+                     , CONNS_CLOSE_ERROR
+                     , ACCEPT_LOOP_TRANSFER_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -494,12 +500,24 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
             if (NULL == (gmpc = flom_conns_get_gmpc(conns, i)))
                 THROW(CONNS_GET_GMPC_ERROR);
             
-            flom_msg_trace(msg);
             if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
                                    buffer, read_bytes, msg, gmpc)))
                 THROW(MSG_DESERIALIZE_ERROR);
             flom_msg_trace(msg);
-            /* @@@ */
+            /* if the message is not valid the client must be terminated */
+            if (FLOM_MSG_STATE_INVALID == msg->state) {
+                FLOM_TRACE(("flom_accept_loop_pollin: message from client %i "
+                            "is invalid, disconneting...\n", i));
+                if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
+                                       conns, i)))
+                    THROW(CONNS_CLOSE_ERROR);            
+            }
+            /* check if the message is completely parsed and can be transferred
+               to a slave thread (a locker) */
+            if (FLOM_MSG_STATE_READY == msg->state)
+                if (FLOM_RC_OK != (ret_cod = flom_accept_loop_transfer(
+                                       conns, i, lockers)))
+                    THROW(ACCEPT_LOOP_TRANSFER_ERROR);
         }
         
         THROW(NONE);
@@ -509,13 +527,15 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
                 ret_cod = FLOM_RC_ACCEPT_ERROR;
                 break;
             case CONNS_ADD_ERROR:
-                break;
             case MSG_RETRIEVE_ERROR:
             case MSG_DESERIALIZE_ERROR:
                 break;
             case CONNS_GET_MSG_ERROR:
             case CONNS_GET_GMPC_ERROR:
                 ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case CONNS_CLOSE_ERROR:
+            case ACCEPT_LOOP_TRANSFER_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -528,3 +548,32 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i)
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
+                              GPtrArray *lockers)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_accept_loop_transfer\n"));
+    TRY {
+        /* check if there is a locker running for this request */
+        
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_accept_loop_transfer/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

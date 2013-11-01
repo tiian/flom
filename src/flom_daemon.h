@@ -96,9 +96,23 @@ extern "C" {
      * Manager POLLIN event received from listener daemon
      * @param conns IN/OUT connections object
      * @param id IN connection id
+     * @param lockers IN/OUT array of lockers serving the connected clients
      * @return a reason code
      */
-    int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id);
+    int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
+                                GPtrArray *lockers);
+
+
+
+    /**
+     * Transfer the arrived message to a slave thread (locker)
+     * @param conns IN/OUT connections object
+     * @param id IN connection id
+     * @param lockers IN/OUT array of lockers serving the connected clients
+     * @return a reason code
+     */     
+    int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
+                                  GPtrArray *lockers);
 
     
 

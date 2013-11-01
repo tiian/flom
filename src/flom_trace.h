@@ -87,6 +87,11 @@
  */
 #define FLOM_TRACE_MOD_MSG                0x00000080
 
+/**
+ * trace module for locker functions
+ */
+#define FLOM_TRACE_MOD_LOCKER             0x00000100
+
 
 
 /**
