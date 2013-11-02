@@ -31,6 +31,10 @@
 
 
 
+#include "flom_conns.h"
+
+
+
 /* save old FLOM_TRACE_MODULE and set a new value */
 #ifdef FLOM_TRACE_MODULE
 # define FLOM_TRACE_MODULE_SAVE FLOM_TRACE_MODULE
@@ -47,9 +51,13 @@
  */
 struct flom_locker_s {
     /**
-     * Pipe file descriptor used to send command from listener to locker thread
+     * Pipe file descriptor: used by main thread (listener) to send commands
      */
-    int       pipe_fd;
+    int       write_pipe;
+    /**
+     * Pipe file descriptor: used by locker thread to receive commands
+     */
+    int       read_pipe;
     /**
      * Resource managed by this locker; this is the key to pick-up the right
      * locker from a pool
@@ -89,6 +97,17 @@ extern "C" {
 
 
     /**
+     * Initialize a locker struct
+     * @param locker IN/OUT struct to be initialized
+     */
+    static inline void flom_locker_init(struct flom_locker_s *locker) {
+        locker->write_pipe = locker->read_pipe = NULL_FD;
+        locker->resource_name = NULL;
+    }
+
+    
+
+    /**
      * Destroy the objects connected to the locker and the locker object
      * itself (the pointer is not anymore valid after this call)
      * @param locker IN/OUT object to destroy (remove from memory)
@@ -97,6 +116,33 @@ extern "C" {
 
     
 
+    /**
+     * Initialize an array of lockers
+     * @param lockers IN/OUT pointer to object to initialize
+     */
+    void     flom_locker_array_init(flom_locker_array_t *lockers);
+
+    
+
+    /**
+     * Add a new locker to locker array
+     * @param lockers IN/OUT array of lockers
+     * @param locker IN new locker to add
+     */
+    void     flom_locker_array_add(flom_locker_array_t *lockers,
+                                   struct flom_locker_s *locker);
+
+
+
+    /**
+     * Main loop function for locker thread
+     * @param data IN pointer to locker context, it must be a pointer to
+     * @ref flom_locker_s
+     */
+    gpointer flom_locker_loop(gpointer data);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

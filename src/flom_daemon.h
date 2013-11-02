@@ -26,8 +26,9 @@
 
 
 #include "flom_config.h"
-#include "flom_trace.h"
 #include "flom_conns.h"
+#include "flom_locker.h"
+#include "flom_trace.h"
 
 
 
@@ -100,7 +101,7 @@ extern "C" {
      * @return a reason code
      */
     int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
-                                GPtrArray *lockers);
+                                flom_locker_array_t *lockers);
 
 
 
@@ -112,7 +113,7 @@ extern "C" {
      * @return a reason code
      */     
     int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
-                                  GPtrArray *lockers);
+                                  flom_locker_array_t *lockers);
 
     
 

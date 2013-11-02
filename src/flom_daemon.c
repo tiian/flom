@@ -361,9 +361,10 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
     TRY {
         int ready_fd;
         int loop = TRUE;
-        GPtrArray *lockers = g_ptr_array_new_with_free_func(
-            (GDestroyNotify)flom_locker_destroy);
+        flom_locker_array_t lockers;
 
+        flom_locker_array_init(&lockers);
+        
         while (loop) {
             nfds_t i, n;
             struct pollfd *fds;
@@ -403,7 +404,7 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
                             fds[i].revents & POLLNVAL));
                 if (fds[i].revents & POLLIN) {
                     if (FLOM_RC_OK != (ret_cod = flom_accept_loop_pollin(
-                                           conns, i, lockers)))
+                                           conns, i, &lockers)))
                         THROW(ACCEPT_LOOP_POLLIN_ERROR);
                 }
                 if ((fds[i].revents & POLLHUP) && (0 != i)) {
@@ -452,7 +453,7 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
 
 
 int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i,
-                            GPtrArray *lockers)
+                            flom_locker_array_t *lockers)
 {
     enum Exception { ACCEPT_ERROR
                      , CONNS_ADD_ERROR
@@ -552,25 +553,111 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i,
 
 
 int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
-                              GPtrArray *lockers)
+                              flom_locker_array_t *lockers)
 {
-    enum Exception { NONE } excp;
+    enum Exception { NULL_OBJECT
+                     , INVALID_VERB_STEP
+                     , CONNS_GET_MSG_ERROR
+                     , PIPE_ERROR
+                     , G_THREAD_CREATE_ERROR
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    struct flom_locker_s *locker;
     
     FLOM_TRACE(("flom_accept_loop_transfer\n"));
     TRY {
+        gint i;
+        int found = FALSE;
+        struct flom_msg_s *msg = NULL;
         /* check if there is a locker running for this request */
-        
+        if (NULL == lockers)
+            THROW(NULL_OBJECT);
+        /* check message */
+        if (NULL == (msg = flom_conns_get_msg(conns, id)))
+            THROW(CONNS_GET_MSG_ERROR);
+        if (FLOM_MSG_VERB_LOCK != msg->header.pvs.verb ||
+            FLOM_MSG_STEP_INCR != msg->header.pvs.step) {
+            FLOM_TRACE(("flom_accept_loop_transfer: message verb (%d) and/or "
+                        "step (%d) are not valid at this point;\n",
+                        msg->header.pvs.verb, msg->header.pvs.step));
+            THROW(INVALID_VERB_STEP);
+        }
+        /* is there a locker already active? */
+        for (i=0; i<lockers->n; ++i) {
+            locker = g_ptr_array_index(lockers->array,i);
+            FLOM_TRACE(("flom_accept_loop_transfer: locker # %d is managing "
+                        "resource '%s'\n", i, locker->resource_name));
+            if (!g_strcmp0(locker->resource_name,
+                           msg->body.lock_8.resource.name)) {
+                FLOM_TRACE(("flom_accept_loop_transfer: found locker %d for "
+                            "resource '%s'\n", i,
+                            msg->body.lock_8.resource.name));
+                found = TRUE;
+                break;
+            }
+        } /* for (i=0; i<lockers->n; ++i) */
+        if (!found) {
+            /* start a new locker */
+            locker = g_malloc(sizeof(struct flom_locker_s));
+            int pipefd[2];
+            GThread *locker_thread = NULL;
+            GError *error_thread;
+            FLOM_TRACE(("flom_accept_loop_transfer: creating a new locker "
+                        "for resource '%s'...\n",
+                        msg->body.lock_8.resource.name));
+            flom_locker_init(locker);
+            locker->resource_name = g_strdup(msg->body.lock_8.resource.name);
+            flom_locker_array_add(lockers, locker);
+            /* creating a communication pipe for the new thread */
+            if (0 != pipe(pipefd))
+                THROW(PIPE_ERROR);
+            locker->read_pipe = pipefd[0];
+            locker->write_pipe = pipefd[1];
+            locker_thread = g_thread_create(flom_locker_loop, (gpointer)locker,
+                                            TRUE, &error_thread);
+            if (NULL == locker_thread) {
+                FLOM_TRACE(("flom_accept_loop_transfer: error_thread->code=%d, "
+                            "error_thread->message='%s'\n",
+                            error_thread->code, error_thread->message));
+                g_free(error_thread);
+                THROW(G_THREAD_CREATE_ERROR);
+            } else {
+                FLOM_TRACE(("flom_accept_loop_transfer: created thread %p\n",
+                            locker_thread));
+            }
+        }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case INVALID_VERB_STEP:
+                ret_cod = FLOM_RC_PROTOCOL_ERROR;
+                break;
+            case CONNS_GET_MSG_ERROR:
+                break;
+            case PIPE_ERROR:
+                ret_cod = FLOM_RC_PIPE_ERROR;
+                break;
+            case G_THREAD_CREATE_ERROR:
+                ret_cod = FLOM_RC_G_THREAD_CREATE_ERROR;
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
             default:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (PIPE_ERROR <= excp && NONE > excp) {
+            /* @@@ clean-up locker */
+            FLOM_TRACE(("flom_accept_loop_transfer: clean-up due to excp=%d\n",
+                        excp));
+            g_free(locker->resource_name);
+            /* @@@ remove from array and following stuff... */
+        }
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_accept_loop_transfer/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

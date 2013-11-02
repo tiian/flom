@@ -150,6 +150,10 @@
  */
 #define FLOM_RC_CONTAINER_FULL                 -12
 /**
+ * A routine has been invoked in an improper context
+ */
+#define FLOM_RC_PROTOCOL_ERROR                 -13
+/**
  * Configuration file is broken
 #define FLOM_RC_CONFIG_ERROR                    -3
  */
@@ -160,10 +164,6 @@
 /**
  * Status files are corrupted and the server can not start-up
 #define FLOM_RC_CORRUPTED_STATUS_FILE          -10
- */
-/**
- * A routine has been invoked in an improper context
-#define FLOM_RC_PROTOCOL_ERROR                 -12
  */
 /**
  * The status (value of any properties) of an object is invalid due to a bug
@@ -270,57 +270,61 @@
  */
 #define FLOM_RC_G_STRDUP_ERROR                      -110
 /**
+ * "g_thread_create" function error
+ */
+#define FLOM_RC_G_THREAD_CREATE_ERROR               -111
+/**
  * "listen" function error
  */
-#define FLOM_RC_LISTEN_ERROR                        -111
+#define FLOM_RC_LISTEN_ERROR                        -112
 /**
  * "malloc"/"g_malloc" function error
  */
-#define FLOM_RC_MALLOC_ERROR                        -112
+#define FLOM_RC_MALLOC_ERROR                        -113
 /**
  * "pipe" function error
  */
-#define FLOM_RC_PIPE_ERROR                          -113
+#define FLOM_RC_PIPE_ERROR                          -114
 /**
  * "poll" function error
  */
-#define FLOM_RC_POLL_ERROR                          -114
+#define FLOM_RC_POLL_ERROR                          -115
 /**
  * "read" function error
  */
-#define FLOM_RC_READ_ERROR                          -115
+#define FLOM_RC_READ_ERROR                          -116
 /**
  * "recv" function error
  */
-#define FLOM_RC_RECV_ERROR                          -116
+#define FLOM_RC_RECV_ERROR                          -117
 /**
  * "signal" function error
  */
-#define FLOM_RC_SIGNAL_ERROR                        -117
+#define FLOM_RC_SIGNAL_ERROR                        -118
 /**
  * "send" function error
  */
-#define FLOM_RC_SEND_ERROR                          -118
+#define FLOM_RC_SEND_ERROR                          -119
 /**
  * "setsid" function error
  */
-#define FLOM_RC_SETSID_ERROR                        -119
+#define FLOM_RC_SETSID_ERROR                        -120
 /**
  * "socket" function error
  */
-#define FLOM_RC_SOCKET_ERROR                        -120
+#define FLOM_RC_SOCKET_ERROR                        -121
 /**
  * "unlink" function error
  */
-#define FLOM_RC_UNLINK_ERROR                        -121
+#define FLOM_RC_UNLINK_ERROR                        -122
 /**
  * "wait" function error
  */
-#define FLOM_RC_WAIT_ERROR                          -122
+#define FLOM_RC_WAIT_ERROR                          -123
 /**
  * "write" function error
  */
-#define FLOM_RC_WRITE_ERROR                         -123
+#define FLOM_RC_WRITE_ERROR                         -124
 /**
  * "realloc" function error
 #define FLOM_RC_REALLOC_ERROR                 -101

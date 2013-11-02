@@ -27,6 +27,7 @@
 
 
 #include "flom_locker.h"
+#include "flom_trace.h"
 
 
 
@@ -42,7 +43,36 @@ void flom_locker_destroy(struct flom_locker_s *locker)
 {
     if (NULL != locker) {
         g_free(locker->resource_name);
-        close(locker->pipe_fd);
+        close(locker->write_pipe);
+        close(locker->read_pipe);
         g_free(locker);
     }
+}
+
+
+
+void flom_locker_array_init(flom_locker_array_t *lockers)
+{
+    lockers->n = 0;
+    lockers->array = g_ptr_array_new_with_free_func(
+        (GDestroyNotify)flom_locker_destroy);
+}
+
+
+
+void flom_locker_array_add(flom_locker_array_t *lockers,
+                           struct flom_locker_s *locker)
+{
+    g_ptr_array_add(lockers->array, (gpointer)locker);
+    lockers->n++;
+}
+
+
+
+gpointer flom_locker_loop(gpointer data)
+{
+    FLOM_TRACE(("flom_locker_loop: new thread in progress...\n"));
+    /* @@@ */
+    FLOM_TRACE(("flom_locker_loop: this thread completed service\n"));
+    return data;
 }

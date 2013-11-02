@@ -78,6 +78,8 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_CONTAINER_FULL:
             return "ERROR: the container is full and cannot store more "
                 "elements";
+        case FLOM_RC_PROTOCOL_ERROR:
+            return "ERROR: a routine has been invoked in an improper context";
             /*
         case FLOM_RC_OUT_OF_RANGE:
             return "ERROR: an argument is out of range";
@@ -91,8 +93,6 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: the status file is corrupted and can not be used";
         case FLOM_RC_INVALID_OPTION:
             return "ERROR: a specified option is not valid";
-        case FLOM_RC_PROTOCOL_ERROR:
-            return "ERROR: a routine has been invoked in an improper context";
         case FLOM_RC_INVALID_STATUS:
                   return "ERROR: invalid object status";
         case FLOM_RC_TOO_MANY_RSRMGRS:
@@ -151,6 +151,9 @@ const char *flom_strerror(int ret_cod)
                 "an error condition";
         case FLOM_RC_G_STRDUP_ERROR:
             return "ERROR: 'g_strdup' function returned an error condition";
+        case FLOM_RC_G_THREAD_CREATE_ERROR:
+            return "ERROR: 'g_thread_create' function returned an error "
+                "condition";
         case FLOM_RC_LISTEN_ERROR:
             return "ERROR: 'listen' function returned an error condition";
         case FLOM_RC_MALLOC_ERROR:
