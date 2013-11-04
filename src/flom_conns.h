@@ -70,6 +70,10 @@
  * Null file descriptor
  */
 #define NULL_FD   -1
+/**
+ * Transferred file descriptor
+ */
+#define TRNS_FD   -2
 
 
 
@@ -168,7 +172,17 @@ extern "C" {
     int flom_conns_add(flom_conns_t *conns, int fd,
                        socklen_t addr_len, const struct sockaddr *sa);
 
+    
 
+    /**
+     * Return the socket domain associated with all the connection
+     * @return socket domain
+     */
+    static inline int flom_conns_get_domain(const flom_conns_t *conns) {
+        return conns->domain;
+    }
+
+    
 
     /**
      * Return the number of active connections managed by the object
@@ -193,6 +207,23 @@ extern "C" {
             return conns->fds[id].fd;
         else
             return NULL_FD;
+    }
+
+
+
+    /**
+     * Return a reference (read-only pointer) to the struct containing
+     * connection data of a specific connection
+     * @param conns IN connections object
+     * @param id IN identificator (position in array) of the connection
+     * @return a reference to the asked structure or NULL
+     */
+    static inline const struct flom_conn_data_s *flom_conns_get_cd(
+        const flom_conns_t *conns, int id) {
+        if (id < conns->used)
+            return &(conns->cd[id]);
+        else
+            return NULL;
     }
 
 
@@ -266,6 +297,17 @@ extern "C" {
      * @return a reason code
      */
     int flom_conns_close_fd(flom_conns_t *conns, nfds_t id);
+
+
+
+    /**
+     * Mark as "transferred to another thread" the file descriptor associated
+     * to a connection
+     * @param conns IN/OUT connections object
+     * @param id IN connection must be marked
+     * @return a reason code
+     */
+    int flom_conns_trns_fd(flom_conns_t *conns, nfds_t id);
 
     
 

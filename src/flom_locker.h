@@ -51,6 +51,10 @@
  */
 struct flom_locker_s {
     /**
+     * Identifier of the thread running the locker
+     */
+    GThread  *thread;
+    /**
      * Pipe file descriptor: used by main thread (listener) to send commands
      */
     int       write_pipe;
@@ -101,6 +105,7 @@ extern "C" {
      * @param locker IN/OUT struct to be initialized
      */
     static inline void flom_locker_init(struct flom_locker_s *locker) {
+        locker->thread = NULL;
         locker->write_pipe = locker->read_pipe = NULL_FD;
         locker->resource_name = NULL;
     }

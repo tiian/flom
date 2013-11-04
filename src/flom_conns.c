@@ -308,6 +308,40 @@ int flom_conns_close_fd(flom_conns_t *conns, nfds_t id)
 
 
 
+int flom_conns_trns_fd(flom_conns_t *conns, nfds_t id)
+{
+    enum Exception { OUT_OF_RANGE
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_conns_trns_fd\n"));
+    TRY {
+        FLOM_TRACE(("flom_conns_trns: marking as transferred connection "
+                    "id=%d with fd=%d\n", id, conns->fds[id].fd));
+        if (id < 0 || id >= conns->used)
+            THROW(OUT_OF_RANGE);
+        conns->fds[id].fd = TRNS_FD;
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OUT_OF_RANGE:
+                ret_cod = FLOM_RC_OUT_OF_RANGE;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_conns_trns_fd/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int flom_conns_clean(flom_conns_t *conns)
 {
     enum Exception { NONE } excp;
@@ -322,6 +356,8 @@ int flom_conns_clean(flom_conns_t *conns)
                         i, conns->fds[i].fd,
                        NULL_FD == conns->fds[i].fd ? "(removing...)" : ""));
             if (NULL_FD == conns->fds[i].fd) {
+                /* connections with NULL_FD are no more valid and must be
+                 * removed and destroyed */
                 /* removing message object */
                 if (NULL != conns->cd[i].msg) {
                     free(conns->cd[i].msg);
@@ -332,6 +368,16 @@ int flom_conns_clean(flom_conns_t *conns)
                     g_markup_parse_context_free(conns->cd[i].gmpc);
                     conns->cd[i].gmpc = NULL;
                 }
+                if (i != last) {
+                    /* moving last connection to this position */
+                    conns->fds[i] = conns->fds[last];
+                    conns->cd[i] = conns->cd[last];
+                }
+                conns->used--;
+            } else if (TRNS_FD == conns->fds[i].fd) {
+                /* connections with TRNS_FD are no still valid but they are
+                   now managed by a different thread: they must be removed
+                   but NOT destroyed */
                 if (i != last) {
                     /* moving last connection to this position */
                     conns->fds[i] = conns->fds[last];

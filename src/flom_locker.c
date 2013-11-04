@@ -26,6 +26,7 @@
 
 
 
+#include "flom_errors.h"
 #include "flom_locker.h"
 #include "flom_trace.h"
 
@@ -71,8 +72,49 @@ void flom_locker_array_add(flom_locker_array_t *lockers,
 
 gpointer flom_locker_loop(gpointer data)
 {
+    enum Exception { READ_ERROR1
+                     , READ_ERROR2
+                     , READ_ERROR3
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
     FLOM_TRACE(("flom_locker_loop: new thread in progress...\n"));
-    /* @@@ */
+    TRY {
+        int domain, client_fd;
+        struct flom_locker_s *locker = (struct flom_locker_s *)data;
+        struct flom_conn_data_s cd;
+    
+        /* as a first action, it marks the identifier */
+        locker->thread = g_thread_self();
+        /* pick-up socket domain from parent thread */
+        if (sizeof(domain) != read(locker->read_pipe, &domain, sizeof(domain)))
+            THROW(READ_ERROR1);
+        /* pick-up connection file descriptor from parent thread */
+        if (sizeof(client_fd) != read(
+                locker->read_pipe, &client_fd, sizeof(client_fd)))
+            THROW(READ_ERROR2);
+        /* pick-up connection data from parent thread */
+        if (sizeof(cd) != read(locker->read_pipe, &cd, sizeof(cd)))
+            THROW(READ_ERROR3);
+        /* @@@ */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case READ_ERROR1:
+            case READ_ERROR2:
+            case READ_ERROR3:
+                ret_cod = FLOM_RC_READ_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_locker_loop/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     FLOM_TRACE(("flom_locker_loop: this thread completed service\n"));
     return data;
 }
