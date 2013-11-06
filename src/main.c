@@ -60,8 +60,6 @@ int main (int argc, char *argv[])
     int child_status = 0;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
-    flom_config_t config;
-    
     FLOM_TRACE_INIT;
     
     option_context = g_option_context_new("-- command to execute");
@@ -72,10 +70,10 @@ int main (int argc, char *argv[])
     }
     g_option_context_free(option_context);
 
-    flom_config_reset(&config);
-    flom_config_set_trace_file(&config, trace_file);
+    flom_config_reset();
+    flom_config_set_trace_file(trace_file);
 
-    if (FLOM_RC_OK != (ret_cod = flom_connect(&config))) {
+    if (FLOM_RC_OK != (ret_cod = flom_connect())) {
         g_print("flom_connect: ret_cod=%d\n", ret_cod);
         exit(1);
     }

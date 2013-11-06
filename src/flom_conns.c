@@ -163,6 +163,44 @@ int flom_conns_add(flom_conns_t *conns, int fd,
 
 
 
+int flom_conns_import(flom_conns_t *conns, int fd,
+                      const struct flom_conn_data_s *cd)
+{
+    enum Exception { CONNS_EXPAND_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_conns_import\n"));
+    TRY {
+        if (conns->used == conns->allocated) {
+            if (FLOM_RC_OK != (ret_cod = flom_conns_expand(conns)))
+                THROW(CONNS_EXPAND_ERROR);
+        }
+        conns->fds[conns->used].fd = fd;
+        conns->fds[conns->used].events = 0;
+        conns->fds[conns->used].revents = 0;
+        conns->cd[conns->used] = *cd;
+        conns->used++;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case CONNS_EXPAND_ERROR:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_conns_import/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+    
+
+
 int flom_conns_set_events(flom_conns_t *conns, short events)
 {
     enum Exception { OBJECT_CORRUPTED
@@ -215,10 +253,12 @@ int flom_conns_expand(flom_conns_t *conns)
         void *tmp;
         nfds_t i;
         nfds_t new_allocated =
-            conns->allocated * (100 + FLOM_CONNS_PERCENT_ALLOCATION) / 100  + 1;
+            conns->allocated * (100 + FLOM_CONNS_PERCENT_ALLOCATION) /
+            100  + 1;
         if (conns->allocated >= new_allocated) {
             FLOM_TRACE(("flom_conns_expand: conns->allocated=%d, "
-                        "new_allocated=%d\n", conns->allocated, new_allocated));
+                        "new_allocated=%d\n",
+                        conns->allocated, new_allocated));
             THROW(INTERNAL_ERROR);
         }
         FLOM_TRACE(("flom_conns_expand: expanding from %d to %d connections\n",
@@ -342,63 +382,62 @@ int flom_conns_trns_fd(flom_conns_t *conns, nfds_t id)
 
 
 
-int flom_conns_clean(flom_conns_t *conns)
+void flom_conns_clean(flom_conns_t *conns)
 {
-    enum Exception { NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
-    FLOM_TRACE(("flom_conns_clean\n"));
-    TRY {
-        nfds_t i=0;
-        while (i<conns->used) {
-            nfds_t last = conns->used-1;
-            FLOM_TRACE(("flom_conns_clean: i=%d, fd=%d %s\n",
-                        i, conns->fds[i].fd,
-                       NULL_FD == conns->fds[i].fd ? "(removing...)" : ""));
-            if (NULL_FD == conns->fds[i].fd) {
-                /* connections with NULL_FD are no more valid and must be
-                 * removed and destroyed */
-                /* removing message object */
-                if (NULL != conns->cd[i].msg) {
-                    free(conns->cd[i].msg);
-                    conns->cd[i].msg = NULL;
-                }
-                /* removing parser object */
-                if (NULL != conns->cd[i].gmpc) {
-                    g_markup_parse_context_free(conns->cd[i].gmpc);
-                    conns->cd[i].gmpc = NULL;
-                }
-                if (i != last) {
-                    /* moving last connection to this position */
-                    conns->fds[i] = conns->fds[last];
-                    conns->cd[i] = conns->cd[last];
-                }
-                conns->used--;
-            } else if (TRNS_FD == conns->fds[i].fd) {
-                /* connections with TRNS_FD are no still valid but they are
-                   now managed by a different thread: they must be removed
-                   but NOT destroyed */
-                if (i != last) {
-                    /* moving last connection to this position */
-                    conns->fds[i] = conns->fds[last];
-                    conns->cd[i] = conns->cd[last];
-                }
-                conns->used--;
-            } else i++;
-        }
+    nfds_t i=0;
+    FLOM_TRACE(("flom_conns_clean: starting...\n"));
+    while (i<conns->used) {
+        nfds_t last = conns->used-1;
+        FLOM_TRACE(("flom_conns_clean: i=%d, fd=%d %s\n",
+                    i, conns->fds[i].fd,
+                    NULL_FD == conns->fds[i].fd ? "(removing...)" : ""));
+        if (NULL_FD == conns->fds[i].fd) {
+            /* connections with NULL_FD are no more valid and must be
+             * removed and destroyed */
+            /* removing message object */
+            if (NULL != conns->cd[i].msg) {
+                free(conns->cd[i].msg);
+                conns->cd[i].msg = NULL;
+            }
+            /* removing parser object */
+            if (NULL != conns->cd[i].gmpc) {
+                g_markup_parse_context_free(conns->cd[i].gmpc);
+                conns->cd[i].gmpc = NULL;
+            }
+            if (i != last) {
+                /* moving last connection to this position */
+                conns->fds[i] = conns->fds[last];
+                conns->cd[i] = conns->cd[last];
+            }
+            conns->used--;
+        } else if (TRNS_FD == conns->fds[i].fd) {
+            /* connections with TRNS_FD are no still valid but they are
+               now managed by a different thread: they must be removed
+               but NOT destroyed */
+            if (i != last) {
+                /* moving last connection to this position */
+                conns->fds[i] = conns->fds[last];
+                conns->cd[i] = conns->cd[last];
+            }
+            conns->used--;
+        } else i++;
+    }
         
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("flom_conns_clean/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
+    FLOM_TRACE(("flom_conns_clean: completed\n"));
+}
+
+
+
+void flom_conns_free(flom_conns_t *conns)
+{
+    nfds_t i;
+    FLOM_TRACE(("flom_conns_free: starting...\n"));
+    for (i=0; i<conns->used; ++i)
+        if (NULL_FD != conns->fds[i].fd) {
+            close(conns->fds[i].fd);
+            conns->fds[i].fd = NULL_FD;
+        }
+    flom_conns_clean(conns);
+    FLOM_TRACE(("flom_conns_free: completed\n"));
 }
 

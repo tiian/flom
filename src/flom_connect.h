@@ -49,20 +49,18 @@ extern "C" {
 
     /**
      * Try to connect to lock daemon
-     * @param config IN configuration object
      * @result a reason code
      */
-    int flom_connect(const flom_config_t *config);
+    int flom_connect();
     
 
 
     /**
      * Send lock command to the daemon
-     * @param config IN configuration object
      * @param fd IN socket file descriptor
      * @return a reason code
      */
-    int flom_connect_lock(const flom_config_t *config, int fd);
+    int flom_connect_lock(int fd);
 
 
     

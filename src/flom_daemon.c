@@ -61,7 +61,7 @@
 
 
 
-int flom_daemon(const flom_config_t *config)
+int flom_daemon()
 {
     enum Exception { PIPE_ERROR
                      , FORK_ERROR
@@ -161,13 +161,13 @@ int flom_daemon(const flom_config_t *config)
                 if (i != pipefd[0] && i != pipefd[1])
                     close(i);
 
-            FLOM_TRACE_REOPEN(config->trace_file);
+            FLOM_TRACE_REOPEN(global_config.trace_file);
             FLOM_TRACE(("flom_daemon: now daemonized!\n"));
 
             /* activate service */
             if (FLOM_RC_OK != (ret_cod = flom_conns_init(&conns, AF_UNIX)))
                 THROW(CONNS_INIT_ERROR);
-            daemon_rc = flom_listen(config, &conns);
+            daemon_rc = flom_listen(&conns);
             
             /* sending reason code to father process */
             if (sizeof(daemon_rc) != write(pipefd[1], &daemon_rc,
@@ -182,10 +182,10 @@ int flom_daemon(const flom_config_t *config)
             
             openlog("flom", LOG_PID, LOG_DAEMON);
             syslog(LOG_NOTICE, "flom_daemon: activated!");
-            if (FLOM_RC_OK != (ret_cod = flom_accept_loop(config, &conns)))
+            if (FLOM_RC_OK != (ret_cod = flom_accept_loop(&conns)))
                 THROW(FLOM_ACCEPT_LOOP_ERROR);
             syslog(LOG_NOTICE, "flom_daemon: exiting");
-            flom_listen_clean(config, &conns);
+            flom_listen_clean(&conns);
         }
         THROW(NONE);
     } CATCH {
@@ -250,8 +250,7 @@ int flom_daemon(const flom_config_t *config)
 
 
 
-int flom_listen(const flom_config_t *config,
-                flom_conns_t *conns)
+int flom_listen(flom_conns_t *conns)
 {
     enum Exception { SOCKET_ERROR
                      , UNLINK_ERROR
@@ -269,12 +268,12 @@ int flom_listen(const flom_config_t *config,
             
         if (-1 == (fd = socket(AF_LOCAL, SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
-        if (-1 == unlink(config->local_socket_path_name) &&
+        if (-1 == unlink(global_config.local_socket_path_name) &&
             ENOENT != errno)
             THROW(UNLINK_ERROR);
         memset(&servaddr, 0, sizeof(servaddr));
         servaddr.sun_family = AF_LOCAL;
-        strcpy(servaddr.sun_path, config->local_socket_path_name);
+        strcpy(servaddr.sun_path, global_config.local_socket_path_name);
         if (-1 == bind(fd, (struct sockaddr *) &servaddr, sizeof(servaddr)))
             THROW(BIND_ERROR);
         if (-1 ==listen(fd, 100))
@@ -314,8 +313,7 @@ int flom_listen(const flom_config_t *config,
 
 
 
-int flom_listen_clean(const flom_config_t *config,
-                      flom_conns_t *conns)
+int flom_listen_clean(flom_conns_t *conns)
 {
     enum Exception { NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -325,7 +323,7 @@ int flom_listen_clean(const flom_config_t *config,
         if (-1 == close(flom_conns_get_fd(conns, 0))) {
             FLOM_TRACE(("flom_listen_clean: close errno=%d\n", errno));
         }
-        if (-1 == unlink(config->local_socket_path_name)) {
+        if (-1 == unlink(global_config.local_socket_path_name)) {
             FLOM_TRACE(("flom_listen_clean: unlink errno=%d\n", errno));
         }
         
@@ -345,10 +343,9 @@ int flom_listen_clean(const flom_config_t *config,
 }
 
 
-int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
+int flom_accept_loop(flom_conns_t *conns)
 {
-    enum Exception { CONNS_CLEAN_ERROR
-                     , CONNS_SET_EVENTS_ERROR
+    enum Exception { CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
                      , ACCEPT_LOOP_POLLIN_ERROR
                      , CONNS_CLOSE_ERROR
@@ -359,22 +356,21 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
     
     FLOM_TRACE(("flom_accept_loop\n"));
     TRY {
-        int ready_fd;
         int loop = TRUE;
         flom_locker_array_t lockers;
 
         flom_locker_array_init(&lockers);
         
         while (loop) {
+            int ready_fd;
             nfds_t i, n;
             struct pollfd *fds;
-            if (FLOM_RC_OK != (ret_cod = flom_conns_clean(conns)))
-                THROW(CONNS_CLEAN_ERROR);
+            flom_conns_clean(conns);
             if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(conns, POLLIN)))
                 THROW(CONNS_SET_EVENTS_ERROR);
             ready_fd = poll(flom_conns_get_fds(conns),
                             flom_conns_get_used(conns),
-                            config->idle_time);
+                            global_config.idle_time);
             FLOM_TRACE(("flom_accept_loop: ready_fd=%d\n", ready_fd));
             /* error on poll function */
             if (0 > ready_fd)
@@ -383,7 +379,7 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
             if (0 == ready_fd) {
                 FLOM_TRACE(("flom_accept_loop: idle time exceeded %d "
                             "milliseconds\n",
-                            config->idle_time));
+                            global_config.idle_time));
                 if (1 == flom_conns_get_used(conns)) {
                     FLOM_TRACE(("flom_accept_loop: only listener connection "
                                 "is active, exiting...\n"));
@@ -423,7 +419,6 @@ int flom_accept_loop(const flom_config_t *config, flom_conns_t *conns)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case CONNS_CLEAN_ERROR:
             case CONNS_SET_EVENTS_ERROR:
                 break;
             case POLL_ERROR:

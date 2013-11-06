@@ -77,6 +77,13 @@ typedef struct flom_config flom_config_t;
 
 
 
+/**
+ * This is a global static object shared by all the application
+ */
+extern flom_config_t global_config;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -85,18 +92,18 @@ extern "C" {
 
     /**
      * Set config to system default
-     * @param config OUT config object
      */
-    void flom_config_reset(flom_config_t *config);
+    void flom_config_reset();
     
 
     
     /**
      * Set trace_file in config object
+     * @param trace_file IN set the new value for trace_file properties
      */
     static inline void flom_config_set_trace_file(
-        flom_config_t *config, const char *trace_file) {
-        config->trace_file = trace_file; }
+        const char *trace_file) {
+        global_config.trace_file = trace_file; }
 
 
     

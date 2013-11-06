@@ -51,44 +51,37 @@ extern "C" {
 
     /**
      * Create a lock daemon
-     * @param config IN configuration object
      * @result a reason code
      */
-    int flom_daemon(const flom_config_t *config);
+    int flom_daemon();
     
 
     
     /**
      * Create a listen socket to serve the clients
-     * @param config IN configuration object
      * @param conns OUT connections object
      * @result a reason code
      */
-    int flom_listen(const flom_config_t *config,
-                    flom_conns_t *conns);
+    int flom_listen(flom_conns_t *conns);
 
 
 
     /**
      * Clean-up the listen socket before daemon termination
-     * @param config IN configuration object
      * @param conns IN/OUT connections object
      * @result a reason code     
      */
-    int flom_listen_clean(const flom_config_t *config,
-                          flom_conns_t *conns);
+    int flom_listen_clean(flom_conns_t *conns);
 
 
     
     /**
      * Possible infinite accept loop: every incoming connection will be
      * processed; after idle time, it will leave
-     * @param config IN configuration object
      * @param conns IN/OUT connections object
      * @result a reason code
      */
-    int flom_accept_loop(const flom_config_t *config,
-                         flom_conns_t *conns);
+    int flom_accept_loop(flom_conns_t *conns);
 
 
     

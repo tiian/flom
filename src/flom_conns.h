@@ -100,11 +100,11 @@ struct flom_conn_data_s {
         struct sockaddr_in sain;
     };
     /**
-     * Last received message
+     * Last received message (allocated by malloc)
      */
     struct flom_msg_s     *msg;
     /**
-     * GMarkup Parser context
+     * GMarkup Parser context (allocated by g_markup_parse_context_new)
      */
     GMarkupParseContext   *gmpc;
 };
@@ -164,13 +164,25 @@ extern "C" {
      * Add a new connection
      * @param conns IN/OUT connections object
      * @param fd IN file descriptor
-     * @param domain IN socket domain
      * @param addr_len IN lenght of address
      * @param sa IN address
      * @return a reason code
      */
     int flom_conns_add(flom_conns_t *conns, int fd,
                        socklen_t addr_len, const struct sockaddr *sa);
+
+
+
+    
+    /**
+     * Import a connection
+     * @param conns IN/OUT connections object
+     * @param fd IN file descriptor
+     * @param cd IN connection data struct
+     * @return a reason code
+     */
+    int flom_conns_import(flom_conns_t *conns, int fd,
+                          const struct flom_conn_data_s *cd);
 
     
 
@@ -180,6 +192,21 @@ extern "C" {
      */
     static inline int flom_conns_get_domain(const flom_conns_t *conns) {
         return conns->domain;
+    }
+
+
+
+    /**
+     * Set the socket domain of an already initialized connections object;
+     * pay attention this may invalidate the already stored addresses and
+     * should be used only when domain is not available at initialization
+     * time
+     * @param conns IN/OUT connections object
+     * @param domain IN the new domain of the connections object
+     */
+    static inline void flom_conns_set_domain(flom_conns_t *conns,
+                                             int domain) {
+        conns->domain = domain;
     }
 
     
@@ -314,11 +341,18 @@ extern "C" {
     /**
      * Remove connections with invalid (closed) file descriptor
      * @param conns IN/OUT connections object
-     * @return a reason code
      */
-    int flom_conns_clean(flom_conns_t *conns);
+    void flom_conns_clean(flom_conns_t *conns);
 
     
+
+    /**
+     * Free all the memory allocated by connections object
+     * @param conns IN/OUT connections object
+     */
+    void flom_conns_free(flom_conns_t *conns);
+
+
     
 #ifdef __cplusplus
 }

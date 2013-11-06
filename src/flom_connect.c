@@ -45,7 +45,7 @@
 
 
 
-int flom_connect(const flom_config_t *config)
+int flom_connect()
 {
     enum Exception { SOCKET_ERROR
                      , DAEMON_ERROR
@@ -61,20 +61,20 @@ int flom_connect(const flom_config_t *config)
         struct sockaddr_un servaddr;
         
         FLOM_TRACE(("flom_connect: connecting to socket '%s'\n",
-                    config->local_socket_path_name));
+                    global_config.local_socket_path_name));
 
         if (-1 == (sockfd = socket(AF_LOCAL, SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
         memset(&servaddr, 0, sizeof(servaddr));
         servaddr.sun_family = AF_LOCAL;
-        strcpy(servaddr.sun_path, config->local_socket_path_name);
+        strcpy(servaddr.sun_path, global_config.local_socket_path_name);
         if (-1 == connect(sockfd, (struct sockaddr *)&servaddr,
                           sizeof(servaddr))) {
             if (ENOENT == errno || ECONNREFUSED == errno) {
                 FLOM_TRACE(("flom_connect: connection failed, activating "
                             "a new daemon\n"));
                 /* daemon is not active, starting it... */
-                if (FLOM_RC_OK != (ret_cod = flom_daemon(config)))
+                if (FLOM_RC_OK != (ret_cod = flom_daemon()))
                     THROW(DAEMON_ERROR);
                 /* trying to connect again... */
                 if (-1 == connect(sockfd, (struct sockaddr *)&servaddr,
@@ -82,7 +82,7 @@ int flom_connect(const flom_config_t *config)
                     THROW(DAEMON_NOT_STARTED);
                 FLOM_TRACE(("flom_connect: connected to flom daemon\n"));
                 /* sending lock command */
-                if (FLOM_RC_OK != (ret_cod = flom_connect_lock(config, sockfd)))
+                if (FLOM_RC_OK != (ret_cod = flom_connect_lock(sockfd)))
                     THROW(CONNECT_LOCK_ERROR);
             } else {
                 THROW(CONNECT_ERROR);
@@ -118,7 +118,7 @@ int flom_connect(const flom_config_t *config)
 
 
 
-int flom_connect_lock(const flom_config_t *config, int fd)
+int flom_connect_lock(int fd)
 {
     enum Exception { G_STRDUP_ERROR
                      , MSG_SERIALIZE_ERROR
@@ -137,7 +137,7 @@ int flom_connect_lock(const flom_config_t *config, int fd)
         msg.header.pvs.step = FLOM_MSG_STEP_INCR;
 
         if (NULL == (msg.body.lock_8.resource.name =
-                     g_strdup(config->resource_name)))
+                     g_strdup(global_config.resource_name)))
             THROW(G_STRDUP_ERROR);
         msg.body.lock_8.resource.type = FLOM_MSG_LOCK_TYPE_EX;
         msg.body.lock_8.resource.wait = TRUE;

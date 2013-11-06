@@ -40,15 +40,19 @@
 #define FLOM_TRACE_MODULE   FLOM_TRACE_MOD_CONFIG
 
 
+
+/* global static objects */
 const char *DEFAULT_RESOURCE_NAME = "_RESOURCE";
+flom_config_t global_config;
 
 
-void flom_config_reset(flom_config_t *config)
+
+void flom_config_reset()
 {
     /* set UNIX socket name */
-    snprintf(config->local_socket_path_name, LOCAL_SOCKET_SIZE,
+    snprintf(global_config.local_socket_path_name, LOCAL_SOCKET_SIZE,
              "/tmp/flom-%s", getlogin());
-    config->trace_file = NULL;
-    config->idle_time = 5000; /* milliseconds */
-    config->resource_name = DEFAULT_RESOURCE_NAME;
+    global_config.trace_file = NULL;
+    global_config.idle_time = 5000; /* milliseconds */
+    global_config.resource_name = DEFAULT_RESOURCE_NAME;
 }
