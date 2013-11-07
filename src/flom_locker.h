@@ -148,6 +148,18 @@ extern "C" {
 
 
     
+    /**
+     * Manager POLLIN event received from locker thread
+     * @param locker IN/OUT locker context object
+     * @param conns IN/OUT connections object
+     * @param id IN connection id
+     * @return a reason code
+     */
+    int flom_locker_loop_pollin(struct flom_locker_s *locker,
+                                flom_conns_t *conns, nfds_t id);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

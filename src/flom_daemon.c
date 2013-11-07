@@ -380,6 +380,8 @@ int flom_accept_loop(flom_conns_t *conns)
                 FLOM_TRACE(("flom_accept_loop: idle time exceeded %d "
                             "milliseconds\n",
                             global_config.idle_time));
+                /* @@@ check lockers to remove useless (write_pipe == NULL_FD)
+                 */
                 if (1 == flom_conns_get_used(conns)) {
                     FLOM_TRACE(("flom_accept_loop: only listener connection "
                                 "is active, exiting...\n"));
@@ -447,7 +449,7 @@ int flom_accept_loop(flom_conns_t *conns)
 
 
 
-int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i,
+int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
                             flom_locker_array_t *lockers)
 {
     enum Exception { ACCEPT_ERROR
@@ -465,14 +467,14 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i,
     TRY {
         struct pollfd *fds = flom_conns_get_fds(conns);
         FLOM_TRACE(("flom_accept_loop_pollin: id=%d, fd=%d\n",
-                    i, fds[i].fd));
-        if (0 == i) {
+                    id, fds[id].fd));
+        if (0 == id) {
             /* it's a new connection */
             int conn_fd;
             struct sockaddr cliaddr;
             socklen_t clilen = sizeof(cliaddr);
             if (-1 == (conn_fd = accept(
-                           fds[i].fd, &cliaddr, &clilen)))
+                           fds[id].fd, &cliaddr, &clilen)))
                 THROW(ACCEPT_ERROR);
             FLOM_TRACE(("flom_accept_loop_pollin: new client connected "
                         "with fd=%d\n", conn_fd));
@@ -486,14 +488,14 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i,
             GMarkupParseContext *gmpc;
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
-                                   fds[i].fd, buffer, sizeof(buffer),
+                                   fds[id].fd, buffer, sizeof(buffer),
                                    &read_bytes)))
                 THROW(MSG_RETRIEVE_ERROR);
 
-            if (NULL == (msg = flom_conns_get_msg(conns, i)))
+            if (NULL == (msg = flom_conns_get_msg(conns, id)))
                 THROW(CONNS_GET_MSG_ERROR);
 
-            if (NULL == (gmpc = flom_conns_get_gmpc(conns, i)))
+            if (NULL == (gmpc = flom_conns_get_gmpc(conns, id)))
                 THROW(CONNS_GET_GMPC_ERROR);
             
             if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
@@ -503,16 +505,16 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t i,
             /* if the message is not valid the client must be terminated */
             if (FLOM_MSG_STATE_INVALID == msg->state) {
                 FLOM_TRACE(("flom_accept_loop_pollin: message from client %i "
-                            "is invalid, disconneting...\n", i));
+                            "is invalid, disconneting...\n", id));
                 if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
-                                       conns, i)))
+                                       conns, id)))
                     THROW(CONNS_CLOSE_ERROR);            
             }
             /* check if the message is completely parsed and can be transferred
                to a slave thread (a locker) */
             if (FLOM_MSG_STATE_READY == msg->state)
                 if (FLOM_RC_OK != (ret_cod = flom_accept_loop_transfer(
-                                       conns, i, lockers)))
+                                       conns, id, lockers)))
                     THROW(ACCEPT_LOOP_TRANSFER_ERROR);
         }
         
@@ -620,7 +622,8 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
             locker_thread = g_thread_create(flom_locker_loop, (gpointer)locker,
                                             FALSE, &error_thread);
             if (NULL == locker_thread) {
-                FLOM_TRACE(("flom_accept_loop_transfer: error_thread->code=%d, "
+                FLOM_TRACE(("flom_accept_loop_transfer: "
+                            "error_thread->code=%d, "
                             "error_thread->message='%s'\n",
                             error_thread->code, error_thread->message));
                 g_free(error_thread);

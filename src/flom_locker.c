@@ -76,10 +76,10 @@ gpointer flom_locker_loop(gpointer data)
     enum Exception { CONNS_INIT_ERROR
                      , CONNS_ADD_ERROR
                      , CONNS_SET_EVENTS_ERROR
-                     , READ_ERROR1
-                     , READ_ERROR2
-                     , READ_ERROR3
-                     , CONNS_IMPORT_ERROR
+                     , POLL_ERROR
+                     , ACCEPT_LOOP_POLLIN_ERROR
+                     , CONNS_CLOSE_ERROR
+                     , NETWORK_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     flom_conns_t conns;
@@ -87,7 +87,6 @@ gpointer flom_locker_loop(gpointer data)
     FLOM_TRACE(("flom_locker_loop: new thread in progress...\n"));
     TRY {
         int loop = TRUE;
-        int domain, client_fd;
         struct flom_locker_s *locker = (struct flom_locker_s *)data;
         struct flom_conn_data_s cd;
 
@@ -105,7 +104,8 @@ gpointer flom_locker_loop(gpointer data)
         
         while (loop) {
             int ready_fd;
-            nfds_t i;
+            nfds_t i, n;
+            struct pollfd *fds;
 
             flom_conns_clean(&conns);
             if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(
@@ -115,37 +115,64 @@ gpointer flom_locker_loop(gpointer data)
                             flom_conns_get_used(&conns),
                             global_config.idle_time);
             FLOM_TRACE(("flom_locker_loop: ready_fd=%d\n", ready_fd));
+            /* error on poll function */
+            if (0 > ready_fd)
+                THROW(POLL_ERROR);
+            /* poll exited due to time out */
+            if (0 == ready_fd) {
+                FLOM_TRACE(("flom_locker_loop: idle time exceeded %d "
+                            "milliseconds\n",
+                            global_config.idle_time));
+                if (1 == flom_conns_get_used(&conns)) {
+                    FLOM_TRACE(("flom_locker_loop: only control connection "
+                                "is active, exiting...\n"));
+                    loop = FALSE;
+                }
+                continue;
+            }
+            /* scanning file descriptors */
+            n = flom_conns_get_used(&conns);
+            for (i=0; i<n; ++i) {
+                fds = flom_conns_get_fds(&conns);
+                FLOM_TRACE(("flom_locker_loop: i=%d, fd=%d, POLLIN=%d, "
+                            "POLLERR=%d, POLLHUP=%d, POLLNVAL=%d\n", i,
+                            fds[i].fd,
+                            fds[i].revents & POLLIN,
+                            fds[i].revents & POLLERR,
+                            fds[i].revents & POLLHUP,
+                            fds[i].revents & POLLNVAL));
+                if (fds[i].revents & POLLIN) {
+                    if (FLOM_RC_OK != (ret_cod = flom_locker_loop_pollin(
+                                           locker, &conns, i)))
+                        THROW(ACCEPT_LOOP_POLLIN_ERROR);
+                }
+                if ((fds[i].revents & POLLHUP) && (0 != i)) {
+                    FLOM_TRACE(("flom_locker_loop: client %i disconnected\n",
+                                i));
+                    /* @@@ */
+                    if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
+                                           &conns, i)))
+                        THROW(CONNS_CLOSE_ERROR);                       
+                    continue;
+                }
+                if (fds[i].revents &
+                    (POLLERR | POLLHUP | POLLNVAL))
+                    THROW(NETWORK_ERROR);
+            } /* for (i... */
             /* @@@ */
         }
-        /* pick-up socket domain from parent thread */
-        if (sizeof(domain) != read(locker->read_pipe, &domain, sizeof(domain)))
-            THROW(READ_ERROR1);
-        flom_conns_set_domain(&conns, domain);
-        /* pick-up connection file descriptor from parent thread */
-        if (sizeof(client_fd) != read(
-                locker->read_pipe, &client_fd, sizeof(client_fd)))
-            THROW(READ_ERROR2);
-        /* pick-up connection data from parent thread */
-        if (sizeof(cd) != read(locker->read_pipe, &cd, sizeof(cd)))
-            THROW(READ_ERROR3);
-        /* import the connection passed by parent thread */
-        if (FLOM_RC_OK != (ret_cod = flom_conns_import(
-                               &conns, client_fd, &cd)))
-            THROW(CONNS_IMPORT_ERROR);
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case CONNS_INIT_ERROR:
             case CONNS_ADD_ERROR:
             case CONNS_SET_EVENTS_ERROR:
+            case POLL_ERROR:
+            case ACCEPT_LOOP_POLLIN_ERROR:
+            case CONNS_CLOSE_ERROR:
                 break;
-            case READ_ERROR1:
-            case READ_ERROR2:
-            case READ_ERROR3:
-                ret_cod = FLOM_RC_READ_ERROR;
-                break;
-            case CONNS_IMPORT_ERROR:
+            case NETWORK_ERROR:
+                ret_cod = FLOM_RC_NETWORK_EVENT_ERROR;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -162,3 +189,122 @@ gpointer flom_locker_loop(gpointer data)
     FLOM_TRACE(("flom_locker_loop: this thread completed service\n"));
     return data;
 }
+
+
+
+int flom_locker_loop_pollin(struct flom_locker_s *locker,
+                            flom_conns_t *conns, nfds_t id)
+{
+    enum Exception { READ_ERROR1
+                     , READ_ERROR2
+                     , READ_ERROR3
+                     , CONNS_IMPORT_ERROR
+                     , MSG_RETRIEVE_ERROR
+                     , CONNS_GET_MSG_ERROR
+                     , CONNS_GET_GMPC_ERROR
+                     , MSG_DESERIALIZE_ERROR
+                     , CONNS_CLOSE_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_locker_loop_pollin\n"));
+    TRY {
+        int domain, client_fd;
+        struct pollfd *fds = flom_conns_get_fds(conns);
+        struct flom_msg_s *msg = NULL;
+        
+        FLOM_TRACE(("flom_locker_loop_pollin: id=%d, fd=%d\n",
+                    id, fds[id].fd));
+        if (0 == id) {
+            /* it's a connection passed by parent thread */
+            struct flom_conn_data_s cd;
+            /* pick-up socket domain from parent thread */
+            if (sizeof(domain) != read(
+                    locker->read_pipe, &domain, sizeof(domain)))
+                THROW(READ_ERROR1);
+            flom_conns_set_domain(conns, domain);
+            /* pick-up connection file descriptor from parent thread */
+            if (sizeof(client_fd) != read(
+                    locker->read_pipe, &client_fd, sizeof(client_fd)))
+                THROW(READ_ERROR2);
+            /* pick-up connection data from parent thread */
+            if (sizeof(cd) != read(locker->read_pipe, &cd, sizeof(cd)))
+                THROW(READ_ERROR3);
+            /* import the connection passed by parent thread */
+            if (FLOM_RC_OK != (ret_cod = flom_conns_import(
+                                   conns, client_fd, &cd)))
+                THROW(CONNS_IMPORT_ERROR);
+            /* retrieve the message sent by the client */
+            msg = cd.msg;
+        } else {
+            char buffer[FLOM_MSG_BUFFER_SIZE];
+            ssize_t read_bytes;
+            GMarkupParseContext *gmpc;
+            /* it's data from an existing connection */
+            if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
+                                   fds[id].fd, buffer, sizeof(buffer),
+                                   &read_bytes)))
+                THROW(MSG_RETRIEVE_ERROR);
+
+            if (0 == read_bytes) {
+                /* connection closed */
+                FLOM_TRACE(("flom_locker_loop_pollin: id=%d, fd=%d "
+                            "returned 0 bytes: disconnecting...\n",
+                            id, fds[id].fd));
+                /* @@@ */
+            } else {
+                /* data arrived */
+                if (NULL == (msg = flom_conns_get_msg(conns, id)))
+                    THROW(CONNS_GET_MSG_ERROR);
+
+                if (NULL == (gmpc = flom_conns_get_gmpc(conns, id)))
+                    THROW(CONNS_GET_GMPC_ERROR);
+            
+                if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
+                                       buffer, read_bytes, msg, gmpc)))
+                    THROW(MSG_DESERIALIZE_ERROR);
+                /* if the message is not valid the client must be terminated */
+                if (FLOM_MSG_STATE_INVALID == msg->state) {
+                    FLOM_TRACE(("flom_locker_loop_pollin: message from client "
+                                "%i is invalid, disconneting...\n", id));
+                    if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
+                                           conns, id)))
+                        THROW(CONNS_CLOSE_ERROR);            
+                }
+            } /* if (0 == read_bytes) */
+        } /* if (0 == id) */
+        
+        if (NULL != msg)
+            flom_msg_trace(msg);
+        /* processing message @@@ */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case READ_ERROR1:
+            case READ_ERROR2:
+            case READ_ERROR3:
+                ret_cod = FLOM_RC_READ_ERROR;
+                break;
+            case CONNS_IMPORT_ERROR:
+            case MSG_RETRIEVE_ERROR:
+                break;
+            case CONNS_GET_MSG_ERROR:
+            case CONNS_GET_GMPC_ERROR:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case MSG_DESERIALIZE_ERROR:
+            case CONNS_CLOSE_ERROR:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_locker_loop_pollin/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

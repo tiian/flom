@@ -78,7 +78,7 @@ int flom_msg_retrieve(int fd,
         if (0 > (*read_bytes = recv(fd, buf, buf_size, 0)))
             THROW(RECV_ERROR);
         
-        FLOM_TRACE(("flom_msg_retrieve: fd = %d returned "
+        FLOM_TRACE(("flom_msg_retrieve: fd=%d returned "
                     SSIZE_T_FORMAT " bytes\n", fd, *read_bytes));
         
         THROW(NONE);
