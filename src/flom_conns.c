@@ -321,10 +321,14 @@ int flom_conns_close_fd(flom_conns_t *conns, nfds_t id)
                     id, conns->fds[id].fd));
         if (id < 0 || id >= conns->used)
             THROW(OUT_OF_RANGE);
-        if (0 != close(conns->fds[id].fd))
-            THROW(CLOSE_ERROR);
-        conns->fds[id].fd = NULL_FD;
-
+        if (NULL_FD == conns->fds[id].fd) {
+            FLOM_TRACE(("flom_conns_close: connection id=%d already closed, "
+                        "skipping...\n", id));
+        } else {
+            if (0 != close(conns->fds[id].fd))
+                THROW(CLOSE_ERROR);
+            conns->fds[id].fd = NULL_FD;
+        }
         THROW(NONE);
     } CATCH {
         switch (excp) {

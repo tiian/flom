@@ -347,6 +347,7 @@ int flom_accept_loop(flom_conns_t *conns)
 {
     enum Exception { CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
+                     , NEGATIVE_NUMBER_OF_LOCKERS_ERROR
                      , ACCEPT_LOOP_POLLIN_ERROR
                      , CONNS_CLOSE_ERROR
                      , NETWORK_ERROR
@@ -377,15 +378,24 @@ int flom_accept_loop(flom_conns_t *conns)
                 THROW(POLL_ERROR);
             /* poll exited due to time out */
             if (0 == ready_fd) {
+                gint number_of_lockers = flom_locker_array_count(&lockers);
                 FLOM_TRACE(("flom_accept_loop: idle time exceeded %d "
-                            "milliseconds\n",
-                            global_config.idle_time));
-                /* @@@ check lockers to remove useless (write_pipe == NULL_FD)
-                 */
-                if (1 == flom_conns_get_used(conns)) {
-                    FLOM_TRACE(("flom_accept_loop: only listener connection "
-                                "is active, exiting...\n"));
-                    loop = FALSE;
+                            "milliseconds, number of lockers=%d\n",
+                            global_config.idle_time, number_of_lockers));
+                if (0 == number_of_lockers) {
+                    if (1 == flom_conns_get_used(conns)) {
+                        FLOM_TRACE(("flom_accept_loop: only listener "
+                                    "connection is active, exiting...\n"));
+                        loop = FALSE;
+                    }
+                } else if (0 < number_of_lockers) {
+                    gint j;
+                    /* @@@ check lockers to remove useless
+                     * (write_pipe == NULL_FD)          */
+                    for (j=0; j<number_of_lockers; ++j) {
+                    }
+                } else {
+                    THROW(NEGATIVE_NUMBER_OF_LOCKERS_ERROR);
                 }
                 continue;
             }
@@ -425,6 +435,9 @@ int flom_accept_loop(flom_conns_t *conns)
                 break;
             case POLL_ERROR:
                 ret_cod = FLOM_RC_POLL_ERROR;
+                break;
+            case NEGATIVE_NUMBER_OF_LOCKERS_ERROR:
+                ret_cod = FLOM_RC_OBJ_CORRUPTED;
                 break;
             case ACCEPT_LOOP_POLLIN_ERROR:
             case CONNS_CLOSE_ERROR:
@@ -558,9 +571,8 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
                      , PIPE_ERROR
                      , G_THREAD_CREATE_ERROR
                      , WRITE_ERROR1
-                     , WRITE_ERROR2
                      , CONNS_GET_CD_ERROR
-                     , WRITE_ERROR3
+                     , WRITE_ERROR2
                      , CONNS_TRNS_FD
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -572,9 +584,9 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
     TRY {
         gint i;
         int found = FALSE;
-        int domain = 0, client_fd = NULL_FD;
         GThread *locker_thread = NULL;
         struct flom_msg_s *msg = NULL;
+        struct flom_locker_token_s flt;
         const struct flom_conn_data_s *cd = NULL;
         /* check if there is a locker running for this request */
         if (NULL == lockers)
@@ -637,26 +649,24 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
         } else
             locker_thread = locker->thread;
 
-        /* current connection must be transferred to the locker thread */
-        client_fd = flom_conns_get_fd(conns, id);
+        /* prepare the token for locker thread */
+        flt.domain = flom_conns_get_domain(conns);
+        flt.client_fd = flom_conns_get_fd(conns, id);
+        flt.sequence = ++locker->write_sequence;
         FLOM_TRACE(("flom_accept_loop_transfer: transferring connection %d "
-                    "(fd %d) to thread %p using pipe %d\n", id, client_fd,
-                    locker_thread, locker->write_pipe));
-        /* send domain */
-        domain = flom_conns_get_domain(conns);
-        if (sizeof(domain) != write(
-                locker->write_pipe, &domain, sizeof(domain)))
+                    "(domain=%d, client_fd=%d, sequence=%d) to thread %p "
+                    "using pipe %d\n", id, flt.domain, flt.client_fd,
+                    flt.sequence, locker_thread, locker->write_pipe));
+        /* send token */
+        if (sizeof(flt) != write(
+                locker->write_pipe, &flt, sizeof(flt)))
             THROW(WRITE_ERROR1);
-        /* send connection file descriptor */
-        if (sizeof(client_fd) != write(
-                locker->write_pipe, &client_fd, sizeof(client_fd)))
-            THROW(WRITE_ERROR2);
         /* send connection data */
         if (NULL == (cd = flom_conns_get_cd(conns, id)))
             THROW(CONNS_GET_CD_ERROR);
         if (sizeof(struct flom_conn_data_s) != write(
                 locker->write_pipe, cd, sizeof(struct flom_conn_data_s)))
-            THROW(WRITE_ERROR3);
+            THROW(WRITE_ERROR2);
         /* set the connection as transferred to another thread */
         if (FLOM_RC_OK != (ret_cod = flom_conns_trns_fd(conns, id)))
             THROW(CONNS_TRNS_FD);
@@ -679,12 +689,11 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
                 ret_cod = FLOM_RC_G_THREAD_CREATE_ERROR;
                 break;
             case WRITE_ERROR1:
-            case WRITE_ERROR2:
                 ret_cod = FLOM_RC_WRITE_ERROR;
                 break;
             case CONNS_GET_CD_ERROR:
                 break;
-            case WRITE_ERROR3:
+            case WRITE_ERROR2:
                 ret_cod = FLOM_RC_WRITE_ERROR;
                 break;
             case CONNS_TRNS_FD:

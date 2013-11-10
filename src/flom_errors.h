@@ -122,7 +122,7 @@
  */
 #define FLOM_RC_INVALID_OPTION                  -5
 /**
- * A corrupted object has been passed to a function
+ * A corrupted object has been discovered
  */
 #define FLOM_RC_OBJ_CORRUPTED                   -6
 /**

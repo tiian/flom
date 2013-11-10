@@ -61,10 +61,16 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_DAEMON_NOT_STARTED:
             return "ERROR: flom command was not able to start a new daemon "
                 "and/or connect to it";
-        case FLOM_RC_NULL_OBJECT:
-            return "ERROR: an argument is null";
         case FLOM_RC_NETWORK_EVENT_ERROR:
             return "ERROR: an unespected network event raised";
+        case FLOM_RC_NULL_OBJECT:
+            return "ERROR: an argument is null";
+        case FLOM_RC_INVALID_OPTION:
+            return "ERROR: a specified option is not valid";
+        case FLOM_RC_OBJ_CORRUPTED:
+            return "ERROR: object is corrupted";
+        case FLOM_RC_OUT_OF_RANGE:
+            return "ERROR: an argument is out of range";
         case FLOM_RC_INVALID_PREFIX_SIZE:
             return "ERROR: the number of chars of the prefix of the "
                 "message is wrong";
@@ -81,18 +87,12 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_PROTOCOL_ERROR:
             return "ERROR: a routine has been invoked in an improper context";
             /*
-        case FLOM_RC_OUT_OF_RANGE:
-            return "ERROR: an argument is out of range";
         case FLOM_RC_CONFIG_ERROR:
             return "ERROR: configuration file is broken";
         case FLOM_RC_OBJ_NOT_INITIALIZED:
             return "ERROR: object is not initialized";
-        case  FLOM_RC_OBJ_CORRUPTED:
-            return "ERROR: object is corrupted";
         case FLOM_RC_CORRUPTED_STATUS_FILE:
             return "ERROR: the status file is corrupted and can not be used";
-        case FLOM_RC_INVALID_OPTION:
-            return "ERROR: a specified option is not valid";
         case FLOM_RC_INVALID_STATUS:
                   return "ERROR: invalid object status";
         case FLOM_RC_TOO_MANY_RSRMGRS:

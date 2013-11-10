@@ -67,6 +67,21 @@ struct flom_locker_s {
      * locker from a pool
      */
     gchar    *resource_name;
+    /**
+     * Last sequence number sent by parent (listener) to locker thread:
+     * parent point of view
+     */
+    int       write_sequence;
+    /**
+     * Last sequence read by locker thread and sent by parent (listener):
+     * child point of view
+     */
+    int       read_sequence;
+    /**
+     * Number of polling periods the locker thread performed nothing (without
+     * any client)
+     */
+    int       idle_periods;
 };
 
 
@@ -94,6 +109,27 @@ typedef struct flom_locker_array_s flom_locker_array_t;
 
 
 
+/**
+ * It's the struct passed from parent thread (listener) to child thread
+ * (locker) when a new client arrive
+ */
+struct flom_locker_token_s {
+    /**
+     * Socket domain associated to client connection
+     */
+    int domain;
+    /**
+     * Client connection (accepted) file descriptor
+     */
+    int client_fd;
+    /**
+     * Sequence number associated to the token
+     */
+    int sequence;
+};
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -108,6 +144,8 @@ extern "C" {
         locker->thread = NULL;
         locker->write_pipe = locker->read_pipe = NULL_FD;
         locker->resource_name = NULL;
+        locker->write_sequence = locker->read_sequence =
+            locker->idle_periods = 0;
     }
 
     
@@ -139,6 +177,17 @@ extern "C" {
 
 
 
+    /**
+     * Number of active lockers thread
+     * @return how many lockers are managed by the object
+     */
+    static inline gint flom_locker_array_count(
+        const flom_locker_array_t *lockers) {
+        return lockers->n;
+    }
+
+
+    
     /**
      * Main loop function for locker thread
      * @param data IN pointer to locker context, it must be a pointer to
