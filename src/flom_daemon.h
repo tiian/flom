@@ -110,6 +110,15 @@ extern "C" {
 
     
 
+    /**
+     * Check lockers state, start locker termination if idle time exceeded
+     * @param lockers IN/OUT array of lockers serving the connected clients
+     * @return a reason code
+     */
+    int flom_accept_loop_chklockers(flom_locker_array_t *lockers);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -64,7 +64,7 @@ struct flom_locker_s {
     int       read_pipe;
     /**
      * Resource managed by this locker; this is the key to pick-up the right
-     * locker from a pool
+     * locker from a pool (allocated by g_strdup)
      */
     gchar    *resource_name;
     /**
@@ -155,7 +155,7 @@ extern "C" {
      * itself (the pointer is not anymore valid after this call)
      * @param locker IN/OUT object to destroy (remove from memory)
      */
-    void     flom_locker_destroy(struct flom_locker_s *locker);
+    void flom_locker_destroy(struct flom_locker_s *locker);
 
     
 
@@ -163,7 +163,7 @@ extern "C" {
      * Initialize an array of lockers
      * @param lockers IN/OUT pointer to object to initialize
      */
-    void     flom_locker_array_init(flom_locker_array_t *lockers);
+    void flom_locker_array_init(flom_locker_array_t *lockers);
 
     
 
@@ -172,18 +172,45 @@ extern "C" {
      * @param lockers IN/OUT array of lockers
      * @param locker IN new locker to add
      */
-    void     flom_locker_array_add(flom_locker_array_t *lockers,
-                                   struct flom_locker_s *locker);
+    void flom_locker_array_add(flom_locker_array_t *lockers,
+                               struct flom_locker_s *locker);
 
 
 
     /**
+     * Remove a locker from locker array
+     * @param lockers IN/OUT array of lockers
+     * @param locker IN pointer to the element must be deleted
+     */
+    void flom_locker_array_del(flom_locker_array_t *lockers,
+                               struct flom_locker_s *locker);
+
+    
+                                   
+    /**
      * Number of active lockers thread
+     * @param lockers IN/OUT array of lockers
      * @return how many lockers are managed by the object
      */
     static inline gint flom_locker_array_count(
         const flom_locker_array_t *lockers) {
         return lockers->n;
+    }
+
+
+
+    /**
+     * Retrieve a pointer to a locker
+     * @param lockers IN/OUT array of lockers
+     * @param i IN index of the desired element
+     * @return NULL if i is an invalid index, the desired locker otherwise
+     */
+    static inline struct flom_locker_s *flom_locker_array_get(
+        flom_locker_array_t *lockers, gint i) {
+        if (i < 0 || i >= lockers->n)
+            return NULL;
+        else
+            return g_ptr_array_index(lockers->array, i);
     }
 
 

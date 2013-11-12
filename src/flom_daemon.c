@@ -347,6 +347,7 @@ int flom_accept_loop(flom_conns_t *conns)
 {
     enum Exception { CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
+                     , ACCEPT_LOOP_CHKLOCKERS_ERROR
                      , NEGATIVE_NUMBER_OF_LOCKERS_ERROR
                      , ACCEPT_LOOP_POLLIN_ERROR
                      , CONNS_CLOSE_ERROR
@@ -389,11 +390,9 @@ int flom_accept_loop(flom_conns_t *conns)
                         loop = FALSE;
                     }
                 } else if (0 < number_of_lockers) {
-                    gint j;
-                    /* @@@ check lockers to remove useless
-                     * (write_pipe == NULL_FD)          */
-                    for (j=0; j<number_of_lockers; ++j) {
-                    }
+                    if (FLOM_RC_OK != (ret_cod =
+                                       flom_accept_loop_chklockers(&lockers)))
+                        THROW(ACCEPT_LOOP_CHKLOCKERS_ERROR);
                 } else {
                     THROW(NEGATIVE_NUMBER_OF_LOCKERS_ERROR);
                 }
@@ -435,6 +434,8 @@ int flom_accept_loop(flom_conns_t *conns)
                 break;
             case POLL_ERROR:
                 ret_cod = FLOM_RC_POLL_ERROR;
+                break;
+            case ACCEPT_LOOP_CHKLOCKERS_ERROR:
                 break;
             case NEGATIVE_NUMBER_OF_LOCKERS_ERROR:
                 ret_cod = FLOM_RC_OBJ_CORRUPTED;
@@ -565,8 +566,9 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
 int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
                               flom_locker_array_t *lockers)
 {
-    enum Exception { NULL_OBJECT
+    enum Exception { NULL_OBJECT1
                      , INVALID_VERB_STEP
+                     , NULL_OBJECT2
                      , CONNS_GET_MSG_ERROR
                      , PIPE_ERROR
                      , G_THREAD_CREATE_ERROR
@@ -582,7 +584,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
     
     FLOM_TRACE(("flom_accept_loop_transfer\n"));
     TRY {
-        gint i;
+        gint i, n;
         int found = FALSE;
         GThread *locker_thread = NULL;
         struct flom_msg_s *msg = NULL;
@@ -590,7 +592,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
         const struct flom_conn_data_s *cd = NULL;
         /* check if there is a locker running for this request */
         if (NULL == lockers)
-            THROW(NULL_OBJECT);
+            THROW(NULL_OBJECT1);
         /* check message */
         if (NULL == (msg = flom_conns_get_msg(conns, id)))
             THROW(CONNS_GET_MSG_ERROR);
@@ -602,8 +604,10 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
             THROW(INVALID_VERB_STEP);
         }
         /* is there a locker already active? */
-        for (i=0; i<lockers->n; ++i) {
-            locker = g_ptr_array_index(lockers->array,i);
+        n = flom_locker_array_count(lockers);
+        for (i=0; i<n; ++i) {
+            if (NULL == (locker = flom_locker_array_get(lockers, i)))
+                THROW(NULL_OBJECT2);
             FLOM_TRACE(("flom_accept_loop_transfer: locker # %d is managing "
                         "resource '%s'\n", i, locker->resource_name));
             if (!g_strcmp0(locker->resource_name,
@@ -674,11 +678,14 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case NULL_OBJECT:
+            case NULL_OBJECT1:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
             case INVALID_VERB_STEP:
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;
+                break;
+            case NULL_OBJECT2:
+                ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
             case CONNS_GET_MSG_ERROR:
                 break;
@@ -713,6 +720,82 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
         }
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_accept_loop_transfer/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
+{
+    enum Exception { NULL_LOCKER
+                     , CLOSE_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_accept_loop_chklockers\n"));
+    TRY {
+        gint i;
+        gint number_of_lockers = flom_locker_array_count(lockers);
+        /* @@@ check lockers to remove useless
+         * (write_pipe == NULL_FD)          */
+        for (i=0; i<number_of_lockers; ++i) {
+            struct flom_locker_s *fl = flom_locker_array_get(lockers, i);
+            if (NULL == fl)
+                THROW(NULL_LOCKER);
+            if (fl->write_sequence == fl->read_sequence &&
+                fl->idle_periods > 1) {
+                if (fl->write_pipe != NULL_FD) {
+                    FLOM_TRACE(("flom_accept_loop_chklockers: starting "
+                                "termination for locker %i (thread=%p, "
+                                "write_pipe=%d, read_pipe=%d, "
+                                "resource_name='%s', "
+                                "write_sequence=%d, read_sequence=%d, "
+                                "idle_periods=%d\n", i, fl->thread,
+                                fl->write_pipe, fl->read_pipe,
+                                fl->resource_name, fl->write_sequence,
+                                fl->read_sequence, fl->idle_periods));
+                    if (-1 == close(fl->write_pipe))
+                        THROW(CLOSE_ERROR);
+                    fl->write_pipe = NULL_FD;
+                    /* @@@ */
+                } else if (fl->write_pipe == NULL_FD &&
+                           fl->read_pipe == NULL_FD) {
+                    FLOM_TRACE(("flom_accept_loop_chklockers: completing "
+                                "termination for locker %i (thread=%p, "
+                                "write_pipe=%d, read_pipe=%d, "
+                                "resource_name='%s', "
+                                "write_sequence=%d, read_sequence=%d, "
+                                "idle_periods=%d\n", i, fl->thread,
+                                fl->write_pipe, fl->read_pipe,
+                                fl->resource_name, fl->write_sequence,
+                                fl->read_sequence, fl->idle_periods));
+                    g_free(fl->resource_name);
+                    fl->resource_name = NULL;
+                    /* @@@ it crashes here */
+                    flom_locker_array_del(lockers, fl);
+                    g_free(fl);
+                }
+            } /* if (fl->write_sequence == fl->read_sequence && ... */
+        } /* for (i=0; i<number_of_lockers; ++i) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_LOCKER:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case CLOSE_ERROR:
+                ret_cod = FLOM_RC_CLOSE_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_accept_loop_chklockers/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

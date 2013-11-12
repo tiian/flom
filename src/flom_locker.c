@@ -71,6 +71,21 @@ void flom_locker_array_add(flom_locker_array_t *lockers,
 
 
 
+void flom_locker_array_del(flom_locker_array_t *lockers,
+                           struct flom_locker_s *locker)
+{
+    if (g_ptr_array_remove(lockers->array, locker)) {
+        FLOM_TRACE(("flom_locker_array_del: removed locker %p from array\n",
+                    locker));
+        lockers->n--;
+    } else {
+        FLOM_TRACE(("flom_locker_array_del: locker %p not found in array\n",
+                    locker));
+    }
+}
+
+
+
 gpointer flom_locker_loop(gpointer data)
 {
     enum Exception { CONNS_INIT_ERROR
@@ -78,7 +93,8 @@ gpointer flom_locker_loop(gpointer data)
                      , CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
                      , ACCEPT_LOOP_POLLIN_ERROR
-                     , CONNS_CLOSE_ERROR
+                     , CONNS_CLOSE_ERROR1
+                     , CONNS_CLOSE_ERROR2
                      , NETWORK_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -148,15 +164,26 @@ gpointer flom_locker_loop(gpointer data)
                                            locker, &conns, i)))
                         THROW(ACCEPT_LOOP_POLLIN_ERROR);
                 }
-                if ((fds[i].revents & POLLHUP) && (0 != i)) {
-                    FLOM_TRACE(("flom_locker_loop: client %i disconnected\n",
-                                i));
-                    /* @@@ */
-                    if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
-                                           &conns, i)))
-                        THROW(CONNS_CLOSE_ERROR);                       
-                    continue;
-                }
+                if (fds[i].revents & POLLHUP) {
+                    if (0 != i) {
+                        /* client termination */
+                        FLOM_TRACE(("flom_locker_loop: client %i "
+                                    "disconnected\n", i));
+                        /* @@@ */
+                        if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
+                                               &conns, i)))
+                            THROW(CONNS_CLOSE_ERROR1);
+                        continue;
+                    } else {
+                        /* locker termination asked by parent thread */
+                        FLOM_TRACE(("flom_locker_loop: termination of this "
+                                    "locker was asked by parent thread...\n"));
+                        if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
+                                               &conns, i)))
+                            THROW(CONNS_CLOSE_ERROR2);
+                        locker->read_pipe = NULL_FD;
+                    }
+                } /* if (fds[i].revents & POLLHUP) */
                 if (fds[i].revents &
                     (POLLERR | POLLHUP | POLLNVAL))
                     THROW(NETWORK_ERROR);
@@ -171,7 +198,8 @@ gpointer flom_locker_loop(gpointer data)
             case CONNS_SET_EVENTS_ERROR:
             case POLL_ERROR:
             case ACCEPT_LOOP_POLLIN_ERROR:
-            case CONNS_CLOSE_ERROR:
+            case CONNS_CLOSE_ERROR1:
+            case CONNS_CLOSE_ERROR2:
                 break;
             case NETWORK_ERROR:
                 ret_cod = FLOM_RC_NETWORK_EVENT_ERROR;
