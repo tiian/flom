@@ -45,8 +45,10 @@ void flom_locker_destroy(struct flom_locker_s *locker)
 {
     if (NULL != locker) {
         g_free(locker->resource_name);
-        close(locker->write_pipe);
-        close(locker->read_pipe);
+        if (NULL_FD != locker->write_pipe)
+            close(locker->write_pipe);
+        if (NULL_FD != locker->read_pipe)
+            close(locker->read_pipe);
         g_free(locker);
     }
 }

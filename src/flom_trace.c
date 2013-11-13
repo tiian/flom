@@ -123,6 +123,7 @@ void flom_trace(const char *fmt, ...)
             getpid(), g_thread_self());
     /* custom message */
     vfprintf(trace_file, fmt, args);
+    fflush(trace_file);
     /* remove the lock from mutex */
     g_static_mutex_unlock(&flom_trace_mutex);
 #else

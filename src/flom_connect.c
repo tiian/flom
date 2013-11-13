@@ -50,8 +50,8 @@ int flom_connect()
     enum Exception { SOCKET_ERROR
                      , DAEMON_ERROR
                      , DAEMON_NOT_STARTED
-                     , CONNECT_LOCK_ERROR
                      , CONNECT_ERROR
+                     , CONNECT_LOCK_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -81,13 +81,14 @@ int flom_connect()
                                   sizeof(servaddr)))
                     THROW(DAEMON_NOT_STARTED);
                 FLOM_TRACE(("flom_connect: connected to flom daemon\n"));
-                /* sending lock command */
-                if (FLOM_RC_OK != (ret_cod = flom_connect_lock(sockfd)))
-                    THROW(CONNECT_LOCK_ERROR);
             } else {
                 THROW(CONNECT_ERROR);
             }
         }
+        /* sending lock command */
+        if (FLOM_RC_OK != (ret_cod = flom_connect_lock(sockfd)))
+            THROW(CONNECT_LOCK_ERROR);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {

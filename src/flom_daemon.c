@@ -347,12 +347,14 @@ int flom_accept_loop(flom_conns_t *conns)
 {
     enum Exception { CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
-                     , ACCEPT_LOOP_CHKLOCKERS_ERROR
-                     , NEGATIVE_NUMBER_OF_LOCKERS_ERROR
+                     , ACCEPT_LOOP_CHKLOCKERS_ERROR1
+                     , NEGATIVE_NUMBER_OF_LOCKERS_ERROR1
                      , ACCEPT_LOOP_POLLIN_ERROR
                      , CONNS_CLOSE_ERROR
                      , NETWORK_ERROR
                      , INTERNAL_ERROR
+                     , ACCEPT_LOOP_CHKLOCKERS_ERROR2
+                     , NEGATIVE_NUMBER_OF_LOCKERS_ERROR2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -367,6 +369,8 @@ int flom_accept_loop(flom_conns_t *conns)
             int ready_fd;
             nfds_t i, n;
             struct pollfd *fds;
+            gint number_of_lockers;
+            
             flom_conns_clean(conns);
             if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(conns, POLLIN)))
                 THROW(CONNS_SET_EVENTS_ERROR);
@@ -379,7 +383,7 @@ int flom_accept_loop(flom_conns_t *conns)
                 THROW(POLL_ERROR);
             /* poll exited due to time out */
             if (0 == ready_fd) {
-                gint number_of_lockers = flom_locker_array_count(&lockers);
+                number_of_lockers = flom_locker_array_count(&lockers);
                 FLOM_TRACE(("flom_accept_loop: idle time exceeded %d "
                             "milliseconds, number of lockers=%d\n",
                             global_config.idle_time, number_of_lockers));
@@ -392,9 +396,9 @@ int flom_accept_loop(flom_conns_t *conns)
                 } else if (0 < number_of_lockers) {
                     if (FLOM_RC_OK != (ret_cod =
                                        flom_accept_loop_chklockers(&lockers)))
-                        THROW(ACCEPT_LOOP_CHKLOCKERS_ERROR);
-                } else {
-                    THROW(NEGATIVE_NUMBER_OF_LOCKERS_ERROR);
+                        THROW(ACCEPT_LOOP_CHKLOCKERS_ERROR1);
+                } else if (0 > number_of_lockers) {
+                    THROW(NEGATIVE_NUMBER_OF_LOCKERS_ERROR1);
                 }
                 continue;
             }
@@ -426,6 +430,17 @@ int flom_accept_loop(flom_conns_t *conns)
                     (POLLERR | POLLHUP | POLLNVAL))
                     THROW(NETWORK_ERROR);
             } /* for (i... */
+            /* check if any locker is ready for termination... */
+            number_of_lockers = flom_locker_array_count(&lockers);
+            FLOM_TRACE(("flom_accept_loop: number of lockers=%d\n",
+                        number_of_lockers));
+            if (0 < number_of_lockers) {
+                if (FLOM_RC_OK != (ret_cod =
+                                   flom_accept_loop_chklockers(&lockers)))
+                    THROW(ACCEPT_LOOP_CHKLOCKERS_ERROR2);
+            } else if (0 > number_of_lockers) {
+                THROW(NEGATIVE_NUMBER_OF_LOCKERS_ERROR2);
+            }
         } /* while (loop) */
         THROW(NONE);
     } CATCH {
@@ -435,9 +450,9 @@ int flom_accept_loop(flom_conns_t *conns)
             case POLL_ERROR:
                 ret_cod = FLOM_RC_POLL_ERROR;
                 break;
-            case ACCEPT_LOOP_CHKLOCKERS_ERROR:
+            case ACCEPT_LOOP_CHKLOCKERS_ERROR1:
                 break;
-            case NEGATIVE_NUMBER_OF_LOCKERS_ERROR:
+            case NEGATIVE_NUMBER_OF_LOCKERS_ERROR1:
                 ret_cod = FLOM_RC_OBJ_CORRUPTED;
                 break;
             case ACCEPT_LOOP_POLLIN_ERROR:
@@ -448,6 +463,11 @@ int flom_accept_loop(flom_conns_t *conns)
                 break;
             case INTERNAL_ERROR:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
+                break;
+            case ACCEPT_LOOP_CHKLOCKERS_ERROR2:
+                break;
+            case NEGATIVE_NUMBER_OF_LOCKERS_ERROR2:
+                ret_cod = FLOM_RC_OBJ_CORRUPTED;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -608,6 +628,13 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
         for (i=0; i<n; ++i) {
             if (NULL == (locker = flom_locker_array_get(lockers, i)))
                 THROW(NULL_OBJECT2);
+            if (NULL_FD == locker->write_pipe || NULL_FD == locker->read_pipe) {
+                FLOM_TRACE(("flom_accept_loop_transfer: locker # %d is "
+                            "terminating (write_pipe=%d, read_pipe=%d), "
+                            "skipping...\n", i, locker->write_pipe,
+                            locker->read_pipe));
+                continue;
+            }
             FLOM_TRACE(("flom_accept_loop_transfer: locker # %d is managing "
                         "resource '%s'\n", i, locker->resource_name));
             if (!g_strcmp0(locker->resource_name,
@@ -737,8 +764,7 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
     TRY {
         gint i;
         gint number_of_lockers = flom_locker_array_count(lockers);
-        /* @@@ check lockers to remove useless
-         * (write_pipe == NULL_FD)          */
+        
         for (i=0; i<number_of_lockers; ++i) {
             struct flom_locker_s *fl = flom_locker_array_get(lockers, i);
             if (NULL == fl)
@@ -758,7 +784,6 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
                     if (-1 == close(fl->write_pipe))
                         THROW(CLOSE_ERROR);
                     fl->write_pipe = NULL_FD;
-                    /* @@@ */
                 } else if (fl->write_pipe == NULL_FD &&
                            fl->read_pipe == NULL_FD) {
                     FLOM_TRACE(("flom_accept_loop_chklockers: completing "
@@ -770,11 +795,9 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
                                 fl->write_pipe, fl->read_pipe,
                                 fl->resource_name, fl->write_sequence,
                                 fl->read_sequence, fl->idle_periods));
-                    g_free(fl->resource_name);
-                    fl->resource_name = NULL;
-                    /* @@@ it crashes here */
                     flom_locker_array_del(lockers, fl);
-                    g_free(fl);
+                    /* lockers object changed, break the loop */
+                    break;
                 }
             } /* if (fl->write_sequence == fl->read_sequence && ... */
         } /* for (i=0; i<number_of_lockers; ++i) */
