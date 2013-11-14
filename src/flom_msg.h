@@ -237,7 +237,7 @@ struct flom_msg_body_answer_s {
 
 
 /**
- * Convenience struct for @ref flom_msg_body_open_8_s
+ * Convenience struct for @ref flom_msg_body_lock_8_s
  */
 struct flom_msg_body_lock_8_resource_s {
     /**
