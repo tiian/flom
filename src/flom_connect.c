@@ -124,6 +124,7 @@ int flom_connect_lock(int fd)
     enum Exception { G_STRDUP_ERROR
                      , MSG_SERIALIZE_ERROR
                      , MSG_SEND_ERROR
+                     , MSG_FREE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -150,6 +151,9 @@ int flom_connect_lock(int fd)
         if (FLOM_RC_OK != (ret_cod = flom_msg_send(
                                fd, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
+
+        if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
+            THROW(MSG_FREE_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -159,6 +163,7 @@ int flom_connect_lock(int fd)
                 break;
             case MSG_SERIALIZE_ERROR:
             case MSG_SEND_ERROR:
+            case MSG_FREE_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

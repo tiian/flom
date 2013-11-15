@@ -320,9 +320,7 @@ int flom_listen_clean(flom_conns_t *conns)
     
     FLOM_TRACE(("flom_listen_clean\n"));
     TRY {
-        if (-1 == close(flom_conns_get_fd(conns, 0))) {
-            FLOM_TRACE(("flom_listen_clean: close errno=%d\n", errno));
-        }
+        flom_conns_free(conns);
         if (-1 == unlink(global_config.local_socket_path_name)) {
             FLOM_TRACE(("flom_listen_clean: unlink errno=%d\n", errno));
         }

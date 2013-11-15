@@ -64,6 +64,15 @@ void flom_locker_array_init(flom_locker_array_t *lockers)
 
 
 
+void flom_locker_array_free(flom_locker_array_t *lockers)
+{
+    g_ptr_array_free(lockers->array, TRUE);
+    lockers->array = NULL;
+    lockers->n = 0;
+}
+
+
+
 void flom_locker_array_add(flom_locker_array_t *lockers,
                            struct flom_locker_s *locker)
 {

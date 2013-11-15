@@ -178,14 +178,14 @@ int flom_msg_free(struct flom_msg_s *msg)
                 break;
             case FLOM_MSG_VERB_LOCK:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case FLOM_MSG_STEP_INCR:
                         if (NULL != msg->body.lock_8.resource.name) {
                             g_free(msg->body.lock_8.resource.name);
                             msg->body.lock_8.resource.name = NULL;
                         }
                         break;
-                    case 16: /* nothing to release */
-                    case 24:
+                    case 2*FLOM_MSG_STEP_INCR: /* nothing to release */
+                    case 3*FLOM_MSG_STEP_INCR:
                         break;
                     default:
                         THROW(INVALID_STEP_LOCK);
@@ -193,13 +193,13 @@ int flom_msg_free(struct flom_msg_s *msg)
                 break;
             case FLOM_MSG_VERB_UNLOCK:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case FLOM_MSG_STEP_INCR:
                         if (NULL != msg->body.unlock_8.resource.name) {
                             g_free(msg->body.unlock_8.resource.name);
                             msg->body.unlock_8.resource.name = NULL;
                         }
                         break;
-                    case 16: /* nothing to release */
+                    case 2*FLOM_MSG_STEP_INCR: /* nothing to release */
                         break;
                     default:
                         THROW(INVALID_STEP_UNLOCK);
@@ -207,8 +207,8 @@ int flom_msg_free(struct flom_msg_s *msg)
                 break;
             case FLOM_MSG_VERB_PING: /* nothing to release */
                 switch (msg->header.pvs.step) {
-                    case 8: /* nothing to release */
-                    case 16: 
+                    case FLOM_MSG_STEP_INCR: /* nothing to release */
+                    case 2*FLOM_MSG_STEP_INCR:
                         break;
                     default:
                         THROW(INVALID_STEP_PING);

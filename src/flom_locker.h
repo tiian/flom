@@ -168,6 +168,14 @@ extern "C" {
     
 
     /**
+     * Remove all objects pointed by locker array and the array itself
+     * @param lockers IN/OUT pointer to object to release
+     */
+    void flom_locker_array_free(flom_locker_array_t *lockers);
+
+
+    
+    /**
      * Add a new locker to locker array
      * @param lockers IN/OUT array of lockers
      * @param locker IN new locker to add

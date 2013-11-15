@@ -445,6 +445,11 @@ void flom_conns_free(flom_conns_t *conns)
             conns->fds[i].fd = NULL_FD;
         }
     flom_conns_clean(conns);
+    free(conns->fds);
+    conns->fds = NULL;
+    free(conns->cd);
+    conns->cd = NULL;
+    conns->used = conns->allocated = 0;
     FLOM_TRACE(("flom_conns_free: completed\n"));
 }
 
