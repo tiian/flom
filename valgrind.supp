@@ -1,0 +1,22 @@
+{
+   GThread initialization
+   Memcheck:Leak
+   ...
+   fun:g_thread_init_glib
+   fun:g_thread_init
+   fun:flom_trace_init
+   ...
+}
+{
+   Command line option parser
+   Memcheck:Leak
+   fun:memalign
+   fun:posix_memalign
+   fun:slab_allocator_alloc_chunk
+   fun:g_slice_alloc
+   fun:g_list_prepend
+   fun:add_pending_null
+   fun:g_option_context_parse
+   fun:main
+}
+

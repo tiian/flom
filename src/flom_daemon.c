@@ -355,11 +355,11 @@ int flom_accept_loop(flom_conns_t *conns)
                      , NEGATIVE_NUMBER_OF_LOCKERS_ERROR2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    flom_locker_array_t lockers;
     
     FLOM_TRACE(("flom_accept_loop\n"));
     TRY {
         int loop = TRUE;
-        flom_locker_array_t lockers;
 
         flom_locker_array_init(&lockers);
         
@@ -474,6 +474,7 @@ int flom_accept_loop(flom_conns_t *conns)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    flom_locker_array_free(&lockers);
     FLOM_TRACE(("flom_accept_loop/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
