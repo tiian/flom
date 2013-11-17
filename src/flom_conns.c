@@ -403,6 +403,7 @@ void flom_conns_clean(flom_conns_t *conns)
              * removed and destroyed */
             /* removing message object */
             if (NULL != conns->cd[i].msg) {
+                flom_msg_free(conns->cd[i].msg);
                 free(conns->cd[i].msg);
                 conns->cd[i].msg = NULL;
             }
