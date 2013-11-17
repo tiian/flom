@@ -47,36 +47,60 @@
 
 
 /**
+ * Type of resource that must be locked (enum)
+ */
+enum flom_locker_res_type_e {
+    /**
+     * Null resource type
+     */
+    FLOM_LOCKER_RES_TYPE_NULL,
+    /**
+     * Standard resource type (a single non numerical resource)
+     */
+    FLOM_LOCKER_RES_TYPE_STD
+};
+/**
+ * Type of resource that must be locked
+ */
+typedef enum flom_locker_res_type_e flom_locker_res_type_t;
+
+
+
+/**
  * Data structure used for a locker thread
  */
 struct flom_locker_s {
     /**
      * Identifier of the thread running the locker
      */
-    GThread  *thread;
+    GThread                 *thread;
     /**
      * Pipe file descriptor: used by main thread (listener) to send commands
      */
-    int       write_pipe;
+    int                      write_pipe;
     /**
      * Pipe file descriptor: used by locker thread to receive commands
      */
-    int       read_pipe;
+    int                      read_pipe;
     /**
      * Resource managed by this locker; this is the key to pick-up the right
      * locker from a pool (allocated by g_strdup)
      */
-    gchar    *resource_name;
+    gchar                   *resource_name;
+    /**
+     * Type of the managed resource (see @ref flom_locker_get_res_type)
+     */
+    flom_locker_res_type_t   resource_type;
     /**
      * Last sequence number sent by parent (listener) to locker thread:
      * parent point of view
      */
-    int       write_sequence;
+    int                      write_sequence;
     /**
      * Last sequence read by locker thread and sent by parent (listener):
      * child point of view
      */
-    int       read_sequence;
+    int                      read_sequence;
     /**
      * Number of polling periods the locker thread performed nothing (without
      * any client)
@@ -144,6 +168,7 @@ extern "C" {
         locker->thread = NULL;
         locker->write_pipe = locker->read_pipe = NULL_FD;
         locker->resource_name = NULL;
+        locker->resource_type = FLOM_LOCKER_RES_TYPE_NULL;
         locker->write_sequence = locker->read_sequence =
             locker->idle_periods = 0;
     }
@@ -166,6 +191,16 @@ extern "C" {
      * @return a reason code
      */
     int flom_locker_check_resource_name(const gchar *resource_name);
+
+
+
+    /**
+     * Retrieve the type of the resource from its name
+     * @param resource_name IN resource name
+     * @return resource type @ref flom_locker_res_type_t
+     */
+    flom_locker_res_type_t flom_locker_get_res_type(
+        const gchar *resource_name);
 
     
 

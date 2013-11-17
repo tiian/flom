@@ -588,6 +588,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
     enum Exception { NULL_OBJECT1
                      , INVALID_VERB_STEP
                      , LOCKER_CHECK_RESOURCE_NAME_ERROR
+                     , RES_TYPE_NULL
                      , NULL_OBJECT2
                      , CONNS_GET_MSG_ERROR
                      , PIPE_ERROR
@@ -609,6 +610,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
         GThread *locker_thread = NULL;
         struct flom_msg_s *msg = NULL;
         struct flom_locker_token_s flt;
+        flom_locker_res_type_t flrt;
         const struct flom_conn_data_s *cd = NULL;
         /* check if there is a locker running for this request */
         if (NULL == lockers)
@@ -629,12 +631,20 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
             /* @@@ send and error message to client and disconnect instead of
              exiting! */
             THROW(LOCKER_CHECK_RESOURCE_NAME_ERROR);
+        /*  */
+        if (FLOM_LOCKER_RES_TYPE_NULL == (
+                flrt = flom_locker_get_res_type(
+                    msg->body.lock_8.resource.name)))
+            /* this is a condition should never happen */
+            THROW(RES_TYPE_NULL);
+                                              
         /* is there a locker already active? */
         n = flom_locker_array_count(lockers);
         for (i=0; i<n; ++i) {
             if (NULL == (locker = flom_locker_array_get(lockers, i)))
                 THROW(NULL_OBJECT2);
-            if (NULL_FD == locker->write_pipe || NULL_FD == locker->read_pipe) {
+            if (NULL_FD == locker->write_pipe ||
+                NULL_FD == locker->read_pipe) {
                 FLOM_TRACE(("flom_accept_loop_transfer: locker # %d is "
                             "terminating (write_pipe=%d, read_pipe=%d), "
                             "skipping...\n", i, locker->write_pipe,
@@ -663,6 +673,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
                         msg->body.lock_8.resource.name));
             flom_locker_init(locker);
             locker->resource_name = g_strdup(msg->body.lock_8.resource.name);
+            locker->resource_type = flrt;
             /* creating a communication pipe for the new thread */
             if (0 != pipe(pipefd))
                 THROW(PIPE_ERROR);
@@ -718,6 +729,9 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;
                 break;
             case LOCKER_CHECK_RESOURCE_NAME_ERROR:
+                break;
+            case RES_TYPE_NULL:
+                ret_cod = FLOM_RC_INVALID_OPTION;
                 break;
             case NULL_OBJECT2:
                 ret_cod = FLOM_RC_NULL_OBJECT;

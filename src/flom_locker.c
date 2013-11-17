@@ -103,6 +103,48 @@ int flom_locker_check_resource_name(const gchar *resource_name)
 
 
 
+flom_locker_res_type_t flom_locker_get_res_type(
+    const gchar *resource_name)
+{
+    enum Exception { REGEXEC_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_LOCKER_RES_TYPE_NULL;
+    
+    FLOM_TRACE(("flom_locker_get_res_type\n"));
+    TRY {
+        int reg_error;
+        char reg_errbuf[200];
+
+        reg_error = regexec(&global_res_name_preg, resource_name, 0, NULL, 0);
+        if (0 != reg_error) {
+            regerror(reg_error, &global_res_name_preg, reg_errbuf,
+                     sizeof(reg_errbuf));
+            FLOM_TRACE(("flom_locker_get_res_type: regexec returned "
+                        "%d ('%s') instead of 0 for string '%s'\n",
+                        reg_error, reg_errbuf, resource_name));
+            THROW(REGEXEC_ERROR);
+        } else
+            ret_cod = FLOM_LOCKER_RES_TYPE_STD;
+
+        /* @@@ complete with different resource types */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                break;
+            case REGEXEC_ERROR:
+            default:
+                ret_cod = FLOM_LOCKER_RES_TYPE_NULL;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_locker_get_res_type/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 void flom_locker_array_init(flom_locker_array_t *lockers)
 {
     lockers->n = 0;
@@ -167,6 +209,9 @@ gpointer flom_locker_loop(gpointer data)
 
         /* as a first action, it marks the identifier */
         locker->thread = g_thread_self();
+        FLOM_TRACE(("flom_locker_loop: resource_name='%s', "
+                    "resource_type=%d\n", locker->resource_name,
+                    locker->resource_type));
         /* initialize a connections object for this locker thread */
         if (FLOM_RC_OK != (ret_cod = flom_conns_init(&conns, AF_UNIX)))
             THROW(CONNS_INIT_ERROR);
