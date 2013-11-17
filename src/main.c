@@ -35,6 +35,7 @@
 #include "flom_connect.h"
 #include "flom_errors.h"
 #include "flom_exec.h"
+#include "flom_regex.h"
 #include "flom_trace.h"
 
 
@@ -72,6 +73,11 @@ int main (int argc, char *argv[])
 
     flom_config_reset();
     flom_config_set_trace_file(trace_file);
+
+    if (FLOM_RC_OK != (ret_cod = global_res_name_preg_init())) {
+        g_print("global_res_name_preg_init: ret_cod=%d\n", ret_cod);
+        exit(1);
+    }
 
     if (FLOM_RC_OK != (ret_cod = flom_connect())) {
         g_print("flom_connect: ret_cod=%d\n", ret_cod);

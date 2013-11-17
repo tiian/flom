@@ -157,6 +157,16 @@ extern "C" {
      */
     void flom_locker_destroy(struct flom_locker_s *locker);
 
+
+
+    /**
+     * Check if a resource name is a valid name (the name implicitly determines
+     * the type of resource)
+     * @param resource_name IN resource name must be checked
+     * @return a reason code
+     */
+    int flom_locker_check_resource_name(const gchar *resource_name);
+
     
 
     /**

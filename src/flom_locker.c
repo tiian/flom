@@ -20,6 +20,12 @@
 
 
 
+#ifdef HAVE_REGEX_H
+# include <regex.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
@@ -29,6 +35,7 @@
 #include "flom_config.h"
 #include "flom_errors.h"
 #include "flom_locker.h"
+#include "flom_regex.h"
 #include "flom_trace.h"
 
 
@@ -51,6 +58,47 @@ void flom_locker_destroy(struct flom_locker_s *locker)
             close(locker->read_pipe);
         g_free(locker);
     }
+}
+
+
+
+int flom_locker_check_resource_name(const gchar *resource_name)
+{
+    enum Exception { REGEXEC_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_locker_check_resource_name\n"));
+    TRY {
+        int reg_error;
+        char reg_errbuf[200];
+
+        reg_error = regexec(&global_res_name_preg, resource_name, 0, NULL, 0);
+        if (0 != reg_error) {
+            regerror(reg_error, &global_res_name_preg, reg_errbuf,
+                     sizeof(reg_errbuf));
+            FLOM_TRACE(("flom_locker_check_resource_name: regexec returned "
+                        "%d ('%s') instead of 0 for string '%s'\n",
+                        reg_error, reg_errbuf, resource_name));
+            THROW(REGEXEC_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case REGEXEC_ERROR:
+                ret_cod = FLOM_RC_REGEXEC_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_locker_check_resource_name/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 

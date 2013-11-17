@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with FLOM.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef FLOM_CONFIG_H
-# define FLOM_CONFIG_H
+#ifndef FLOM_REGEX_H
+# define FLOM_REGEX_H
 
 
 
@@ -25,9 +25,14 @@
 
 
 
-#ifdef HAVE_SYS_UN_H
-# include <sys/un.h>
+#ifdef HAVE_REGEX_H
+# include <regex.h>
 #endif
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+
+
 
 #include "flom_trace.h"
 
@@ -40,45 +45,16 @@
 #else
 # undef FLOM_TRACE_MODULE_SAVE
 #endif /* FLOM_TRACE_MODULE */
-#define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_CONFIG
-
-
-
-#define LOCAL_SOCKET_SIZE sizeof(((struct sockaddr_un *)NULL)->sun_path)
-
-
-extern const char *DEFAULT_RESOURCE_NAME;
-
-/**
- * This struct contains all the values necessary for configuration
- */
-struct flom_config {
-    /**
-     * Path of UNIX socket using for local connection
-     */
-    char        local_socket_path_name[LOCAL_SOCKET_SIZE];
-    /**
-     * Name of the file must be used to write trace messages
-     */
-    char const *trace_file;
-    /**
-     * After idle_time milliseconds without new incoming requests, the daemon
-     * will terminate activity
-     */
-    int         idle_time;
-    /**
-     * Name of the resource that must be locked
-     */
-    char const *resource_name;
-};
-typedef struct flom_config flom_config_t;
+#define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_REGEX
 
 
 
 /**
- * This is a global static object shared by all the application
+ * This is a global static object shared by all modules and contain the
+ * precompiled regular expression used to parse resource names and check if
+ * they are valid resource names
  */
-extern flom_config_t global_config;
+extern regex_t global_res_name_preg;
 
 
 
@@ -87,24 +63,15 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-
-    /**
-     * Set config to system default
-     */
-    void flom_config_reset();
-    
-
     
     /**
-     * Set trace_file in config object
-     * @param trace_file IN set the new value for trace_file properties
+     * Initialize the precompiled regular expression @ref global_res_name_preg
+     * @return a reason code
      */
-    static inline void flom_config_set_trace_file(
-        const char *trace_file) {
-        global_config.trace_file = trace_file; }
-
-
+    int global_res_name_preg_init();
     
+    
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
@@ -120,4 +87,4 @@ extern "C" {
 
 
 
-#endif /* FLOM_CONFIG_H */
+#endif /* FLOM_REGEX_H */

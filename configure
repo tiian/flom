@@ -4551,6 +4551,18 @@ fi
 
 done
 
+for ac_header in regex.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "regex.h" "ac_cv_header_regex_h" "$ac_includes_default"
+if test "x$ac_cv_header_regex_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_REGEX_H 1
+_ACEOF
+
+fi
+
+done
+
 for ac_header in stdarg.h stdint.h stdio.h stdlib.h string.h syslog.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`

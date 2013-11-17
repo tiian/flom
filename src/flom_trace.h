@@ -92,6 +92,11 @@
  */
 #define FLOM_TRACE_MOD_LOCKER             0x00000100
 
+/**
+ * trace module for regex functions (resource name check)
+ */
+#define FLOM_TRACE_MOD_REGEX              0x00000200
+
 
 
 /**

@@ -167,6 +167,10 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'read' function returned an error condition";
         case FLOM_RC_RECV_ERROR:
             return "ERROR: 'recv' function returned an error condition";
+        case FLOM_RC_REGCOMP_ERROR:
+            return "ERROR: 'regcomp' function returned an error condition";
+        case FLOM_RC_REGEXEC_ERROR:
+            return "ERROR: 'regexec' function returned an error condition";
         case FLOM_RC_SEND_ERROR:
             return "ERROR: 'send' function returned an error condition";
         case FLOM_RC_SETSID_ERROR:
@@ -175,6 +179,9 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'signal' function returned an error condition";
         case FLOM_RC_SOCKET_ERROR:
             return "ERROR: 'socket' function returned an error condition";
+        case FLOM_RC_SNPRINTF_ERROR:
+            return "ERROR: 'snprintf' function was not able to write the "
+                "complete content due to insufficient buffer space";
         case FLOM_RC_UNLINK_ERROR:
             return "ERROR: 'unlink' function returned an error condition";
         case FLOM_RC_WAIT_ERROR:

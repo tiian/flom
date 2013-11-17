@@ -587,6 +587,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
 {
     enum Exception { NULL_OBJECT1
                      , INVALID_VERB_STEP
+                     , LOCKER_CHECK_RESOURCE_NAME_ERROR
                      , NULL_OBJECT2
                      , CONNS_GET_MSG_ERROR
                      , PIPE_ERROR
@@ -599,7 +600,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     struct flom_locker_s *locker = NULL;
-    int locker_allocated = TRUE;
+    int locker_allocated = FALSE;
     
     FLOM_TRACE(("flom_accept_loop_transfer\n"));
     TRY {
@@ -622,6 +623,12 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
                         msg->header.pvs.verb, msg->header.pvs.step));
             THROW(INVALID_VERB_STEP);
         }
+        /* is the asked resource a valid resource name (and type!) ? */
+        if (FLOM_RC_OK != (ret_cod = flom_locker_check_resource_name(
+                               msg->body.lock_8.resource.name)))
+            /* @@@ send and error message to client and disconnect instead of
+             exiting! */
+            THROW(LOCKER_CHECK_RESOURCE_NAME_ERROR);
         /* is there a locker already active? */
         n = flom_locker_array_count(lockers);
         for (i=0; i<n; ++i) {
@@ -709,6 +716,8 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
                 break;
             case INVALID_VERB_STEP:
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;
+                break;
+            case LOCKER_CHECK_RESOURCE_NAME_ERROR:
                 break;
             case NULL_OBJECT2:
                 ret_cod = FLOM_RC_NULL_OBJECT;
