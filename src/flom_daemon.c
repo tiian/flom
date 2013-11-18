@@ -609,7 +609,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
         GThread *locker_thread = NULL;
         struct flom_msg_s *msg = NULL;
         struct flom_locker_token_s flt;
-        flom_regex_res_type_t flrt;
+        flom_rsrc_type_t flrt;
         const struct flom_conn_data_s *cd = NULL;
         /* check if there is a locker running for this request */
         if (NULL == lockers)
@@ -625,8 +625,8 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
             THROW(INVALID_VERB_STEP);
         }
         /* is the asked resource a valid resource name (and type!) ? */
-        if (FLOM_REGEX_RES_TYPE_NULL == (
-                flrt = flom_regex_get_res_type(
+        if (FLOM_RSRC_TYPE_NULL == (
+                flrt = flom_rsrc_get_type(
                     msg->body.lock_8.resource.name)))
             /* @@@ send and error message to client and disconnect instead of
              exiting! */

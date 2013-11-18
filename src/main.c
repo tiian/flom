@@ -35,7 +35,7 @@
 #include "flom_connect.h"
 #include "flom_errors.h"
 #include "flom_exec.h"
-#include "flom_regex.h"
+#include "flom_rsrc.h"
 #include "flom_trace.h"
 
 

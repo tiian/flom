@@ -28,7 +28,7 @@
 
 #include "flom_config.h"
 #include "flom_errors.h"
-#include "flom_regex.h"
+#include "flom_rsrc.h"
 #include "flom_trace.h"
 
 
@@ -37,12 +37,12 @@
 #ifdef FLOM_TRACE_MODULE
 # undef FLOM_TRACE_MODULE
 #endif /* FLOM_TRACE_MODULE */
-#define FLOM_TRACE_MODULE   FLOM_TRACE_MOD_REGEX
+#define FLOM_TRACE_MODULE   FLOM_TRACE_MOD_RSRC
 
 
 
 /* global static objects */
-regex_t global_res_name_preg[FLOM_REGEX_RES_TYPE_N];
+regex_t global_res_name_preg[FLOM_RSRC_TYPE_N];
 
 
 
@@ -58,12 +58,12 @@ int global_res_name_preg_init()
         int reg_error;
         char reg_errbuf[200];
         char reg_expr[1000];
-        flom_regex_res_type_t i;
-        const char *reg_str[FLOM_REGEX_RES_TYPE_N] = {
+        flom_rsrc_type_t i;
+        const char *reg_str[FLOM_RSRC_TYPE_N] = {
             "^_$" /* this is a dummy value */ ,
             "^%s|([[:alpha:][:digit:]])+$" };
 
-        for (i=FLOM_REGEX_RES_TYPE_NULL; i<FLOM_REGEX_RES_TYPE_N; ++i) {
+        for (i=FLOM_RSRC_TYPE_NULL; i<FLOM_RSRC_TYPE_N; ++i) {
             /* preparing regular expression */
             if (sizeof(reg_expr) <= snprintf(
                     reg_expr, sizeof(reg_expr), reg_str[i],
@@ -105,32 +105,77 @@ int global_res_name_preg_init()
 
 
 
-flom_regex_res_type_t flom_regex_get_res_type(
-    const gchar *resource_name)
+flom_rsrc_type_t flom_rsrc_get_type(const gchar *resource_name)
 {
     int reg_error;
     char reg_errbuf[200];
-    flom_regex_res_type_t i;
-    flom_regex_res_type_t ret_cod = FLOM_REGEX_RES_TYPE_NULL;
+    flom_rsrc_type_t i;
+    flom_rsrc_type_t ret_cod = FLOM_RSRC_TYPE_NULL;
     
-    FLOM_TRACE(("flom_regex_get_res_type\n"));
+    FLOM_TRACE(("flom_rsrc_get_type\n"));
 
-    for (i=FLOM_REGEX_RES_TYPE_NULL+1; i<FLOM_REGEX_RES_TYPE_N; ++i) {
+    for (i=FLOM_RSRC_TYPE_NULL+1; i<FLOM_RSRC_TYPE_N; ++i) {
         reg_error = regexec(global_res_name_preg+i,
                             resource_name, 0, NULL, 0);
         regerror(reg_error, global_res_name_preg+i, reg_errbuf,
                  sizeof(reg_errbuf));
-        FLOM_TRACE(("flom_regex_get_res_type: regexec returned "
+        FLOM_TRACE(("flom_rsrc_get_type: regexec returned "
                     "%d ('%s') for string '%s'\n",
                     reg_error, reg_errbuf, resource_name));
         if (0 == reg_error) {
             ret_cod = i;
             break;
-        }
-    } /* for (i=FLOM_REGEX_RES_TYPE_NULL+1; ... */
-    FLOM_TRACE(("flom_regex_get_res_type/ret_cod=%d\n", ret_cod));
+        } /* if (0 == reg_error) */
+    } /* for (i=FLOM_RSRC_RES_TYPE_NULL+1; ... */
+    FLOM_TRACE(("flom_rsrc_get_type/ret_cod=%d\n", ret_cod));
     return ret_cod;
 }
 
 
+
+int flom_resource_init(flom_resource_t *resource,
+                       flom_rsrc_type_t type, const gchar *name)
+{
+    enum Exception { OUT_OF_RANGE
+                     , UNKNOW_RESOURCE
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_resource_init\n"));
+    TRY {
+        if (FLOM_RSRC_TYPE_NULL >= type || FLOM_RSRC_TYPE_N <= type)
+            THROW(OUT_OF_RANGE);
+        resource->type = type;
+        resource->name = name;
+        FLOM_TRACE(("flom_resource_init: initialized resource ('%s',%d)\n",
+                    resource->name, resource->type));
+
+        switch (resource->type) {
+            case FLOM_RSRC_TYPE_SIMPLE:
+                resource->data.simple.current_lock = FLOM_LOCK_TYPE_NL;
+                break;
+            default:
+                THROW(UNKNOW_RESOURCE);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OUT_OF_RANGE:
+                ret_cod = FLOM_RC_OUT_OF_RANGE;
+                break;
+            case UNKNOW_RESOURCE:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_resource_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
 

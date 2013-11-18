@@ -93,9 +93,9 @@
 #define FLOM_TRACE_MOD_LOCKER             0x00000100
 
 /**
- * trace module for regex functions (resource name check)
+ * trace module for rsrc (resoruce) functions
  */
-#define FLOM_TRACE_MOD_REGEX              0x00000200
+#define FLOM_TRACE_MOD_RSRC               0x00000200
 
 
 

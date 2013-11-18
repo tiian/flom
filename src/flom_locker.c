@@ -35,7 +35,7 @@
 #include "flom_config.h"
 #include "flom_errors.h"
 #include "flom_locker.h"
-#include "flom_regex.h"
+#include "flom_rsrc.h"
 #include "flom_trace.h"
 
 
@@ -106,7 +106,8 @@ void flom_locker_array_del(flom_locker_array_t *lockers,
 
 gpointer flom_locker_loop(gpointer data)
 {
-    enum Exception { CONNS_INIT_ERROR
+    enum Exception { RESOURCE_INIT_ERROR
+                     , CONNS_INIT_ERROR
                      , CONNS_ADD_ERROR
                      , CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
@@ -117,6 +118,7 @@ gpointer flom_locker_loop(gpointer data)
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     flom_conns_t conns;
+    flom_resource_t resource;
     
     FLOM_TRACE(("flom_locker_loop: new thread in progress...\n"));
     TRY {
@@ -129,6 +131,11 @@ gpointer flom_locker_loop(gpointer data)
         FLOM_TRACE(("flom_locker_loop: resource_name='%s', "
                     "resource_type=%d\n", locker->resource_name,
                     locker->resource_type));
+        /* initialize a resource objcet for this locker */
+        if (FLOM_RC_OK != (ret_cod = flom_resource_init(
+                               &resource, locker->resource_type,
+                               locker->resource_name)))
+            THROW(RESOURCE_INIT_ERROR);
         /* initialize a connections object for this locker thread */
         if (FLOM_RC_OK != (ret_cod = flom_conns_init(&conns, AF_UNIX)))
             THROW(CONNS_INIT_ERROR);
@@ -214,6 +221,7 @@ gpointer flom_locker_loop(gpointer data)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case RESOURCE_INIT_ERROR:
             case CONNS_INIT_ERROR:
             case CONNS_ADD_ERROR:
             case CONNS_SET_EVENTS_ERROR:

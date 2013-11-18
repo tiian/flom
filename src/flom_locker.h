@@ -32,7 +32,7 @@
 
 
 #include "flom_conns.h"
-#include "flom_regex.h"
+#include "flom_rsrc.h"
 
 
 
@@ -69,9 +69,9 @@ struct flom_locker_s {
      */
     gchar                   *resource_name;
     /**
-     * Type of the managed resource (see @ref flom_regex_get_res_type)
+     * Type of the managed resource
      */
-    flom_regex_res_type_t    resource_type;
+    flom_rsrc_type_t         resource_type;
     /**
      * Last sequence number sent by parent (listener) to locker thread:
      * parent point of view
@@ -86,7 +86,7 @@ struct flom_locker_s {
      * Number of polling periods the locker thread performed nothing (without
      * any client)
      */
-    int       idle_periods;
+    int                      idle_periods;
 };
 
 
@@ -149,7 +149,7 @@ extern "C" {
         locker->thread = NULL;
         locker->write_pipe = locker->read_pipe = NULL_FD;
         locker->resource_name = NULL;
-        locker->resource_type = FLOM_REGEX_RES_TYPE_NULL;
+        locker->resource_type = FLOM_RSRC_TYPE_NULL;
         locker->write_sequence = locker->read_sequence =
             locker->idle_periods = 0;
     }
