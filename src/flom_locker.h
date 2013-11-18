@@ -32,6 +32,7 @@
 
 
 #include "flom_conns.h"
+#include "flom_regex.h"
 
 
 
@@ -43,26 +44,6 @@
 # undef FLOM_TRACE_MODULE_SAVE
 #endif /* FLOM_TRACE_MODULE */
 #define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_LOCKER
-
-
-
-/**
- * Type of resource that must be locked (enum)
- */
-enum flom_locker_res_type_e {
-    /**
-     * Null resource type
-     */
-    FLOM_LOCKER_RES_TYPE_NULL,
-    /**
-     * Standard resource type (a single non numerical resource)
-     */
-    FLOM_LOCKER_RES_TYPE_STD
-};
-/**
- * Type of resource that must be locked
- */
-typedef enum flom_locker_res_type_e flom_locker_res_type_t;
 
 
 
@@ -88,9 +69,9 @@ struct flom_locker_s {
      */
     gchar                   *resource_name;
     /**
-     * Type of the managed resource (see @ref flom_locker_get_res_type)
+     * Type of the managed resource (see @ref flom_regex_get_res_type)
      */
-    flom_locker_res_type_t   resource_type;
+    flom_regex_res_type_t    resource_type;
     /**
      * Last sequence number sent by parent (listener) to locker thread:
      * parent point of view
@@ -168,7 +149,7 @@ extern "C" {
         locker->thread = NULL;
         locker->write_pipe = locker->read_pipe = NULL_FD;
         locker->resource_name = NULL;
-        locker->resource_type = FLOM_LOCKER_RES_TYPE_NULL;
+        locker->resource_type = FLOM_REGEX_RES_TYPE_NULL;
         locker->write_sequence = locker->read_sequence =
             locker->idle_periods = 0;
     }
@@ -183,26 +164,6 @@ extern "C" {
     void flom_locker_destroy(struct flom_locker_s *locker);
 
 
-
-    /**
-     * Check if a resource name is a valid name (the name implicitly determines
-     * the type of resource)
-     * @param resource_name IN resource name must be checked
-     * @return a reason code
-     */
-    int flom_locker_check_resource_name(const gchar *resource_name);
-
-
-
-    /**
-     * Retrieve the type of the resource from its name
-     * @param resource_name IN resource name
-     * @return resource type @ref flom_locker_res_type_t
-     */
-    flom_locker_res_type_t flom_locker_get_res_type(
-        const gchar *resource_name);
-
-    
 
     /**
      * Initialize an array of lockers

@@ -588,7 +588,6 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
     enum Exception { NULL_OBJECT1
                      , INVALID_VERB_STEP
                      , LOCKER_CHECK_RESOURCE_NAME_ERROR
-                     , RES_TYPE_NULL
                      , NULL_OBJECT2
                      , CONNS_GET_MSG_ERROR
                      , PIPE_ERROR
@@ -610,7 +609,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
         GThread *locker_thread = NULL;
         struct flom_msg_s *msg = NULL;
         struct flom_locker_token_s flt;
-        flom_locker_res_type_t flrt;
+        flom_regex_res_type_t flrt;
         const struct flom_conn_data_s *cd = NULL;
         /* check if there is a locker running for this request */
         if (NULL == lockers)
@@ -626,17 +625,12 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
             THROW(INVALID_VERB_STEP);
         }
         /* is the asked resource a valid resource name (and type!) ? */
-        if (FLOM_RC_OK != (ret_cod = flom_locker_check_resource_name(
-                               msg->body.lock_8.resource.name)))
+        if (FLOM_REGEX_RES_TYPE_NULL == (
+                flrt = flom_regex_get_res_type(
+                    msg->body.lock_8.resource.name)))
             /* @@@ send and error message to client and disconnect instead of
              exiting! */
             THROW(LOCKER_CHECK_RESOURCE_NAME_ERROR);
-        /*  */
-        if (FLOM_LOCKER_RES_TYPE_NULL == (
-                flrt = flom_locker_get_res_type(
-                    msg->body.lock_8.resource.name)))
-            /* this is a condition should never happen */
-            THROW(RES_TYPE_NULL);
                                               
         /* is there a locker already active? */
         n = flom_locker_array_count(lockers);
@@ -729,9 +723,6 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;
                 break;
             case LOCKER_CHECK_RESOURCE_NAME_ERROR:
-                break;
-            case RES_TYPE_NULL:
-                ret_cod = FLOM_RC_INVALID_OPTION;
                 break;
             case NULL_OBJECT2:
                 ret_cod = FLOM_RC_NULL_OBJECT;

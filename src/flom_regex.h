@@ -50,11 +50,35 @@
 
 
 /**
+ * Type of resource that must be locked (enum)
+ */
+enum flom_regex_res_type_e {
+    /**
+     * Null resource type
+     */
+    FLOM_REGEX_RES_TYPE_NULL,
+    /**
+     * Simple resource type (a single non numerical resource)
+     */
+    FLOM_REGEX_RES_TYPE_SIMPLE,
+    /**
+     * Number of managed resource types
+     */
+    FLOM_REGEX_RES_TYPE_N
+};
+/**
+ * Type of resource that must be locked
+ */
+typedef enum flom_regex_res_type_e flom_regex_res_type_t;
+
+
+
+/**
  * This is a global static object shared by all modules and contain the
  * precompiled regular expression used to parse resource names and check if
  * they are valid resource names
  */
-extern regex_t global_res_name_preg;
+extern regex_t global_res_name_preg[];
 
 
 
@@ -70,6 +94,18 @@ extern "C" {
      */
     int global_res_name_preg_init();
     
+    
+
+    /**
+     * Retrieve the type of the resource from its name
+     * @param resource_name IN resource name
+     * @return resource type @ref flom_locker_res_type_t;
+     *     @ref FLOM_REGEX_RES_TYPE_NULL means the name is not valid for
+     *      any resource type
+     */
+    flom_regex_res_type_t flom_regex_get_res_type(
+        const gchar *resource_name);
+
     
 
 #ifdef __cplusplus
