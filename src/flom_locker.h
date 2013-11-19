@@ -64,15 +64,6 @@ struct flom_locker_s {
      */
     int                      read_pipe;
     /**
-     * Resource managed by this locker; this is the key to pick-up the right
-     * locker from a pool (allocated by g_strdup)
-     */
-    gchar                   *resource_name;
-    /**
-     * Type of the managed resource
-     */
-    flom_rsrc_type_t         resource_type;
-    /**
      * Last sequence number sent by parent (listener) to locker thread:
      * parent point of view
      */
@@ -87,6 +78,10 @@ struct flom_locker_s {
      * any client)
      */
     int                      idle_periods;
+    /**
+     * Resource managed by the locker
+     */
+    flom_resource_t          resource;
 };
 
 
@@ -144,14 +139,14 @@ extern "C" {
     /**
      * Initialize a locker struct
      * @param locker IN/OUT struct to be initialized
+     * @return a reason code
      */
     static inline void flom_locker_init(struct flom_locker_s *locker) {
         locker->thread = NULL;
         locker->write_pipe = locker->read_pipe = NULL_FD;
-        locker->resource_name = NULL;
-        locker->resource_type = FLOM_RSRC_TYPE_NULL;
         locker->write_sequence = locker->read_sequence =
             locker->idle_periods = 0;
+        memset(&locker->resource, 0, sizeof(flom_resource_t));
     }
 
     

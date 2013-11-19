@@ -590,6 +590,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
                      , LOCKER_CHECK_RESOURCE_NAME_ERROR
                      , NULL_OBJECT2
                      , CONNS_GET_MSG_ERROR
+                     , RESOURCE_INIT_ERROR
                      , PIPE_ERROR
                      , G_THREAD_CREATE_ERROR
                      , WRITE_ERROR1
@@ -646,8 +647,9 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
                 continue;
             }
             FLOM_TRACE(("flom_accept_loop_transfer: locker # %d is managing "
-                        "resource '%s'\n", i, locker->resource_name));
-            if (!g_strcmp0(locker->resource_name,
+                        "resource '%s'\n", i,
+                        flom_resource_get_name(&locker->resource)));
+            if (!g_strcmp0(flom_resource_get_name(&locker->resource),
                            msg->body.lock_8.resource.name)) {
                 FLOM_TRACE(("flom_accept_loop_transfer: found locker %d for "
                             "resource '%s'\n", i,
@@ -666,8 +668,10 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
                         "for resource '%s'...\n",
                         msg->body.lock_8.resource.name));
             flom_locker_init(locker);
-            locker->resource_name = g_strdup(msg->body.lock_8.resource.name);
-            locker->resource_type = flrt;
+            if (FLOM_RC_OK != (ret_cod = flom_resource_init(
+                                   &locker->resource, flrt,
+                                   msg->body.lock_8.resource.name)))
+                THROW(RESOURCE_INIT_ERROR);
             /* creating a communication pipe for the new thread */
             if (0 != pipe(pipefd))
                 THROW(PIPE_ERROR);
@@ -728,6 +732,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
             case CONNS_GET_MSG_ERROR:
+            case RESOURCE_INIT_ERROR:
                 break;
             case PIPE_ERROR:
                 ret_cod = FLOM_RC_PIPE_ERROR;
@@ -755,7 +760,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
             /* clean-up locker */
             FLOM_TRACE(("flom_accept_loop_transfer: clean-up due to excp=%d\n",
                         excp));
-            g_free(locker->resource_name);
+            flom_resource_free(&locker->resource);
             g_free(locker);
         }
     } /* TRY-CATCH */
@@ -792,7 +797,8 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
                                 "write_sequence=%d, read_sequence=%d, "
                                 "idle_periods=%d\n", i, fl->thread,
                                 fl->write_pipe, fl->read_pipe,
-                                fl->resource_name, fl->write_sequence,
+                                flom_resource_get_name(&fl->resource),
+                                fl->write_sequence,
                                 fl->read_sequence, fl->idle_periods));
                     if (-1 == close(fl->write_pipe))
                         THROW(CLOSE_ERROR);
@@ -806,7 +812,8 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
                                 "write_sequence=%d, read_sequence=%d, "
                                 "idle_periods=%d\n", i, fl->thread,
                                 fl->write_pipe, fl->read_pipe,
-                                fl->resource_name, fl->write_sequence,
+                                flom_resource_get_name(&fl->resource),
+                                fl->write_sequence,
                                 fl->read_sequence, fl->idle_periods));
                     flom_locker_array_del(lockers, fl);
                     /* lockers object changed, break the loop */

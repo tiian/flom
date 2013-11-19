@@ -141,7 +141,7 @@ int flom_connect_lock(int fd)
         if (NULL == (msg.body.lock_8.resource.name =
                      g_strdup(global_config.resource_name)))
             THROW(G_STRDUP_ERROR);
-        msg.body.lock_8.resource.type = FLOM_MSG_LOCK_TYPE_EX;
+        msg.body.lock_8.resource.type = FLOM_LOCK_TYPE_EX;
         msg.body.lock_8.resource.wait = TRUE;
 
         if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(

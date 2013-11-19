@@ -146,13 +146,14 @@ int flom_resource_init(flom_resource_t *resource,
         if (FLOM_RSRC_TYPE_NULL >= type || FLOM_RSRC_TYPE_N <= type)
             THROW(OUT_OF_RANGE);
         resource->type = type;
-        resource->name = name;
+        resource->name = g_strdup(name);
         FLOM_TRACE(("flom_resource_init: initialized resource ('%s',%d)\n",
                     resource->name, resource->type));
 
         switch (resource->type) {
             case FLOM_RSRC_TYPE_SIMPLE:
                 resource->data.simple.current_lock = FLOM_LOCK_TYPE_NL;
+                resource->inmsg = flom_resource_simple_inmsg;
                 break;
             default:
                 THROW(UNKNOW_RESOURCE);
@@ -175,6 +176,44 @@ int flom_resource_init(flom_resource_t *resource,
         } /* switch (excp) */
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_resource_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+void flom_resource_free(flom_resource_t *resource)
+{
+    FLOM_TRACE(("flom_resource_free\n"));
+    if (NULL != resource->name)
+        g_free(resource->name);
+    resource->name = NULL;
+}
+
+
+
+int flom_resource_simple_inmsg(flom_resource_t *resource,
+                               struct flom_msg_s *msg)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_resource_simple_inmsg\n"));
+    TRY {
+        flom_msg_trace(msg);
+        /* @@@ put automata code here */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_resource_simple_inmsg/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

@@ -34,6 +34,7 @@
 
 
 
+#include "flom_msg.h"
 #include "flom_trace.h"
 
 
@@ -74,46 +75,6 @@ typedef enum flom_rsrc_type_e flom_rsrc_type_t;
 
 
 /**
- * Type of lock that can be asked for a resource (enum)
- */
-enum flom_lock_type_e {
-    /**
-     * Null lock type
-     */
-    FLOM_LOCK_TYPE_NL,
-    /**
-     * Concurrent read lock type
-     */
-    FLOM_LOCK_TYPE_CR,
-    /**
-     * Concurrent write lock type
-     */
-    FLOM_LOCK_TYPE_CW,
-    /**
-     * Protected read / shared lock type
-     */
-    FLOM_LOCK_TYPE_PR,
-    /**
-     * Protectec write / update lock type
-     */
-    FLOM_LOCK_TYPE_PW,
-    /**
-     * Exclusive lock type
-     */
-    FLOM_LOCK_TYPE_EX,
-    /**
-     * Number of lock types
-     */
-    FLOM_LOCK_TYPE_N
-};
-/**
- * Type of lock that can be asked for a resource
- */
-typedef enum flom_lock_type_e flom_lock_type_t;
-
-
-
-/**
  * Resource data for type "simple" @ref FLOM_RSRC_TYPE_SIMPLE
  */
 struct flom_rsrc_data_simple_s {
@@ -123,8 +84,15 @@ struct flom_rsrc_data_simple_s {
     flom_lock_type_t        current_lock;
 };
 
- 
 
+
+/* necessary to declare flom_resource_t used inside the struct ("class")
+   definition */
+struct flom_resource_s;
+/**
+ * Resource type: a resource is an object that can be locked!
+ */
+typedef struct flom_resource_s flom_resource_t;
 /**
  * Base struct for resource object
  */
@@ -134,21 +102,21 @@ struct flom_resource_s {
      */
     flom_rsrc_type_t          type;
     /**
-     * Resource name: it's a const value because it's only a reference to a
-     * string allocated elsewhere (typically by @ref flom_locker_s struct)
+     * Resource name (allocated by g_strdup)
      */
-    const gchar              *name;
+    gchar                    *name;
     /**
      * Locking data associated with a resource (it depends from type)
      */
     union {
         struct flom_rsrc_data_simple_s       simple;
     } data;
+    /**
+     * Method called to process incoming messages (it depends from resource
+     * type)
+     */
+    int    (*inmsg)   (flom_resource_t *, struct flom_msg_s *);
 };
-/**
- * Resource type: a resource is an object that can be locked!
- */
-typedef struct flom_resource_s flom_resource_t;
 
 
 
@@ -195,6 +163,49 @@ extern "C" {
      */
     int flom_resource_init(flom_resource_t *resource,
                            flom_rsrc_type_t type, const gchar *name);
+
+
+
+    /**
+     * Free all dynamically allocated memory
+     * @param resource IN/OUT object to release
+     */
+    void flom_resource_free(flom_resource_t *resource);
+
+
+    
+    /**
+     * Get the name of a resource
+     * @param resource IN referente to resource object
+     * @return the name of the resource
+     */
+    static inline const gchar *flom_resource_get_name(
+        const flom_resource_t *resource) {
+        return resource->name;
+    }
+
+
+
+    /**
+     * Get the type of a resource
+     * @param resource IN referente to resource object
+     * @return the type of the resource
+     */
+    static inline flom_rsrc_type_t flom_resource_get_type(
+        const flom_resource_t *resource) {
+        return resource->type;
+    }
+
+    
+    
+    /**
+     * Manage an incoming message for a "simple" resource
+     * @param resource IN/OUT reference to resource object
+     * @param msg IN reference to incoming message
+     * @return a reason code
+     */
+    int flom_resource_simple_inmsg(flom_resource_t *resource,
+                                   struct flom_msg_s *msg);
 
 
     

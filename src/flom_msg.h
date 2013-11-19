@@ -111,29 +111,42 @@
 
 
 /**
- * Lock type NL = null lock
+ * Type of lock that can be asked for a resource (enum)
  */
-#define FLOM_MSG_LOCK_TYPE_NL   0
+enum flom_lock_type_e {
+    /**
+     * Null lock type
+     */
+    FLOM_LOCK_TYPE_NL,
+    /**
+     * Concurrent read lock type
+     */
+    FLOM_LOCK_TYPE_CR,
+    /**
+     * Concurrent write lock type
+     */
+    FLOM_LOCK_TYPE_CW,
+    /**
+     * Protected read / shared lock type
+     */
+    FLOM_LOCK_TYPE_PR,
+    /**
+     * Protectec write / update lock type
+     */
+    FLOM_LOCK_TYPE_PW,
+    /**
+     * Exclusive lock type
+     */
+    FLOM_LOCK_TYPE_EX,
+    /**
+     * Number of lock types
+     */
+    FLOM_LOCK_TYPE_N
+};
 /**
- * Lock type CR = concurrent read
+ * Type of lock that can be asked for a resource
  */
-#define FLOM_MSG_LOCK_TYPE_CR   1
-/**
- * Lock type CW = concurrent write
- */
-#define FLOM_MSG_LOCK_TYPE_CW   2
-/**
- * Lock type CR = protected read (shared lock)
- */
-#define FLOM_MSG_LOCK_TYPE_PR   3
-/**
- * Lock type CR = protected write (update lock)
- */
-#define FLOM_MSG_LOCK_TYPE_PW   4
-/**
- * Lock type EX = exclusive lock
- */
-#define FLOM_MSG_LOCK_TYPE_EX   5
+typedef enum flom_lock_type_e flom_lock_type_t;
 
 
 
@@ -243,15 +256,15 @@ struct flom_msg_body_lock_8_resource_s {
     /**
      * name of the resource to lock
      */
-    gchar     *name;
+    gchar            *name;
     /**
      * type of lock to acquire
      */
-    int        type;
+    flom_lock_type_t  type;
     /**
      * wait if lock is currently not available
      */
-    int        wait;
+    int               wait;
 };
 
     

@@ -51,7 +51,7 @@
 void flom_locker_destroy(struct flom_locker_s *locker)
 {
     if (NULL != locker) {
-        g_free(locker->resource_name);
+        flom_resource_free(&locker->resource);
         if (NULL_FD != locker->write_pipe)
             close(locker->write_pipe);
         if (NULL_FD != locker->read_pipe)
@@ -106,8 +106,7 @@ void flom_locker_array_del(flom_locker_array_t *lockers,
 
 gpointer flom_locker_loop(gpointer data)
 {
-    enum Exception { RESOURCE_INIT_ERROR
-                     , CONNS_INIT_ERROR
+    enum Exception { CONNS_INIT_ERROR
                      , CONNS_ADD_ERROR
                      , CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
@@ -118,7 +117,6 @@ gpointer flom_locker_loop(gpointer data)
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     flom_conns_t conns;
-    flom_resource_t resource;
     
     FLOM_TRACE(("flom_locker_loop: new thread in progress...\n"));
     TRY {
@@ -129,13 +127,9 @@ gpointer flom_locker_loop(gpointer data)
         /* as a first action, it marks the identifier */
         locker->thread = g_thread_self();
         FLOM_TRACE(("flom_locker_loop: resource_name='%s', "
-                    "resource_type=%d\n", locker->resource_name,
-                    locker->resource_type));
-        /* initialize a resource objcet for this locker */
-        if (FLOM_RC_OK != (ret_cod = flom_resource_init(
-                               &resource, locker->resource_type,
-                               locker->resource_name)))
-            THROW(RESOURCE_INIT_ERROR);
+                    "resource_type=%d\n",
+                    flom_resource_get_name(&locker->resource),
+                    flom_resource_get_type(&locker->resource)));
         /* initialize a connections object for this locker thread */
         if (FLOM_RC_OK != (ret_cod = flom_conns_init(&conns, AF_UNIX)))
             THROW(CONNS_INIT_ERROR);
@@ -221,7 +215,6 @@ gpointer flom_locker_loop(gpointer data)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case RESOURCE_INIT_ERROR:
             case CONNS_INIT_ERROR:
             case CONNS_ADD_ERROR:
             case CONNS_SET_EVENTS_ERROR:
@@ -263,6 +256,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                      , CONNS_GET_GMPC_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , CONNS_CLOSE_ERROR2
+                     , RESOURCE_INMSG_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -339,9 +333,12 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
             } /* if (0 == read_bytes) */
         } /* if (0 == id) */
         
-        if (NULL != msg)
-            flom_msg_trace(msg);
-        /* processing message @@@ */
+        if (NULL != msg) {
+            if (FLOM_RC_OK != (ret_cod = 
+                               locker->resource.inmsg(
+                                   &locker->resource, msg)))
+                THROW(RESOURCE_INMSG_ERROR);
+        } /* if (NULL != msg) */
         
         THROW(NONE);
     } CATCH {
