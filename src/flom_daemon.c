@@ -74,7 +74,6 @@ int flom_daemon()
                      , SIGNAL_ERROR
                      , FORK_ERROR3
                      , CHDIR_ERROR
-                     , CONNS_INIT_ERROR
                      , WRITE_ERROR
                      , FLOM_LISTEN_ERROR
                      , FLOM_ACCEPT_LOOP_ERROR
@@ -165,8 +164,7 @@ int flom_daemon()
             FLOM_TRACE(("flom_daemon: now daemonized!\n"));
 
             /* activate service */
-            if (FLOM_RC_OK != (ret_cod = flom_conns_init(&conns, AF_UNIX)))
-                THROW(CONNS_INIT_ERROR);
+            flom_conns_init(&conns, AF_UNIX);
             daemon_rc = flom_listen(&conns);
             
             /* sending reason code to father process */
@@ -222,8 +220,6 @@ int flom_daemon()
                 break;
             case CHDIR_ERROR:
                 ret_cod = FLOM_RC_CHDIR_ERROR;
-                break;
-            case CONNS_INIT_ERROR:
                 break;
             case WRITE_ERROR:
                 ret_cod = FLOM_RC_WRITE_ERROR;
@@ -343,7 +339,8 @@ int flom_listen_clean(flom_conns_t *conns)
 
 int flom_accept_loop(flom_conns_t *conns)
 {
-    enum Exception { CONNS_SET_EVENTS_ERROR
+    enum Exception { CONNS_GET_FDS_ERROR
+                     , CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
                      , ACCEPT_LOOP_CHKLOCKERS_ERROR1
                      , NEGATIVE_NUMBER_OF_LOCKERS_ERROR1
@@ -365,15 +362,17 @@ int flom_accept_loop(flom_conns_t *conns)
         
         while (loop) {
             int ready_fd;
-            nfds_t i, n;
+            guint i, n;
             struct pollfd *fds;
             gint number_of_lockers;
             
             flom_conns_clean(conns);
+            if (NULL == (fds = flom_conns_get_fds(conns)))
+                THROW(CONNS_GET_FDS_ERROR);
             if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(conns, POLLIN)))
                 THROW(CONNS_SET_EVENTS_ERROR);
-            ready_fd = poll(flom_conns_get_fds(conns),
-                            flom_conns_get_used(conns),
+            FLOM_TRACE(("flom_accept_loop: entering poll...\n"));
+            ready_fd = poll(fds, flom_conns_get_used(conns),
                             global_config.idle_time);
             FLOM_TRACE(("flom_accept_loop: ready_fd=%d\n", ready_fd));
             /* error on poll function */
@@ -403,8 +402,7 @@ int flom_accept_loop(flom_conns_t *conns)
             /* scanning file descriptors */
             n = flom_conns_get_used(conns);
             for (i=0; i<n; ++i) {
-                fds = flom_conns_get_fds(conns);
-                FLOM_TRACE(("flom_accept_loop: i=%d, fd=%d, POLLIN=%d, "
+                FLOM_TRACE(("flom_accept_loop: i=%u, fd=%d, POLLIN=%d, "
                             "POLLERR=%d, POLLHUP=%d, POLLNVAL=%d\n", i,
                             fds[i].fd,
                             fds[i].revents & POLLIN,
@@ -417,7 +415,7 @@ int flom_accept_loop(flom_conns_t *conns)
                         THROW(ACCEPT_LOOP_POLLIN_ERROR);
                 }
                 if ((fds[i].revents & POLLHUP) && (0 != i)) {
-                    FLOM_TRACE(("flom_accept_loop: client %i disconnected "
+                    FLOM_TRACE(("flom_accept_loop: client %u disconnected "
                                 "before categorization!\n", i));
                     if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                            conns, i)))
@@ -443,6 +441,9 @@ int flom_accept_loop(flom_conns_t *conns)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CONNS_GET_FDS_ERROR:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
             case CONNS_SET_EVENTS_ERROR:
                 break;
             case POLL_ERROR:
@@ -482,10 +483,11 @@ int flom_accept_loop(flom_conns_t *conns)
 
 
 
-int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
+int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                             flom_locker_array_t *lockers)
 {
-    enum Exception { ACCEPT_ERROR
+    enum Exception { CONNS_GET_CD_ERROR
+                     , ACCEPT_ERROR
                      , CONNS_ADD_ERROR
                      , MSG_RETRIEVE_ERROR
                      , CONNS_GET_MSG_ERROR
@@ -499,16 +501,18 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
     
     FLOM_TRACE(("flom_accept_loop_pollin\n"));
     TRY {
-        struct pollfd *fds = flom_conns_get_fds(conns);
-        FLOM_TRACE(("flom_accept_loop_pollin: id=%d, fd=%d\n",
-                    id, fds[id].fd));
+        struct flom_conn_data_s *c;
+        
+        if (NULL == (c = flom_conns_get_cd(conns, id)))
+            THROW(CONNS_GET_CD_ERROR);
+        FLOM_TRACE(("flom_accept_loop_pollin: id=%u, fd=%d\n",
+                    id, c->fd));
         if (0 == id) {
             /* it's a new connection */
             int conn_fd;
             struct sockaddr cliaddr;
             socklen_t clilen = sizeof(cliaddr);
-            if (-1 == (conn_fd = accept(
-                           fds[id].fd, &cliaddr, &clilen)))
+            if (-1 == (conn_fd = accept(c->fd, &cliaddr, &clilen)))
                 THROW(ACCEPT_ERROR);
             FLOM_TRACE(("flom_accept_loop_pollin: new client connected "
                         "with fd=%d\n", conn_fd));
@@ -522,7 +526,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
             GMarkupParseContext *gmpc;
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
-                                   fds[id].fd, buffer, sizeof(buffer),
+                                   c->fd, buffer, sizeof(buffer),
                                    &read_bytes)))
                 THROW(MSG_RETRIEVE_ERROR);
 
@@ -538,7 +542,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
             flom_msg_trace(msg);
             /* if the message is not valid the client must be terminated */
             if (FLOM_MSG_STATE_INVALID == msg->state) {
-                FLOM_TRACE(("flom_accept_loop_pollin: message from client %i "
+                FLOM_TRACE(("flom_accept_loop_pollin: message from client %u "
                             "is invalid, disconneting...\n", id));
                 if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                        conns, id)))
@@ -559,6 +563,9 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CONNS_GET_CD_ERROR:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
             case ACCEPT_ERROR:
                 ret_cod = FLOM_RC_ACCEPT_ERROR;
                 break;
@@ -591,7 +598,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
 
 
 
-int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
+int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                               flom_locker_array_t *lockers)
 {
     enum Exception { NULL_OBJECT1
@@ -708,7 +715,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
         flt.domain = flom_conns_get_domain(conns);
         flt.client_fd = flom_conns_get_fd(conns, id);
         flt.sequence = ++locker->write_sequence;
-        FLOM_TRACE(("flom_accept_loop_transfer: transferring connection %d "
+        FLOM_TRACE(("flom_accept_loop_transfer: transferring connection %u "
                     "(domain=%d, client_fd=%d, sequence=%d) to thread %p "
                     "using pipe %d\n", id, flt.domain, flt.client_fd,
                     flt.sequence, locker_thread, locker->write_pipe));

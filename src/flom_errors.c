@@ -154,6 +154,9 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_G_THREAD_CREATE_ERROR:
             return "ERROR: 'g_thread_create' function returned an error "
                 "condition";
+        case FLOM_RC_G_TRY_MALLOC_ERROR:
+            return "ERROR: 'g_try_malloc'/'g_try_malloc0' function returned "
+                "an error condition";
         case FLOM_RC_LISTEN_ERROR:
             return "ERROR: 'listen' function returned an error condition";
         case FLOM_RC_MALLOC_ERROR:

@@ -25,6 +25,9 @@
 
 
 
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
@@ -82,6 +85,10 @@
  */
 struct flom_conn_data_s {
     /**
+     * File descriptor associated to the connection
+     */
+    int       fd;
+    /**
      * Client address len
      */
     socklen_t addr_len;
@@ -115,26 +122,38 @@ struct flom_conn_data_s {
  * A structured object used to register connections
  */
 struct flom_conns_s {
-    /**
+    /* @@@ remove me
      * Number of allocated connections
-     */
     nfds_t allocated;
-    /**
+     */
+    /* @@@ remove me
      * Number of used connections
-     */
     nfds_t used;
-    /**
-     * Array used for poll function
      */
+    /**
+     * Array used for poll function (it must be re-generated before poll
+     * function)
+     */
+    struct pollfd *poll_array;
+    /* @@@ remove me!
     struct pollfd *fds;
+    */
     /**
      * Connection domain as specified when calling socket function
      */
     int domain;
     /**
-     * Array of connection data
+     * Array of connection data (it's an array of pointer for @ref
+     * flom_conn_data_s)
      */
+    GPtrArray     *array;
+    /**
+     * Array size
+     */
+    guint          n;
+    /* @@@ remove me! 
     struct flom_conn_data_s *cd;
+    */
 };
     
 
@@ -154,9 +173,8 @@ extern "C" {
      * @param conns IN/OUT object to be initialized
      * @param domain IN socket domain for all the connections managed by this
      *                  object
-     * @return a reason code
      */
-    int flom_conns_init(flom_conns_t *conns, int domain);
+    void flom_conns_init(flom_conns_t *conns, int domain);
 
 
 
@@ -175,14 +193,15 @@ extern "C" {
 
     
     /**
-     * Import a connection
+     * Import a connection: the imported connection (@ref flom_conn_data_s)
+     * must not be freed by the caller because the import does not make a copy
+     * of the structure, it picks up the passed reference
      * @param conns IN/OUT connections object
      * @param fd IN file descriptor
      * @param cd IN connection data struct
-     * @return a reason code
      */
-    int flom_conns_import(flom_conns_t *conns, int fd,
-                          const struct flom_conn_data_s *cd);
+    void flom_conns_import(flom_conns_t *conns, int fd,
+                           struct flom_conn_data_s *cd);
 
     
 
@@ -216,8 +235,8 @@ extern "C" {
      * @param conns IN connections object
      * @return the number of active connections
      */
-    static inline nfds_t flom_conns_get_used(const flom_conns_t *conns) {
-        return conns->used;
+    static inline guint flom_conns_get_used(const flom_conns_t *conns) {
+        return conns->n;
     }
 
     
@@ -229,9 +248,10 @@ extern "C" {
      * @return the associated file descriptor or @ref NULL_FD if any error
      *         happens
      */
-    static inline int flom_conns_get_fd(const flom_conns_t *conns, int id) {
-        if (id < conns->used)
-            return conns->fds[id].fd;
+    static inline int flom_conns_get_fd(const flom_conns_t *conns, guint id) {
+        if (id < conns->n)
+            return ((struct flom_conn_data_s *)
+                    g_ptr_array_index(conns->array, id))->fd;
         else
             return NULL_FD;
     }
@@ -245,10 +265,11 @@ extern "C" {
      * @param id IN identificator (position in array) of the connection
      * @return a reference to the asked structure or NULL
      */
-    static inline const struct flom_conn_data_s *flom_conns_get_cd(
-        const flom_conns_t *conns, int id) {
-        if (id < conns->used)
-            return &(conns->cd[id]);
+    static inline struct flom_conn_data_s *flom_conns_get_cd(
+        const flom_conns_t *conns, guint id) {
+        if (id < conns->n)
+            return ((struct flom_conn_data_s *)
+                    g_ptr_array_index(conns->array, id));
         else
             return NULL;
     }
@@ -256,11 +277,12 @@ extern "C" {
 
 
     /**
-     * @return the fds array to be used with poll function
+     * Build a new array for poll function and return it
+     * @param conns IN connections object
+     * @return the fds array to be used with poll function or NULL if an
+     *         error happens
      */
-    static inline struct pollfd *flom_conns_get_fds(flom_conns_t *conns) {
-        return conns->fds;
-    }
+    struct pollfd *flom_conns_get_fds(flom_conns_t *conns);
 
 
 
@@ -271,9 +293,10 @@ extern "C" {
      * @return the associated message or NULL if any error happens
      */
     static inline struct flom_msg_s *flom_conns_get_msg(
-        flom_conns_t *conns, int id) {
-        if (id < conns->used)
-            return conns->cd[id].msg;
+        flom_conns_t *conns, guint id) {
+        if (id < conns->n)
+            return ((struct flom_conn_data_s *)
+                    g_ptr_array_index(conns->array, id))->msg;
         else
             return NULL;
     }
@@ -287,9 +310,10 @@ extern "C" {
      * @return the associated GMarkupParseContext or NULL if any error happens
      */
     static inline GMarkupParseContext *flom_conns_get_gmpc(        
-        flom_conns_t *conns, int id) {
-        if (id < conns->used)
-            return conns->cd[id].gmpc;
+        flom_conns_t *conns, guint id) {
+        if (id < conns->n)
+            return ((struct flom_conn_data_s *)
+                    g_ptr_array_index(conns->array, id))->gmpc;
         else
             return NULL;
     }
@@ -297,17 +321,9 @@ extern "C" {
 
 
     /**
-     * Search the id of the connection associated to a file descriptor
-     * @param conns IN connections object
-     * @param fd IN file descriptor associated to the searched connection
-     * @return the id of the connection
-     */
-    nfds_t flom_conns_search_id(const flom_conns_t *conns, int fd);
-
-    
-    
-    /**
      * Set events field for every connection in the object
+     * NOTE: it must be called after @ref flom_conns_get_fds because it
+     *       resize the poll array if necessary
      * @param conns IN/OUT connections object
      * @param events IN new value for every events field
      * @return a reason code
@@ -317,15 +333,6 @@ extern "C" {
 
 
     /**
-     * Expand object size
-     * @param conns IN/OUT connections object
-     * @return a reason code
-     */
-    int flom_conns_expand(flom_conns_t *conns);
-
-    
-    
-    /**
      * Close a file descriptor and set it to @ref NULL_FD; use
      * @ref flom_conns_clean to remove the connections associated to closed
      * file descriptors
@@ -333,7 +340,7 @@ extern "C" {
      * @param id IN connection must be closed
      * @return a reason code
      */
-    int flom_conns_close_fd(flom_conns_t *conns, nfds_t id);
+    int flom_conns_close_fd(flom_conns_t *conns, guint id);
 
 
 
@@ -344,7 +351,7 @@ extern "C" {
      * @param id IN connection must be marked
      * @return a reason code
      */
-    int flom_conns_trns_fd(flom_conns_t *conns, nfds_t id);
+    int flom_conns_trns_fd(flom_conns_t *conns, guint id);
 
     
 
@@ -361,6 +368,22 @@ extern "C" {
      * @param conns IN/OUT connections object
      */
     void flom_conns_free(flom_conns_t *conns);
+
+
+
+    /**
+     * Trace the content of a connection data struct
+     * @param conn IN connection data to trace
+     */
+    void flom_conn_data_trace(const struct flom_conn_data_s *conn);
+
+
+    
+    /**
+     * Trace the content of a connections object
+     * @param conns IN connections object to trace
+     */
+    void flom_conns_trace(const flom_conns_t *conns);
 
 
     

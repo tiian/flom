@@ -163,6 +163,7 @@ void flom_trace_hex_data(const char *prefix, const byte_t *data,
     fprintf(out_stream, "\n");
     /* remove the lock from mutex */
     g_static_mutex_unlock(&flom_trace_mutex);
+    fflush(out_stream);
 #else
 # error "vfprintf is necessary for flom_trace_hex_data function!"
 #endif

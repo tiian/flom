@@ -692,7 +692,7 @@ int flom_msg_trace(const struct flom_msg_s *msg)
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
-    FLOM_TRACE(("flom_msg_trace\n"));
+    FLOM_TRACE(("flom_msg_trace: object=%p\n", msg));
     TRY {
         FLOM_TRACE(("flom_msg_trace: state=%d,header[level=%d,pvs.verb=%d,"
                     "pvs.step=%d]\n", msg->state,

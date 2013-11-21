@@ -92,6 +92,7 @@ struct flom_locker_s {
 struct flom_locker_array_s {
     /**
      * Number of available lockers
+     @@@ change gint with guint...
      */
     gint       n;
     /**
@@ -241,7 +242,7 @@ extern "C" {
      * @return a reason code
      */
     int flom_locker_loop_pollin(struct flom_locker_s *locker,
-                                flom_conns_t *conns, nfds_t id);
+                                flom_conns_t *conns, guint id);
 
 
 

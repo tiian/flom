@@ -34,61 +34,13 @@
 
 
 
-int flom_conns_init(flom_conns_t *conns, int domain)
+void flom_conns_init(flom_conns_t *conns, int domain)
 {
-    enum Exception { MALLOC_ERROR1
-                     , MALLOC_ERROR2
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
-    FLOM_TRACE(("flom_conns_init\n"));
-    TRY {
-        void *tmp;
-        nfds_t i;
-        
-        /* reset */
-        conns->allocated = 0;
-        conns->used = 0;
-        conns->fds = NULL;
-        conns->domain = domain;
-        conns->cd = NULL;
-        /* allocate with default size */
-        if (NULL == (tmp = malloc(sizeof(struct pollfd) *
-                                  FLOM_CONNS_DEFAULT_ALLOCATION)))
-            THROW(MALLOC_ERROR1);
-        /* reset the content of the array */
-        memset(tmp, 0, sizeof(struct pollfd) *
-               FLOM_CONNS_DEFAULT_ALLOCATION);
-        conns->fds = (struct pollfd *)tmp;
-        for (i=0; i<FLOM_CONNS_DEFAULT_ALLOCATION; ++i)
-            conns->fds[i].fd = NULL_FD;
-        if (NULL == (tmp = malloc(sizeof(struct flom_conn_data_s) *
-                                  FLOM_CONNS_DEFAULT_ALLOCATION)))
-            THROW(MALLOC_ERROR2);
-        /* reset the content of the array */
-        memset(tmp, 0, sizeof(struct flom_conn_data_s) *
-               FLOM_CONNS_DEFAULT_ALLOCATION);
-        conns->cd = (struct flom_conn_data_s *)tmp;
-        conns->allocated = FLOM_CONNS_DEFAULT_ALLOCATION;
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case MALLOC_ERROR1:
-                ret_cod = FLOM_RC_MALLOC_ERROR;
-                break;
-            case MALLOC_ERROR2:
-                ret_cod = FLOM_RC_MALLOC_ERROR;
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("flom_conns_init/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
+    FLOM_TRACE(("flom_conns_init\n"));        
+    conns->n = 0;
+    conns->poll_array = NULL;
+    conns->domain = domain;
+    conns->array = g_ptr_array_new();
 }
 
 
@@ -96,55 +48,58 @@ int flom_conns_init(flom_conns_t *conns, int domain)
 int flom_conns_add(flom_conns_t *conns, int fd,
                    socklen_t addr_len, const struct sockaddr *sa)
 {
-    enum Exception { CONNS_EXPAND_ERROR
+    enum Exception { G_TRY_MALLOC_ERROR1
                      , INVALID_DOMAIN
-                     , MALLOC_ERROR
+                     , G_TRY_MALLOC_ERROR2
                      , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    struct flom_conn_data_s *tmp;
     
     FLOM_TRACE(("flom_conns_add\n"));
     TRY {
-        if (conns->used == conns->allocated) {
-            if (FLOM_RC_OK != (ret_cod = flom_conns_expand(conns)))
-                THROW(CONNS_EXPAND_ERROR);
-        }
-        conns->fds[conns->used].fd = fd;
-        conns->fds[conns->used].events = 0;
-        conns->fds[conns->used].revents = 0;
-        conns->cd[conns->used].addr_len = addr_len;
+        if (NULL == (tmp = g_try_malloc0(sizeof(struct flom_conn_data_s))))
+            THROW(G_TRY_MALLOC_ERROR1);
+        FLOM_TRACE(("flom_conns_add: allocated a new connection:%p\n", tmp));
         switch (conns->domain) {
             case AF_UNIX:
-                conns->cd[conns->used].saun = *((struct sockaddr_un *)sa);
+                tmp->saun = *((struct sockaddr_un *)sa);
                 break;
             case AF_INET:
-                conns->cd[conns->used].sain = *((struct sockaddr_in *)sa);
+                tmp->sain = *((struct sockaddr_in *)sa);
                 break;
             default:
                 THROW(INVALID_DOMAIN);
         }
+        tmp->fd = fd;
+        tmp->addr_len = addr_len;
         /* reset the associated message */
-        if (NULL == (conns->cd[conns->used].msg =
-                     malloc(sizeof(struct flom_msg_s))))
-            THROW(MALLOC_ERROR);
-        flom_msg_init(conns->cd[conns->used].msg);
+        if (NULL == (tmp->msg =
+                     g_try_malloc(sizeof(struct flom_msg_s))))
+            THROW(G_TRY_MALLOC_ERROR2);
+        FLOM_TRACE(("flom_conns_add: allocated a new message:%p\n", tmp->msg));
+        flom_msg_init(tmp->msg);
+        
         /* initialize the associated parser */
-        conns->cd[conns->used].gmpc = g_markup_parse_context_new (
-            &flom_msg_parser, 0, (gpointer)(conns->cd[conns->used].msg), NULL);
-        if (NULL == conns->cd[conns->used].gmpc)
+        tmp->gmpc = g_markup_parse_context_new (
+            &flom_msg_parser, 0, (gpointer)(tmp->msg), NULL);
+        if (NULL == tmp->gmpc)
             THROW(G_MARKUP_PARSE_CONTEXT_NEW_ERROR);
-        conns->used++;
+        g_ptr_array_add(conns->array, tmp);
+        conns->n++;
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case CONNS_EXPAND_ERROR:
+            case G_TRY_MALLOC_ERROR1:
+                ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
                 break;
             case INVALID_DOMAIN:
                 ret_cod = FLOM_RC_OBJ_CORRUPTED;
                 break;
-            case MALLOC_ERROR:
-                ret_cod = FLOM_RC_MALLOC_ERROR;
+            case G_TRY_MALLOC_ERROR2:
+                ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
                 break;
             case G_MARKUP_PARSE_CONTEXT_NEW_ERROR:
                 ret_cod = FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR;
@@ -156,6 +111,12 @@ int flom_conns_add(flom_conns_t *conns, int fd,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    if (NONE != excp) {
+        if (G_TRY_MALLOC_ERROR2 < excp) /* release message */
+            g_free(tmp->msg);
+        if (G_TRY_MALLOC_ERROR1 < excp) /* release connection data */
+            g_free(tmp);
+    }
     FLOM_TRACE(("flom_conns_add/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -163,42 +124,42 @@ int flom_conns_add(flom_conns_t *conns, int fd,
 
 
 
-int flom_conns_import(flom_conns_t *conns, int fd,
-                      const struct flom_conn_data_s *cd)
+void flom_conns_import(flom_conns_t *conns, int fd,
+                      struct flom_conn_data_s *cd)
 {
-    enum Exception { CONNS_EXPAND_ERROR
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
     FLOM_TRACE(("flom_conns_import\n"));
-    TRY {
-        if (conns->used == conns->allocated) {
-            if (FLOM_RC_OK != (ret_cod = flom_conns_expand(conns)))
-                THROW(CONNS_EXPAND_ERROR);
-        }
-        conns->fds[conns->used].fd = fd;
-        conns->fds[conns->used].events = 0;
-        conns->fds[conns->used].revents = 0;
-        conns->cd[conns->used] = *cd;
-        conns->used++;
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case CONNS_EXPAND_ERROR:
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("flom_conns_import/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
+    flom_conn_data_trace(cd);
+    g_ptr_array_add(conns->array, cd);
+    conns->n++;
 }
     
+
+
+struct pollfd *flom_conns_get_fds(flom_conns_t *conns)
+{
+    struct pollfd *tmp = NULL;
+    guint i;
+    
+    FLOM_TRACE(("flom_conns_get_fds\n"));
+    /* resize the previous poll array */
+    if (NULL == (tmp = (struct pollfd *)realloc(
+                     conns->poll_array,
+                     (size_t)(conns->n*sizeof(struct pollfd)))))
+        return NULL;
+    
+    /* reset the array */
+    memset(tmp, 0, (size_t)(conns->n*sizeof(struct pollfd)));
+    /* fill the poll array with file descriptors */
+    for (i=0; i<conns->n; ++i) {
+        tmp[i].fd =
+            ((struct flom_conn_data_s *)g_ptr_array_index(
+                conns->array, i))->fd;
+    }
+    conns->poll_array = tmp;
+    return conns->poll_array;
+}
+
+
 
 
 int flom_conns_set_events(flom_conns_t *conns, short events)
@@ -209,13 +170,16 @@ int flom_conns_set_events(flom_conns_t *conns, short events)
     
     FLOM_TRACE(("flom_conns_set_events\n"));
     TRY {
-        nfds_t i;
-        for (i=0; i<conns->used; ++i) {
-            if (NULL_FD != conns->fds[i].fd)
-                conns->fds[i].events = events;
+        guint i;
+        for (i=0; i<conns->n; ++i) {
+            struct flom_conn_data_s *c =
+                (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
+            if (NULL_FD != c->fd)
+                conns->poll_array[i].events = events;
             else {
-                FLOM_TRACE(("flom_conns_set_events: i=%d, "
-                            "conns->fds[i].fd=%d\n", i, conns->fds[i].fd));
+                FLOM_TRACE(("flom_conns_set_events: i=%u, "
+                            "conns->poll_array[i].fd=%d\n", i,
+                            conns->poll_array[i].fd));
                 THROW(OBJECT_CORRUPTED);
             }
         }
@@ -240,75 +204,7 @@ int flom_conns_set_events(flom_conns_t *conns, short events)
 
 
 
-int flom_conns_expand(flom_conns_t *conns)
-{
-    enum Exception { INTERNAL_ERROR
-                     , MALLOC_ERROR1
-                     , MALLOC_ERROR2
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
-    FLOM_TRACE(("flom_conns_expand\n"));
-    TRY {
-        void *tmp;
-        nfds_t i;
-        nfds_t new_allocated =
-            conns->allocated * (100 + FLOM_CONNS_PERCENT_ALLOCATION) /
-            100  + 1;
-        if (conns->allocated >= new_allocated) {
-            FLOM_TRACE(("flom_conns_expand: conns->allocated=%d, "
-                        "new_allocated=%d\n",
-                        conns->allocated, new_allocated));
-            THROW(INTERNAL_ERROR);
-        }
-        FLOM_TRACE(("flom_conns_expand: expanding from %d to %d connections\n",
-                    conns->allocated, new_allocated));
-        if (NULL == (tmp = realloc(conns->fds, sizeof(struct pollfd) *
-                                   new_allocated)))
-            THROW(MALLOC_ERROR1);
-        /* reset the content of the new allocated memory */
-        memset(tmp + conns->allocated * sizeof(struct pollfd), 0,
-               (new_allocated - conns->allocated) * sizeof(struct pollfd));
-        conns->fds = (struct pollfd *)tmp;
-        for (i=conns->allocated; i<new_allocated; ++i)
-            conns->fds[i].fd = NULL_FD;
-        if (NULL == (tmp = realloc(conns->cd, sizeof(struct flom_conn_data_s) *
-                                   new_allocated)))
-            THROW(MALLOC_ERROR2);
-        /* reset the content of the new allocated memory */
-        memset(tmp + conns->allocated * sizeof(struct flom_conn_data_s), 0,
-               (new_allocated - conns->allocated) *
-               sizeof(struct flom_conn_data_s));
-        conns->cd = (struct flom_conn_data_s *)tmp;
-        conns->allocated = new_allocated;
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case INTERNAL_ERROR:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-                break;
-            case MALLOC_ERROR1:
-                ret_cod = FLOM_RC_MALLOC_ERROR;
-                break;
-            case MALLOC_ERROR2:
-                ret_cod = FLOM_RC_MALLOC_ERROR;
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("flom_conns_expand/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-int flom_conns_close_fd(flom_conns_t *conns, nfds_t id)
+int flom_conns_close_fd(flom_conns_t *conns, guint id)
 {
     enum Exception { OUT_OF_RANGE
                      , CLOSE_ERROR
@@ -317,20 +213,21 @@ int flom_conns_close_fd(flom_conns_t *conns, nfds_t id)
     
     FLOM_TRACE(("flom_conns_close_fd\n"));
     TRY {
-        FLOM_TRACE(("flom_conns_close: closing connection id=%d with fd=%d\n",
-                    id, conns->fds[id].fd));
-        if (id < 0 || id >= conns->used)
+        struct flom_conn_data_s *c;
+        FLOM_TRACE(("flom_conns_close: closing connection id=%u\n", id));
+        if (id >= conns->n)
             THROW(OUT_OF_RANGE);
-        if (NULL_FD == conns->fds[id].fd) {
-            FLOM_TRACE(("flom_conns_close: connection id=%d already closed, "
+        c = (struct flom_conn_data_s *)g_ptr_array_index(conns->array, id);
+        if (NULL_FD == c->fd) {
+            FLOM_TRACE(("flom_conns_close: connection id=%u already closed, "
                         "skipping...\n", id));
-        } else if (TRNS_FD == conns->fds[id].fd) {
-            FLOM_TRACE(("flom_conns_close: connection id=%d transferred, "
+        } else if (TRNS_FD == c->fd) {
+            FLOM_TRACE(("flom_conns_close: connection id=%u transferred, "
                         "skipping...\n", id));
         } else {
-            if (0 != close(conns->fds[id].fd))
+            if (0 != close(c->fd))
                 THROW(CLOSE_ERROR);
-            conns->fds[id].fd = NULL_FD;
+            c->fd = NULL_FD;
         }
         THROW(NONE);
     } CATCH {
@@ -355,7 +252,7 @@ int flom_conns_close_fd(flom_conns_t *conns, nfds_t id)
 
 
 
-int flom_conns_trns_fd(flom_conns_t *conns, nfds_t id)
+int flom_conns_trns_fd(flom_conns_t *conns, guint id)
 {
     enum Exception { OUT_OF_RANGE
                      , NONE } excp;
@@ -363,11 +260,13 @@ int flom_conns_trns_fd(flom_conns_t *conns, nfds_t id)
     
     FLOM_TRACE(("flom_conns_trns_fd\n"));
     TRY {
+        struct flom_conn_data_s *c;
         FLOM_TRACE(("flom_conns_trns: marking as transferred connection "
-                    "id=%d with fd=%d\n", id, conns->fds[id].fd));
-        if (id < 0 || id >= conns->used)
+                    "id=%u\n", id));
+        if (id >= conns->n)
             THROW(OUT_OF_RANGE);
-        conns->fds[id].fd = TRNS_FD;
+        c = (struct flom_conn_data_s *)g_ptr_array_index(conns->array, id);
+        c->fd = TRNS_FD;
 
         THROW(NONE);
     } CATCH {
@@ -391,43 +290,40 @@ int flom_conns_trns_fd(flom_conns_t *conns, nfds_t id)
 
 void flom_conns_clean(flom_conns_t *conns)
 {
-    nfds_t i=0;
+    guint i=0;
     FLOM_TRACE(("flom_conns_clean: starting...\n"));
-    while (i<conns->used) {
-        nfds_t last = conns->used-1;
-        FLOM_TRACE(("flom_conns_clean: i=%d, fd=%d %s\n",
-                    i, conns->fds[i].fd,
-                    NULL_FD == conns->fds[i].fd ? "(removing...)" : ""));
-        if (NULL_FD == conns->fds[i].fd) {
+    while (i<conns->n) {
+        struct flom_conn_data_s *c =
+            (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
+        FLOM_TRACE(("flom_conns_clean: i=%u, fd=%d %s\n",
+                    i, c->fd, NULL_FD == c->fd ? "(removing...)" : ""));
+        flom_conn_data_trace(c);
+        if (NULL_FD == c->fd) {
             /* connections with NULL_FD are no more valid and must be
              * removed and destroyed */
             /* removing message object */
-            if (NULL != conns->cd[i].msg) {
-                flom_msg_free(conns->cd[i].msg);
-                free(conns->cd[i].msg);
-                conns->cd[i].msg = NULL;
+            if (NULL != c->msg) {
+                flom_msg_free(c->msg);
+                g_free(c->msg);
+                c->msg = NULL;
             }
             /* removing parser object */
-            if (NULL != conns->cd[i].gmpc) {
-                g_markup_parse_context_free(conns->cd[i].gmpc);
-                conns->cd[i].gmpc = NULL;
+            if (NULL != c->gmpc) {
+                g_markup_parse_context_free(c->gmpc);
+                c->gmpc = NULL;
             }
-            if (i != last) {
-                /* moving last connection to this position */
-                conns->fds[i] = conns->fds[last];
-                conns->cd[i] = conns->cd[last];
-            }
-            conns->used--;
-        } else if (TRNS_FD == conns->fds[i].fd) {
+            /* removing from array */
+            g_ptr_array_remove_index(conns->array, i);
+            /* release connection */
+            FLOM_TRACE(("flom_conns_clean: releasing connection %p\n", c));
+            g_free(c);
+            conns->n--;
+        } else if (TRNS_FD == c->fd) {
             /* connections with TRNS_FD are no still valid but they are
-               now managed by a different thread: they must be removed
+               now managed by a different thread: they must be unlinked
                but NOT destroyed */
-            if (i != last) {
-                /* moving last connection to this position */
-                conns->fds[i] = conns->fds[last];
-                conns->cd[i] = conns->cd[last];
-            }
-            conns->used--;
+            g_ptr_array_remove_index(conns->array, i);
+            conns->n--;
         } else i++;
     }
         
@@ -438,19 +334,41 @@ void flom_conns_clean(flom_conns_t *conns)
 
 void flom_conns_free(flom_conns_t *conns)
 {
-    nfds_t i;
+    guint i;
     FLOM_TRACE(("flom_conns_free: starting...\n"));
-    for (i=0; i<conns->used; ++i)
-        if (NULL_FD != conns->fds[i].fd) {
-            close(conns->fds[i].fd);
-            conns->fds[i].fd = NULL_FD;
+    for (i=0; i<conns->n; ++i) {
+        struct flom_conn_data_s *c =
+            (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
+        if (NULL_FD != c->fd) {
+            close(c->fd);
+            c->fd = NULL_FD;
         }
+    }
     flom_conns_clean(conns);
-    free(conns->fds);
-    conns->fds = NULL;
-    free(conns->cd);
-    conns->cd = NULL;
-    conns->used = conns->allocated = 0;
+    g_free(conns->poll_array);
+    conns->poll_array = NULL;
+    g_ptr_array_free(conns->array, TRUE);
+    conns->array = NULL;
+    conns->n = 0;
     FLOM_TRACE(("flom_conns_free: completed\n"));
 }
 
+
+
+void flom_conn_data_trace(const struct flom_conn_data_s *conn)
+{
+    FLOM_TRACE(("flom_conn_data_trace: object=%p\n", conn));
+    FLOM_TRACE(("flom_conn_data_trace: "
+                "fd=%d, msg=%p, gmpc=%p, addr_len=%d\n",
+                conn->fd, conn->msg, conn->gmpc, conn->addr_len));
+}
+
+
+
+void flom_conns_trace(const flom_conns_t *conns)
+{
+    FLOM_TRACE(("flom_conns_trace: object=%p\n", conns));
+    FLOM_TRACE(("flom_conns_trace: domain=%d, n=%u, array=%p, "
+                "poll_array=%p\n",
+                conns->domain, conns->n, conns->array, conns->poll_array));
+}

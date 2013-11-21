@@ -93,7 +93,7 @@ extern "C" {
      * @param lockers IN/OUT array of lockers serving the connected clients
      * @return a reason code
      */
-    int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
+    int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                                 flom_locker_array_t *lockers);
 
 
@@ -105,7 +105,7 @@ extern "C" {
      * @param lockers IN/OUT array of lockers serving the connected clients
      * @return a reason code
      */     
-    int flom_accept_loop_transfer(flom_conns_t *conns, nfds_t id,
+    int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                                   flom_locker_array_t *lockers);
 
     

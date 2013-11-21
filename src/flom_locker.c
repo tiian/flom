@@ -106,8 +106,8 @@ void flom_locker_array_del(flom_locker_array_t *lockers,
 
 gpointer flom_locker_loop(gpointer data)
 {
-    enum Exception { CONNS_INIT_ERROR
-                     , CONNS_ADD_ERROR
+    enum Exception { CONNS_ADD_ERROR
+                     , CONNS_GET_FDS_ERROR
                      , CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
                      , ACCEPT_LOOP_POLLIN_ERROR
@@ -131,8 +131,7 @@ gpointer flom_locker_loop(gpointer data)
                     flom_resource_get_name(&locker->resource),
                     flom_resource_get_type(&locker->resource)));
         /* initialize a connections object for this locker thread */
-        if (FLOM_RC_OK != (ret_cod = flom_conns_init(&conns, AF_UNIX)))
-            THROW(CONNS_INIT_ERROR);
+        flom_conns_init(&conns, AF_UNIX);
         /* add the parent communication pipe to connections */
         memset(&cd, 0, sizeof(cd));
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
@@ -142,15 +141,19 @@ gpointer flom_locker_loop(gpointer data)
         
         while (loop) {
             int ready_fd;
-            nfds_t i, n;
+            guint i, n;
             struct pollfd *fds;
 
+            flom_conns_trace(&conns);
             flom_conns_clean(&conns);
+            flom_conns_trace(&conns);
+            if (NULL == (fds = flom_conns_get_fds(&conns)))
+                THROW(CONNS_GET_FDS_ERROR);
             if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(
                                    &conns, POLLIN)))
                 THROW(CONNS_SET_EVENTS_ERROR);
-            ready_fd = poll(flom_conns_get_fds(&conns),
-                            flom_conns_get_used(&conns),
+            FLOM_TRACE(("flom_locker_loop: entering poll...\n"));
+            ready_fd = poll(fds, flom_conns_get_used(&conns),
                             global_config.idle_time);
             FLOM_TRACE(("flom_locker_loop: ready_fd=%d\n", ready_fd));
             /* error on poll function */
@@ -173,8 +176,7 @@ gpointer flom_locker_loop(gpointer data)
             /* scanning file descriptors */
             n = flom_conns_get_used(&conns);
             for (i=0; i<n; ++i) {
-                fds = flom_conns_get_fds(&conns);
-                FLOM_TRACE(("flom_locker_loop: i=%d, fd=%d, POLLIN=%d, "
+                FLOM_TRACE(("flom_locker_loop: i=%u, fd=%d, POLLIN=%d, "
                             "POLLERR=%d, POLLHUP=%d, POLLNVAL=%d\n", i,
                             fds[i].fd,
                             fds[i].revents & POLLIN,
@@ -189,7 +191,7 @@ gpointer flom_locker_loop(gpointer data)
                 if (fds[i].revents & POLLHUP) {
                     if (0 != i) {
                         /* client termination */
-                        FLOM_TRACE(("flom_locker_loop: client %i "
+                        FLOM_TRACE(("flom_locker_loop: client %u "
                                     "disconnected\n", i));
                         /* @@@ */
                         if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
@@ -215,8 +217,11 @@ gpointer flom_locker_loop(gpointer data)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case CONNS_INIT_ERROR:
             case CONNS_ADD_ERROR:
+                break;
+            case CONNS_GET_FDS_ERROR:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
             case CONNS_SET_EVENTS_ERROR:
             case POLL_ERROR:
             case ACCEPT_LOOP_POLLIN_ERROR:
@@ -234,8 +239,7 @@ gpointer flom_locker_loop(gpointer data)
         } /* switch (excp) */
     } /* TRY-CATCH */
     /* clean-up connections object */
-    if (CONNS_INIT_ERROR < excp)
-        flom_conns_free(&conns);
+    flom_conns_free(&conns);
     FLOM_TRACE(("flom_locker_loop/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     FLOM_TRACE(("flom_locker_loop: this thread completed service\n"));
@@ -245,11 +249,12 @@ gpointer flom_locker_loop(gpointer data)
 
 
 int flom_locker_loop_pollin(struct flom_locker_s *locker,
-                            flom_conns_t *conns, nfds_t id)
+                            flom_conns_t *conns, guint id)
 {
-    enum Exception { READ_ERROR1
+    enum Exception { CONNS_GET_CD_ERROR
+                     , G_TRY_MALLOC_ERROR
+                     , READ_ERROR1
                      , READ_ERROR2
-                     , CONNS_IMPORT_ERROR
                      , MSG_RETRIEVE_ERROR
                      , CONNS_CLOSE_ERROR1
                      , CONNS_GET_MSG_ERROR
@@ -260,18 +265,24 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
+    struct flom_conn_data_s *new_cd = NULL;
+    
     FLOM_TRACE(("flom_locker_loop_pollin\n"));
     TRY {
-        struct pollfd *fds = flom_conns_get_fds(conns);
         struct flom_msg_s *msg = NULL;
+        struct flom_conn_data_s *curr_cd;
         
+        if (NULL == (curr_cd = flom_conns_get_cd(conns, id)))
+            THROW(CONNS_GET_CD_ERROR);
         FLOM_TRACE(("flom_locker_loop_pollin: id=%d, fd=%d\n",
-                    id, fds[id].fd));
+                    id, curr_cd->fd));
         locker->idle_periods = 0;
         if (0 == id) {
             struct flom_locker_token_s flt;
             /* it's a connection passed by parent thread */
-            struct flom_conn_data_s cd;
+            if (NULL == (new_cd = g_try_malloc0(
+                             sizeof(struct flom_conn_data_s))))
+                THROW(G_TRY_MALLOC_ERROR);
             /* pick-up token from parent thread */
             if (sizeof(flt) != read(
                     locker->read_pipe, &flt, sizeof(flt)))
@@ -282,23 +293,23 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                         flt.domain, flt.client_fd, flt.sequence,
                         locker->read_pipe));
             /* pick-up connection data from parent thread */
-            if (sizeof(cd) != read(locker->read_pipe, &cd, sizeof(cd)))
+            if (sizeof(struct flom_conn_data_s) !=
+                read(locker->read_pipe, new_cd,
+                     sizeof(struct flom_conn_data_s)))
                 THROW(READ_ERROR2);
             /* import the connection passed by parent thread */
-            if (FLOM_RC_OK != (ret_cod = flom_conns_import(
-                                   conns, flt.client_fd, &cd)))
-                THROW(CONNS_IMPORT_ERROR);
+            flom_conns_import(conns, flt.client_fd, new_cd);
             /* set the locker sequence */
             locker->read_sequence = flt.sequence;
             /* retrieve the message sent by the client */
-            msg = cd.msg;
+            msg = new_cd->msg;
         } else {
             char buffer[FLOM_MSG_BUFFER_SIZE];
             ssize_t read_bytes;
             GMarkupParseContext *gmpc;
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
-                                   fds[id].fd, buffer, sizeof(buffer),
+                                   curr_cd->fd, buffer, sizeof(buffer),
                                    &read_bytes)))
                 THROW(MSG_RETRIEVE_ERROR);
 
@@ -306,7 +317,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 /* connection closed */
                 FLOM_TRACE(("flom_locker_loop_pollin: id=%d, fd=%d "
                             "returned 0 bytes: disconnecting...\n",
-                            id, fds[id].fd));
+                            id, curr_cd->fd));
                 if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                        conns, id)))
                     THROW(CONNS_CLOSE_ERROR1);
@@ -348,11 +359,16 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CONNS_GET_CD_ERROR:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case G_TRY_MALLOC_ERROR:
+                ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
+                break;
             case READ_ERROR1:
             case READ_ERROR2:
                 ret_cod = FLOM_RC_READ_ERROR;
                 break;
-            case CONNS_IMPORT_ERROR:
             case MSG_RETRIEVE_ERROR:
             case CONNS_CLOSE_ERROR1:
                 break;
@@ -370,6 +386,10 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    if (NONE > excp && G_TRY_MALLOC_ERROR < excp) {
+        FLOM_TRACE(("flom_locker_loop_pollin: releasing new_cd=%p\n"));
+        g_free(new_cd);
+    }
     FLOM_TRACE(("flom_locker_loop_pollin/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
