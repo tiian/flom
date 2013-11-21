@@ -295,6 +295,16 @@ extern "C" {
     }
 
 
+
+    /**
+     * Search the id of the connection associated to a file descriptor
+     * @param conns IN connections object
+     * @param fd IN file descriptor associated to the searched connection
+     * @return the id of the connection
+     */
+    nfds_t flom_conns_search_id(const flom_conns_t *conns, int fd);
+
+    
     
     /**
      * Set events field for every connection in the object

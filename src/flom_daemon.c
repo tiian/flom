@@ -492,6 +492,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
                      , CONNS_GET_GMPC_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , CONNS_CLOSE_ERROR
+                     , PROTOCOL_ERROR
                      , ACCEPT_LOOP_TRANSFER_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -545,11 +546,15 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
             }
             /* check if the message is completely parsed and can be transferred
                to a slave thread (a locker) */
-            if (FLOM_MSG_STATE_READY == msg->state)
+            if (FLOM_MSG_STATE_READY == msg->state) {
+                /* check the message is protocol correct */
+                if (!flom_msg_check_protocol(msg, TRUE))
+                    THROW(PROTOCOL_ERROR);
                 if (FLOM_RC_OK != (ret_cod = flom_accept_loop_transfer(
                                        conns, id, lockers)))
                     THROW(ACCEPT_LOOP_TRANSFER_ERROR);
-        }
+            } /* if (FLOM_MSG_STATE_READY == msg->state) */
+        } /* if (0 == id) */
         
         THROW(NONE);
     } CATCH {
@@ -566,6 +571,10 @@ int flom_accept_loop_pollin(flom_conns_t *conns, nfds_t id,
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
             case CONNS_CLOSE_ERROR:
+                break;
+            case PROTOCOL_ERROR:
+                ret_cod = FLOM_RC_PROTOCOL_ERROR;
+                break;
             case ACCEPT_LOOP_TRANSFER_ERROR:
                 break;
             case NONE:

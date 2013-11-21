@@ -40,12 +40,12 @@ verb=1 (lock)
     <resource name="_RESOURCE" type="5" wait="1">
   </msg>
 
-  server -> client message (answer: lock obtained/not obtained/wait)
+  server->client message (answer: lock obtained/not obtained/wait)
   <msg level="0" verb="1" step="16">
     <answer rc="0/..."/>
   </msg>
 
-  server -> client message (answer: lock obtained)
+  server->client message (answer: lock obtained)
   <msg level="0" verb="1" step="24">
     <answer rc="0/..."/>
   </msg>
@@ -87,7 +87,7 @@ verb=3 (ping)
   <msg level="0" verb="3" step="8">
   </msg>
 
-  client -> server message (I'am alive)
+  client->server message (I'am alive)
   <msg level="0" verb="3" step="16">
   </msg>
 

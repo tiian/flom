@@ -192,20 +192,51 @@ void flom_resource_free(flom_resource_t *resource)
 
 
 
-int flom_resource_simple_inmsg(flom_resource_t *resource,
+int flom_resource_simple_inmsg(flom_resource_t *resource, nfds_t id,
                                struct flom_msg_s *msg)
 {
-    enum Exception { NONE } excp;
+    enum Exception { PROTOCOL_ERROR
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    static const int lock_table[FLOM_LOCK_TYPE_N][FLOM_LOCK_TYPE_N] =
+        { { TRUE,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE } ,
+          { TRUE,  TRUE,  TRUE,  TRUE,  TRUE,  FALSE } ,
+          { TRUE,  TRUE,  TRUE,  FALSE, FALSE, FALSE } ,
+          { TRUE,  TRUE,  FALSE, TRUE,  FALSE, FALSE } ,
+          { TRUE,  TRUE,  FALSE, FALSE, FALSE, FALSE } ,
+          { TRUE,  FALSE, FALSE, FALSE, FALSE, FALSE } };
     
     FLOM_TRACE(("flom_resource_simple_inmsg\n"));
     TRY {
         flom_msg_trace(msg);
         /* @@@ put automata code here */
+        switch (msg->header.pvs.verb) {
+            case FLOM_MSG_VERB_LOCK:
+                FLOM_TRACE(("flom_resource_simple_inmsg: current_lock=%d, "
+                            "asked_lock=%d, lock_table[%d][%d]=%d\n",
+                            resource->data.simple.current_lock,
+                            msg->body.lock_8.resource.type,
+                            resource->data.simple.current_lock,
+                            msg->body.lock_8.resource.type,
+                            lock_table[resource->data.simple.current_lock]
+                            [msg->body.lock_8.resource.type]));
+                /*
+                if (lock_table[][])
+                */
+                break;
+            case FLOM_MSG_VERB_UNLOCK:
+                break;
+            default:
+                THROW(PROTOCOL_ERROR);
+        } /* switch (msg->header.pvs.verb) */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case PROTOCOL_ERROR:
+                ret_cod = FLOM_RC_PROTOCOL_ERROR;
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;

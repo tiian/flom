@@ -25,6 +25,9 @@
 
 
 
+#ifdef HAVE_POLL_H
+# include <poll.h>
+#endif
 #ifdef HAVE_REGEX_H
 # include <regex.h>
 #endif
@@ -82,6 +85,14 @@ struct flom_rsrc_data_simple_s {
      * Type of lock currently applied to the resource
      */
     flom_lock_type_t        current_lock;
+    /**
+     * List of connections with an acquired lock
+     */
+    GList                   holders;
+    /**
+     * List of connections waiting for a lock
+     */
+    GQueue                  waiters;
 };
 
 
@@ -115,7 +126,7 @@ struct flom_resource_s {
      * Method called to process incoming messages (it depends from resource
      * type)
      */
-    int    (*inmsg)   (flom_resource_t *, struct flom_msg_s *);
+    int   (*inmsg)   (flom_resource_t *, nfds_t id, struct flom_msg_s *);
 };
 
 
@@ -201,10 +212,11 @@ extern "C" {
     /**
      * Manage an incoming message for a "simple" resource
      * @param resource IN/OUT reference to resource object
+     * @param id IN connection identificator
      * @param msg IN reference to incoming message
      * @return a reason code
      */
-    int flom_resource_simple_inmsg(flom_resource_t *resource,
+    int flom_resource_simple_inmsg(flom_resource_t *resource, nfds_t id,
                                    struct flom_msg_s *msg);
 
 

@@ -243,6 +243,54 @@ int flom_msg_free(struct flom_msg_s *msg)
 
 
 
+int flom_msg_check_protocol(const struct flom_msg_s *msg, int client)
+{
+    int ret_cod = FALSE;
+    FLOM_TRACE(("flom_msg_check_protocol\n"));
+    switch (msg->header.pvs.verb) {
+        case FLOM_MSG_VERB_LOCK:
+            switch (msg->header.pvs.step) {
+                case FLOM_MSG_STEP_INCR:
+                    ret_cod = client ? TRUE : FALSE;
+                    break;
+                case 2*FLOM_MSG_STEP_INCR:
+                case 3*FLOM_MSG_STEP_INCR:
+                    ret_cod = client ? FALSE : TRUE;
+                    break;
+                default:
+                    break;
+            } /* switch (msg->header.pvs.step) */
+            break;
+        case FLOM_MSG_VERB_UNLOCK:
+            switch (msg->header.pvs.step) {
+                case FLOM_MSG_STEP_INCR:
+                    ret_cod = client ? TRUE : FALSE;
+                    break;
+                default:
+                    break;
+            } /* switch (msg->header.pvs.step) */                
+            break;
+        case FLOM_MSG_VERB_PING:
+            switch (msg->header.pvs.step) {
+                case FLOM_MSG_STEP_INCR:
+                    ret_cod = client ? FALSE : TRUE;
+                    break;
+                case 2*FLOM_MSG_STEP_INCR:
+                    ret_cod = client ? TRUE : FALSE;
+                    break;
+                default:
+                    break;
+            } /* switch (msg->header.pvs.step) */                
+            break;
+        default:
+            break;
+    } /* switch (msg->header.pvs.verb) */
+    FLOM_TRACE(("flom_msg_check_protocol/ret_cod=%d\n", ret_cod));
+    return ret_cod;
+}
+
+
+
 int flom_msg_serialize(const struct flom_msg_s *msg,
                        char *buffer, size_t buffer_len,
                        size_t *msg_len)

@@ -44,7 +44,7 @@
 #else
 # undef FLOM_TRACE_MODULE_SAVE
 #endif /* FLOM_TRACE_MODULE */
-#define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_
+#define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_MSG
 
 
 
@@ -422,6 +422,19 @@ extern "C" {
 
 
 
+    /**
+     * Check if the message is correct from a protocol point of view:
+     * client can send only some verb/step combinations, daemon can send
+     * only other verb/step combinations
+     * @param msg IN message to be inspected
+     * @param client IN true if client sent the message, false if daemon sent
+     *        the message
+     * @return a boolean value
+     */
+    int flom_msg_check_protocol(const struct flom_msg_s *msg, int client);
+
+    
+    
     /**
      * Serialize a message struct to an XML buffer for external transmission
      * @param msg IN the object must be serialized
