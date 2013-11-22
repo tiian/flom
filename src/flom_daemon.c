@@ -723,11 +723,11 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
         if (sizeof(flt) != write(
                 locker->write_pipe, &flt, sizeof(flt)))
             THROW(WRITE_ERROR1);
-        /* send connection data */
+        /* send connection data (pointer is used because this object will
+           be managed by child thread */
         if (NULL == (cd = flom_conns_get_cd(conns, id)))
             THROW(CONNS_GET_CD_ERROR);
-        if (sizeof(struct flom_conn_data_s) != write(
-                locker->write_pipe, cd, sizeof(struct flom_conn_data_s)))
+        if (sizeof(cd) != write(locker->write_pipe, &cd, sizeof(cd)))
             THROW(WRITE_ERROR2);
         /* set the connection as transferred to another thread */
         if (FLOM_RC_OK != (ret_cod = flom_conns_trns_fd(conns, id)))

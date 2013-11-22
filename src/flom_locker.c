@@ -292,10 +292,9 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                     "(domain=%d, client_fd=%d, sequence=%d) using pipe %d\n",
                         flt.domain, flt.client_fd, flt.sequence,
                         locker->read_pipe));
-            /* pick-up connection data from parent thread */
-            if (sizeof(struct flom_conn_data_s) !=
-                read(locker->read_pipe, new_cd,
-                     sizeof(struct flom_conn_data_s)))
+            /* pick-up connection data pointer parent thread */
+            if (sizeof(new_cd) != read(
+                    locker->read_pipe, &new_cd, sizeof(new_cd)))
                 THROW(READ_ERROR2);
             /* import the connection passed by parent thread */
             flom_conns_import(conns, flt.client_fd, new_cd);
