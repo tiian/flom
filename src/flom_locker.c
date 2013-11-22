@@ -136,7 +136,7 @@ gpointer flom_locker_loop(gpointer data)
         memset(&cd, 0, sizeof(cd));
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
                                &conns, locker->read_pipe, sizeof(cd.sa),
-                               &(cd.sa))))
+                               &(cd.sa), FALSE)))
             THROW(CONNS_ADD_ERROR);
         
         while (loop) {
@@ -187,6 +187,9 @@ gpointer flom_locker_loop(gpointer data)
                     if (FLOM_RC_OK != (ret_cod = flom_locker_loop_pollin(
                                            locker, &conns, i)))
                         THROW(ACCEPT_LOOP_POLLIN_ERROR);
+                    /* conns is no more consistent, break the loop and poll
+                       again */
+                    break;
                 }
                 if (fds[i].revents & POLLHUP) {
                     if (0 != i) {
@@ -197,7 +200,6 @@ gpointer flom_locker_loop(gpointer data)
                         if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                                &conns, i)))
                             THROW(CONNS_CLOSE_ERROR1);
-                        continue;
                     } else {
                         /* locker termination asked by parent thread */
                         FLOM_TRACE(("flom_locker_loop: termination of this "
@@ -207,6 +209,9 @@ gpointer flom_locker_loop(gpointer data)
                             THROW(CONNS_CLOSE_ERROR2);
                         locker->read_pipe = NULL_FD;
                     }
+                    /* conns is no more consistent, break the loop and poll
+                       again */
+                    break;
                 } /* if (fds[i].revents & POLLHUP) */
                 if (fds[i].revents &
                     (POLLERR | POLLHUP | POLLNVAL))
@@ -252,7 +257,6 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                             flom_conns_t *conns, guint id)
 {
     enum Exception { CONNS_GET_CD_ERROR
-                     , G_TRY_MALLOC_ERROR
                      , READ_ERROR1
                      , READ_ERROR2
                      , MSG_RETRIEVE_ERROR
@@ -280,9 +284,6 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
         if (0 == id) {
             struct flom_locker_token_s flt;
             /* it's a connection passed by parent thread */
-            if (NULL == (new_cd = g_try_malloc0(
-                             sizeof(struct flom_conn_data_s))))
-                THROW(G_TRY_MALLOC_ERROR);
             /* pick-up token from parent thread */
             if (sizeof(flt) != read(
                     locker->read_pipe, &flt, sizeof(flt)))
@@ -361,9 +362,6 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
             case CONNS_GET_CD_ERROR:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
-            case G_TRY_MALLOC_ERROR:
-                ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
-                break;
             case READ_ERROR1:
             case READ_ERROR2:
                 ret_cod = FLOM_RC_READ_ERROR;
@@ -385,10 +383,6 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    if (NONE > excp && G_TRY_MALLOC_ERROR < excp) {
-        FLOM_TRACE(("flom_locker_loop_pollin: releasing new_cd=%p\n"));
-        g_free(new_cd);
-    }
     FLOM_TRACE(("flom_locker_loop_pollin/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

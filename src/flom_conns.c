@@ -46,7 +46,8 @@ void flom_conns_init(flom_conns_t *conns, int domain)
 
 
 int flom_conns_add(flom_conns_t *conns, int fd,
-                   socklen_t addr_len, const struct sockaddr *sa)
+                   socklen_t addr_len, const struct sockaddr *sa,
+                   int main_thread)
 {
     enum Exception { G_TRY_MALLOC_ERROR1
                      , INVALID_DOMAIN
@@ -73,6 +74,8 @@ int flom_conns_add(flom_conns_t *conns, int fd,
                 THROW(INVALID_DOMAIN);
         }
         tmp->fd = fd;
+        tmp->state = main_thread ?
+            FLOM_CONN_STATE_DAEMON : FLOM_CONN_STATE_LOCKER;
         tmp->addr_len = addr_len;
         /* reset the associated message */
         if (NULL == (tmp->msg =
@@ -111,6 +114,7 @@ int flom_conns_add(flom_conns_t *conns, int fd,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    FLOM_TRACE(("flom_conns_add: excp=%d\n", excp));
     if (NONE != excp) {
         if (G_TRY_MALLOC_ERROR2 < excp) /* release message */
             g_free(tmp->msg);
@@ -144,9 +148,10 @@ struct pollfd *flom_conns_get_fds(flom_conns_t *conns)
     /* resize the previous poll array */
     if (NULL == (tmp = (struct pollfd *)realloc(
                      conns->poll_array,
-                     (size_t)(conns->n*sizeof(struct pollfd)))))
+                     (size_t)(conns->n*sizeof(struct pollfd))))) {
+        conns->poll_array = tmp;
         return NULL;
-    
+    }    
     /* reset the array */
     memset(tmp, 0, (size_t)(conns->n*sizeof(struct pollfd)));
     /* fill the poll array with file descriptors */
@@ -207,6 +212,7 @@ int flom_conns_set_events(flom_conns_t *conns, short events)
 int flom_conns_close_fd(flom_conns_t *conns, guint id)
 {
     enum Exception { OUT_OF_RANGE
+                     , NULL_OBJECT
                      , CLOSE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -217,23 +223,31 @@ int flom_conns_close_fd(flom_conns_t *conns, guint id)
         FLOM_TRACE(("flom_conns_close: closing connection id=%u\n", id));
         if (id >= conns->n)
             THROW(OUT_OF_RANGE);
-        c = (struct flom_conn_data_s *)g_ptr_array_index(conns->array, id);
-        if (NULL_FD == c->fd) {
-            FLOM_TRACE(("flom_conns_close: connection id=%u already closed, "
-                        "skipping...\n", id));
-        } else if (TRNS_FD == c->fd) {
-            FLOM_TRACE(("flom_conns_close: connection id=%u transferred, "
-                        "skipping...\n", id));
+        if (NULL == (c = (struct flom_conn_data_s *)
+                     g_ptr_array_index(conns->array, id)))
+            THROW(NULL_OBJECT);
+        if (FLOM_CONN_STATE_REMOVE != c->state) {
+            c->state = FLOM_CONN_STATE_REMOVE;
+            if (NULL_FD == c->fd) {
+                FLOM_TRACE(("flom_conns_close: connection id=%u already "
+                            "closed, skipping...\n", id));
+            } else {
+                if (0 != close(c->fd))
+                    THROW(CLOSE_ERROR);
+                c->fd = NULL_FD;
+            }
         } else {
-            if (0 != close(c->fd))
-                THROW(CLOSE_ERROR);
-            c->fd = NULL_FD;
-        }
+            FLOM_TRACE(("flom_conns_close: connection id=%u already "
+                        "in state %d, skipping...\n", id, c->state));
+        } /* if (FLOM_CONN_STATE_REMOVE == c->state) */
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case OUT_OF_RANGE:
                 ret_cod = FLOM_RC_OUT_OF_RANGE;
+                break;
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
             case CLOSE_ERROR:
                 ret_cod = FLOM_RC_CLOSE_ERROR;
@@ -255,6 +269,7 @@ int flom_conns_close_fd(flom_conns_t *conns, guint id)
 int flom_conns_trns_fd(flom_conns_t *conns, guint id)
 {
     enum Exception { OUT_OF_RANGE
+                     , G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -265,14 +280,23 @@ int flom_conns_trns_fd(flom_conns_t *conns, guint id)
                     "id=%u\n", id));
         if (id >= conns->n)
             THROW(OUT_OF_RANGE);
+        /* update connection state */
         c = (struct flom_conn_data_s *)g_ptr_array_index(conns->array, id);
-        c->fd = TRNS_FD;
+        c->state = FLOM_CONN_STATE_LOCKER;
+        /* detach the connection from this connections object (it will be
+           attached by a locker connections object */
+        if (NULL == g_ptr_array_remove_index_fast(conns->array, id))
+            THROW(G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR);
+        conns->n--;
 
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case OUT_OF_RANGE:
                 ret_cod = FLOM_RC_OUT_OF_RANGE;
+                break;
+            case G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR:
+                ret_cod = FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -295,12 +319,14 @@ void flom_conns_clean(flom_conns_t *conns)
     while (i<conns->n) {
         struct flom_conn_data_s *c =
             (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
-        FLOM_TRACE(("flom_conns_clean: i=%u, fd=%d %s\n",
-                    i, c->fd, NULL_FD == c->fd ? "(removing...)" : ""));
+        FLOM_TRACE(("flom_conns_clean: i=%u, state=%d, fd=%d %s\n",
+                    i, c->state, c->fd,
+                    FLOM_CONN_STATE_REMOVE == c->state ?
+                    "(removing...)" : ""));
         flom_conn_data_trace(c);
-        if (NULL_FD == c->fd) {
-            /* connections with NULL_FD are no more valid and must be
-             * removed and destroyed */
+        if (FLOM_CONN_STATE_REMOVE == c->state) {
+            /* connections with this state are no more valid and must be
+               removed and destroyed */
             /* removing message object */
             if (NULL != c->msg) {
                 flom_msg_free(c->msg);
@@ -313,20 +339,16 @@ void flom_conns_clean(flom_conns_t *conns)
                 c->gmpc = NULL;
             }
             /* removing from array */
-            g_ptr_array_remove_index(conns->array, i);
+            if (NULL == g_ptr_array_remove_index_fast(conns->array, i))
+                FLOM_TRACE(("flom_conns_clean: g_ptr_array_remove_index_fast "
+                            "returned NULL\n"));
+            else
+                conns->n--;
             /* release connection */
             FLOM_TRACE(("flom_conns_clean: releasing connection %p\n", c));
             g_free(c);
-            conns->n--;
-        } else if (TRNS_FD == c->fd) {
-            /* connections with TRNS_FD are no still valid but they are
-               now managed by a different thread: they must be unlinked
-               but NOT destroyed */
-            g_ptr_array_remove_index(conns->array, i);
-            conns->n--;
         } else i++;
-    }
-        
+    } /* while (i<conns->n) */
     FLOM_TRACE(("flom_conns_clean: completed\n"));
 }
 
@@ -336,19 +358,17 @@ void flom_conns_free(flom_conns_t *conns)
 {
     guint i;
     FLOM_TRACE(("flom_conns_free: starting...\n"));
-    for (i=0; i<conns->n; ++i) {
-        struct flom_conn_data_s *c =
-            (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
-        if (NULL_FD != c->fd) {
-            close(c->fd);
-            c->fd = NULL_FD;
-        }
-    }
+    for (i=0; i<conns->n; ++i)
+        flom_conns_close_fd(conns, i);
     flom_conns_clean(conns);
-    g_free(conns->poll_array);
-    conns->poll_array = NULL;
-    g_ptr_array_free(conns->array, TRUE);
-    conns->array = NULL;
+    if (NULL != conns->poll_array) {
+        free(conns->poll_array);
+        conns->poll_array = NULL;
+    }
+    if (NULL != conns->array) {
+        g_ptr_array_free(conns->array, TRUE);
+        conns->array = NULL;
+    }
     conns->n = 0;
     FLOM_TRACE(("flom_conns_free: completed\n"));
 }
@@ -359,8 +379,9 @@ void flom_conn_data_trace(const struct flom_conn_data_s *conn)
 {
     FLOM_TRACE(("flom_conn_data_trace: object=%p\n", conn));
     FLOM_TRACE(("flom_conn_data_trace: "
-                "fd=%d, msg=%p, gmpc=%p, addr_len=%d\n",
-                conn->fd, conn->msg, conn->gmpc, conn->addr_len));
+                "fd=%d, state=%d, msg=%p, gmpc=%p, addr_len=%d\n",
+                conn->fd, conn->state, conn->msg, conn->gmpc,
+                conn->addr_len));
 }
 
 

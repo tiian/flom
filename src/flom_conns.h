@@ -73,10 +73,32 @@
  * Null file descriptor
  */
 #define NULL_FD   -1
+
+
+
 /**
- * Transferred file descriptor
+ * Possible state of a connection (enum)
  */
-#define TRNS_FD   -2
+enum flom_conn_state_e {
+    /**
+     * The connection is managed by main daemon thread (the listener thread)
+     */
+    FLOM_CONN_STATE_DAEMON,
+    /**
+     * The connection is managed by a locker thread (the resource manager
+     * threads)
+     */
+    FLOM_CONN_STATE_LOCKER,
+    /**
+     * The connection is no more useful and must be eliminated by
+     * @ref flom_conns_clean
+     */
+    FLOM_CONN_STATE_REMOVE
+};
+/**
+ * Possible state of a connection (enum)
+ */
+typedef enum flom_conn_state_e flom_conn_state_t;
 
 
 
@@ -87,7 +109,11 @@ struct flom_conn_data_s {
     /**
      * File descriptor associated to the connection
      */
-    int       fd;
+    int                   fd;
+    /**
+     * Connection state
+     */
+    flom_conn_state_t     state;
     /**
      * Client address len
      */
@@ -184,10 +210,13 @@ extern "C" {
      * @param fd IN file descriptor
      * @param addr_len IN lenght of address
      * @param sa IN address
+     * @param main_thread IN thread is asking the connection: TRUE = father
+     *        (listener) thread, FALSE = child (locker) thread
      * @return a reason code
      */
     int flom_conns_add(flom_conns_t *conns, int fd,
-                       socklen_t addr_len, const struct sockaddr *sa);
+                       socklen_t addr_len, const struct sockaddr *sa,
+                       int main_thread);
 
 
 
@@ -345,8 +374,8 @@ extern "C" {
 
 
     /**
-     * Mark as "transferred to another thread" the file descriptor associated
-     * to a connection
+     * Mark as "transferred to another thread" a connection and detach it
+     * from this connections object
      * @param conns IN/OUT connections object
      * @param id IN connection must be marked
      * @return a reason code

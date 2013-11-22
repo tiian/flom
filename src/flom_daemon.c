@@ -276,7 +276,7 @@ int flom_listen(flom_conns_t *conns)
             THROW(LISTEN_ERROR);
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
                                conns, fd, sizeof(servaddr),
-                               (struct sockaddr *)&servaddr)))
+                               (struct sockaddr *)&servaddr, TRUE)))
             THROW(CONNS_ADD_ERROR);
         THROW(NONE);
     } CATCH {
@@ -413,6 +413,9 @@ int flom_accept_loop(flom_conns_t *conns)
                     if (FLOM_RC_OK != (ret_cod = flom_accept_loop_pollin(
                                            conns, i, &lockers)))
                         THROW(ACCEPT_LOOP_POLLIN_ERROR);
+                    /* conns is no more consistent, break the loop and poll
+                       again */
+                    break;
                 }
                 if ((fds[i].revents & POLLHUP) && (0 != i)) {
                     FLOM_TRACE(("flom_accept_loop: client %u disconnected "
@@ -420,7 +423,9 @@ int flom_accept_loop(flom_conns_t *conns)
                     if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                            conns, i)))
                         THROW(CONNS_CLOSE_ERROR);                       
-                    continue;
+                    /* conns is no more consistent, break the loop and poll
+                       again */
+                    break;
                 }
                 if (fds[i].revents &
                     (POLLERR | POLLHUP | POLLNVAL))
@@ -517,7 +522,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
             FLOM_TRACE(("flom_accept_loop_pollin: new client connected "
                         "with fd=%d\n", conn_fd));
             if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                                   conns, conn_fd, clilen, &cliaddr)))
+                                   conns, conn_fd, clilen, &cliaddr, TRUE)))
                 THROW(CONNS_ADD_ERROR);
         } else {
             char buffer[FLOM_MSG_BUFFER_SIZE];
