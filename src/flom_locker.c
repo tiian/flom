@@ -118,7 +118,7 @@ gpointer flom_locker_loop(gpointer data)
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     flom_conns_t conns;
     
-    FLOM_TRACE(("flom_locker_loop: new thread in progress...\n"));
+    FLOM_TRACE(("flom_locker_loop: new thread in progress (first message)\n"));
     TRY {
         int loop = TRUE;
         struct flom_locker_s *locker = (struct flom_locker_s *)data;
@@ -143,10 +143,15 @@ gpointer flom_locker_loop(gpointer data)
             int ready_fd;
             guint i, n;
             struct pollfd *fds;
-
-            flom_conns_trace(&conns);
+            
             flom_conns_clean(&conns);
-            flom_conns_trace(&conns);
+            if (flom_conns_get_used(&conns) == 0) {
+                FLOM_TRACE(("flom_locker_loop: no more available connections"
+                            ", leaving...\n"));
+                /* break the loop */
+                loop = FALSE;
+                break;
+            }
             if (NULL == (fds = flom_conns_get_fds(&conns)))
                 THROW(CONNS_GET_FDS_ERROR);
             if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(
@@ -218,7 +223,8 @@ gpointer flom_locker_loop(gpointer data)
                     THROW(NETWORK_ERROR);
             } /* for (i... */
             /* @@@ */
-        }
+            
+        } /* while (loop) */
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -247,7 +253,8 @@ gpointer flom_locker_loop(gpointer data)
     flom_conns_free(&conns);
     FLOM_TRACE(("flom_locker_loop/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    FLOM_TRACE(("flom_locker_loop: this thread completed service\n"));
+    FLOM_TRACE(("flom_locker_loop: this thread completed service (last "
+                "message)\n"));
     return data;
 }
 

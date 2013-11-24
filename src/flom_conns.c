@@ -36,11 +36,12 @@
 
 void flom_conns_init(flom_conns_t *conns, int domain)
 {
-    FLOM_TRACE(("flom_conns_init\n"));        
+    FLOM_TRACE(("flom_conns_init\n"));
     conns->n = 0;
     conns->poll_array = NULL;
     conns->domain = domain;
     conns->array = g_ptr_array_new();
+    FLOM_TRACE(("flom_conns_init: allocated array:%p\n", conns->array));
 }
 
 
@@ -62,7 +63,7 @@ int flom_conns_add(flom_conns_t *conns, int fd,
     TRY {
         if (NULL == (tmp = g_try_malloc0(sizeof(struct flom_conn_data_s))))
             THROW(G_TRY_MALLOC_ERROR1);
-        FLOM_TRACE(("flom_conns_add: allocated a new connection:%p\n", tmp));
+        FLOM_TRACE(("flom_conns_add: allocated a new connection (%p)\n", tmp));
         switch (conns->domain) {
             case AF_UNIX:
                 tmp->saun = *((struct sockaddr_un *)sa);
@@ -80,8 +81,9 @@ int flom_conns_add(flom_conns_t *conns, int fd,
         /* reset the associated message */
         if (NULL == (tmp->msg =
                      g_try_malloc(sizeof(struct flom_msg_s))))
-            THROW(G_TRY_MALLOC_ERROR2);
-        FLOM_TRACE(("flom_conns_add: allocated a new message:%p\n", tmp->msg));
+            THROW(G_TRY_MALLOC_ERROR2); 
+        FLOM_TRACE(("flom_conns_add: allocated a new message (%p)\n",
+                    tmp->msg));
         flom_msg_init(tmp->msg);
         
         /* initialize the associated parser */
@@ -89,6 +91,8 @@ int flom_conns_add(flom_conns_t *conns, int fd,
             &flom_msg_parser, 0, (gpointer)(tmp->msg), NULL);
         if (NULL == tmp->gmpc)
             THROW(G_MARKUP_PARSE_CONTEXT_NEW_ERROR);
+        FLOM_TRACE(("flom_conns_add: allocated a new parser (%p)\n",
+                    tmp->gmpc));
         g_ptr_array_add(conns->array, tmp);
         conns->n++;
         
@@ -232,6 +236,7 @@ int flom_conns_close_fd(flom_conns_t *conns, guint id)
                 FLOM_TRACE(("flom_conns_close: connection id=%u already "
                             "closed, skipping...\n", id));
             } else {
+                FLOM_TRACE(("flom_conns_close: closing fd=%d\n", c->fd));
                 if (0 != close(c->fd))
                     THROW(CLOSE_ERROR);
                 c->fd = NULL_FD;
@@ -362,10 +367,14 @@ void flom_conns_free(flom_conns_t *conns)
         flom_conns_close_fd(conns, i);
     flom_conns_clean(conns);
     if (NULL != conns->poll_array) {
+        FLOM_TRACE(("flom_conns_free: releasing poll_array:%p\n",
+                    conns->poll_array));
         free(conns->poll_array);
         conns->poll_array = NULL;
     }
     if (NULL != conns->array) {
+        FLOM_TRACE(("flom_conns_free: releasing array:%p\n",
+                    conns->array));
         g_ptr_array_free(conns->array, TRUE);
         conns->array = NULL;
     }

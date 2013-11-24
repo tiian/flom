@@ -410,12 +410,13 @@ int flom_accept_loop(flom_conns_t *conns)
                             fds[i].revents & POLLHUP,
                             fds[i].revents & POLLNVAL));
                 if (fds[i].revents & POLLIN) {
+                    int conn_moved = FALSE;
                     if (FLOM_RC_OK != (ret_cod = flom_accept_loop_pollin(
-                                           conns, i, &lockers)))
+                                           conns, i, &lockers, &conn_moved)))
                         THROW(ACCEPT_LOOP_POLLIN_ERROR);
-                    /* conns is no more consistent, break the loop and poll
-                       again */
-                    break;
+                    if (conn_moved)
+                        /* connection is no more available for main thread */
+                        continue;
                 }
                 if ((fds[i].revents & POLLHUP) && (0 != i)) {
                     FLOM_TRACE(("flom_accept_loop: client %u disconnected "
@@ -423,9 +424,6 @@ int flom_accept_loop(flom_conns_t *conns)
                     if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                            conns, i)))
                         THROW(CONNS_CLOSE_ERROR);                       
-                    /* conns is no more consistent, break the loop and poll
-                       again */
-                    break;
                 }
                 if (fds[i].revents &
                     (POLLERR | POLLHUP | POLLNVAL))
@@ -489,7 +487,8 @@ int flom_accept_loop(flom_conns_t *conns)
 
 
 int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
-                            flom_locker_array_t *lockers)
+                            flom_locker_array_t *lockers,
+                            int *moved)
 {
     enum Exception { CONNS_GET_CD_ERROR
                      , ACCEPT_ERROR
@@ -562,6 +561,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                 if (FLOM_RC_OK != (ret_cod = flom_accept_loop_transfer(
                                        conns, id, lockers)))
                     THROW(ACCEPT_LOOP_TRANSFER_ERROR);
+                *moved = TRUE;
             } /* if (FLOM_MSG_STATE_READY == msg->state) */
         } /* if (0 == id) */
         
@@ -616,8 +616,8 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                      , G_THREAD_CREATE_ERROR
                      , WRITE_ERROR1
                      , CONNS_GET_CD_ERROR
-                     , WRITE_ERROR2
                      , CONNS_TRNS_FD
+                     , WRITE_ERROR2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
@@ -732,11 +732,11 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
            be managed by child thread */
         if (NULL == (cd = flom_conns_get_cd(conns, id)))
             THROW(CONNS_GET_CD_ERROR);
-        if (sizeof(cd) != write(locker->write_pipe, &cd, sizeof(cd)))
-            THROW(WRITE_ERROR2);
         /* set the connection as transferred to another thread */
         if (FLOM_RC_OK != (ret_cod = flom_conns_trns_fd(conns, id)))
             THROW(CONNS_TRNS_FD);
+        if (sizeof(cd) != write(locker->write_pipe, &cd, sizeof(cd)))
+            THROW(WRITE_ERROR2);
         
         THROW(NONE);
     } CATCH {
@@ -765,11 +765,10 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                 ret_cod = FLOM_RC_WRITE_ERROR;
                 break;
             case CONNS_GET_CD_ERROR:
+            case CONNS_TRNS_FD:
                 break;
             case WRITE_ERROR2:
                 ret_cod = FLOM_RC_WRITE_ERROR;
-                break;
-            case CONNS_TRNS_FD:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

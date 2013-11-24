@@ -91,10 +91,13 @@ extern "C" {
      * @param conns IN/OUT connections object
      * @param id IN connection id
      * @param lockers IN/OUT array of lockers serving the connected clients
+     * @param moved OUT boolean value: TRUE the connection was passed to
+     *                  a locker thread, FALSE the connection is still valid
      * @return a reason code
      */
     int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
-                                flom_locker_array_t *lockers);
+                                flom_locker_array_t *lockers,
+                                int *moved);
 
 
 
