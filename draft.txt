@@ -20,7 +20,67 @@ flom_conns_s::array use cases:
 
 Dependency tree:
 flom_conns_add
-	flom_accept_loop_pollin
-	flom_listen
 	flom_locker_loop
+		flom_accept_loop_transfer
+			flom_accept_loop_pollin
+				flom_accept_loop
+	flom_accept_loop_pollin
+		flom_accept_loop
+	flom_listen
+		flom_daemon
 
+flom_conns_clean
+	flom_conns_free
+		flom_listen_clean
+			flom_daemon
+		flom_locker_loop
+			flom_accept_loop_transfer
+				flom_accept_loop_pollin
+					flom_accept_loop
+	flom_locker_loop
+		flom_accept_loop_transfer
+			flom_accept_loop_pollin
+				flom_accept_loop
+	flom_accept_loop
+
+flom_conns_close_fd
+	flom_accept_loop
+	flom_locker_loop
+		flom_accept_loop_transfer
+			flom_accept_loop_pollin
+				flom_accept_loop
+	flom_locker_loop_pollin
+		flom_locker_loop
+			flom_accept_loop_transfer
+				flom_accept_loop_pollin
+					flom_accept_loop
+	flom_conns_free
+		flom_locker_loop
+			flom_accept_loop_transfer
+				flom_accept_loop_pollin
+					flom_accept_loop
+		flom_listen_clean
+			flom_daemon				
+
+flom_conns_free
+	flom_listen_clean
+		flom_daemon
+	flom_locker_loop
+		flom_accept_loop_transfer
+			flom_accept_loop_pollin
+				flom_accept_loop
+
+flom_conns_get_fds		
+	flom_accept_loop
+	flom_locker_loop
+		flom_accept_loop_transfer
+			flom_accept_loop_pollin
+				flom_accept_loop
+
+flom_conns_set_events
+	flom_accept_loop
+	flom_locker_loop
+		flom_accept_loop_transfer
+			flom_accept_loop_pollin
+				flom_accept_loop
+		
