@@ -116,6 +116,7 @@ AC_CHECK_SIZEOF([ssize_t])
 #AC_CHECK_SIZEOF([uuid_t], [], [[#include <uuid/uuid.h>]])
 
 AC_CHECK_FUNCS(vfprintf)
+AC_CHECK_FUNCS(vsnprintf)
 
 AC_SUBST(PACKAGE_BUGREPORT)
 AC_SUBST(PACKAGE_NAME)

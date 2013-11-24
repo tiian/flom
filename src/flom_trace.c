@@ -105,29 +105,37 @@ void flom_trace(const char *fmt, ...)
     va_list args;
     struct tm broken_time;
     struct timeval tv;
+    char buffer[2000];
+    int nw1;
     
     va_start(args, fmt);
-#ifdef HAVE_VFPRINTF
-    gettimeofday(&tv, NULL);
-    localtime_r(&tv.tv_sec, &broken_time);
+#ifdef HAVE_VSNPRINTF
 
     /* lock the mutex */
+    /* @@@ remove me
     g_static_mutex_lock(&flom_trace_mutex);
+    */
+    gettimeofday(&tv, NULL);
+    localtime_r(&tv.tv_sec, &broken_time);
     /* default header */
-    fprintf(trace_file,
-            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [" PID_T_FORMAT
-            "/%p] ",
-            broken_time.tm_year + 1900, broken_time.tm_mon + 1,
-            broken_time.tm_mday, broken_time.tm_hour,
-            broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
-            getpid(), g_thread_self());
-    /* custom message */
-    vfprintf(trace_file, fmt, args);
+    nw1 = snprintf(
+        buffer, sizeof(buffer), 
+        "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [" PID_T_FORMAT "/%p] ",
+        broken_time.tm_year + 1900, broken_time.tm_mon + 1,
+        broken_time.tm_mday, broken_time.tm_hour,
+        broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
+        getpid(), g_thread_self());
+    if (nw1 < sizeof(buffer))
+        /* custom message */
+        vsnprintf(buffer+nw1, sizeof(buffer)-nw1, fmt, args);
+    fputs(buffer, trace_file);
     fflush(trace_file);
     /* remove the lock from mutex */
+    /* @@@ remove me 
     g_static_mutex_unlock(&flom_trace_mutex);
+    */
 #else
-# error "vfprintf is necessary for flom_trace function!"
+# error "vsnprintf is necessary for flom_trace function!"
 #endif
     va_end(args);
 }
@@ -142,11 +150,11 @@ void flom_trace_hex_data(const char *prefix, const byte_t *data,
     struct timeval tv;
     
 #ifdef HAVE_VFPRINTF
-    gettimeofday(&tv, NULL);
-    localtime_r(&tv.tv_sec, &broken_time);
 
     /* lock the mutex */
     g_static_mutex_lock(&flom_trace_mutex);
+    gettimeofday(&tv, NULL);
+    localtime_r(&tv.tv_sec, &broken_time);
     /* default header */
     fprintf(out_stream,
             "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d [" PID_T_FORMAT
@@ -179,11 +187,11 @@ void flom_trace_text_data(const char *prefix, const byte_t *data,
     struct timeval tv;
     
 #ifdef HAVE_VFPRINTF
-    gettimeofday(&tv, NULL);
-    localtime_r(&tv.tv_sec, &broken_time);
 
     /* lock the mutex */
     g_static_mutex_lock(&flom_trace_mutex);
+    gettimeofday(&tv, NULL);
+    localtime_r(&tv.tv_sec, &broken_time);
     /* default header */
     fprintf(out_stream,
             "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d ["
