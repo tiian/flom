@@ -339,13 +339,14 @@ int flom_listen_clean(flom_conns_t *conns)
 
 int flom_accept_loop(flom_conns_t *conns)
 {
-    enum Exception { CONNS_GET_FDS_ERROR
+    enum Exception { CONNS_CLEAN_ERROR
+                     , CONNS_GET_FDS_ERROR
                      , CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
                      , ACCEPT_LOOP_CHKLOCKERS_ERROR1
                      , NEGATIVE_NUMBER_OF_LOCKERS_ERROR1
-                     , ACCEPT_LOOP_POLLIN_ERROR
                      , CONNS_CLOSE_ERROR
+                     , ACCEPT_LOOP_POLLIN_ERROR
                      , NETWORK_ERROR
                      , INTERNAL_ERROR
                      , ACCEPT_LOOP_CHKLOCKERS_ERROR2
@@ -366,7 +367,8 @@ int flom_accept_loop(flom_conns_t *conns)
             struct pollfd *fds;
             gint number_of_lockers;
             
-            flom_conns_clean(conns);
+            if (FLOM_RC_OK != (ret_cod = flom_conns_clean(conns)))
+                THROW(CONNS_CLEAN_ERROR);
             if (NULL == (fds = flom_conns_get_fds(conns)))
                 THROW(CONNS_GET_FDS_ERROR);
             if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(conns, POLLIN)))
@@ -409,21 +411,25 @@ int flom_accept_loop(flom_conns_t *conns)
                             fds[i].revents & POLLERR,
                             fds[i].revents & POLLHUP,
                             fds[i].revents & POLLNVAL));
+                if ((fds[i].revents & POLLHUP) && (0 != i)) {
+                    FLOM_TRACE(("flom_accept_loop: client %u disconnected "
+                                "before categorization!\n", i));
+                    if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
+                                           conns, i)))
+                        THROW(CONNS_CLOSE_ERROR);
+                    /* this file descriptor is no more valid, continue to
+                       next one */
+                    continue;
+                }
                 if (fds[i].revents & POLLIN) {
                     int conn_moved = FALSE;
                     if (FLOM_RC_OK != (ret_cod = flom_accept_loop_pollin(
                                            conns, i, &lockers, &conn_moved)))
                         THROW(ACCEPT_LOOP_POLLIN_ERROR);
                     if (conn_moved)
-                        /* connection is no more available for main thread */
-                        continue;
-                }
-                if ((fds[i].revents & POLLHUP) && (0 != i)) {
-                    FLOM_TRACE(("flom_accept_loop: client %u disconnected "
-                                "before categorization!\n", i));
-                    if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
-                                           conns, i)))
-                        THROW(CONNS_CLOSE_ERROR);                       
+                        /* connection is no more available for main thread,
+                           a new main loop must be started */
+                        break;
                 }
                 if (fds[i].revents &
                     (POLLERR | POLLHUP | POLLNVAL))
@@ -444,6 +450,8 @@ int flom_accept_loop(flom_conns_t *conns)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CONNS_CLEAN_ERROR:
+                break;
             case CONNS_GET_FDS_ERROR:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
@@ -457,8 +465,8 @@ int flom_accept_loop(flom_conns_t *conns)
             case NEGATIVE_NUMBER_OF_LOCKERS_ERROR1:
                 ret_cod = FLOM_RC_OBJ_CORRUPTED;
                 break;
-            case ACCEPT_LOOP_POLLIN_ERROR:
             case CONNS_CLOSE_ERROR:
+            case ACCEPT_LOOP_POLLIN_ERROR:
                 break;
             case NETWORK_ERROR:
                 ret_cod = FLOM_RC_NETWORK_EVENT_ERROR;
@@ -506,7 +514,8 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
     FLOM_TRACE(("flom_accept_loop_pollin\n"));
     TRY {
         struct flom_conn_data_s *c;
-        
+
+        *moved = FALSE;
         if (NULL == (c = flom_conns_get_cd(conns, id)))
             THROW(CONNS_GET_CD_ERROR);
         FLOM_TRACE(("flom_accept_loop_pollin: id=%u, fd=%d\n",

@@ -106,7 +106,8 @@ void flom_locker_array_del(flom_locker_array_t *lockers,
 
 gpointer flom_locker_loop(gpointer data)
 {
-    enum Exception { CONNS_ADD_ERROR
+    enum Exception { CONNS_CLEAN_ERROR
+                     , CONNS_ADD_ERROR
                      , CONNS_GET_FDS_ERROR
                      , CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
@@ -144,7 +145,8 @@ gpointer flom_locker_loop(gpointer data)
             guint i, n;
             struct pollfd *fds;
             
-            flom_conns_clean(&conns);
+            if (FLOM_RC_OK != (ret_cod = flom_conns_clean(&conns)))
+                THROW(CONNS_CLEAN_ERROR);
             if (flom_conns_get_used(&conns) == 0) {
                 FLOM_TRACE(("flom_locker_loop: no more available connections"
                             ", leaving...\n"));
@@ -228,6 +230,7 @@ gpointer flom_locker_loop(gpointer data)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CONNS_CLEAN_ERROR:
             case CONNS_ADD_ERROR:
                 break;
             case CONNS_GET_FDS_ERROR:

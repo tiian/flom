@@ -288,11 +288,12 @@ int flom_conns_trns_fd(flom_conns_t *conns, guint id)
         /* update connection state */
         c = (struct flom_conn_data_s *)g_ptr_array_index(conns->array, id);
         c->state = FLOM_CONN_STATE_LOCKER;
-        /* detach the connection from this connections object (it will be
-           attached by a locker connections object */
-        if (NULL == g_ptr_array_remove_index_fast(conns->array, id))
+        /* detach the connection from this connections object (it
+           will be attached by a locker connections object */
+        if (NULL == g_ptr_array_remove_index_fast(conns->array, id)) {
             THROW(G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR);
-        conns->n--;
+        } else
+            conns->n--;
 
         THROW(NONE);
     } CATCH {
@@ -317,44 +318,64 @@ int flom_conns_trns_fd(flom_conns_t *conns, guint id)
 
 
 
-void flom_conns_clean(flom_conns_t *conns)
+int flom_conns_clean(flom_conns_t *conns)
 {
+    enum Exception { G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
     guint i=0;
-    FLOM_TRACE(("flom_conns_clean: starting...\n"));
-    while (i<conns->n) {
-        struct flom_conn_data_s *c =
-            (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
-        FLOM_TRACE(("flom_conns_clean: i=%u, state=%d, fd=%d %s\n",
-                    i, c->state, c->fd,
-                    FLOM_CONN_STATE_REMOVE == c->state ?
-                    "(removing...)" : ""));
-        flom_conn_data_trace(c);
-        if (FLOM_CONN_STATE_REMOVE == c->state) {
-            /* connections with this state are no more valid and must be
-               removed and destroyed */
-            /* removing message object */
-            if (NULL != c->msg) {
-                flom_msg_free(c->msg);
-                g_free(c->msg);
-                c->msg = NULL;
-            }
-            /* removing parser object */
-            if (NULL != c->gmpc) {
-                g_markup_parse_context_free(c->gmpc);
-                c->gmpc = NULL;
-            }
-            /* removing from array */
-            if (NULL == g_ptr_array_remove_index_fast(conns->array, i))
-                FLOM_TRACE(("flom_conns_clean: g_ptr_array_remove_index_fast "
-                            "returned NULL\n"));
-            else
-                conns->n--;
-            /* release connection */
-            FLOM_TRACE(("flom_conns_clean: releasing connection %p\n", c));
-            g_free(c);
-        } else i++;
-    } /* while (i<conns->n) */
-    FLOM_TRACE(("flom_conns_clean: completed\n"));
+    
+    FLOM_TRACE(("flom_conns_clean\n"));
+    TRY {
+        while (i<conns->n) {
+            struct flom_conn_data_s *c =
+                (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
+            FLOM_TRACE(("flom_conns_clean: i=%u, state=%d, fd=%d %s\n",
+                        i, c->state, c->fd,
+                        FLOM_CONN_STATE_REMOVE == c->state ?
+                        "(removing...)" : ""));
+            flom_conn_data_trace(c);
+            if (FLOM_CONN_STATE_REMOVE == c->state) {
+                /* connections with this state are no more valid and must be
+                   removed and destroyed */
+                /* removing message object */
+                if (NULL != c->msg) {
+                    flom_msg_free(c->msg);
+                    g_free(c->msg);
+                    c->msg = NULL;
+                }
+                /* removing parser object */
+                if (NULL != c->gmpc) {
+                    g_markup_parse_context_free(c->gmpc);
+                    c->gmpc = NULL;
+                }
+                /* removing from array */
+                if (NULL == g_ptr_array_remove_index_fast(conns->array, i)) {
+                    THROW(G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR);
+                } else
+                    conns->n--;
+                /* release connection */
+                FLOM_TRACE(("flom_conns_clean: releasing connection %p\n", c));
+                g_free(c);
+            } else i++;
+        } /* while (i<conns->n) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            case G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR:
+                ret_cod = FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_conns_clean/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 

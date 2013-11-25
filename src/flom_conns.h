@@ -387,8 +387,9 @@ extern "C" {
     /**
      * Remove connections with invalid (closed) file descriptor
      * @param conns IN/OUT connections object
+     * @return a reason code
      */
-    void flom_conns_clean(flom_conns_t *conns);
+    int flom_conns_clean(flom_conns_t *conns);
 
     
 
