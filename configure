@@ -4503,6 +4503,18 @@ fi
 done
 
 
+for ac_header in assert.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "assert.h" "ac_cv_header_assert_h" "$ac_includes_default"
+if test "x$ac_cv_header_assert_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ASSERT_H 1
+_ACEOF
+
+fi
+
+done
+
 for ac_header in errno.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "errno.h" "ac_cv_header_errno_h" "$ac_includes_default"

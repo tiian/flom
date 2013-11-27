@@ -20,6 +20,12 @@
 
 
 
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
+
+
+
 #include "flom_conns.h"
 #include "flom_errors.h"
 #include "flom_trace.h"
@@ -31,6 +37,24 @@
 # undef FLOM_TRACE_MODULE
 #endif /* FLOM_TRACE_MODULE */
 #define FLOM_TRACE_MODULE   FLOM_TRACE_MOD_CONNS
+
+
+
+int flom_conns_check_n(flom_conns_t *conns)
+{
+    /* this is a dirty hack because this struct is opaque and this operation
+       should not be done :( */
+    typedef struct _GPtrArrayPriv {
+        gpointer *pdata;
+        guint len;
+        guint size;
+    } GPtrArrayPriv;
+    GPtrArrayPriv *p = (GPtrArrayPriv *)conns->array;
+    
+    FLOM_TRACE(("flom_conns_check_n: p->len=%u, p->size=%u, conns->n=%u\n",
+                p->len, p->size, conns->n));
+    return conns->n == p->len;
+}
 
 
 
@@ -393,6 +417,7 @@ void flom_conns_free(flom_conns_t *conns)
         free(conns->poll_array);
         conns->poll_array = NULL;
     }
+    assert(flom_conns_check_n(conns));
     if (NULL != conns->array) {
         FLOM_TRACE(("flom_conns_free: releasing array:%p\n",
                     conns->array));

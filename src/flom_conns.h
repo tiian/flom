@@ -195,6 +195,16 @@ extern "C" {
 
 
     /**
+     * Check if n field of the object and the real size of the underlying
+     * array match
+     * @param conns IN connections object
+     * @return a boolean value: TRUE OK, FALSE KO
+     */
+    int flom_conns_check_n(flom_conns_t *conns);
+    
+
+
+    /**
      * Initialize a new object
      * @param conns IN/OUT object to be initialized
      * @param domain IN socket domain for all the connections managed by this

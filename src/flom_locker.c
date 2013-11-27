@@ -183,6 +183,7 @@ gpointer flom_locker_loop(gpointer data)
             /* scanning file descriptors */
             n = flom_conns_get_used(&conns);
             for (i=0; i<n; ++i) {
+                int refresh_conns = FALSE;
                 FLOM_TRACE(("flom_locker_loop: i=%u, fd=%d, POLLIN=%d, "
                             "POLLERR=%d, POLLHUP=%d, POLLNVAL=%d\n", i,
                             fds[i].fd,
@@ -192,11 +193,12 @@ gpointer flom_locker_loop(gpointer data)
                             fds[i].revents & POLLNVAL));
                 if (fds[i].revents & POLLIN) {
                     if (FLOM_RC_OK != (ret_cod = flom_locker_loop_pollin(
-                                           locker, &conns, i)))
+                                           locker, &conns, i, &refresh_conns)))
                         THROW(ACCEPT_LOOP_POLLIN_ERROR);
-                    /* conns is no more consistent, break the loop and poll
-                       again */
-                    break;
+                    if (refresh_conns)
+                        /* conns is no more consistent, break the loop and poll
+                           again */
+                        break;
                 }
                 if (fds[i].revents & POLLHUP) {
                     if (0 != i) {
@@ -264,7 +266,8 @@ gpointer flom_locker_loop(gpointer data)
 
 
 int flom_locker_loop_pollin(struct flom_locker_s *locker,
-                            flom_conns_t *conns, guint id)
+                            flom_conns_t *conns, guint id,
+                            int *refresh_conns)
 {
     enum Exception { CONNS_GET_CD_ERROR
                      , READ_ERROR1
@@ -283,6 +286,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
     
     FLOM_TRACE(("flom_locker_loop_pollin\n"));
     TRY {
+        *refresh_conns = FALSE;
         struct flom_msg_s *msg = NULL;
         struct flom_conn_data_s *curr_cd;
         
@@ -331,6 +335,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                        conns, id)))
                     THROW(CONNS_CLOSE_ERROR1);
+                *refresh_conns = TRUE;
                 /* @@@ clean lock state if any lock was acquired... */
             } else {
                 /* data arrived */

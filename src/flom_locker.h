@@ -239,10 +239,13 @@ extern "C" {
      * @param locker IN/OUT locker context object
      * @param conns IN/OUT connections object
      * @param id IN connection id
+     * @param refresh_conns OUT the conns object must be refreshed due to
+     *        some deletion inside it
      * @return a reason code
      */
     int flom_locker_loop_pollin(struct flom_locker_s *locker,
-                                flom_conns_t *conns, guint id);
+                                flom_conns_t *conns, guint id,
+                                int *refresh_conns);
 
 
 

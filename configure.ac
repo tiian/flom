@@ -59,6 +59,7 @@ AC_CHECK_PROGS(VALGRIND, [valgrind], [])
 AC_CHECK_PROGS(XSLTPROC, [xsltproc], [])
 AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
 
+AC_CHECK_HEADERS(assert.h)
 AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(glib.h)
 AC_CHECK_HEADERS(netinet/in.h)
