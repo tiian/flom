@@ -54,9 +54,9 @@
 
 
 /**
- * Type of resource that must be locked (enum)
+ * Type of resource that must be locked
  */
-enum flom_rsrc_type_e {
+typedef enum flom_rsrc_type_e {
     /**
      * Null resource type
      */
@@ -69,11 +69,24 @@ enum flom_rsrc_type_e {
      * Number of managed resource types
      */
     FLOM_RSRC_TYPE_N
-};
+} flom_rsrc_type_t;
+
+
+
 /**
- * Type of resource that must be locked
+ * Lock/connection pair: used to store which type of lock is requested by
+ * a connection (a client)
  */
-typedef enum flom_rsrc_type_e flom_rsrc_type_t;
+struct flom_rsrc_conn_lock_s {
+    /**
+     * Type of lock requested by the connection
+     */
+    flom_lock_type_t            current_lock;
+    /**
+     * Connection requesting the lock
+     */
+    struct flom_conn_data_s    *conn;
+};
 
 
 
@@ -82,17 +95,13 @@ typedef enum flom_rsrc_type_e flom_rsrc_type_t;
  */
 struct flom_rsrc_data_simple_s {
     /**
-     * Type of lock currently applied to the resource
-     */
-    flom_lock_type_t        current_lock;
-    /**
      * List of connections with an acquired lock
      */
-    GList                   holders;
+    GSList                 *holders;
     /**
      * List of connections waiting for a lock
      */
-    GQueue                  waiters;
+    GQueue                 *waiters;
 };
 
 
@@ -126,7 +135,8 @@ struct flom_resource_s {
      * Method called to process incoming messages (it depends from resource
      * type)
      */
-    int   (*inmsg)   (flom_resource_t *, nfds_t id, struct flom_msg_s *);
+    int   (*inmsg)   (flom_resource_t *,
+                      struct flom_conn_data_s *conn, struct flom_msg_s *);
 };
 
 
@@ -216,7 +226,8 @@ extern "C" {
      * @param msg IN reference to incoming message
      * @return a reason code
      */
-    int flom_resource_simple_inmsg(flom_resource_t *resource, nfds_t id,
+    int flom_resource_simple_inmsg(flom_resource_t *resource,
+                                   struct flom_conn_data_s *conn,
                                    struct flom_msg_s *msg);
 
 

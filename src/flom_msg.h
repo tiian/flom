@@ -111,9 +111,9 @@
 
 
 /**
- * Type of lock that can be asked for a resource (enum)
+ * Type of lock that can be asked for a resource
  */
-enum flom_lock_type_e {
+typedef enum flom_lock_type_e {
     /**
      * Null lock type
      */
@@ -142,11 +142,7 @@ enum flom_lock_type_e {
      * Number of lock types
      */
     FLOM_LOCK_TYPE_N
-};
-/**
- * Type of lock that can be asked for a resource
- */
-typedef enum flom_lock_type_e flom_lock_type_t;
+} flom_lock_type_t;
 
 
 

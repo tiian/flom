@@ -152,6 +152,8 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR:
             return "ERROR: 'g_ptr_array_remove_index_fast' function returned "
                 "an error condition";
+        case FLOM_RC_G_QUEUE_NEW_ERROR:
+            return "ERROR: 'g_queue_new' function returned an error condition";
         case FLOM_RC_G_STRDUP_ERROR:
             return "ERROR: 'g_strdup' function returned an error condition";
         case FLOM_RC_G_THREAD_CREATE_ERROR:

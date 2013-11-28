@@ -137,6 +137,7 @@ int flom_resource_init(flom_resource_t *resource,
                        flom_rsrc_type_t type, const gchar *name)
 {
     enum Exception { OUT_OF_RANGE
+                     , G_QUEUE_NEW_ERROR
                      , UNKNOW_RESOURCE
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -152,7 +153,9 @@ int flom_resource_init(flom_resource_t *resource,
 
         switch (resource->type) {
             case FLOM_RSRC_TYPE_SIMPLE:
-                resource->data.simple.current_lock = FLOM_LOCK_TYPE_NL;
+                resource->data.simple.holders = NULL;
+                if (NULL == (resource->data.simple.waiters = g_queue_new()))
+                    THROW(G_QUEUE_NEW_ERROR);
                 resource->inmsg = flom_resource_simple_inmsg;
                 break;
             default:
@@ -164,6 +167,9 @@ int flom_resource_init(flom_resource_t *resource,
         switch (excp) {
             case OUT_OF_RANGE:
                 ret_cod = FLOM_RC_OUT_OF_RANGE;
+                break;
+            case G_QUEUE_NEW_ERROR:
+                ret_cod = FLOM_RC_G_QUEUE_NEW_ERROR;
                 break;
             case UNKNOW_RESOURCE:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -192,14 +198,16 @@ void flom_resource_free(flom_resource_t *resource)
 
 
 
-int flom_resource_simple_inmsg(flom_resource_t *resource, nfds_t id,
+int flom_resource_simple_inmsg(flom_resource_t *resource,
+                               struct flom_conn_data_s *conn,
                                struct flom_msg_s *msg)
 {
     enum Exception { PROTOCOL_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
-    static const int lock_table[FLOM_LOCK_TYPE_N][FLOM_LOCK_TYPE_N] =
+    static const flom_lock_type_t lock_table[
+        FLOM_LOCK_TYPE_N][FLOM_LOCK_TYPE_N] =
         { { TRUE,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE } ,
           { TRUE,  TRUE,  TRUE,  TRUE,  TRUE,  FALSE } ,
           { TRUE,  TRUE,  TRUE,  FALSE, FALSE, FALSE } ,
@@ -209,21 +217,47 @@ int flom_resource_simple_inmsg(flom_resource_t *resource, nfds_t id,
     
     FLOM_TRACE(("flom_resource_simple_inmsg\n"));
     TRY {
+        GSList *p = NULL;
+        flom_lock_type_t old_lock , new_lock = FLOM_LOCK_TYPE_NL;
+        int can_lock = TRUE;
         flom_msg_trace(msg);
-        /* @@@ put automata code here */
         switch (msg->header.pvs.verb) {
             case FLOM_MSG_VERB_LOCK:
-                FLOM_TRACE(("flom_resource_simple_inmsg: current_lock=%d, "
-                            "asked_lock=%d, lock_table[%d][%d]=%d\n",
-                            resource->data.simple.current_lock,
-                            msg->body.lock_8.resource.type,
-                            resource->data.simple.current_lock,
-                            msg->body.lock_8.resource.type,
-                            lock_table[resource->data.simple.current_lock]
-                            [msg->body.lock_8.resource.type]));
-                /*
-                if (lock_table[][])
-                */
+                p = resource->data.simple.holders;
+                new_lock = msg->body.lock_8.resource.type;
+                while (NULL != p) {
+                    old_lock = ((struct flom_rsrc_conn_lock_s *)
+                                p->data)->current_lock;
+                    new_lock = msg->body.lock_8.resource.type;
+                    FLOM_TRACE(("flom_resource_simple_inmsg: current_lock=%d, "
+                                "asked_lock=%d, lock_table[%d][%d]=%d\n",
+                                old_lock, new_lock, old_lock, new_lock,
+                                lock_table[old_lock][new_lock]));
+                    can_lock &= lock_table[old_lock][new_lock];
+                    if (!can_lock)
+                        break;
+                } /* while (NULL != p) */
+                /* can't lock, enqueue */
+                if (can_lock) {
+                    /* put this connection in holders list */
+                    FLOM_TRACE(("flom_resource_simple_inmsg: asked lock %d "
+                                "can be assigned to connection %p\n",
+                                new_lock, conn));
+                    /* @@@ */
+                } else {
+                    if (msg->body.lock_8.resource.wait) {
+                        /* put this connection in waiters queue */
+                        FLOM_TRACE(("flom_resource_simple_inmsg: asked lock %d "
+                                    "can not be assigned to connection %p, "
+                                    "queing...\n", new_lock, conn));
+                        /* @@@ */
+                    } else {
+                        FLOM_TRACE(("flom_resource_simple_inmsg: asked lock %p "
+                                    "can not be assigned to connection %p, "
+                                    "rejecting...\n", new_lock, conn));
+                        /* @@@ */
+                    }
+                }
                 break;
             case FLOM_MSG_VERB_UNLOCK:
                 break;

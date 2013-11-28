@@ -362,9 +362,10 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
         if (NULL != msg) {
             if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb ||
                 FLOM_MSG_VERB_UNLOCK == msg->header.pvs.verb) {
+                
                 if (FLOM_RC_OK != (ret_cod = 
                                    locker->resource.inmsg(
-                                       &locker->resource, id, msg)))
+                                       &locker->resource, curr_cd, msg)))
                     THROW(RESOURCE_INMSG_ERROR);
             } else {
                 /* @@@ */
