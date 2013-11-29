@@ -51,7 +51,15 @@
 /**
  * Peer has closed socket while expecting data
  */
-#define FLOM_RC_CONNECTION_CLOSED               +1
+#define FLOM_RC_CONNECTION_CLOSED               +10
+/**
+ * The lock can not be obtained
+ */
+#define FLOM_RC_LOCK_BUSY                        +2
+/**
+ * The lock can not be obtained now, but the request was enqueued
+ */
+#define FLOM_RC_LOCK_ENQUEUED                    +1
 
 
 

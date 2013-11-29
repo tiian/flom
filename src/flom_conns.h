@@ -77,9 +77,9 @@
 
 
 /**
- * Possible state of a connection (enum)
+ * Possible state of a connection
  */
-enum flom_conn_state_e {
+typedef enum flom_conn_state_e {
     /**
      * The connection is managed by main daemon thread (the listener thread)
      */
@@ -94,11 +94,7 @@ enum flom_conn_state_e {
      * @ref flom_conns_clean
      */
     FLOM_CONN_STATE_REMOVE
-};
-/**
- * Possible state of a connection (enum)
- */
-typedef enum flom_conn_state_e flom_conn_state_t;
+} flom_conn_state_t;
 
 
 

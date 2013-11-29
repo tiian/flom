@@ -109,7 +109,7 @@ int flom_msg_send(int fd, const char *buf, size_t buf_size)
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
-    FLOM_TRACE(("flom_msg_send\n"));
+    FLOM_TRACE(("flom_msg_send: fd=%d\n", fd));
     TRY {
         ssize_t wrote_bytes;
         int optval;
@@ -127,11 +127,11 @@ int flom_msg_send(int fd, const char *buf, size_t buf_size)
             THROW(CONNECTION_CLOSED);
         }
         FLOM_TRACE(("flom_msg_send: sending " SIZE_T_FORMAT
-                    " bytes to the server (fd=%d)...\n", buf_size, fd));
-        wrote_bytes = send(fd, buf, buf_size, 0);
+                    " bytes (fd=%d)...\n", buf_size, fd));
+        wrote_bytes = send(fd, buf, buf_size, MSG_NOSIGNAL);
         if (buf_size != wrote_bytes) {
             FLOM_TRACE(("flom_msg_send: sent " SSIZE_T_FORMAT
-                        " bytes instead of " SIZE_T_FORMAT " to the server\n",
+                        " bytes instead of " SIZE_T_FORMAT "\n",
                         wrote_bytes, buf_size));
             THROW(SEND_ERROR);
         }
@@ -173,6 +173,7 @@ int flom_msg_free(struct flom_msg_s *msg)
     
     FLOM_TRACE(("flom_msg_free\n"));
     TRY {
+        msg->state = FLOM_MSG_STATE_INVALID;
         switch (msg->header.pvs.verb) {
             case FLOM_MSG_VERB_NULL: /* nothing to release */
                 break;
@@ -1107,3 +1108,56 @@ void flom_msg_deserialize_end_element(GMarkupParseContext *context,
     FLOM_TRACE(("flom_msg_deserialize_end_element/excp=%d/"
                 "msg->state=%d\n", excp, msg->state));
 }
+
+
+
+int flom_msg_build_answer(struct flom_msg_s *msg,
+                          int verb, int step, int rc)
+{
+    enum Exception { NULL_OBJECT
+                     , INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_msg_build_answer\n"));
+    TRY {
+        if (NULL == msg)
+            THROW(NULL_OBJECT);
+        msg->state = FLOM_MSG_STATE_PARSING;
+        msg->header.level = FLOM_MSG_LEVEL;
+        msg->header.pvs.verb = verb;
+        msg->header.pvs.step = step;
+        switch (step) {
+            case 2*FLOM_MSG_STEP_INCR:
+                msg->body.lock_16.answer.rc = rc;
+                break;
+            case 3*FLOM_MSG_STEP_INCR:
+                msg->body.lock_24.answer.rc = rc;
+                break;
+            default:
+                THROW(INVALID_STEP);
+                break;
+        } /*  switch (step) */
+        msg->state = FLOM_MSG_STATE_READY;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case INVALID_STEP:
+                ret_cod = FLOM_RC_INVALID_OPTION;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_msg_build_answer/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

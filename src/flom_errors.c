@@ -54,6 +54,11 @@ const char *flom_strerror(int ret_cod)
 */
         case FLOM_RC_CONNECTION_CLOSED:
             return "WARNING: peer has closed socket connection";
+        case FLOM_RC_LOCK_BUSY:
+            return "INFO: the lock can not be obtained";
+        case FLOM_RC_LOCK_ENQUEUED:
+            return "INFO: the lock can not be obtained now, but the "
+                "request was enqueued";
         case FLOM_RC_OK:
             return "OK: no error";
         case FLOM_RC_INTERNAL_ERROR:

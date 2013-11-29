@@ -57,23 +57,28 @@
 
 
 /**
- * The message has been initialized, but the values are not ready to be
- * read
+ * Message state enum type
  */
-#define FLOM_MSG_STATE_INITIALIZED     0
-/**
- * The parser is filling the message fields, but the values are not ready to
- * be read
- */
-#define FLOM_MSG_STATE_PARSING         1
-/**
- * The parser completed its job and the values are ready to be read
- */
-#define FLOM_MSG_STATE_READY           2
-/**
- * An error occurred and the content of the messafe is INVALID
- */
-#define FLOM_MSG_STATE_INVALID         3
+typedef enum flom_msg_state_e {
+    /**
+     * The message has been initialized, but the values are not ready to be
+     * read
+     */
+    FLOM_MSG_STATE_INITIALIZED,
+    /**
+     * The parser is filling the message fields, but the values are not ready to
+     * be read
+     */
+    FLOM_MSG_STATE_PARSING,
+    /**
+     * The parser completed its job and the values are ready to be read
+     */
+    FLOM_MSG_STATE_READY,
+    /**
+     * An error occurred and the content of the messafe is INVALID
+     */
+    FLOM_MSG_STATE_INVALID
+} flom_msg_state_t;
 
 
 
@@ -347,7 +352,7 @@ struct flom_msg_s {
     /**
      * Message state
      */
-    int                                       state;
+    flom_msg_state_t                          state;
     /**
      * Message header, common to all messages
      */
@@ -410,7 +415,7 @@ extern "C" {
     
     /**
      * Free all the dynamically allocated strings previously allocated by
-     * @ref flom_msg_deserialize using xmlGetProp method
+     * @ref flom_msg_deserialize
      * @param msg IN/OUT the message must be massaged
      * @return a reason code
      */
@@ -641,6 +646,19 @@ extern "C" {
 
     
 
+    /**
+     * Build a standard answer message
+     * @param msg IN/OUT message allocated and initialized
+     * @param verb IN answer verb
+     * @param step IN answer step
+     * @param rc IN answer rc
+     * @return a reason code
+     */
+    int flom_msg_build_answer(struct flom_msg_s *msg,
+                              int verb, int step, int rc);
+
+    
+                              
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

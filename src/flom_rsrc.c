@@ -202,7 +202,13 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                                struct flom_conn_data_s *conn,
                                struct flom_msg_s *msg)
 {
-    enum Exception { PROTOCOL_ERROR
+    enum Exception { MSG_FREE_ERROR
+                     , G_TRY_MALLOC_ERROR1
+                     , MSG_BUILD_ANSWER_ERROR1
+                     , G_TRY_MALLOC_ERROR2
+                     , MSG_BUILD_ANSWER_ERROR2
+                     , MSG_BUILD_ANSWER_ERROR3
+                     , PROTOCOL_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
@@ -227,8 +233,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                 new_lock = msg->body.lock_8.resource.type;
                 while (NULL != p) {
                     old_lock = ((struct flom_rsrc_conn_lock_s *)
-                                p->data)->current_lock;
-                    new_lock = msg->body.lock_8.resource.type;
+                                p->data)->lock_type;
                     FLOM_TRACE(("flom_resource_simple_inmsg: current_lock=%d, "
                                 "asked_lock=%d, lock_table[%d][%d]=%d\n",
                                 old_lock, new_lock, old_lock, new_lock,
@@ -237,27 +242,63 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                     if (!can_lock)
                         break;
                 } /* while (NULL != p) */
+                /* free the input message */
+                if (FLOM_RC_OK != (ret_cod = flom_msg_free(msg)))
+                    THROW(MSG_FREE_ERROR);
+                flom_msg_init(msg);
                 /* can't lock, enqueue */
                 if (can_lock) {
+                    struct flom_rsrc_conn_lock_s *cl = NULL;
                     /* put this connection in holders list */
                     FLOM_TRACE(("flom_resource_simple_inmsg: asked lock %d "
                                 "can be assigned to connection %p\n",
                                 new_lock, conn));
-                    /* @@@ */
+                    if (NULL == (cl = (struct flom_rsrc_conn_lock_s *)
+                                 g_try_malloc(
+                                     sizeof(struct flom_rsrc_conn_lock_s))))
+                        THROW(G_TRY_MALLOC_ERROR1);
+                    cl->lock_type = new_lock;
+                    cl->conn = conn;
+                    resource->data.simple.holders = g_slist_prepend(
+                        resource->data.simple.holders,
+                        (gpointer)cl);
+                    if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
+                                           msg, FLOM_MSG_VERB_LOCK,
+                                           2*FLOM_MSG_STEP_INCR,
+                                           FLOM_RC_OK)))
+                        THROW(MSG_BUILD_ANSWER_ERROR1);
                 } else {
                     if (msg->body.lock_8.resource.wait) {
+                        struct flom_rsrc_conn_lock_s *cl = NULL;
                         /* put this connection in waiters queue */
                         FLOM_TRACE(("flom_resource_simple_inmsg: asked lock %d "
                                     "can not be assigned to connection %p, "
                                     "queing...\n", new_lock, conn));
-                        /* @@@ */
+                        if (NULL == (cl = (struct flom_rsrc_conn_lock_s *)
+                                     g_try_malloc(
+                                         sizeof(struct flom_rsrc_conn_lock_s))))
+                            THROW(G_TRY_MALLOC_ERROR2);
+                        cl->lock_type = new_lock;
+                        cl->conn = conn;
+                        g_queue_push_tail(
+                            resource->data.simple.waiters,
+                            (gpointer)cl);
+                        if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
+                                               msg, FLOM_MSG_VERB_LOCK,
+                                               2*FLOM_MSG_STEP_INCR,
+                                               FLOM_RC_LOCK_ENQUEUED)))
+                            THROW(MSG_BUILD_ANSWER_ERROR2);
                     } else {
                         FLOM_TRACE(("flom_resource_simple_inmsg: asked lock %p "
                                     "can not be assigned to connection %p, "
                                     "rejecting...\n", new_lock, conn));
-                        /* @@@ */
-                    }
-                }
+                        if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
+                                               msg, FLOM_MSG_VERB_LOCK,
+                                               2*FLOM_MSG_STEP_INCR,
+                                               FLOM_RC_LOCK_BUSY)))
+                            THROW(MSG_BUILD_ANSWER_ERROR3);
+                    } /* if (msg->body.lock_8.resource.wait) */
+                } /* if (can_lock) */
                 break;
             case FLOM_MSG_VERB_UNLOCK:
                 break;
@@ -268,6 +309,19 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case MSG_FREE_ERROR:
+                break;
+            case G_TRY_MALLOC_ERROR1:
+                ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case MSG_BUILD_ANSWER_ERROR1:
+                break;
+            case G_TRY_MALLOC_ERROR2:
+                ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case MSG_BUILD_ANSWER_ERROR2:
+            case MSG_BUILD_ANSWER_ERROR3:
+                break;
             case PROTOCOL_ERROR:
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;
                 break;

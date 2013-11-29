@@ -81,7 +81,7 @@ struct flom_rsrc_conn_lock_s {
     /**
      * Type of lock requested by the connection
      */
-    flom_lock_type_t            current_lock;
+    flom_lock_type_t            lock_type;
     /**
      * Connection requesting the lock
      */

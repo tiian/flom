@@ -279,6 +279,9 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                      , MSG_DESERIALIZE_ERROR
                      , CONNS_CLOSE_ERROR2
                      , RESOURCE_INMSG_ERROR
+                     , MSG_SERIALIZE_ERROR
+                     , MSG_SEND_ERROR
+                     , MSG_FREE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -360,16 +363,40 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
         } /* if (0 == id) */
         
         if (NULL != msg) {
+            if (NULL != new_cd)
+                curr_cd = new_cd;
             if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb ||
                 FLOM_MSG_VERB_UNLOCK == msg->header.pvs.verb) {
-                
+                /* process input message */
                 if (FLOM_RC_OK != (ret_cod = 
                                    locker->resource.inmsg(
                                        &locker->resource, curr_cd, msg)))
                     THROW(RESOURCE_INMSG_ERROR);
+                /* reply with output message */
+                if (FLOM_MSG_STATE_READY == msg->state) {
+                    char buffer[FLOM_MSG_BUFFER_SIZE];
+                    size_t msg_len = 0;
+                    if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
+                                           msg, buffer, sizeof(buffer),
+                                           &msg_len)))
+                        THROW(MSG_SERIALIZE_ERROR);
+                    ret_cod = flom_msg_send(curr_cd->fd, buffer, msg_len);
+                    if (FLOM_RC_OK == FLOM_RC_SEND_ERROR) {
+                        FLOM_TRACE(("flom_locker_loop_pollin: error while "
+                                    "sending message to client (the "
+                                    "connection) will be closed during next "
+                                    "poll loop...\n"));
+                    }
+                    if (FLOM_RC_OK != ret_cod)
+                        THROW(MSG_SEND_ERROR);
+                } /* if (FLOM_MSG_STATE_READY == msg->state) */
             } else {
                 /* @@@ */
             } /* if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb ... */
+            /* free message content and reset it */
+            if (FLOM_RC_OK != (ret_cod = flom_msg_free(msg)))
+                THROW(MSG_FREE_ERROR);
+            flom_msg_init(msg);
         } /* if (NULL != msg) */
         
         THROW(NONE);
@@ -391,6 +418,9 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 break;
             case MSG_DESERIALIZE_ERROR:
             case CONNS_CLOSE_ERROR2:
+                break;
+            case MSG_SEND_ERROR:
+            case MSG_FREE_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
