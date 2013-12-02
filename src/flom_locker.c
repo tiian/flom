@@ -111,10 +111,11 @@ gpointer flom_locker_loop(gpointer data)
                      , CONNS_GET_FDS_ERROR
                      , CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
-                     , ACCEPT_LOOP_POLLIN_ERROR
                      , CONNS_CLOSE_ERROR1
+                     , RESOURCE_CLEAN_ERROR
+                     , ACCEPT_LOOP_POLLIN_ERROR
                      , CONNS_CLOSE_ERROR2
-                     , NETWORK_ERROR
+                     , CONNS_CLOSE_ERROR3
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     flom_conns_t conns;
@@ -191,6 +192,23 @@ gpointer flom_locker_loop(gpointer data)
                             fds[i].revents & POLLERR,
                             fds[i].revents & POLLHUP,
                             fds[i].revents & POLLNVAL));
+                if (fds[i].revents & POLLERR) {
+                    /* client error, termination */
+                    FLOM_TRACE(("flom_locker_loop: connection to client %u "
+                                "encountered an error, closing it...\n", i));
+                    if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
+                                           &conns, i)))
+                        THROW(CONNS_CLOSE_ERROR1);
+                    /* @@@ */
+                    if (FLOM_RC_OK != (ret_cod =
+                                       locker->resource.clean(
+                                           &locker->resource,
+                                           flom_conns_get_cd(&conns, i))))
+                        THROW(RESOURCE_CLEAN_ERROR);
+                    /* conns is no more consistent, break the loop and poll
+                       again */
+                    break;
+                } /* if (fds[i].revents & POLLERR) */
                 if (fds[i].revents & POLLIN) {
                     if (FLOM_RC_OK != (ret_cod = flom_locker_loop_pollin(
                                            locker, &conns, i, &refresh_conns)))
@@ -208,23 +226,20 @@ gpointer flom_locker_loop(gpointer data)
                         /* @@@ */
                         if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                                &conns, i)))
-                            THROW(CONNS_CLOSE_ERROR1);
+                            THROW(CONNS_CLOSE_ERROR2);
                     } else {
                         /* locker termination asked by parent thread */
                         FLOM_TRACE(("flom_locker_loop: termination of this "
                                     "locker was asked by parent thread...\n"));
                         if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                                &conns, i)))
-                            THROW(CONNS_CLOSE_ERROR2);
+                            THROW(CONNS_CLOSE_ERROR3);
                         locker->read_pipe = NULL_FD;
                     }
                     /* conns is no more consistent, break the loop and poll
                        again */
                     break;
                 } /* if (fds[i].revents & POLLHUP) */
-                if (fds[i].revents &
-                    (POLLERR | POLLHUP | POLLNVAL))
-                    THROW(NETWORK_ERROR);
             } /* for (i... */
             /* @@@ */
             
@@ -240,12 +255,11 @@ gpointer flom_locker_loop(gpointer data)
                 break;
             case CONNS_SET_EVENTS_ERROR:
             case POLL_ERROR:
-            case ACCEPT_LOOP_POLLIN_ERROR:
             case CONNS_CLOSE_ERROR1:
+            case RESOURCE_CLEAN_ERROR:
+            case ACCEPT_LOOP_POLLIN_ERROR:
             case CONNS_CLOSE_ERROR2:
-                break;
-            case NETWORK_ERROR:
-                ret_cod = FLOM_RC_NETWORK_EVENT_ERROR;
+            case CONNS_CLOSE_ERROR3:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -381,13 +395,12 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                                            &msg_len)))
                         THROW(MSG_SERIALIZE_ERROR);
                     ret_cod = flom_msg_send(curr_cd->fd, buffer, msg_len);
-                    if (FLOM_RC_OK == FLOM_RC_SEND_ERROR) {
+                    if (FLOM_RC_SEND_ERROR == ret_cod) {
                         FLOM_TRACE(("flom_locker_loop_pollin: error while "
                                     "sending message to client (the "
                                     "connection) will be closed during next "
                                     "poll loop...\n"));
-                    }
-                    if (FLOM_RC_OK != ret_cod)
+                    } else if (FLOM_RC_OK != ret_cod)
                         THROW(MSG_SEND_ERROR);
                 } /* if (FLOM_MSG_STATE_READY == msg->state) */
             } else {

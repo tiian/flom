@@ -101,7 +101,7 @@ struct flom_rsrc_data_simple_s {
     /**
      * List of connections waiting for a lock
      */
-    GQueue                 *waiters;
+    GQueue                 *waitings;
 };
 
 
@@ -136,7 +136,11 @@ struct flom_resource_s {
      * type)
      */
     int   (*inmsg)   (flom_resource_t *,
-                      struct flom_conn_data_s *conn, struct flom_msg_s *);
+                      struct flom_conn_data_s *, struct flom_msg_s *);
+    /**
+     * Method called to process a clean-up signal (client disconnected)
+     */
+    int   (*clean)   (flom_resource_t *, struct flom_conn_data_s *);
 };
 
 
@@ -222,13 +226,33 @@ extern "C" {
     /**
      * Manage an incoming message for a "simple" resource
      * @param resource IN/OUT reference to resource object
-     * @param id IN connection identificator
+     * @param conn IN connection reference
      * @param msg IN reference to incoming message
      * @return a reason code
      */
     int flom_resource_simple_inmsg(flom_resource_t *resource,
                                    struct flom_conn_data_s *conn,
                                    struct flom_msg_s *msg);
+
+
+    
+    /**
+     * Manage an clean-up signal for a "simple" resource
+     * @param resource IN/OUT reference to resource object
+     * @param conn IN connection reference
+     * @return a reason code
+     */
+    int flom_resource_simple_clean(flom_resource_t *resource,
+                                   struct flom_conn_data_s *conn);
+
+    
+
+    /**
+     * Check if any of the lock waitings can get a lock
+     * @param resource IN/OUT reference to resource object
+     * @return a reason code
+     */
+    int flom_resource_simple_waitings(flom_resource_t *resource);
 
 
     

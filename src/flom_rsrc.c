@@ -154,9 +154,10 @@ int flom_resource_init(flom_resource_t *resource,
         switch (resource->type) {
             case FLOM_RSRC_TYPE_SIMPLE:
                 resource->data.simple.holders = NULL;
-                if (NULL == (resource->data.simple.waiters = g_queue_new()))
+                if (NULL == (resource->data.simple.waitings = g_queue_new()))
                     THROW(G_QUEUE_NEW_ERROR);
                 resource->inmsg = flom_resource_simple_inmsg;
+                resource->clean = flom_resource_simple_clean;
                 break;
             default:
                 THROW(UNKNOW_RESOURCE);
@@ -241,13 +242,15 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                     can_lock &= lock_table[old_lock][new_lock];
                     if (!can_lock)
                         break;
+                    else
+                        p = p->next;
                 } /* while (NULL != p) */
                 /* free the input message */
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(msg)))
                     THROW(MSG_FREE_ERROR);
                 flom_msg_init(msg);
-                /* can't lock, enqueue */
                 if (can_lock) {
+                    /* get the lock */
                     struct flom_rsrc_conn_lock_s *cl = NULL;
                     /* put this connection in holders list */
                     FLOM_TRACE(("flom_resource_simple_inmsg: asked lock %d "
@@ -268,9 +271,10 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                                            FLOM_RC_OK)))
                         THROW(MSG_BUILD_ANSWER_ERROR1);
                 } else {
+                    /* can't lock, enqueue */
                     if (msg->body.lock_8.resource.wait) {
                         struct flom_rsrc_conn_lock_s *cl = NULL;
-                        /* put this connection in waiters queue */
+                        /* put this connection in waitings queue */
                         FLOM_TRACE(("flom_resource_simple_inmsg: asked lock %d "
                                     "can not be assigned to connection %p, "
                                     "queing...\n", new_lock, conn));
@@ -281,7 +285,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                         cl->lock_type = new_lock;
                         cl->conn = conn;
                         g_queue_push_tail(
-                            resource->data.simple.waiters,
+                            resource->data.simple.waitings,
                             (gpointer)cl);
                         if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                                msg, FLOM_MSG_VERB_LOCK,
@@ -333,6 +337,105 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
         } /* switch (excp) */
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_resource_simple_inmsg/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_resource_simple_clean(flom_resource_t *resource,
+                               struct flom_conn_data_s *conn)
+{
+    enum Exception { NULL_OBJECT
+                     , SIMPLE_WAITINGS_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_resource_simple_clean\n"));
+    TRY {
+        GSList *p = NULL;
+
+        if (NULL == resource)
+            THROW(NULL_OBJECT);
+        /* check if the connection keeps a lock */
+        p = resource->data.simple.holders;
+        while (NULL != p) {
+            if (((struct flom_rsrc_conn_lock_s *)p->data)->conn == conn)
+                break;
+            else
+                p = p->next;
+        } /* while (NULL != p) */
+        if (NULL != p) {
+            FLOM_TRACE(("flom_resource_simple_clean: the client is holding "
+                        "a lock of type %d, removing it...\n",
+                        ((struct flom_rsrc_conn_lock_s *)p->data)->lock_type));
+            resource->data.simple.holders = g_slist_remove(
+                resource->data.simple.holders, p->data);
+            /*
+            FLOM_TRACE(("flom_resource_simple_clean: g_slist_length=%u\n",
+                        g_slist_length(resource->data.simple.holders)));
+            */
+            /* check if the some other clients can get a lock now */
+            if (FLOM_RC_OK != (ret_cod = flom_resource_simple_waitings(
+                                   resource)))
+                THROW(SIMPLE_WAITINGS_ERROR);
+        } else {
+            guint i = 0;
+            /* check if the connection was waiting a lock */
+            do {
+                struct flom_rsrc_conn_lock_s *cl =
+                    (struct flom_rsrc_conn_lock_s *)
+                    g_queue_peek_nth(resource->data.simple.waitings, i);
+                if (NULL == cl)
+                    break;
+                /* try to apply this lock... */
+                /* @@@ extract the logic from simple_inmsg and put in a
+                   distinct function ... */
+            } while (TRUE);
+            
+        }
+                
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case SIMPLE_WAITINGS_ERROR:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_resource_simple_clean/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_resource_simple_waitings(flom_resource_t *resource)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_resource_simple_waitings\n"));
+    TRY {
+        /* @@@ */
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_resource_simple_waitings/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
