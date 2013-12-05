@@ -49,7 +49,8 @@ am_flom_OBJECTS = main.$(OBJEXT) flom_config.$(OBJEXT) \
 	flom_connect.$(OBJEXT) flom_conns.$(OBJEXT) \
 	flom_daemon.$(OBJEXT) flom_errors.$(OBJEXT) \
 	flom_exec.$(OBJEXT) flom_locker.$(OBJEXT) flom_msg.$(OBJEXT) \
-	flom_rsrc.$(OBJEXT) flom_trace.$(OBJEXT)
+	flom_resource_simple.$(OBJEXT) flom_rsrc.$(OBJEXT) \
+	flom_trace.$(OBJEXT)
 flom_OBJECTS = $(am_flom_OBJECTS)
 flom_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -167,8 +168,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CFLAGS = -Wall
 flom_SOURCES = main.c flom_config.c flom_connect.c flom_conns.c flom_daemon.c \
-	flom_errors.c flom_exec.c flom_locker.c flom_msg.c flom_rsrc.c \
-	flom_trace.c
+	flom_errors.c flom_exec.c flom_locker.c flom_msg.c \
+	flom_resource_simple.c flom_rsrc.c flom_trace.c
 
 all: all-am
 
@@ -259,6 +260,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_exec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_locker.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_msg.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_resource_simple.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_rsrc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_trace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
