@@ -223,39 +223,6 @@ extern "C" {
 
     
     
-    /**
-     * Manage an incoming message for a "simple" resource
-     * @param resource IN/OUT reference to resource object
-     * @param conn IN connection reference
-     * @param msg IN reference to incoming message
-     * @return a reason code
-     */
-    int flom_resource_simple_inmsg(flom_resource_t *resource,
-                                   struct flom_conn_data_s *conn,
-                                   struct flom_msg_s *msg);
-
-
-    
-    /**
-     * Manage an clean-up signal for a "simple" resource
-     * @param resource IN/OUT reference to resource object
-     * @param conn IN connection reference
-     * @return a reason code
-     */
-    int flom_resource_simple_clean(flom_resource_t *resource,
-                                   struct flom_conn_data_s *conn);
-
-    
-
-    /**
-     * Check if any of the lock waitings can get a lock
-     * @param resource IN/OUT reference to resource object
-     * @return a reason code
-     */
-    int flom_resource_simple_waitings(flom_resource_t *resource);
-
-
-    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

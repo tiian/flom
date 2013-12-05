@@ -29,6 +29,7 @@
 #include "flom_config.h"
 #include "flom_errors.h"
 #include "flom_rsrc.h"
+#include "flom_resource_simple.h"
 #include "flom_trace.h"
 
 
