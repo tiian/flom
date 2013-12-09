@@ -116,15 +116,15 @@ struct flom_conn_data_s {
     socklen_t addr_len;
     union {
         /**
-         * Client addressed for generic connections
+         * Client address for generic connections
          */
         struct sockaddr    sa;
         /**
-         * Client addresses for AF_UNIX connections
+         * Client address for AF_UNIX connections
          */
         struct sockaddr_un saun;
         /**
-         * Client addresses for AF_INET connections
+         * Client address for AF_INET connections
          */
         struct sockaddr_in sain;
     };

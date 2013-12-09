@@ -26,6 +26,7 @@
 
 
 #include "flom_config.h"
+#include "flom_conns.h"
 #include "flom_trace.h"
 
 
@@ -57,10 +58,10 @@ extern "C" {
 
     /**
      * Send lock command to the daemon
-     * @param fd IN socket file descriptor
+     * @param fd IN connection data
      * @return a reason code
      */
-    int flom_connect_lock(int fd);
+    int flom_connect_lock(struct flom_conn_data_s *cd);
 
 
     
