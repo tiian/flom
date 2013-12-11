@@ -129,6 +129,9 @@ int flom_connect_lock(struct flom_conn_data_s *cd)
                      , MSG_RETRIEVE_ERROR
                      , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
                      , MSG_DESERIALIZE_ERROR
+                     , PROTOCOL_ERROR1
+                     , LOCK_BUSY
+                     , PROTOCOL_ERROR2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -178,6 +181,27 @@ int flom_connect_lock(struct flom_conn_data_s *cd)
         if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
                                buffer, to_read, &msg, cd->gmpc)))
             THROW(MSG_DESERIALIZE_ERROR);
+
+        flom_msg_trace(&msg);
+
+        /* check lock answer */
+        if (FLOM_MSG_VERB_LOCK != msg.header.pvs.verb ||
+            2*FLOM_MSG_STEP_INCR != msg.header.pvs.step)
+            THROW(PROTOCOL_ERROR1);
+        switch (msg.body.lock_16.answer.rc) {
+            case FLOM_RC_OK:
+                break;
+            case FLOM_RC_LOCK_ENQUEUED:
+                /* @@@ implement me */
+                break;
+            case FLOM_RC_LOCK_BUSY:
+                ret_cod = msg.body.lock_16.answer.rc;
+                THROW(LOCK_BUSY);
+                break;
+            default:
+                THROW(PROTOCOL_ERROR2);
+                break;
+        } /* switch (msg.body.lock_16.answer.rc) */
         
         THROW(NONE);
     } CATCH {
@@ -194,6 +218,12 @@ int flom_connect_lock(struct flom_conn_data_s *cd)
                 ret_cod = FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR;
                 break;
             case MSG_DESERIALIZE_ERROR:
+                break;
+            case PROTOCOL_ERROR1:
+            case PROTOCOL_ERROR2:
+                ret_cod = FLOM_RC_PROTOCOL_ERROR;
+                break;
+            case LOCK_BUSY:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

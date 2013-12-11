@@ -918,10 +918,11 @@ void flom_msg_deserialize_start_element(
                      , G_STRDUP_ERROR
                      , INVALID_PROPERTY1
                      , INVALID_PROPERTY2
+                     , INVALID_PROPERTY3
                      , TAG_TYPE_ERROR
                      , NONE } excp;
     
-    enum {dummy_tag, msg_tag, resource_tag} tag_type = dummy_tag;
+    enum {dummy_tag, msg_tag, resource_tag, answer_tag } tag_type = dummy_tag;
     /* deserialized message */
     struct flom_msg_s *msg = (struct flom_msg_s *)user_data;
     
@@ -943,6 +944,8 @@ void flom_msg_deserialize_start_element(
             tag_type = msg_tag;
         else if (!strcmp(element_name, FLOM_MSG_TAG_RESOURCE))
             tag_type = resource_tag;
+        else if (!strcmp(element_name, FLOM_MSG_TAG_ANSWER))
+            tag_type = answer_tag;
         while (*name_cursor) {
             FLOM_TRACE(("flom_msg_deserialize_start_element: name_cursor='%s' "
                         "value_cursor='%s'\n", *name_cursor, *value_cursor));
@@ -998,6 +1001,30 @@ void flom_msg_deserialize_start_element(
                         }
                     }
                     break;
+                case answer_tag:
+                    /* check if this tag is OK for the current message */
+                    if ((FLOM_MSG_VERB_LOCK == msg->header.pvs.verb &&
+                         2*FLOM_MSG_STEP_INCR == msg->header.pvs.step) ||
+                        (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb &&
+                         3*FLOM_MSG_STEP_INCR == msg->header.pvs.step)) {
+                        if (!strcmp(*name_cursor, FLOM_MSG_PROP_RC)) {
+                            if (2*FLOM_MSG_STEP_INCR == msg->header.pvs.step)
+                                msg->body.lock_16.answer.rc =
+                                    strtol(*value_cursor, NULL, 10);
+                            else if (2*FLOM_MSG_STEP_INCR ==
+                                     msg->header.pvs.step)
+                                msg->body.lock_24.answer.rc =
+                                    strtol(*value_cursor, NULL, 10);
+                            else {
+                                FLOM_TRACE(("flom_msg_deserialize_start_"
+                                            "element: property '%s' is not "
+                                            "valid for verb '%s'\n",
+                                            *name_cursor, element_name));
+                                THROW(INVALID_PROPERTY3);
+                            }
+                        }
+                    }
+                    break;
                 default:
                     FLOM_TRACE(("flom_msg_deserialize_start_element: ERROR, "
                                 "tag_type=%d\n", tag_type));
@@ -1015,6 +1042,7 @@ void flom_msg_deserialize_start_element(
             case G_STRDUP_ERROR:
             case INVALID_PROPERTY1:
             case INVALID_PROPERTY2:
+            case INVALID_PROPERTY3:
             case TAG_TYPE_ERROR:
                 msg->state = FLOM_MSG_STATE_INVALID;
                 break;
