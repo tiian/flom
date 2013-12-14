@@ -130,6 +130,7 @@ int flom_connect_lock(struct flom_conn_data_s *cd)
                      , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , PROTOCOL_ERROR1
+                     , CONNECT_WAIT_LOCK_ERROR
                      , LOCK_BUSY
                      , PROTOCOL_ERROR2
                      , NONE } excp;
@@ -192,7 +193,10 @@ int flom_connect_lock(struct flom_conn_data_s *cd)
             case FLOM_RC_OK:
                 break;
             case FLOM_RC_LOCK_ENQUEUED:
-                /* @@@ implement me */
+                FLOM_TRACE(("flom_connect_lock: resource is busy, "
+                            "waiting...\n"));
+                if (FLOM_RC_OK != (ret_cod = flom_connect_wait_lock(cd, &msg)))
+                    THROW(CONNECT_WAIT_LOCK_ERROR);
                 break;
             case FLOM_RC_LOCK_BUSY:
                 ret_cod = msg.body.lock_16.answer.rc;
@@ -223,6 +227,7 @@ int flom_connect_lock(struct flom_conn_data_s *cd)
             case PROTOCOL_ERROR2:
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;
                 break;
+            case CONNECT_WAIT_LOCK_ERROR:
             case LOCK_BUSY:
                 break;
             case NONE:
@@ -240,6 +245,72 @@ int flom_connect_lock(struct flom_conn_data_s *cd)
     }
     
     FLOM_TRACE(("flom_connect_lock/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_connect_wait_lock(struct flom_conn_data_s *cd,
+                           struct flom_msg_s *msg)
+{
+    enum Exception { MSG_RETRIEVE_ERROR
+                     , MSG_DESERIALIZE_ERROR
+                     , PROTOCOL_ERROR1
+                     , LOCK_CANT_LOCK
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_connect_wait_lock\n"));
+    TRY {
+        char buffer[1024];
+        ssize_t to_read;
+        
+        /* retrieve the reply message */
+        if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
+                               cd->fd, buffer, sizeof(buffer), &to_read)))
+            THROW(MSG_RETRIEVE_ERROR);
+
+        flom_msg_free(msg);
+        flom_msg_init(msg);
+        
+        /* deserialize the reply message */
+        if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
+                               buffer, to_read, msg, cd->gmpc)))
+            THROW(MSG_DESERIALIZE_ERROR);
+
+        flom_msg_trace(msg);
+        
+        /* check lock answer */
+        if (FLOM_MSG_VERB_LOCK != msg->header.pvs.verb ||
+            3*FLOM_MSG_STEP_INCR != msg->header.pvs.step)
+            THROW(PROTOCOL_ERROR1);
+        if (FLOM_RC_OK != msg->body.lock_24.answer.rc) {
+            FLOM_TRACE(("flom_connect_wait_lock: lock can NOT be acquired, "
+                        "leaving...\n"));
+            THROW(LOCK_CANT_LOCK);
+        }   
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case MSG_RETRIEVE_ERROR:
+            case MSG_DESERIALIZE_ERROR:               
+                break;
+            case PROTOCOL_ERROR1:
+                ret_cod = FLOM_RC_PROTOCOL_ERROR;
+                break;
+            case LOCK_CANT_LOCK:
+                ret_cod = FLOM_RC_LOCK_CANT_LOCK;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_connect_wait_lock/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

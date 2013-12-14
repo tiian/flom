@@ -58,11 +58,22 @@ extern "C" {
 
     /**
      * Send lock command to the daemon
-     * @param fd IN connection data
+     * @param cd IN connection data
      * @return a reason code
      */
     int flom_connect_lock(struct flom_conn_data_s *cd);
 
+
+
+    /**
+     * Wait while the desired resource is busy, then go on
+     * @param cd IN connection data
+     * @param msg IN/OUT message used to deserialize the replies
+     * @return a reason code
+     */     
+    int flom_connect_wait_lock(struct flom_conn_data_s *cd,
+                               struct flom_msg_s *msg);
+    
 
     
 #ifdef __cplusplus

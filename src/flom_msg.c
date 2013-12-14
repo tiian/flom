@@ -1011,7 +1011,7 @@ void flom_msg_deserialize_start_element(
                             if (2*FLOM_MSG_STEP_INCR == msg->header.pvs.step)
                                 msg->body.lock_16.answer.rc =
                                     strtol(*value_cursor, NULL, 10);
-                            else if (2*FLOM_MSG_STEP_INCR ==
+                            else if (3*FLOM_MSG_STEP_INCR ==
                                      msg->header.pvs.step)
                                 msg->body.lock_24.answer.rc =
                                     strtol(*value_cursor, NULL, 10);

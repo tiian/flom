@@ -54,8 +54,10 @@ const char *flom_strerror(int ret_cod)
 */
         case FLOM_RC_CONNECTION_CLOSED:
             return "WARNING: peer has closed socket connection";
+        case FLOM_RC_LOCK_CANT_LOCK:
+            return "INFO: the lock can not be obtained, generic issue";
         case FLOM_RC_LOCK_BUSY:
-            return "INFO: the lock can not be obtained";
+            return "INFO: the lock can not be obtained because it's busy";
         case FLOM_RC_LOCK_ENQUEUED:
             return "INFO: the lock can not be obtained now, but the "
                 "request was enqueued";
@@ -90,7 +92,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: the container is full and cannot store more "
                 "elements";
         case FLOM_RC_PROTOCOL_ERROR:
-            return "ERROR: a routine has been invoked in an improper context";
+            return "ERROR: client/server protocol error, an unexpected "
+                "packet of data was received";
             /*
         case FLOM_RC_CONFIG_ERROR:
             return "ERROR: configuration file is broken";

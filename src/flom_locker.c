@@ -288,6 +288,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                      , READ_ERROR2
                      , MSG_RETRIEVE_ERROR
                      , CONNS_CLOSE_ERROR1
+                     , RESOURCE_CLEAN_ERROR
                      , CONNS_GET_MSG_ERROR
                      , CONNS_GET_GMPC_ERROR
                      , MSG_DESERIALIZE_ERROR
@@ -353,7 +354,11 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                                        conns, id)))
                     THROW(CONNS_CLOSE_ERROR1);
                 *refresh_conns = TRUE;
-                /* @@@ clean lock state if any lock was acquired... */
+                /* clean lock state if any lock was acquired... */
+                if (FLOM_RC_OK != (ret_cod = 
+                                   locker->resource.clean(
+                                       &locker->resource, curr_cd)))
+                    THROW(RESOURCE_CLEAN_ERROR);
             } else {
                 /* data arrived */
                 if (NULL == (msg = flom_conns_get_msg(conns, id)))
@@ -424,6 +429,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 break;
             case MSG_RETRIEVE_ERROR:
             case CONNS_CLOSE_ERROR1:
+            case RESOURCE_CLEAN_ERROR:
                 break;
             case CONNS_GET_MSG_ERROR:
             case CONNS_GET_GMPC_ERROR:

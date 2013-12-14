@@ -27,6 +27,7 @@
 
 
 #include "flom_config.h"
+#include "flom_conns.h"
 #include "flom_errors.h"
 #include "flom_rsrc.h"
 #include "flom_resource_simple.h"
@@ -95,10 +96,12 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
     TRY {
         flom_lock_type_t new_lock = FLOM_LOCK_TYPE_NL;
         int can_lock = TRUE;
+        int can_wait = TRUE;
         flom_msg_trace(msg);
         switch (msg->header.pvs.verb) {
             case FLOM_MSG_VERB_LOCK:
                 new_lock = msg->body.lock_8.resource.type;
+                can_wait = msg->body.lock_8.resource.wait;
                 can_lock = flom_resource_simple_can_lock(
                     resource, new_lock);
                 /* free the input message */
@@ -128,7 +131,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                         THROW(MSG_BUILD_ANSWER_ERROR1);
                 } else {
                     /* can't lock, enqueue */
-                    if (msg->body.lock_8.resource.wait) {
+                    if (can_wait) {
                         struct flom_rsrc_conn_lock_s *cl = NULL;
                         /* put this connection in waitings queue */
                         FLOM_TRACE(("flom_resource_simple_inmsg: asked lock "
@@ -232,7 +235,7 @@ int flom_resource_simple_clean(flom_resource_t *resource,
             FLOM_TRACE(("flom_resource_simple_clean: g_slist_length=%u\n",
                         g_slist_length(resource->data.simple.holders)));
             */
-            /* check if the some other clients can get a lock now */
+            /* check if some other clients can get a lock now */
             if (FLOM_RC_OK != (ret_cod = flom_resource_simple_waitings(
                                    resource)))
                 THROW(SIMPLE_WAITINGS_ERROR);
@@ -245,18 +248,14 @@ int flom_resource_simple_clean(flom_resource_t *resource,
                     g_queue_peek_nth(resource->data.simple.waitings, i);
                 if (NULL == cl)
                     break;
-                /* try to apply this lock... */
-                if (flom_resource_simple_can_lock(resource, cl->lock_type)) {
+                if (cl->conn == conn) {
                     /* remove from waitings */
                     cl = g_queue_pop_nth(resource->data.simple.waitings, i);
                     if (NULL == cl)
                         /* this should be impossibile because peek was ok
                            some rows above */
                         THROW(INTERNAL_ERROR);
-                    /* insert into holders */
-                    resource->data.simple.holders = g_slist_prepend(
-                        resource->data.simple.holders,
-                        (gpointer)cl);
+                    break;
                 } else
                     ++i;
             } while (TRUE);
@@ -289,15 +288,71 @@ int flom_resource_simple_clean(flom_resource_t *resource,
 
 int flom_resource_simple_waitings(flom_resource_t *resource)
 {
-    enum Exception { NONE } excp;
+    enum Exception { INTERNAL_ERROR
+                     , MSG_BUILD_ANSWER_ERROR
+                     , MSG_SERIALIZE_ERROR
+                     , MSG_SEND_ERROR
+                     , MSG_FREE_ERROR
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    struct flom_rsrc_conn_lock_s *cl = NULL;
     
     FLOM_TRACE(("flom_resource_simple_waitings\n"));
     TRY {
-        /* @@@ */
+        guint i = 0;
+        struct flom_msg_s msg;
+        char buffer[1024];
+        size_t to_send;
+        
+        /* check if there is any connection waiting for a lock */
+        do {
+            cl = (struct flom_rsrc_conn_lock_s *)
+                g_queue_peek_nth(resource->data.simple.waitings, i);
+            if (NULL == cl)
+                break;
+            /* try to apply this lock... */
+            if (flom_resource_simple_can_lock(resource, cl->lock_type)) {
+                /* remove from waitings */
+                cl = g_queue_pop_nth(resource->data.simple.waitings, i);
+                if (NULL == cl)
+                    /* this should be impossibile because peek was ok
+                       some rows above */
+                    THROW(INTERNAL_ERROR);
+                /* send a message to the client thatìs waiting the lock */
+                flom_msg_init(&msg);
+                if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
+                                       &msg, FLOM_MSG_VERB_LOCK,
+                                       3*FLOM_MSG_STEP_INCR,
+                                       FLOM_RC_OK)))
+                    THROW(MSG_BUILD_ANSWER_ERROR);
+                if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
+                                       &msg, buffer, sizeof(buffer), &to_send)))
+                    THROW(MSG_SERIALIZE_ERROR);
+                if (FLOM_RC_OK != (ret_cod = flom_msg_send(
+                                       cl->conn->fd, buffer, to_send)))
+                    THROW(MSG_SEND_ERROR);
+                if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
+                    THROW(MSG_FREE_ERROR);                
+                /* insert into holders */
+                resource->data.simple.holders = g_slist_prepend(
+                    resource->data.simple.holders,
+                    (gpointer)cl);
+                cl = NULL;
+            } else
+                ++i;
+        } while (TRUE);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INTERNAL_ERROR:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+                break;
+            case MSG_BUILD_ANSWER_ERROR:
+            case MSG_SERIALIZE_ERROR:
+            case MSG_SEND_ERROR:
+            case MSG_FREE_ERROR:
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -305,6 +360,9 @@ int flom_resource_simple_waitings(flom_resource_t *resource)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    if (NULL != cl) {
+        g_free(cl);
+    }
     FLOM_TRACE(("flom_resource_simple_waitings/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

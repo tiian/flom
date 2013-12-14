@@ -53,7 +53,11 @@
  */
 #define FLOM_RC_CONNECTION_CLOSED               +10
 /**
- * The lock can not be obtained
+ * The lock can not be obtained, generic issue
+ */
+#define FLOM_RC_LOCK_CANT_LOCK                   +3
+/**
+ * The lock can not be obtained because it's busy
  */
 #define FLOM_RC_LOCK_BUSY                        +2
 /**

@@ -80,7 +80,8 @@ int main (int argc, char *argv[])
     }
 
     if (FLOM_RC_OK != (ret_cod = flom_connect())) {
-        g_print("flom_connect: ret_cod=%d\n", ret_cod);
+        g_print("flom_connect: ret_cod=%d (%s)\n",
+                ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
     
