@@ -197,8 +197,17 @@
 
 
 
+/**
+ * Path separator
+ */
 #define FLOM_PATH_SEPARATOR '/'
 
+
+
+/**
+ * Default buffer size for network operations
+ */
+#define FLOM_NETWORK_BUFFER_SIZE 1024
 
 
 #ifdef __cplusplus

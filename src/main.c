@@ -32,7 +32,8 @@
 
 
 #include "flom_config.h"
-#include "flom_connect.h"
+#include "flom_client.h"
+#include "flom_conns.h"
 #include "flom_errors.h"
 #include "flom_exec.h"
 #include "flom_rsrc.h"
@@ -60,6 +61,7 @@ int main (int argc, char *argv[])
     GOptionContext *option_context;
     int child_status = 0;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    struct flom_conn_data_s cd;
 
     FLOM_TRACE_INIT;
     
@@ -79,17 +81,39 @@ int main (int argc, char *argv[])
         exit(1);
     }
 
-    if (FLOM_RC_OK != (ret_cod = flom_connect())) {
-        g_print("flom_connect: ret_cod=%d (%s)\n",
+    /* open connection to a valid flom lock manager... */
+    if (FLOM_RC_OK != (ret_cod = flom_client_connect(&cd))) {
+        g_print("flom_client_connect: ret_cod=%d (%s)\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
-    
+
+    /* sending lock command */
+    if (FLOM_RC_OK != (ret_cod = flom_client_lock(&cd))) {
+        g_print("flom_client_lock: ret_cod=%d (%s)\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+
+    /* execute the command */
     if (FLOM_RC_OK != (ret_cod = flom_exec(command_argv, &child_status))) {
         g_print("flom_exec: ret_cod=%d\n", ret_cod);
         exit(1);
     }
     
+    /* sending unlock command */
+    if (FLOM_RC_OK != (ret_cod = flom_client_unlock(&cd))) {
+        g_print("flom_client_unlock: ret_cod=%d (%s)\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+
+    /* gracely disconnect from daemon */
+    if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
+        g_print("flom_client_unlock: ret_cod=%d (%s)\n",
+                ret_cod, flom_strerror(ret_cod));
+    }
+
     g_strfreev (command_argv);
     command_argv = NULL;
     

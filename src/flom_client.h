@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with FLOM.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef CONNECT_H
-# define CONNECT_H
+#ifndef CLIENT_H
+# define CLIENT_H
 
 
 
@@ -38,7 +38,7 @@
 #else
 # undef FLOM_TRACE_MODULE_SAVE
 #endif /* FLOM_TRACE_MODULE */
-#define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_CONNECT
+#define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_CLIENT
 
 
 
@@ -50,9 +50,19 @@ extern "C" {
 
     /**
      * Try to connect to lock daemon
+     * @param cd OUT connection data
      * @result a reason code
      */
-    int flom_connect();
+    int flom_client_connect(struct flom_conn_data_s *cd);
+    
+
+
+    /**
+     * Disconnect from lock daemon
+     * @param cd IN/OUT connection data
+     * @result a reason code
+     */
+    int flom_client_disconnect(struct flom_conn_data_s *cd);
     
 
 
@@ -61,7 +71,7 @@ extern "C" {
      * @param cd IN connection data
      * @return a reason code
      */
-    int flom_connect_lock(struct flom_conn_data_s *cd);
+    int flom_client_lock(struct flom_conn_data_s *cd);
 
 
 
@@ -71,11 +81,20 @@ extern "C" {
      * @param msg IN/OUT message used to deserialize the replies
      * @return a reason code
      */     
-    int flom_connect_wait_lock(struct flom_conn_data_s *cd,
+    int flom_client_wait_lock(struct flom_conn_data_s *cd,
                                struct flom_msg_s *msg);
     
 
     
+    /**
+     * Send unlock command to the daemon
+     * @param cd IN connection data
+     * @return a reason code
+     */
+    int flom_client_unlock(struct flom_conn_data_s *cd);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
@@ -91,4 +110,4 @@ extern "C" {
 
 
 
-#endif /* CONNECT_H */
+#endif /* CLIENT_H */

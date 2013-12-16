@@ -29,7 +29,7 @@
 
 
 
-#include "flom_connect.h"
+#include "flom_client.h"
 #include "flom_daemon.h"
 #include "flom_errors.h"
 #include "flom_msg.h"
@@ -41,54 +41,50 @@
 #ifdef FLOM_TRACE_MODULE
 # undef FLOM_TRACE_MODULE
 #endif /* FLOM_TRACE_MODULE */
-#define FLOM_TRACE_MODULE   FLOM_TRACE_MOD_CONNECT
+#define FLOM_TRACE_MODULE   FLOM_TRACE_MOD_CLIENT
 
 
 
-int flom_connect()
+int flom_client_connect(struct flom_conn_data_s *cd)
 {
     enum Exception { SOCKET_ERROR
                      , DAEMON_ERROR
                      , DAEMON_NOT_STARTED
                      , CONNECT_ERROR
-                     , CONNECT_LOCK_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
-    FLOM_TRACE(("flom_connect\n"));
+    FLOM_TRACE(("flom_client_connect\n"));
     TRY {
-        struct flom_conn_data_s cd;
-
-        memset(&cd, 0, sizeof(cd));
+        /* reset connection data struct */
+        memset(cd, 0, sizeof(cd));
         
-        FLOM_TRACE(("flom_connect: connecting to socket '%s'\n",
+        FLOM_TRACE(("flom_client_connect: connecting to socket '%s'\n",
                     global_config.local_socket_path_name));
 
-        if (-1 == (cd.fd = socket(AF_LOCAL, SOCK_STREAM, 0)))
+        if (-1 == (cd->fd = socket(AF_LOCAL, SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
-        cd.saun.sun_family = AF_LOCAL;
-        strcpy(cd.saun.sun_path, global_config.local_socket_path_name);
-        cd.addr_len = sizeof(cd.saun);
-        if (-1 == connect(cd.fd, (struct sockaddr *)&cd.saun,
-                          cd.addr_len)) {
+        cd->saun.sun_family = AF_LOCAL;
+        strcpy(cd->saun.sun_path, global_config.local_socket_path_name);
+        cd->addr_len = sizeof(cd->saun);
+        if (-1 == connect(cd->fd, (struct sockaddr *)&cd->saun,
+                          cd->addr_len)) {
             if (ENOENT == errno || ECONNREFUSED == errno) {
-                FLOM_TRACE(("flom_connect: connection failed, activating "
-                            "a new daemon\n"));
+                FLOM_TRACE(("flom_client_connect: connection failed, "
+                            "activating a new daemon\n"));
                 /* daemon is not active, starting it... */
                 if (FLOM_RC_OK != (ret_cod = flom_daemon()))
                     THROW(DAEMON_ERROR);
                 /* trying to connect again... */
-                if (-1 == connect(cd.fd, (struct sockaddr *)&cd.saun,
-                                  cd.addr_len))
+                if (-1 == connect(cd->fd, (struct sockaddr *)&cd->saun,
+                                  cd->addr_len))
                     THROW(DAEMON_NOT_STARTED);
-                FLOM_TRACE(("flom_connect: connected to flom daemon\n"));
+                FLOM_TRACE(("flom_client_connect: connected to flom "
+                            "daemon\n"));
             } else {
                 THROW(CONNECT_ERROR);
             }
         }
-        /* sending lock command */
-        if (FLOM_RC_OK != (ret_cod = flom_connect_lock(&cd)))
-            THROW(CONNECT_LOCK_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -104,8 +100,6 @@ int flom_connect()
             case CONNECT_ERROR:
                 ret_cod = FLOM_RC_CONNECT_ERROR;
                 break;
-            case CONNECT_LOCK_ERROR:
-                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -113,14 +107,14 @@ int flom_connect()
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    FLOM_TRACE(("flom_connect/excp=%d/"
+    FLOM_TRACE(("flom_client_connect/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int flom_connect_lock(struct flom_conn_data_s *cd)
+int flom_client_lock(struct flom_conn_data_s *cd)
 {
     enum Exception { G_STRDUP_ERROR
                      , MSG_SERIALIZE_ERROR
@@ -136,10 +130,10 @@ int flom_connect_lock(struct flom_conn_data_s *cd)
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
-    FLOM_TRACE(("flom_connect_lock\n"));
+    FLOM_TRACE(("flom_client_lock\n"));
     TRY {
         struct flom_msg_s msg;
-        char buffer[1024];
+        char buffer[FLOM_NETWORK_BUFFER_SIZE];
         size_t to_send;
         ssize_t to_read;
 
@@ -193,9 +187,9 @@ int flom_connect_lock(struct flom_conn_data_s *cd)
             case FLOM_RC_OK:
                 break;
             case FLOM_RC_LOCK_ENQUEUED:
-                FLOM_TRACE(("flom_connect_lock: resource is busy, "
+                FLOM_TRACE(("flom_client_lock: resource is busy, "
                             "waiting...\n"));
-                if (FLOM_RC_OK != (ret_cod = flom_connect_wait_lock(cd, &msg)))
+                if (FLOM_RC_OK != (ret_cod = flom_client_wait_lock(cd, &msg)))
                     THROW(CONNECT_WAIT_LOCK_ERROR);
                 break;
             case FLOM_RC_LOCK_BUSY:
@@ -244,15 +238,15 @@ int flom_connect_lock(struct flom_conn_data_s *cd)
         cd->gmpc = NULL;
     }
     
-    FLOM_TRACE(("flom_connect_lock/excp=%d/"
+    FLOM_TRACE(("flom_client_lock/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int flom_connect_wait_lock(struct flom_conn_data_s *cd,
-                           struct flom_msg_s *msg)
+int flom_client_wait_lock(struct flom_conn_data_s *cd,
+                          struct flom_msg_s *msg)
 {
     enum Exception { MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
@@ -261,9 +255,9 @@ int flom_connect_wait_lock(struct flom_conn_data_s *cd,
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
-    FLOM_TRACE(("flom_connect_wait_lock\n"));
+    FLOM_TRACE(("flom_client_wait_lock\n"));
     TRY {
-        char buffer[1024];
+        char buffer[FLOM_NETWORK_BUFFER_SIZE];
         ssize_t to_read;
         
         /* retrieve the reply message */
@@ -286,7 +280,7 @@ int flom_connect_wait_lock(struct flom_conn_data_s *cd,
             3*FLOM_MSG_STEP_INCR != msg->header.pvs.step)
             THROW(PROTOCOL_ERROR1);
         if (FLOM_RC_OK != msg->body.lock_24.answer.rc) {
-            FLOM_TRACE(("flom_connect_wait_lock: lock can NOT be acquired, "
+            FLOM_TRACE(("flom_client_wait_lock: lock can NOT be acquired, "
                         "leaving...\n"));
             THROW(LOCK_CANT_LOCK);
         }   
@@ -310,7 +304,108 @@ int flom_connect_wait_lock(struct flom_conn_data_s *cd,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    FLOM_TRACE(("flom_connect_wait_lock/excp=%d/"
+    FLOM_TRACE(("flom_client_wait_lock/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_client_unlock(struct flom_conn_data_s *cd)
+{
+    enum Exception { G_STRDUP_ERROR
+                     , MSG_SERIALIZE_ERROR
+                     , MSG_SEND_ERROR
+                     , MSG_FREE_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_client_unlock\n"));
+    TRY {
+        struct flom_msg_s msg;
+        char buffer[FLOM_NETWORK_BUFFER_SIZE];
+        size_t to_send;
+
+        /* prepare a request (lock) message */
+        msg.header.level = FLOM_MSG_LEVEL;
+        msg.header.pvs.verb = FLOM_MSG_VERB_UNLOCK;
+        msg.header.pvs.step = FLOM_MSG_STEP_INCR;
+
+        if (NULL == (msg.body.lock_8.resource.name =
+                     g_strdup(global_config.resource_name)))
+            THROW(G_STRDUP_ERROR);
+
+        /* serialize the request message */
+        if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
+                               &msg, buffer, sizeof(buffer), &to_send)))
+            THROW(MSG_SERIALIZE_ERROR);
+
+        /* send the request message */
+        if (FLOM_RC_OK != (ret_cod = flom_msg_send(
+                               cd->fd, buffer, to_send)))
+            THROW(MSG_SEND_ERROR);
+
+        if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
+            THROW(MSG_FREE_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
+            case MSG_SERIALIZE_ERROR:
+            case MSG_SEND_ERROR:
+            case MSG_FREE_ERROR:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_client_unlock/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_client_disconnect(struct flom_conn_data_s *cd)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_client_disconnect\n"));
+    TRY {
+        char buffer[FLOM_NETWORK_BUFFER_SIZE];
+        /* gracely shutdown write half socket */
+        if (-1 == shutdown(cd->fd, SHUT_WR))
+            FLOM_TRACE(("flom_client_disconnect/shutdown(%d,SHUT_WR)=%d "
+                        "('%s')\n", cd->fd, errno, strerror(errno)));
+        /* pick-up socket close/error but does not wait */
+        if (-1 == recv(cd->fd, buffer, sizeof(buffer), 0 /* MSG_DONTWAIT */)) 
+            FLOM_TRACE(("flom_client_disconnect/recv(%d,,%u,MSG_DONTWAIT)=%d "
+                        "('%s')\n", cd->fd, sizeof(buffer),
+                        errno, strerror(errno)));
+        /* shutdown read half socket */
+        if (-1 == shutdown(cd->fd, SHUT_RD))
+            FLOM_TRACE(("flom_client_disconnect/shutdown(%d,SHUT_RD)=%d "
+                        "('%s')\n", cd->fd, errno, strerror(errno)));
+        cd->fd = NULL_FD;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_client_disconnect/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

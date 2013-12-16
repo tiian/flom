@@ -63,9 +63,9 @@
 #define FLOM_TRACE_MOD_EXEC               0x00000004
 
 /**
- * trace module for connect functions
+ * trace module for client functions
  */
-#define FLOM_TRACE_MOD_CONNECT            0x00000008
+#define FLOM_TRACE_MOD_CLIENT             0x00000008
 
 /**
  * trace module for daemon functions

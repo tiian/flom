@@ -708,7 +708,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
             locker->read_pipe = pipefd[0];
             locker->write_pipe = pipefd[1];
             locker_thread = g_thread_create(flom_locker_loop, (gpointer)locker,
-                                            FALSE, &error_thread);
+                                            TRUE, &error_thread);
             if (NULL == locker_thread) {
                 FLOM_TRACE(("flom_accept_loop_transfer: "
                             "error_thread->code=%d, "
@@ -834,6 +834,7 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
                     fl->write_pipe = NULL_FD;
                 } else if (fl->write_pipe == NULL_FD &&
                            fl->read_pipe == NULL_FD) {
+                    gpointer thread_ret_cod;
                     FLOM_TRACE(("flom_accept_loop_chklockers: completing "
                                 "termination for locker %i (thread=%p, "
                                 "write_pipe=%d, read_pipe=%d, "
@@ -844,6 +845,12 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
                                 flom_resource_get_name(&fl->resource),
                                 fl->write_sequence,
                                 fl->read_sequence, fl->idle_periods));
+                    /* this is a possibly locking function... :(
+                       but it's necessary to release glib stuff...
+                       in case of issues, move to POSIX standard thread... */
+                    thread_ret_cod = g_thread_join(fl->thread);
+                    FLOM_TRACE(("flom_accept_loop_chklockers/g_thread_join"
+                                "(%p)=%p\n", fl->thread, thread_ret_cod));
                     flom_locker_array_del(lockers, fl);
                     /* lockers object changed, break the loop */
                     break;

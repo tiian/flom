@@ -82,12 +82,15 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                                struct flom_conn_data_s *conn,
                                struct flom_msg_s *msg)
 {
-    enum Exception { MSG_FREE_ERROR
+    enum Exception { MSG_FREE_ERROR1
                      , G_TRY_MALLOC_ERROR1
                      , MSG_BUILD_ANSWER_ERROR1
                      , G_TRY_MALLOC_ERROR2
                      , MSG_BUILD_ANSWER_ERROR2
                      , MSG_BUILD_ANSWER_ERROR3
+                     , INVALID_OPTION
+                     , RESOURCE_SIMPLE_CLEAN_ERROR
+                     , MSG_FREE_ERROR2
                      , PROTOCOL_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -106,7 +109,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                     resource, new_lock);
                 /* free the input message */
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(msg)))
-                    THROW(MSG_FREE_ERROR);
+                    THROW(MSG_FREE_ERROR1);
                 flom_msg_init(msg);
                 if (can_lock) {
                     /* get the lock */
@@ -164,6 +167,25 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                 } /* if (can_lock) */
                 break;
             case FLOM_MSG_VERB_UNLOCK:
+                /* check lock is managed by this locker (this check will
+                   trigger some issue if a client obtained more locks...) */
+                if (g_strcmp0(flom_resource_get_name(resource),
+                              msg->body.lock_8.resource.name)) {
+                    FLOM_TRACE(("flom_resource_simple_inmsg: client wants to "
+                                "unlock resource '%s' while it's locking "
+                                "resource '%s'\n",
+                                msg->body.lock_8.resource.name,
+                                flom_resource_get_name(resource)));
+                    THROW(INVALID_OPTION);
+                }
+                /* clean lock */
+                if (FLOM_RC_OK != (ret_cod = flom_resource_simple_clean(
+                                       resource, conn)))
+                    THROW(RESOURCE_SIMPLE_CLEAN_ERROR);
+                /* free the input message */
+                if (FLOM_RC_OK != (ret_cod = flom_msg_free(msg)))
+                    THROW(MSG_FREE_ERROR2);
+                flom_msg_init(msg);
                 break;
             default:
                 THROW(PROTOCOL_ERROR);
@@ -172,7 +194,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case MSG_FREE_ERROR:
+            case MSG_FREE_ERROR1:
                 break;
             case G_TRY_MALLOC_ERROR1:
                 ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
@@ -184,6 +206,12 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                 break;
             case MSG_BUILD_ANSWER_ERROR2:
             case MSG_BUILD_ANSWER_ERROR3:
+                break;
+            case INVALID_OPTION:
+                ret_cod = FLOM_RC_INVALID_OPTION;
+                break;
+            case RESOURCE_SIMPLE_CLEAN_ERROR:
+            case MSG_FREE_ERROR2:
                 break;
             case PROTOCOL_ERROR:
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;
@@ -250,6 +278,9 @@ int flom_resource_simple_clean(flom_resource_t *resource,
                     break;
                 if (cl->conn == conn) {
                     /* remove from waitings */
+                    FLOM_TRACE(("flom_resource_simple_clean: the client is "
+                                "waiting for a lock of type %d, removing "
+                                "it...\n", cl->lock_type));
                     cl = g_queue_pop_nth(resource->data.simple.waitings, i);
                     if (NULL == cl)
                         /* this should be impossibile because peek was ok
@@ -301,7 +332,7 @@ int flom_resource_simple_waitings(flom_resource_t *resource)
     TRY {
         guint i = 0;
         struct flom_msg_s msg;
-        char buffer[1024];
+        char buffer[FLOM_NETWORK_BUFFER_SIZE];
         size_t to_send;
         
         /* check if there is any connection waiting for a lock */

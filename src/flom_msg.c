@@ -807,6 +807,7 @@ int flom_msg_trace_unlock(const struct flom_msg_s *msg)
                             "name='%s']]\n",
                             msg->body.unlock_8.resource.name != NULL ?
                             msg->body.unlock_8.resource.name : ""));
+                break;
             default:
                 THROW(INVALID_STEP);
         }
