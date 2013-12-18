@@ -77,8 +77,16 @@ extern "C" {
     int flom_resource_simple_clean(flom_resource_t *resource,
                                    struct flom_conn_data_s *conn);
 
-    
 
+
+    /**
+     * Destroy a simple resource (frees holders list and waitings queue)
+     * @param resource IN/OUT reference to resource object
+     */
+    void flom_resource_simple_free(flom_resource_t *resource);
+
+
+    
     /**
      * Check if any of the lock waitings can get a lock
      * @param resource IN/OUT reference to resource object

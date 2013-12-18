@@ -159,6 +159,7 @@ int flom_resource_init(flom_resource_t *resource,
                     THROW(G_QUEUE_NEW_ERROR);
                 resource->inmsg = flom_resource_simple_inmsg;
                 resource->clean = flom_resource_simple_clean;
+                resource->free = flom_resource_simple_free;
                 break;
             default:
                 THROW(UNKNOW_RESOURCE);
@@ -193,6 +194,9 @@ int flom_resource_init(flom_resource_t *resource,
 void flom_resource_free(flom_resource_t *resource)
 {
     FLOM_TRACE(("flom_resource_free\n"));
+    /* calling the destructor */
+    resource->free(resource);
+    /* releasing resource name */
     if (NULL != resource->name)
         g_free(resource->name);
     resource->name = NULL;

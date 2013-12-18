@@ -122,6 +122,9 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                                  g_try_malloc(
                                      sizeof(struct flom_rsrc_conn_lock_s))))
                         THROW(G_TRY_MALLOC_ERROR1);
+                    /* @@@ remove this debug message */
+                    FLOM_TRACE(("flom_resource_simple_inmsg: allocated %p\n",
+                                cl));
                     cl->lock_type = new_lock;
                     cl->conn = conn;
                     resource->data.simple.holders = g_slist_prepend(
@@ -254,11 +257,15 @@ int flom_resource_simple_clean(flom_resource_t *resource,
                 p = p->next;
         } /* while (NULL != p) */
         if (NULL != p) {
+            struct flom_rsrc_conn_lock_s *cl =
+                (struct flom_rsrc_conn_lock_s *)p->data;
             FLOM_TRACE(("flom_resource_simple_clean: the client is holding "
-                        "a lock of type %d, removing it...\n",
-                        ((struct flom_rsrc_conn_lock_s *)p->data)->lock_type));
+                        "a lock of type %d, removing it...\n", cl->lock_type));
+            FLOM_TRACE(("flom_resource_simple_clean: cl=%p\n", cl));
             resource->data.simple.holders = g_slist_remove(
-                resource->data.simple.holders, p->data);
+                resource->data.simple.holders, cl);
+            /* free the now useless connection lock record */
+            g_free(cl);
             /*
             FLOM_TRACE(("flom_resource_simple_clean: g_slist_length=%u\n",
                         g_slist_length(resource->data.simple.holders)));
@@ -282,10 +289,17 @@ int flom_resource_simple_clean(flom_resource_t *resource,
                                 "waiting for a lock of type %d, removing "
                                 "it...\n", cl->lock_type));
                     cl = g_queue_pop_nth(resource->data.simple.waitings, i);
-                    if (NULL == cl)
+                    if (NULL == cl) {
                         /* this should be impossibile because peek was ok
                            some rows above */
                         THROW(INTERNAL_ERROR);
+                    } else {
+                        /* free the now useless connection lock record */
+                        /* @@@ remove this debug message */
+                        FLOM_TRACE(("flom_resource_simple_clean: freeing %p\n",
+                                    cl));
+                        g_free(cl);
+                    }
                     break;
                 } else
                     ++i;
@@ -313,6 +327,32 @@ int flom_resource_simple_clean(flom_resource_t *resource,
     FLOM_TRACE(("flom_resource_simple_clean/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+void flom_resource_simple_free(flom_resource_t *resource)
+{    
+    /* clean-up holders list... */
+    FLOM_TRACE(("flom_resource_simple_free: cleaning-up holders list...\n"));
+    while (NULL != resource->data.simple.holders) {
+        struct flom_conn_lock_s *cl =
+            (struct flom_conn_lock_s *)resource->data.simple.holders->data;
+        resource->data.simple.holders = g_slist_remove(
+            resource->data.simple.holders, cl);
+        g_free(cl);
+    }
+    resource->data.simple.holders = NULL;
+    /* clean-up waitings queue... */
+    FLOM_TRACE(("flom_resource_simple_free: cleaning-up waitings queue...\n"));
+    while (!g_queue_is_empty(resource->data.simple.waitings)) {
+        struct flom_conn_lock_s *cl =
+            (struct flom_conn_lock_s *)g_queue_pop_head(
+                resource->data.simple.waitings);
+        g_free(cl);
+    }
+    g_queue_free(resource->data.simple.waitings);
+    resource->data.simple.waitings = NULL;
 }
 
 

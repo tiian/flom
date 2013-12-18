@@ -141,6 +141,10 @@ struct flom_resource_s {
      * Method called to process a clean-up signal (client disconnected)
      */
     int   (*clean)   (flom_resource_t *, struct flom_conn_data_s *);
+    /**
+     * Method called to clean-up the entire resource (it's the destructor)
+     */
+    void  (*free)    (flom_resource_t *);
 };
 
 
