@@ -365,7 +365,7 @@ int flom_accept_loop(flom_conns_t *conns)
             int ready_fd;
             guint i, n;
             struct pollfd *fds;
-            gint number_of_lockers;
+            guint number_of_lockers;
             
             if (FLOM_RC_OK != (ret_cod = flom_conns_clean(conns)))
                 THROW(CONNS_CLEAN_ERROR);
@@ -384,7 +384,7 @@ int flom_accept_loop(flom_conns_t *conns)
             if (0 == ready_fd) {
                 number_of_lockers = flom_locker_array_count(&lockers);
                 FLOM_TRACE(("flom_accept_loop: idle time exceeded %d "
-                            "milliseconds, number of lockers=%d\n",
+                            "milliseconds, number of lockers=%u\n",
                             global_config.idle_time, number_of_lockers));
                 if (0 == number_of_lockers) {
                     if (1 == flom_conns_get_used(conns)) {
@@ -437,7 +437,7 @@ int flom_accept_loop(flom_conns_t *conns)
             } /* for (i... */
             /* check if any locker is ready for termination... */
             number_of_lockers = flom_locker_array_count(&lockers);
-            FLOM_TRACE(("flom_accept_loop: number of lockers=%d\n",
+            FLOM_TRACE(("flom_accept_loop: number of lockers=%u\n",
                         number_of_lockers));
             if (0 < number_of_lockers) {
                 if (FLOM_RC_OK != (ret_cod =
@@ -635,7 +635,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
     
     FLOM_TRACE(("flom_accept_loop_transfer\n"));
     TRY {
-        gint i, n;
+        guint i, n;
         int found = FALSE;
         GThread *locker_thread = NULL;
         struct flom_msg_s *msg = NULL;
@@ -670,18 +670,18 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                 THROW(NULL_OBJECT2);
             if (NULL_FD == locker->write_pipe ||
                 NULL_FD == locker->read_pipe) {
-                FLOM_TRACE(("flom_accept_loop_transfer: locker # %d is "
+                FLOM_TRACE(("flom_accept_loop_transfer: locker # %u is "
                             "terminating (write_pipe=%d, read_pipe=%d), "
                             "skipping...\n", i, locker->write_pipe,
                             locker->read_pipe));
                 continue;
             }
-            FLOM_TRACE(("flom_accept_loop_transfer: locker # %d is managing "
+            FLOM_TRACE(("flom_accept_loop_transfer: locker # %u is managing "
                         "resource '%s'\n", i,
                         flom_resource_get_name(&locker->resource)));
             if (!g_strcmp0(flom_resource_get_name(&locker->resource),
                            msg->body.lock_8.resource.name)) {
-                FLOM_TRACE(("flom_accept_loop_transfer: found locker %d for "
+                FLOM_TRACE(("flom_accept_loop_transfer: found locker %u for "
                             "resource '%s'\n", i,
                             msg->body.lock_8.resource.name));
                 found = TRUE;
@@ -809,8 +809,8 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
     
     FLOM_TRACE(("flom_accept_loop_chklockers\n"));
     TRY {
-        gint i;
-        gint number_of_lockers = flom_locker_array_count(lockers);
+        guint i;
+        guint number_of_lockers = flom_locker_array_count(lockers);
         
         for (i=0; i<number_of_lockers; ++i) {
             struct flom_locker_s *fl = flom_locker_array_get(lockers, i);
@@ -820,7 +820,7 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
                 fl->idle_periods > 1) {
                 if (fl->write_pipe != NULL_FD) {
                     FLOM_TRACE(("flom_accept_loop_chklockers: starting "
-                                "termination for locker %i (thread=%p, "
+                                "termination for locker %u (thread=%p, "
                                 "write_pipe=%d, read_pipe=%d, "
                                 "resource_name='%s', "
                                 "write_sequence=%d, read_sequence=%d, "
@@ -836,7 +836,7 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
                            fl->read_pipe == NULL_FD) {
                     gpointer thread_ret_cod;
                     FLOM_TRACE(("flom_accept_loop_chklockers: completing "
-                                "termination for locker %i (thread=%p, "
+                                "termination for locker %u (thread=%p, "
                                 "write_pipe=%d, read_pipe=%d, "
                                 "resource_name='%s', "
                                 "write_sequence=%d, read_sequence=%d, "

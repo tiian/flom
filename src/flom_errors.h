@@ -48,85 +48,88 @@
 
 
 
+/* WARNINGS */
 /**
  * Peer has closed socket while expecting data
  */
-#define FLOM_RC_CONNECTION_CLOSED               +10
+#define FLOM_RC_CONNECTION_CLOSED                    +10
 /**
  * The lock can not be obtained, generic issue
  */
-#define FLOM_RC_LOCK_CANT_LOCK                   +3
+#define FLOM_RC_LOCK_CANT_LOCK                        +3
 /**
  * The lock can not be obtained because it's busy
  */
-#define FLOM_RC_LOCK_BUSY                        +2
+#define FLOM_RC_LOCK_BUSY                             +2
 /**
  * The lock can not be obtained now, but the request was enqueued
  */
-#define FLOM_RC_LOCK_ENQUEUED                    +1
+#define FLOM_RC_LOCK_ENQUEUED                         +1
 
 
 
+/* OK */
 /**
  * Successfully completion
  */
-#define FLOM_RC_OK                               0
+#define FLOM_RC_OK                                     0
 
 
 
+/* ERRORS */
 /**
  * Internal error: unrecoverable status!
  */
-#define FLOM_RC_INTERNAL_ERROR                  -1
+#define FLOM_RC_INTERNAL_ERROR                        -1
 /**
  * Flom was not able to start a new daemon and/or connect to it
  */
-#define FLOM_RC_DAEMON_NOT_STARTED              -2
+#define FLOM_RC_DAEMON_NOT_STARTED                    -2
 /**
  * Unespected network event
  */
-#define FLOM_RC_NETWORK_EVENT_ERROR             -3
+#define FLOM_RC_NETWORK_EVENT_ERROR                   -3
 /**
  * A passed object/option/arg is NULL and it can NOT be inferred from a default
  * value
  */
-#define FLOM_RC_NULL_OBJECT                     -4
+#define FLOM_RC_NULL_OBJECT                           -4
 /**
  * A specified option is not valid for method and/or object status
  */
-#define FLOM_RC_INVALID_OPTION                  -5
+#define FLOM_RC_INVALID_OPTION                        -5
 /**
  * A corrupted object has been discovered
  */
-#define FLOM_RC_OBJ_CORRUPTED                   -6
+#define FLOM_RC_OBJ_CORRUPTED                         -6
 /**
  * A parameter passed to a function is OUT OF RANGE
  */
-#define FLOM_RC_OUT_OF_RANGE                    -7
+#define FLOM_RC_OUT_OF_RANGE                          -7
 /**
  * The number of chars of the prefix of the message 
  */
-#define FLOM_RC_INVALID_PREFIX_SIZE             -8
+#define FLOM_RC_INVALID_PREFIX_SIZE                   -8
 /**
  * The process has been stopped to avoid a buffer overflow
  */
-#define FLOM_RC_BUFFER_OVERFLOW                 -9
+#define FLOM_RC_BUFFER_OVERFLOW                       -9
 /**
  * The length of the message differs from prefix 
  */
-#define FLOM_RC_INVALID_MSG_LENGTH             -10
+#define FLOM_RC_INVALID_MSG_LENGTH                   -10
 /**
  * The XML message is malformed and can not be processed
  */
-#define FLOM_RC_INVALID_PROPERTY_VALUE         -11
+#define FLOM_RC_INVALID_PROPERTY_VALUE               -11
 /**
  * The container is full and can NOT store more elements
  */
-#define FLOM_RC_CONTAINER_FULL                 -12
+#define FLOM_RC_CONTAINER_FULL                       -12
 /**
  * A routine has been invoked in an improper context
  */
-#define FLOM_RC_PROTOCOL_ERROR                 -13
+#define FLOM_RC_PROTOCOL_ERROR                       -13
 
 
 
@@ -223,17 +226,17 @@
  */
 #define FLOM_RC_REGEXEC_ERROR                       -122
 /**
- * "signal" function error
- */
-#define FLOM_RC_SIGNAL_ERROR                        -123
-/**
  * "send" function error
  */
-#define FLOM_RC_SEND_ERROR                          -124
+#define FLOM_RC_SEND_ERROR                          -123
 /**
  * "setsid" function error
  */
-#define FLOM_RC_SETSID_ERROR                        -125
+#define FLOM_RC_SETSID_ERROR                        -124
+/**
+ * "signal" function error
+ */
+#define FLOM_RC_SIGNAL_ERROR                        -125
 /**
  * "socket" function error
  */

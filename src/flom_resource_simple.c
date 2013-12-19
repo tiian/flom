@@ -122,9 +122,6 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                                  g_try_malloc(
                                      sizeof(struct flom_rsrc_conn_lock_s))))
                         THROW(G_TRY_MALLOC_ERROR1);
-                    /* @@@ remove this debug message */
-                    FLOM_TRACE(("flom_resource_simple_inmsg: allocated %p\n",
-                                cl));
                     cl->lock_type = new_lock;
                     cl->conn = conn;
                     resource->data.simple.holders = g_slist_prepend(
@@ -295,9 +292,6 @@ int flom_resource_simple_clean(flom_resource_t *resource,
                         THROW(INTERNAL_ERROR);
                     } else {
                         /* free the now useless connection lock record */
-                        /* @@@ remove this debug message */
-                        FLOM_TRACE(("flom_resource_simple_clean: freeing %p\n",
-                                    cl));
                         g_free(cl);
                     }
                     break;

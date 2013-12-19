@@ -92,9 +92,8 @@ struct flom_locker_s {
 struct flom_locker_array_s {
     /**
      * Number of available lockers
-     @@@ change gint with guint...
      */
-    gint       n;
+    guint       n;
     /**
      * Array of lockers
      */
@@ -202,7 +201,7 @@ extern "C" {
      * @param lockers IN/OUT array of lockers
      * @return how many lockers are managed by the object
      */
-    static inline gint flom_locker_array_count(
+    static inline guint flom_locker_array_count(
         const flom_locker_array_t *lockers) {
         return lockers->n;
     }
@@ -216,7 +215,7 @@ extern "C" {
      * @return NULL if i is an invalid index, the desired locker otherwise
      */
     static inline struct flom_locker_s *flom_locker_array_get(
-        flom_locker_array_t *lockers, gint i) {
+        flom_locker_array_t *lockers, guint i) {
         if (i < 0 || i >= lockers->n)
             return NULL;
         else

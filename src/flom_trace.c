@@ -111,10 +111,6 @@ void flom_trace(const char *fmt, ...)
     va_start(args, fmt);
 #ifdef HAVE_VSNPRINTF
 
-    /* lock the mutex */
-    /* @@@ remove me
-    g_static_mutex_lock(&flom_trace_mutex);
-    */
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
     /* default header */
@@ -130,10 +126,6 @@ void flom_trace(const char *fmt, ...)
         vsnprintf(buffer+nw1, sizeof(buffer)-nw1, fmt, args);
     fputs(buffer, trace_file);
     fflush(trace_file);
-    /* remove the lock from mutex */
-    /* @@@ remove me 
-    g_static_mutex_unlock(&flom_trace_mutex);
-    */
 #else
 # error "vsnprintf is necessary for flom_trace function!"
 #endif

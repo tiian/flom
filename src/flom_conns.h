@@ -144,22 +144,11 @@ struct flom_conn_data_s {
  * A structured object used to register connections
  */
 struct flom_conns_s {
-    /* @@@ remove me
-     * Number of allocated connections
-    nfds_t allocated;
-     */
-    /* @@@ remove me
-     * Number of used connections
-    nfds_t used;
-     */
     /**
      * Array used for poll function (it must be re-generated before poll
      * function)
      */
     struct pollfd *poll_array;
-    /* @@@ remove me!
-    struct pollfd *fds;
-    */
     /**
      * Connection domain as specified when calling socket function
      */
@@ -173,9 +162,6 @@ struct flom_conns_s {
      * Array size
      */
     guint          n;
-    /* @@@ remove me! 
-    struct flom_conn_data_s *cd;
-    */
 };
     
 
