@@ -36,6 +36,7 @@
 #include "flom_conns.h"
 #include "flom_errors.h"
 #include "flom_exec.h"
+#include "flom_inst_conf.h"
 #include "flom_rsrc.h"
 #include "flom_trace.h"
 
@@ -73,6 +74,18 @@ int main (int argc, char *argv[])
     }
     g_option_context_free(option_context);
 
+    if (print_version) {
+        g_print("FLOM: Free LOck Manager\n"
+                "Copyright (c) 2013, Christian Ferrari; "
+                "all rights reserved.\n"
+                "License: GPL (GNU Public License) version 2\n"
+                "Package name: %s; package version: %s\n"
+                "Access http://sourceforge.net/projects/flom/ to report bugs "
+                "and partecipate to the project\n",
+                FLOM_PACKAGE_NAME, FLOM_PACKAGE_VERSION);
+        exit(0);
+    }
+    
     flom_config_reset();
     flom_config_set_trace_file(trace_file);
 

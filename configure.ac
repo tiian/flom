@@ -6,6 +6,7 @@ AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
   Makefile
   src/Makefile
+  src/flom_inst_conf.c
   doxygen.conf
 ])
 # AC_CONFIG_TESTDIR([tests])
