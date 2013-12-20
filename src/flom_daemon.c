@@ -845,9 +845,7 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
                                 flom_resource_get_name(&fl->resource),
                                 fl->write_sequence,
                                 fl->read_sequence, fl->idle_periods));
-                    /* this is a possibly locking function... :(
-                       but it's necessary to release glib stuff...
-                       in case of issues, move to POSIX standard thread... */
+                    /* join already terminated child thread */
                     thread_ret_cod = g_thread_join(fl->thread);
                     FLOM_TRACE(("flom_accept_loop_chklockers/g_thread_join"
                                 "(%p)=%p\n", fl->thread, thread_ret_cod));

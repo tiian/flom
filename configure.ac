@@ -12,8 +12,8 @@ AC_CONFIG_FILES([
 # AC_CONFIG_TESTDIR([tests])
 
 # Installation PATH
-test "x$prefix" = "xNONE" && prefix="/opt/flom"
-test "x$exec_prefix" = "xNONE" -a "x$prefix" != "xNONE" && exec_prefix=$prefix
+# test "x$prefix" = "xNONE" && prefix="/opt/flom"
+# test "x$exec_prefix" = "xNONE" -a "x$prefix" != "xNONE" && exec_prefix=$prefix
 
 # Expanded variables can be used in C code and XML files
 EXPANDED_SYSCONFDIR=$(eval echo $sysconfdir)
