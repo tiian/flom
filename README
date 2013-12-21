@@ -1,0 +1,28 @@
+	FLOM, Free LOck Manager, a free and open source lock manager
+
+FLOM (Free LOck Manager) is an open source and free lock manager designed to
+serialize shell command execution.
+
+ * FLOM is free software: you can redistribute it and/or modify under the terms
+ * of GNU General Public License version 2 as published by the Free Software
+ * Foundation.
+ *
+ * FLOM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+Install FLOM using standard GNU build chain: 
+tar xvzf flom-V.R.M.tar.gz
+cd flom-V.R.M
+./configure
+make
+sudo make install
+refer to INSTALL file for more details.
+
+Use 
+man flom 
+to read man page and pick up Internet relevant URLs for FLOM project.
+
+Enjoy it!
+Ch.F.

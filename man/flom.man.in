@@ -1,0 +1,37 @@
+.\" Manpage for flom.
+.\" Contact tiian@users.sourceforge.net to correct errors or typos.
+.TH man 1 "@BUILD_DATE@" "@PACKAGE_VERSION@" "flom man page"
+.SH NAME
+flom \- serialize a command execution
+.SH SYNOPSIS
+.B "flom"
+[OPTION] -- [COMMAND [ARG]...]
+.SH DESCRIPTION
+Run COMMAND serializing it with other commands executed by flom.
+.SH OPTIONS
+.TP 4
+.B "-h, --help"
+show help options
+.TP
+.B -t, --trace-file=\fIFILENAME
+specify daemon trace filename (FILENAME must be an absolute path)
+.TP
+.B -v, --version
+print flom version and exit
+.SH CAVEATS
+.B flom -- flom --
+[COMMAND [ARG]...]
+.P
+hangs due to a deadlock: the inner flom instance waits the lock obtained by the first flom instance.
+.SH AUTHOR
+Christian Ferrari (tiian@users.sourceforge.net)
+.SH REPORTING BUGS
+Report flom bugs using http://sourceforge.net/p/flom/tickets/
+.SH COPYRIGHT
+Copyright (C) 2013, Christian Ferrari. License GPL version 2 <http://www.gnu.org/licenses/>. This is free software: you are free to change and redistribute it. There is 
+.B NO WARRANTY
+, to the extent permitted by law.
+.SH SEE ALSO
+More documentation available at project wiki page
+.P
+<http://sourceforge.net/p/flom/wiki/Home/>

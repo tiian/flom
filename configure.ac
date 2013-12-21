@@ -1,10 +1,12 @@
-AC_INIT([flom], [0.0.0], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([flom], [0.1.0], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
   Makefile
+  man/Makefile
+  man/flom.man
   src/Makefile
   src/flom_inst_conf.c
   doxygen.conf
@@ -19,6 +21,8 @@ AC_CONFIG_FILES([
 EXPANDED_SYSCONFDIR=$(eval echo $sysconfdir)
 EXPANDED_LOCALSTATEDIR=$(eval echo $localstatedir)
 EXPANDED_LIBDIR=$(eval echo $libdir)
+
+BUILD_DATE=$(date +"%Y-%m-%d")
 
 AC_PRESERVE_HELP_ORDER
 AC_ARG_ENABLE([trace],
@@ -123,6 +127,7 @@ AC_CHECK_FUNCS(vsnprintf)
 AC_SUBST(PACKAGE_BUGREPORT)
 AC_SUBST(PACKAGE_NAME)
 AC_SUBST(PACKAGE_VERSION)
+AC_SUBST(BUILD_DATE)
 AC_SUBST(LDFLAGS_GLIB)
 AC_SUBST(EXPANDED_SYSCONFDIR)
 AC_SUBST(EXPANDED_LOCALSTATEDIR)
