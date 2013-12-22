@@ -1,3 +1,5 @@
 LOG:
 
-YYYYMMDD - 0.1.0 first release: implemented use case #1
+20121222 - 0.1.0 first release: it implements use case #1 (simple
+	serialization)
+

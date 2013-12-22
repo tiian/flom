@@ -79,10 +79,10 @@ int main (int argc, char *argv[])
                 "Copyright (c) 2013, Christian Ferrari; "
                 "all rights reserved.\n"
                 "License: GPL (GNU Public License) version 2\n"
-                "Package name: %s; package version: %s\n"
+                "Package name: %s; package version: %s; release date: %s\n"
                 "Access http://sourceforge.net/projects/flom/ to report bugs "
                 "and partecipate to the project\n",
-                FLOM_PACKAGE_NAME, FLOM_PACKAGE_VERSION);
+                FLOM_PACKAGE_NAME, FLOM_PACKAGE_VERSION, FLOM_PACKAGE_DATE);
         exit(0);
     }
     

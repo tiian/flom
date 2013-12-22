@@ -13,8 +13,8 @@ serialize shell command execution.
  * GNU General Public License for more details.
 
 Install FLOM using standard GNU build chain: 
-tar xvzf flom-V.R.M.tar.gz
-cd flom-V.R.M
+tar xvzf flom-X.Y.Z.tar.gz
+cd flom-X.Y.Z
 ./configure
 make
 sudo make install

@@ -1,4 +1,6 @@
 AC_INIT([flom], [0.1.0], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+RELEASE_DATE="2013-12-22"
+
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_CC
@@ -21,8 +23,6 @@ AC_CONFIG_FILES([
 EXPANDED_SYSCONFDIR=$(eval echo $sysconfdir)
 EXPANDED_LOCALSTATEDIR=$(eval echo $localstatedir)
 EXPANDED_LIBDIR=$(eval echo $libdir)
-
-BUILD_DATE=$(date +"%Y-%m-%d")
 
 AC_PRESERVE_HELP_ORDER
 AC_ARG_ENABLE([trace],
@@ -127,7 +127,7 @@ AC_CHECK_FUNCS(vsnprintf)
 AC_SUBST(PACKAGE_BUGREPORT)
 AC_SUBST(PACKAGE_NAME)
 AC_SUBST(PACKAGE_VERSION)
-AC_SUBST(BUILD_DATE)
+AC_SUBST(RELEASE_DATE)
 AC_SUBST(LDFLAGS_GLIB)
 AC_SUBST(EXPANDED_SYSCONFDIR)
 AC_SUBST(EXPANDED_LOCALSTATEDIR)

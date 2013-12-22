@@ -606,7 +606,7 @@ EXPANDED_LIBDIR
 EXPANDED_LOCALSTATEDIR
 EXPANDED_SYSCONFDIR
 LDFLAGS_GLIB
-BUILD_DATE
+RELEASE_DATE
 EGREP
 GREP
 CPP
@@ -2360,6 +2360,8 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+RELEASE_DATE="2013-12-22"
+
 am__api_version='1.11'
 
 ac_aux_dir=
@@ -3856,8 +3858,6 @@ ac_config_files="$ac_config_files Makefile man/Makefile man/flom.man src/Makefil
 EXPANDED_SYSCONFDIR=$(eval echo $sysconfdir)
 EXPANDED_LOCALSTATEDIR=$(eval echo $localstatedir)
 EXPANDED_LIBDIR=$(eval echo $libdir)
-
-BUILD_DATE=$(date +"%Y-%m-%d")
 
 
 

@@ -1,8 +1,8 @@
 .\" Manpage for flom.
 .\" Contact tiian@users.sourceforge.net to correct errors or typos.
-.TH man 1 "@BUILD_DATE@" "@PACKAGE_VERSION@" "flom man page"
+.TH man 1 "@RELEASE_DATE@" "@PACKAGE_VERSION@" "flom man page"
 .SH NAME
-flom \- serialize a command execution
+flom \- serialize command execution
 .SH SYNOPSIS
 .B "flom"
 [OPTION] -- [COMMAND [ARG]...]

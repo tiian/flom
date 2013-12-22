@@ -37,6 +37,11 @@ extern const char *FLOM_PACKAGE_NAME;
  * Version of the package as set inside configure.ac
  */
 extern const char *FLOM_PACKAGE_VERSION;
+/**
+ * Date of package release as set inside configure.ac
+ */
+extern const char *FLOM_PACKAGE_DATE;
+
 
 
 #ifdef __cplusplus
