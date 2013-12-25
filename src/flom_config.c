@@ -52,7 +52,8 @@ void flom_config_reset()
     /* set UNIX socket name */
     snprintf(global_config.local_socket_path_name, LOCAL_SOCKET_SIZE,
              "/tmp/flom-%s", getlogin());
-    global_config.trace_file = NULL;
+    global_config.daemon_trace_file = NULL;
+    global_config.command_trace_file = NULL;
     global_config.idle_time = 5000; /* milliseconds */
     global_config.resource_name = DEFAULT_RESOURCE_NAME;
 }

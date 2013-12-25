@@ -43,13 +43,15 @@
 
 
 static gboolean print_version = FALSE;
-static char *trace_file = NULL;
+static char *command_trace_file = NULL;
+static char *daemon_trace_file = NULL;
 static gchar **command_argv = NULL;
 /* command line options */
 static GOptionEntry entries[] =
 {
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
-    { "trace-file", 't', 0, G_OPTION_ARG_STRING, &trace_file, "Specify daemon trace file name (absolute path required)", NULL },
+    { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
+    { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
     { NULL }
 };
@@ -64,8 +66,6 @@ int main (int argc, char *argv[])
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     struct flom_conn_data_s cd;
 
-    FLOM_TRACE_INIT;
-    
     option_context = g_option_context_new("-- command to execute");
     g_option_context_add_main_entries(option_context, entries, NULL);
     if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
@@ -87,8 +87,13 @@ int main (int argc, char *argv[])
     }
     
     flom_config_reset();
-    flom_config_set_trace_file(trace_file);
+    flom_config_set_daemon_trace_file(daemon_trace_file);
+    flom_config_set_command_trace_file(command_trace_file);
 
+    /* initialize and change trace destination if necessary */
+    FLOM_TRACE_INIT;    
+    FLOM_TRACE_REOPEN(flom_config_get_command_trace_file());
+    
     if (FLOM_RC_OK != (ret_cod = global_res_name_preg_init())) {
         g_print("global_res_name_preg_init: ret_cod=%d\n", ret_cod);
         exit(1);

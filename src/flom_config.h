@@ -52,15 +52,19 @@ extern const char *DEFAULT_RESOURCE_NAME;
 /**
  * This struct contains all the values necessary for configuration
  */
-struct flom_config {
+typedef struct flom_config {
     /**
      * Path of UNIX socket using for local connection
      */
     char        local_socket_path_name[LOCAL_SOCKET_SIZE];
     /**
-     * Name of the file must be used to write trace messages
+     * Name of the file must be used to write trace messages from the daemon
      */
-    char const *trace_file;
+    char const *daemon_trace_file;
+    /**
+     * Name of the file must be used to write trace messages from the command
+     */
+    char const *command_trace_file;
     /**
      * After idle_time milliseconds without new incoming requests, the daemon
      * will terminate activity
@@ -70,8 +74,7 @@ struct flom_config {
      * Name of the resource that must be locked
      */
     char const *resource_name;
-};
-typedef struct flom_config flom_config_t;
+} flom_config_t;
 
 
 
@@ -97,11 +100,39 @@ extern "C" {
     
     /**
      * Set trace_file in config object
-     * @param trace_file IN set the new value for trace_file properties
+     * @param daemon_trace_file IN set the new value for trace_file properties
      */
-    static inline void flom_config_set_trace_file(
-        const char *trace_file) {
-        global_config.trace_file = trace_file; }
+    static inline void flom_config_set_daemon_trace_file(
+        const char *daemon_trace_file) {
+        global_config.daemon_trace_file = daemon_trace_file; }
+
+
+
+    /**
+     * Retrieve the trace file specified for daemon process
+     * @return trace file name
+     */
+    static inline const char *flom_config_get_daemon_trace_file(void) {
+        return global_config.daemon_trace_file; }
+
+
+    
+    /**
+     * Set trace_file in config object
+     * @param command_trace_file IN set the new value for trace_file properties
+     */
+    static inline void flom_config_set_command_trace_file(
+        const char *command_trace_file) {
+        global_config.command_trace_file = command_trace_file; }
+
+
+
+    /**
+     * Retrieve the trace file specified for command process
+     * @return trace file name
+     */
+    static inline const char *flom_config_get_command_trace_file(void) {
+        return global_config.command_trace_file; }
 
 
     
