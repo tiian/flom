@@ -44,6 +44,13 @@ extern const char *FLOM_PACKAGE_DATE;
 
 
 
+/**
+ * Installation configuration dir (./configure output)
+ */
+extern const char *FLOM_INSTALL_SYSCONFIDR;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

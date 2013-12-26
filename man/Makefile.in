@@ -32,15 +32,15 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 subdir = man
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/flom.man.in
+DIST_COMMON = $(dist_man1_MANS) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = flom.man
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -68,7 +68,7 @@ am__base_list = \
 man1dir = $(mandir)/man1
 am__installdirs = "$(DESTDIR)$(man1dir)"
 NROFF = nroff
-MANS = $(man1_MANS)
+MANS = $(dist_man1_MANS) $(man1_MANS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -89,14 +89,6 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
-EXPANDED_LIBDIR = @EXPANDED_LIBDIR@
-EXPANDED_LOCALSTATEDIR = @EXPANDED_LOCALSTATEDIR@
-EXPANDED_SYSCONFDIR = @EXPANDED_SYSCONFDIR@
-FLOM_CONFIG_INCLUDEDIR = @FLOM_CONFIG_INCLUDEDIR@
-FLOM_CONFIG_LIBDIR = @FLOM_CONFIG_LIBDIR@
-FLOM_CONFIG_LOCALSTATEDIR = @FLOM_CONFIG_LOCALSTATEDIR@
-FLOM_CONFIG_PREFIX = @FLOM_CONFIG_PREFIX@
-FLOM_CONFIG_SYSCONFDIR = @FLOM_CONFIG_SYSCONFDIR@
 GDB = @GDB@
 GREP = @GREP@
 HAVE_DOT = @HAVE_DOT@
@@ -172,6 +164,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 man1_MANS = flom.man
+CLEANFILES = flom.man
+dist_man1_MANS = flom.man.in
 all: all-am
 
 .SUFFIXES:
@@ -205,12 +199,10 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-flom.man: $(top_builddir)/config.status $(srcdir)/flom.man.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-install-man1: $(man1_MANS)
+install-man1: $(dist_man1_MANS) $(man1_MANS)
 	@$(NORMAL_INSTALL)
 	test -z "$(man1dir)" || $(MKDIR_P) "$(DESTDIR)$(man1dir)"
-	@list='$(man1_MANS)'; test -n "$(man1dir)" || exit 0; \
+	@list='$(dist_man1_MANS) $(man1_MANS)'; test -n "$(man1dir)" || exit 0; \
 	{ for i in $$list; do echo "$$i"; done; \
 	} | while read p; do \
 	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
@@ -234,7 +226,7 @@ install-man1: $(man1_MANS)
 
 uninstall-man1:
 	@$(NORMAL_UNINSTALL)
-	@list='$(man1_MANS)'; test -n "$(man1dir)" || exit 0; \
+	@list='$(dist_man1_MANS) $(man1_MANS)'; test -n "$(man1dir)" || exit 0; \
 	files=`{ for i in $$list; do echo "$$i"; done; \
 	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^1][0-9a-z]*$$,1,;x' \
 	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
@@ -315,6 +307,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -404,6 +397,12 @@ uninstall-man: uninstall-man1
 	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am uninstall \
 	uninstall-am uninstall-man uninstall-man1
 
+flom.man: flom.man.in
+	sed \
+	-e 's|@sysconfdir[@]|$(sysconfdir)|g' \
+	-e 's|@RELEASE_DATE[@]|$(RELEASE_DATE)|g' \
+	-e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
+	$< >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -1,4 +1,4 @@
-AC_INIT([flom], [0.1.0], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([flom], [0.1.1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 RELEASE_DATE="2013-12-22"
 
 AM_INIT_AUTOMAKE([-Wall -Werror])
@@ -8,21 +8,13 @@ AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
   Makefile
   man/Makefile
-  man/flom.man
   src/Makefile
-  src/flom_inst_conf.c
-  doxygen.conf
 ])
 # AC_CONFIG_TESTDIR([tests])
 
 # Installation PATH
 # test "x$prefix" = "xNONE" && prefix="/opt/flom"
 # test "x$exec_prefix" = "xNONE" -a "x$prefix" != "xNONE" && exec_prefix=$prefix
-
-# Expanded variables can be used in C code and XML files
-EXPANDED_SYSCONFDIR=$(eval echo $sysconfdir)
-EXPANDED_LOCALSTATEDIR=$(eval echo $localstatedir)
-EXPANDED_LIBDIR=$(eval echo $libdir)
 
 AC_PRESERVE_HELP_ORDER
 AC_ARG_ENABLE([trace],
@@ -49,14 +41,6 @@ else
 	LDFLAGS="$LDFLAGS $($PKG_CONFIG --libs glib-2.0) $($PKG_CONFIG --libs gthread-2.0)"
 	AC_MSG_RESULT([yes])
 fi
-
-# Vars useful for lixa-config utility program
-eval "FLOM_CONFIG_INCLUDEDIR=$includedir"
-eval "FLOM_CONFIG_LIBDIR=$libdir"
-eval "FLOM_CONFIG_PREFIX=$prefix"
-eval "FLOM_CONFIG_LOCALSTATEDIR=$localstatedir"
-eval "FLOM_CONFIG_SYSCONFDIR=$sysconfdir"
-
 
 # Checking pkg-config is available
 AC_CHECK_PROGS(GDB, [gdb], [])
@@ -124,19 +108,8 @@ AC_CHECK_SIZEOF([ssize_t])
 AC_CHECK_FUNCS(vfprintf)
 AC_CHECK_FUNCS(vsnprintf)
 
-AC_SUBST(PACKAGE_BUGREPORT)
-AC_SUBST(PACKAGE_NAME)
-AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(RELEASE_DATE)
 AC_SUBST(LDFLAGS_GLIB)
-AC_SUBST(EXPANDED_SYSCONFDIR)
-AC_SUBST(EXPANDED_LOCALSTATEDIR)
-AC_SUBST(EXPANDED_LIBDIR)
 AC_SUBST(HAVE_DOT)
-AC_SUBST(FLOM_CONFIG_INCLUDEDIR)
-AC_SUBST(FLOM_CONFIG_LIBDIR)
-AC_SUBST(FLOM_CONFIG_PREFIX)
-AC_SUBST(FLOM_CONFIG_LOCALSTATEDIR)
-AC_SUBST(FLOM_CONFIG_SYSCONFDIR)
 
 AC_OUTPUT

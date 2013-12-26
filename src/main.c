@@ -43,6 +43,7 @@
 
 
 static gboolean print_version = FALSE;
+static char *config_file = NULL;
 static char *command_trace_file = NULL;
 static char *daemon_trace_file = NULL;
 static gchar **command_argv = NULL;
@@ -50,6 +51,7 @@ static gchar **command_argv = NULL;
 static GOptionEntry entries[] =
 {
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
+    { "config-file", 'c', 0, G_OPTION_ARG_STRING, &config_file, "User configuration file name", NULL },
     { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
