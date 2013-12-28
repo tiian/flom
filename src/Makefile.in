@@ -54,8 +54,7 @@ am_flom_OBJECTS = main.$(OBJEXT) flom_client.$(OBJEXT) \
 	flom_locker.$(OBJEXT) flom_msg.$(OBJEXT) \
 	flom_resource_simple.$(OBJEXT) flom_rsrc.$(OBJEXT) \
 	flom_trace.$(OBJEXT)
-dist_flom_OBJECTS =
-flom_OBJECTS = $(am_flom_OBJECTS) $(dist_flom_OBJECTS)
+flom_OBJECTS = $(am_flom_OBJECTS)
 flom_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -65,8 +64,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(flom_SOURCES) $(dist_flom_SOURCES)
-DIST_SOURCES = $(flom_SOURCES) $(dist_flom_SOURCES)
+SOURCES = $(flom_SOURCES)
+DIST_SOURCES = $(flom_SOURCES)
 HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -164,14 +163,24 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+AM_CPPFLAGS = -DSYSCONFDIR='"@sysconfdir@"'
 AM_CFLAGS = -Wall
-CLEANFILES = flom_inst_conf.c
+
+#CLEANFILES = flom_inst_conf.c
+#flom_inst_conf.c: flom_inst_conf.c.in
+#	sed \
+#	-e 's|@PACKAGE_BUGREPORT[@]|$(PACKAGE_BUGREPORT)|g' \
+#	-e 's|@PACKAGE_NAME[@]|$(PACKAGE_NAME)|g' \
+#	-e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
+#	-e 's|@RELEASE_DATE[@]|$(RELEASE_DATE)|g' \
+#	-e 's|@sysconfdir[@]|$(sysconfdir)|g' \
+#	$< >$@
 noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_defines.h flom_errors.h flom_exec.h flom_inst_conf.h \
 	flom_locker.h flom_msg.h flom_resource_simple.h flom_rsrc.h \
 	flom_trace.h
 
-dist_flom_SOURCES = flom_inst_conf.c.in
+#dist_flom_SOURCES = flom_inst_conf.c.in
 flom_SOURCES = main.c flom_client.c flom_config.c flom_conns.c flom_daemon.c \
 	flom_errors.c flom_exec.c flom_inst_conf.c flom_locker.c flom_msg.c \
 	flom_resource_simple.c flom_rsrc.c flom_trace.c
@@ -391,7 +400,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -484,14 +492,6 @@ uninstall-am: uninstall-binPROGRAMS
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-binPROGRAMS
 
-flom_inst_conf.c: flom_inst_conf.c.in
-	sed \
-	-e 's|@PACKAGE_BUGREPORT[@]|$(PACKAGE_BUGREPORT)|g' \
-	-e 's|@PACKAGE_NAME[@]|$(PACKAGE_NAME)|g' \
-	-e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
-	-e 's|@RELEASE_DATE[@]|$(RELEASE_DATE)|g' \
-	-e 's|@sysconfdir[@]|$(sysconfdir)|g' \
-	$< >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

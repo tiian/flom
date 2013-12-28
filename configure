@@ -2354,6 +2354,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 RELEASE_DATE="2013-12-22"
 
+$as_echo "#define RELEASE_DATE \"2013-12-22\"" >>confdefs.h
+
 am__api_version='1.11'
 
 ac_aux_dir=

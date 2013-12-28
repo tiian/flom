@@ -1,6 +1,6 @@
 AC_INIT([flom], [0.1.1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 RELEASE_DATE="2013-12-22"
-
+AC_DEFINE([RELEASE_DATE], ["2013-12-22"], [Date of release])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_CC
