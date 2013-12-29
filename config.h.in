@@ -1,5 +1,9 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* String used to separate directory from file inside fully qualified path
+   names */
+#undef DIR_FILE_SEPARATOR
+
 /* Define to 1 if you have the <assert.h> header file. */
 #undef HAVE_ASSERT_H
 
@@ -134,6 +138,12 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* System wide configuration filename */
+#undef SYSTEM_CONFIG_FILENAME
+
+/* User default configuration filename */
+#undef USER_CONFIG_FILENAME
 
 /* Version number of package */
 #undef VERSION

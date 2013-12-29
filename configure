@@ -597,8 +597,10 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
-LDFLAGS_GLIB
+USER_CONFIG_FILENAME
+SYSTEM_CONFIG_FILENAME
 RELEASE_DATE
+LDFLAGS_GLIB
 EGREP
 GREP
 CPP
@@ -2352,10 +2354,6 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-RELEASE_DATE="2013-12-22"
-
-$as_echo "#define RELEASE_DATE \"2013-12-22\"" >>confdefs.h
-
 am__api_version='1.11'
 
 ac_aux_dir=
@@ -2856,6 +2854,33 @@ am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
 
 
 
+
+
+# hardwired configuration
+RELEASE_DATE="2013-12-22"
+SYSTEM_CONFIG_FILENAME="flom.conf"
+USER_CONFIG_FILENAME=".flom"
+DIR_FILE_SEPARATOR="/"
+# definition inside config.h for hardwired configuration
+
+cat >>confdefs.h <<_ACEOF
+#define RELEASE_DATE "$RELEASE_DATE"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define SYSTEM_CONFIG_FILENAME "$SYSTEM_CONFIG_FILENAME"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define USER_CONFIG_FILENAME "$USER_CONFIG_FILENAME"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define DIR_FILE_SEPARATOR "$DIR_FILE_SEPARATOR"
+_ACEOF
 
 
 ac_ext=c
@@ -4689,7 +4714,8 @@ _ACEOF
 
 fi
 
-ac_fn_c_check_type "$LINENO" "struct sockaddr_un" "ac_cv_type_struct_sockaddr_un" "$ac_includes_default"
+ac_fn_c_check_type "$LINENO" "struct sockaddr_un" "ac_cv_type_struct_sockaddr_un" "#include <sys/un.h>
+"
 if test "x$ac_cv_type_struct_sockaddr_un" = x""yes; then :
 
 cat >>confdefs.h <<_ACEOF
@@ -4905,6 +4931,10 @@ fi
 done
 
 
+
+
+
+# substitution inside *.in for hardwired configuration
 
 
 

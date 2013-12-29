@@ -50,8 +50,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am_flom_OBJECTS = main.$(OBJEXT) flom_client.$(OBJEXT) \
 	flom_config.$(OBJEXT) flom_conns.$(OBJEXT) \
 	flom_daemon.$(OBJEXT) flom_errors.$(OBJEXT) \
-	flom_exec.$(OBJEXT) flom_inst_conf.$(OBJEXT) \
-	flom_locker.$(OBJEXT) flom_msg.$(OBJEXT) \
+	flom_exec.$(OBJEXT) flom_locker.$(OBJEXT) flom_msg.$(OBJEXT) \
 	flom_resource_simple.$(OBJEXT) flom_rsrc.$(OBJEXT) \
 	flom_trace.$(OBJEXT)
 flom_OBJECTS = $(am_flom_OBJECTS)
@@ -118,6 +117,8 @@ RELEASE_DATE = @RELEASE_DATE@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+SYSTEM_CONFIG_FILENAME = @SYSTEM_CONFIG_FILENAME@
+USER_CONFIG_FILENAME = @USER_CONFIG_FILENAME@
 VALGRIND = @VALGRIND@
 VERSION = @VERSION@
 XSLTPROC = @XSLTPROC@
@@ -176,13 +177,13 @@ AM_CFLAGS = -Wall
 #	-e 's|@sysconfdir[@]|$(sysconfdir)|g' \
 #	$< >$@
 noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
-	flom_defines.h flom_errors.h flom_exec.h flom_inst_conf.h \
+	flom_defines.h flom_errors.h flom_exec.h \
 	flom_locker.h flom_msg.h flom_resource_simple.h flom_rsrc.h \
 	flom_trace.h
 
 #dist_flom_SOURCES = flom_inst_conf.c.in
 flom_SOURCES = main.c flom_client.c flom_config.c flom_conns.c flom_daemon.c \
-	flom_errors.c flom_exec.c flom_inst_conf.c flom_locker.c flom_msg.c \
+	flom_errors.c flom_exec.c flom_locker.c flom_msg.c \
 	flom_resource_simple.c flom_rsrc.c flom_trace.c
 
 all: all-am
@@ -272,7 +273,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_errors.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_exec.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_inst_conf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_locker.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_msg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_resource_simple.Po@am__quote@

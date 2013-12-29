@@ -1,7 +1,16 @@
 AC_INIT([flom], [0.1.1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
-RELEASE_DATE="2013-12-22"
-AC_DEFINE([RELEASE_DATE], ["2013-12-22"], [Date of release])
 AM_INIT_AUTOMAKE([-Wall -Werror])
+
+# hardwired configuration
+RELEASE_DATE="2013-12-22"
+SYSTEM_CONFIG_FILENAME="flom.conf"
+USER_CONFIG_FILENAME=".flom"
+DIR_FILE_SEPARATOR="/"
+# definition inside config.h for hardwired configuration
+AC_DEFINE_UNQUOTED([RELEASE_DATE], ["$RELEASE_DATE"], [Date of release])
+AC_DEFINE_UNQUOTED([SYSTEM_CONFIG_FILENAME], ["$SYSTEM_CONFIG_FILENAME"], [System wide configuration filename])
+AC_DEFINE_UNQUOTED([USER_CONFIG_FILENAME], ["$USER_CONFIG_FILENAME"], [User default configuration filename])
+AC_DEFINE_UNQUOTED([DIR_FILE_SEPARATOR], ["$DIR_FILE_SEPARATOR"], [String used to separate directory from file inside fully qualified path names])
 
 AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
@@ -87,7 +96,7 @@ AC_CHECK_TYPES(pid_t)
 AC_CHECK_TYPES(uint8_t)
 AC_CHECK_TYPES(uint32_t)
 AC_CHECK_TYPES(uintptr_t)
-AC_CHECK_TYPES(struct sockaddr_un)
+AC_CHECK_TYPES([struct sockaddr_un], [], [], [[#include <sys/un.h>]])
 
 AC_CHECK_SIZEOF([int])
 AC_CHECK_SIZEOF([long int])
@@ -108,8 +117,12 @@ AC_CHECK_SIZEOF([ssize_t])
 AC_CHECK_FUNCS(vfprintf)
 AC_CHECK_FUNCS(vsnprintf)
 
-AC_SUBST(RELEASE_DATE)
 AC_SUBST(LDFLAGS_GLIB)
 AC_SUBST(HAVE_DOT)
+
+# substitution inside *.in for hardwired configuration
+AC_SUBST(RELEASE_DATE)
+AC_SUBST(SYSTEM_CONFIG_FILENAME)
+AC_SUBST(USER_CONFIG_FILENAME)
 
 AC_OUTPUT

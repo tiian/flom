@@ -47,7 +47,49 @@
 #define LOCAL_SOCKET_SIZE sizeof(((struct sockaddr_un *)NULL)->sun_path)
 
 
+
+/* configure dependent constant values */
+/**
+ * E-mail address as set inside configure.ac
+ */
+extern const char *FLOM_PACKAGE_BUGREPORT;
+/**
+ * Name of the package as set inside configure.ac
+ */
+extern const char *FLOM_PACKAGE_NAME;
+/**
+ * Version of the package as set inside configure.ac
+ */
+extern const char *FLOM_PACKAGE_VERSION;
+/**
+ * Date of package release as set inside configure.ac
+ */
+extern const char *FLOM_PACKAGE_DATE;
+/**
+ * Installation configuration dir (./configure output)
+ */
+extern const char FLOM_INSTALL_SYSCONFDIR[];
+
+
+
+/**
+ * Default name for a simple resource
+ */
 extern const char *DEFAULT_RESOURCE_NAME;
+/**
+ * Filename of system wide configuration file
+ */
+extern const char FLOM_SYSTEM_CONFIG_FILENAME[];
+/**
+ * Filename of user default configuration file
+ */
+extern const char FLOM_USER_CONFIG_FILENAME[];
+/**
+ * Separator used between directory and file names
+ */
+extern const char FLOM_DIR_FILE_SEPARATOR[];
+
+
 
 /**
  * This struct contains all the values necessary for configuration
@@ -96,6 +138,24 @@ extern "C" {
      */
     void flom_config_reset();
     
+
+
+    /**
+     * Initialize configuration (global) object retrieving data from
+     * configuration files
+     * @param user_config_file_name IN filename of user configuration file
+     */
+    void flom_config_init(const char *user_config_file_name);
+
+
+
+    /**
+     * Load a configuration file, parse it and initialize global configuration
+     * as described in the config file
+     * @param config_file_name IN configuration file to open and parse
+     */
+    void flom_config_init_load(const char *config_file_name);
+
 
     
     /**

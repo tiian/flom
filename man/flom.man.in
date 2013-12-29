@@ -14,7 +14,7 @@ Run COMMAND serializing it with other commands executed by flom.
 show help options
 .TP
 .B -c, --config-file=\fIFILENAME
-user configuration file name. Flom tries to read system default configuration file @sysconfdir@/flom.conf, user default configuration file ~/.flom and finally this file if specified
+user configuration file name. Flom tries to read system default configuration file @sysconfdir@/@SYSTEM_CONFIG_FILENAME@, user default configuration file ~/@USER_CONFIG_FILENAME@ and finally this file if specified
 .TP
 .B -T, --command-trace-file=\fIFILENAME
 file destination of the trace messages produced by the command (foreground) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module.

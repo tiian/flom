@@ -36,7 +36,6 @@
 #include "flom_conns.h"
 #include "flom_errors.h"
 #include "flom_exec.h"
-#include "flom_inst_conf.h"
 #include "flom_rsrc.h"
 #include "flom_trace.h"
 
@@ -87,13 +86,21 @@ int main (int argc, char *argv[])
                 FLOM_PACKAGE_NAME, FLOM_PACKAGE_VERSION, FLOM_PACKAGE_DATE);
         exit(0);
     }
-    
-    flom_config_reset();
-    flom_config_set_daemon_trace_file(daemon_trace_file);
-    flom_config_set_command_trace_file(command_trace_file);
 
-    /* initialize and change trace destination if necessary */
+    /* reset global configuration */
+    flom_config_reset();
+    /* initialize trace destination if necessary */
     FLOM_TRACE_INIT;    
+    /* initialize configuration with standard system, statndard user and
+       user customized config files */
+    flom_config_init(config_file);
+    /* overrides configuration with command line passed arguments */
+    if (NULL != daemon_trace_file)
+        flom_config_set_daemon_trace_file(daemon_trace_file);
+    if (NULL != command_trace_file)
+        flom_config_set_command_trace_file(command_trace_file);
+
+    /* change trace destination if necessary */
     FLOM_TRACE_REOPEN(flom_config_get_command_trace_file());
     
     if (FLOM_RC_OK != (ret_cod = global_res_name_preg_init())) {
