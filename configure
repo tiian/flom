@@ -597,9 +597,12 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
-USER_CONFIG_FILENAME
-SYSTEM_CONFIG_FILENAME
-RELEASE_DATE
+_CONFIG_KEY_COMMANDTRACEFILE
+_CONFIG_KEY_DAEMONTRACEFILE
+_CONFIG_GROUP_TRACE
+_USER_CONFIG_FILENAME
+_SYSTEM_CONFIG_FILENAME
+_RELEASE_DATE
 LDFLAGS_GLIB
 EGREP
 GREP
@@ -2857,29 +2860,47 @@ am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
 
 
 # hardwired configuration
-RELEASE_DATE="2013-12-22"
-SYSTEM_CONFIG_FILENAME="flom.conf"
-USER_CONFIG_FILENAME=".flom"
-DIR_FILE_SEPARATOR="/"
+_RELEASE_DATE="2013-12-22"
+_SYSTEM_CONFIG_FILENAME="flom.conf"
+_USER_CONFIG_FILENAME=".flom"
+_DIR_FILE_SEPARATOR="/"
+_CONFIG_GROUP_TRACE="Trace"
+_CONFIG_KEY_DAEMONTRACEFILE="DaemonTraceFile"
+_CONFIG_KEY_COMMANDTRACEFILE="CommandTraceFile"
 # definition inside config.h for hardwired configuration
 
 cat >>confdefs.h <<_ACEOF
-#define RELEASE_DATE "$RELEASE_DATE"
+#define _RELEASE_DATE "$_RELEASE_DATE"
 _ACEOF
 
 
 cat >>confdefs.h <<_ACEOF
-#define SYSTEM_CONFIG_FILENAME "$SYSTEM_CONFIG_FILENAME"
+#define _SYSTEM_CONFIG_FILENAME "$_SYSTEM_CONFIG_FILENAME"
 _ACEOF
 
 
 cat >>confdefs.h <<_ACEOF
-#define USER_CONFIG_FILENAME "$USER_CONFIG_FILENAME"
+#define _USER_CONFIG_FILENAME "$_USER_CONFIG_FILENAME"
 _ACEOF
 
 
 cat >>confdefs.h <<_ACEOF
-#define DIR_FILE_SEPARATOR "$DIR_FILE_SEPARATOR"
+#define _DIR_FILE_SEPARATOR "$_DIR_FILE_SEPARATOR"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define _CONFIG_GROUP_TRACE "$_CONFIG_GROUP_TRACE"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define _CONFIG_KEY_DAEMONTRACEFILE "$_CONFIG_KEY_DAEMONTRACEFILE"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define _CONFIG_KEY_COMMANDTRACEFILE "$_CONFIG_KEY_COMMANDTRACEFILE"
 _ACEOF
 
 
@@ -3865,7 +3886,7 @@ fi
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files Makefile man/Makefile src/Makefile"
+ac_config_files="$ac_config_files Makefile etc/Makefile man/Makefile src/Makefile"
 
 # AC_CONFIG_TESTDIR([tests])
 
@@ -4939,6 +4960,9 @@ done
 
 
 
+
+
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -5653,6 +5677,7 @@ do
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "etc/Makefile") CONFIG_FILES="$CONFIG_FILES etc/Makefile" ;;
     "man/Makefile") CONFIG_FILES="$CONFIG_FILES man/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
 

@@ -1,0 +1,16 @@
+# flom.conf.in should be distributed but not installed
+# flom.conf should be installed but not distributed
+# the best I was able to obtain was:
+#	flom.conf.in is distributed and installed
+#	flom.conf    is installed but not distributed
+dist_doc_DATA = flom.conf.in
+nodist_doc_DATA = flom.conf 
+CLEANFILES = flom.conf
+flom.conf : flom.conf.in
+	sed \
+        -e 's|@sysconfdir[@]|$(sysconfdir)|g' \
+        -e 's|@_USER_CONFIG_FILENAME[@]|$(_USER_CONFIG_FILENAME)|g' \
+	-e 's|@_CONFIG_GROUP_TRACE[@]|$(_CONFIG_GROUP_TRACE)|g' \
+	-e 's|@_CONFIG_KEY_DAEMONTRACEFILE[@]|$(_CONFIG_KEY_DAEMONTRACEFILE)|g' \
+	-e 's|@_CONFIG_KEY_COMMANDTRACEFILE[@]|$(_CONFIG_KEY_COMMANDTRACEFILE)|g' \
+	$< >$@

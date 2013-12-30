@@ -1,0 +1,20 @@
+#
+# Copy this file to @sysconfdir@ and coustomize it to use as system wide
+# flom configuration file
+# Copy this file to your home directory, rename it as @_USER_CONFIG_FILENAME@
+# and customize it to use as your user default flom configuration file
+# Copy this file elsewhere, rename it as you prefer, customize it and use
+# as your custom configuration file using -c/--config-file command line
+# option
+#
+# This file uses GLIB key-value file parser syntax; take a look to official 
+# GLIB documentations for additional details
+#
+#
+#
+# This configuration group is related to tracing
+[@_CONFIG_GROUP_TRACE@]
+# Destination of trace messages produced by daemon (background) process
+@_CONFIG_KEY_DAEMONTRACEFILE@=/tmp/flom-daemon.trc
+# Destination of trace messages produced by command (foreground) process
+@_CONFIG_KEY_COMMANDTRACEFILE@=/tmp/flom-command.trc

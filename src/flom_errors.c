@@ -88,25 +88,6 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'fork' function returned an error condition";
         case FLOM_RC_GETSOCKOPT_ERROR:
             return "ERROR: 'getsockopt' function returned an error condition";
-        case FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR:
-            return "ERROR: 'g_markup_parse_context_new' function returned "
-                "an error condition";
-        case FLOM_RC_G_MARKUP_PARSE_CONTEXT_PARSE_ERROR:
-            return "ERROR: 'g_markup_parse_context_parse' function returned "
-                "an error condition";
-        case FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR:
-            return "ERROR: 'g_ptr_array_remove_index_fast' function returned "
-                "an error condition";
-        case FLOM_RC_G_QUEUE_NEW_ERROR:
-            return "ERROR: 'g_queue_new' function returned an error condition";
-        case FLOM_RC_G_STRDUP_ERROR:
-            return "ERROR: 'g_strdup' function returned an error condition";
-        case FLOM_RC_G_THREAD_CREATE_ERROR:
-            return "ERROR: 'g_thread_create' function returned an error "
-                "condition";
-        case FLOM_RC_G_TRY_MALLOC_ERROR:
-            return "ERROR: 'g_try_malloc'/'g_try_malloc0' function returned "
-                "an error condition";
         case FLOM_RC_LISTEN_ERROR:
             return "ERROR: 'listen' function returned an error condition";
         case FLOM_RC_MALLOC_ERROR:
@@ -141,6 +122,32 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'wait' function returned an error condition";
         case FLOM_RC_WRITE_ERROR:
             return "ERROR: 'write' function returned an error condition";
+            /* GLIB related errors */
+        case FLOM_RC_G_KEY_FILE_LOAD_FROM_FILE_ERROR:
+            return "ERROR: 'g_key_file_load_from_file' function returned "
+                "an error condition";
+        case FLOM_RC_G_KEY_FILE_NEW_ERROR:
+            return "ERROR: 'g_key_file_new' function returned "
+                "an error condition";
+        case FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR:
+            return "ERROR: 'g_markup_parse_context_new' function returned "
+                "an error condition";
+        case FLOM_RC_G_MARKUP_PARSE_CONTEXT_PARSE_ERROR:
+            return "ERROR: 'g_markup_parse_context_parse' function returned "
+                "an error condition";
+        case FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR:
+            return "ERROR: 'g_ptr_array_remove_index_fast' function returned "
+                "an error condition";
+        case FLOM_RC_G_QUEUE_NEW_ERROR:
+            return "ERROR: 'g_queue_new' function returned an error condition";
+        case FLOM_RC_G_STRDUP_ERROR:
+            return "ERROR: 'g_strdup' function returned an error condition";
+        case FLOM_RC_G_THREAD_CREATE_ERROR:
+            return "ERROR: 'g_thread_create' function returned an error "
+                "condition";
+        case FLOM_RC_G_TRY_MALLOC_ERROR:
+            return "ERROR: 'g_try_malloc'/'g_try_malloc0' function returned "
+                "an error condition";
         default:
             return "ERROR: unknown error";
     } /* switch (ret_cod) */

@@ -25,6 +25,9 @@
 
 
 
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 #ifdef HAVE_SYS_UN_H
 # include <sys/un.h>
 #endif
@@ -92,30 +95,45 @@ extern const char FLOM_DIR_FILE_SEPARATOR[];
 
 
 /**
+ * Label associated to Trace group inside config files
+ */
+extern const gchar *FLOM_CONFIG_GROUP_TRACE;
+/**
+ * Label associated to DaemonTraceFile key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_DAEMONTRACEFILE;
+/**
+ * Label associated to CommandTraceFile key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_COMMANDTRACEFILE;
+
+
+
+/**
  * This struct contains all the values necessary for configuration
  */
 typedef struct flom_config {
     /**
      * Path of UNIX socket using for local connection
      */
-    char        local_socket_path_name[LOCAL_SOCKET_SIZE];
+    char         local_socket_path_name[LOCAL_SOCKET_SIZE];
     /**
      * Name of the file must be used to write trace messages from the daemon
      */
-    char const *daemon_trace_file;
+    gchar       *daemon_trace_file;
     /**
      * Name of the file must be used to write trace messages from the command
      */
-    char const *command_trace_file;
+    gchar       *command_trace_file;
     /**
      * After idle_time milliseconds without new incoming requests, the daemon
      * will terminate activity
      */
-    int         idle_time;
+    int          idle_time;
     /**
      * Name of the resource that must be locked
      */
-    char const *resource_name;
+    char        *resource_name;
 } flom_config_t;
 
 
@@ -134,18 +152,25 @@ extern "C" {
 
 
     /**
-     * Set config to system default
+     * Reset config
      */
     void flom_config_reset();
     
 
 
     /**
+     * Release all memory allocated by global config object
+     */
+    void flom_config_free();
+
+
+    
+    /**
      * Initialize configuration (global) object retrieving data from
      * configuration files
-     * @param user_config_file_name IN filename of user configuration file
+     * @param custom_config_filename IN filename of user configuration file
      */
-    void flom_config_init(const char *user_config_file_name);
+    void flom_config_init(const char *custom_config_filename);
 
 
 
@@ -153,8 +178,9 @@ extern "C" {
      * Load a configuration file, parse it and initialize global configuration
      * as described in the config file
      * @param config_file_name IN configuration file to open and parse
+     * @return a reason code
      */
-    void flom_config_init_load(const char *config_file_name);
+    int flom_config_init_load(const char *config_file_name);
 
 
     
@@ -163,7 +189,9 @@ extern "C" {
      * @param daemon_trace_file IN set the new value for trace_file properties
      */
     static inline void flom_config_set_daemon_trace_file(
-        const char *daemon_trace_file) {
+        gchar *daemon_trace_file) {
+        if (NULL != global_config.daemon_trace_file)
+            g_free(global_config.daemon_trace_file);
         global_config.daemon_trace_file = daemon_trace_file; }
 
 
@@ -172,7 +200,7 @@ extern "C" {
      * Retrieve the trace file specified for daemon process
      * @return trace file name
      */
-    static inline const char *flom_config_get_daemon_trace_file(void) {
+    static inline const gchar *flom_config_get_daemon_trace_file(void) {
         return global_config.daemon_trace_file; }
 
 
@@ -182,7 +210,9 @@ extern "C" {
      * @param command_trace_file IN set the new value for trace_file properties
      */
     static inline void flom_config_set_command_trace_file(
-        const char *command_trace_file) {
+        gchar *command_trace_file) {
+        if (NULL != global_config.command_trace_file)
+            g_free(global_config.command_trace_file);
         global_config.command_trace_file = command_trace_file; }
 
 
@@ -191,7 +221,7 @@ extern "C" {
      * Retrieve the trace file specified for command process
      * @return trace file name
      */
-    static inline const char *flom_config_get_command_trace_file(void) {
+    static inline const gchar *flom_config_get_command_trace_file(void) {
         return global_config.command_trace_file; }
 
 

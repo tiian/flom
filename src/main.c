@@ -144,5 +144,7 @@ int main (int argc, char *argv[])
     g_strfreev (command_argv);
     command_argv = NULL;
     
+    flom_config_free();
+    
 	return child_status;
 }

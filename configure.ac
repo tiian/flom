@@ -2,20 +2,27 @@ AC_INIT([flom], [0.1.1], [tiian at users dot sourceforge dot net], [], [http://s
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 # hardwired configuration
-RELEASE_DATE="2013-12-22"
-SYSTEM_CONFIG_FILENAME="flom.conf"
-USER_CONFIG_FILENAME=".flom"
-DIR_FILE_SEPARATOR="/"
+_RELEASE_DATE="2013-12-22"
+_SYSTEM_CONFIG_FILENAME="flom.conf"
+_USER_CONFIG_FILENAME=".flom"
+_DIR_FILE_SEPARATOR="/"
+_CONFIG_GROUP_TRACE="Trace"
+_CONFIG_KEY_DAEMONTRACEFILE="DaemonTraceFile"
+_CONFIG_KEY_COMMANDTRACEFILE="CommandTraceFile"
 # definition inside config.h for hardwired configuration
-AC_DEFINE_UNQUOTED([RELEASE_DATE], ["$RELEASE_DATE"], [Date of release])
-AC_DEFINE_UNQUOTED([SYSTEM_CONFIG_FILENAME], ["$SYSTEM_CONFIG_FILENAME"], [System wide configuration filename])
-AC_DEFINE_UNQUOTED([USER_CONFIG_FILENAME], ["$USER_CONFIG_FILENAME"], [User default configuration filename])
-AC_DEFINE_UNQUOTED([DIR_FILE_SEPARATOR], ["$DIR_FILE_SEPARATOR"], [String used to separate directory from file inside fully qualified path names])
+AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
+AC_DEFINE_UNQUOTED([_SYSTEM_CONFIG_FILENAME], ["$_SYSTEM_CONFIG_FILENAME"], [System wide configuration filename])
+AC_DEFINE_UNQUOTED([_USER_CONFIG_FILENAME], ["$_USER_CONFIG_FILENAME"], [User default configuration filename])
+AC_DEFINE_UNQUOTED([_DIR_FILE_SEPARATOR], ["$_DIR_FILE_SEPARATOR"], [String used to separate directory from file inside fully qualified path names])
+AC_DEFINE_UNQUOTED([_CONFIG_GROUP_TRACE], ["$_CONFIG_GROUP_TRACE"], [Label of "trace" group inside config files])
+AC_DEFINE_UNQUOTED([_CONFIG_KEY_DAEMONTRACEFILE], ["$_CONFIG_KEY_DAEMONTRACEFILE"], [Label of "daemon trace file" key inside config files])
+AC_DEFINE_UNQUOTED([_CONFIG_KEY_COMMANDTRACEFILE], ["$_CONFIG_KEY_COMMANDTRACEFILE"], [Label of "command trace file" key inside config files])
 
 AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
   Makefile
+  etc/Makefile
   man/Makefile
   src/Makefile
 ])
@@ -121,8 +128,11 @@ AC_SUBST(LDFLAGS_GLIB)
 AC_SUBST(HAVE_DOT)
 
 # substitution inside *.in for hardwired configuration
-AC_SUBST(RELEASE_DATE)
-AC_SUBST(SYSTEM_CONFIG_FILENAME)
-AC_SUBST(USER_CONFIG_FILENAME)
+AC_SUBST(_RELEASE_DATE)
+AC_SUBST(_SYSTEM_CONFIG_FILENAME)
+AC_SUBST(_USER_CONFIG_FILENAME)
+AC_SUBST(_CONFIG_GROUP_TRACE)
+AC_SUBST(_CONFIG_KEY_DAEMONTRACEFILE)
+AC_SUBST(_CONFIG_KEY_COMMANDTRACEFILE)
 
 AC_OUTPUT

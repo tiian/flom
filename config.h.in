@@ -1,9 +1,5 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* String used to separate directory from file inside fully qualified path
-   names */
-#undef DIR_FILE_SEPARATOR
-
 /* Define to 1 if you have the <assert.h> header file. */
 #undef HAVE_ASSERT_H
 
@@ -118,9 +114,6 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* Date of release */
-#undef RELEASE_DATE
-
 /* The size of `int', as computed by sizeof. */
 #undef SIZEOF_INT
 
@@ -139,11 +132,27 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* System wide configuration filename */
-#undef SYSTEM_CONFIG_FILENAME
-
-/* User default configuration filename */
-#undef USER_CONFIG_FILENAME
-
 /* Version number of package */
 #undef VERSION
+
+/* Label of "trace" group inside config files */
+#undef _CONFIG_GROUP_TRACE
+
+/* Label of "command trace file" key inside config files */
+#undef _CONFIG_KEY_COMMANDTRACEFILE
+
+/* Label of "daemon trace file" key inside config files */
+#undef _CONFIG_KEY_DAEMONTRACEFILE
+
+/* String used to separate directory from file inside fully qualified path
+   names */
+#undef _DIR_FILE_SEPARATOR
+
+/* Date of release */
+#undef _RELEASE_DATE
+
+/* System wide configuration filename */
+#undef _SYSTEM_CONFIG_FILENAME
+
+/* User default configuration filename */
+#undef _USER_CONFIG_FILENAME

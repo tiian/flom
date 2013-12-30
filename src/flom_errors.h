@@ -166,97 +166,108 @@
  */
 #define FLOM_RC_GETSOCKOPT_ERROR                    -107
 /**
- * "g_markup_parse_context_new_error" function error
- */
-#define FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR    -108
-/**
- * "g_markup_parse_context_parse" function error
- */
-#define FLOM_RC_G_MARKUP_PARSE_CONTEXT_PARSE_ERROR  -109
-/**
- * "g_ptr_array_remove_index_fast" function error
- */
-#define FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR -110
-/**
- * "g_queue_new" function error
- */
-#define FLOM_RC_G_QUEUE_NEW_ERROR                   -111
-/**
- * "g_strdup" function error
- */
-#define FLOM_RC_G_STRDUP_ERROR                      -112
-/**
- * "g_thread_create" function error
- */
-#define FLOM_RC_G_THREAD_CREATE_ERROR               -113
-/**
- * "g_try_malloc"/"g_try_malloc0" function error
- */
-#define FLOM_RC_G_TRY_MALLOC_ERROR                  -114
-/**
  * "listen" function error
  */
-#define FLOM_RC_LISTEN_ERROR                        -115
+#define FLOM_RC_LISTEN_ERROR                        -108
 /**
  * "malloc"/"g_malloc" function error
  */
-#define FLOM_RC_MALLOC_ERROR                        -116
+#define FLOM_RC_MALLOC_ERROR                        -109
 /**
  * "pipe" function error
  */
-#define FLOM_RC_PIPE_ERROR                          -117
+#define FLOM_RC_PIPE_ERROR                          -110
 /**
  * "poll" function error
  */
-#define FLOM_RC_POLL_ERROR                          -118
+#define FLOM_RC_POLL_ERROR                          -111
 /**
  * "read" function error
  */
-#define FLOM_RC_READ_ERROR                          -119
+#define FLOM_RC_READ_ERROR                          -112
 /**
  * "recv" function error
  */
-#define FLOM_RC_RECV_ERROR                          -120
+#define FLOM_RC_RECV_ERROR                          -113
 /**
  * "regcomp" function error
  */
-#define FLOM_RC_REGCOMP_ERROR                       -121
+#define FLOM_RC_REGCOMP_ERROR                       -114
 /**
  * "regexec" function error
  */
-#define FLOM_RC_REGEXEC_ERROR                       -122
+#define FLOM_RC_REGEXEC_ERROR                       -115
 /**
  * "send" function error
  */
-#define FLOM_RC_SEND_ERROR                          -123
+#define FLOM_RC_SEND_ERROR                          -116
 /**
  * "setsid" function error
  */
-#define FLOM_RC_SETSID_ERROR                        -124
+#define FLOM_RC_SETSID_ERROR                        -117
 /**
  * "signal" function error
  */
-#define FLOM_RC_SIGNAL_ERROR                        -125
+#define FLOM_RC_SIGNAL_ERROR                        -118
 /**
  * "socket" function error
  */
-#define FLOM_RC_SOCKET_ERROR                        -126
+#define FLOM_RC_SOCKET_ERROR                        -119
 /**
  * "snprintf" function error (truncation)
  */
-#define FLOM_RC_SNPRINTF_ERROR                      -127
+#define FLOM_RC_SNPRINTF_ERROR                      -120
 /**
  * "unlink" function error
  */
-#define FLOM_RC_UNLINK_ERROR                        -128
+#define FLOM_RC_UNLINK_ERROR                        -121
 /**
  * "wait" function error
  */
-#define FLOM_RC_WAIT_ERROR                          -129
+#define FLOM_RC_WAIT_ERROR                          -122
 /**
  * "write" function error
  */
-#define FLOM_RC_WRITE_ERROR                         -130
+#define FLOM_RC_WRITE_ERROR                         -123
+
+/* GLIB related errors */
+
+/**
+ * "g_key_file_load_from_file" function error
+ */
+#define FLOM_RC_G_KEY_FILE_LOAD_FROM_FILE_ERROR     -200
+/**
+ * "g_key_file_new" function error
+ */
+#define FLOM_RC_G_KEY_FILE_NEW_ERROR                -201
+/**
+ * "g_markup_parse_context_new_error" function error
+ */
+#define FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR    -202
+/**
+ * "g_markup_parse_context_parse" function error
+ */
+#define FLOM_RC_G_MARKUP_PARSE_CONTEXT_PARSE_ERROR  -203
+/**
+ * "g_ptr_array_remove_index_fast" function error
+ */
+#define FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR -204
+/**
+ * "g_queue_new" function error
+ */
+#define FLOM_RC_G_QUEUE_NEW_ERROR                   -205
+/**
+ * "g_strdup" function error
+ */
+#define FLOM_RC_G_STRDUP_ERROR                      -206
+/**
+ * "g_thread_create" function error
+ */
+#define FLOM_RC_G_THREAD_CREATE_ERROR               -207
+/**
+ * "g_try_malloc"/"g_try_malloc0" function error
+ */
+#define FLOM_RC_G_TRY_MALLOC_ERROR                  -208
 
 
 
