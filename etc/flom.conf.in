@@ -18,7 +18,7 @@
 @_CONFIG_KEY_DAEMONTRACEFILE@=/tmp/flom-daemon.trc
 # Destination of trace messages produced by command (foreground) process
 @_CONFIG_KEY_COMMANDTRACEFILE@=/tmp/flom-command.trc
-#
+
 # This section (configuration group) is related to locked resource
 [@_CONFIG_GROUP_RESOURCE@]
 # Name of the resource that must be locked; see function 

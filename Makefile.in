@@ -223,7 +223,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = src man etc
+SUBDIRS = src man etc doc
 # Unfortunately doxygen.conf.in is installed too (it should be only distributed)
 # I was not able to fix it!
 dist_doc_DATA = README doxygen.conf.in

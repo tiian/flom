@@ -34,6 +34,7 @@
 
 #include "flom_config.h"
 #include "flom_errors.h"
+#include "flom_rsrc.h"
 
 
 
@@ -51,10 +52,10 @@ flom_config_t global_config;
 
 
 /* static strings */
-const char *DEFAULT_RESOURCE_NAME = "_RESOURCE";
-const char FLOM_SYSTEM_CONFIG_FILENAME[] = _SYSTEM_CONFIG_FILENAME;
-const char FLOM_USER_CONFIG_FILENAME[] = _USER_CONFIG_FILENAME;
-const char FLOM_DIR_FILE_SEPARATOR[] = _DIR_FILE_SEPARATOR;
+const gchar *DEFAULT_RESOURCE_NAME = "_RESOURCE";
+const gchar FLOM_SYSTEM_CONFIG_FILENAME[] = _SYSTEM_CONFIG_FILENAME;
+const gchar FLOM_USER_CONFIG_FILENAME[] = _USER_CONFIG_FILENAME;
+const gchar FLOM_DIR_FILE_SEPARATOR[] = _DIR_FILE_SEPARATOR;
 
 
 const char *FLOM_PACKAGE_BUGREPORT = PACKAGE_BUGREPORT;
@@ -62,7 +63,7 @@ const char *FLOM_PACKAGE_NAME = PACKAGE;
 const char *FLOM_PACKAGE_VERSION = PACKAGE_VERSION;
 const char *FLOM_PACKAGE_DATE = _RELEASE_DATE;
 
-const char FLOM_INSTALL_SYSCONFDIR[] = _SYSCONFDIR;
+const gchar FLOM_INSTALL_SYSCONFDIR[] = _SYSCONFDIR;
 
 const gchar *FLOM_CONFIG_GROUP_TRACE = _CONFIG_GROUP_TRACE;
 const gchar *FLOM_CONFIG_KEY_DAEMONTRACEFILE = _CONFIG_KEY_DAEMONTRACEFILE;
@@ -228,12 +229,9 @@ int flom_config_init_load(const char *config_file_name)
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_RESOURCE,
                         FLOM_CONFIG_KEY_NAME, value));
-            /* @@@
-            flom_config_set_command_trace_file(value);
-            */
+            flom_config_set_resource_name(value);
             value = NULL;
         }
-            
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -255,4 +253,19 @@ int flom_config_init_load(const char *config_file_name)
     FLOM_TRACE(("flom_config_init_load/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+void flom_config_set_resource_name(gchar *resource_name)
+{
+    FLOM_TRACE(("flom_config_set_resource_name(%s)\n", resource_name));
+    if (FLOM_RSRC_TYPE_NULL == flom_rsrc_get_type(resource_name)) {
+        FLOM_TRACE(("flom_config_set_resource_name: invalid resource "
+                    "name '%s'\n", resource_name));
+    } else {
+        if (NULL != global_config.resource_name)
+            g_free(global_config.resource_name);
+        global_config.resource_name = resource_name;
+    }
 }

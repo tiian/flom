@@ -26,6 +26,7 @@ AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
   Makefile
+  doc/Makefile
   etc/Makefile
   man/Makefile
   src/Makefile

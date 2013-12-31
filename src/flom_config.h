@@ -78,19 +78,19 @@ extern const char FLOM_INSTALL_SYSCONFDIR[];
 /**
  * Default name for a simple resource
  */
-extern const char *DEFAULT_RESOURCE_NAME;
+extern const gchar *DEFAULT_RESOURCE_NAME;
 /**
  * Filename of system wide configuration file
  */
-extern const char FLOM_SYSTEM_CONFIG_FILENAME[];
+extern const gchar FLOM_SYSTEM_CONFIG_FILENAME[];
 /**
  * Filename of user default configuration file
  */
-extern const char FLOM_USER_CONFIG_FILENAME[];
+extern const gchar FLOM_USER_CONFIG_FILENAME[];
 /**
  * Separator used between directory and file names
  */
-extern const char FLOM_DIR_FILE_SEPARATOR[];
+extern const gchar FLOM_DIR_FILE_SEPARATOR[];
 
 
 
@@ -141,7 +141,7 @@ typedef struct flom_config {
     /**
      * Name of the resource that must be locked
      */
-    char        *resource_name;
+    gchar       *resource_name;
 } flom_config_t;
 
 
@@ -231,6 +231,23 @@ extern "C" {
      */
     static inline const gchar *flom_config_get_command_trace_file(void) {
         return global_config.command_trace_file; }
+
+
+    
+    /**
+     * Set resource_name in config object
+     * @param resource_name IN set the new value for resource_name properties
+     */
+    void flom_config_set_resource_name(gchar *resource_name);
+
+
+
+    /**
+     * Retrieve the trace file specified for command process
+     * @return trace file name
+     */
+    static inline const gchar *flom_config_get_resource_name(void) {
+        return global_config.resource_name; }
 
 
     

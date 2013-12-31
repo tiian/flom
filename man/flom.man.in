@@ -16,6 +16,9 @@ show help options
 .B -c, --config-file=\fIFILENAME
 user configuration file name. Flom tries to read system default configuration file @sysconfdir@/@_SYSTEM_CONFIG_FILENAME@, user default configuration file ~/@_USER_CONFIG_FILENAME@ and finally this file if specified. Definitive configuration is obtained overloading hard wired build time defaults, system defaults, user defaults, user custom, command line options.
 .TP
+.B -r, --resource-name=\fIRESOURCE
+name of the resource used for enqueing (locking); resource name can be composed of "alpha" and "digit" characters. Accepted resource names are described in function "global_res_name_preg_init": inspect source code for more details.
+.TP
 .B -T, --command-trace-file=\fIFILENAME
 file destination of the trace messages produced by the command (foreground) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module.
 .TP

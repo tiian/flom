@@ -1,4 +1,4 @@
-SUBDIRS = src man etc
+SUBDIRS = src man etc doc
 # Unfortunately doxygen.conf.in is installed too (it should be only distributed)
 # I was not able to fix it!
 dist_doc_DATA = README doxygen.conf.in

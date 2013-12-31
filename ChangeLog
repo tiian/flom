@@ -1,6 +1,7 @@
 LOG:
 
-         - 0.1.1 splitted daemon/command trace file
+         - 0.1.1 splitted daemon/command trace file; implemented configuration
+		files; implemented multiple resources (use case #2)
 
 20121222 - 0.1.0 first release: it implements use case #1 (simple
 	serialization)
