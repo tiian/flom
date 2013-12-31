@@ -64,6 +64,7 @@ int global_res_name_preg_init()
             "^_$" /* this is a dummy value */ ,
             "^%s|([[:alpha:][:digit:]])+$" };
 
+        memset(global_res_name_preg, 0, sizeof(global_res_name_preg));
         for (i=FLOM_RSRC_TYPE_NULL; i<FLOM_RSRC_TYPE_N; ++i) {
             /* preparing regular expression */
             if (sizeof(reg_expr) <= snprintf(
@@ -102,6 +103,18 @@ int global_res_name_preg_init()
     FLOM_TRACE(("global_res_name_preg_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+void global_res_name_preg_free()
+{
+    flom_rsrc_type_t i;
+    
+    FLOM_TRACE(("global_res_name_preg_free\n"));
+    for (i=FLOM_RSRC_TYPE_NULL; i<FLOM_RSRC_TYPE_N; ++i)
+        regfree(global_res_name_preg+i);
+    memset(global_res_name_preg, 0, sizeof(global_res_name_preg));
 }
 
 

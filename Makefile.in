@@ -77,8 +77,8 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(docdir)"
-DATA = $(dist_doc_DATA)
+am__installdirs = "$(DESTDIR)$(docdir)" "$(DESTDIR)$(docdir)"
+DATA = $(dist_doc_DATA) $(nodist_doc_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
@@ -173,9 +173,11 @@ STRIP = @STRIP@
 VALGRIND = @VALGRIND@
 VERSION = @VERSION@
 XSLTPROC = @XSLTPROC@
+_CONFIG_GROUP_RESOURCE = @_CONFIG_GROUP_RESOURCE@
 _CONFIG_GROUP_TRACE = @_CONFIG_GROUP_TRACE@
 _CONFIG_KEY_COMMANDTRACEFILE = @_CONFIG_KEY_COMMANDTRACEFILE@
 _CONFIG_KEY_DAEMONTRACEFILE = @_CONFIG_KEY_DAEMONTRACEFILE@
+_CONFIG_KEY_NAME = @_CONFIG_KEY_NAME@
 _RELEASE_DATE = @_RELEASE_DATE@
 _SYSTEM_CONFIG_FILENAME = @_SYSTEM_CONFIG_FILENAME@
 _USER_CONFIG_FILENAME = @_USER_CONFIG_FILENAME@
@@ -225,6 +227,7 @@ SUBDIRS = src man etc
 # Unfortunately doxygen.conf.in is installed too (it should be only distributed)
 # I was not able to fix it!
 dist_doc_DATA = README doxygen.conf.in
+nodist_doc_DATA = doxygen.conf
 CLEANFILES = doxygen.conf
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -297,6 +300,26 @@ install-dist_docDATA: $(dist_doc_DATA)
 uninstall-dist_docDATA:
 	@$(NORMAL_UNINSTALL)
 	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(docdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(docdir)" && rm -f $$files
+install-nodist_docDATA: $(nodist_doc_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(docdir)" || $(MKDIR_P) "$(DESTDIR)$(docdir)"
+	@list='$(nodist_doc_DATA)'; test -n "$(docdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(docdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(docdir)" || exit $$?; \
+	done
+
+uninstall-nodist_docDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_doc_DATA)'; test -n "$(docdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(docdir)' && rm -f" $$files ")"; \
@@ -617,7 +640,7 @@ check: check-recursive
 all-am: Makefile $(DATA) config.h
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(docdir)"; do \
+	for dir in "$(DESTDIR)$(docdir)" "$(DESTDIR)$(docdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -667,7 +690,7 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-dist_docDATA
+install-data-am: install-dist_docDATA install-nodist_docDATA
 
 install-dvi: install-dvi-recursive
 
@@ -713,7 +736,7 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-dist_docDATA
+uninstall-am: uninstall-dist_docDATA uninstall-nodist_docDATA
 
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) all \
 	ctags-recursive install-am install-strip tags-recursive
@@ -728,11 +751,12 @@ uninstall-am: uninstall-dist_docDATA
 	install-data-am install-dist_docDATA install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags \
-	tags-recursive uninstall uninstall-am uninstall-dist_docDATA
+	install-nodist_docDATA install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-dist_docDATA uninstall-nodist_docDATA
 
 doxygen.conf: doxygen.conf.in
 	sed \

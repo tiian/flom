@@ -106,6 +106,14 @@ extern const gchar *FLOM_CONFIG_KEY_DAEMONTRACEFILE;
  * Label associated to CommandTraceFile key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_COMMANDTRACEFILE;
+/**
+ * Label associated to "Resource" group inside config files
+ */
+extern const gchar *FLOM_CONFIG_GROUP_RESOURCE;
+/**
+ * Label associated to "Name" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_NAME;
 
 
 

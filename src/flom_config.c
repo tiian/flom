@@ -67,6 +67,8 @@ const char FLOM_INSTALL_SYSCONFDIR[] = _SYSCONFDIR;
 const gchar *FLOM_CONFIG_GROUP_TRACE = _CONFIG_GROUP_TRACE;
 const gchar *FLOM_CONFIG_KEY_DAEMONTRACEFILE = _CONFIG_KEY_DAEMONTRACEFILE;
 const gchar *FLOM_CONFIG_KEY_COMMANDTRACEFILE = _CONFIG_KEY_COMMANDTRACEFILE;
+const gchar *FLOM_CONFIG_GROUP_RESOURCE = _CONFIG_GROUP_RESOURCE;
+const gchar *FLOM_CONFIG_KEY_NAME = _CONFIG_KEY_NAME;
 
 
 
@@ -208,6 +210,27 @@ int flom_config_init_load(const char *config_file_name)
                         FLOM_CONFIG_GROUP_TRACE,
                         FLOM_CONFIG_KEY_COMMANDTRACEFILE, value));
             flom_config_set_command_trace_file(value);
+            value = NULL;
+        }
+        /* pick-up resource name from configuration */
+        if (NULL == (value = g_key_file_get_string(
+                         gkf, FLOM_CONFIG_GROUP_RESOURCE,
+                         FLOM_CONFIG_KEY_NAME, &error))) {
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_NAME, 
+                        error->code,
+                        error->message));
+            g_error_free(error);
+            error = NULL;
+        } else {
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_NAME, value));
+            /* @@@
+            flom_config_set_command_trace_file(value);
+            */
             value = NULL;
         }
             

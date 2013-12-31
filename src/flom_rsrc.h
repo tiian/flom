@@ -173,6 +173,13 @@ extern "C" {
     
 
     /**
+     * Free the precompiled regular expression @ref global_res_name_preg
+     */
+    void global_res_name_preg_free();
+    
+    
+
+    /**
      * Retrieve the type of the resource from its name
      * @param resource_name IN resource name
      * @return resource type @ref flom_rsrc_type_t;

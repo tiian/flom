@@ -87,10 +87,17 @@ int main (int argc, char *argv[])
         exit(0);
     }
 
+    /* initialize trace destination if necessary */
+    FLOM_TRACE_INIT;
+    
+    /* initialize regular expression table */
+    if (FLOM_RC_OK != (ret_cod = global_res_name_preg_init())) {
+        g_print("global_res_name_preg_init: ret_cod=%d\n", ret_cod);
+        exit(1);
+    }
+
     /* reset global configuration */
     flom_config_reset();
-    /* initialize trace destination if necessary */
-    FLOM_TRACE_INIT;    
     /* initialize configuration with standard system, statndard user and
        user customized config files */
     flom_config_init(config_file);
@@ -102,11 +109,6 @@ int main (int argc, char *argv[])
 
     /* change trace destination if necessary */
     FLOM_TRACE_REOPEN(flom_config_get_command_trace_file());
-    
-    if (FLOM_RC_OK != (ret_cod = global_res_name_preg_init())) {
-        g_print("global_res_name_preg_init: ret_cod=%d\n", ret_cod);
-        exit(1);
-    }
 
     /* open connection to a valid flom lock manager... */
     if (FLOM_RC_OK != (ret_cod = flom_client_connect(&cd))) {
@@ -143,8 +145,11 @@ int main (int argc, char *argv[])
 
     g_strfreev (command_argv);
     command_argv = NULL;
-    
+
+    /* release config data */
     flom_config_free();
+    /* release regular expression data */
+    global_res_name_preg_free();
     
 	return child_status;
 }

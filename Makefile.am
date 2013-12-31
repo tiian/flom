@@ -2,7 +2,7 @@ SUBDIRS = src man etc
 # Unfortunately doxygen.conf.in is installed too (it should be only distributed)
 # I was not able to fix it!
 dist_doc_DATA = README doxygen.conf.in
-
+nodist_doc_DATA = doxygen.conf
 CLEANFILES = doxygen.conf
 doxygen.conf: doxygen.conf.in
 	sed \
