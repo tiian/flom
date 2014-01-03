@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of FLOM.
@@ -79,7 +79,7 @@ int main (int argc, char *argv[])
 
     if (print_version) {
         g_print("FLOM: Free LOck Manager\n"
-                "Copyright (c) 2013, Christian Ferrari; "
+                "Copyright (c) 2013-2014, Christian Ferrari; "
                 "all rights reserved.\n"
                 "License: GPL (GNU Public License) version 2\n"
                 "Package name: %s; package version: %s; release date: %s\n"
