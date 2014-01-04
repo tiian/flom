@@ -95,7 +95,7 @@
  */
 #define FLOM_RC_NULL_OBJECT                           -4
 /**
- * A specified option is not valid for method and/or object status
+ * A specified option is not valid
  */
 #define FLOM_RC_INVALID_OPTION                        -5
 /**

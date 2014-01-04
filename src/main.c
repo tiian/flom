@@ -102,10 +102,17 @@ int main (int argc, char *argv[])
     flom_config_reset();
     /* initialize configuration with standard system, statndard user and
        user customized config files */
-    flom_config_init(config_file);
+    if (FLOM_RC_OK != (ret_cod = flom_config_init(config_file))) {
+        g_print("flom_config_init: ret_cod=%d\n", ret_cod);
+        exit(1);
+    }
     /* overrides configuration with command line passed arguments */
     if (NULL != resource_name)
-        flom_config_set_resource_name(resource_name);
+        if (FLOM_RC_OK != (ret_cod = flom_config_set_resource_name(
+                               resource_name))) {
+            g_print("flom_config_set_resource_name: ret_cod=%d\n", ret_cod);
+            exit(1);
+        }
     if (NULL != daemon_trace_file)
         flom_config_set_daemon_trace_file(daemon_trace_file);
     if (NULL != command_trace_file)

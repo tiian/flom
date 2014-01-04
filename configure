@@ -2862,7 +2862,7 @@ am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
 
 
 # hardwired configuration
-_RELEASE_DATE="2013-12-22"
+_RELEASE_DATE="2014-01-04"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"

@@ -880,12 +880,21 @@ int flom_msg_deserialize(char *buffer, size_t buffer_len,
     
     FLOM_TRACE(("flom_msg_deserialize\n"));
     TRY {
+        GError *error = NULL;
+        
         FLOM_TRACE(("flom_msg_deserialize: deserializing message |%*.*s|\n",
                     buffer_len, buffer_len, buffer));
         
         if (FALSE == g_markup_parse_context_parse(
-                gmpc, buffer, buffer_len, NULL))
+                gmpc, buffer, buffer_len, &error)) {
+            if (NULL != error) {
+                FLOM_TRACE(("flom_msg_deserialize: code=%d, message='%s'\n",
+                            error->code, error->message));
+                g_error_free(error);
+                error = NULL;
+            }
             THROW(G_MARKUP_PARSE_CONTEXT_PARSE_ERROR);
+        }
         
         THROW(NONE);
     } CATCH {

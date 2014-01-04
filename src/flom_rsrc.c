@@ -62,7 +62,7 @@ int global_res_name_preg_init()
         flom_rsrc_type_t i;
         const char *reg_str[FLOM_RSRC_TYPE_N] = {
             "^_$" /* this is a dummy value */ ,
-            "^%s|([[:alpha:][:digit:]])+$" };
+            "^%s$|^[[:alpha:]]([[:alpha:][:digit:]])+$" };
 
         memset(global_res_name_preg, 0, sizeof(global_res_name_preg));
         for (i=FLOM_RSRC_TYPE_NULL; i<FLOM_RSRC_TYPE_N; ++i) {

@@ -78,7 +78,7 @@ extern const char FLOM_INSTALL_SYSCONFDIR[];
 /**
  * Default name for a simple resource
  */
-extern const gchar *DEFAULT_RESOURCE_NAME;
+extern const gchar DEFAULT_RESOURCE_NAME[];
 /**
  * Filename of system wide configuration file
  */
@@ -177,8 +177,9 @@ extern "C" {
      * Initialize configuration (global) object retrieving data from
      * configuration files
      * @param custom_config_filename IN filename of user configuration file
+     * @return a reason code
      */
-    void flom_config_init(const char *custom_config_filename);
+    int flom_config_init(const char *custom_config_filename);
 
 
 
@@ -237,8 +238,9 @@ extern "C" {
     /**
      * Set resource_name in config object
      * @param resource_name IN set the new value for resource_name properties
+     * @return a reason code
      */
-    void flom_config_set_resource_name(gchar *resource_name);
+    int flom_config_set_resource_name(gchar *resource_name);
 
 
 
