@@ -30,8 +30,10 @@ AC_CONFIG_FILES([
   etc/Makefile
   man/Makefile
   src/Makefile
+  tests/Makefile
+  tests/atlocal
 ])
-# AC_CONFIG_TESTDIR([tests])
+AC_CONFIG_TESTDIR([tests])
 
 # Installation PATH
 # test "x$prefix" = "xNONE" && prefix="/opt/flom"

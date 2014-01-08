@@ -1,0 +1,2 @@
+PATH=@abs_top_builddir@/src/:$PATH
+export PATH
