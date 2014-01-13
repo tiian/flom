@@ -19,7 +19,8 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	package.m4 \
 	testsuite.at \
-	cmdopt.at
+	cmdopt.at \
+	usecase.at
 
 TESTSUITE = $(srcdir)/testsuite
 
@@ -35,7 +36,8 @@ AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/testsuite.at \
-	$(srcdir)/cmdopt.at
+	$(srcdir)/cmdopt.at \
+	$(srcdir)/usecase.at
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@
 

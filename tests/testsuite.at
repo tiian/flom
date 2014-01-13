@@ -3,3 +3,4 @@ AT_COPYRIGHT([Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforg
 AT_COLOR_TESTS
 
 m4_include([cmdopt.at])
+m4_include([usecase.at])

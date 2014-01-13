@@ -1,0 +1,15 @@
+AT_BANNER([Use case check])
+
+AT_SETUP([Use case #1])
+AT_DATA([expout],
+[[1 starting
+1 ending
+2 starting
+2 ending
+3 starting
+3 ending
+]])
+AT_CHECK([flom flom_test_exec.sh 1 2 \& ; flom flom_test_exec.sh 2 0 \& ; flom flom_test_exec.sh 3 0], [0], [expout], [ignore])
+AT_CLEANUP
+
+
