@@ -20,17 +20,26 @@
 
 # Options:
 # $1 ID
-# $2 sleep time
+# $2 delay time
+# $3 duration time
 
-if test $# -lt 2
+if test $# -lt 3
 then
-	echo "At least two parameters must be specified"
+	echo "At least three parameters must be specified"
 	exit 1
 fi	
 
+# Triple comments are used to distinguish debug rows
+
 # print start message
-echo "$1 starting"
+###echo -n $(date +'%s %N')
+###echo " $1 starting and waiting $2 seconds"
 # wait some seconds...
 sleep $2 
+# execution with duration
+###echo -n $(date +'%s %N')
+echo " $1 locking for $3 seconds"
+flom sleep $3
 # print end message
-echo "$1 ending"
+###echo -n $(date +'%s %N')
+###echo " $1 ending"
