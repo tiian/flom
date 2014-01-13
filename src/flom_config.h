@@ -122,7 +122,7 @@ extern const gchar *FLOM_CONFIG_KEY_NAME;
  */
 typedef struct flom_config {
     /**
-     * Path of UNIX socket using for local connection
+     * Path of UNIX socket used for local connection
      */
     char         local_socket_path_name[LOCAL_SOCKET_SIZE];
     /**

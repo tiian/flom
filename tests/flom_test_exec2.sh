@@ -22,10 +22,11 @@
 # $1 ID
 # $2 delay time
 # $3 duration time
+# $4 locking resource
 
-if test $# -lt 3
+if test $# -lt 4
 then
-	echo "At least three parameters must be specified"
+	echo "At least four parameters must be specified"
 	exit 1
 fi	
 
@@ -39,7 +40,7 @@ sleep $2
 # execution with duration
 ###echo -n $(date +'%s %N')
 echo " $1 locking for $3 seconds"
-flom sleep $3
+flom -r $4 -- sleep $3
 # print end message
 ###echo -n $(date +'%s %N')
-###echo " $1 ending"
+echo " $1 ending"

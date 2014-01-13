@@ -4596,12 +4596,14 @@ fi
 
 done
 
-for ac_header in poll.h
+for ac_header in poll.h pwd.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "poll.h" "ac_cv_header_poll_h" "$ac_includes_default"
-if test "x$ac_cv_header_poll_h" = x""yes; then :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+eval as_val=\$$as_ac_Header
+   if test "x$as_val" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_POLL_H 1
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
 _ACEOF
 
 fi
@@ -4943,6 +4945,28 @@ _ACEOF
 #AC_CHECK_SIZEOF([uintptr_t])
 #AC_CHECK_SIZEOF([uint32_t])
 #AC_CHECK_SIZEOF([uuid_t], [], [[#include <uuid/uuid.h>]])
+
+for ac_func in getuid
+do :
+  ac_fn_c_check_func "$LINENO" "getuid" "ac_cv_func_getuid"
+if test "x$ac_cv_func_getuid" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETUID 1
+_ACEOF
+
+fi
+done
+
+for ac_func in getpwuid
+do :
+  ac_fn_c_check_func "$LINENO" "getpwuid" "ac_cv_func_getpwuid"
+if test "x$ac_cv_func_getpwuid" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETPWUID 1
+_ACEOF
+
+fi
+done
 
 for ac_func in vfprintf
 do :

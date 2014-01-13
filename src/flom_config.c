@@ -23,11 +23,17 @@
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
-#ifdef HAVE_STDIO_H
-# include <stdio.h>
+#ifdef HAVE_PWD_H
+# include <pwd.h>
 #endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
+#endif
+#ifdef HAVE_STDIO_H
+# include <stdio.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
 #endif
 
 
@@ -75,10 +81,18 @@ const gchar *FLOM_CONFIG_KEY_NAME = _CONFIG_KEY_NAME;
 
 void flom_config_reset()
 {
+    struct passwd *pwd;
+    char *login = NULL;
+    
     FLOM_TRACE(("flom_config_reset\n"));
     /* set UNIX socket name */
+    pwd = getpwuid(getuid());
+    if (NULL == pwd || NULL == pwd->pw_name)
+        login = "nobody";
+    else
+        login = pwd->pw_name;
     snprintf(global_config.local_socket_path_name, LOCAL_SOCKET_SIZE,
-             "/tmp/flom-%s", getlogin());
+             "/tmp/flom-%s", login);
     global_config.daemon_trace_file = NULL;
     global_config.command_trace_file = NULL;
     global_config.idle_time = 5000; /* milliseconds */
