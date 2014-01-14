@@ -44,6 +44,7 @@
 static gboolean print_version = FALSE;
 static char *config_file = NULL;
 static gchar *resource_name = NULL;
+static gchar *resource_wait = NULL;
 static gchar *command_trace_file = NULL;
 static gchar *daemon_trace_file = NULL;
 static gchar **command_argv = NULL;
@@ -53,6 +54,7 @@ static GOptionEntry entries[] =
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
     { "config-file", 'c', 0, G_OPTION_ARG_STRING, &config_file, "User configuration file name", NULL },
     { "resource-name", 'r', 0, G_OPTION_ARG_STRING, &resource_name, "Specify the name of the resource to be locked", NULL },
+    { "resource-wait", 'w', 0, G_OPTION_ARG_STRING, &resource_wait, "Specify if the command enques when the resource is already locked (accepted values 'yes', 'no')", NULL },
     { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
@@ -113,6 +115,16 @@ int main (int argc, char *argv[])
             g_print("flom_config_set_resource_name: ret_cod=%d\n", ret_cod);
             exit(1);
         }
+    if (NULL != resource_wait) {
+        flom_bool_value_t fbv;
+        if (FLOM_BOOL_INVALID == (
+                fbv = flom_bool_value_retrieve(resource_wait))) {
+            g_print("flom_config_set_resource_wait: '%s' is an "
+                    "invalid value\n", resource_wait);
+            exit(1);
+        }
+        flom_config_set_resource_wait(fbv);
+    }
     if (NULL != daemon_trace_file)
         flom_config_set_daemon_trace_file(daemon_trace_file);
     if (NULL != command_trace_file) {

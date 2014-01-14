@@ -1,4 +1,4 @@
-AC_INIT([flom], [0.1.1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([flom], [0.1.2-pre], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 # hardwired configuration
@@ -11,6 +11,7 @@ _CONFIG_KEY_DAEMONTRACEFILE="DaemonTraceFile"
 _CONFIG_KEY_COMMANDTRACEFILE="CommandTraceFile"
 _CONFIG_GROUP_RESOURCE="Resource"
 _CONFIG_KEY_NAME="Name"
+_CONFIG_KEY_WAIT="Wait"
 # definition inside config.h for hardwired configuration
 AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
 AC_DEFINE_UNQUOTED([_SYSTEM_CONFIG_FILENAME], ["$_SYSTEM_CONFIG_FILENAME"], [System wide configuration filename])
@@ -20,7 +21,8 @@ AC_DEFINE_UNQUOTED([_CONFIG_GROUP_TRACE], ["$_CONFIG_GROUP_TRACE"], [Label of "t
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_DAEMONTRACEFILE], ["$_CONFIG_KEY_DAEMONTRACEFILE"], [Label of "daemon trace file" key inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_COMMANDTRACEFILE], ["$_CONFIG_KEY_COMMANDTRACEFILE"], [Label of "command trace file" key inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_GROUP_RESOURCE], ["$_CONFIG_GROUP_RESOURCE"], [Label of "resource" group inside config files])
-AC_DEFINE_UNQUOTED([_CONFIG_KEY_NAME], ["$_CONFIG_KEY_NAME"], [Label of "name" key inside config files])
+AC_DEFINE_UNQUOTED([_CONFIG_KEY_NAME], ["$_CONFIG_KEY_NAME"], [Label of "Name" key inside config files])
+AC_DEFINE_UNQUOTED([_CONFIG_KEY_WAIT], ["$_CONFIG_KEY_WAIT"], [Label of "Wait" key inside config files])
 
 AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
@@ -143,5 +145,6 @@ AC_SUBST(_CONFIG_KEY_DAEMONTRACEFILE)
 AC_SUBST(_CONFIG_KEY_COMMANDTRACEFILE)
 AC_SUBST(_CONFIG_GROUP_RESOURCE)
 AC_SUBST(_CONFIG_KEY_NAME)
+AC_SUBST(_CONFIG_KEY_WAIT)
 
 AC_OUTPUT

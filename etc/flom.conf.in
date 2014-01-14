@@ -27,4 +27,8 @@
 # "global_res_name_preg_init" for valid regular expressions
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_NAME@=MYRESOURCE123
+# Flom command will enqueue if the resource is not available; valid values
+# are "yes" and "no" (case insensitive)
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_WAIT@=yes
 

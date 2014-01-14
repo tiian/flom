@@ -147,8 +147,11 @@
 /* Label of "daemon trace file" key inside config files */
 #undef _CONFIG_KEY_DAEMONTRACEFILE
 
-/* Label of "name" key inside config files */
+/* Label of "Name" key inside config files */
 #undef _CONFIG_KEY_NAME
+
+/* Label of "Wait" key inside config files */
+#undef _CONFIG_KEY_WAIT
 
 /* String used to separate directory from file inside fully qualified path
    names */

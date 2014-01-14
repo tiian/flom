@@ -20,6 +20,11 @@
 
 
 
+#ifdef HAVE_STRING_H
+/* strcasestr is not POSIX standard and needs GNU extensions... */
+# define _GNU_SOURCE
+# include <string.h>
+#endif
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
@@ -76,6 +81,31 @@ const gchar *FLOM_CONFIG_KEY_DAEMONTRACEFILE = _CONFIG_KEY_DAEMONTRACEFILE;
 const gchar *FLOM_CONFIG_KEY_COMMANDTRACEFILE = _CONFIG_KEY_COMMANDTRACEFILE;
 const gchar *FLOM_CONFIG_GROUP_RESOURCE = _CONFIG_GROUP_RESOURCE;
 const gchar *FLOM_CONFIG_KEY_NAME = _CONFIG_KEY_NAME;
+const gchar *FLOM_CONFIG_KEY_WAIT = _CONFIG_KEY_WAIT;
+
+
+
+flom_bool_value_t flom_bool_value_retrieve(const gchar *text)
+{
+    char *p = NULL;
+    FLOM_TRACE(("flom_bool_value_retrieve: '%s'\n", text));
+    /* check if 'yes', 'no' - any case - are in the text */
+    if (NULL != (p = strcasestr(text, "no"))) {
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'no' here: '%s'\n", p));
+        return FLOM_BOOL_NO;
+    } else if (NULL != (p = strcasestr(text, "yes"))) {
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'yes' here: '%s'\n", p));
+        return FLOM_BOOL_YES;
+    /* check if 'y', 'n' - any case - are in the text */
+    } else if (NULL != (p = strcasestr(text, "n"))) {
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'n' here: '%s'\n", p));
+        return FLOM_BOOL_NO;
+    } else if (NULL != (p = strcasestr(text, "y"))) {
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'y' here: '%s'\n", p));
+        return FLOM_BOOL_YES;
+    }
+    return FLOM_BOOL_INVALID;
+}
 
 
 
@@ -97,6 +127,7 @@ void flom_config_reset()
     global_config.command_trace_file = NULL;
     global_config.idle_time = 5000; /* milliseconds */
     global_config.resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
+    global_config.resource_wait = TRUE;
 }
 
 
@@ -204,6 +235,7 @@ int flom_config_init_load(const char *config_file_name)
     enum Exception { G_KEY_FILE_NEW_ERROR
                      , G_KEY_FILE_LOAD_FROM_FILE_ERROR
                      , CONFIG_SET_RESOURCE_NAME_ERROR
+                     , CONFIG_SET_RESOURCE_WAIT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int print_file_name = FALSE;
@@ -293,6 +325,33 @@ int flom_config_init_load(const char *config_file_name)
                 value = NULL;
             }
         }
+        /* pick-up resource wait from configuration */
+        if (NULL == (value = g_key_file_get_string(
+                         gkf, FLOM_CONFIG_GROUP_RESOURCE,
+                         FLOM_CONFIG_KEY_WAIT, &error))) {
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_WAIT,
+                        error->code,
+                        error->message));
+            g_error_free(error);
+            error = NULL;
+        } else {
+            flom_bool_value_t fbv;
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_WAIT, value));
+            if (FLOM_BOOL_INVALID == (
+                    fbv = flom_bool_value_retrieve(value))) {
+                print_file_name = TRUE;
+                THROW(CONFIG_SET_RESOURCE_WAIT_ERROR);
+            } else {
+                flom_config_set_resource_wait(fbv);
+            }
+            g_free(value);
+            value = NULL;
+        }
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -303,6 +362,9 @@ int flom_config_init_load(const char *config_file_name)
                 ret_cod = FLOM_RC_G_KEY_FILE_LOAD_FROM_FILE_ERROR;
                 break;
             case CONFIG_SET_RESOURCE_NAME_ERROR:
+                break;
+            case CONFIG_SET_RESOURCE_WAIT_ERROR:
+                ret_cod = FLOM_RC_INVALID_OPTION;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

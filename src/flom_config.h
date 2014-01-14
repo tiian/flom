@@ -114,6 +114,31 @@ extern const gchar *FLOM_CONFIG_GROUP_RESOURCE;
  * Label associated to "Name" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_NAME;
+/**
+ * Label associated to "Wait" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_WAIT;
+
+
+
+/**
+ * This type is useful for retrieving boolean values from configuration
+ * and command options
+ */
+typedef enum flom_bool_value_e {
+    /**
+     * FALSE value
+     */
+    FLOM_BOOL_NO = FALSE,
+    /**
+     * TRUE value
+     */
+    FLOM_BOOL_YES = TRUE,
+    /**
+     * Invalid value
+     */
+    FLOM_BOOL_INVALID
+} flom_bool_value_t;
 
 
 
@@ -142,6 +167,11 @@ typedef struct flom_config {
      * Name of the resource that must be locked
      */
     gchar       *resource_name;
+    /**
+     * The requester enqueues if the lock can not be obtained
+     * (boolean value)
+     */
+    int          resource_wait;
 } flom_config_t;
 
 
@@ -157,6 +187,15 @@ extern flom_config_t global_config;
 extern "C" {
 #endif /* __cplusplus */
 
+
+
+    /**
+     * Interpret a string and extract the boolean value
+     * @param text IN string to interpret
+     * @return a boolean value
+     */
+    flom_bool_value_t flom_bool_value_retrieve(const gchar *text);
+    
 
 
     /**
@@ -250,6 +289,26 @@ extern "C" {
      */
     static inline const gchar *flom_config_get_resource_name(void) {
         return global_config.resource_name; }
+
+
+
+    /**
+     * Set "rexource_wait" config parameter
+     * @param wait IN new (boolean) value
+     */
+    static inline void flom_config_set_resource_wait(int wait) {
+        global_config.resource_wait = wait;
+    }
+
+
+
+    /**
+     * Get "resource_wait" config parameter
+     * @return a boolean value
+     */
+    static inline int flom_config_get_wait(void) {
+        return global_config.resource_wait;
+    }
 
 
     
