@@ -10,3 +10,31 @@ AT_CHECK([flom -v], [0], [ignore], [ignore])
 AT_CHECK([flom --version], [0], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([Custom config file: -c, --config-file])
+AT_DATA([flom.conf],
+[[# dummy config file
+]])
+AT_CHECK([flom -c flom.conf -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom --config-file=flom.conf -- ls], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Custom resource name: -r, --resource-name])
+AT_CHECK([flom -r MYRES -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom --resource-name=MYRES -- ls], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Command trace file: -T, --command-trace-file])
+AT_CHECK([export FLOM_TRACE_MASK=0xffffffff ; flom -T command.trc -- ls], [0], [ignore], [ignore])
+AT_CHECK([export FLOM_TRACE_MASK=0xffffffff ; flom --command-trace-file=command.trc -- ls], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Daemon trace file: -t, --daemon-trace-file])
+AT_CHECK([export FLOM_TRACE_MASK=0xffffffff ; flom -t daemon.trc -- ls], [0], [ignore], [ignore])
+AT_CHECK([export FLOM_TRACE_MASK=0xffffffff ; flom --daemon-trace-file=daemon.trc -- ls], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Invalid option: -Z, --ZZZ-ZZZ])
+AT_CHECK([flom -z FOO -- ls], [1], [ignore], [ignore])
+AT_CHECK([flom --ZZZ-ZZZ=BAR -- ls], [1], [ignore], [ignore])
+AT_CLEANUP
+

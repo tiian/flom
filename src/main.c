@@ -115,11 +115,11 @@ int main (int argc, char *argv[])
         }
     if (NULL != daemon_trace_file)
         flom_config_set_daemon_trace_file(daemon_trace_file);
-    if (NULL != command_trace_file)
+    if (NULL != command_trace_file) {
         flom_config_set_command_trace_file(command_trace_file);
-
-    /* change trace destination if necessary */
-    FLOM_TRACE_REOPEN(flom_config_get_command_trace_file());
+        /* change trace destination if necessary */
+        FLOM_TRACE_REOPEN(flom_config_get_command_trace_file());
+    }
 
     /* open connection to a valid flom lock manager... */
     if (FLOM_RC_OK != (ret_cod = flom_client_connect(&cd))) {

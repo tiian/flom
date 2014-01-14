@@ -81,7 +81,7 @@ const gchar *FLOM_CONFIG_KEY_NAME = _CONFIG_KEY_NAME;
 
 void flom_config_reset()
 {
-    struct passwd *pwd;
+    struct passwd *pwd = NULL;
     char *login = NULL;
     
     FLOM_TRACE(("flom_config_reset\n"));

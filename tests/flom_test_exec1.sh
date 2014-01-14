@@ -42,4 +42,4 @@ echo " $1 locking for $3 seconds"
 flom -- sleep $3
 # print end message
 ###echo -n $(date +'%s %N')
-###echo " $1 ending"
+echo " $1 ending"

@@ -79,7 +79,8 @@ int flom_msg_retrieve(int fd,
             THROW(RECV_ERROR);
         
         FLOM_TRACE(("flom_msg_retrieve: fd=%d returned "
-                    SSIZE_T_FORMAT " bytes\n", fd, *read_bytes));
+                    SSIZE_T_FORMAT " bytes '%*.*s'\n", fd, *read_bytes,
+                    *read_bytes, *read_bytes, buf));
         
         THROW(NONE);
     } CATCH {
@@ -127,7 +128,8 @@ int flom_msg_send(int fd, const char *buf, size_t buf_size)
             THROW(CONNECTION_CLOSED);
         }
         FLOM_TRACE(("flom_msg_send: sending " SIZE_T_FORMAT
-                    " bytes (fd=%d)...\n", buf_size, fd));
+                    " bytes (fd=%d) '%*.*s'...\n", buf_size, fd,
+                    buf_size, buf_size, buf));
         wrote_bytes = send(fd, buf, buf_size, MSG_NOSIGNAL);
         if (buf_size != wrote_bytes) {
             FLOM_TRACE(("flom_msg_send: sent " SSIZE_T_FORMAT

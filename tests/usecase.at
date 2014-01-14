@@ -4,10 +4,11 @@ AT_SETUP([Use case #1])
 AT_DATA([expout],
 [[ 2 locking for 2 seconds
  1 locking for 1 seconds
- 3 locking for 0 seconds
+ 2 ending
+ 1 ending
 ]])
 #AT_CHECK([flom_test_exec1.sh 1 1 1 & flom_test_exec1.sh 2 0 2 ; flom_test_exec1.sh 3 0 0], [0], [expout], [ignore])
-AT_CHECK([flom_test_exec1.sh 1 1 1 & flom_test_exec1.sh 2 0 2 ; flom_test_exec1.sh 3 0 0], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec1.sh 1 1 1 & flom_test_exec1.sh 2 0 2 ; flom_test_exec1.sh 3 0 0 >/dev/null], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Use case #2])

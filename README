@@ -24,5 +24,10 @@ Use
 man flom 
 to read man page and pick up Internet relevant URLs for FLOM project.
 
+Use
+make check
+to perform package automatic tests.
+NOTE: tests needs the system is NOT overloaded because they stick on timing
+      and timing breaks if the system is overloaded.
 Enjoy it!
 Ch.F.

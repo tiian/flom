@@ -93,8 +93,14 @@ void flom_trace_reopen(const char *file_name)
     FILE *tmp_trace_file;
     if (NULL != file_name) {
         tmp_trace_file = fopen(file_name, "w");
-        if (NULL != tmp_trace_file)
+        if (NULL != tmp_trace_file) {
+            fclose(trace_file);
             trace_file = tmp_trace_file;
+        }
+    } else {
+        /* close trace! */
+        fclose(trace_file);
+        trace_file = NULL;
     }
 }
 
@@ -107,10 +113,13 @@ void flom_trace(const char *fmt, ...)
     struct timeval tv;
     char buffer[2000];
     int nw1;
+
+    /* trace is closed, skipping it! */
+    if (NULL == trace_file)
+        return;
     
     va_start(args, fmt);
 #ifdef HAVE_VSNPRINTF
-
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
     /* default header */
@@ -141,8 +150,10 @@ void flom_trace_hex_data(const char *prefix, const byte_t *data,
     struct tm broken_time;
     struct timeval tv;
     
-#ifdef HAVE_VFPRINTF
-
+    /* trace is closed, skipping it! */
+    if (NULL == trace_file)
+        return;
+    
     /* lock the mutex */
     g_static_mutex_lock(&flom_trace_mutex);
     gettimeofday(&tv, NULL);
@@ -164,9 +175,6 @@ void flom_trace_hex_data(const char *prefix, const byte_t *data,
     /* remove the lock from mutex */
     g_static_mutex_unlock(&flom_trace_mutex);
     fflush(out_stream);
-#else
-# error "vfprintf is necessary for flom_trace_hex_data function!"
-#endif
 }
 
 
@@ -178,8 +186,10 @@ void flom_trace_text_data(const char *prefix, const byte_t *data,
     struct tm broken_time;
     struct timeval tv;
     
-#ifdef HAVE_VFPRINTF
-
+    /* trace is closed, skipping it! */
+    if (NULL == trace_file)
+        return;
+    
     /* lock the mutex */
     g_static_mutex_lock(&flom_trace_mutex);
     gettimeofday(&tv, NULL);
@@ -203,9 +213,6 @@ void flom_trace_text_data(const char *prefix, const byte_t *data,
     fprintf(out_stream, "\n");
     /* remove the lock from mutex */
     g_static_mutex_unlock(&flom_trace_mutex);
-#else
-# error "vfprintf is necessary for flom_trace_hex_data function!"
-#endif
 }
 
 
