@@ -75,7 +75,7 @@ int main (int argc, char *argv[])
     g_option_context_add_main_entries(option_context, entries, NULL);
     if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
         g_print("option parsing failed: %s\n", error->message);
-        exit(1);
+        exit(FLOM_ES_GENERIC_ERROR);
     }
     g_option_context_free(option_context);
 
@@ -88,7 +88,7 @@ int main (int argc, char *argv[])
                 "Access http://sourceforge.net/projects/flom/ for "
                 "project community activities\n",
                 FLOM_PACKAGE_NAME, FLOM_PACKAGE_VERSION, FLOM_PACKAGE_DATE);
-        exit(0);
+        exit(FLOM_ES_OK);
     }
 
     /* initialize trace destination if necessary */
@@ -97,7 +97,7 @@ int main (int argc, char *argv[])
     /* initialize regular expression table */
     if (FLOM_RC_OK != (ret_cod = global_res_name_preg_init())) {
         g_print("global_res_name_preg_init: ret_cod=%d\n", ret_cod);
-        exit(1);
+        exit(FLOM_ES_GENERIC_ERROR);
     }
 
     /* reset global configuration */
@@ -106,14 +106,14 @@ int main (int argc, char *argv[])
        user customized config files */
     if (FLOM_RC_OK != (ret_cod = flom_config_init(config_file))) {
         g_print("flom_config_init: ret_cod=%d\n", ret_cod);
-        exit(1);
+        exit(FLOM_ES_GENERIC_ERROR);
     }
     /* overrides configuration with command line passed arguments */
     if (NULL != resource_name)
         if (FLOM_RC_OK != (ret_cod = flom_config_set_resource_name(
                                resource_name))) {
             g_print("flom_config_set_resource_name: ret_cod=%d\n", ret_cod);
-            exit(1);
+            exit(FLOM_ES_GENERIC_ERROR);
         }
     if (NULL != resource_wait) {
         flom_bool_value_t fbv;
@@ -121,7 +121,7 @@ int main (int argc, char *argv[])
                 fbv = flom_bool_value_retrieve(resource_wait))) {
             g_print("flom_config_set_resource_wait: '%s' is an "
                     "invalid value\n", resource_wait);
-            exit(1);
+            exit(FLOM_ES_GENERIC_ERROR);
         }
         flom_config_set_resource_wait(fbv);
     }
@@ -137,27 +137,32 @@ int main (int argc, char *argv[])
     if (FLOM_RC_OK != (ret_cod = flom_client_connect(&cd))) {
         g_print("flom_client_connect: ret_cod=%d (%s)\n",
                 ret_cod, flom_strerror(ret_cod));
-        exit(1);
+        exit(FLOM_ES_GENERIC_ERROR);
     }
 
     /* sending lock command */
     if (FLOM_RC_OK != (ret_cod = flom_client_lock(&cd))) {
-        g_print("flom_client_lock: ret_cod=%d (%s)\n",
-                ret_cod, flom_strerror(ret_cod));
-        exit(1);
+        if (FLOM_RC_LOCK_BUSY == ret_cod) {
+            g_print("Resource already locked, the lock cannot be obtained\n");
+            exit(FLOM_ES_RESOURCE_BUSY);
+        } else {
+            g_print("flom_client_lock: ret_cod=%d (%s)\n",
+                    ret_cod, flom_strerror(ret_cod));
+            exit(FLOM_ES_GENERIC_ERROR);
+        }
     }
 
     /* execute the command */
     if (FLOM_RC_OK != (ret_cod = flom_exec(command_argv, &child_status))) {
         g_print("flom_exec: ret_cod=%d\n", ret_cod);
-        exit(1);
+        exit(FLOM_ES_GENERIC_ERROR);
     }
     
     /* sending unlock command */
     if (FLOM_RC_OK != (ret_cod = flom_client_unlock(&cd))) {
         g_print("flom_client_unlock: ret_cod=%d (%s)\n",
                 ret_cod, flom_strerror(ret_cod));
-        exit(1);
+        exit(FLOM_ES_GENERIC_ERROR);
     }
 
     /* gracely disconnect from daemon */

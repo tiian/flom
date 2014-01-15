@@ -137,7 +137,7 @@ int flom_daemon()
             if (-1 == (pid = fork())) {
                 THROW(FORK_ERROR2);
             } else if (0 != pid)
-                exit(0);
+                exit(FLOM_ES_OK);
             FLOM_TRACE(("flom_daemon: daemonizing... setsid()\n"));
             if (-1 == setsid())
                 THROW(SETSID_ERROR);
@@ -148,7 +148,7 @@ int flom_daemon()
             if (-1 == (pid = fork())) {
                 THROW(FORK_ERROR3);
             } else if (0 != pid)
-                exit(0);
+                exit(FLOM_ES_OK);
             FLOM_TRACE(("flom_daemon: daemonizing... chdir()\n"));
             if (-1 == chdir("/"))
                 THROW(CHDIR_ERROR);
@@ -240,7 +240,7 @@ int flom_daemon()
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     /* the function must not return control if in daemonized state */
     if (daemon)
-        exit(0);
+        exit(FLOM_ES_OK);
     return ret_cod;
 }
 

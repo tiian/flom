@@ -45,6 +45,9 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
 
+/* Define to 1 if you have the `strcasestr' function. */
+#undef HAVE_STRCASESTR
+
 /* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
 
@@ -156,6 +159,15 @@
 /* String used to separate directory from file inside fully qualified path
    names */
 #undef _DIR_FILE_SEPARATOR
+
+/* Exit status for generic error */
+#undef _ES_GENERIC_ERROR
+
+/* Exit status for busy resource condition */
+#undef _ES_RESOURCE_BUSY
+
+/* Exit status for command execution error */
+#undef _ES_UNABLE_TO_EXECUTE_COMMAND
 
 /* Date of release */
 #undef _RELEASE_DATE

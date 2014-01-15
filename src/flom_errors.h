@@ -34,9 +34,23 @@
 
 
 /**
- * Default exit status when FLOM is unable to execute the command
+ * Exit status when FLOM is unable to execute the command
  */
-#define FLOM_ES_UNABLE_TO_EXECUTE_COMMAND   3
+#define FLOM_ES_UNABLE_TO_EXECUTE_COMMAND   _ES_UNABLE_TO_EXECUTE_COMMAND
+/**
+ * Exit status when FLOM is unable to lock a resource already locked by
+ * someone else
+ */
+#define FLOM_ES_RESOURCE_BUSY               _ES_RESOURCE_BUSY
+/**
+ * Exit status when FLOM pick-up an error
+ */
+#define FLOM_ES_GENERIC_ERROR               _ES_GENERIC_ERROR
+/**
+ * Exit status when FLOM terminates without errors (and without executing
+ * some process)
+ */
+#define FLOM_ES_OK                           0
 
 
 
@@ -48,19 +62,22 @@
 
 
 
+
+
+
 /* WARNINGS */
 /**
  * Peer has closed socket while expecting data
  */
-#define FLOM_RC_CONNECTION_CLOSED                    +10
+#define FLOM_RC_CONNECTION_CLOSED                     +4
+/**
+ * The lock can not be obtained because the resource is already locked
+ */
+#define FLOM_RC_LOCK_BUSY                             +3
 /**
  * The lock can not be obtained, generic issue
  */
-#define FLOM_RC_LOCK_CANT_LOCK                        +3
-/**
- * The lock can not be obtained because it's busy
- */
-#define FLOM_RC_LOCK_BUSY                             +2
+#define FLOM_RC_LOCK_CANT_LOCK                        +2
 /**
  * The lock can not be obtained now, but the request was enqueued
  */

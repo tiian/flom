@@ -18,9 +18,16 @@ AT_CHECK([flom -c flom.conf -- ls], [0], [ignore], [ignore])
 AT_CHECK([flom --config-file=flom.conf -- ls], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Custom resource name: -r, --resource-name])
+AT_SETUP([Resource name: -r, --resource-name])
 AT_CHECK([flom -r MYRES -- ls], [0], [ignore], [ignore])
 AT_CHECK([flom --resource-name=MYRES -- ls], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Resource wait: -w, --resource-wait])
+AT_CHECK([flom -w y -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom -w n -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom --resource-wait=yes -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom --resource-wait=no -- ls], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Command trace file: -T, --command-trace-file])
@@ -34,7 +41,7 @@ AT_CHECK([export FLOM_TRACE_MASK=0xffffffff ; flom --daemon-trace-file=daemon.tr
 AT_CLEANUP
 
 AT_SETUP([Invalid option: -Z, --ZZZ-ZZZ])
-AT_CHECK([flom -z FOO -- ls], [1], [ignore], [ignore])
-AT_CHECK([flom --ZZZ-ZZZ=BAR -- ls], [1], [ignore], [ignore])
+AT_CHECK([flom -z FOO -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom --ZZZ-ZZZ=BAR -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CLEANUP
 

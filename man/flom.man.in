@@ -5,7 +5,7 @@
 flom \- serialize command execution
 .SH SYNOPSIS
 .B "flom"
-[OPTION] -- [COMMAND [ARG]...]
+[\fIOPTION\fP] -- [\fICOMMAND\fP [\fIARG\fP]...]
 .SH DESCRIPTION
 Run COMMAND serializing it with other commands executed by flom.
 .SH OPTIONS
@@ -20,7 +20,7 @@ user configuration file name. Flom tries to read system default configuration fi
 name of the resource used for enqueing (locking). Resource name can be composed of "alpha" and "digit" characters, but the first character \fBmust be\fP of type "alpha" (example: "RA123" is \fBOK\fP, "123RA" is \fBnot\fP OK). Accepted resource names are described in function "global_res_name_preg_init": inspect source code for more details.
 .TP
 .B -w, --resource-wait=\fIyes|no
-\fIyes\fP: the command will enqueue if the resource is already locked by someone else, otherwise (\fIno\fP) it will return immediately
+\fBdefault\fP (\fIyes\fP): the command will enqueue if the resource is already locked by someone else, otherwise (\fIno\fP) it will return immediately
 .TP
 .B -T, --command-trace-file=\fIFILENAME
 file destination of the trace messages produced by the command (foreground) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module.
@@ -30,6 +30,18 @@ file destination of the trace messages produced by the daemon (background) proce
 .TP
 .B -v, --version
 print flom version and exit
+.SH EXIT STATUS
+if anything runs as expected, \fBflom\fP exit status is the same of the controlled (serialized) command. Sometimes an error occurs and \fBflom\fP reports it using dedicated exit statuses you can check with \fI$?\fP environment variable:
+.P
+\fB@_ES_UNABLE_TO_EXECUTE_COMMAND@:\fP \fBflom\fP caught an error trying to exec (see \fIexecvp\fP man page) COMMAND
+.P
+\fB@_ES_RESOURCE_BUSY@:\fP the resource can \fBnot\fP be locked because it's already locked by someone else (have you used \fB--resource-wait=no\fP option?!)
+.P
+\fB@_ES_GENERIC_ERROR@:\fP \fBflom\fP caught some type of error and did not execute COMMAND
+.P
+.SH EXAMPLES
+See web page \fIhttp://sourceforge.net/p/flom/wiki/FLOM%20by%20examples/\fP for a detailed list of use cases
+.P
 .SH CAVEATS
 .B flom -- flom --
 [COMMAND [ARG]...]
@@ -38,15 +50,15 @@ hangs due to a deadlock: the inner flom instance waits the lock obtained by the 
 .SH AUTHOR
 Christian Ferrari (tiian@users.sourceforge.net)
 .SH REPORTING BUGS
-Report flom bugs using http://sourceforge.net/p/flom/tickets/
+Report flom bugs using \fIhttp://sourceforge.net/p/flom/tickets/\fP
 .SH COPYRIGHT
-Copyright (C) 2013-2014, Christian Ferrari. License GPL version 2 <http://www.gnu.org/licenses/>. This is free software: you are free to change and redistribute it. There is 
+Copyright (C) 2013-2014, Christian Ferrari. License GPL version 2 \fIhttp://www.gnu.org/licenses/\fP. This is free software: you are free to change and redistribute it. There is 
 .B NO WARRANTY
 , to the extent permitted by law.
 .SH SEE ALSO
 More documentation available at project wiki page
 .P
-<http://sourceforge.net/p/flom/wiki/Home/>
+\fIhttp://sourceforge.net/p/flom/wiki/Home/\fP
 .P
 A sample configuration file (\fI@_SYSTEM_CONFIG_FILENAME@\fP) is installed in dir \fI@docdir@\fP: you may copy it and customize as explained inside the sample itself.
 .P

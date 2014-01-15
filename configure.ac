@@ -1,8 +1,8 @@
-AC_INIT([flom], [0.1.2-pre], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([flom], [0.1.2], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 # hardwired configuration
-_RELEASE_DATE="2014-01-04"
+_RELEASE_DATE="2014-01-15"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"
@@ -12,6 +12,9 @@ _CONFIG_KEY_COMMANDTRACEFILE="CommandTraceFile"
 _CONFIG_GROUP_RESOURCE="Resource"
 _CONFIG_KEY_NAME="Name"
 _CONFIG_KEY_WAIT="Wait"
+_ES_UNABLE_TO_EXECUTE_COMMAND=97
+_ES_RESOURCE_BUSY=98
+_ES_GENERIC_ERROR=99
 # definition inside config.h for hardwired configuration
 AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
 AC_DEFINE_UNQUOTED([_SYSTEM_CONFIG_FILENAME], ["$_SYSTEM_CONFIG_FILENAME"], [System wide configuration filename])
@@ -23,6 +26,9 @@ AC_DEFINE_UNQUOTED([_CONFIG_KEY_COMMANDTRACEFILE], ["$_CONFIG_KEY_COMMANDTRACEFI
 AC_DEFINE_UNQUOTED([_CONFIG_GROUP_RESOURCE], ["$_CONFIG_GROUP_RESOURCE"], [Label of "resource" group inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_NAME], ["$_CONFIG_KEY_NAME"], [Label of "Name" key inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_WAIT], ["$_CONFIG_KEY_WAIT"], [Label of "Wait" key inside config files])
+AC_DEFINE_UNQUOTED([_ES_UNABLE_TO_EXECUTE_COMMAND], [$_ES_UNABLE_TO_EXECUTE_COMMAND], [Exit status for command execution error])
+AC_DEFINE_UNQUOTED([_ES_RESOURCE_BUSY], [$_ES_RESOURCE_BUSY], [Exit status for busy resource condition])
+AC_DEFINE_UNQUOTED([_ES_GENERIC_ERROR], [$_ES_GENERIC_ERROR], [Exit status for generic error])
 
 AC_PROG_CC
 AC_CONFIG_HEADER([config.h])
@@ -131,6 +137,7 @@ AC_CHECK_SIZEOF([ssize_t])
 #AC_CHECK_SIZEOF([uuid_t], [], [[#include <uuid/uuid.h>]])
 
 AC_CHECK_FUNCS(snprintf)
+AC_CHECK_FUNCS(strcasestr)
 AC_CHECK_FUNCS(vsnprintf)
 
 AC_SUBST(LDFLAGS_GLIB)
@@ -146,5 +153,8 @@ AC_SUBST(_CONFIG_KEY_COMMANDTRACEFILE)
 AC_SUBST(_CONFIG_GROUP_RESOURCE)
 AC_SUBST(_CONFIG_KEY_NAME)
 AC_SUBST(_CONFIG_KEY_WAIT)
+AC_SUBST(_ES_UNABLE_TO_EXECUTE_COMMAND)
+AC_SUBST(_ES_RESOURCE_BUSY)
+AC_SUBST(_ES_GENERIC_ERROR)
 
 AC_OUTPUT

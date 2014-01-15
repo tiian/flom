@@ -306,7 +306,7 @@ extern "C" {
      * Get "resource_wait" config parameter
      * @return a boolean value
      */
-    static inline int flom_config_get_wait(void) {
+    static inline int flom_config_get_resource_wait(void) {
         return global_config.resource_wait;
     }
 

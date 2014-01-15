@@ -19,8 +19,14 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	package.m4 \
 	testsuite.at \
-	cmdopt.at \
-	usecase.at
+	cmdopt.at.in \
+	usecase.at \
+	scripts/flom_*.sh
+
+cmdopt.at: cmdopt.at.in
+	sed \
+	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
+	$< >$@
 
 TESTSUITE = $(srcdir)/testsuite
 
@@ -42,3 +48,4 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	mv $@.tmp $@
 
 DISTCLEANFILES = atconfig
+CLEANFILES = cmdopt.at

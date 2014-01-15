@@ -1,2 +1,2 @@
-PATH=@abs_top_builddir@/src/:$PATH
+PATH=@abs_top_builddir@/src/:@abs_top_builddir@/tests/scripts/:$PATH
 export PATH

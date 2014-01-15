@@ -101,6 +101,9 @@ _CONFIG_KEY_COMMANDTRACEFILE = @_CONFIG_KEY_COMMANDTRACEFILE@
 _CONFIG_KEY_DAEMONTRACEFILE = @_CONFIG_KEY_DAEMONTRACEFILE@
 _CONFIG_KEY_NAME = @_CONFIG_KEY_NAME@
 _CONFIG_KEY_WAIT = @_CONFIG_KEY_WAIT@
+_ES_GENERIC_ERROR = @_ES_GENERIC_ERROR@
+_ES_RESOURCE_BUSY = @_ES_RESOURCE_BUSY@
+_ES_UNABLE_TO_EXECUTE_COMMAND = @_ES_UNABLE_TO_EXECUTE_COMMAND@
 _RELEASE_DATE = @_RELEASE_DATE@
 _SYSTEM_CONFIG_FILENAME = @_SYSTEM_CONFIG_FILENAME@
 _USER_CONFIG_FILENAME = @_USER_CONFIG_FILENAME@
@@ -152,13 +155,15 @@ TESTSUITEFLAGS = "-e"
 EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	package.m4 \
 	testsuite.at \
-	cmdopt.at \
-	usecase.at
+	cmdopt.at.in \
+	usecase.at \
+	scripts/flom_*.sh
 
 TESTSUITE = $(srcdir)/testsuite
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 DISTCLEANFILES = atconfig
+CLEANFILES = cmdopt.at
 all: all-am
 
 .SUFFIXES:
@@ -253,6 +258,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -356,6 +362,11 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	  echo 'm4_define([AT_PACKAGE_URL],       [$(PACKAGE_URL)])'; \
 	} > $@-t
 	mv $@-t $@
+
+cmdopt.at: cmdopt.at.in
+	sed \
+	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
+	$< >$@
 
 check-local: atconfig atlocal $(TESTSUITE)
 	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)

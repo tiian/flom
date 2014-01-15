@@ -87,7 +87,14 @@ const gchar *FLOM_CONFIG_KEY_WAIT = _CONFIG_KEY_WAIT;
 
 flom_bool_value_t flom_bool_value_retrieve(const gchar *text)
 {
+    /* parsing is case sensitive only on GNU systems */
+#ifdef HAVE_STRCASESTR
+# define STRCASESTR(haystack,needle) strcasestr(haystack,needle)
+#else
+# define STRCASESTR(haystack,needle) strstr(haystack,needle)
+#endif
     char *p = NULL;
+    
     FLOM_TRACE(("flom_bool_value_retrieve: '%s'\n", text));
     /* check if 'yes', 'no' - any case - are in the text */
     if (NULL != (p = strcasestr(text, "no"))) {
@@ -105,6 +112,7 @@ flom_bool_value_t flom_bool_value_retrieve(const gchar *text)
         return FLOM_BOOL_YES;
     }
     return FLOM_BOOL_INVALID;
+#undef HAVE_STRCASESTR
 }
 
 
