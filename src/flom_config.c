@@ -82,6 +82,7 @@ const gchar *FLOM_CONFIG_KEY_COMMANDTRACEFILE = _CONFIG_KEY_COMMANDTRACEFILE;
 const gchar *FLOM_CONFIG_GROUP_RESOURCE = _CONFIG_GROUP_RESOURCE;
 const gchar *FLOM_CONFIG_KEY_NAME = _CONFIG_KEY_NAME;
 const gchar *FLOM_CONFIG_KEY_WAIT = _CONFIG_KEY_WAIT;
+const gchar *FLOM_CONFIG_KEY_TIMEOUT = _CONFIG_KEY_TIMEOUT;
 
 
 
@@ -136,6 +137,7 @@ void flom_config_reset()
     global_config.idle_time = 5000; /* milliseconds */
     global_config.resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
     global_config.resource_wait = TRUE;
+    global_config.resource_timeout = FLOM_CONFIG_DEFAULT_RESOURCE_TIMEOUT;
 }
 
 
@@ -244,6 +246,7 @@ int flom_config_init_load(const char *config_file_name)
                      , G_KEY_FILE_LOAD_FROM_FILE_ERROR
                      , CONFIG_SET_RESOURCE_NAME_ERROR
                      , CONFIG_SET_RESOURCE_WAIT_ERROR
+                     , CONFIG_SET_RESOURCE_TIMEOUT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int print_file_name = FALSE;
@@ -251,6 +254,7 @@ int flom_config_init_load(const char *config_file_name)
     GKeyFile *gkf = NULL;
     GError *error = NULL;
     gchar *value = NULL;
+    gint ivalue = 0;
     
     FLOM_TRACE(("flom_config_init_load\n"));
     TRY {
@@ -346,6 +350,7 @@ int flom_config_init_load(const char *config_file_name)
             g_error_free(error);
             error = NULL;
         } else {
+            int throw_error = FALSE;
             flom_bool_value_t fbv;
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_RESOURCE,
@@ -353,12 +358,37 @@ int flom_config_init_load(const char *config_file_name)
             if (FLOM_BOOL_INVALID == (
                     fbv = flom_bool_value_retrieve(value))) {
                 print_file_name = TRUE;
-                THROW(CONFIG_SET_RESOURCE_WAIT_ERROR);
+                throw_error = TRUE;
             } else {
                 flom_config_set_resource_wait(fbv);
             }
             g_free(value);
             value = NULL;
+            if (throw_error) THROW(CONFIG_SET_RESOURCE_WAIT_ERROR);
+        }
+        /* pick-up resource timeout from configuration */
+        ivalue = g_key_file_get_integer(
+            gkf, FLOM_CONFIG_GROUP_RESOURCE, FLOM_CONFIG_KEY_TIMEOUT, &error);
+        if (NULL != error) {
+            int throw_error = FALSE;
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_TIMEOUT,
+                        error->code,
+                        error->message));
+            if (G_KEY_FILE_ERROR_KEY_NOT_FOUND != error->code) {
+                print_file_name = throw_error = TRUE;
+                g_print("%s\n", error->message);
+            }
+            g_error_free(error);
+            error = NULL;
+            if (throw_error) THROW(CONFIG_SET_RESOURCE_TIMEOUT_ERROR);
+        } else {
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_TIMEOUT, ivalue));
+            flom_config_set_resource_timeout(ivalue);
         }
         THROW(NONE);
     } CATCH {
@@ -372,6 +402,7 @@ int flom_config_init_load(const char *config_file_name)
             case CONFIG_SET_RESOURCE_NAME_ERROR:
                 break;
             case CONFIG_SET_RESOURCE_WAIT_ERROR:
+            case CONFIG_SET_RESOURCE_TIMEOUT_ERROR:
                 ret_cod = FLOM_RC_INVALID_OPTION;
                 break;
             case NONE:

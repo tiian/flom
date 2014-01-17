@@ -52,7 +52,7 @@ int flom_exec(gchar **const command_argv, int *child_status)
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
-    pid_t pid = 0;
+    pid_t pid = -1;
     
     FLOM_TRACE(("flom_exec\n"));
     TRY {

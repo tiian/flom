@@ -153,6 +153,9 @@
 /* Label of "Name" key inside config files */
 #undef _CONFIG_KEY_NAME
 
+/* Label of "Timeout" key inside config files */
+#undef _CONFIG_KEY_TIMEOUT
+
 /* Label of "Wait" key inside config files */
 #undef _CONFIG_KEY_WAIT
 

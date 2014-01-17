@@ -1,5 +1,7 @@
 LOG:
 
+20140115 - 0.1.2 implemented non blocking behavior (--resource-wait, -w)
+
 20140104 - 0.1.1 splitted daemon/command trace file; implemented configuration
 		files; implemented multiple resources (use case #2)
 

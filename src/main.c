@@ -45,6 +45,7 @@ static gboolean print_version = FALSE;
 static char *config_file = NULL;
 static gchar *resource_name = NULL;
 static gchar *resource_wait = NULL;
+static gint resource_timeout = FLOM_CONFIG_DEFAULT_RESOURCE_TIMEOUT;
 static gchar *command_trace_file = NULL;
 static gchar *daemon_trace_file = NULL;
 static gchar **command_argv = NULL;
@@ -55,6 +56,7 @@ static GOptionEntry entries[] =
     { "config-file", 'c', 0, G_OPTION_ARG_STRING, &config_file, "User configuration file name", NULL },
     { "resource-name", 'r', 0, G_OPTION_ARG_STRING, &resource_name, "Specify the name of the resource to be locked", NULL },
     { "resource-wait", 'w', 0, G_OPTION_ARG_STRING, &resource_wait, "Specify if the command enques when the resource is already locked (accepted values 'yes', 'no')", NULL },
+    { "resource-timeout", 'o', 0, G_OPTION_ARG_INT, &resource_timeout, "Specify maximum wait time (milliseconds) if a resource is already locked", NULL },
     { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
@@ -125,12 +127,20 @@ int main (int argc, char *argv[])
         }
         flom_config_set_resource_wait(fbv);
     }
+    if (FLOM_CONFIG_DEFAULT_RESOURCE_TIMEOUT != resource_timeout)
+        flom_config_set_resource_timeout(resource_timeout);
     if (NULL != daemon_trace_file)
         flom_config_set_daemon_trace_file(daemon_trace_file);
     if (NULL != command_trace_file) {
         flom_config_set_command_trace_file(command_trace_file);
         /* change trace destination if necessary */
         FLOM_TRACE_REOPEN(flom_config_get_command_trace_file());
+    }
+
+    /* check the command is not null */
+    if (NULL == command_argv) {
+        g_warning("No command to execute!\n");
+        exit(FLOM_ES_UNABLE_TO_EXECUTE_COMMAND);        
     }
 
     /* open connection to a valid flom lock manager... */
@@ -154,8 +164,13 @@ int main (int argc, char *argv[])
 
     /* execute the command */
     if (FLOM_RC_OK != (ret_cod = flom_exec(command_argv, &child_status))) {
-        g_print("flom_exec: ret_cod=%d\n", ret_cod);
-        exit(FLOM_ES_GENERIC_ERROR);
+        guint i, num;
+        g_print("Unable to execute command: '");
+        num = g_strv_length(command_argv);
+        for (i=0; i<num; ++i)
+            g_print("%s", command_argv[i]);
+        g_print("'\n");
+        exit(FLOM_ES_UNABLE_TO_EXECUTE_COMMAND);
     }
     
     /* sending unlock command */

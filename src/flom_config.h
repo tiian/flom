@@ -51,6 +51,14 @@
 
 
 
+/**
+ * Default timeout associated to locking: -1 = infinite, see pool POSIX
+ * function
+ */
+#define FLOM_CONFIG_DEFAULT_RESOURCE_TIMEOUT -1
+
+
+
 /* configure dependent constant values */
 /**
  * E-mail address as set inside configure.ac
@@ -118,6 +126,10 @@ extern const gchar *FLOM_CONFIG_KEY_NAME;
  * Label associated to "Wait" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_WAIT;
+/**
+ * Label associated to "Timeout" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_TIMEOUT;
 
 
 
@@ -172,6 +184,11 @@ typedef struct flom_config {
      * (boolean value)
      */
     int          resource_wait;
+    /**
+     * The requester stay blocked for a maximum time if the resource and then
+     * it will return (milliseconds as specified by poll POSIX function)
+     */
+    gint         resource_timeout;
 } flom_config_t;
 
 
@@ -308,6 +325,26 @@ extern "C" {
      */
     static inline int flom_config_get_resource_wait(void) {
         return global_config.resource_wait;
+    }
+
+
+    
+    /**
+     * Set "rexource_timeout" config parameter
+     * @param timeout IN milliseconds
+     */
+    static inline void flom_config_set_resource_timeout(gint timeout) {
+        global_config.resource_timeout = timeout;
+    }
+
+
+
+    /**
+     * Get "resource_timeout" config parameter
+     * @return current timeout in milliseconds
+     */
+    static inline gint flom_config_get_resource_timeout(void) {
+        return global_config.resource_timeout;
     }
 
 

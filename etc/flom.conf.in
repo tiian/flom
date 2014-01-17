@@ -31,4 +31,10 @@
 # are "yes" and "no" (case insensitive)
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_WAIT@=yes
+# Flom command will stay enqueued if the resource is not available for a
+# maximum number of milliseconds specified by this property;
+# the parameter passed will be used as "timeout" argument for "poll" POSIX
+# function 
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_TIMEOUT@=-1
 

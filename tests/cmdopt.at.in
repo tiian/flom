@@ -11,9 +11,8 @@ AT_CHECK([flom --version], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Custom config file: -c, --config-file])
-AT_DATA([flom.conf],
-[[# dummy config file
-]])
+AT_CHECK([cp $srcdir/../etc/@_SYSTEM_CONFIG_FILENAME@ .], [0], [ignore], [ignore])
+#AT_CHECK([echo $srcdir], [0], [ignore], [ignore])
 AT_CHECK([flom -c flom.conf -- ls], [0], [ignore], [ignore])
 AT_CHECK([flom --config-file=flom.conf -- ls], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -28,6 +27,11 @@ AT_CHECK([flom -w y -- ls], [0], [ignore], [ignore])
 AT_CHECK([flom -w n -- ls], [0], [ignore], [ignore])
 AT_CHECK([flom --resource-wait=yes -- ls], [0], [ignore], [ignore])
 AT_CHECK([flom --resource-wait=no -- ls], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Resource timeout: -o, --resource-timeout])
+AT_CHECK([flom -o 100 -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom --resource-timeout=200 -- ls], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Command trace file: -T, --command-trace-file])

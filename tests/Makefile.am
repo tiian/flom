@@ -26,6 +26,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 cmdopt.at: cmdopt.at.in
 	sed \
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
+	-e 's|@_SYSTEM_CONFIG_FILENAME[@]|$(_SYSTEM_CONFIG_FILENAME)|g' \
 	$< >$@
 
 TESTSUITE = $(srcdir)/testsuite
