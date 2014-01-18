@@ -69,9 +69,10 @@ extern "C" {
     /**
      * Send lock command to the daemon
      * @param cd IN connection data
+     * @param timeout IN maximum wait time for lock acquisition
      * @return a reason code
      */
-    int flom_client_lock(struct flom_conn_data_s *cd);
+    int flom_client_lock(struct flom_conn_data_s *cd, int timeout);
 
 
 
@@ -79,10 +80,11 @@ extern "C" {
      * Wait while the desired resource is busy, then go on
      * @param cd IN connection data
      * @param msg IN/OUT message used to deserialize the replies
+     * @param timeout IN maximum wait time for lock acquisition
      * @return a reason code
      */     
     int flom_client_wait_lock(struct flom_conn_data_s *cd,
-                               struct flom_msg_s *msg);
+                               struct flom_msg_s *msg, int timeout);
     
 
     

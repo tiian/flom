@@ -540,7 +540,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
                                    c->fd, buffer, sizeof(buffer),
-                                   &read_bytes)))
+                                   &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT)))
                 THROW(MSG_RETRIEVE_ERROR);
 
             if (NULL == (msg = flom_conns_get_msg(conns, id)))

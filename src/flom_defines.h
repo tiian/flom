@@ -207,6 +207,17 @@
 #define FLOM_NETWORK_BUFFER_SIZE 1024
 
 
+
+/**
+ * Default timeout for network operation (used as timeout parameter for
+ * "poll" function). This default value *** MUST *** be -1 (infinite timeout)
+ * because it's used by many blocking functions does not need timeout
+ * implementation
+ */
+#define FLOM_NETWORK_WAIT_TIMEOUT   -1
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

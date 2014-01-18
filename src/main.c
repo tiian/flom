@@ -45,7 +45,7 @@ static gboolean print_version = FALSE;
 static char *config_file = NULL;
 static gchar *resource_name = NULL;
 static gchar *resource_wait = NULL;
-static gint resource_timeout = FLOM_CONFIG_DEFAULT_RESOURCE_TIMEOUT;
+static gint resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
 static gchar *command_trace_file = NULL;
 static gchar *daemon_trace_file = NULL;
 static gchar **command_argv = NULL;
@@ -127,8 +127,14 @@ int main (int argc, char *argv[])
         }
         flom_config_set_resource_wait(fbv);
     }
-    if (FLOM_CONFIG_DEFAULT_RESOURCE_TIMEOUT != resource_timeout)
-        flom_config_set_resource_timeout(resource_timeout);
+    if (FLOM_NETWORK_WAIT_TIMEOUT != resource_timeout) {
+        /* timeout is useless if no wait was specified */
+        if (FLOM_BOOL_NO == flom_config_get_resource_wait())
+            g_warning("Timeout ignored because 'no wait' behavior was "
+                      "specified\n");
+        else
+            flom_config_set_resource_timeout(resource_timeout);
+    }
     if (NULL != daemon_trace_file)
         flom_config_set_daemon_trace_file(daemon_trace_file);
     if (NULL != command_trace_file) {
@@ -151,16 +157,35 @@ int main (int argc, char *argv[])
     }
 
     /* sending lock command */
-    if (FLOM_RC_OK != (ret_cod = flom_client_lock(&cd))) {
-        if (FLOM_RC_LOCK_BUSY == ret_cod) {
+    ret_cod = flom_client_lock(&cd, flom_config_get_resource_timeout());
+    switch (ret_cod) {
+        case FLOM_RC_OK: /* OK, go on */
+            break;
+        case FLOM_RC_LOCK_BUSY: /* busy */
             g_print("Resource already locked, the lock cannot be obtained\n");
+            /* gracefully disconnect from daemon */
+            if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
+                g_print("flom_client_unlock: ret_cod=%d (%s)\n",
+                        ret_cod, flom_strerror(ret_cod));
+            }
             exit(FLOM_ES_RESOURCE_BUSY);
-        } else {
+            break;
+        case FLOM_RC_NETWORK_TIMEOUT: /* timeout expired, busy resource */
+            g_print("Resource already locked, the lock was not obtained "
+                    "because timeout (%d milliseconds) expired\n",
+                    flom_config_get_resource_timeout());
+            /* gracefully disconnect from daemon */
+            if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
+                g_print("flom_client_unlock: ret_cod=%d (%s)\n",
+                        ret_cod, flom_strerror(ret_cod));
+            }
+            exit(FLOM_ES_RESOURCE_BUSY);
+            break;            
+        default:
             g_print("flom_client_lock: ret_cod=%d (%s)\n",
                     ret_cod, flom_strerror(ret_cod));
             exit(FLOM_ES_GENERIC_ERROR);
-        }
-    }
+    } /* switch (ret_cod) */
 
     /* execute the command */
     if (FLOM_RC_OK != (ret_cod = flom_exec(command_argv, &child_status))) {
@@ -180,7 +205,7 @@ int main (int argc, char *argv[])
         exit(FLOM_ES_GENERIC_ERROR);
     }
 
-    /* gracely disconnect from daemon */
+    /* gracefully disconnect from daemon */
     if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
         g_print("flom_client_unlock: ret_cod=%d (%s)\n",
                 ret_cod, flom_strerror(ret_cod));

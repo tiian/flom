@@ -67,6 +67,10 @@
 
 /* WARNINGS */
 /**
+ * A network operation timed out
+ */
+#define FLOM_RC_NETWORK_TIMEOUT                       +5
+/**
  * Peer has closed socket while expecting data
  */
 #define FLOM_RC_CONNECTION_CLOSED                     +4

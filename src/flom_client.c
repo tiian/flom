@@ -114,16 +114,18 @@ int flom_client_connect(struct flom_conn_data_s *cd)
 
 
 
-int flom_client_lock(struct flom_conn_data_s *cd)
+int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
 {
     enum Exception { G_STRDUP_ERROR
                      , MSG_SERIALIZE_ERROR
                      , MSG_SEND_ERROR
                      , MSG_FREE_ERROR
+                     , NETWORK_TIMEOUT1
                      , MSG_RETRIEVE_ERROR
                      , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , PROTOCOL_ERROR1
+                     , NETWORK_TIMEOUT2
                      , CONNECT_WAIT_LOCK_ERROR
                      , LOCK_BUSY
                      , PROTOCOL_ERROR2
@@ -163,9 +165,17 @@ int flom_client_lock(struct flom_conn_data_s *cd)
         flom_msg_init(&msg);
 
         /* retrieve the reply message */
-        if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
-                               cd->fd, buffer, sizeof(buffer), &to_read)))
-            THROW(MSG_RETRIEVE_ERROR);
+        ret_cod = flom_msg_retrieve(
+            cd->fd, buffer, sizeof(buffer), &to_read, timeout);
+        switch (ret_cod) {
+            case FLOM_RC_OK:
+                break;
+            case FLOM_RC_NETWORK_TIMEOUT:
+                THROW(NETWORK_TIMEOUT1);
+                break;
+            default:
+                THROW(MSG_RETRIEVE_ERROR);
+        } /* switch (ret_cod) */
 
         /* instantiate a new parser */
         if (NULL == (cd->gmpc = g_markup_parse_context_new(
@@ -189,8 +199,16 @@ int flom_client_lock(struct flom_conn_data_s *cd)
             case FLOM_RC_LOCK_ENQUEUED:
                 FLOM_TRACE(("flom_client_lock: resource is busy, "
                             "waiting...\n"));
-                if (FLOM_RC_OK != (ret_cod = flom_client_wait_lock(cd, &msg)))
-                    THROW(CONNECT_WAIT_LOCK_ERROR);
+                ret_cod = flom_client_wait_lock(cd, &msg, timeout);
+                switch (ret_cod) {
+                    case FLOM_RC_OK:
+                        break;
+                    case FLOM_RC_NETWORK_TIMEOUT:
+                        THROW(NETWORK_TIMEOUT2);
+                        break;
+                    default:
+                        THROW(CONNECT_WAIT_LOCK_ERROR);
+                } /* switch (ret_cod) */
                 break;
             case FLOM_RC_LOCK_BUSY:
                 ret_cod = msg.body.lock_16.answer.rc;
@@ -210,6 +228,7 @@ int flom_client_lock(struct flom_conn_data_s *cd)
             case MSG_SERIALIZE_ERROR:
             case MSG_SEND_ERROR:
             case MSG_FREE_ERROR:
+            case NETWORK_TIMEOUT1:
             case MSG_RETRIEVE_ERROR:
                 break;
             case G_MARKUP_PARSE_CONTEXT_NEW_ERROR:
@@ -218,6 +237,10 @@ int flom_client_lock(struct flom_conn_data_s *cd)
             case MSG_DESERIALIZE_ERROR:
                 break;
             case PROTOCOL_ERROR1:
+                ret_cod = FLOM_RC_PROTOCOL_ERROR;
+                break;
+            case NETWORK_TIMEOUT2:
+                break;                
             case PROTOCOL_ERROR2:
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;
                 break;
@@ -246,9 +269,10 @@ int flom_client_lock(struct flom_conn_data_s *cd)
 
 
 int flom_client_wait_lock(struct flom_conn_data_s *cd,
-                          struct flom_msg_s *msg)
+                          struct flom_msg_s *msg, int timeout)
 {
-    enum Exception { MSG_RETRIEVE_ERROR
+    enum Exception { NETWORK_TIMEOUT
+                     , MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , PROTOCOL_ERROR1
                      , LOCK_CANT_LOCK
@@ -261,9 +285,17 @@ int flom_client_wait_lock(struct flom_conn_data_s *cd,
         ssize_t to_read;
         
         /* retrieve the reply message */
-        if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
-                               cd->fd, buffer, sizeof(buffer), &to_read)))
-            THROW(MSG_RETRIEVE_ERROR);
+        ret_cod = flom_msg_retrieve(
+            cd->fd, buffer, sizeof(buffer), &to_read, timeout);
+        switch (ret_cod) {
+            case FLOM_RC_OK:
+                break;
+            case FLOM_RC_NETWORK_TIMEOUT:
+                THROW(NETWORK_TIMEOUT);
+                break;
+            default:
+                THROW(MSG_RETRIEVE_ERROR);
+        } /* switch (ret_cod) */
 
         flom_msg_free(msg);
         flom_msg_init(msg);
@@ -288,6 +320,7 @@ int flom_client_wait_lock(struct flom_conn_data_s *cd,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NETWORK_TIMEOUT:
             case MSG_RETRIEVE_ERROR:
             case MSG_DESERIALIZE_ERROR:               
                 break;

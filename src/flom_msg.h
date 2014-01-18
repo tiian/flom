@@ -394,11 +394,13 @@ extern "C" {
      * @param buf OUT buffer will be used to store the XML message
      * @param buf_size IN size of buf
      * @param read_bytes OUT number of bytes read, XML message length
+     * @param timeout IN maximum wait time to receive the answer (milliseconds)
      * @return a reason code
      */
     int flom_msg_retrieve(int fd,
                           char *buf, size_t buf_size,
-                          ssize_t *read_bytes);
+                          ssize_t *read_bytes,
+                          int timeout);
 
 
 

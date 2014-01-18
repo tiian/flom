@@ -51,14 +51,6 @@
 
 
 
-/**
- * Default timeout associated to locking: -1 = infinite, see pool POSIX
- * function
- */
-#define FLOM_CONFIG_DEFAULT_RESOURCE_TIMEOUT -1
-
-
-
 /* configure dependent constant values */
 /**
  * E-mail address as set inside configure.ac

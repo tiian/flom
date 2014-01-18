@@ -137,7 +137,7 @@ void flom_config_reset()
     global_config.idle_time = 5000; /* milliseconds */
     global_config.resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
     global_config.resource_wait = TRUE;
-    global_config.resource_timeout = FLOM_CONFIG_DEFAULT_RESOURCE_TIMEOUT;
+    global_config.resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
 }
 
 

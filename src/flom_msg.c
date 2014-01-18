@@ -20,6 +20,9 @@
 
 
 
+#ifdef HAVE_POLL_H
+# include <poll.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -67,14 +70,41 @@ GMarkupParser flom_msg_parser = {
 
 int flom_msg_retrieve(int fd,
                       char *buf, size_t buf_size,
-                      ssize_t *read_bytes)
+                      ssize_t *read_bytes,
+                      int timeout)
 {
-    enum Exception { RECV_ERROR
+    enum Exception { POLL_ERROR
+                     , NETWORK_TIMEOUT
+                     , INTERNAL_ERROR
+                     , RECV_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_msg_retrieve\n"));
     TRY {
+        if (timeout >= 0) {
+            struct pollfd fds[1];
+            int rc;
+            /* use poll to check the filedescriptor for a limited amount of
+               time */
+            fds[0].fd = fd;
+            fds[0].events = POLLIN;
+            fds[0].revents = 0;
+            rc = poll(fds, 1, timeout);
+            switch (rc) {
+                case -1: /* error in poll function */
+                    THROW(POLL_ERROR);
+                    break;
+                case 0: /* timeout, return! */
+                    THROW(NETWORK_TIMEOUT);
+                    break;
+                case 1: /* data arrived, go on... */
+                    break;
+                default: /* unexpected result, internal error! */
+                    THROW(INTERNAL_ERROR);
+            } /* switch (rc) */
+        } /* if (timeout >= 0) */
+        
         if (0 > (*read_bytes = recv(fd, buf, buf_size, 0)))
             THROW(RECV_ERROR);
         
@@ -85,6 +115,15 @@ int flom_msg_retrieve(int fd,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case POLL_ERROR:
+                ret_cod = FLOM_RC_POLL_ERROR;
+                break;
+            case NETWORK_TIMEOUT:
+                ret_cod = FLOM_RC_NETWORK_TIMEOUT;
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+                break;
             case RECV_ERROR:
                 ret_cod = FLOM_RC_RECV_ERROR;
                 break;
