@@ -23,7 +23,7 @@ name of the resource used for enqueing (locking). Resource name can be composed 
 \fBdefault\fP (\fIyes\fP): the command will enqueue if the resource is already locked by someone else, otherwise (\fIno\fP) it will return immediately
 .TP
 .B -o, --resource-timeout=\fImilliseconds
-maximum enqueue time if the resource is already locked by someone else; if the resource don't become free before \fItimeout milliseconds\fP the command will return
+maximum enqueue time if the resource is already locked by someone else; if the resource doesn't become free before \fItimeout milliseconds\fP the command will return
 .TP
 .B -T, --command-trace-file=\fIFILENAME
 file destination of the trace messages produced by the command (foreground) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module.

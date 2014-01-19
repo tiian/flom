@@ -1,7 +1,8 @@
 LOG:
 
-         - 0.1.3 implemented blocking with timeout behavior 
-	(--resource-timeout, -o)
+20140119 - 0.1.3 implemented blocking with timeout behavior 
+	(--resource-timeout, -o) [use case #4]
+
 20140115 - 0.1.2 implemented non blocking behavior (--resource-wait, -w)
 	[use case #3]
 
@@ -10,4 +11,3 @@ LOG:
 
 20131222 - 0.1.0 first release: it implements use case #1 (simple
 	serialization)
-
