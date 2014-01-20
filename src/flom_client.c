@@ -147,7 +147,7 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
         if (NULL == (msg.body.lock_8.resource.name =
                      g_strdup(global_config.resource_name)))
             THROW(G_STRDUP_ERROR);
-        msg.body.lock_8.resource.type = FLOM_LOCK_TYPE_EX;
+        msg.body.lock_8.resource.mode = FLOM_LOCK_MODE_EX;
         msg.body.lock_8.resource.wait = flom_config_get_resource_wait();
 
         /* serialize the request message */

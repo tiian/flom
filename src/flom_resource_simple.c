@@ -44,10 +44,10 @@
 
 
 int flom_resource_simple_can_lock(flom_resource_t *resource,
-                                  flom_lock_type_t lock)
+                                  flom_lock_mode_t lock)
 {
-    static const flom_lock_type_t lock_table[
-        FLOM_LOCK_TYPE_N][FLOM_LOCK_TYPE_N] =
+    static const flom_lock_mode_t lock_table[
+        FLOM_LOCK_MODE_N][FLOM_LOCK_MODE_N] =
         { { TRUE,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE } ,
           { TRUE,  TRUE,  TRUE,  TRUE,  TRUE,  FALSE } ,
           { TRUE,  TRUE,  TRUE,  FALSE, FALSE, FALSE } ,
@@ -56,13 +56,13 @@ int flom_resource_simple_can_lock(flom_resource_t *resource,
           { TRUE,  FALSE, FALSE, FALSE, FALSE, FALSE } };
     
     GSList *p = NULL;
-    flom_lock_type_t old_lock;
+    flom_lock_mode_t old_lock;
     int can_lock = TRUE;
     
     FLOM_TRACE(("flom_resource_simple_can_lock: checking lock=%d\n", lock));
     p = resource->data.simple.holders;
     while (NULL != p) {
-        old_lock = ((struct flom_rsrc_conn_lock_s *)p->data)->lock_type;
+        old_lock = ((struct flom_rsrc_conn_lock_s *)p->data)->lock_mode;
         FLOM_TRACE(("flom_resource_simple_can_lock: current_lock=%d, "
                     "asked_lock=%d, lock_table[%d][%d]=%d\n",
                     old_lock, lock, old_lock, lock,
@@ -97,13 +97,13 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
 
     FLOM_TRACE(("flom_resource_simple_inmsg\n"));
     TRY {
-        flom_lock_type_t new_lock = FLOM_LOCK_TYPE_NL;
+        flom_lock_mode_t new_lock = FLOM_LOCK_MODE_NL;
         int can_lock = TRUE;
         int can_wait = TRUE;
         flom_msg_trace(msg);
         switch (msg->header.pvs.verb) {
             case FLOM_MSG_VERB_LOCK:
-                new_lock = msg->body.lock_8.resource.type;
+                new_lock = msg->body.lock_8.resource.mode;
                 can_wait = msg->body.lock_8.resource.wait;
                 can_lock = flom_resource_simple_can_lock(
                     resource, new_lock);
@@ -122,7 +122,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                                  g_try_malloc(
                                      sizeof(struct flom_rsrc_conn_lock_s))))
                         THROW(G_TRY_MALLOC_ERROR1);
-                    cl->lock_type = new_lock;
+                    cl->lock_mode = new_lock;
                     cl->conn = conn;
                     resource->data.simple.holders = g_slist_prepend(
                         resource->data.simple.holders,
@@ -144,7 +144,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                                      g_try_malloc(
                                          sizeof(struct flom_rsrc_conn_lock_s))))
                             THROW(G_TRY_MALLOC_ERROR2);
-                        cl->lock_type = new_lock;
+                        cl->lock_mode = new_lock;
                         cl->conn = conn;
                         g_queue_push_tail(
                             resource->data.simple.waitings,
@@ -257,7 +257,7 @@ int flom_resource_simple_clean(flom_resource_t *resource,
             struct flom_rsrc_conn_lock_s *cl =
                 (struct flom_rsrc_conn_lock_s *)p->data;
             FLOM_TRACE(("flom_resource_simple_clean: the client is holding "
-                        "a lock of type %d, removing it...\n", cl->lock_type));
+                        "a lock mode %d, removing it...\n", cl->lock_mode));
             FLOM_TRACE(("flom_resource_simple_clean: cl=%p\n", cl));
             resource->data.simple.holders = g_slist_remove(
                 resource->data.simple.holders, cl);
@@ -283,8 +283,8 @@ int flom_resource_simple_clean(flom_resource_t *resource,
                 if (cl->conn == conn) {
                     /* remove from waitings */
                     FLOM_TRACE(("flom_resource_simple_clean: the client is "
-                                "waiting for a lock of type %d, removing "
-                                "it...\n", cl->lock_type));
+                                "waiting for a lock mode %d, removing "
+                                "it...\n", cl->lock_mode));
                     cl = g_queue_pop_nth(resource->data.simple.waitings, i);
                     if (NULL == cl) {
                         /* this should be impossibile because peek was ok
@@ -376,7 +376,7 @@ int flom_resource_simple_waitings(flom_resource_t *resource)
             if (NULL == cl)
                 break;
             /* try to apply this lock... */
-            if (flom_resource_simple_can_lock(resource, cl->lock_type)) {
+            if (flom_resource_simple_can_lock(resource, cl->lock_mode)) {
                 /* remove from waitings */
                 cl = g_queue_pop_nth(resource->data.simple.waitings, i);
                 if (NULL == cl)

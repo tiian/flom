@@ -20,6 +20,11 @@
 
 
 
+#ifdef HAVE_STRING_H
+/* strcasestr is not POSIX standard and needs GNU extensions... */
+# define _GNU_SOURCE
+# include <string.h>
+#endif
 #ifdef HAVE_POLL_H
 # include <poll.h>
 #endif
@@ -51,7 +56,7 @@ const gchar *FLOM_MSG_PROP_LEVEL          = (gchar *)"level";
 const gchar *FLOM_MSG_PROP_NAME           = (gchar *)"name";
 const gchar *FLOM_MSG_PROP_RC             = (gchar *)"rc";
 const gchar *FLOM_MSG_PROP_STEP           = (gchar *)"step";
-const gchar *FLOM_MSG_PROP_TYPE           = (gchar *)"type";
+const gchar *FLOM_MSG_PROP_MODE           = (gchar *)"mode";
 const gchar *FLOM_MSG_PROP_VERB           = (gchar *)"verb"; 
 const gchar *FLOM_MSG_PROP_WAIT           = (gchar *)"wait";
 const gchar *FLOM_MSG_TAG_ANSWER          = (gchar *)"answer";
@@ -65,6 +70,54 @@ GMarkupParser flom_msg_parser = {
     flom_msg_deserialize_end_element,
     flom_msg_deserialize_text,
     NULL, NULL };
+
+
+
+flom_lock_mode_t flom_lock_mode_retrieve(const gchar *text)
+{
+    /* parsing is case sensitive only on GNU systems */
+    char *p = NULL;
+    
+    FLOM_TRACE(("flom_bool_value_retrieve: '%s'\n", text));
+    /* check if 'NullLock', 'NL' - any case - is in the text */
+    if (NULL != (p = STRCASESTR(text, "NullLock")) ||
+        NULL != (p = STRCASESTR(text, "NL"))) {
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'NullLock' here: '%s'\n",
+                    p));
+        return FLOM_LOCK_MODE_NL;
+    /* check if 'ConcurrentRead', 'CR' - any case - is in the text */
+    } else if (NULL != (p = STRCASESTR(text, "ConcurrentRead")) ||
+               NULL != (p = STRCASESTR(text, "CR"))) {
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'ConcurrentRead' "
+                    "here: '%s'\n", p));
+        return FLOM_LOCK_MODE_CR;
+    /* check if 'ConcurrentWrite', 'CW' - any case - is in the text */
+    } else if (NULL != (p = STRCASESTR(text, "ConcurrentWrite")) ||
+               NULL != (p = STRCASESTR(text, "CW"))) {
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'ConcurrentWrite' "
+                    "here: '%s'\n", p));
+        return FLOM_LOCK_MODE_CW;
+    /* check if 'ProtectedRead', 'PR' - any case - is in the text */
+    } else if (NULL != (p = STRCASESTR(text, "ProtectedRead")) ||
+               NULL != (p = STRCASESTR(text, "PR"))) {
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'ProtectedRead' "
+                    "here: '%s'\n", p));
+        return FLOM_LOCK_MODE_PR;
+    /* check if 'ProtectedWrite', 'PW' - any case - is in the text */
+    } else if (NULL != (p = STRCASESTR(text, "ProtectedWrite")) ||
+               NULL != (p = STRCASESTR(text, "PW"))) {
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'ProtectedWrite' "
+                    "here: '%s'\n", p));
+        return FLOM_LOCK_MODE_PW;
+    /* check if 'Exclusive', 'EX' - any case - is in the text */
+    } else if (NULL != (p = STRCASESTR(text, "Exclusive")) ||
+               NULL != (p = STRCASESTR(text, "EX"))) {
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'Exclusive' "
+                    "here: '%s'\n", p));
+        return FLOM_LOCK_MODE_EX;
+    }
+    return FLOM_LOCK_MODE_INVALID;
+}
 
 
 
@@ -513,8 +566,8 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                               FLOM_MSG_TAG_RESOURCE,
                               FLOM_MSG_PROP_NAME,
                               msg->body.lock_8.resource.name,
-                              FLOM_MSG_PROP_TYPE,
-                              msg->body.lock_8.resource.type,
+                              FLOM_MSG_PROP_MODE,
+                              msg->body.lock_8.resource.mode,
                               FLOM_MSG_PROP_WAIT,
                               msg->body.lock_8.resource.wait);
         if (used_chars >= *free_chars)
@@ -794,10 +847,10 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
         switch (msg->header.pvs.step) {
             case 8:
                 FLOM_TRACE(("flom_msg_trace_lock: body[resource["
-                            "name='%s',type=%d,wait=%d]]\n",
+                            "name='%s',mode=%d,wait=%d]]\n",
                             msg->body.lock_8.resource.name != NULL ?
                             msg->body.lock_8.resource.name : "",
-                            msg->body.lock_8.resource.type,
+                            msg->body.lock_8.resource.mode,
                             msg->body.lock_8.resource.wait));
                 break;
             case 16:
@@ -1027,9 +1080,9 @@ void flom_msg_deserialize_start_element(
                                 msg->body.lock_8.resource.name = tmp;
                             else
                                 msg->body.unlock_8.resource.name = tmp;
-                        } else if (!strcmp(*name_cursor, FLOM_MSG_PROP_TYPE)) {
+                        } else if (!strcmp(*name_cursor, FLOM_MSG_PROP_MODE)) {
                             if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb)
-                                msg->body.lock_8.resource.type =
+                                msg->body.lock_8.resource.mode =
                                     strtol(*value_cursor, NULL, 10);
                             else {
                                 FLOM_TRACE(("flom_msg_deserialize_start_"

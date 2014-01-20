@@ -218,6 +218,22 @@
 
 
 
+#ifdef HAVE_STRCASESTR
+/**
+ * If "strcasstr" is available, strings are checked case insensitive; else
+ * strings are checked case sensitive
+ */
+# define STRCASESTR(haystack,needle) strcasestr(haystack,needle)
+#else
+/**
+ * If "strcasstr" is available, strings are checked case insensitive; else
+ * strings are checked case sensitive
+ */
+# define STRCASESTR(haystack,needle) strstr(haystack,needle)
+#endif
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

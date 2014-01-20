@@ -89,31 +89,25 @@ const gchar *FLOM_CONFIG_KEY_TIMEOUT = _CONFIG_KEY_TIMEOUT;
 flom_bool_value_t flom_bool_value_retrieve(const gchar *text)
 {
     /* parsing is case sensitive only on GNU systems */
-#ifdef HAVE_STRCASESTR
-# define STRCASESTR(haystack,needle) strcasestr(haystack,needle)
-#else
-# define STRCASESTR(haystack,needle) strstr(haystack,needle)
-#endif
     char *p = NULL;
     
     FLOM_TRACE(("flom_bool_value_retrieve: '%s'\n", text));
     /* check if 'yes', 'no' - any case - are in the text */
-    if (NULL != (p = strcasestr(text, "no"))) {
+    if (NULL != (p = STRCASESTR(text, "no"))) {
         FLOM_TRACE(("flom_bool_value_retrieve: found 'no' here: '%s'\n", p));
         return FLOM_BOOL_NO;
-    } else if (NULL != (p = strcasestr(text, "yes"))) {
+    } else if (NULL != (p = STRCASESTR(text, "yes"))) {
         FLOM_TRACE(("flom_bool_value_retrieve: found 'yes' here: '%s'\n", p));
         return FLOM_BOOL_YES;
     /* check if 'y', 'n' - any case - are in the text */
-    } else if (NULL != (p = strcasestr(text, "n"))) {
+    } else if (NULL != (p = STRCASESTR(text, "n"))) {
         FLOM_TRACE(("flom_bool_value_retrieve: found 'n' here: '%s'\n", p));
         return FLOM_BOOL_NO;
-    } else if (NULL != (p = strcasestr(text, "y"))) {
+    } else if (NULL != (p = STRCASESTR(text, "y"))) {
         FLOM_TRACE(("flom_bool_value_retrieve: found 'y' here: '%s'\n", p));
         return FLOM_BOOL_YES;
     }
     return FLOM_BOOL_INVALID;
-#undef HAVE_STRCASESTR
 }
 
 

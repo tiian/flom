@@ -116,38 +116,42 @@ typedef enum flom_msg_state_e {
 
 
 /**
- * Type of lock that can be asked for a resource
+ * Lock mode that can be asked for a resource
  */
-typedef enum flom_lock_type_e {
+typedef enum flom_lock_mode_e {
     /**
-     * Null lock type
+     * Null lock mode
      */
-    FLOM_LOCK_TYPE_NL,
+    FLOM_LOCK_MODE_NL,
     /**
-     * Concurrent read lock type
+     * Concurrent read lock mode
      */
-    FLOM_LOCK_TYPE_CR,
+    FLOM_LOCK_MODE_CR,
     /**
-     * Concurrent write lock type
+     * Concurrent write lock mode
      */
-    FLOM_LOCK_TYPE_CW,
+    FLOM_LOCK_MODE_CW,
     /**
-     * Protected read / shared lock type
+     * Protected read / shared lock mode
      */
-    FLOM_LOCK_TYPE_PR,
+    FLOM_LOCK_MODE_PR,
     /**
-     * Protectec write / update lock type
+     * Protectec write / update lock mode
      */
-    FLOM_LOCK_TYPE_PW,
+    FLOM_LOCK_MODE_PW,
     /**
-     * Exclusive lock type
+     * Exclusive lock mode
      */
-    FLOM_LOCK_TYPE_EX,
+    FLOM_LOCK_MODE_EX,
     /**
-     * Number of lock types
+     * Number of lock modes
      */
-    FLOM_LOCK_TYPE_N
-} flom_lock_type_t;
+    FLOM_LOCK_MODE_N,
+    /**
+     * Special value used to encode an invalid value
+     */
+    FLOM_LOCK_MODE_INVALID
+} flom_lock_mode_t;
 
 
 
@@ -172,9 +176,9 @@ extern const gchar *FLOM_MSG_PROP_RC;
  */
 extern const gchar *FLOM_MSG_PROP_STEP;
 /**
- * Label used to specify "type" property
+ * Label used to specify "mode" property
  */
-extern const gchar *FLOM_MSG_PROP_TYPE;
+extern const gchar *FLOM_MSG_PROP_MODE;
 /**
  * Label used to specify "verb" property
  */
@@ -259,9 +263,9 @@ struct flom_msg_body_lock_8_resource_s {
      */
     gchar            *name;
     /**
-     * type of lock to acquire
+     * asked lock mode
      */
-    flom_lock_type_t  type;
+    flom_lock_mode_t  mode;
     /**
      * wait if lock is currently not available
      */
@@ -376,6 +380,15 @@ struct flom_msg_s {
 extern "C" {
 #endif /* __cplusplus */
 
+
+
+    /**
+     * Interpret a string and extract the lock mode
+     * @param text IN string to interpret
+     * @return a lock mode
+     */
+    flom_lock_mode_t flom_lock_mode_retrieve(const gchar *text);
+    
 
 
     /**
