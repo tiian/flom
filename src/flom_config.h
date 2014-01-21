@@ -32,6 +32,9 @@
 # include <sys/un.h>
 #endif
 
+
+
+#include "flom_msg.h"
 #include "flom_trace.h"
 
 
@@ -122,6 +125,10 @@ extern const gchar *FLOM_CONFIG_KEY_WAIT;
  * Label associated to "Timeout" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_TIMEOUT;
+/**
+ * Label associated to "LockMode" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_LOCK_MODE;
 
 
 
@@ -153,34 +160,38 @@ typedef struct flom_config {
     /**
      * Path of UNIX socket used for local connection
      */
-    char         local_socket_path_name[LOCAL_SOCKET_SIZE];
+    char               local_socket_path_name[LOCAL_SOCKET_SIZE];
     /**
      * Name of the file must be used to write trace messages from the daemon
      */
-    gchar       *daemon_trace_file;
+    gchar             *daemon_trace_file;
     /**
      * Name of the file must be used to write trace messages from the command
      */
-    gchar       *command_trace_file;
+    gchar             *command_trace_file;
     /**
      * After idle_time milliseconds without new incoming requests, the daemon
      * will terminate activity
      */
-    int          idle_time;
+    int                idle_time;
     /**
      * Name of the resource that must be locked
      */
-    gchar       *resource_name;
+    gchar             *resource_name;
     /**
      * The requester enqueues if the lock can not be obtained
      * (boolean value)
      */
-    int          resource_wait;
+    int                resource_wait;
     /**
      * The requester stay blocked for a maximum time if the resource and then
      * it will return (milliseconds as specified by poll POSIX function)
      */
-    gint         resource_timeout;
+    gint               resource_timeout;
+    /**
+     * Lock mode as designed by VMS DLM
+     */
+    flom_lock_mode_t   lock_mode;
 } flom_config_t;
 
 
@@ -212,6 +223,13 @@ extern "C" {
      */
     void flom_config_reset();
     
+
+
+    /**
+     * Print config using "g_print"
+     */
+    void flom_config_print();
+
 
 
     /**
@@ -322,7 +340,7 @@ extern "C" {
 
     
     /**
-     * Set "rexource_timeout" config parameter
+     * Set "resource_timeout" config parameter
      * @param timeout IN milliseconds
      */
     static inline void flom_config_set_resource_timeout(gint timeout) {
@@ -337,6 +355,26 @@ extern "C" {
      */
     static inline gint flom_config_get_resource_timeout(void) {
         return global_config.resource_timeout;
+    }
+
+
+    
+    /**
+     * Set "lock_mode" config parameter
+     * @param lock_mode IN lock mode
+     */
+    static inline void flom_config_set_lock_mode(flom_lock_mode_t lock_mode) {
+        global_config.lock_mode = lock_mode;
+    }
+
+
+
+    /**
+     * Get "lock_mode" config parameter
+     * @return current lock mode
+     */
+    static inline flom_lock_mode_t flom_config_get_lock_mode(void) {
+        return global_config.lock_mode;
     }
 
 

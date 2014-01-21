@@ -1,4 +1,4 @@
-AC_INIT([flom], [0.1.3], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([flom], [0.1.4-pre], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 # hardwired configuration
@@ -13,6 +13,7 @@ _CONFIG_GROUP_RESOURCE="Resource"
 _CONFIG_KEY_NAME="Name"
 _CONFIG_KEY_WAIT="Wait"
 _CONFIG_KEY_TIMEOUT="Timeout"
+_CONFIG_KEY_LOCK_MODE="LockMode"
 _ES_UNABLE_TO_EXECUTE_COMMAND=97
 _ES_RESOURCE_BUSY=98
 _ES_GENERIC_ERROR=99
@@ -28,6 +29,7 @@ AC_DEFINE_UNQUOTED([_CONFIG_GROUP_RESOURCE], ["$_CONFIG_GROUP_RESOURCE"], [Label
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_NAME], ["$_CONFIG_KEY_NAME"], [Label of "Name" key inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_WAIT], ["$_CONFIG_KEY_WAIT"], [Label of "Wait" key inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_TIMEOUT], ["$_CONFIG_KEY_TIMEOUT"], [Label of "Timeout" key inside config files])
+AC_DEFINE_UNQUOTED([_CONFIG_KEY_LOCK_MODE], ["$_CONFIG_KEY_LOCK_MODE"], [Label of "LockMode" key inside config files])
 AC_DEFINE_UNQUOTED([_ES_UNABLE_TO_EXECUTE_COMMAND], [$_ES_UNABLE_TO_EXECUTE_COMMAND], [Exit status for command execution error])
 AC_DEFINE_UNQUOTED([_ES_RESOURCE_BUSY], [$_ES_RESOURCE_BUSY], [Exit status for busy resource condition])
 AC_DEFINE_UNQUOTED([_ES_GENERIC_ERROR], [$_ES_GENERIC_ERROR], [Exit status for generic error])
@@ -156,6 +158,7 @@ AC_SUBST(_CONFIG_GROUP_RESOURCE)
 AC_SUBST(_CONFIG_KEY_NAME)
 AC_SUBST(_CONFIG_KEY_WAIT)
 AC_SUBST(_CONFIG_KEY_TIMEOUT)
+AC_SUBST(_CONFIG_KEY_LOCK_MODE)
 AC_SUBST(_ES_UNABLE_TO_EXECUTE_COMMAND)
 AC_SUBST(_ES_RESOURCE_BUSY)
 AC_SUBST(_ES_GENERIC_ERROR)

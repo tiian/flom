@@ -150,6 +150,9 @@
 /* Label of "daemon trace file" key inside config files */
 #undef _CONFIG_KEY_DAEMONTRACEFILE
 
+/* Label of "LockMode" key inside config files */
+#undef _CONFIG_KEY_LOCK_MODE
+
 /* Label of "Name" key inside config files */
 #undef _CONFIG_KEY_NAME
 

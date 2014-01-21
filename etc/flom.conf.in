@@ -37,4 +37,16 @@
 # function 
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_TIMEOUT@=-1
+# Lock mode: a resource can be locked with different modes; FLOM supports
+# the same semantic introduced by VMS DLM ad described here:
+# http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
+# These values are accepted:
+# "NullLock"/"NL" for Null Lock mode
+# "ConcurrentRead"/"CR" for Concurrent Read mode
+# "ConcurrentWrite"/"CW" for Concurrent Write mode
+# "ProtectedRead"/"PR" for Protected Read mode
+# "ProtectedWrite"/"PW" for Protected Write mode
+# "Exclusive"/"EX" for Exclusive mode
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_LOCK_MODE@=Exclusive
 

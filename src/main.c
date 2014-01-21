@@ -42,10 +42,12 @@
 
 
 static gboolean print_version = FALSE;
+static gboolean verbose = FALSE;
 static char *config_file = NULL;
 static gchar *resource_name = NULL;
 static gchar *resource_wait = NULL;
 static gint resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
+static gchar *lock_mode = NULL;
 static gchar *command_trace_file = NULL;
 static gchar *daemon_trace_file = NULL;
 static gchar **command_argv = NULL;
@@ -53,10 +55,12 @@ static gchar **command_argv = NULL;
 static GOptionEntry entries[] =
 {
     { "version", 'v', 0, G_OPTION_ARG_NONE, &print_version, "Print package info and exit", NULL },
+    { "verbose", 'V', 0, G_OPTION_ARG_NONE, &verbose, "Activate verbose messages", NULL },
     { "config-file", 'c', 0, G_OPTION_ARG_STRING, &config_file, "User configuration file name", NULL },
     { "resource-name", 'r', 0, G_OPTION_ARG_STRING, &resource_name, "Specify the name of the resource to be locked", NULL },
     { "resource-wait", 'w', 0, G_OPTION_ARG_STRING, &resource_wait, "Specify if the command enques when the resource is already locked (accepted values 'yes', 'no')", NULL },
     { "resource-timeout", 'o', 0, G_OPTION_ARG_INT, &resource_timeout, "Specify maximum wait time (milliseconds) if a resource is already locked", NULL },
+    { "lock-mode", 'l', 0, G_OPTION_ARG_STRING, &lock_mode, "Resource lock mode ('NL', 'CR', 'CW', 'PR', 'PW', 'EX')", NULL },
     { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
@@ -121,8 +125,8 @@ int main (int argc, char *argv[])
         flom_bool_value_t fbv;
         if (FLOM_BOOL_INVALID == (
                 fbv = flom_bool_value_retrieve(resource_wait))) {
-            g_print("flom_config_set_resource_wait: '%s' is an "
-                    "invalid value\n", resource_wait);
+            g_print("resource-wait: '%s' is an invalid value\n",
+                    resource_wait);
             exit(FLOM_ES_GENERIC_ERROR);
         }
         flom_config_set_resource_wait(fbv);
@@ -135,6 +139,15 @@ int main (int argc, char *argv[])
         else
             flom_config_set_resource_timeout(resource_timeout);
     }
+    if (NULL != lock_mode) {
+        flom_lock_mode_t flm;
+        if (FLOM_LOCK_MODE_INVALID == (
+                flm = flom_lock_mode_retrieve(lock_mode))) {
+            g_print("lock-mode: '%s' is an invalid value\n", lock_mode);
+            exit(FLOM_ES_GENERIC_ERROR);
+        }
+        flom_config_set_lock_mode(flm);
+    }
     if (NULL != daemon_trace_file)
         flom_config_set_daemon_trace_file(daemon_trace_file);
     if (NULL != command_trace_file) {
@@ -143,6 +156,10 @@ int main (int argc, char *argv[])
         FLOM_TRACE_REOPEN(flom_config_get_command_trace_file());
     }
 
+    /* print configuration */
+    if (verbose)
+        flom_config_print();
+    
     /* check the command is not null */
     if (NULL == command_argv) {
         g_warning("No command to execute!\n");

@@ -13,6 +13,12 @@ Run COMMAND serializing it with other commands executed by flom.
 .B "-h, --help"
 show help options
 .TP
+.B -v, --version
+print flom version and exit
+.TP
+.B -V, --verbose
+verbose mode execution
+.TP
 .B -c, --config-file=\fIFILENAME
 user configuration file name. Flom tries to read system default configuration file @sysconfdir@/@_SYSTEM_CONFIG_FILENAME@, user default configuration file ~/@_USER_CONFIG_FILENAME@ and finally this file if specified. Definitive configuration is obtained overloading hard wired build time defaults, system defaults, user defaults, user custom, command line options.
 .TP
@@ -23,7 +29,10 @@ name of the resource used for enqueing (locking). Resource name can be composed 
 \fBdefault\fP (\fIyes\fP): the command will enqueue if the resource is already locked by someone else, otherwise (\fIno\fP) it will return immediately
 .TP
 .B -o, --resource-timeout=\fImilliseconds
-maximum enqueue time if the resource is already locked by someone else; if the resource doesn't become free before \fItimeout milliseconds\fP the command will return
+maximum enqueue time if the resource is already locked by someone else; if the resource doesn't become free before \fItimeout milliseconds\fP the command will return. Note: "\fI-o 0\fP" is equivalent to "\fI-w no\fP"
+.TP
+.B -l, --lock-mode=\fIMODE
+lock mode as defined by VMS DLM (Distributed Lock Manager). \fIMODE\fP can be: "NullLock", "ConcurrentRead", "ConcurrentWrite", "ProtectedRead", "ProtectedWrite", "Exclusive" (equivalent short forms are: "NL", "CR", "CW", "PR", "PW", "EX"). More information are available here \fIhttp://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes\fP
 .TP
 .B -T, --command-trace-file=\fIFILENAME
 file destination of the trace messages produced by the command (foreground) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module.
@@ -31,8 +40,6 @@ file destination of the trace messages produced by the command (foreground) proc
 .B -t, --daemon-trace-file=\fIFILENAME
 file destination of the trace messages produced by the daemon (background) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module.
 .TP
-.B -v, --version
-print flom version and exit
 .SH EXIT STATUS
 if anything runs as expected, \fBflom\fP exit status is the same of the controlled (serialized) command. Sometimes an error occurs and \fBflom\fP reports it using dedicated exit statuses you can check with \fI$?\fP environment variable:
 .P

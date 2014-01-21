@@ -83,6 +83,7 @@ const gchar *FLOM_CONFIG_GROUP_RESOURCE = _CONFIG_GROUP_RESOURCE;
 const gchar *FLOM_CONFIG_KEY_NAME = _CONFIG_KEY_NAME;
 const gchar *FLOM_CONFIG_KEY_WAIT = _CONFIG_KEY_WAIT;
 const gchar *FLOM_CONFIG_KEY_TIMEOUT = _CONFIG_KEY_TIMEOUT;
+const gchar *FLOM_CONFIG_KEY_LOCK_MODE = _CONFIG_KEY_LOCK_MODE;
 
 
 
@@ -132,6 +133,31 @@ void flom_config_reset()
     global_config.resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
     global_config.resource_wait = TRUE;
     global_config.resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
+    global_config.lock_mode = FLOM_LOCK_MODE_EX;
+}
+
+
+
+void flom_config_print()
+{
+    g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_TRACE,
+            FLOM_CONFIG_KEY_DAEMONTRACEFILE,
+            NULL == flom_config_get_daemon_trace_file() ? "" :
+            flom_config_get_daemon_trace_file());
+    g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_TRACE,
+            FLOM_CONFIG_KEY_COMMANDTRACEFILE,
+            NULL == flom_config_get_command_trace_file() ? "" :
+            flom_config_get_command_trace_file());
+    g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_RESOURCE,
+            FLOM_CONFIG_KEY_NAME,
+            NULL == flom_config_get_resource_name() ? "" :
+            flom_config_get_resource_name());
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
+            FLOM_CONFIG_KEY_WAIT, flom_config_get_resource_wait());
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
+            FLOM_CONFIG_KEY_TIMEOUT, flom_config_get_resource_timeout());
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
+            FLOM_CONFIG_KEY_LOCK_MODE, flom_config_get_lock_mode());
 }
 
 
@@ -241,6 +267,7 @@ int flom_config_init_load(const char *config_file_name)
                      , CONFIG_SET_RESOURCE_NAME_ERROR
                      , CONFIG_SET_RESOURCE_WAIT_ERROR
                      , CONFIG_SET_RESOURCE_TIMEOUT_ERROR
+                     , CONFIG_SET_LOCK_MODE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int print_file_name = FALSE;
@@ -384,6 +411,35 @@ int flom_config_init_load(const char *config_file_name)
                         FLOM_CONFIG_KEY_TIMEOUT, ivalue));
             flom_config_set_resource_timeout(ivalue);
         }
+        /* pick-up resource lock mode from configuration */
+        if (NULL == (value = g_key_file_get_string(
+                         gkf, FLOM_CONFIG_GROUP_RESOURCE,
+                         FLOM_CONFIG_KEY_LOCK_MODE, &error))) {
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_LOCK_MODE,
+                        error->code,
+                        error->message));
+            g_error_free(error);
+            error = NULL;
+        } else {
+            int throw_error = FALSE;
+            flom_lock_mode_t flm;
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_LOCK_MODE, value));
+            if (FLOM_LOCK_MODE_INVALID == (
+                    flm = flom_lock_mode_retrieve(value))) {
+                print_file_name = TRUE;
+                throw_error = TRUE;
+            } else {
+                flom_config_set_lock_mode(flm);
+            }
+            g_free(value);
+            value = NULL;
+            if (throw_error) THROW(CONFIG_SET_LOCK_MODE_ERROR);
+        }
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -397,6 +453,7 @@ int flom_config_init_load(const char *config_file_name)
                 break;
             case CONFIG_SET_RESOURCE_WAIT_ERROR:
             case CONFIG_SET_RESOURCE_TIMEOUT_ERROR:
+            case CONFIG_SET_LOCK_MODE_ERROR:
                 ret_cod = FLOM_RC_INVALID_OPTION;
                 break;
             case NONE:

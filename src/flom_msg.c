@@ -82,37 +82,37 @@ flom_lock_mode_t flom_lock_mode_retrieve(const gchar *text)
     /* check if 'NullLock', 'NL' - any case - is in the text */
     if (NULL != (p = STRCASESTR(text, "NullLock")) ||
         NULL != (p = STRCASESTR(text, "NL"))) {
-        FLOM_TRACE(("flom_bool_value_retrieve: found 'NullLock' here: '%s'\n",
-                    p));
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'Null Lock' mode "
+                    "here: '%s'\n", p));
         return FLOM_LOCK_MODE_NL;
     /* check if 'ConcurrentRead', 'CR' - any case - is in the text */
     } else if (NULL != (p = STRCASESTR(text, "ConcurrentRead")) ||
                NULL != (p = STRCASESTR(text, "CR"))) {
-        FLOM_TRACE(("flom_bool_value_retrieve: found 'ConcurrentRead' "
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'Concurrent Read' mode "
                     "here: '%s'\n", p));
         return FLOM_LOCK_MODE_CR;
     /* check if 'ConcurrentWrite', 'CW' - any case - is in the text */
     } else if (NULL != (p = STRCASESTR(text, "ConcurrentWrite")) ||
                NULL != (p = STRCASESTR(text, "CW"))) {
-        FLOM_TRACE(("flom_bool_value_retrieve: found 'ConcurrentWrite' "
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'Concurrent Write' mode "
                     "here: '%s'\n", p));
         return FLOM_LOCK_MODE_CW;
     /* check if 'ProtectedRead', 'PR' - any case - is in the text */
     } else if (NULL != (p = STRCASESTR(text, "ProtectedRead")) ||
                NULL != (p = STRCASESTR(text, "PR"))) {
-        FLOM_TRACE(("flom_bool_value_retrieve: found 'ProtectedRead' "
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'Protected Read' mode "
                     "here: '%s'\n", p));
         return FLOM_LOCK_MODE_PR;
     /* check if 'ProtectedWrite', 'PW' - any case - is in the text */
     } else if (NULL != (p = STRCASESTR(text, "ProtectedWrite")) ||
                NULL != (p = STRCASESTR(text, "PW"))) {
-        FLOM_TRACE(("flom_bool_value_retrieve: found 'ProtectedWrite' "
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'Protected Write' mode "
                     "here: '%s'\n", p));
         return FLOM_LOCK_MODE_PW;
     /* check if 'Exclusive', 'EX' - any case - is in the text */
     } else if (NULL != (p = STRCASESTR(text, "Exclusive")) ||
                NULL != (p = STRCASESTR(text, "EX"))) {
-        FLOM_TRACE(("flom_bool_value_retrieve: found 'Exclusive' "
+        FLOM_TRACE(("flom_bool_value_retrieve: found 'Exclusive' mode "
                     "here: '%s'\n", p));
         return FLOM_LOCK_MODE_EX;
     }
