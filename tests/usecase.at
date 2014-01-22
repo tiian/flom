@@ -1,4 +1,4 @@
-AT_BANNER([Use cases check])
+AT_BANNER([Use case checks])
 
 AT_SETUP([Use case #1])
 AT_DATA([expout],
@@ -52,5 +52,122 @@ AT_DATA([expout],
  1 ending
 ]])
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-o 1000" ; flom_test_exec1.sh 2 0 0 >/dev/null], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case #5 (1/9)])
+AT_DATA([expout],
+[[ 1 locking for 4 seconds
+ 3 locking for 1 seconds
+ 2 locking for 1 seconds
+ 2 ending
+ 1 ending
+ 3 ending
+]])
+AT_CHECK([flom_test_exec3.sh 1 0 4 "-l PR" & flom_test_exec3.sh 2 2 1 "-l PR" & flom_test_exec3.sh 3 1 1 "-l PW" ; flom_test_exec1.sh 4 0 0 >/dev/null], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case #5 (2/9)])
+AT_DATA([expout],
+[[ 1 locking for 2 seconds
+ 2 locking for 1 seconds
+Resource already locked, the lock cannot be obtained
+ 2 ending
+ 1 ending
+]])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l CR" & flom_test_exec3.sh 2 1 1 "-l EX -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case #5 (3/9)])
+AT_DATA([expout],
+[[ 1 locking for 2 seconds
+ 2 locking for 1 seconds
+Resource already locked, the lock cannot be obtained
+ 2 ending
+ 1 ending
+]])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l CW" & flom_test_exec3.sh 2 1 1 "-l PR -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l CW" & flom_test_exec3.sh 2 1 1 "-l PW -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l CW" & flom_test_exec3.sh 2 1 1 "-l EX -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case #5 (4/9)])
+AT_DATA([expout],
+[[ 1 locking for 2 seconds
+ 2 locking for 1 seconds
+Resource already locked, the lock cannot be obtained
+ 2 ending
+ 1 ending
+]])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l PR" & flom_test_exec3.sh 2 1 1 "-l CW -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l PR" & flom_test_exec3.sh 2 1 1 "-l PW -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l PR" & flom_test_exec3.sh 2 1 1 "-l EX -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case #5 (5/9)])
+AT_DATA([expout],
+[[ 1 locking for 2 seconds
+ 2 locking for 1 seconds
+Resource already locked, the lock cannot be obtained
+ 2 ending
+ 1 ending
+]])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l PW" & flom_test_exec3.sh 2 1 1 "-l CW -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l PW" & flom_test_exec3.sh 2 1 1 "-l PR -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l PW" & flom_test_exec3.sh 2 1 1 "-l PW -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l PW" & flom_test_exec3.sh 2 1 1 "-l EX -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case #5 (6/9)])
+AT_DATA([expout],
+[[ 1 locking for 2 seconds
+ 2 locking for 1 seconds
+Resource already locked, the lock cannot be obtained
+ 2 ending
+ 1 ending
+]])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l EX" & flom_test_exec3.sh 2 1 1 "-l CR -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l EX" & flom_test_exec3.sh 2 1 1 "-l CW -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l EX" & flom_test_exec3.sh 2 1 1 "-l PR -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l EX" & flom_test_exec3.sh 2 1 1 "-l PW -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l EX" & flom_test_exec3.sh 2 1 1 "-l EX -w n" ; flom_test_exec1.sh 3 0 0 >/dev/null ], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case #5 (7/9)])
+AT_DATA([expout],
+[[ 1 locking for 2 seconds
+ 2 locking for 0 seconds
+ 2 ending
+ 1 ending
+]])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l NL" & flom_test_exec3.sh 2 1 0 "-l NL" ; flom_test_exec1.sh 3 0 3 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l NL" & flom_test_exec3.sh 2 1 0 "-l CR" ; flom_test_exec1.sh 3 0 3 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l NL" & flom_test_exec3.sh 2 1 0 "-l CW" ; flom_test_exec1.sh 3 0 3 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l NL" & flom_test_exec3.sh 2 1 0 "-l PR" ; flom_test_exec1.sh 3 0 3 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l NL" & flom_test_exec3.sh 2 1 0 "-l PW" ; flom_test_exec1.sh 3 0 3 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l NL" & flom_test_exec3.sh 2 1 0 "-l EX" ; flom_test_exec1.sh 3 0 3 >/dev/null ], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case #5 (8/9)])
+AT_DATA([expout],
+[[ 1 locking for 2 seconds
+ 2 locking for 0 seconds
+ 2 ending
+ 1 ending
+]])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l CR" & flom_test_exec3.sh 2 1 0 "-l CR" ; flom_test_exec1.sh 3 0 3 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l CR" & flom_test_exec3.sh 2 1 0 "-l CW" ; flom_test_exec1.sh 3 0 3 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l CR" & flom_test_exec3.sh 2 1 0 "-l PR" ; flom_test_exec1.sh 3 0 3 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l CR" & flom_test_exec3.sh 2 1 0 "-l PW" ; flom_test_exec1.sh 3 0 3 >/dev/null ], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case #5 (9/9)])
+AT_DATA([expout],
+[[ 1 locking for 2 seconds
+ 2 locking for 0 seconds
+ 2 ending
+ 1 ending
+]])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l CW" & flom_test_exec3.sh 2 1 0 "-l CW" ; flom_test_exec1.sh 3 0 3 >/dev/null ], [0], [expout], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-l PR" & flom_test_exec3.sh 2 1 0 "-l PR" ; flom_test_exec1.sh 3 0 3 >/dev/null ], [0], [expout], [ignore])
 AT_CLEANUP
 
