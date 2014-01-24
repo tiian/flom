@@ -1,5 +1,5 @@
 #
-# Copy this file to @sysconfdir@ and coustomize it to use as system wide
+# Copy this file to @sysconfdir@ and customize it to use as system wide
 # flom configuration file
 # Copy this file to your home directory, rename it as @_USER_CONFIG_FILENAME@
 # and customize it to use as your user default flom configuration file
@@ -25,6 +25,8 @@
 [@_CONFIG_GROUP_RESOURCE@]
 # Name of the resource that must be locked; see function 
 # "global_res_name_preg_init" for valid regular expressions
+# Alphanumeric characters are OK, but the first character MUST be alphabetic;
+# special characters are not accepted
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_NAME@=MYRESOURCE123
 # Flom command will enqueue if the resource is not available; valid values
