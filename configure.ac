@@ -1,8 +1,8 @@
-AC_INIT([flom], [0.1.4-pre], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([flom], [0.1.4], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 # hardwired configuration
-_RELEASE_DATE="2014-01-19"
+_RELEASE_DATE="2014-01-24"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"

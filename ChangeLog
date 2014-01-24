@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.1.4 implemented lock mode semantic as in VMS DLM (Distributed Lock
+20140124 - 0.1.4 implemented lock mode semantic as in VMS DLM (Distributed Lock
 	Manager).
 
 20140119 - 0.1.3 implemented blocking with timeout behavior 
