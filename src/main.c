@@ -44,6 +44,7 @@
 static gboolean print_version = FALSE;
 static gboolean verbose = FALSE;
 static char *config_file = NULL;
+static gchar *socket_name = NULL;
 static gchar *resource_name = NULL;
 static gchar *resource_wait = NULL;
 static gint resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
@@ -61,6 +62,7 @@ static GOptionEntry entries[] =
     { "resource-wait", 'w', 0, G_OPTION_ARG_STRING, &resource_wait, "Specify if the command enques when the resource is already locked (accepted values 'yes', 'no')", NULL },
     { "resource-timeout", 'o', 0, G_OPTION_ARG_INT, &resource_timeout, "Specify maximum wait time (milliseconds) if a resource is already locked", NULL },
     { "lock-mode", 'l', 0, G_OPTION_ARG_STRING, &lock_mode, "Resource lock mode ('NL', 'CR', 'CW', 'PR', 'PW', 'EX')", NULL },
+    { "socket-name", 's', 0, G_OPTION_ARG_STRING, &socket_name, "Daemon/command communication socket name", NULL },
     { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
@@ -148,6 +150,8 @@ int main (int argc, char *argv[])
         }
         flom_config_set_lock_mode(flm);
     }
+    if (NULL != socket_name)
+        flom_config_set_socket_name(socket_name);
     if (NULL != daemon_trace_file)
         flom_config_set_daemon_trace_file(daemon_trace_file);
     if (NULL != command_trace_file) {

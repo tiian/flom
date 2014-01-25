@@ -264,12 +264,11 @@ int flom_listen(flom_conns_t *conns)
             
         if (-1 == (fd = socket(AF_LOCAL, SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
-        if (-1 == unlink(global_config.local_socket_path_name) &&
-            ENOENT != errno)
+        if (-1 == unlink(global_config.socket_name) && ENOENT != errno)
             THROW(UNLINK_ERROR);
         memset(&servaddr, 0, sizeof(servaddr));
         servaddr.sun_family = AF_LOCAL;
-        strcpy(servaddr.sun_path, global_config.local_socket_path_name);
+        strcpy(servaddr.sun_path, global_config.socket_name);
         if (-1 == bind(fd, (struct sockaddr *) &servaddr, sizeof(servaddr)))
             THROW(BIND_ERROR);
         if (-1 ==listen(fd, 100))
@@ -317,7 +316,7 @@ int flom_listen_clean(flom_conns_t *conns)
     FLOM_TRACE(("flom_listen_clean\n"));
     TRY {
         flom_conns_free(conns);
-        if (-1 == unlink(global_config.local_socket_path_name)) {
+        if (-1 == unlink(global_config.socket_name)) {
             FLOM_TRACE(("flom_listen_clean: unlink errno=%d\n", errno));
         }
         

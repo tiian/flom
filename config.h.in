@@ -138,6 +138,9 @@
 /* Version number of package */
 #undef VERSION
 
+/* Label of "communication" group inside config files */
+#undef _CONFIG_GROUP_COMMUNICATION
+
 /* Label of "resource" group inside config files */
 #undef _CONFIG_GROUP_RESOURCE
 
@@ -155,6 +158,9 @@
 
 /* Label of "Name" key inside config files */
 #undef _CONFIG_KEY_NAME
+
+/* Label of "SocketName" key inside config files */
+#undef _CONFIG_KEY_SOCKET_NAME
 
 /* Label of "Timeout" key inside config files */
 #undef _CONFIG_KEY_TIMEOUT

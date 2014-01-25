@@ -84,6 +84,8 @@ const gchar *FLOM_CONFIG_KEY_NAME = _CONFIG_KEY_NAME;
 const gchar *FLOM_CONFIG_KEY_WAIT = _CONFIG_KEY_WAIT;
 const gchar *FLOM_CONFIG_KEY_TIMEOUT = _CONFIG_KEY_TIMEOUT;
 const gchar *FLOM_CONFIG_KEY_LOCK_MODE = _CONFIG_KEY_LOCK_MODE;
+const gchar *FLOM_CONFIG_GROUP_COMMUNICATION = _CONFIG_GROUP_COMMUNICATION;
+const gchar *FLOM_CONFIG_KEY_SOCKET_NAME = _CONFIG_KEY_SOCKET_NAME;
 
 
 
@@ -120,12 +122,13 @@ void flom_config_reset()
     
     FLOM_TRACE(("flom_config_reset\n"));
     /* set UNIX socket name */
+    global_config.socket_name = g_malloc(LOCAL_SOCKET_SIZE);
     pwd = getpwuid(getuid());
     if (NULL == pwd || NULL == pwd->pw_name)
         login = "nobody";
     else
         login = pwd->pw_name;
-    snprintf(global_config.local_socket_path_name, LOCAL_SOCKET_SIZE,
+    snprintf(global_config.socket_name, LOCAL_SOCKET_SIZE,
              "/tmp/flom-%s", login);
     global_config.daemon_trace_file = NULL;
     global_config.command_trace_file = NULL;
@@ -439,6 +442,25 @@ int flom_config_init_load(const char *config_file_name)
             g_free(value);
             value = NULL;
             if (throw_error) THROW(CONFIG_SET_LOCK_MODE_ERROR);
+        }
+        /* pick-up socket name configuration */
+        if (NULL == (value = g_key_file_get_string(
+                         gkf, FLOM_CONFIG_GROUP_COMMUNICATION,
+                         FLOM_CONFIG_KEY_SOCKET_NAME, &error))) {
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_COMMUNICATION,
+                        FLOM_CONFIG_KEY_SOCKET_NAME, 
+                        error->code,
+                        error->message));
+            g_error_free(error);
+            error = NULL;
+        } else {
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
+                        FLOM_CONFIG_GROUP_COMMUNICATION,
+                        FLOM_CONFIG_KEY_SOCKET_NAME, value));
+            flom_config_set_socket_name(value);
+            value = NULL;
         }
         THROW(NONE);
     } CATCH {

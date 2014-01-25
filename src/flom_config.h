@@ -129,6 +129,14 @@ extern const gchar *FLOM_CONFIG_KEY_TIMEOUT;
  * Label associated to "LockMode" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_LOCK_MODE;
+/**
+ * Label associated to "Communication" group inside config files
+ */
+extern const gchar *FLOM_CONFIG_GROUP_COMMUNICATION;
+/**
+ * Label associated to "SocketName" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_SOCKET_NAME;
 
 
 
@@ -158,9 +166,9 @@ typedef enum flom_bool_value_e {
  */
 typedef struct flom_config {
     /**
-     * Path of UNIX socket used for local connection
+     * Path of UNIX socket / IP name or address used for connection
      */
-    char               local_socket_path_name[LOCAL_SOCKET_SIZE];
+    gchar             *socket_name;
     /**
      * Name of the file must be used to write trace messages from the daemon
      */
@@ -256,6 +264,26 @@ extern "C" {
      * @return a reason code
      */
     int flom_config_init_load(const char *config_file_name);
+
+
+    
+    /**
+     * Set daemon_socket_name
+     * @param socket_name IN set the new value for socket_name properties
+     */
+    static inline void flom_config_set_socket_name(gchar *socket_name) {
+        if (NULL != global_config.socket_name)
+            g_free(global_config.socket_name);
+        global_config.socket_name = socket_name; }
+
+
+
+    /**
+     * Retrieve the socket_name specified for daemon process
+     * @return socket_name
+     */
+    static inline const gchar *flom_config_get_socket_name(void) {
+        return global_config.socket_name; }
 
 
     

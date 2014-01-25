@@ -60,12 +60,12 @@ int flom_client_connect(struct flom_conn_data_s *cd)
         memset(cd, 0, sizeof(cd));
         
         FLOM_TRACE(("flom_client_connect: connecting to socket '%s'\n",
-                    global_config.local_socket_path_name));
+                    global_config.socket_name));
 
         if (-1 == (cd->fd = socket(AF_LOCAL, SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
         cd->saun.sun_family = AF_LOCAL;
-        strcpy(cd->saun.sun_path, global_config.local_socket_path_name);
+        strcpy(cd->saun.sun_path, global_config.socket_name);
         cd->addr_len = sizeof(cd->saun);
         if (-1 == connect(cd->fd, (struct sockaddr *)&cd->saun,
                           cd->addr_len)) {

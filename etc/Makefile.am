@@ -18,4 +18,6 @@ flom.conf : flom.conf.in
 	-e 's|@_CONFIG_KEY_WAIT[@]|$(_CONFIG_KEY_WAIT)|g' \
 	-e 's|@_CONFIG_KEY_TIMEOUT[@]|$(_CONFIG_KEY_TIMEOUT)|g' \
 	-e 's|@_CONFIG_KEY_LOCK_MODE[@]|$(_CONFIG_KEY_LOCK_MODE)|g' \
+	-e 's|@_CONFIG_GROUP_COMMUNICATION[@]|$(_CONFIG_GROUP_COMMUNICATION)|g' \
+	-e 's|@_CONFIG_KEY_SOCKET_NAME[@]|$(_CONFIG_KEY_SOCKET_NAME)|g' \
 	$< >$@
