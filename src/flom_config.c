@@ -271,6 +271,7 @@ int flom_config_init_load(const char *config_file_name)
                      , CONFIG_SET_RESOURCE_WAIT_ERROR
                      , CONFIG_SET_RESOURCE_TIMEOUT_ERROR
                      , CONFIG_SET_LOCK_MODE_ERROR
+                     , CONFIG_SET_SOCKET_NAME_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int print_file_name = FALSE;
@@ -459,8 +460,11 @@ int flom_config_init_load(const char *config_file_name)
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_COMMUNICATION,
                         FLOM_CONFIG_KEY_SOCKET_NAME, value));
-            flom_config_set_socket_name(value);
-            value = NULL;
+            if (FLOM_RC_OK != (ret_cod = flom_config_set_socket_name(value))) {
+                print_file_name = TRUE;
+                THROW(CONFIG_SET_SOCKET_NAME_ERROR);
+            } else
+                value = NULL;
         }
         THROW(NONE);
     } CATCH {
@@ -476,6 +480,7 @@ int flom_config_init_load(const char *config_file_name)
             case CONFIG_SET_RESOURCE_WAIT_ERROR:
             case CONFIG_SET_RESOURCE_TIMEOUT_ERROR:
             case CONFIG_SET_LOCK_MODE_ERROR:
+            case CONFIG_SET_SOCKET_NAME_ERROR:
                 ret_cod = FLOM_RC_INVALID_OPTION;
                 break;
             case NONE:
@@ -495,6 +500,18 @@ int flom_config_init_load(const char *config_file_name)
     FLOM_TRACE(("flom_config_init_load/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+int flom_config_set_socket_name(gchar *socket_name) {
+    FLOM_TRACE(("flom_config_set_socket_name(%s)\n", socket_name));
+    if (LOCAL_SOCKET_SIZE <= strlen(socket_name))
+        return FLOM_RC_BUFFER_OVERFLOW;
+    if (NULL != global_config.socket_name)
+        g_free(global_config.socket_name);
+    global_config.socket_name = socket_name;
+    return FLOM_RC_OK;
 }
 
 

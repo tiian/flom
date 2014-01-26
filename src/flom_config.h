@@ -270,11 +270,9 @@ extern "C" {
     /**
      * Set daemon_socket_name
      * @param socket_name IN set the new value for socket_name properties
+     * @return a reason code
      */
-    static inline void flom_config_set_socket_name(gchar *socket_name) {
-        if (NULL != global_config.socket_name)
-            g_free(global_config.socket_name);
-        global_config.socket_name = socket_name; }
+    int flom_config_set_socket_name(gchar *socket_name);
 
 
 

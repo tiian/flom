@@ -150,8 +150,15 @@ int main (int argc, char *argv[])
         }
         flom_config_set_lock_mode(flm);
     }
-    if (NULL != socket_name)
-        flom_config_set_socket_name(socket_name);
+    if (NULL != socket_name) {
+        if (FLOM_RC_OK != (ret_cod = flom_config_set_socket_name(
+                               socket_name))) {
+            g_print("socket-name: '%s' is an invalid value\n", socket_name);
+            g_print("flom_client_connect: ret_cod=%d (%s)\n",
+                    ret_cod, flom_strerror(ret_cod));
+            exit(FLOM_ES_GENERIC_ERROR);
+        }
+    }
     if (NULL != daemon_trace_file)
         flom_config_set_daemon_trace_file(daemon_trace_file);
     if (NULL != command_trace_file) {
