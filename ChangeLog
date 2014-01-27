@@ -1,7 +1,9 @@
 LOG:
 
+         - 0.1.5 implemented lock sharing among two or more users [use case #6]
+
 20140124 - 0.1.4 implemented lock mode semantic as in VMS DLM (Distributed Lock
-	Manager).
+	Manager) [use case #5]
 
 20140119 - 0.1.3 implemented blocking with timeout behavior 
 	(--resource-timeout, -o) [use case #4]

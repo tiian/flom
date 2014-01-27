@@ -23,7 +23,7 @@ verbose mode execution
 user configuration file name. Flom tries to read system default configuration file @sysconfdir@/@_SYSTEM_CONFIG_FILENAME@, user default configuration file ~/@_USER_CONFIG_FILENAME@ and finally this file if specified. Definitive configuration is obtained overloading hard wired build time defaults, system defaults, user defaults, user custom, command line options.
 .TP
 .B -r, --resource-name=\fIRESOURCE
-name of the resource used for enqueing (locking). Resource name can be composed of "alpha" and "digit" characters, but the first character \fBmust be\fP of type "alpha" (example: "RA123" is \fBOK\fP, "123RA" is \fBnot\fP OK). Accepted resource names are described in function "global_res_name_preg_init": inspect source code for more details.
+name of the resource used for enqueing (locking). Resource name can be composed of "alpha" and "digit" characters, but the first character \fBmust be\fP of type "alpha" (example: "RA123" is \fBOK\fP, "123RA" is \fBnot\fP OK). Accepted resource names are described in function "global_res_name_preg_init": inspect source code for more details
 .TP
 .B -w, --resource-wait=\fIyes|no
 \fBdefault\fP (\fIyes\fP): the command will enqueue if the resource is already locked by someone else, otherwise (\fIno\fP) it will return immediately
@@ -34,11 +34,14 @@ maximum enqueue time if the resource is already locked by someone else; if the r
 .B -l, --lock-mode=\fIMODE
 lock mode as defined by VMS DLM (Distributed Lock Manager). \fIMODE\fP can be: "NullLock", "ConcurrentRead", "ConcurrentWrite", "ProtectedRead", "ProtectedWrite", "Exclusive" (equivalent short forms are: "NL", "CR", "CW", "PR", "PW", "EX"). More information are available here \fIhttp://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes\fP
 .TP
+.B -s, --socket-name=\fIFILENAME
+absolute \fIFILENAME\fP that must be used to create the UNIX socket used for local communication between \fBflom\fP command line and \fBflom daemon\fP; typical values are something like \fI/tmp/something\fP. This option is useful to share locks between different users (the default socket is per user and every user creates a different one)
+.TP
 .B -T, --command-trace-file=\fIFILENAME
-file destination of the trace messages produced by the command (foreground) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module.
+file destination of the trace messages produced by the command (foreground) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module
 .TP
 .B -t, --daemon-trace-file=\fIFILENAME
-file destination of the trace messages produced by the daemon (background) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module.
+file destination of the trace messages produced by the daemon (background) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module
 .TP
 .SH EXIT STATUS
 if anything runs as expected, \fBflom\fP exit status is the same of the controlled (serialized) command. Sometimes an error occurs and \fBflom\fP reports it using dedicated exit statuses you can check with \fI$?\fP environment variable:
