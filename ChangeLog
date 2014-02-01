@@ -1,5 +1,8 @@
 LOG:
 
+         - 0.3.0 Renamed [Communication] with [Daemon] inside configuration 
+	files
+
 20140127 - 0.1.5 implemented lock sharing among two or more users [use case #6]
 
 20140124 - 0.1.4 implemented lock mode semantic as in VMS DLM (Distributed Lock

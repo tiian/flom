@@ -48,6 +48,14 @@
 
 
 /**
+ * Used to break poll loop when looking for new/old clients
+ * This constant will probably become useless after "ping" implementation
+ */
+#define FLOM_LOCKER_POLL_TIMEOUT   1000
+
+
+
+/**
  * Data structure used for a locker thread
  */
 struct flom_locker_s {

@@ -1,4 +1,4 @@
-AC_INIT([flom], [0.1.5], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([flom], [0.3.0-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 # hardwired configuration
@@ -14,7 +14,7 @@ _CONFIG_KEY_NAME="Name"
 _CONFIG_KEY_WAIT="Wait"
 _CONFIG_KEY_TIMEOUT="Timeout"
 _CONFIG_KEY_LOCK_MODE="LockMode"
-_CONFIG_GROUP_COMMUNICATION="Communication"
+_CONFIG_GROUP_DAEMON="Daemon"
 _CONFIG_KEY_SOCKET_NAME="SocketName"
 _ES_UNABLE_TO_EXECUTE_COMMAND=97
 _ES_RESOURCE_BUSY=98
@@ -32,7 +32,7 @@ AC_DEFINE_UNQUOTED([_CONFIG_KEY_NAME], ["$_CONFIG_KEY_NAME"], [Label of "Name" k
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_WAIT], ["$_CONFIG_KEY_WAIT"], [Label of "Wait" key inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_TIMEOUT], ["$_CONFIG_KEY_TIMEOUT"], [Label of "Timeout" key inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_LOCK_MODE], ["$_CONFIG_KEY_LOCK_MODE"], [Label of "LockMode" key inside config files])
-AC_DEFINE_UNQUOTED([_CONFIG_GROUP_COMMUNICATION], ["$_CONFIG_GROUP_COMMUNICATION"], [Label of "communication" group inside config files])
+AC_DEFINE_UNQUOTED([_CONFIG_GROUP_DAEMON], ["$_CONFIG_GROUP_DAEMON"], [Label of "communication" group inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_SOCKET_NAME], ["$_CONFIG_KEY_SOCKET_NAME"], [Label of "SocketName" key inside config files])
 AC_DEFINE_UNQUOTED([_ES_UNABLE_TO_EXECUTE_COMMAND], [$_ES_UNABLE_TO_EXECUTE_COMMAND], [Exit status for command execution error])
 AC_DEFINE_UNQUOTED([_ES_RESOURCE_BUSY], [$_ES_RESOURCE_BUSY], [Exit status for busy resource condition])
@@ -163,7 +163,7 @@ AC_SUBST(_CONFIG_KEY_NAME)
 AC_SUBST(_CONFIG_KEY_WAIT)
 AC_SUBST(_CONFIG_KEY_TIMEOUT)
 AC_SUBST(_CONFIG_KEY_LOCK_MODE)
-AC_SUBST(_CONFIG_GROUP_COMMUNICATION)
+AC_SUBST(_CONFIG_GROUP_DAEMON)
 AC_SUBST(_CONFIG_KEY_SOCKET_NAME)
 AC_SUBST(_ES_UNABLE_TO_EXECUTE_COMMAND)
 AC_SUBST(_ES_RESOURCE_BUSY)

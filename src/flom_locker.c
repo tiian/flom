@@ -163,7 +163,7 @@ gpointer flom_locker_loop(gpointer data)
                 THROW(CONNS_SET_EVENTS_ERROR);
             FLOM_TRACE(("flom_locker_loop: entering poll...\n"));
             ready_fd = poll(fds, flom_conns_get_used(&conns),
-                            global_config.idle_time);
+                            FLOM_LOCKER_POLL_TIMEOUT);
             FLOM_TRACE(("flom_locker_loop: ready_fd=%d\n", ready_fd));
             /* error on poll function */
             if (0 > ready_fd)
@@ -172,7 +172,7 @@ gpointer flom_locker_loop(gpointer data)
             if (0 == ready_fd) {
                 FLOM_TRACE(("flom_locker_loop: idle time exceeded %d "
                             "milliseconds\n",
-                            global_config.idle_time));
+                            FLOM_LOCKER_POLL_TIMEOUT));
                 if (1 == flom_conns_get_used(&conns)) {
                     locker->idle_periods++;
                     FLOM_TRACE(("flom_locker_loop: only control connection "

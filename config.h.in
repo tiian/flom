@@ -139,7 +139,7 @@
 #undef VERSION
 
 /* Label of "communication" group inside config files */
-#undef _CONFIG_GROUP_COMMUNICATION
+#undef _CONFIG_GROUP_DAEMON
 
 /* Label of "resource" group inside config files */
 #undef _CONFIG_GROUP_RESOURCE

@@ -52,9 +52,9 @@
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_LOCK_MODE@=Exclusive
 
-# This section (configuration group) is related to communication between
-# flom command(s) and flom daemon
-[@_CONFIG_GROUP_COMMUNICATION@]
+# This section (configuration group) is related to daemon and communication 
+# between flom command(s) and flom daemon
+[@_CONFIG_GROUP_DAEMON@]
 # Complete filepath for UNIX socket (AF_LOCAL) used for local communication
 # between flom command and flom daemon
 # (Uncomment below row if necessary)

@@ -130,9 +130,9 @@ extern const gchar *FLOM_CONFIG_KEY_TIMEOUT;
  */
 extern const gchar *FLOM_CONFIG_KEY_LOCK_MODE;
 /**
- * Label associated to "Communication" group inside config files
+ * Label associated to "Daemon" group inside config files
  */
-extern const gchar *FLOM_CONFIG_GROUP_COMMUNICATION;
+extern const gchar *FLOM_CONFIG_GROUP_DAEMON;
 /**
  * Label associated to "SocketName" key inside config files
  */
@@ -178,10 +178,11 @@ typedef struct flom_config {
      */
     gchar             *command_trace_file;
     /**
-     * After idle_time milliseconds without new incoming requests, the daemon
-     * will terminate activity
+     * Daemon lifespan (milliseconds):
+     * < 0 infinite, = 0 don't activate a daemon, > 0 after lifespan idle time
+     * the activated daemon will terminate
      */
-    int                idle_time;
+    gint               lifespan;
     /**
      * Name of the resource that must be locked
      */
@@ -324,6 +325,26 @@ extern "C" {
      */
     static inline const gchar *flom_config_get_command_trace_file(void) {
         return global_config.command_trace_file; }
+
+
+    
+    /**
+     * Set "lifespan" config parameter
+     * @param timeout IN milliseconds
+     */
+    static inline void flom_config_set_lifespan(gint timeout) {
+        global_config.lifespan = timeout;
+    }
+
+
+
+    /**
+     * Get "lifespan" config parameter
+     * @return current timeout in milliseconds
+     */
+    static inline gint flom_config_get_lifespan(void) {
+        return global_config.lifespan;
+    }
 
 
     

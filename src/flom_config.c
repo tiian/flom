@@ -84,7 +84,7 @@ const gchar *FLOM_CONFIG_KEY_NAME = _CONFIG_KEY_NAME;
 const gchar *FLOM_CONFIG_KEY_WAIT = _CONFIG_KEY_WAIT;
 const gchar *FLOM_CONFIG_KEY_TIMEOUT = _CONFIG_KEY_TIMEOUT;
 const gchar *FLOM_CONFIG_KEY_LOCK_MODE = _CONFIG_KEY_LOCK_MODE;
-const gchar *FLOM_CONFIG_GROUP_COMMUNICATION = _CONFIG_GROUP_COMMUNICATION;
+const gchar *FLOM_CONFIG_GROUP_DAEMON = _CONFIG_GROUP_DAEMON;
 const gchar *FLOM_CONFIG_KEY_SOCKET_NAME = _CONFIG_KEY_SOCKET_NAME;
 
 
@@ -132,7 +132,7 @@ void flom_config_reset()
              "/tmp/flom-%s", login);
     global_config.daemon_trace_file = NULL;
     global_config.command_trace_file = NULL;
-    global_config.idle_time = 5000; /* milliseconds */
+    global_config.lifespan = 5000; /* milliseconds */
     global_config.resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
     global_config.resource_wait = TRUE;
     global_config.resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
@@ -446,11 +446,11 @@ int flom_config_init_load(const char *config_file_name)
         }
         /* pick-up socket name configuration */
         if (NULL == (value = g_key_file_get_string(
-                         gkf, FLOM_CONFIG_GROUP_COMMUNICATION,
+                         gkf, FLOM_CONFIG_GROUP_DAEMON,
                          FLOM_CONFIG_KEY_SOCKET_NAME, &error))) {
             FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
                         "(...,%s,%s,...): code=%d, message='%s'\n",
-                        FLOM_CONFIG_GROUP_COMMUNICATION,
+                        FLOM_CONFIG_GROUP_DAEMON,
                         FLOM_CONFIG_KEY_SOCKET_NAME, 
                         error->code,
                         error->message));
@@ -458,7 +458,7 @@ int flom_config_init_load(const char *config_file_name)
             error = NULL;
         } else {
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
-                        FLOM_CONFIG_GROUP_COMMUNICATION,
+                        FLOM_CONFIG_GROUP_DAEMON,
                         FLOM_CONFIG_KEY_SOCKET_NAME, value));
             if (FLOM_RC_OK != (ret_cod = flom_config_set_socket_name(value))) {
                 print_file_name = TRUE;

@@ -374,7 +374,7 @@ int flom_accept_loop(flom_conns_t *conns)
                 THROW(CONNS_SET_EVENTS_ERROR);
             FLOM_TRACE(("flom_accept_loop: entering poll...\n"));
             ready_fd = poll(fds, flom_conns_get_used(conns),
-                            global_config.idle_time);
+                            flom_config_get_lifespan());
             FLOM_TRACE(("flom_accept_loop: ready_fd=%d\n", ready_fd));
             /* error on poll function */
             if (0 > ready_fd)
@@ -384,7 +384,7 @@ int flom_accept_loop(flom_conns_t *conns)
                 number_of_lockers = flom_locker_array_count(&lockers);
                 FLOM_TRACE(("flom_accept_loop: idle time exceeded %d "
                             "milliseconds, number of lockers=%u\n",
-                            global_config.idle_time, number_of_lockers));
+                            flom_config_get_lifespan(), number_of_lockers));
                 if (0 == number_of_lockers) {
                     if (1 == flom_conns_get_used(conns)) {
                         FLOM_TRACE(("flom_accept_loop: only listener "

@@ -1,0 +1,47 @@
+Daemon lifespan truth table
+
+unic	multic	lifesp	behavior
+null	null	<0	no networking, daemon will never end
+null	null	0	no networking, daemon will NOT be started by this
+			command
+null	null	>0	no networking, daemon will die after lifespan inactivity
+			time
+null	value	<0	use multicast to reach daemon, if there is no answer
+			a new instance will be activated locally; activated
+			daemon will never end
+null	value	0	use multicast to reach daemon, if there is no answer
+			no new instance will be activated locally: an error
+			will be reported
+null	value	>0	use multicast to reach daemon, if there is no answer
+			a new instance will be activated locally; activated
+			daemon will die after lifespan inactivity time
+value	null	<0	use unicast to reach daemon, if there is no answer
+			a new instance will be started locally, but it can be
+			activated only if unicast address is a valid address
+			for the current host; activated daemon will never end
+value	null	0	use unicast to reach daemon, if there is no answer
+			no new instance will be activated locally: an error
+			will be reported
+value	null	>0	use unicast to reach daemon, if there is no answer
+			a new instance will be started locally, but it can be
+			activated only if unicast address is a valid address
+			for the current host; activated daemon will die after
+			lifespan inactivity time
+value	value	<0	use unicast to reach daemon, if there is no answer
+			a new instance will be started locally, but it can be
+			activated only if unicast address is a valid address
+			for the current host; multicast address will be used
+			to answer other commands looking for the daemon using
+			multicast address (null, value, 0); activated daemon 
+			will never end
+value	value	=0	use unicast to reach daemon, if there is no answer
+			no new instance will be activated locally: an error 
+			will be reported. "multicast" option is ignored, the
+			same behavior of (value, null, 0)
+value	value	>0	use unicast to reach daemon, if there is no answer
+			a new instance will be started locally, but it can be
+			activated only if unicast address is a valid address
+			for the current host; multicast address will be used
+			to answer other commands looking for the daemon using
+			multicast address (null, value, 0); activated daemon 
+			will die after lifespan inactivity time
