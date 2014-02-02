@@ -39,6 +39,11 @@ AT_CHECK([flom -s /tmp/foo -- ls], [0], [ignore], [ignore])
 AT_CHECK([flom --socket-name=/tmp/bar -- ls], [0], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([Daemon lifespan: -d, --daemon-lifespan])
+AT_CHECK([flom -d 100 -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom --daemon-lifespan=200 -- ls], [0], [ignore], [ignore])
+AT_CLEANUP
+
 AT_SETUP([Command trace file: -T, --command-trace-file])
 AT_CHECK([export FLOM_TRACE_MASK=0xffffffff ; flom -T command.trc -- ls], [0], [ignore], [ignore])
 AT_CHECK([export FLOM_TRACE_MASK=0xffffffff ; flom --command-trace-file=command.trc -- ls], [0], [ignore], [ignore])
