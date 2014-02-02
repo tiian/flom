@@ -49,6 +49,7 @@ static gchar *resource_name = NULL;
 static gchar *resource_wait = NULL;
 static gint resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
 static gchar *lock_mode = NULL;
+static gint daemon_lifespan = _DEFAULT_DAEMON_LIFESPAN;
 static gchar *command_trace_file = NULL;
 static gchar *daemon_trace_file = NULL;
 static gchar **command_argv = NULL;
@@ -63,6 +64,7 @@ static GOptionEntry entries[] =
     { "resource-timeout", 'o', 0, G_OPTION_ARG_INT, &resource_timeout, "Specify maximum wait time (milliseconds) if a resource is already locked", NULL },
     { "lock-mode", 'l', 0, G_OPTION_ARG_STRING, &lock_mode, "Resource lock mode ('NL', 'CR', 'CW', 'PR', 'PW', 'EX')", NULL },
     { "socket-name", 's', 0, G_OPTION_ARG_STRING, &socket_name, "Daemon/command communication socket name", NULL },
+    { "daemon-lifespan", 'd', 0, G_OPTION_ARG_INT, &daemon_lifespan, "Specify minimum lifespan of the flom daemon (if activated)", NULL },
     { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
@@ -158,6 +160,9 @@ int main (int argc, char *argv[])
                     ret_cod, flom_strerror(ret_cod));
             exit(FLOM_ES_GENERIC_ERROR);
         }
+    }
+    if (_DEFAULT_DAEMON_LIFESPAN != daemon_lifespan) {
+        flom_config_set_daemon_lifespan(daemon_lifespan);
     }
     if (NULL != daemon_trace_file)
         flom_config_set_daemon_trace_file(daemon_trace_file);

@@ -138,7 +138,7 @@
 /* Version number of package */
 #undef VERSION
 
-/* Label of "communication" group inside config files */
+/* Label of "Daemon" group inside config files */
 #undef _CONFIG_GROUP_DAEMON
 
 /* Label of "resource" group inside config files */
@@ -152,6 +152,9 @@
 
 /* Label of "daemon trace file" key inside config files */
 #undef _CONFIG_KEY_DAEMONTRACEFILE
+
+/* Label of "Lifespan" key inside config files */
+#undef _CONFIG_KEY_LIFESPAN
 
 /* Label of "LockMode" key inside config files */
 #undef _CONFIG_KEY_LOCK_MODE
@@ -167,6 +170,9 @@
 
 /* Label of "Wait" key inside config files */
 #undef _CONFIG_KEY_WAIT
+
+/* Default value for option daemon lifespan */
+#undef _DEFAULT_DAEMON_LIFESPAN
 
 /* String used to separate directory from file inside fully qualified path
    names */

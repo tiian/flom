@@ -37,6 +37,9 @@ lock mode as defined by VMS DLM (Distributed Lock Manager). \fIMODE\fP can be: "
 .B -s, --socket-name=\fIFILENAME
 absolute \fIFILENAME\fP that must be used to create the UNIX socket used for local communication between \fBflom\fP command line and \fBflom daemon\fP; typical values are something like \fI/tmp/something\fP. This option is useful to share locks between different users (the default socket is per user and every user creates a different one)
 .TP
+.B -d, --daemon-lifespan=\fImilliseconds
+lifespan of \fBflom\fP daemon if activated, expressed using milliseconds. The value of \fImilliseconds\fP can be and integer greater than 0, equal to 0 or less than 0: values greater than 0 are interpreted as minimum daemon lifetime (in milliseconds), the value 0 is interpreted as "don't start a daemon process" and values less than 0 are interpreted as "run forever" (or until a kill message is sent to \fBflom\fP daemon)
+.TP
 .B -T, --command-trace-file=\fIFILENAME
 file destination of the trace messages produced by the command (foreground) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module
 .TP

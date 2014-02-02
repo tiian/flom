@@ -86,6 +86,7 @@ const gchar *FLOM_CONFIG_KEY_TIMEOUT = _CONFIG_KEY_TIMEOUT;
 const gchar *FLOM_CONFIG_KEY_LOCK_MODE = _CONFIG_KEY_LOCK_MODE;
 const gchar *FLOM_CONFIG_GROUP_DAEMON = _CONFIG_GROUP_DAEMON;
 const gchar *FLOM_CONFIG_KEY_SOCKET_NAME = _CONFIG_KEY_SOCKET_NAME;
+const gchar *FLOM_CONFIG_KEY_LIFESPAN = _CONFIG_KEY_LIFESPAN;
 
 
 
@@ -132,7 +133,7 @@ void flom_config_reset()
              "/tmp/flom-%s", login);
     global_config.daemon_trace_file = NULL;
     global_config.command_trace_file = NULL;
-    global_config.lifespan = 5000; /* milliseconds */
+    global_config.daemon_lifespan = _DEFAULT_DAEMON_LIFESPAN;
     global_config.resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
     global_config.resource_wait = TRUE;
     global_config.resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
@@ -272,6 +273,7 @@ int flom_config_init_load(const char *config_file_name)
                      , CONFIG_SET_RESOURCE_TIMEOUT_ERROR
                      , CONFIG_SET_LOCK_MODE_ERROR
                      , CONFIG_SET_SOCKET_NAME_ERROR
+                     , CONFIG_SET_DAEMON_LIFESPAN_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int print_file_name = FALSE;
@@ -466,6 +468,30 @@ int flom_config_init_load(const char *config_file_name)
             } else
                 value = NULL;
         }
+        /* pick-up daemon lifespan from configuration */
+        ivalue = g_key_file_get_integer(
+            gkf, FLOM_CONFIG_GROUP_DAEMON, FLOM_CONFIG_KEY_LIFESPAN, &error);
+        if (NULL != error) {
+            int throw_error = FALSE;
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_DAEMON,
+                        FLOM_CONFIG_KEY_LIFESPAN,
+                        error->code,
+                        error->message));
+            if (G_KEY_FILE_ERROR_KEY_NOT_FOUND != error->code) {
+                print_file_name = throw_error = TRUE;
+                g_print("%s\n", error->message);
+            }
+            g_error_free(error);
+            error = NULL;
+            if (throw_error) THROW(CONFIG_SET_DAEMON_LIFESPAN_ERROR);
+        } else {
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
+                        FLOM_CONFIG_GROUP_DAEMON,
+                        FLOM_CONFIG_KEY_LIFESPAN, ivalue));
+            flom_config_set_daemon_lifespan(ivalue);
+        }
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -481,6 +507,7 @@ int flom_config_init_load(const char *config_file_name)
             case CONFIG_SET_RESOURCE_TIMEOUT_ERROR:
             case CONFIG_SET_LOCK_MODE_ERROR:
             case CONFIG_SET_SOCKET_NAME_ERROR:
+            case CONFIG_SET_DAEMON_LIFESPAN_ERROR:
                 ret_cod = FLOM_RC_INVALID_OPTION;
                 break;
             case NONE:

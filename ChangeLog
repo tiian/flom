@@ -2,6 +2,7 @@ LOG:
 
          - 0.3.0 Renamed [Communication] with [Daemon] inside configuration 
 	files
+	Added "-d, --daemon-lifespan" option (see [Daemon]/Lifespan)
 
 20140127 - 0.1.5 implemented lock sharing among two or more users [use case #6]
 

@@ -49,8 +49,9 @@ int flom_client_connect(struct flom_conn_data_s *cd)
 {
     enum Exception { SOCKET_ERROR
                      , DAEMON_ERROR
-                     , DAEMON_NOT_STARTED
-                     , CONNECT_ERROR
+                     , DAEMON_NOT_STARTED 
+                     , CONNECT_ERROR1
+                     , CONNECT_ERROR2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -70,19 +71,26 @@ int flom_client_connect(struct flom_conn_data_s *cd)
         if (-1 == connect(cd->fd, (struct sockaddr *)&cd->saun,
                           cd->addr_len)) {
             if (ENOENT == errno || ECONNREFUSED == errno) {
-                FLOM_TRACE(("flom_client_connect: connection failed, "
-                            "activating a new daemon\n"));
-                /* daemon is not active, starting it... */
-                if (FLOM_RC_OK != (ret_cod = flom_daemon()))
-                    THROW(DAEMON_ERROR);
-                /* trying to connect again... */
-                if (-1 == connect(cd->fd, (struct sockaddr *)&cd->saun,
-                                  cd->addr_len))
-                    THROW(DAEMON_NOT_STARTED);
-                FLOM_TRACE(("flom_client_connect: connected to flom "
-                            "daemon\n"));
+                if (0 != flom_config_get_daemon_lifespan()) {
+                    FLOM_TRACE(("flom_client_connect: connection failed, "
+                                "activating a new daemon\n"));
+                    /* daemon is not active, starting it... */
+                    if (FLOM_RC_OK != (ret_cod = flom_daemon()))
+                        THROW(DAEMON_ERROR);
+                    /* trying to connect again... */
+                    if (-1 == connect(cd->fd, (struct sockaddr *)&cd->saun,
+                                      cd->addr_len))
+                        THROW(DAEMON_NOT_STARTED);
+                    FLOM_TRACE(("flom_client_connect: connected to flom "
+                                "daemon\n"));
+                } else {
+                    FLOM_TRACE(("flom_client_connect: connection failed, "
+                                "a new daemon can not be started because "
+                                "daemon lifespan is 0\n"));
+                    THROW(CONNECT_ERROR1);
+                }
             } else {
-                THROW(CONNECT_ERROR);
+                THROW(CONNECT_ERROR2);
             }
         }
         
@@ -97,7 +105,8 @@ int flom_client_connect(struct flom_conn_data_s *cd)
             case DAEMON_NOT_STARTED:
                 ret_cod = FLOM_RC_DAEMON_NOT_STARTED;
                 break;
-            case CONNECT_ERROR:
+            case CONNECT_ERROR1:
+            case CONNECT_ERROR2:
                 ret_cod = FLOM_RC_CONNECT_ERROR;
                 break;
             case NONE:

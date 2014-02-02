@@ -137,6 +137,10 @@ extern const gchar *FLOM_CONFIG_GROUP_DAEMON;
  * Label associated to "SocketName" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_SOCKET_NAME;
+/**
+ * Label associated to "Lifespan" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_LIFESPAN;
 
 
 
@@ -182,7 +186,7 @@ typedef struct flom_config {
      * < 0 infinite, = 0 don't activate a daemon, > 0 after lifespan idle time
      * the activated daemon will terminate
      */
-    gint               lifespan;
+    gint               daemon_lifespan;
     /**
      * Name of the resource that must be locked
      */
@@ -329,21 +333,21 @@ extern "C" {
 
     
     /**
-     * Set "lifespan" config parameter
+     * Set "daemon_lifespan" config parameter
      * @param timeout IN milliseconds
      */
-    static inline void flom_config_set_lifespan(gint timeout) {
-        global_config.lifespan = timeout;
+    static inline void flom_config_set_daemon_lifespan(gint timeout) {
+        global_config.daemon_lifespan = timeout;
     }
 
 
 
     /**
-     * Get "lifespan" config parameter
+     * Get "daemon_lifespan" config parameter
      * @return current timeout in milliseconds
      */
-    static inline gint flom_config_get_lifespan(void) {
-        return global_config.lifespan;
+    static inline gint flom_config_get_daemon_lifespan(void) {
+        return global_config.daemon_lifespan;
     }
 
 

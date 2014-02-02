@@ -59,4 +59,10 @@
 # between flom command and flom daemon
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_SOCKET_NAME@=/tmp/flom-socket
+# Lifespan of activated daemon: it must be an integer value >0 or =0 or <0
+# > 0: minimum number of milliseconds the daemon must operate 
+# = 0: daemon must not started
+# < 0: the daemon must operate forever (until kill command)
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_LIFESPAN@=@_DEFAULT_DAEMON_LIFESPAN@
 
