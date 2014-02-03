@@ -141,6 +141,22 @@ extern const gchar *FLOM_CONFIG_KEY_SOCKET_NAME;
  * Label associated to "Lifespan" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_LIFESPAN;
+/**
+ * Label associated to "UnicastAddress" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_UNICAST_ADDRESS;
+/**
+ * Label associated to "UnicastPort" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_UNICAST_PORT;
+/**
+ * Label associated to "MulticastAddress" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_MULTICAST_ADDRESS;
+/**
+ * Label associated to "MulticastPort" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_MULTICAST_PORT;
 
 
 
@@ -205,6 +221,22 @@ typedef struct flom_config {
      * Lock mode as designed by VMS DLM
      */
     flom_lock_mode_t   lock_mode;
+    /**
+     * Daemon TCP/IP address
+     */
+    gchar             *unicast_address;
+    /**
+     * Daemon TCP/IP port
+     */
+    gint               unicast_port;
+    /**
+     * Daemon UDP/IP multicast address
+     */
+    gchar             *multicast_address;
+    /**
+     * Daemon UDP/IP multicast port
+     */
+    gint               multicast_port;
 } flom_config_t;
 
 
@@ -426,6 +458,86 @@ extern "C" {
      */
     static inline flom_lock_mode_t flom_config_get_lock_mode(void) {
         return global_config.lock_mode;
+    }
+
+
+    
+    /**
+     * Set unicast_address in config object
+     * @param address IN set the new value for unicast_address property
+     */
+    static inline void flom_config_set_unicast_address(gchar *address) {
+        if (NULL != global_config.unicast_address)
+            g_free(global_config.unicast_address);
+        global_config.unicast_address = address; }
+
+
+
+    /**
+     * Retrieve the unicast address specified for daemon process
+     * @return TCP/IP unicast address
+     */
+    static inline const gchar *flom_config_get_unicast_address(void) {
+        return global_config.unicast_address; }
+
+
+    
+    /**
+     * Set TCP/IP unicast port config parameter
+     * @param port IN TCP/IP port
+     */
+    static inline void flom_config_set_unicast_port(gint port) {
+        global_config.unicast_port = port;
+    }
+
+
+
+    /**
+     * Get TCP/IP unicast port config parameter
+     * @return current unicast port
+     */
+    static inline gint flom_config_get_unicast_port(void) {
+        return global_config.unicast_port;
+    }
+
+
+    
+    /**
+     * Set multicast_address in config object
+     * @param address IN set the new value for multicast_address property
+     */
+    static inline void flom_config_set_multicast_address(gchar *address) {
+        if (NULL != global_config.multicast_address)
+            g_free(global_config.multicast_address);
+        global_config.multicast_address = address; }
+
+
+
+    /**
+     * Retrieve the multicast address specified for daemon process
+     * @return UDP/IP multicast address
+     */
+    static inline const gchar *flom_config_get_multicast_address(void) {
+        return global_config.multicast_address; }
+
+
+    
+    /**
+     * Set UDP/IP multicast port config parameter
+     * @param port IN UDP/IP port
+     */
+    static inline void flom_config_set_multicast_port(gint port) {
+        global_config.multicast_port = port;
+    }
+
+
+
+    /**
+     * Get UDP/IP multicast port config parameter
+     * @return current multicast port
+     */
+    static inline gint flom_config_get_multicast_port(void) {
+        return global_config.multicast_port;
     }
 
 
