@@ -65,4 +65,17 @@
 # < 0: the daemon must operate forever (until kill command)
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_LIFESPAN@=@_DEFAULT_DAEMON_LIFESPAN@
+# TCP/IP address used by flom daemon
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_UNICAST_ADDRESS@=127.0.0.1
+# TCP/IP port used by flom daemon
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_UNICAST_PORT@=@_DEFAULT_DAEMON_PORT@
+# UDP/IP multicast address used to discover flom daemon unicast address & port
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_MULTICAST_ADDRESS@=224.0.0.1
+# UDP/IP multicast port used to discover flom daemon unicast address & port
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_MULTICAST_PORT@=@_DEFAULT_DAEMON_PORT@
+
 

@@ -50,6 +50,10 @@ static gchar *resource_wait = NULL;
 static gint resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
 static gchar *lock_mode = NULL;
 static gint daemon_lifespan = _DEFAULT_DAEMON_LIFESPAN;
+static gchar *unicast_address = NULL;
+static gint unicast_port = _DEFAULT_DAEMON_PORT;
+static gchar *multicast_address = NULL;
+static gint multicast_port = _DEFAULT_DAEMON_PORT;
 static gchar *command_trace_file = NULL;
 static gchar *daemon_trace_file = NULL;
 static gchar **command_argv = NULL;
@@ -65,8 +69,12 @@ static GOptionEntry entries[] =
     { "lock-mode", 'l', 0, G_OPTION_ARG_STRING, &lock_mode, "Resource lock mode ('NL', 'CR', 'CW', 'PR', 'PW', 'EX')", NULL },
     { "socket-name", 's', 0, G_OPTION_ARG_STRING, &socket_name, "Daemon/command communication socket name", NULL },
     { "daemon-lifespan", 'd', 0, G_OPTION_ARG_INT, &daemon_lifespan, "Specify minimum lifespan of the flom daemon (if activated)", NULL },
-    { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
+    { "unicast-address", 'a', 0, G_OPTION_ARG_STRING, &unicast_address, "Daemon TCP/IP address", NULL },
+    { "unicast-port", 'p', 0, G_OPTION_ARG_INT, &unicast_port, "Daemon TCP/IP port", NULL },
+    { "multicast-address", 'A', 0, G_OPTION_ARG_STRING, &multicast_address, "Daemon UDP/IP (multicast) address", NULL },
+    { "multicast-port", 'P', 0, G_OPTION_ARG_INT, &multicast_port, "Daemon UDP/IP (multicast) port", NULL },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
+    { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
     { NULL }
 };

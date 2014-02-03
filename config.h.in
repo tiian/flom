@@ -159,6 +159,12 @@
 /* Label of "LockMode" key inside config files */
 #undef _CONFIG_KEY_LOCK_MODE
 
+/* Label of "MulticastAddress" key inside config files */
+#undef _CONFIG_KEY_MULTICAST_ADDRESS
+
+/* Label of "MulticastPort" key inside config files */
+#undef _CONFIG_KEY_MULTICAST_PORT
+
 /* Label of "Name" key inside config files */
 #undef _CONFIG_KEY_NAME
 
@@ -168,11 +174,20 @@
 /* Label of "Timeout" key inside config files */
 #undef _CONFIG_KEY_TIMEOUT
 
+/* Label of "UnicastAddress" key inside config files */
+#undef _CONFIG_KEY_UNICAST_ADDRESS
+
+/* Label of "UnicastPort" key inside config files */
+#undef _CONFIG_KEY_UNICAST_PORT
+
 /* Label of "Wait" key inside config files */
 #undef _CONFIG_KEY_WAIT
 
 /* Default value for option daemon lifespan */
 #undef _DEFAULT_DAEMON_LIFESPAN
+
+/* Default port used to reach flom daemon using TCP and UDP (multicast) */
+#undef _DEFAULT_DAEMON_PORT
 
 /* String used to separate directory from file inside fully qualified path
    names */
