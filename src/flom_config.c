@@ -122,30 +122,75 @@ flom_bool_value_t flom_bool_value_retrieve(const gchar *text)
 
 void flom_config_reset()
 {
-    struct passwd *pwd = NULL;
-    char *login = NULL;
-    
     FLOM_TRACE(("flom_config_reset\n"));
-    /* set UNIX socket name */
-    global_config.socket_name = g_malloc(LOCAL_SOCKET_SIZE);
-    pwd = getpwuid(getuid());
-    if (NULL == pwd || NULL == pwd->pw_name)
-        login = "nobody";
-    else
-        login = pwd->pw_name;
-    snprintf(global_config.socket_name, LOCAL_SOCKET_SIZE,
-             "/tmp/flom-%s", login);
     global_config.daemon_trace_file = NULL;
     global_config.command_trace_file = NULL;
-    global_config.daemon_lifespan = _DEFAULT_DAEMON_LIFESPAN;
     global_config.resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
     global_config.resource_wait = TRUE;
     global_config.resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
     global_config.lock_mode = FLOM_LOCK_MODE_EX;
+    global_config.socket_name = NULL;
+    global_config.daemon_lifespan = _DEFAULT_DAEMON_LIFESPAN;
     global_config.unicast_address = NULL;
     global_config.unicast_port = _DEFAULT_DAEMON_PORT;
     global_config.multicast_address = NULL;
     global_config.multicast_port = _DEFAULT_DAEMON_PORT;
+}
+
+
+
+int flom_config_check()
+{
+    enum Exception { INVALID_OPTION
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_config_check\n"));
+    TRY {
+        /* check if configuration is for LOCAL and for NETWORK: it's not
+           acceptable */
+        if (NULL != flom_config_get_socket_name() &&
+            (NULL != flom_config_get_unicast_address() ||
+             NULL != flom_config_get_multicast_address())) {
+            g_print("ERROR: flom can not be configured for local "
+                    "(UNIX socket) and network (TCP-UDP/IP) communication "
+                    "at the same time.\n");
+            THROW(INVALID_OPTION);
+        }
+        /* if neither local nor network communication were configured,
+           use default local */
+        if (NULL == flom_config_get_socket_name() &&
+            NULL == flom_config_get_unicast_address() &&
+            NULL == flom_config_get_multicast_address()) {
+            struct passwd *pwd = NULL;
+            char *login = NULL;
+            /* set UNIX socket name */
+            global_config.socket_name = g_malloc(LOCAL_SOCKET_SIZE);
+            pwd = getpwuid(getuid());
+            if (NULL == pwd || NULL == pwd->pw_name)
+                login = "nobody";
+            else
+                login = pwd->pw_name;
+            snprintf(global_config.socket_name, LOCAL_SOCKET_SIZE,
+                     "/tmp/flom-%s", login);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_OPTION:
+                ret_cod = FLOM_RC_INVALID_OPTION;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_config_check/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 
@@ -170,6 +215,24 @@ void flom_config_print()
             FLOM_CONFIG_KEY_TIMEOUT, flom_config_get_resource_timeout());
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
             FLOM_CONFIG_KEY_LOCK_MODE, flom_config_get_lock_mode());
+    g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
+            FLOM_CONFIG_KEY_SOCKET_NAME,
+            NULL == flom_config_get_socket_name() ? "" :
+            flom_config_get_socket_name());
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
+            FLOM_CONFIG_KEY_LIFESPAN, flom_config_get_lifespan());
+    g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
+            FLOM_CONFIG_KEY_UNICAST_ADDRESS,
+            NULL == flom_config_get_unicast_address() ? "" :
+            flom_config_get_unicast_address());
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
+            FLOM_CONFIG_KEY_UNICAST_PORT, flom_config_get_unicast_port());
+    g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
+            FLOM_CONFIG_KEY_MULTICAST_ADDRESS,
+            NULL == flom_config_get_multicast_address() ? "" :
+            flom_config_get_multicast_address());
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
+            FLOM_CONFIG_KEY_MULTICAST_PORT, flom_config_get_multicast_port());
 }
 
 
@@ -500,7 +563,7 @@ int flom_config_init_load(const char *config_file_name)
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_DAEMON,
                         FLOM_CONFIG_KEY_LIFESPAN, ivalue));
-            flom_config_set_daemon_lifespan(ivalue);
+            flom_config_set_lifespan(ivalue);
         }
         /* pick-up unicast address configuration */
         if (NULL == (value = g_key_file_get_string(

@@ -183,73 +183,77 @@
  */
 #define FLOM_RC_FORK_ERROR                          -106
 /**
+ * "getaddrinfo" function error
+ */
+#define FLOM_RC_GETADDRINFO_ERROR                   -107
+/**
  * "getsockopt" function error
  */
-#define FLOM_RC_GETSOCKOPT_ERROR                    -107
+#define FLOM_RC_GETSOCKOPT_ERROR                    -108
 /**
  * "listen" function error
  */
-#define FLOM_RC_LISTEN_ERROR                        -108
+#define FLOM_RC_LISTEN_ERROR                        -109
 /**
  * "malloc"/"g_malloc" function error
  */
-#define FLOM_RC_MALLOC_ERROR                        -109
+#define FLOM_RC_MALLOC_ERROR                        -110
 /**
  * "pipe" function error
  */
-#define FLOM_RC_PIPE_ERROR                          -110
+#define FLOM_RC_PIPE_ERROR                          -111
 /**
  * "poll" function error
  */
-#define FLOM_RC_POLL_ERROR                          -111
+#define FLOM_RC_POLL_ERROR                          -112
 /**
  * "read" function error
  */
-#define FLOM_RC_READ_ERROR                          -112
+#define FLOM_RC_READ_ERROR                          -113
 /**
  * "recv" function error
  */
-#define FLOM_RC_RECV_ERROR                          -113
+#define FLOM_RC_RECV_ERROR                          -114
 /**
  * "regcomp" function error
  */
-#define FLOM_RC_REGCOMP_ERROR                       -114
+#define FLOM_RC_REGCOMP_ERROR                       -115
 /**
  * "regexec" function error
  */
-#define FLOM_RC_REGEXEC_ERROR                       -115
+#define FLOM_RC_REGEXEC_ERROR                       -116
 /**
  * "send" function error
  */
-#define FLOM_RC_SEND_ERROR                          -116
+#define FLOM_RC_SEND_ERROR                          -117
 /**
  * "setsid" function error
  */
-#define FLOM_RC_SETSID_ERROR                        -117
+#define FLOM_RC_SETSID_ERROR                        -118
 /**
  * "signal" function error
  */
-#define FLOM_RC_SIGNAL_ERROR                        -118
+#define FLOM_RC_SIGNAL_ERROR                        -119
 /**
  * "socket" function error
  */
-#define FLOM_RC_SOCKET_ERROR                        -119
+#define FLOM_RC_SOCKET_ERROR                        -120
 /**
  * "snprintf" function error (truncation)
  */
-#define FLOM_RC_SNPRINTF_ERROR                      -120
+#define FLOM_RC_SNPRINTF_ERROR                      -121
 /**
  * "unlink" function error
  */
-#define FLOM_RC_UNLINK_ERROR                        -121
+#define FLOM_RC_UNLINK_ERROR                        -122
 /**
  * "wait" function error
  */
-#define FLOM_RC_WAIT_ERROR                          -122
+#define FLOM_RC_WAIT_ERROR                          -123
 /**
  * "write" function error
  */
-#define FLOM_RC_WRITE_ERROR                         -123
+#define FLOM_RC_WRITE_ERROR                         -124
 
 /* GLIB related errors */
 

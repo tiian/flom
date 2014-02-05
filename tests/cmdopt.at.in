@@ -34,7 +34,7 @@ AT_CHECK([flom -o 100 -- ls], [0], [ignore], [ignore])
 AT_CHECK([flom --resource-timeout=200 -- ls], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Local comm. socket name: -s, --socket-name])
+AT_SETUP([Local socket name: -s, --socket-name])
 AT_CHECK([flom -s /tmp/foo -- ls], [0], [ignore], [ignore])
 AT_CHECK([flom --socket-name=/tmp/bar -- ls], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -42,6 +42,26 @@ AT_CLEANUP
 AT_SETUP([Daemon lifespan: -d, --daemon-lifespan])
 AT_CHECK([flom -d 100 -- ls], [0], [ignore], [ignore])
 AT_CHECK([flom --daemon-lifespan=200 -- ls], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Unicast address: -a, --unicast-address])
+AT_CHECK([flom -a 192.168.1.1 -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom --unicast-address=192.168.1.2 -- ls], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Unicast port: -p, --unicast-port])
+AT_CHECK([flom -p 27750 -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom --unicast-port=27750 -- ls], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Unicast address: -A, --multicast-address])
+AT_CHECK([flom -A 239.255.0.1 -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom --multicast-address=239.255.0.2 -- ls], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Unicast port: -P, --multicast-port])
+AT_CHECK([flom -P 27750 -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom --multicast-port=27750 -- ls], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Command trace file: -T, --command-trace-file])

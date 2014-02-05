@@ -271,6 +271,15 @@ extern "C" {
 
 
     /**
+     * Check configuration after config file values and command line option
+     * overrides
+     * @return a reason code
+     */
+    int flom_config_check();
+
+
+    
+    /**
      * Print config using "g_print"
      */
     void flom_config_print();
@@ -368,7 +377,7 @@ extern "C" {
      * Set "daemon_lifespan" config parameter
      * @param timeout IN milliseconds
      */
-    static inline void flom_config_set_daemon_lifespan(gint timeout) {
+    static inline void flom_config_set_lifespan(gint timeout) {
         global_config.daemon_lifespan = timeout;
     }
 
@@ -378,7 +387,7 @@ extern "C" {
      * Get "daemon_lifespan" config parameter
      * @return current timeout in milliseconds
      */
-    static inline gint flom_config_get_daemon_lifespan(void) {
+    static inline gint flom_config_get_lifespan(void) {
         return global_config.daemon_lifespan;
     }
 

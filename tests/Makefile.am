@@ -20,6 +20,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	package.m4 \
 	testsuite.at \
 	cmdopt.at.in \
+	incompopt.at.in \
 	usecase.at \
 	scripts/flom_*.sh
 
@@ -27,6 +28,11 @@ cmdopt.at: cmdopt.at.in
 	sed \
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
 	-e 's|@_SYSTEM_CONFIG_FILENAME[@]|$(_SYSTEM_CONFIG_FILENAME)|g' \
+	$< >$@
+
+incompopt.at: incompopt.at.in
+	sed \
+	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
 	$< >$@
 
 TESTSUITE = $(srcdir)/testsuite
@@ -44,9 +50,10 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/testsuite.at \
 	$(srcdir)/cmdopt.at \
+	$(srcdir)/incompopt.at \
 	$(srcdir)/usecase.at
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@
 
 DISTCLEANFILES = atconfig
-CLEANFILES = cmdopt.at
+CLEANFILES = cmdopt.at incompopt.at

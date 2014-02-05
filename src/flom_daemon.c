@@ -365,7 +365,7 @@ int flom_accept_loop(flom_conns_t *conns)
             guint i, n;
             struct pollfd *fds;
             guint number_of_lockers;
-            int poll_timeout = flom_config_get_daemon_lifespan();
+            int poll_timeout = flom_config_get_lifespan();
 
             /* the completion needs three polling cycles, so timeout must
                be a third of estimated lifespan */

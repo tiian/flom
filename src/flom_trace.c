@@ -217,3 +217,38 @@ void flom_trace_text_data(const char *prefix, const byte_t *data,
 
 
 
+void flom_trace_addrinfo(const char *prefix, const struct addrinfo *p)
+{
+    struct tm broken_time;
+    struct timeval tv;
+    
+    /* trace is closed, skipping it! */
+    if (NULL == trace_file)
+        return;
+    
+    /* lock the mutex */
+    g_static_mutex_lock(&flom_trace_mutex);
+    gettimeofday(&tv, NULL);
+    localtime_r(&tv.tv_sec, &broken_time);
+    /* default header */
+    fprintf(trace_file,
+            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d ["
+            PID_T_FORMAT "/%p] %s",
+            broken_time.tm_year + 1900, broken_time.tm_mon + 1,
+            broken_time.tm_mday, broken_time.tm_hour,
+            broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
+            getpid(), g_thread_self(), prefix);
+    /* dump data */
+    while (NULL != p) {
+        fprintf(trace_file, "[ai_flags=%d,ai_family=%d,ai_socktype=%d,"
+                "ai_protocol=%d,ai_addrlen=%u,ai_canonname='%s'] ",
+                p->ai_flags, p->ai_family, p->ai_socktype, p->ai_protocol,
+                p->ai_addrlen,
+                NULL != p->ai_canonname ? p->ai_canonname : "");
+        p = p->ai_next;
+    }
+    /* close trace record */
+    fprintf(trace_file, "\n");
+    /* remove the lock from mutex */
+    g_static_mutex_unlock(&flom_trace_mutex);
+}

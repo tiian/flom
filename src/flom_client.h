@@ -49,11 +49,29 @@ extern "C" {
 
 
     /**
-     * Try to connect to lock daemon
+     * Try to connect to flom daemon
      * @param cd OUT connection data
      * @result a reason code
      */
     int flom_client_connect(struct flom_conn_data_s *cd);
+    
+
+
+    /**
+     * Try to connect to flom daemon using local (AF_LOCAL) socket
+     * @param cd OUT connection data
+     * @result a reason code
+     */
+    int flom_client_connect_local(struct flom_conn_data_s *cd);
+    
+
+
+    /**
+     * Try to connect to flom daemon using network (TCP/IP) socket
+     * @param cd OUT connection data
+     * @result a reason code
+     */
+    int flom_client_connect_tcp(struct flom_conn_data_s *cd);
     
 
 

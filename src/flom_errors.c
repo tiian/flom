@@ -89,6 +89,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'execvp' function returned an error condition";
         case FLOM_RC_FORK_ERROR:
             return "ERROR: 'fork' function returned an error condition";
+        case FLOM_RC_GETADDRINFO_ERROR:
+            return "ERROR: 'getaddrinfo' function returned an error condition";
         case FLOM_RC_GETSOCKOPT_ERROR:
             return "ERROR: 'getsockopt' function returned an error condition";
         case FLOM_RC_LISTEN_ERROR:

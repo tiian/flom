@@ -6,7 +6,7 @@
    fun:__nss_database_lookup
    ...
    fun:getpwuid
-   fun:flom_config_reset
+   fun:flom_config_check
    fun:main
 }
 

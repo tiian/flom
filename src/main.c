@@ -170,7 +170,19 @@ int main (int argc, char *argv[])
         }
     }
     if (_DEFAULT_DAEMON_LIFESPAN != daemon_lifespan) {
-        flom_config_set_daemon_lifespan(daemon_lifespan);
+        flom_config_set_lifespan(daemon_lifespan);
+    }
+    if (NULL != unicast_address) {
+        flom_config_set_unicast_address(unicast_address);
+    }
+    if (_DEFAULT_DAEMON_PORT != unicast_port) {
+        flom_config_set_unicast_port(unicast_port);
+    }
+    if (NULL != multicast_address) {
+        flom_config_set_multicast_address(multicast_address);
+    }
+    if (_DEFAULT_DAEMON_PORT != multicast_port) {
+        flom_config_set_multicast_port(multicast_port);
     }
     if (NULL != daemon_trace_file)
         flom_config_set_daemon_trace_file(daemon_trace_file);
@@ -183,6 +195,12 @@ int main (int argc, char *argv[])
     /* print configuration */
     if (verbose)
         flom_config_print();
+
+    /* check configuration */
+    if (FLOM_RC_OK != (ret_cod = flom_config_check())) {
+        g_warning("Configuration is not valid, cannot go on!\n");
+        exit(FLOM_ES_GENERIC_ERROR);        
+    }
     
     /* check the command is not null */
     if (NULL == command_argv) {

@@ -20,6 +20,9 @@
 
 
 
+#ifdef HAVE_NETDB_H
+# include <netdb.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -47,6 +50,47 @@
 
 int flom_client_connect(struct flom_conn_data_s *cd)
 {
+    enum Exception { CLIENT_CONNECT_LOCAL_ERROR
+                     , CLIENT_CONNECT_TCP_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_client_connect\n"));
+    TRY {
+        /* reset connection data struct */
+        memset(cd, 0, sizeof(cd));
+
+        /* choose and instantiate connection type */
+        if (NULL != flom_config_get_socket_name()) {
+            if (FLOM_RC_OK != (ret_cod = flom_client_connect_local(cd)))
+                THROW(CLIENT_CONNECT_LOCAL_ERROR);
+        } else if (NULL != flom_config_get_unicast_address()) {
+            if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(cd)))
+                THROW(CLIENT_CONNECT_TCP_ERROR);
+        } /* @@@ implement multicast */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case CLIENT_CONNECT_LOCAL_ERROR:
+            case CLIENT_CONNECT_TCP_ERROR:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_client_connect/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_client_connect_local(struct flom_conn_data_s *cd)
+{
     enum Exception { SOCKET_ERROR
                      , DAEMON_ERROR
                      , DAEMON_NOT_STARTED 
@@ -55,13 +99,10 @@ int flom_client_connect(struct flom_conn_data_s *cd)
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
-    FLOM_TRACE(("flom_client_connect\n"));
+    FLOM_TRACE(("flom_client_connect_local\n"));
     TRY {
-        /* reset connection data struct */
-        memset(cd, 0, sizeof(cd));
-        
-        FLOM_TRACE(("flom_client_connect: connecting to socket '%s'\n",
-                    global_config.socket_name));
+        FLOM_TRACE(("flom_client_connect_local: connecting to socket '%s'\n",
+                    flom_config_get_socket_name()));
 
         if (-1 == (cd->fd = socket(AF_LOCAL, SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
@@ -71,9 +112,9 @@ int flom_client_connect(struct flom_conn_data_s *cd)
         if (-1 == connect(cd->fd, (struct sockaddr *)&cd->saun,
                           cd->addr_len)) {
             if (ENOENT == errno || ECONNREFUSED == errno) {
-                if (0 != flom_config_get_daemon_lifespan()) {
-                    FLOM_TRACE(("flom_client_connect: connection failed, "
-                                "activating a new daemon\n"));
+                if (0 != flom_config_get_lifespan()) {
+                    FLOM_TRACE(("flom_client_connect_local: connection "
+                                "failed, activating a new daemon\n"));
                     /* daemon is not active, starting it... */
                     if (FLOM_RC_OK != (ret_cod = flom_daemon()))
                         THROW(DAEMON_ERROR);
@@ -81,19 +122,19 @@ int flom_client_connect(struct flom_conn_data_s *cd)
                     if (-1 == connect(cd->fd, (struct sockaddr *)&cd->saun,
                                       cd->addr_len))
                         THROW(DAEMON_NOT_STARTED);
-                    FLOM_TRACE(("flom_client_connect: connected to flom "
-                                "daemon\n"));
+                    FLOM_TRACE(("flom_client_connect_local: connected to "
+                                "flom daemon\n"));
                 } else {
-                    FLOM_TRACE(("flom_client_connect: connection failed, "
-                                "a new daemon can not be started because "
-                                "daemon lifespan is 0\n"));
+                    FLOM_TRACE(("flom_client_connect_local: connection "
+                                "failed, a new daemon can not be started "
+                                "because daemon lifespan is 0\n"));
                     THROW(CONNECT_ERROR1);
                 }
             } else {
                 THROW(CONNECT_ERROR2);
             }
         }
-        
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -116,7 +157,63 @@ int flom_client_connect(struct flom_conn_data_s *cd)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    FLOM_TRACE(("flom_client_connect/excp=%d/"
+    FLOM_TRACE(("flom_client_connect_local/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_client_connect_tcp(struct flom_conn_data_s *cd)
+{
+    enum Exception { GETADDRINFO_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    struct addrinfo *result = NULL;
+    
+    FLOM_TRACE(("flom_client_connect_tcp\n"));
+    TRY {
+        struct addrinfo hints;
+        int errcode;
+        
+        FLOM_TRACE(("flom_client_connect_tcp: connecting to address '%s' "
+                    "and port %d\n", flom_config_get_unicast_address(),
+                    flom_config_get_unicast_port()));
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_flags = AI_CANONNAME;
+        /* remoce this filter to support IPV6 */
+        hints.ai_family = AF_INET; 
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_protocol = IPPROTO_TCP;
+
+        if (0 != (errcode = getaddrinfo(flom_config_get_unicast_address(),
+                                        NULL, &hints, &result))) {
+            FLOM_TRACE(("flom_client_connect_tcp/getaddrinfo(): "
+                        "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
+            THROW(GETADDRINFO_ERROR);
+        } else {
+            FLOM_TRACE_ADDRINFO("flom_client_connect_tcp/getaddrinfo(): ",
+                                result);
+            /* @@@ traverse the list and try to connect... */
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case GETADDRINFO_ERROR:
+                ret_cod = FLOM_RC_GETADDRINFO_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    if (NULL != result)
+        freeaddrinfo(result);
+    FLOM_TRACE(("flom_client_connect_tcp/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

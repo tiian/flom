@@ -25,6 +25,9 @@
 
 
 
+#ifdef HAVE_NETDB_H
+# include <netdb.h>
+#endif
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif /* HAVE_STDIO_H */
@@ -174,6 +177,21 @@ extern unsigned long flom_trace_mask;
 
 
 
+/**
+ * FLOM_TRACE_ADDRINFO macro is used to compile trace messages only if _TRACE
+ * macro is defined;
+ * trace message is printed only for modules (FLOM_TRACE_MODULE) covered by
+ * trace mask (FLOM_TRACE_MASK) specified as environment variable
+ */
+#ifdef _TRACE
+# define FLOM_TRACE_ADDRINFO(a,b) (FLOM_TRACE_MODULE & flom_trace_mask ? \
+                                   flom_trace_addrinfo(a,b) : 0)
+#else
+# define FLOM_TRACE_ADDRINFO(a,b)
+#endif /* _TRACE */
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -232,6 +250,17 @@ extern "C" {
 
 
 
+    /**
+     * Dump the content of an addrinfo list typically returned by getaddrinfo
+     * POSIX function
+     * @param prefix IN trace prefix to print before dump (it is a fixed
+     *               prefix, not a format with values)
+     * @param ai IN pointer to list head
+     */
+    void flom_trace_addrinfo(const char *prefix, const struct addrinfo *ai);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
