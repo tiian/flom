@@ -32,6 +32,8 @@ const char *flom_strerror(int ret_cod)
             return "WARNING: network operation timeout";
         case FLOM_RC_CONNECTION_CLOSED:
             return "WARNING: peer has closed socket connection";
+        case FLOM_RC_CONNECTION_REFUSED:
+            return "WARNING: peer is not ready to accept a connection";
         case FLOM_RC_LOCK_CANT_LOCK:
             return "INFO: the lock can not be obtained, generic issue";
         case FLOM_RC_LOCK_BUSY:
