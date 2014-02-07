@@ -51,9 +51,10 @@ extern "C" {
 
     /**
      * Create a lock daemon
+     * @param family IN socket family, socket domain (AF_LOCAL, AF_INET, ...)
      * @result a reason code
      */
-    int flom_daemon();
+    int flom_daemon(int family);
     
 
     
@@ -63,6 +64,24 @@ extern "C" {
      * @result a reason code
      */
     int flom_listen(flom_conns_t *conns);
+
+
+
+    /**
+     * Create a listen local (AF_LOCAL) socket to serve the clients
+     * @param conns OUT connections object
+     * @result a reason code
+     */
+    int flom_listen_local(flom_conns_t *conns);
+
+
+
+    /**
+     * Create a listen network (AF_INET, TCP/IP) socket to serve the clients
+     * @param conns OUT connections object
+     * @result a reason code
+     */
+    int flom_listen_tcp(flom_conns_t *conns);
 
 
 

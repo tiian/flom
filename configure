@@ -4689,7 +4689,7 @@ fi
 
 done
 
-for ac_header in netdb.h netinet/in.h
+for ac_header in netdb.h netinet/in.h netinet/tcp.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -4800,7 +4800,6 @@ done
 #AC_CHECK_HEADERS(fcntl.h)
 #AC_CHECK_HEADERS(glib.h)
 #AC_CHECK_HEADERS(libgen.h)
-#AC_CHECK_HEADERS(netdb.h netinet/in.h netinet/tcp.h)
 #AC_CHECK_HEADERS(poll.h pthread.h regex.h)
 #AC_CHECK_HEADERS(signal.h stdarg.h stdint.h stdio.h stdlib.h string.h syslog.h)
 #AC_CHECK_HEADERS(sys/mman.h sys/select.h sys/socket.h sys/stat.h)

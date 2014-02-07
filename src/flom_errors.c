@@ -116,6 +116,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'send' function returned an error condition";
         case FLOM_RC_SETSID_ERROR:
             return "ERROR: 'setsid' function returned an error condition";
+        case FLOM_RC_SETSOCKOPT_ERROR:
+            return "ERROR: 'setsockopt' function returned an error condition";
         case FLOM_RC_SIGNAL_ERROR:
             return "ERROR: 'signal' function returned an error condition";
         case FLOM_RC_SOCKET_ERROR:

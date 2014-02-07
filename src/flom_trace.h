@@ -170,7 +170,7 @@ extern unsigned long flom_trace_mask;
  */
 #ifdef _TRACE
 # define FLOM_TRACE_HEX_DATA(a,b,c) (FLOM_TRACE_MODULE & flom_trace_mask ? \
-                                     flom_trace_hex_data(a,b,c,stderr) : 0)
+                                     flom_trace_hex_data(a,b,c) : 0)
 #else
 # define FLOM_TRACE_HEX_DATA(a,b,c)
 #endif /* _TRACE */
@@ -230,10 +230,9 @@ extern "C" {
      *               prefix, not a format with values)
      * @param data IN pointer to base memory
      * @param size IN number of bytes to dump
-     * @param out_stream IN destination standard I/O stream
      */
     void flom_trace_hex_data(const char *prefix, const byte_t *data,
-                             size_t size, FILE *out_stream);
+                             size_t size);
 
 
       

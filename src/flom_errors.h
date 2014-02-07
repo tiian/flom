@@ -235,29 +235,33 @@
  */
 #define FLOM_RC_SETSID_ERROR                        -118
 /**
+ * "setsockopt" function error
+ */
+#define FLOM_RC_SETSOCKOPT_ERROR                    -119
+/**
  * "signal" function error
  */
-#define FLOM_RC_SIGNAL_ERROR                        -119
+#define FLOM_RC_SIGNAL_ERROR                        -120
 /**
  * "socket" function error
  */
-#define FLOM_RC_SOCKET_ERROR                        -120
+#define FLOM_RC_SOCKET_ERROR                        -121
 /**
  * "snprintf" function error (truncation)
  */
-#define FLOM_RC_SNPRINTF_ERROR                      -121
+#define FLOM_RC_SNPRINTF_ERROR                      -122
 /**
  * "unlink" function error
  */
-#define FLOM_RC_UNLINK_ERROR                        -122
+#define FLOM_RC_UNLINK_ERROR                        -123
 /**
  * "wait" function error
  */
-#define FLOM_RC_WAIT_ERROR                          -123
+#define FLOM_RC_WAIT_ERROR                          -124
 /**
  * "write" function error
  */
-#define FLOM_RC_WRITE_ERROR                         -124
+#define FLOM_RC_WRITE_ERROR                         -125
 
 /* GLIB related errors */
 

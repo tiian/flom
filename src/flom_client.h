@@ -72,6 +72,16 @@ extern "C" {
      * @result a reason code
      */
     int flom_client_connect_tcp(struct flom_conn_data_s *cd);
+
+
+
+    /**
+     * A TCP/IP connection chance: it can be reapeted after daemon start-up
+     * @param gai IN result obtained by getaddrinfo function
+     * @param fd OUT file descriptor associated to the connected socket
+     * @return a boolean value: TRUE=connection OK, FALSE=connection failed
+     */
+    int flom_client_connect_tcp_try(const struct addrinfo *gai, int *fd);
     
 
 
