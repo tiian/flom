@@ -21,6 +21,9 @@
 
 
 #include <stdio.h>
+#ifdef HAVE_NETINET_TCP_H
+# include <netinet/tcp.h>
+#endif
 #ifdef HAVE_POLL_H
 # include <poll.h>
 #endif
@@ -373,7 +376,7 @@ int flom_listen_tcp(flom_conns_t *conns)
 
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_PASSIVE;
-        hints.ai_family = AF_INET /* @@@ flom_conns_get_domain(conns) */;
+        hints.ai_family = flom_conns_get_domain(conns);
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = IPPROTO_TCP;
         snprintf(port, sizeof(port), "%u", flom_config_get_unicast_port());
@@ -381,7 +384,8 @@ int flom_listen_tcp(flom_conns_t *conns)
                     "and port %s\n", flom_config_get_unicast_address(),
                     port));
 
-        if (0 != (errcode = getaddrinfo(NULL, port, &hints, &result))) {
+        if (0 != (errcode = getaddrinfo(flom_config_get_unicast_address(),
+                                        port, &hints, &result))) {
             FLOM_TRACE(("flom_listen_tcp/getaddrinfo(): "
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
             THROW(GETADDRINFO_ERROR);
@@ -430,6 +434,7 @@ int flom_listen_tcp(flom_conns_t *conns)
                                conns, fd, gai->ai_addrlen,
                                gai->ai_addr, TRUE)))
             THROW(CONNS_ADD_ERROR);
+        fd = NULL_FD; /* avoid socket close by clean-up section */
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -658,6 +663,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
 {
     enum Exception { CONNS_GET_CD_ERROR
                      , ACCEPT_ERROR
+                     , SETSOCKOPT_ERROR
                      , CONNS_ADD_ERROR
                      , MSG_RETRIEVE_ERROR
                      , CONNS_GET_MSG_ERROR
@@ -687,6 +693,12 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                 THROW(ACCEPT_ERROR);
             FLOM_TRACE(("flom_accept_loop_pollin: new client connected "
                         "with fd=%d\n", conn_fd));
+            if (AF_INET == flom_conns_get_domain(conns)) {
+                int sock_opt = 1;
+                if (0 != setsockopt(conn_fd, IPPROTO_TCP, TCP_NODELAY,
+                                    (void *)(&sock_opt), sizeof(sock_opt)))
+                    THROW(SETSOCKOPT_ERROR);
+            }
             if (FLOM_RC_OK != (ret_cod = flom_conns_add(
                                    conns, conn_fd, clilen, &cliaddr, TRUE)))
                 THROW(CONNS_ADD_ERROR);
@@ -740,6 +752,9 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                 break;
             case ACCEPT_ERROR:
                 ret_cod = FLOM_RC_ACCEPT_ERROR;
+                break;
+            case SETSOCKOPT_ERROR:
+                ret_cod = FLOM_RC_SETSOCKOPT_ERROR;
                 break;
             case CONNS_ADD_ERROR:
             case MSG_RETRIEVE_ERROR:

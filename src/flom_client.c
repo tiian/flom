@@ -55,6 +55,8 @@ int flom_client_connect(struct flom_conn_data_s *cd)
 {
     enum Exception { CLIENT_CONNECT_LOCAL_ERROR
                      , CLIENT_CONNECT_TCP_ERROR
+                     , CLIENT_DISCOVER_UDP_ERROR
+                     , INTERNAL_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -70,13 +72,21 @@ int flom_client_connect(struct flom_conn_data_s *cd)
         } else if (NULL != flom_config_get_unicast_address()) {
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(cd)))
                 THROW(CLIENT_CONNECT_TCP_ERROR);
-        } /* @@@ implement multicast */
-        
+        } else if (NULL != flom_config_get_multicast_address()) {
+            if (FLOM_RC_OK != (ret_cod = flom_client_discover_udp()))
+                THROW(CLIENT_DISCOVER_UDP_ERROR);
+        } else /* this condition must be impossible! */
+            THROW(INTERNAL_ERROR);
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case CLIENT_CONNECT_LOCAL_ERROR:
             case CLIENT_CONNECT_TCP_ERROR:
+            case CLIENT_DISCOVER_UDP_ERROR:
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -185,7 +195,7 @@ int flom_client_connect_tcp(struct flom_conn_data_s *cd)
     TRY {
         struct addrinfo hints;
         int errcode, sock_opt = 1;
-        struct addrinfo *p = NULL;
+        const struct addrinfo *p = NULL;
         char port[100];
         
         FLOM_TRACE(("flom_client_connect_tcp: connecting to address '%s' "
@@ -206,11 +216,10 @@ int flom_client_connect_tcp(struct flom_conn_data_s *cd)
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
             THROW(GETADDRINFO_ERROR);
         } else {
-            int connected;
             FLOM_TRACE_ADDRINFO("flom_client_connect_tcp/getaddrinfo(): ",
                                 result);
-            connected = flom_client_connect_tcp_try(result, &fd);
-            if (!connected) {
+            p = flom_client_connect_tcp_try(result, &fd);
+            if (NULL == p) {
                 if (0 != flom_config_get_lifespan()) {
                     FLOM_TRACE(("flom_client_connect_tcp: connection "
                                 "failed, activating a new daemon\n"));
@@ -218,8 +227,8 @@ int flom_client_connect_tcp(struct flom_conn_data_s *cd)
                     if (FLOM_RC_OK != (ret_cod = flom_daemon(hints.ai_family)))
                         THROW(DAEMON_ERROR);
                     /* trying to connect again... */
-                    connected = flom_client_connect_tcp_try(result, &fd);
-                    if (!connected)
+                    p = flom_client_connect_tcp_try(result, &fd);
+                    if (NULL == p)
                         THROW(DAEMON_NOT_STARTED);
                 } else {
                     FLOM_TRACE(("flom_client_connect_tcp: connection "
@@ -275,12 +284,13 @@ int flom_client_connect_tcp(struct flom_conn_data_s *cd)
 
 
 
-int flom_client_connect_tcp_try(const struct addrinfo *gai, int *fd)
+const struct addrinfo *flom_client_connect_tcp_try(
+    const struct addrinfo *gai, int *fd)
 {
-    int connected = FALSE;
+    const struct addrinfo *found = NULL; 
     *fd = NULL_FD;
     /* traverse the list and try to connect... */
-    while (NULL != gai && !connected) {
+    while (NULL != gai && NULL == found) {
         if (-1 == (*fd = socket(gai->ai_family, gai->ai_socktype,
                                 gai->ai_protocol))) {
             FLOM_TRACE(("flom_client_connect_tcp_try/socket(): "
@@ -296,10 +306,35 @@ int flom_client_connect_tcp_try(const struct addrinfo *gai, int *fd)
                 close(*fd);
                 *fd = NULL_FD;
             } else
-                connected = TRUE;
+                found = gai;
         } /* if (-1 == (*fd = socket( */
     } /* while (NULL != gai && !connected) */
-    return connected;
+    return found;
+}
+
+
+
+int flom_client_discover_udp(void)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_client_discover_udp\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_client_discover_udp/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 

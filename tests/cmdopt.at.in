@@ -45,8 +45,8 @@ AT_CHECK([flom --daemon-lifespan=200 -- ls], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Unicast address: -a, --unicast-address])
-AT_CHECK([flom -a 192.168.1.1 -- ls], [0], [ignore], [ignore])
-AT_CHECK([flom --unicast-address=192.168.1.2 -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom -a localhost -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom --unicast-address=localhost -- ls], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Unicast port: -p, --unicast-port])

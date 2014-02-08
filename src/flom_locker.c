@@ -146,7 +146,6 @@ gpointer flom_locker_loop(gpointer data)
             int ready_fd;
             guint i, n;
             struct pollfd *fds;
-            
             if (FLOM_RC_OK != (ret_cod = flom_conns_clean(&conns)))
                 THROW(CONNS_CLEAN_ERROR);
             if (flom_conns_get_used(&conns) == 0) {
