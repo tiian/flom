@@ -89,8 +89,9 @@ extern "C" {
 
     /**
      * Discover flom daemon address using multicast UDP
+     * @param cd IN connection data
      */
-    int flom_client_discover_udp(void);
+    int flom_client_discover_udp(struct flom_conn_data_s *cd);
     
     
 
