@@ -330,6 +330,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
         char port[100];
         int errcode;
         int found = FALSE;
+        const struct addrinfo *gai = result;
         
         FLOM_TRACE(("flom_client_discover_udp: using address '%s' "
                     "and port %d\n", flom_config_get_multicast_address(),
@@ -349,13 +350,16 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
             THROW(GETADDRINFO_ERROR);
         } else {
-            const struct addrinfo *gai = result;
             int sock_opt = 1;
             
             FLOM_TRACE_ADDRINFO("flom_client_discover_udp/getaddrinfo(): ",
                                 result);
             /* traverse the list and try to connect... */
+            gai = result;
             while (NULL != gai && !found) {
+                u_char loop = 0;
+                FLOM_TRACE_HEX_DATA("flom_client_discover_udp: ai_addr ",
+                                    (void *)gai->ai_addr, gai->ai_addrlen);
                 if (-1 == (fd = socket(gai->ai_family, gai->ai_socktype,
                                        gai->ai_protocol))) {
                     FLOM_TRACE(("flom_client_discover_udp/socket(): "
@@ -372,22 +376,20 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
-                } else  if (-1 == bind(fd, gai->ai_addr, gai->ai_addrlen)) {
+                } else if (-1 == bind(fd, gai->ai_addr, gai->ai_addrlen)) {
                     FLOM_TRACE(("flom_client_discover_udp/bind() : "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
-                } else {
-                    /* switching to multicast mode */
+                } else { /* switching to multicast mode */
                     struct ip_mreq mreq;
                     
                     memcpy(&mreq.imr_multiaddr,
                            &((struct sockaddr_in *)gai->ai_addr)->sin_addr,
                            sizeof(struct in_addr));
                     mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-                    
                     if (-1 == setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
                                             &mreq, sizeof(mreq))) {
                         FLOM_TRACE(("flom_client_discover_udp/setsockopt("
@@ -397,9 +399,19 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                         gai = gai->ai_next;
                         close(fd);
                         fd = NULL_FD;
+                    } else if (-1 == setsockopt( /* disable loopback */
+                                   fd, IPPROTO_IP, IP_MULTICAST_LOOP,
+                                   &loop, sizeof(loop))) {
+                        FLOM_TRACE(("flom_client_discover_udp/setsockopt("
+                                    "IP_MULTICAST_LOOP) : "
+                                    "errno=%d '%s', skipping...\n", errno,
+                                    strerror(errno)));
+                        gai = gai->ai_next;
+                        close(fd);
+                        fd = NULL_FD;
                     } else {
                         found = TRUE;
-                    } /* else */
+                    }  /* else */
                 } /* if (-1 == (*fd = socket( */
             } /* while (NULL != gai && !connected) */            
         }
@@ -408,6 +420,34 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                         "to discover a daemon\n"));
             THROW(CONNECT_ERROR);
         }
+        /* send a packet */
+    {
+        ssize_t sent, received;
+        char *packet = "This is a try!";
+        char buffer[200];
+        struct sockaddr from;
+        socklen_t addrlen;
+        int new_fd;
+
+        /* @@@ */
+        new_fd = socket(AF_INET, SOCK_DGRAM, 0);
+        FLOM_TRACE(("flom_client_discover_udp: new_fd=%d\n", new_fd));
+        
+        sent = sendto(new_fd, packet, strlen(packet), 0,
+                      gai->ai_addr, gai->ai_addrlen);
+        FLOM_TRACE(("flom_client_discover_udp: sendto('%s')=%d\n",
+                    packet, sent));
+
+        memset(&from, 0, sizeof(from));
+        received = recvfrom(fd, buffer, sizeof(buffer), 0, &from, &addrlen);
+        FLOM_TRACE(("flom_client_discover_udp: recvfrom()='%*.*s', %d\n",
+                    received, received, buffer, received));
+        
+        FLOM_TRACE_HEX_DATA("flom_client_discover_udp: from ",
+                            (void *)&from, addrlen);
+        
+    }
+        
         
         THROW(NONE);
     } CATCH {
