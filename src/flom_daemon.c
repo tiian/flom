@@ -21,6 +21,9 @@
 
 
 #include <stdio.h>
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
 #ifdef HAVE_NETINET_TCP_H
 # include <netinet/tcp.h>
 #endif
@@ -253,6 +256,7 @@ int flom_listen(flom_conns_t *conns)
 {
     enum Exception { LISTEN_LOCAL_ERROR
                      , LISTEN_TCP_ERROR
+                     , LISTEN_UDP_ERROR
                      , INVALID_DOMAIN
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -265,8 +269,12 @@ int flom_listen(flom_conns_t *conns)
                     THROW(LISTEN_LOCAL_ERROR);
                 break;
             case AF_INET:
+                /* create TCP/IP unicast listener */
                 if (FLOM_RC_OK != (ret_cod = flom_listen_tcp(conns)))
                     THROW(LISTEN_TCP_ERROR);
+                /* create UDP/IP multicast listener (resover) */
+                if (FLOM_RC_OK != (ret_cod = flom_listen_udp(conns)))
+                    THROW(LISTEN_UDP_ERROR);
                 break;
             default:
                 THROW(INVALID_DOMAIN);
@@ -276,6 +284,7 @@ int flom_listen(flom_conns_t *conns)
         switch (excp) {
             case LISTEN_LOCAL_ERROR:
             case LISTEN_TCP_ERROR:
+            case LISTEN_UDP_ERROR:
                 break;
             case INVALID_DOMAIN:
                 ret_cod = FLOM_RC_INVALID_OPTION;
@@ -322,7 +331,7 @@ int flom_listen_local(flom_conns_t *conns)
         if (-1 ==listen(fd, 100))
             THROW(LISTEN_ERROR);
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                               conns, fd, sizeof(servaddr),
+                               conns, fd, SOCK_STREAM, sizeof(servaddr),
                                (struct sockaddr *)&servaddr, TRUE)))
             THROW(CONNS_ADD_ERROR);
         THROW(NONE);
@@ -431,7 +440,7 @@ int flom_listen_tcp(flom_conns_t *conns)
         if (-1 ==listen(fd, 100))
             THROW(LISTEN_ERROR);
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                               conns, fd, gai->ai_addrlen,
+                               conns, fd, SOCK_STREAM, gai->ai_addrlen,
                                gai->ai_addr, TRUE)))
             THROW(CONNS_ADD_ERROR);
         fd = NULL_FD; /* avoid socket close by clean-up section */
@@ -461,6 +470,160 @@ int flom_listen_tcp(flom_conns_t *conns)
     if (NULL_FD != fd)
         close(fd);
     FLOM_TRACE(("flom_listen_tcp/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_listen_udp(flom_conns_t *conns)
+{
+    enum Exception { NO_MULTICAST
+                     , GETADDRINFO_ERROR
+                     , CONNECT_ERROR
+                     , CONNS_ADD_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    struct addrinfo *result = NULL;
+    int fd = NULL_FD;
+    
+    FLOM_TRACE(("flom_listen_udp\n"));
+    TRY {
+        struct addrinfo hints;
+        char port[100];
+        int errcode;
+        int found = FALSE;
+        const struct addrinfo *gai = result;
+        
+        if (NULL == flom_config_get_multicast_address()) {
+            FLOM_TRACE(("flom_listen_udp: no multicast address specified, "
+                        "this listener will not answer to daemon location "
+                        "inquiries\n"));
+            THROW(NO_MULTICAST);
+        }
+
+        FLOM_TRACE(("flom_listen_udp: creating multicast daemon locator "
+                    "using address '%s' and port %d\n",
+                    flom_config_get_multicast_address(),
+                    flom_config_get_multicast_port()));
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_flags = AI_CANONNAME;
+        /* remove this filter to support IPV6, but most of the following
+           calls must be fixed! */
+        hints.ai_family = AF_INET; 
+        hints.ai_socktype = SOCK_DGRAM;
+        hints.ai_protocol = IPPROTO_UDP;
+        snprintf(port, sizeof(port), "%u", flom_config_get_multicast_port());
+
+        if (0 != (errcode = getaddrinfo(flom_config_get_multicast_address(),
+                                        port, &hints, &result))) {
+            FLOM_TRACE(("flom_listen_udp/getaddrinfo(): "
+                        "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
+            THROW(GETADDRINFO_ERROR);
+        } else {
+            int sock_opt = 1;
+            
+            FLOM_TRACE_ADDRINFO("flom_listen_udp/getaddrinfo(): ",
+                                result);
+            /* traverse the list and try to connect... */
+            gai = result;
+            while (NULL != gai && !found) {
+                u_char loop = 0;
+                FLOM_TRACE_HEX_DATA("flom_listen_udp: ai_addr ",
+                                    (void *)gai->ai_addr, gai->ai_addrlen);
+                if (-1 == (fd = socket(gai->ai_family, gai->ai_socktype,
+                                       gai->ai_protocol))) {
+                    FLOM_TRACE(("flom_listen_udp/socket(): "
+                                "errno=%d '%s', skipping...\n", errno,
+                                strerror(errno)));
+                    gai = gai->ai_next;
+                } else if (-1 == setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
+                                            (void *)&sock_opt,
+                                            sizeof(sock_opt))) {
+                    FLOM_TRACE(("flom_listen_udp/setsockopt("
+                                "SO_REUSEADDR) : "
+                                "errno=%d '%s', skipping...\n", errno,
+                                strerror(errno)));
+                    gai = gai->ai_next;
+                    close(fd);
+                    fd = NULL_FD;
+                } else if (-1 == bind(fd, gai->ai_addr, gai->ai_addrlen)) {
+                    FLOM_TRACE(("flom_listen_udp/bind() : "
+                                "errno=%d '%s', skipping...\n", errno,
+                                strerror(errno)));
+                    gai = gai->ai_next;
+                    close(fd);
+                    fd = NULL_FD;
+                } else { /* switching to multicast mode */
+                    struct ip_mreq mreq;
+                    
+                    memcpy(&mreq.imr_multiaddr,
+                           &((struct sockaddr_in *)gai->ai_addr)->sin_addr,
+                           sizeof(struct in_addr));
+                    mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+                    if (-1 == setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+                                            &mreq, sizeof(mreq))) {
+                        FLOM_TRACE(("flom_listen_udp/setsockopt("
+                                    "IP_ADD_MEMBERSHIP) : "
+                                    "errno=%d '%s', skipping...\n", errno,
+                                    strerror(errno)));
+                        gai = gai->ai_next;
+                        close(fd);
+                        fd = NULL_FD;
+                    } else if (-1 == setsockopt( /* disable loopback */
+                                   fd, IPPROTO_IP, IP_MULTICAST_LOOP,
+                                   &loop, sizeof(loop))) {
+                        FLOM_TRACE(("flom_listen_udp/setsockopt("
+                                    "IP_MULTICAST_LOOP) : "
+                                    "errno=%d '%s', skipping...\n", errno,
+                                    strerror(errno)));
+                        gai = gai->ai_next;
+                        close(fd);
+                        fd = NULL_FD;
+                    } else {
+                        found = TRUE;
+                    }  /* else */
+                } /* if (-1 == (*fd = socket( */
+            } /* while (NULL != gai && !connected) */            
+        }
+        if (!found) {
+            FLOM_TRACE(("flom_listen_udp: unable to use multicast\n"));
+            THROW(CONNECT_ERROR);
+        }
+        /* add connection */
+        if (FLOM_RC_OK != (ret_cod = flom_conns_add(
+                               conns, fd, SOCK_DGRAM, gai->ai_addrlen,
+                               gai->ai_addr, TRUE)))
+            THROW(CONNS_ADD_ERROR);
+        fd = NULL_FD; /* avoid socket close by clean-up section */        
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NO_MULTICAST:
+                ret_cod = FLOM_RC_OK;
+                break;
+            case GETADDRINFO_ERROR:
+                ret_cod = FLOM_RC_GETADDRINFO_ERROR;
+                break;
+            case CONNECT_ERROR:
+                ret_cod = FLOM_RC_CONNECT_ERROR;
+                break;
+            case CONNS_ADD_ERROR:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    if (NULL != result)
+        freeaddrinfo(result);
+    if (NULL_FD != fd)
+        close(fd);
+    FLOM_TRACE(("flom_listen_udp/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -700,13 +863,20 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                     THROW(SETSOCKOPT_ERROR);
             }
             if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                                   conns, conn_fd, clilen, &cliaddr, TRUE)))
+                                   conns, conn_fd, SOCK_STREAM, clilen,
+                                   &cliaddr, TRUE)))
                 THROW(CONNS_ADD_ERROR);
         } else {
             char buffer[FLOM_MSG_BUFFER_SIZE];
             ssize_t read_bytes;
             struct flom_msg_s *msg;
             GMarkupParseContext *gmpc;
+            int socket_type;
+            /* retrieve socket type */
+            socket_type = flom_conns_get_type(conns, id);
+            assert(0 != socket_type);
+            /* @@@ implement socket_type in flom_msg_retrieve to manage a
+               SOCK_DGRAM socket (UDP/IP for daemon discovery) */
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
                                    c->fd, buffer, sizeof(buffer),

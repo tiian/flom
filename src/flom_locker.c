@@ -138,8 +138,8 @@ gpointer flom_locker_loop(gpointer data)
         /* add the parent communication pipe to connections */
         memset(&cd, 0, sizeof(cd));
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                               &conns, locker->read_pipe, sizeof(cd.sa),
-                               &(cd.sa), FALSE)))
+                               &conns, locker->read_pipe, SOCK_STREAM,
+                               sizeof(cd.sa), &(cd.sa), FALSE)))
             THROW(CONNS_ADD_ERROR);
         
         while (loop) {

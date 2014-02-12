@@ -107,6 +107,11 @@ struct flom_conn_data_s {
      */
     int                   fd;
     /**
+     * Socket type associated to file descriptor;
+     * possible values are: SOCK_STREAM and SOCK_DGRAM
+     */
+    int                   type;
+    /**
      * Connection state
      */
     flom_conn_state_t     state;
@@ -200,13 +205,15 @@ extern "C" {
      * Add a new connection
      * @param conns IN/OUT connections object
      * @param fd IN file descriptor
+     * @param type IN socket type associated to file descriptor (SOCK_STREAM,
+     *                SOCK_DGRAM)
      * @param addr_len IN lenght of address
      * @param sa IN address
      * @param main_thread IN thread is asking the connection: TRUE = father
      *        (listener) thread, FALSE = child (locker) thread
      * @return a reason code
      */
-    int flom_conns_add(flom_conns_t *conns, int fd,
+    int flom_conns_add(flom_conns_t *conns, int fd, int type,
                        socklen_t addr_len, const struct sockaddr *sa,
                        int main_thread);
 
@@ -275,6 +282,23 @@ extern "C" {
                     g_ptr_array_index(conns->array, id))->fd;
         else
             return NULL_FD;
+    }
+
+
+
+    /**
+     * Return the socket type related to a file descriptor
+     * @param conns IN connections object
+     * @param id IN identificator (position in array) of the connection
+     * @return SOCK_STREAM or SOCK_DGRAM or 0 (error condition)
+     */
+    static inline int flom_conns_get_type(
+        const flom_conns_t *conns, guint id) {
+        if (id < conns->n)
+            return ((struct flom_conn_data_s *)
+                    g_ptr_array_index(conns->array, id))->type;
+        else
+            return 0;
     }
 
 

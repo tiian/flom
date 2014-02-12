@@ -429,7 +429,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
         socklen_t addrlen;
         int new_fd;
 
-        /* @@@ */
+        /* @@@ TEMPORARY CODE !!! */
         new_fd = socket(AF_INET, SOCK_DGRAM, 0);
         FLOM_TRACE(("flom_client_discover_udp: new_fd=%d\n", new_fd));
         

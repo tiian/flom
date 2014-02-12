@@ -70,7 +70,7 @@ void flom_conns_init(flom_conns_t *conns, int domain)
 
 
 
-int flom_conns_add(flom_conns_t *conns, int fd,
+int flom_conns_add(flom_conns_t *conns, int fd, int type,
                    socklen_t addr_len, const struct sockaddr *sa,
                    int main_thread)
 {
@@ -99,6 +99,8 @@ int flom_conns_add(flom_conns_t *conns, int fd,
                 THROW(INVALID_DOMAIN);
         }
         tmp->fd = fd;
+        assert(SOCK_STREAM == type || SOCK_DGRAM == type);
+        tmp->type = type;
         tmp->state = main_thread ?
             FLOM_CONN_STATE_DAEMON : FLOM_CONN_STATE_LOCKER;
         tmp->addr_len = addr_len;
@@ -434,8 +436,8 @@ void flom_conn_data_trace(const struct flom_conn_data_s *conn)
 {
     FLOM_TRACE(("flom_conn_data_trace: object=%p\n", conn));
     FLOM_TRACE(("flom_conn_data_trace: "
-                "fd=%d, state=%d, msg=%p, gmpc=%p, addr_len=%d\n",
-                conn->fd, conn->state, conn->msg, conn->gmpc,
+                "fd=%d, type=%d, state=%d, msg=%p, gmpc=%p, addr_len=%d\n",
+                conn->fd, conn->type, conn->state, conn->msg, conn->gmpc,
                 conn->addr_len));
 }
 

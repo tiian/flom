@@ -86,6 +86,16 @@ extern "C" {
 
 
     /**
+     * Create a listen network (AF_INET, UDP/IP, multicast) to answer
+     * location inquiry from other flom commands
+     * @param conns OUT connections object
+     * @result a reason code
+     */     
+    int flom_listen_udp(flom_conns_t *conns);
+
+    
+
+    /**
      * Clean-up the listen socket before daemon termination
      * @param conns IN/OUT connections object
      * @result a reason code     
