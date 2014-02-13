@@ -346,7 +346,8 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
             GMarkupParseContext *gmpc;
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
-                                   curr_cd->fd, buffer, sizeof(buffer),
+                                   curr_cd->fd, curr_cd->type,
+                                   buffer, sizeof(buffer),
                                    &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT)))
                 THROW(MSG_RETRIEVE_ERROR);
 

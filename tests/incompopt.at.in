@@ -4,7 +4,7 @@ AT_SETUP([Communication mess: -s, -a])
 AT_CHECK([flom -V -s /tmp/foo -a 192.168.1.1 -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Communication mess: -s, -A])
-AT_CHECK([flom -V -s /tmp/foo -A 239.255.0.1 -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
-AT_CLEANUP
+#AT_SETUP([Communication mess: -s, -A])
+#AT_CHECK([flom -V -s /tmp/foo -A 239.255.0.1 -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+#AT_CLEANUP
 

@@ -219,49 +219,53 @@
  */
 #define FLOM_RC_RECV_ERROR                          -114
 /**
+ * "recvfrom" function error
+ */
+#define FLOM_RC_RECVFROM_ERROR                      -115
+/**
  * "regcomp" function error
  */
-#define FLOM_RC_REGCOMP_ERROR                       -115
+#define FLOM_RC_REGCOMP_ERROR                       -116
 /**
  * "regexec" function error
  */
-#define FLOM_RC_REGEXEC_ERROR                       -116
+#define FLOM_RC_REGEXEC_ERROR                       -117
 /**
  * "send" function error
  */
-#define FLOM_RC_SEND_ERROR                          -117
+#define FLOM_RC_SEND_ERROR                          -118
 /**
  * "setsid" function error
  */
-#define FLOM_RC_SETSID_ERROR                        -118
+#define FLOM_RC_SETSID_ERROR                        -119
 /**
  * "setsockopt" function error
  */
-#define FLOM_RC_SETSOCKOPT_ERROR                    -119
+#define FLOM_RC_SETSOCKOPT_ERROR                    -120
 /**
  * "signal" function error
  */
-#define FLOM_RC_SIGNAL_ERROR                        -120
+#define FLOM_RC_SIGNAL_ERROR                        -121
 /**
  * "socket" function error
  */
-#define FLOM_RC_SOCKET_ERROR                        -121
+#define FLOM_RC_SOCKET_ERROR                        -122
 /**
  * "snprintf" function error (truncation)
  */
-#define FLOM_RC_SNPRINTF_ERROR                      -122
+#define FLOM_RC_SNPRINTF_ERROR                      -123
 /**
  * "unlink" function error
  */
-#define FLOM_RC_UNLINK_ERROR                        -123
+#define FLOM_RC_UNLINK_ERROR                        -124
 /**
  * "wait" function error
  */
-#define FLOM_RC_WAIT_ERROR                          -124
+#define FLOM_RC_WAIT_ERROR                          -125
 /**
  * "write" function error
  */
-#define FLOM_RC_WRITE_ERROR                         -125
+#define FLOM_RC_WRITE_ERROR                         -126
 
 /* GLIB related errors */
 

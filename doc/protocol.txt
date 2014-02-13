@@ -93,3 +93,20 @@ verb=3 (ping)
 
 ***************************************************************************
 
+verb=4 (discover)
+
+  level: message leve, version
+  verb:  discover -> 4
+  step:  8, 16
+
+  client->server message (where are you?)
+  <msg level="0" verb="4" step="8">
+  </msg>
+
+  server->client (I'm here)
+  <msg level="0" verb="4" step="16">
+  </msg>
+
+  Note: this is an UDP/IP communication: client sends a datagram to a 
+        multicast address, server replies with a unicast datagram to sender
+        address

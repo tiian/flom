@@ -108,6 +108,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'read' function returned an error condition";
         case FLOM_RC_RECV_ERROR:
             return "ERROR: 'recv' function returned an error condition";
+        case FLOM_RC_RECVFROM_ERROR:
+            return "ERROR: 'recvfrom' function returned an error condition";
         case FLOM_RC_REGCOMP_ERROR:
             return "ERROR: 'regcomp' function returned an error condition";
         case FLOM_RC_REGEXEC_ERROR:

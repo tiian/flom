@@ -871,15 +871,11 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
             ssize_t read_bytes;
             struct flom_msg_s *msg;
             GMarkupParseContext *gmpc;
-            int socket_type;
-            /* retrieve socket type */
-            socket_type = flom_conns_get_type(conns, id);
-            assert(0 != socket_type);
             /* @@@ implement socket_type in flom_msg_retrieve to manage a
                SOCK_DGRAM socket (UDP/IP for daemon discovery) */
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
-                                   c->fd, buffer, sizeof(buffer),
+                                   c->fd, c->type, buffer, sizeof(buffer),
                                    &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT)))
                 THROW(MSG_RETRIEVE_ERROR);
 

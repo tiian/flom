@@ -121,7 +121,7 @@ flom_lock_mode_t flom_lock_mode_retrieve(const gchar *text)
 
 
 
-int flom_msg_retrieve(int fd,
+int flom_msg_retrieve(int fd, int type,
                       char *buf, size_t buf_size,
                       ssize_t *read_bytes,
                       int timeout)
@@ -129,12 +129,16 @@ int flom_msg_retrieve(int fd,
     enum Exception { POLL_ERROR
                      , NETWORK_TIMEOUT
                      , INTERNAL_ERROR
+                     , INVALID_SOCKET_TYPE
                      , RECV_ERROR
+                     , RECVFROM_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_msg_retrieve\n"));
     TRY {
+        struct sockaddr src_addr;
+        socklen_t addrlen;
         if (timeout >= 0) {
             struct pollfd fds[1];
             int rc;
@@ -157,9 +161,22 @@ int flom_msg_retrieve(int fd,
                     THROW(INTERNAL_ERROR);
             } /* switch (rc) */
         } /* if (timeout >= 0) */
-        
-        if (0 > (*read_bytes = recv(fd, buf, buf_size, 0)))
-            THROW(RECV_ERROR);
+
+        switch (type) {
+            case SOCK_STREAM:
+                if (0 > (*read_bytes = recv(fd, buf, buf_size, 0)))
+                    THROW(RECV_ERROR);
+                break;
+            case SOCK_DGRAM:
+                if (0 > (*read_bytes = recvfrom(
+                             fd, buf, buf_size, 0, &src_addr, &addrlen)))
+                    THROW(RECVFROM_ERROR);
+                FLOM_TRACE_HEX_DATA("flom_msg_retrieve: from ",
+                                    (void *)&src_addr, addrlen);        
+                break;
+            default:
+                THROW(INVALID_SOCKET_TYPE);
+        } /* switch (type) */
         
         FLOM_TRACE(("flom_msg_retrieve: fd=%d returned "
                     SSIZE_T_FORMAT " bytes '%*.*s'\n", fd, *read_bytes,
@@ -177,8 +194,14 @@ int flom_msg_retrieve(int fd,
             case INTERNAL_ERROR:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
                 break;
+            case INVALID_SOCKET_TYPE:
+                ret_cod = FLOM_RC_INVALID_OPTION;
+                break;
             case RECV_ERROR:
                 ret_cod = FLOM_RC_RECV_ERROR;
+                break;
+            case RECVFROM_ERROR:
+                ret_cod = FLOM_RC_RECVFROM_ERROR;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -261,6 +284,7 @@ int flom_msg_free(struct flom_msg_s *msg)
     enum Exception { INVALID_STEP_LOCK
                      , INVALID_STEP_UNLOCK
                      , INVALID_STEP_PING
+                     , INVALID_STEP_DISCOVER
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -309,6 +333,15 @@ int flom_msg_free(struct flom_msg_s *msg)
                         THROW(INVALID_STEP_PING);
                 }
                 break;
+            case FLOM_MSG_VERB_DISCOVER: /* nothing to release */
+                switch (msg->header.pvs.step) {
+                    case FLOM_MSG_STEP_INCR: /* nothing to release */
+                    case 2*FLOM_MSG_STEP_INCR:
+                        break;
+                    default:
+                        THROW(INVALID_STEP_DISCOVER);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         } /* switch (msg->header.pvs.verb) */
@@ -319,6 +352,7 @@ int flom_msg_free(struct flom_msg_s *msg)
             case INVALID_STEP_LOCK:
             case INVALID_STEP_UNLOCK:
             case INVALID_STEP_PING:
+            case INVALID_STEP_DISCOVER:
             case INVALID_VERB:
                 FLOM_TRACE(("flom_msg_free: verb=%d, step=%d\n",
                             msg->header.pvs.verb, msg->header.pvs.step));
@@ -377,6 +411,18 @@ int flom_msg_check_protocol(const struct flom_msg_s *msg, int client)
                     break;
             } /* switch (msg->header.pvs.step) */                
             break;
+        case FLOM_MSG_VERB_DISCOVER:
+            switch (msg->header.pvs.step) {
+                case FLOM_MSG_STEP_INCR:
+                    ret_cod = client ? FALSE : TRUE;
+                    break;
+                case 2*FLOM_MSG_STEP_INCR:
+                    ret_cod = client ? TRUE : FALSE;
+                    break;
+                default:
+                    break;
+            } /* switch (msg->header.pvs.step) */                
+            break;
         default:
             break;
     } /* switch (msg->header.pvs.verb) */
@@ -401,6 +447,9 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
                      , SERIALIZE_PING_8_ERROR
                      , SERIALIZE_PING_16_ERROR
                      , INVALID_PING_STEP
+                     , SERIALIZE_DISCOVER_8_ERROR
+                     , SERIALIZE_DISCOVER_16_ERROR
+                     , INVALID_DISCOVER_STEP
                      , INVALID_VERB
                      , BUFFER_TOO_SHORT3
                      , NONE } excp;
@@ -495,6 +544,26 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
                         THROW(INVALID_PING_STEP);
                 }
                 break;
+            case FLOM_MSG_VERB_DISCOVER:
+                switch (msg->header.pvs.step) {
+                    case 8:
+                        if (FLOM_RC_OK != (
+                                ret_cod =
+                                flom_msg_serialize_discover_8(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_DISCOVER_8_ERROR);
+                        break;
+                    case 16:
+                        if (FLOM_RC_OK != (
+                                ret_cod =
+                                flom_msg_serialize_discover_16(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_DISCOVER_16_ERROR);
+                        break;
+                    default:
+                        THROW(INVALID_DISCOVER_STEP);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -524,10 +593,13 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
             case SERIALIZE_UNLOCK_8_ERROR:
             case SERIALIZE_PING_8_ERROR:
             case SERIALIZE_PING_16_ERROR:
+            case SERIALIZE_DISCOVER_8_ERROR:
+            case SERIALIZE_DISCOVER_16_ERROR:
                 break;
             case INVALID_LOCK_STEP:
             case INVALID_UNLOCK_STEP:
             case INVALID_PING_STEP:
+            case INVALID_DISCOVER_STEP:
             case INVALID_VERB:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
                 break;
@@ -778,11 +850,66 @@ int flom_msg_serialize_ping_16(const struct flom_msg_s *msg,
 
 
 
+int flom_msg_serialize_discover_8(const struct flom_msg_s *msg,
+                                  char *buffer,
+                                  size_t *offset, size_t *free_chars)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_msg_serialize_discover_8\n"));
+    TRY {
+        /* nothing to add */
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_msg_serialize_discover_8/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_msg_serialize_discover_16(const struct flom_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_msg_serialize_discover_16\n"));
+    TRY {
+        /* nothing to add */
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_msg_serialize_discover_16/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int flom_msg_trace(const struct flom_msg_s *msg)
 {
     enum Exception { TRACE_LOCK_ERROR
                      , TRACE_UNLOCK_ERROR
                      , TRACE_PING_ERROR
+                     , TRACE_DISCOVER_ERROR
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -808,6 +935,10 @@ int flom_msg_trace(const struct flom_msg_s *msg)
                 if (FLOM_RC_OK != (ret_cod = flom_msg_trace_ping(msg)))
                     THROW(TRACE_PING_ERROR);
                 break;
+            case FLOM_MSG_VERB_DISCOVER: /* discover */
+                if (FLOM_RC_OK != (ret_cod = flom_msg_trace_discover(msg)))
+                    THROW(TRACE_DISCOVER_ERROR);
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -818,6 +949,7 @@ int flom_msg_trace(const struct flom_msg_s *msg)
             case TRACE_LOCK_ERROR:
             case TRACE_UNLOCK_ERROR:
             case TRACE_PING_ERROR:
+            case TRACE_DISCOVER_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = FLOM_RC_INVALID_PROPERTY_VALUE;
@@ -938,7 +1070,6 @@ int flom_msg_trace_ping(const struct flom_msg_s *msg)
             case 8:
             case 16:
                 FLOM_TRACE(("flom_msg_trace_ping: body[null]\n"));
-                FLOM_TRACE(("flom_msg_trace_ping: body[null]\n"));
                 break;
             default:
                 THROW(INVALID_STEP);
@@ -958,6 +1089,43 @@ int flom_msg_trace_ping(const struct flom_msg_s *msg)
         } /* switch (excp) */
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_msg_trace_ping/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+    
+int flom_msg_trace_discover(const struct flom_msg_s *msg)
+{
+    enum Exception { INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_msg_trace_discover\n"));
+    TRY {
+        switch (msg->header.pvs.step) {
+            case 8:
+            case 16:
+                FLOM_TRACE(("flom_msg_trace_discover: body[null]\n"));
+                break;
+            default:
+                THROW(INVALID_STEP);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP:
+                ret_cod = FLOM_RC_INVALID_PROPERTY_VALUE;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_msg_trace_discover/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

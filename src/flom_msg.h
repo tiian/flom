@@ -107,6 +107,10 @@ typedef enum flom_msg_state_e {
  * Id assigned to verb "ping"
  */
 #define FLOM_MSG_VERB_PING      3
+/**
+ * Id assigned to verb "discover"
+ */
+#define FLOM_MSG_VERB_DISCOVER  4
 
 /**
  * Default increment for message step
@@ -347,6 +351,30 @@ struct flom_msg_body_ping_16_s {
 
 
 /**
+ * Message body for verb "discover", step "8"
+ */
+struct flom_msg_body_discover_8_s {
+    /**
+     * discover verb does not need to carry anything
+     */
+    int   dummy_field;
+};
+
+
+
+/**
+ * Message body for verb "discover", step "16"
+ */
+struct flom_msg_body_discover_16_s {
+    /**
+     * discover verb does not need to carry anything
+     */
+    int   dummy_field;
+};
+
+
+
+/**
  * This structure maps the messages flowing between FLOM client and
  * FLOM server (daemon). The struct is not used for the transmission over the
  * network, but only inside the client and the server.
@@ -371,6 +399,8 @@ struct flom_msg_s {
         struct flom_msg_body_unlock_8_s       unlock_8;
         struct flom_msg_body_ping_8_s         ping_8;
         struct flom_msg_body_ping_16_s        ping_16;
+        struct flom_msg_body_discover_8_s     discover_8;
+        struct flom_msg_body_discover_16_s    discover_16;
     } body;
 };
 
@@ -404,13 +434,15 @@ extern "C" {
     /**
      * Retrieve the first XML message from a TCP/IP socket (file descriptor)
      * @param fd IN file descriptor associated to the TCP/IP socket
+     * @param type IN file descriptor associated type (SOCK_STREAM or
+     *             SOCK_DGRAM)
      * @param buf OUT buffer will be used to store the XML message
      * @param buf_size IN size of buf
      * @param read_bytes OUT number of bytes read, XML message length
      * @param timeout IN maximum wait time to receive the answer (milliseconds)
      * @return a reason code
      */
-    int flom_msg_retrieve(int fd,
+    int flom_msg_retrieve(int fd, int type,
                           char *buf, size_t buf_size,
                           ssize_t *read_bytes,
                           int timeout);
@@ -577,6 +609,42 @@ extern "C" {
 
 
     /**
+     * Serialize the "discover_8" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int flom_msg_serialize_discover_8(const struct flom_msg_s *msg,
+                                      char *buffer,
+                                      size_t *offset, size_t *free_chars);
+
+
+    
+    /**
+     * Serialize the "discover_16" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int flom_msg_serialize_discover_16(const struct flom_msg_s *msg,
+                                       char *buffer,
+                                       size_t *offset, size_t *free_chars);
+
+
+
+    /**
      * Display the content of a message
      * @param msg IN the message must be massaged
      * @return a reason code
@@ -609,6 +677,15 @@ extern "C" {
      * @return a reason code
      */
     int flom_msg_trace_ping(const struct flom_msg_s *msg);
+
+    
+    
+    /**
+     * Display the content of a discover message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int flom_msg_trace_discover(const struct flom_msg_s *msg);
 
     
     
