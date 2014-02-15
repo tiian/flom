@@ -150,6 +150,18 @@ extern "C" {
     int flom_accept_loop_chklockers(flom_locker_array_t *lockers);
 
 
+
+    /**
+     * Reply to a discover multicast message: I'm here!
+     * @param fd IN file descriptor that must be used to reply to client
+     * @param src_addr IN address extracted from discover packet
+     * @param addrlen IN size of src_addr structure
+     * @return a reason code
+     */
+    int flom_accept_discover_reply(int fd, const struct sockaddr *src_addr,
+                                   socklen_t addrlen);
+
+
     
 #ifdef __cplusplus
 }

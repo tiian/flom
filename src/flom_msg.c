@@ -124,7 +124,8 @@ flom_lock_mode_t flom_lock_mode_retrieve(const gchar *text)
 int flom_msg_retrieve(int fd, int type,
                       char *buf, size_t buf_size,
                       ssize_t *read_bytes,
-                      int timeout)
+                      int timeout,
+                      struct sockaddr *src_addr, socklen_t *addrlen)
 {
     enum Exception { POLL_ERROR
                      , NETWORK_TIMEOUT
@@ -137,8 +138,6 @@ int flom_msg_retrieve(int fd, int type,
     
     FLOM_TRACE(("flom_msg_retrieve\n"));
     TRY {
-        struct sockaddr src_addr;
-        socklen_t addrlen;
         if (timeout >= 0) {
             struct pollfd fds[1];
             int rc;
@@ -169,10 +168,11 @@ int flom_msg_retrieve(int fd, int type,
                 break;
             case SOCK_DGRAM:
                 if (0 > (*read_bytes = recvfrom(
-                             fd, buf, buf_size, 0, &src_addr, &addrlen)))
+                             fd, buf, buf_size, 0,
+                             (struct sockaddr *)src_addr, addrlen)))
                     THROW(RECVFROM_ERROR);
                 FLOM_TRACE_HEX_DATA("flom_msg_retrieve: from ",
-                                    (void *)&src_addr, addrlen);        
+                                    (void *)src_addr, *addrlen);        
                 break;
             default:
                 THROW(INVALID_SOCKET_TYPE);
@@ -414,10 +414,10 @@ int flom_msg_check_protocol(const struct flom_msg_s *msg, int client)
         case FLOM_MSG_VERB_DISCOVER:
             switch (msg->header.pvs.step) {
                 case FLOM_MSG_STEP_INCR:
-                    ret_cod = client ? FALSE : TRUE;
+                    ret_cod = client ? TRUE : FALSE;
                     break;
                 case 2*FLOM_MSG_STEP_INCR:
-                    ret_cod = client ? TRUE : FALSE;
+                    ret_cod = client ? FALSE : TRUE;
                     break;
                 default:
                     break;

@@ -31,6 +31,9 @@
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
+#ifdef HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -440,12 +443,17 @@ extern "C" {
      * @param buf_size IN size of buf
      * @param read_bytes OUT number of bytes read, XML message length
      * @param timeout IN maximum wait time to receive the answer (milliseconds)
+     * @param src_addr OUT transparently passed to recvfrom if type is
+     *                 SOCK_DGRAM (see recvfrom man page)
+     * @param addrlen OUT transparently passed to recvfrom if type is
+     *                 SOCK_DGRAM (see recvfrom man page)
      * @return a reason code
      */
     int flom_msg_retrieve(int fd, int type,
                           char *buf, size_t buf_size,
                           ssize_t *read_bytes,
-                          int timeout);
+                          int timeout,
+                          struct sockaddr *src_addr, socklen_t *addrlen);
 
 
 

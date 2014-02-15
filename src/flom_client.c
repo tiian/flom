@@ -324,11 +324,13 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
     enum Exception { GETADDRINFO_ERROR
                      , CONNECT_ERROR
                      , MSG_SERIALIZE_ERROR
+                     , SENDTO_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     struct addrinfo *result = NULL;
     int fd = NULL_FD;
+    struct flom_msg_s msg;
     
     FLOM_TRACE(("flom_client_discover_udp\n"));
     TRY {
@@ -337,10 +339,11 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
         int errcode;
         int found = FALSE;
         const struct addrinfo *gai = result;
-        struct flom_msg_s msg;
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
         size_t to_send;
         ssize_t sent;
+        
+        flom_msg_init(&msg);
         
         FLOM_TRACE(("flom_client_discover_udp: using address '%s' "
                     "and port %d\n", flom_config_get_multicast_address(),
@@ -370,6 +373,10 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                 struct sockaddr_in local_address;
                 socklen_t local_address_len;
 
+                /* prepare a local address on an ephemeral port to listen for
+                   a reply from daemon */
+                memset(&local_address, 0, sizeof(local_address));
+                local_address.sin_family = hints.ai_family;
                 local_address.sin_addr.s_addr = htonl(INADDR_ANY);
                 local_address.sin_port = 0;
                 local_address_len = sizeof(local_address);
@@ -439,7 +446,6 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
             THROW(CONNECT_ERROR);
         }
         /* prepare a discover message */
-        flom_msg_init(&msg);
         msg.header.level = FLOM_MSG_LEVEL;
         msg.header.pvs.verb = FLOM_MSG_VERB_DISCOVER;
         msg.header.pvs.step = FLOM_MSG_STEP_INCR;
@@ -449,12 +455,16 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
             THROW(MSG_SERIALIZE_ERROR);
 
         /* send discover message */
-        sent = sendto(fd, &msg, to_send, 0,
-                      gai->ai_addr, gai->ai_addrlen);
-        FLOM_TRACE(("flom_client_discover_udp: sendto('%s')=%d\n",
-                    msg, sent));
-        assert(sent != to_send);
-
+        if (to_send != (sent = sendto(fd, buffer, to_send, 0,
+                                      gai->ai_addr, gai->ai_addrlen))) {
+            FLOM_TRACE(("flom_client_discover_udp: sendto() to_send=%d, "
+                        "sent=%d\n", to_send, sent));
+            THROW(SENDTO_ERROR);
+        }
+        
+        assert(sent == to_send);
+        FLOM_TRACE(("flom_client_discover_udp: exit(0);\n"));
+        exit(0);
 /*        
     {
         ssize_t sent, received;
@@ -496,6 +506,9 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                 break;
             case MSG_SERIALIZE_ERROR:
                 break;
+            case SENDTO_ERROR:
+                ret_cod = FLOM_RC_SENDTO_ERROR;
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -507,6 +520,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
         freeaddrinfo(result);
     if (NULL_FD != fd)
         close(fd);
+    flom_msg_free(&msg);
     FLOM_TRACE(("flom_client_discover_udp/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -566,7 +580,8 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
 
         /* retrieve the reply message */
         ret_cod = flom_msg_retrieve(
-            cd->fd, cd->type, buffer, sizeof(buffer), &to_read, timeout);
+            cd->fd, cd->type, buffer, sizeof(buffer), &to_read, timeout,
+            NULL, NULL);
         switch (ret_cod) {
             case FLOM_RC_OK:
                 break;
@@ -686,7 +701,8 @@ int flom_client_wait_lock(struct flom_conn_data_s *cd,
         
         /* retrieve the reply message */
         ret_cod = flom_msg_retrieve(
-            cd->fd, cd->type, buffer, sizeof(buffer), &to_read, timeout);
+            cd->fd, cd->type, buffer, sizeof(buffer), &to_read, timeout,
+            NULL, NULL);
         switch (ret_cod) {
             case FLOM_RC_OK:
                 break;

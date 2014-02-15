@@ -713,7 +713,9 @@ int flom_accept_loop(flom_conns_t *conns)
                             "milliseconds, number of lockers=%u\n",
                             poll_timeout, number_of_lockers));
                 if (0 == number_of_lockers) {
-                    if (1 == flom_conns_get_used(conns)) {
+                    if (1 == flom_conns_get_used(conns) ||
+                        (2 == flom_conns_get_used(conns) &&
+                         SOCK_DGRAM == flom_conns_get_type(conns, 1))) {
                         FLOM_TRACE(("flom_accept_loop: only listener "
                                     "connection is active, exiting...\n"));
                         loop = FALSE;
@@ -834,6 +836,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                      , MSG_DESERIALIZE_ERROR
                      , CONNS_CLOSE_ERROR
                      , PROTOCOL_ERROR
+                     , ACCEPT_DISCOVER_REPLY_ERROR
                      , ACCEPT_LOOP_TRANSFER_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -871,12 +874,15 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
             ssize_t read_bytes;
             struct flom_msg_s *msg;
             GMarkupParseContext *gmpc;
+            struct sockaddr_in src_addr;
+            socklen_t addrlen = sizeof(src_addr);
             /* @@@ implement socket_type in flom_msg_retrieve to manage a
                SOCK_DGRAM socket (UDP/IP for daemon discovery) */
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
                                    c->fd, c->type, buffer, sizeof(buffer),
-                                   &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT)))
+                                   &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT,
+                                   (struct sockaddr *)&src_addr, &addrlen)))
                 THROW(MSG_RETRIEVE_ERROR);
 
             if (NULL == (msg = flom_conns_get_msg(conns, id)))
@@ -903,10 +909,19 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                 /* check the message is protocol correct */
                 if (!flom_msg_check_protocol(msg, TRUE))
                     THROW(PROTOCOL_ERROR);
-                if (FLOM_RC_OK != (ret_cod = flom_accept_loop_transfer(
-                                       conns, id, lockers)))
-                    THROW(ACCEPT_LOOP_TRANSFER_ERROR);
-                *moved = TRUE;
+                /* check the message is discover */
+                if (FLOM_MSG_VERB_DISCOVER == msg->header.pvs.verb) {
+                    if (FLOM_RC_OK != (ret_cod = flom_accept_discover_reply(
+                                           flom_conns_get_fd(conns, 0),
+                                           (const struct sockaddr *)&src_addr,
+                                           addrlen)))
+                        THROW(ACCEPT_DISCOVER_REPLY_ERROR);
+                } else {
+                    if (FLOM_RC_OK != (ret_cod = flom_accept_loop_transfer(
+                                           conns, id, lockers)))
+                        THROW(ACCEPT_LOOP_TRANSFER_ERROR);
+                    *moved = TRUE;
+                }
             } /* if (FLOM_MSG_STATE_READY == msg->state) */
         } /* if (0 == id) */
         
@@ -935,6 +950,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
             case PROTOCOL_ERROR:
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;
                 break;
+            case ACCEPT_DISCOVER_REPLY_ERROR:
             case ACCEPT_LOOP_TRANSFER_ERROR:
                 break;
             case NONE:
@@ -1212,6 +1228,67 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
         } /* switch (excp) */
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_accept_loop_chklockers/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_accept_discover_reply(int fd, const struct sockaddr *src_addr,
+                               socklen_t addrlen)
+{
+    enum Exception { MSG_SERIALIZE_ERROR
+                     , SENDTO_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    struct flom_msg_s msg;
+    
+    FLOM_TRACE(("flom_accept_discover_reply\n"));
+    TRY {
+        char buffer[FLOM_NETWORK_BUFFER_SIZE];
+        size_t to_send;
+        ssize_t sent;
+        
+        flom_msg_init(&msg);
+        /* prepare a discover message */
+        msg.header.level = FLOM_MSG_LEVEL;
+        msg.header.pvs.verb = FLOM_MSG_VERB_DISCOVER;
+        msg.header.pvs.step = 2*FLOM_MSG_STEP_INCR;
+        /* serialize the request message */
+        if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
+                               &msg, buffer, sizeof(buffer), &to_send)))
+            THROW(MSG_SERIALIZE_ERROR);
+        FLOM_TRACE(("flom_accept_discover_reply: src_addr=%p, addrlen=%d\n",
+                    src_addr, addrlen));
+        FLOM_TRACE_HEX_DATA("flom_accept_discover_reply: src_addr ",
+                            (void *)src_addr, addrlen);        
+
+        /* send reply message */
+        if (to_send != (sent = sendto(
+                            fd, buffer, to_send, 0, src_addr, addrlen))) {
+            THROW(SENDTO_ERROR);
+        }        
+        FLOM_TRACE(("flom_accept_discover_reply: sendto() to_send=%u, "
+                    "sent=%d\n", to_send, sent));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case MSG_SERIALIZE_ERROR:
+                break;
+            case SENDTO_ERROR:
+                ret_cod = FLOM_RC_SENDTO_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    flom_msg_free(&msg);
+    FLOM_TRACE(("flom_accept_discover_reply/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

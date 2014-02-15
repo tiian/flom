@@ -93,6 +93,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'fork' function returned an error condition";
         case FLOM_RC_GETADDRINFO_ERROR:
             return "ERROR: 'getaddrinfo' function returned an error condition";
+        case FLOM_RC_GETSOCKNAME_ERROR:
+            return "ERROR: 'getsockname' function returned an error condition";
         case FLOM_RC_GETSOCKOPT_ERROR:
             return "ERROR: 'getsockopt' function returned an error condition";
         case FLOM_RC_LISTEN_ERROR:
@@ -116,6 +118,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'regexec' function returned an error condition";
         case FLOM_RC_SEND_ERROR:
             return "ERROR: 'send' function returned an error condition";
+        case FLOM_RC_SENDTO_ERROR:
+            return "ERROR: 'sendto' function returned an error condition";
         case FLOM_RC_SETSID_ERROR:
             return "ERROR: 'setsid' function returned an error condition";
         case FLOM_RC_SETSOCKOPT_ERROR:

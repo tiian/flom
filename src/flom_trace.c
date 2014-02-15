@@ -171,9 +171,7 @@ void flom_trace_hex_data(const char *prefix, const byte_t *data, size_t size)
     } /* for (i = 0; i < size; ++i) */
     /* close trace record */
     fprintf(trace_file, "\n");
-    /*
     fflush(trace_file);
-    */
     /* remove the lock from mutex */
     g_static_mutex_unlock(&flom_trace_mutex);
 }

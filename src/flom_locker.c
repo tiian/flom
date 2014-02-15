@@ -348,7 +348,8 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
             if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
                                    curr_cd->fd, curr_cd->type,
                                    buffer, sizeof(buffer),
-                                   &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT)))
+                                   &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT,
+                                   NULL, NULL)))
                 THROW(MSG_RETRIEVE_ERROR);
 
             if (0 == read_bytes) {
