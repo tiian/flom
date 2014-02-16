@@ -325,6 +325,10 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                      , CONNECT_ERROR
                      , MSG_SERIALIZE_ERROR
                      , SENDTO_ERROR
+                     , SETSOCKOPT_ERROR
+                     , RECVFROM_ERROR
+                     , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
+                     , MSG_DESERIALIZE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
@@ -342,6 +346,10 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
         size_t to_send;
         ssize_t sent;
+        struct timeval timeout;
+        ssize_t received;
+        struct sockaddr_in from;
+        socklen_t addrlen = sizeof(from);
         
         flom_msg_init(&msg);
         
@@ -407,34 +415,6 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
-                    /*
-                      } else { 
-                    struct ip_mreq mreq;
-                    
-                    memcpy(&mreq.imr_multiaddr,
-                           &((struct sockaddr_in *)gai->ai_addr)->sin_addr,
-                           sizeof(struct in_addr));
-                    mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-                    if (-1 == setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-                                            &mreq, sizeof(mreq))) {
-                        FLOM_TRACE(("flom_client_discover_udp/setsockopt("
-                                    "IP_ADD_MEMBERSHIP) : "
-                                    "errno=%d '%s', skipping...\n", errno,
-                                    strerror(errno)));
-                        gai = gai->ai_next;
-                        close(fd);
-                        fd = NULL_FD;
-                    } else if (-1 == setsockopt(
-                                   fd, IPPROTO_IP, IP_MULTICAST_LOOP,
-                                   &loop, sizeof(loop))) {
-                        FLOM_TRACE(("flom_client_discover_udp/setsockopt("
-                                    "IP_MULTICAST_LOOP) : "
-                                    "errno=%d '%s', skipping...\n", errno,
-                                    strerror(errno)));
-                        gai = gai->ai_next;
-                        close(fd);
-                        fd = NULL_FD;
-                    */
                 } else {
                     found = TRUE;
                 }  /* if (-1 == (*fd = socket( */
@@ -461,38 +441,51 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                         "sent=%d\n", to_send, sent));
             THROW(SENDTO_ERROR);
         }
-        
-        assert(sent == to_send);
-        FLOM_TRACE(("flom_client_discover_udp: exit(0);\n"));
-        exit(0);
-/*        
-    {
-        ssize_t sent, received;
-        char *packet = "This is a try!";
-        char buffer[200];
-        struct sockaddr from;
-        socklen_t addrlen;
-        int new_fd;
 
-         @@@ TEMPORARY CODE !!!
-        new_fd = socket(AF_INET, SOCK_DGRAM, 0);
-        FLOM_TRACE(("flom_client_discover_udp: new_fd=%d\n", new_fd));
+        /* set time-out for receive operation */
+        timeout.tv_sec = 2;
+        timeout.tv_usec = 0;
+        if (-1 == setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                             sizeof(timeout)))
+            THROW(SETSOCKOPT_ERROR);
         
-        sent = sendto(new_fd, packet, strlen(packet), 0,
-                      gai->ai_addr, gai->ai_addrlen);
-        FLOM_TRACE(("flom_client_discover_udp: sendto('%s')=%d\n",
-                    packet, sent));
-
+        /* retrieve answer */
         memset(&from, 0, sizeof(from));
-        received = recvfrom(fd, buffer, sizeof(buffer), 0, &from, &addrlen);
+        if (-1 == (received = recvfrom(fd, buffer, sizeof(buffer), 0,
+                                       (struct sockaddr *)&from, &addrlen))) {
+            if (EAGAIN == errno || EWOULDBLOCK == errno)
+                /* @@@ */
+                FLOM_TRACE(("flom_client_discover_udp: no answer from "
+                            "UDP/IP multicast discovery\n"));
+            THROW(RECVFROM_ERROR);
+        }
         FLOM_TRACE(("flom_client_discover_udp: recvfrom()='%*.*s', %d\n",
-                    received, received, buffer, received));
-        
+                    received, received, buffer, received));        
         FLOM_TRACE_HEX_DATA("flom_client_discover_udp: from ",
                             (void *)&from, addrlen);
+
+        flom_msg_free(&msg);
+        flom_msg_init(&msg);
+
+        /* instantiate a new parser */
+        if (NULL == (cd->gmpc = g_markup_parse_context_new(
+                         &flom_msg_parser, 0, (gpointer)&msg, NULL)))
+            THROW(G_MARKUP_PARSE_CONTEXT_NEW_ERROR);
         
-    }
-*/        
+        /* deserialize the reply message */
+        if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
+                               buffer, received, &msg, cd->gmpc)))
+            THROW(MSG_DESERIALIZE_ERROR);
+
+        flom_msg_trace(&msg);        
+
+        from.sin_port = msg.body.discover_16.network.port;
+        from.sin_family = hints.ai_family;
+
+        /* @@@ ready to use this sockaddr_in to connect... */
+        
+        FLOM_TRACE(("flom_client_discover_udp: exit(0);\n"));
+        exit(0);
         /* @@@ store fd elsewhere because it will be closed by clean-up
            section (see below) */
         THROW(NONE);
@@ -509,6 +502,17 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
             case SENDTO_ERROR:
                 ret_cod = FLOM_RC_SENDTO_ERROR;
                 break;
+            case SETSOCKOPT_ERROR:
+                ret_cod = FLOM_RC_SETSOCKOPT_ERROR;
+                break;
+            case RECVFROM_ERROR:
+                ret_cod = FLOM_RC_RECVFROM_ERROR;
+                break;
+            case G_MARKUP_PARSE_CONTEXT_NEW_ERROR:
+                ret_cod = FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR;
+                break;
+            case MSG_DESERIALIZE_ERROR:
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -522,7 +526,8 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
         close(fd);
     flom_msg_free(&msg);
     FLOM_TRACE(("flom_client_discover_udp/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+                "ret_cod=%d/errno=%d ('%s')\n", excp, ret_cod, errno,
+                strerror(errno)));
     return ret_cod;
 }
 

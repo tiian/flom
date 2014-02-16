@@ -37,7 +37,7 @@ verb=1 (lock)
 
   client->server message (ask for a lock)
   <msg level="0" verb="1" step="8">
-    <resource name="_RESOURCE" type="5" wait="1">
+    <resource name="_RESOURCE" type="5" wait="1"/>
   </msg>
 
   server->client message (answer: lock obtained/not obtained/wait)
@@ -69,7 +69,7 @@ verb=2 (unlock)
 
   client->server message (async assertion)
   <msg verb="2" step="8">
-    <resource name="_RESOURCE">
+    <resource name="_RESOURCE"/>
   </msg>
 
 client 			 server		description
@@ -105,8 +105,11 @@ verb=4 (discover)
 
   server->client (I'm here)
   <msg level="0" verb="4" step="16">
+    <network port="X"/>
   </msg>
 
   Note: this is an UDP/IP communication: client sends a datagram to a 
         multicast address, server replies with a unicast datagram to sender
         address
+  Note2: client extracts address from reply datagram, but port may be different
+         (use choosed different ports for TCP/IP unicast and UDP/IP multicast)

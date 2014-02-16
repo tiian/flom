@@ -912,7 +912,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                 /* check the message is discover */
                 if (FLOM_MSG_VERB_DISCOVER == msg->header.pvs.verb) {
                     if (FLOM_RC_OK != (ret_cod = flom_accept_discover_reply(
-                                           flom_conns_get_fd(conns, 0),
+                                           flom_conns_get_fd(conns, id),
                                            (const struct sockaddr *)&src_addr,
                                            addrlen)))
                         THROW(ACCEPT_DISCOVER_REPLY_ERROR);
@@ -1251,18 +1251,22 @@ int flom_accept_discover_reply(int fd, const struct sockaddr *src_addr,
         ssize_t sent;
         
         flom_msg_init(&msg);
-        /* prepare a discover message */
+        /* prepare a reply to discover message */
         msg.header.level = FLOM_MSG_LEVEL;
         msg.header.pvs.verb = FLOM_MSG_VERB_DISCOVER;
         msg.header.pvs.step = 2*FLOM_MSG_STEP_INCR;
+        msg.body.discover_16.network.port =
+            (in_port_t)flom_config_get_unicast_port();
         /* serialize the request message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
                                &msg, buffer, sizeof(buffer), &to_send)))
             THROW(MSG_SERIALIZE_ERROR);
-        FLOM_TRACE(("flom_accept_discover_reply: src_addr=%p, addrlen=%d\n",
-                    src_addr, addrlen));
+        FLOM_TRACE(("flom_accept_discover_reply: fd=%d, src_addr=%p, "
+                    "addrlen=%d\n", fd, src_addr, addrlen));
         FLOM_TRACE_HEX_DATA("flom_accept_discover_reply: src_addr ",
                             (void *)src_addr, addrlen);        
+        FLOM_TRACE_TEXT_DATA("flom_accept_discover_reply: buffer ",
+                             (void *)buffer, to_send);
 
         /* send reply message */
         if (to_send != (sent = sendto(
@@ -1271,7 +1275,6 @@ int flom_accept_discover_reply(int fd, const struct sockaddr *src_addr,
         }        
         FLOM_TRACE(("flom_accept_discover_reply: sendto() to_send=%u, "
                     "sent=%d\n", to_send, sent));
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {

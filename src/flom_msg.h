@@ -28,6 +28,9 @@
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
@@ -187,6 +190,10 @@ extern const gchar *FLOM_MSG_PROP_STEP;
  */
 extern const gchar *FLOM_MSG_PROP_MODE;
 /**
+ * Label used to specify "port" property
+ */
+extern const gchar *FLOM_MSG_PROP_PORT;
+/**
  * Label used to specify "verb" property
  */
 extern const gchar *FLOM_MSG_PROP_VERB;
@@ -202,6 +209,10 @@ extern const gchar *FLOM_MSG_TAG_ANSWER;
  * Label used to specify "msg" tag
  */
 extern const gchar *FLOM_MSG_TAG_MSG;
+/**
+ * Label used to specify "network" tag
+ */
+extern const gchar *FLOM_MSG_TAG_NETWORK;
 /**
  * Label used to specify "resource" tag
  */
@@ -366,13 +377,22 @@ struct flom_msg_body_discover_8_s {
 
 
 /**
+ * Convenience struct for @ref flom_msg_body_discover_16_s
+ */
+struct flom_msg_body_discover_16_network_s {
+    /**
+     * unicast TCP/IP port used by daemon
+     */
+    in_port_t       port;
+};
+
+    
+
+/**
  * Message body for verb "discover", step "16"
  */
 struct flom_msg_body_discover_16_s {
-    /**
-     * discover verb does not need to carry anything
-     */
-    int   dummy_field;
+    struct flom_msg_body_discover_16_network_s   network;
 };
 
 

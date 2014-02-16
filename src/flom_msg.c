@@ -57,10 +57,12 @@ const gchar *FLOM_MSG_PROP_NAME           = (gchar *)"name";
 const gchar *FLOM_MSG_PROP_RC             = (gchar *)"rc";
 const gchar *FLOM_MSG_PROP_STEP           = (gchar *)"step";
 const gchar *FLOM_MSG_PROP_MODE           = (gchar *)"mode";
+const gchar *FLOM_MSG_PROP_PORT           = (gchar *)"port";
 const gchar *FLOM_MSG_PROP_VERB           = (gchar *)"verb"; 
 const gchar *FLOM_MSG_PROP_WAIT           = (gchar *)"wait";
 const gchar *FLOM_MSG_TAG_ANSWER          = (gchar *)"answer";
 const gchar *FLOM_MSG_TAG_MSG             = (gchar *)"msg";
+const gchar *FLOM_MSG_TAG_NETWORK         = (gchar *)"network";
 const gchar *FLOM_MSG_TAG_RESOURCE        = (gchar *)"resource";
 
 
@@ -881,15 +883,31 @@ int flom_msg_serialize_discover_16(const struct flom_msg_s *msg,
                                    char *buffer,
                                    size_t *offset, size_t *free_chars)
 {
-    enum Exception { NONE } excp;
+    enum Exception { BUFFER_TOO_SHORT
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_msg_serialize_discover_16\n"));
     TRY {
-        /* nothing to add */
+        int used_chars;
+        
+        /* <network> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%hd\"/>",
+                              FLOM_MSG_TAG_NETWORK,
+                              FLOM_MSG_PROP_PORT,
+                              msg->body.discover_16.network.port);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case BUFFER_TOO_SHORT:
+                ret_cod = FLOM_RC_CONTAINER_FULL;
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -1105,8 +1123,12 @@ int flom_msg_trace_discover(const struct flom_msg_s *msg)
     TRY {
         switch (msg->header.pvs.step) {
             case 8:
-            case 16:
                 FLOM_TRACE(("flom_msg_trace_discover: body[null]\n"));
+            case 16:
+                FLOM_TRACE(("flom_msg_trace_unlock: body[%s["
+                            "port=%hd]]\n",
+                            FLOM_MSG_TAG_NETWORK,
+                            msg->body.discover_16.network.port));
                 break;
             default:
                 THROW(INVALID_STEP);
@@ -1191,10 +1213,12 @@ void flom_msg_deserialize_start_element(
                      , INVALID_PROPERTY1
                      , INVALID_PROPERTY2
                      , INVALID_PROPERTY3
+                     , INVALID_PROPERTY4
                      , TAG_TYPE_ERROR
                      , NONE } excp;
     
-    enum {dummy_tag, msg_tag, resource_tag, answer_tag } tag_type = dummy_tag;
+    enum {dummy_tag, msg_tag, resource_tag,
+          answer_tag, network_tag } tag_type = dummy_tag;
     /* deserialized message */
     struct flom_msg_s *msg = (struct flom_msg_s *)user_data;
     
@@ -1218,6 +1242,8 @@ void flom_msg_deserialize_start_element(
             tag_type = resource_tag;
         else if (!strcmp(element_name, FLOM_MSG_TAG_ANSWER))
             tag_type = answer_tag;
+        else if (!strcmp(element_name, FLOM_MSG_TAG_NETWORK))
+            tag_type = network_tag;
         while (*name_cursor) {
             FLOM_TRACE(("flom_msg_deserialize_start_element: name_cursor='%s' "
                         "value_cursor='%s'\n", *name_cursor, *value_cursor));
@@ -1297,6 +1323,22 @@ void flom_msg_deserialize_start_element(
                         }
                     }
                     break;
+                case network_tag:
+                    /* check if this tag is OK for the current message */
+                    if (FLOM_MSG_VERB_DISCOVER == msg->header.pvs.verb &&
+                        2*FLOM_MSG_STEP_INCR == msg->header.pvs.step) {
+                        if (!strcmp(*name_cursor, FLOM_MSG_PROP_PORT))
+                            msg->body.discover_16.network.port =
+                                strtol(*value_cursor, NULL, 10);
+                        else {
+                            FLOM_TRACE(("flom_msg_deserialize_start_"
+                                        "element: property '%s' is not "
+                                        "valid for verb '%s'\n",
+                                        *name_cursor, element_name));
+                            THROW(INVALID_PROPERTY4);
+                        }
+                    }
+                    break;
                 default:
                     FLOM_TRACE(("flom_msg_deserialize_start_element: ERROR, "
                                 "tag_type=%d\n", tag_type));
@@ -1315,6 +1357,7 @@ void flom_msg_deserialize_start_element(
             case INVALID_PROPERTY1:
             case INVALID_PROPERTY2:
             case INVALID_PROPERTY3:
+            case INVALID_PROPERTY4:
             case TAG_TYPE_ERROR:
                 msg->state = FLOM_MSG_STATE_INVALID;
                 break;

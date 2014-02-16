@@ -178,6 +178,21 @@ extern unsigned long flom_trace_mask;
 
 
 /**
+ * FLOM_TRACE_TEXT_DATA macro is used to compile trace messages only if _TRACE
+ * macro is defined;
+ * trace message is printed only for modules (FLOM_TRACE_MODULE) covered by
+ * trace mask (FLOM_TRACE_MASK) specified as environment variable
+ */
+#ifdef _TRACE
+# define FLOM_TRACE_TEXT_DATA(a,b,c) (FLOM_TRACE_MODULE & flom_trace_mask ? \
+                                     flom_trace_text_data(a,b,c) : 0)
+#else
+# define FLOM_TRACE_TEXT_DATA(a,b,c)
+#endif /* _TRACE */
+
+
+
+/**
  * FLOM_TRACE_ADDRINFO macro is used to compile trace messages only if _TRACE
  * macro is defined;
  * trace message is printed only for modules (FLOM_TRACE_MODULE) covered by
@@ -242,10 +257,9 @@ extern "C" {
      *               prefix, not a format with values)
      * @param data IN pointer to base memory
      * @param size IN number of bytes to dump
-     * @param out_stream IN destination standard I/O stream
      */
     void flom_trace_text_data(const char *prefix, const byte_t *data,
-                              size_t size, FILE *out_stream);
+                              size_t size);
 
 
 

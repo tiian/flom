@@ -178,8 +178,7 @@ void flom_trace_hex_data(const char *prefix, const byte_t *data, size_t size)
 
 
 
-void flom_trace_text_data(const char *prefix, const byte_t *data,
-                          size_t size, FILE *out_stream)
+void flom_trace_text_data(const char *prefix, const byte_t *data, size_t size)
 {
     size_t i;
     struct tm broken_time;
@@ -194,7 +193,7 @@ void flom_trace_text_data(const char *prefix, const byte_t *data,
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
     /* default header */
-    fprintf(out_stream,
+    fprintf(trace_file,
             "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d ["
             PID_T_FORMAT "/%p] %s",
             broken_time.tm_year + 1900, broken_time.tm_mon + 1,
@@ -204,12 +203,13 @@ void flom_trace_text_data(const char *prefix, const byte_t *data,
     /* dump data */
     for (i = 0; i < size; ++i) {
         if (data[i] >= (byte_t)' ' && data[i] < (byte_t)0x80)
-            putc((int)(data[i] & 0xff), out_stream);
+            putc((int)(data[i] & 0xff), trace_file);
         else
-            putc((int)' ', out_stream);
+            putc((int)' ', trace_file);
     } /* for (i = 0; i < size; ++i) */
     /* close trace record */
-    fprintf(out_stream, "\n");
+    fprintf(trace_file, "\n");
+    fflush(trace_file);
     /* remove the lock from mutex */
     g_static_mutex_unlock(&flom_trace_mutex);
 }
