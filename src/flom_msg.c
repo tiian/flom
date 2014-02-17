@@ -893,7 +893,7 @@ int flom_msg_serialize_discover_16(const struct flom_msg_s *msg,
         
         /* <network> */
         used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%hd\"/>",
+                              "<%s %s=\"%hu\"/>",
                               FLOM_MSG_TAG_NETWORK,
                               FLOM_MSG_PROP_PORT,
                               msg->body.discover_16.network.port);
@@ -1124,9 +1124,10 @@ int flom_msg_trace_discover(const struct flom_msg_s *msg)
         switch (msg->header.pvs.step) {
             case 8:
                 FLOM_TRACE(("flom_msg_trace_discover: body[null]\n"));
+                break;
             case 16:
-                FLOM_TRACE(("flom_msg_trace_unlock: body[%s["
-                            "port=%hd]]\n",
+                FLOM_TRACE(("flom_msg_trace_discover: body[%s["
+                            "port=%hu]]\n",
                             FLOM_MSG_TAG_NETWORK,
                             msg->body.discover_16.network.port));
                 break;

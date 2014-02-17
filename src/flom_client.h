@@ -89,9 +89,22 @@ extern "C" {
 
     /**
      * Discover flom daemon address using multicast UDP
-     * @param cd IN connection data
+     * @param cd IN/OUT connection data
+     * @return a reason code
      */
     int flom_client_discover_udp(struct flom_conn_data_s *cd);
+
+
+
+    /**
+     * Connect to a daemon using TCP/IP; daemon was previously discovered
+     * using multicast UDP/IP
+     * @param cd IN/OUT connection data
+     * @param soin IN address and port of daemon
+     * @return a reason code
+     */
+    int flom_client_discover_udp_connect(struct flom_conn_data_s *cd,
+                                         const struct sockaddr_in *soin);
     
     
 

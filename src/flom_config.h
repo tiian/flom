@@ -49,9 +49,24 @@
 #define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_CONFIG
 
 
-
+/**
+ * Number of chars accepted for a filename bound to AF_LOCAL socket
+ */
 #define LOCAL_SOCKET_SIZE sizeof(((struct sockaddr_un *)NULL)->sun_path)
-
+/**
+ * Timeout for discover receiver after it sent a multicast packet
+ * (it's used for field tv_sec of struct timeval)
+ */
+#define DISCOVER_TIMEOUT_SEC       0
+/**
+ * Timeout for discover receiver after it sent a multicast packet
+ * (it's used for field tv_usec of struct timeval)
+ */
+#define DISCOVER_TIMEOUR_USEC  10000
+/**
+ * Used as backlog parameter for "listen" function call
+ */
+#define LISTEN_BACKLOG           100
 
 
 /* configure dependent constant values */

@@ -86,6 +86,27 @@ extern "C" {
 
 
     /**
+     * Create a listen network (AF_INET, TCP/IP) socket to serve the clients;
+     * it uses the configured TCP/IP unicast address
+     * @param conns OUT connections object
+     * @result a reason code
+     */
+    int flom_listen_tcp_configured(flom_conns_t *conns);
+
+
+
+    /**
+     * Create a listen network (AF_INET, TCP/IP) socket to serve the clients;
+     * it uses an automatic TCP/IP unicast address using INADDR_ANY and an
+     * ephemeral port
+     * @param conns OUT connections object
+     * @result a reason code
+     */
+    int flom_listen_tcp_automatic(flom_conns_t *conns);
+
+
+
+    /**
      * Create a listen network (AF_INET, UDP/IP, multicast) to answer
      * location inquiry from other flom commands
      * @param conns OUT connections object

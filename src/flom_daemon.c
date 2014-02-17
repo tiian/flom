@@ -272,7 +272,7 @@ int flom_listen(flom_conns_t *conns)
                 /* create TCP/IP unicast listener */
                 if (FLOM_RC_OK != (ret_cod = flom_listen_tcp(conns)))
                     THROW(LISTEN_TCP_ERROR);
-                /* create UDP/IP multicast listener (resover) */
+                /* create UDP/IP multicast listener (resolver) */
                 if (FLOM_RC_OK != (ret_cod = flom_listen_udp(conns)))
                     THROW(LISTEN_UDP_ERROR);
                 break;
@@ -328,7 +328,7 @@ int flom_listen_local(flom_conns_t *conns)
         strcpy(servaddr.sun_path, global_config.socket_name);
         if (-1 == bind(fd, (struct sockaddr *) &servaddr, sizeof(servaddr)))
             THROW(BIND_ERROR);
-        if (-1 ==listen(fd, 100))
+        if (-1 == listen(fd, LISTEN_BACKLOG))
             THROW(LISTEN_ERROR);
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
                                conns, fd, SOCK_STREAM, sizeof(servaddr),
@@ -367,6 +367,20 @@ int flom_listen_local(flom_conns_t *conns)
 
 int flom_listen_tcp(flom_conns_t *conns)
 {
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    FLOM_TRACE(("flom_listen_tcp\n"));
+    if (NULL != flom_config_get_unicast_address())
+        ret_cod = flom_listen_tcp_configured(conns);
+    else
+        ret_cod = flom_listen_tcp_automatic(conns);
+    FLOM_TRACE(("flom_listen_tcp/ret_cod=%d/errno=%d\n", ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_listen_tcp_configured(flom_conns_t *conns)
+{
     enum Exception { GETADDRINFO_ERROR
                      , BIND_ERROR
                      , LISTEN_ERROR
@@ -377,7 +391,7 @@ int flom_listen_tcp(flom_conns_t *conns)
     struct addrinfo *result = NULL;
     int fd = NULL_FD;
     
-    FLOM_TRACE(("flom_listen_tcp\n"));
+    FLOM_TRACE(("flom_listen_tcp_configured\n"));
     TRY {
         struct addrinfo hints, *gai = NULL;
         int errcode;
@@ -389,41 +403,42 @@ int flom_listen_tcp(flom_conns_t *conns)
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = IPPROTO_TCP;
         snprintf(port, sizeof(port), "%u", flom_config_get_unicast_port());
-        FLOM_TRACE(("flom_listen_tcp: binding address '%s' "
+        FLOM_TRACE(("flom_listen_tcp_configured: binding address '%s' "
                     "and port %s\n", flom_config_get_unicast_address(),
                     port));
 
         if (0 != (errcode = getaddrinfo(flom_config_get_unicast_address(),
                                         port, &hints, &result))) {
-            FLOM_TRACE(("flom_listen_tcp/getaddrinfo(): "
+            FLOM_TRACE(("flom_listen_tcp_configured/getaddrinfo(): "
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
             THROW(GETADDRINFO_ERROR);
         } else {
             int bound = FALSE;
             int sock_opt = 1;
-            FLOM_TRACE_ADDRINFO("flom_listen_tcp/getaddrinfo(): ", result);
+            FLOM_TRACE_ADDRINFO("flom_listen_tcp_configured/getaddrinfo(): ",
+                                result);
             /* traverse the list and try to bind... */
             gai = result;
             while (NULL != gai && !bound) {
-                FLOM_TRACE_HEX_DATA("flom_listen_tcp: ai_addr ",
+                FLOM_TRACE_HEX_DATA("flom_listen_tcp_configured: ai_addr ",
                                     (void *)gai->ai_addr, gai->ai_addrlen);
                 if (-1 == (fd = socket(gai->ai_family, gai->ai_socktype,
                                        gai->ai_protocol))) {
-                    FLOM_TRACE(("flom_listen_tcp/socket(): "
+                    FLOM_TRACE(("flom_listen_tcp_configured/socket(): "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
                     gai = gai->ai_next;
                 } else if (-1 == setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
                                             (void *)&sock_opt,
                                             sizeof(sock_opt))) {
-                    FLOM_TRACE(("flom_listen_tcp/setsockopt() : "
+                    FLOM_TRACE(("flom_listen_tcp_configured/setsockopt() : "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
                 } else  if (-1 == bind(fd, gai->ai_addr, gai->ai_addrlen)) {
-                    FLOM_TRACE(("flom_listen_tcp/bind() : "
+                    FLOM_TRACE(("flom_listen_tcp_configured/bind() : "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
                     gai = gai->ai_next;
@@ -431,13 +446,13 @@ int flom_listen_tcp(flom_conns_t *conns)
                     fd = NULL_FD;
                 } else {
                     bound = TRUE;
-                    FLOM_TRACE(("flom_listen_tcp: bound!\n"));
+                    FLOM_TRACE(("flom_listen_tcp_configured: bound!\n"));
                 }
             } /* while (NULL != gai && !bound) */
             if (!bound)
                 THROW(BIND_ERROR);
         }        
-        if (-1 ==listen(fd, 100))
+        if (-1 == listen(fd, LISTEN_BACKLOG))
             THROW(LISTEN_ERROR);
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
                                conns, fd, SOCK_STREAM, gai->ai_addrlen,
@@ -469,8 +484,96 @@ int flom_listen_tcp(flom_conns_t *conns)
         freeaddrinfo(result);
     if (NULL_FD != fd)
         close(fd);
-    FLOM_TRACE(("flom_listen_tcp/excp=%d/"
+    FLOM_TRACE(("flom_listen_tcp_configured/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_listen_tcp_automatic(flom_conns_t *conns)
+{
+    enum Exception { SOCKET_ERROR
+                     , SETSOCKOPT_ERROR
+                     , BIND_ERROR
+                     , LISTEN_ERROR
+                     , GETSOCKNAME_ERROR
+                     , CONNS_ADD_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    int fd = NULL_FD;
+    
+    FLOM_TRACE(("flom_listen_tcp_automatic\n"));
+    TRY {
+        struct sockaddr_in soin, addr;
+        socklen_t addrlen;
+        int sock_opt = 1;
+        gint unicast_port;
+
+        if (-1 == (fd = socket(flom_conns_get_domain(conns), SOCK_STREAM,
+                               IPPROTO_TCP)))
+            THROW(SOCKET_ERROR);
+        if (-1 == setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
+                             (void *)&sock_opt, sizeof(sock_opt)))
+            THROW(SETSOCKOPT_ERROR);
+        /* binding local address, ephemeral port */
+        memset(&soin, 0, sizeof(soin));
+        soin.sin_addr.s_addr = htonl(INADDR_ANY);
+        soin.sin_port = 0;
+        if (-1 == bind(fd, (struct sockaddr *)&soin, sizeof(soin)))
+            THROW(BIND_ERROR);
+        if (-1 ==listen(fd, 100))
+            THROW(LISTEN_ERROR);
+        /* retrieve address and port */
+        addrlen = sizeof(addr);
+        if (-1 == getsockname(fd, (struct sockaddr *)&addr, &addrlen))
+            THROW(GETSOCKNAME_ERROR);
+        FLOM_TRACE_HEX_DATA("flom_listen_tcp_automatic: addr ",
+                            (void *)&addr, addrlen);
+        /* inject port value to configuration */
+        unicast_port = ntohs(addr.sin_port);
+        FLOM_TRACE(("flom_listen_tcp_automatic: set unicast port to value "
+                    "%d\n", unicast_port));
+        flom_config_set_unicast_port(unicast_port);
+        /* add connection to pool */
+        if (FLOM_RC_OK != (ret_cod = flom_conns_add(
+                               conns, fd, SOCK_STREAM, addrlen,
+                               (struct sockaddr *)&addr, TRUE)))
+            THROW(CONNS_ADD_ERROR);
+        fd = NULL_FD; /* avoid socket close by clean-up section */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case SOCKET_ERROR:
+                ret_cod = FLOM_RC_SOCKET_ERROR;
+                break;
+            case SETSOCKOPT_ERROR:
+                ret_cod = FLOM_RC_SETSOCKOPT_ERROR;
+                break;
+            case BIND_ERROR:
+                ret_cod = FLOM_RC_BIND_ERROR;
+                break;
+            case LISTEN_ERROR:
+                ret_cod = FLOM_RC_LISTEN_ERROR;
+                break;
+            case GETSOCKNAME_ERROR:
+                ret_cod = FLOM_RC_GETSOCKNAME_ERROR;
+                break;
+            case CONNS_ADD_ERROR:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    if (NULL_FD != fd)
+        close(fd);
+    FLOM_TRACE(("flom_listen_tcp_automatic/excp=%d/"
+                "ret_cod=%d/errno=%d ('%s')\n", excp, ret_cod, errno,
+                strerror(errno)));
     return ret_cod;
 }
 
