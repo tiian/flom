@@ -22,6 +22,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	cmdopt.at.in \
 	incompopt.at.in \
 	usecase.at \
+	usecase-dist.at \
 	scripts/flom_*.sh
 
 cmdopt.at: cmdopt.at.in
@@ -31,6 +32,11 @@ cmdopt.at: cmdopt.at.in
 	$< >$@
 
 incompopt.at: incompopt.at.in
+	sed \
+	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
+	$< >$@
+
+usecase-dist.at: usecase-dist.at.in
 	sed \
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
 	$< >$@
@@ -51,9 +57,10 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/testsuite.at \
 	$(srcdir)/cmdopt.at \
 	$(srcdir)/incompopt.at \
-	$(srcdir)/usecase.at
+	$(srcdir)/usecase.at \
+	$(srcdir)/usecase-dist.at
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@
 
 DISTCLEANFILES = atconfig
-CLEANFILES = cmdopt.at incompopt.at
+CLEANFILES = cmdopt.at incompopt.at usecase-dist.at

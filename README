@@ -27,6 +27,9 @@ to read man page and pick up Internet relevant URLs for FLOM project.
 Use
 make check
 to perform package automatic tests.
+NOTE: do *NOT* run tests on a system that's using flom because some tests
+      need to kill all flom running instances and this is not acceptable if
+      you are playing production workloads. DO USE A TEST SYSTEM!
 NOTE: tests needs the system is NOT overloaded because they stick on timing
       and timing breaks if the system is overloaded.
 Enjoy it!

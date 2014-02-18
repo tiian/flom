@@ -42,6 +42,8 @@ sleep $2
 echo " $1 locking for $3 seconds"
 ###echo "flom $4 -- sleep $3"
 flom $4 -- sleep $3
+EXIT_RC=$?
 # print end message
 ###echo -n $(date +'%s %N')
 echo " $1 ending"
+exit $EXIT_RC

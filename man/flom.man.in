@@ -37,8 +37,20 @@ lock mode as defined by VMS DLM (Distributed Lock Manager). \fIMODE\fP can be: "
 .B -s, --socket-name=\fIFILENAME
 absolute \fIFILENAME\fP that must be used to create the UNIX socket used for local communication between \fBflom\fP command line and \fBflom daemon\fP; typical values are something like \fI/tmp/something\fP. This option is useful to share locks between different users (the default socket is per user and every user creates a different one)
 .TP
+.B -a, --unicast-address=\fIIPaddress
+TCP/IP address that must be used to reach a running daemon; if the daemon must be started locally, \fIIPaddress\fP must be a valid IP address for this host
+.TP
+.B -p, --unicast-port=\fIIPport
+TCP/IP port that must be used to reach a running daemon; if the daemon must be started locally, \fIIPport\fP must be a port not used by another process on this host. If \fIIPaddress\fP (see \fB-a\fP, \fB--unicast-address\fP) is specified and \fIIPport\fP is not specified, the default value is @_DEFAULT_DAEMON_PORT@
+.TP
+.B -A, --multicast-address=\fIIPaddress
+UDP/IP multicast address that must be used to discover the location of a running daemon; if the daemon must be started locally, \fIIPaddress\fP must be a valid multicast IP address for this host. Multicast address ranges are: 224.0.0.1-224.0.0.255 (link-local), 239.255.0.0-239.255.255.255 (site-local), 239.192.0.0-239.195.255.255 (organization-local) and 224.0.1.0-238.255.255.255 (global); a typical choice is an address in \fIlink-local\fP or in \fIsite-local\fP range
+.TP
+.B -P, --multicast-port=\fIIPport
+UDP/IP multicast port that must be used to discover the location of a running daemon; if the daemon must be started locally, \fIIPport\fP must be a port not used by another process on this host. If \fIIPaddress\fP (see \fB-A\fP, \fB--multicast-address\fP) is specified and \fIIPport\fP is not specified, the default value is @_DEFAULT_DAEMON_PORT@
+.TP
 .B -d, --daemon-lifespan=\fImilliseconds
-lifespan of \fBflom\fP daemon if activated, expressed using milliseconds. The value of \fImilliseconds\fP can be and integer greater than 0, equal to 0 or less than 0: values greater than 0 are interpreted as minimum daemon lifetime (in milliseconds), the value 0 is interpreted as "don't start a daemon process" and values less than 0 are interpreted as "run forever" (or until a kill message is sent to \fBflom\fP daemon)
+lifespan of \fBflom\fP daemon if activated, expressed using milliseconds. The value of \fImilliseconds\fP can be and integer greater than 0, equal to 0 or less than 0: values greater than 0 are interpreted as minimum daemon lifetime (in milliseconds), the value 0 is interpreted as "don't start a daemon process" and values less than 0 are interpreted as "run forever" (or until a kill message is sent to \fBflom\fP daemon). If not specified, the default value is @_DEFAULT_DAEMON_LIFESPAN@ milliseconds
 .TP
 .B -T, --command-trace-file=\fIFILENAME
 file destination of the trace messages produced by the command (foreground) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module
