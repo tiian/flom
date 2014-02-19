@@ -1,5 +1,6 @@
 AM_CPPFLAGS = -D_SYSCONFDIR='"@sysconfdir@"'
 AM_CFLAGS = -Wall
+flom_LDADD=@GLIB_LIBS@
 bin_PROGRAMS = flom
 
 noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \

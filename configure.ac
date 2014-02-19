@@ -19,7 +19,7 @@ _CONFIG_KEY_LOCK_MODE="LockMode"
 _CONFIG_GROUP_DAEMON="Daemon"
 _CONFIG_KEY_SOCKET_NAME="SocketName"
 _CONFIG_KEY_LIFESPAN="Lifespan"
-_CONFIG_KEY_UNICAST_ADDRESS="UnicastAddress"
+
 _CONFIG_KEY_UNICAST_PORT="UnicastPort"
 _CONFIG_KEY_MULTICAST_ADDRESS="MulticastAddress"
 _CONFIG_KEY_MULTICAST_PORT="MulticastPort"
@@ -91,7 +91,7 @@ then
 	AC_MSG_ERROR([it seems glib-2.0 is not configured with pkg-config])
 else
 	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0)"
-	LDFLAGS="$LDFLAGS $($PKG_CONFIG --libs glib-2.0) $($PKG_CONFIG --libs gthread-2.0)"
+	GLIB_LIBS="$($PKG_CONFIG --libs glib-2.0) $($PKG_CONFIG --libs gthread-2.0)"
 	AC_MSG_RESULT([yes])
 fi
 
@@ -161,7 +161,7 @@ AC_CHECK_FUNCS(snprintf)
 AC_CHECK_FUNCS(strcasestr)
 AC_CHECK_FUNCS(vsnprintf)
 
-AC_SUBST(LDFLAGS_GLIB)
+AC_SUBST(GLIB_LIBS)
 AC_SUBST(HAVE_DOT)
 
 # substitution inside *.in for hardwired configuration
