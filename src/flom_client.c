@@ -526,6 +526,13 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
         from.sin_port = htons(msg.body.discover_16.network.port);
         from.sin_family = hints.ai_family;
 
+        FLOM_TRACE(("flom_client_discover_udp: address=%p, "
+                    "strlen(address)=%u\n",
+                    msg.body.discover_16.network.address,
+                    strlen(msg.body.discover_16.network.address)));
+
+        /* @@@ if address length is > 0, it must be resolved */
+        
         /* connect to discovered server */
         if (FLOM_RC_OK != (ret_cod = flom_client_discover_udp_connect(
                                cd, &from)))

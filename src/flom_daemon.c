@@ -526,6 +526,7 @@ int flom_listen_tcp_automatic(flom_conns_t *conns)
             THROW(LISTEN_ERROR);
         /* retrieve address and port */
         addrlen = sizeof(addr);
+        memset(&addr, 0, addrlen);
         if (-1 == getsockname(fd, (struct sockaddr *)&addr, &addrlen))
             THROW(GETSOCKNAME_ERROR);
         FLOM_TRACE_HEX_DATA("flom_listen_tcp_automatic: addr ",
@@ -979,8 +980,6 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
             GMarkupParseContext *gmpc;
             struct sockaddr_in src_addr;
             socklen_t addrlen = sizeof(src_addr);
-            /* @@@ implement socket_type in flom_msg_retrieve to manage a
-               SOCK_DGRAM socket (UDP/IP for daemon discovery) */
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
                                    c->fd, c->type, buffer, sizeof(buffer),
@@ -1360,6 +1359,9 @@ int flom_accept_discover_reply(int fd, const struct sockaddr *src_addr,
         msg.header.pvs.step = 2*FLOM_MSG_STEP_INCR;
         msg.body.discover_16.network.port =
             (in_port_t)flom_config_get_unicast_port();
+        if (NULL != flom_config_get_unicast_address())
+            msg.body.discover_16.network.address = g_strdup(
+                flom_config_get_unicast_address());
         /* serialize the request message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
                                &msg, buffer, sizeof(buffer), &to_send)))

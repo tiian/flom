@@ -52,6 +52,7 @@
 
 
 const gchar *FLOM_MSG_HEADER              = (gchar *)"<?xml";
+const gchar *FLOM_MSG_PROP_ADDRESS        = (gchar *)"address";
 const gchar *FLOM_MSG_PROP_LEVEL          = (gchar *)"level";
 const gchar *FLOM_MSG_PROP_NAME           = (gchar *)"name";
 const gchar *FLOM_MSG_PROP_RC             = (gchar *)"rc";
@@ -338,7 +339,12 @@ int flom_msg_free(struct flom_msg_s *msg)
             case FLOM_MSG_VERB_DISCOVER: /* nothing to release */
                 switch (msg->header.pvs.step) {
                     case FLOM_MSG_STEP_INCR: /* nothing to release */
-                    case 2*FLOM_MSG_STEP_INCR:
+                        break;
+                    case 2*FLOM_MSG_STEP_INCR: /* release address */
+                        if (NULL != msg->body.discover_16.network.address) {
+                            g_free(msg->body.discover_16.network.address);
+                            msg->body.discover_16.network.address = NULL;
+                        }
                         break;
                     default:
                         THROW(INVALID_STEP_DISCOVER);
@@ -893,8 +899,11 @@ int flom_msg_serialize_discover_16(const struct flom_msg_s *msg,
         
         /* <network> */
         used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%hu\"/>",
+                              "<%s %s=\"%s\" %s=\"%hu\"/>",
                               FLOM_MSG_TAG_NETWORK,
+                              FLOM_MSG_PROP_ADDRESS,
+                              NULL != msg->body.discover_16.network.address ?
+                              msg->body.discover_16.network.address : "",
                               FLOM_MSG_PROP_PORT,
                               msg->body.discover_16.network.port);
         if (used_chars >= *free_chars)
@@ -1127,8 +1136,12 @@ int flom_msg_trace_discover(const struct flom_msg_s *msg)
                 break;
             case 16:
                 FLOM_TRACE(("flom_msg_trace_discover: body[%s["
-                            "port=%hu]]\n",
+                            "%s='%s',%s=%hu]]\n",
                             FLOM_MSG_TAG_NETWORK,
+                            FLOM_MSG_PROP_ADDRESS,
+                            NULL != msg->body.discover_16.network.address ?
+                            msg->body.discover_16.network.address : "",
+                            FLOM_MSG_PROP_PORT,
                             msg->body.discover_16.network.port));
                 break;
             default:
@@ -1210,10 +1223,11 @@ void flom_msg_deserialize_start_element(
     GError             **error)
 {
     enum Exception { ALREADY_INVALID
-                     , G_STRDUP_ERROR
+                     , G_STRDUP_ERROR1
                      , INVALID_PROPERTY1
                      , INVALID_PROPERTY2
                      , INVALID_PROPERTY3
+                     , G_STRDUP_ERROR2
                      , INVALID_PROPERTY4
                      , TAG_TYPE_ERROR
                      , NONE } excp;
@@ -1269,7 +1283,7 @@ void flom_msg_deserialize_start_element(
                                 FLOM_TRACE(("flom_msg_deserialize_start_"
                                             "element: unable to duplicate "
                                             "*name_cursor\n"));
-                                THROW(G_STRDUP_ERROR);
+                                THROW(G_STRDUP_ERROR1);
                             }
                             if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb)
                                 msg->body.lock_8.resource.name = tmp;
@@ -1331,7 +1345,16 @@ void flom_msg_deserialize_start_element(
                         if (!strcmp(*name_cursor, FLOM_MSG_PROP_PORT))
                             msg->body.discover_16.network.port =
                                 strtol(*value_cursor, NULL, 10);
-                        else {
+                        else if (!strcmp(*name_cursor, FLOM_MSG_PROP_ADDRESS)) {
+                            gchar *tmp = g_strdup(*value_cursor);
+                            if (NULL == tmp) {
+                                FLOM_TRACE(("flom_msg_deserialize_start_"
+                                            "element: unable to duplicate "
+                                            "*value_cursor\n"));
+                                THROW(G_STRDUP_ERROR2);
+                            }
+                            msg->body.discover_16.network.address = tmp;
+                        } else {
                             FLOM_TRACE(("flom_msg_deserialize_start_"
                                         "element: property '%s' is not "
                                         "valid for verb '%s'\n",
@@ -1354,10 +1377,11 @@ void flom_msg_deserialize_start_element(
         switch (excp) {
             case ALREADY_INVALID:
                 break;
-            case G_STRDUP_ERROR:
+            case G_STRDUP_ERROR1:
             case INVALID_PROPERTY1:
             case INVALID_PROPERTY2:
             case INVALID_PROPERTY3:
+            case G_STRDUP_ERROR2:
             case INVALID_PROPERTY4:
             case TAG_TYPE_ERROR:
                 msg->state = FLOM_MSG_STATE_INVALID;

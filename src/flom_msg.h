@@ -170,6 +170,10 @@ typedef enum flom_lock_mode_e {
  */
 extern const gchar *FLOM_MSG_HEADER;
 /**
+ * Label used to specify "address" property
+ */
+extern const gchar *FLOM_MSG_PROP_ADDRESS;
+/**
  * Label used to specify "level" property
  */
 extern const gchar *FLOM_MSG_PROP_LEVEL;
@@ -380,6 +384,12 @@ struct flom_msg_body_discover_8_s {
  * Convenience struct for @ref flom_msg_body_discover_16_s
  */
 struct flom_msg_body_discover_16_network_s {
+    /**
+     * unicast TCP/IP address used by daemon. It can * NOT * be desumed by
+     * packet sender because the daemon might be bound to an interface
+     * distinct from the interface used to send UDP datagrams
+     */
+    gchar          *address;
     /**
      * unicast TCP/IP port used by daemon
      */
