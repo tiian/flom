@@ -232,7 +232,7 @@ int flom_client_connect_tcp(struct flom_conn_data_s *cd)
         struct addrinfo hints;
         int errcode, sock_opt = 1;
         const struct addrinfo *p = NULL;
-        char port[100];
+        char port_string[100];
         
         FLOM_TRACE(("flom_client_connect_tcp: connecting to address '%s' "
                     "and port %d\n", flom_config_get_unicast_address(),
@@ -244,10 +244,11 @@ int flom_client_connect_tcp(struct flom_conn_data_s *cd)
         hints.ai_family = AF_INET; 
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = IPPROTO_TCP;
-        snprintf(port, sizeof(port), "%u", flom_config_get_unicast_port());
+        snprintf(port_string, sizeof(port_string), "%u",
+                 flom_config_get_unicast_port());
 
         if (0 != (errcode = getaddrinfo(flom_config_get_unicast_address(),
-                                        port, &hints, &result))) {
+                                        port_string, &hints, &result))) {
             FLOM_TRACE(("flom_client_connect_tcp/getaddrinfo(): "
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
             THROW(GETADDRINFO_ERROR);
@@ -365,6 +366,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                      , RECVFROM_ERROR
                      , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
                      , MSG_DESERIALIZE_ERROR
+                     , CLIENT_CONNECT_TCP_ERROR
                      , CLIENT_DISCOVER_UDP_CONNECT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -523,21 +525,31 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
 
         flom_msg_trace(&msg);        
 
-        from.sin_port = htons(msg.body.discover_16.network.port);
-        from.sin_family = hints.ai_family;
-
         FLOM_TRACE(("flom_client_discover_udp: address=%p, "
                     "strlen(address)=%u\n",
                     msg.body.discover_16.network.address,
                     strlen(msg.body.discover_16.network.address)));
 
-        /* @@@ if address length is > 0, it must be resolved */
-        
-        /* connect to discovered server */
-        if (FLOM_RC_OK != (ret_cod = flom_client_discover_udp_connect(
-                               cd, &from)))
-            THROW(CLIENT_DISCOVER_UDP_CONNECT_ERROR);
-        
+        /* if address length is > 0, server specified a callback address
+           potentially different than UDP packet IP source */
+        if (0 < strlen(msg.body.discover_16.network.address)) {
+            /* update global configuration */
+            flom_config_set_unicast_address(
+                msg.body.discover_16.network.address);
+            flom_config_set_unicast_port(
+                msg.body.discover_16.network.port);
+            /* switch to normal TCP connect phase */
+            if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(cd)))
+                THROW(CLIENT_CONNECT_TCP_ERROR);
+        } else {
+            /* connect to discovered server using IP source address and
+               port retrieved from message */
+            from.sin_port = htons(msg.body.discover_16.network.port);
+            from.sin_family = hints.ai_family;
+            if (FLOM_RC_OK != (ret_cod = flom_client_discover_udp_connect(
+                                   cd, &from)))
+                THROW(CLIENT_DISCOVER_UDP_CONNECT_ERROR);
+        }
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -565,6 +577,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                 ret_cod = FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR;
                 break;
             case MSG_DESERIALIZE_ERROR:
+            case CLIENT_CONNECT_TCP_ERROR:
             case CLIENT_DISCOVER_UDP_CONNECT_ERROR:
                 break;
             case NONE:
