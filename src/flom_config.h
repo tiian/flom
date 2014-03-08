@@ -57,12 +57,12 @@
  * Timeout for discover receiver after it sent a multicast packet
  * (it's used for field tv_sec of struct timeval)
  */
-#define DISCOVER_TIMEOUT_SEC       0
+#define DISCOVER_TIMEOUT_SEC       1
 /**
  * Timeout for discover receiver after it sent a multicast packet
  * (it's used for field tv_usec of struct timeval)
  */
-#define DISCOVER_TIMEOUR_USEC  10000
+#define DISCOVER_TIMEOUT_USEC      0
 /**
  * Used as backlog parameter for "listen" function call
  */
