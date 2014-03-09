@@ -22,7 +22,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	cmdopt.at.in \
 	incompopt.at.in \
 	usecase.at \
-	usecase-dist.at \
+	usecase-dist.at.in \
 	scripts/flom_*.sh
 
 cmdopt.at: cmdopt.at.in
