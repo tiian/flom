@@ -1,4 +1,4 @@
-AC_INIT([flom], [0.3.0], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([flom], [0.3.1-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 # hardwired configuration
@@ -19,7 +19,7 @@ _CONFIG_KEY_LOCK_MODE="LockMode"
 _CONFIG_GROUP_DAEMON="Daemon"
 _CONFIG_KEY_SOCKET_NAME="SocketName"
 _CONFIG_KEY_LIFESPAN="Lifespan"
-
+_CONFIG_KEY_UNICAST_ADDRESS="UnicastAddress"
 _CONFIG_KEY_UNICAST_PORT="UnicastPort"
 _CONFIG_KEY_MULTICAST_ADDRESS="MulticastAddress"
 _CONFIG_KEY_MULTICAST_PORT="MulticastPort"

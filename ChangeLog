@@ -1,8 +1,14 @@
 LOG:
 
-         - 0.3.0 Renamed [Communication] with [Daemon] inside configuration 
+         - 0.3.1 Fixed a bug related to token "UnicastAddress" inside config
+	files
+
+20140309 - 0.3.0 Renamed [Communication] with [Daemon] inside configuration 
 	files
 	Added "-d, --daemon-lifespan" option (see [Daemon]/Lifespan)
+	Added distributed lock manager feature with all related options:
+	-a, --unicast-address, -p, --unicast-port, -A, --multicast-address,
+	-P, --multicast-port	
 
 20140127 - 0.1.5 implemented lock sharing among two or more users [use case #6]
 
