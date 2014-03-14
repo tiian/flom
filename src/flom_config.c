@@ -91,6 +91,7 @@ const gchar *FLOM_CONFIG_KEY_UNICAST_ADDRESS = _CONFIG_KEY_UNICAST_ADDRESS;
 const gchar *FLOM_CONFIG_KEY_UNICAST_PORT = _CONFIG_KEY_UNICAST_PORT;
 const gchar *FLOM_CONFIG_KEY_MULTICAST_ADDRESS = _CONFIG_KEY_MULTICAST_ADDRESS;
 const gchar *FLOM_CONFIG_KEY_MULTICAST_PORT = _CONFIG_KEY_MULTICAST_PORT;
+const gchar *FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT = _CONFIG_KEY_DISCOVERY_TIMEOUT;
 
 
 
@@ -135,6 +136,7 @@ void flom_config_reset()
     global_config.unicast_port = _DEFAULT_DAEMON_PORT;
     global_config.multicast_address = NULL;
     global_config.multicast_port = _DEFAULT_DAEMON_PORT;
+    global_config.discovery_timeout = _DEFAULT_DISCOVERY_TIMEOUT;
 }
 
 
@@ -233,6 +235,9 @@ void flom_config_print()
             flom_config_get_multicast_address());
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_MULTICAST_PORT, flom_config_get_multicast_port());
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
+            FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT,
+            flom_config_get_discovery_timeout());
 }
 
 
@@ -347,6 +352,7 @@ int flom_config_init_load(const char *config_file_name)
                      , CONFIG_SET_DAEMON_LIFESPAN_ERROR
                      , CONFIG_SET_DAEMON_UNICAST_PORT_ERROR
                      , CONFIG_SET_DAEMON_MULTICAST_PORT_ERROR
+                     , CONFIG_SET_DAEMON_DISCOVERY_TIMEOUT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int print_file_name = FALSE;
@@ -652,6 +658,31 @@ int flom_config_init_load(const char *config_file_name)
                         FLOM_CONFIG_KEY_MULTICAST_PORT, ivalue));
             flom_config_set_multicast_port(ivalue);
         }
+        /* pick-up discovery timeout from configuration */
+        ivalue = g_key_file_get_integer(gkf, FLOM_CONFIG_GROUP_DAEMON,
+                                        FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT,
+                                        &error);
+        if (NULL != error) {
+            int throw_error = FALSE;
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_DAEMON,
+                        FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT,
+                        error->code,
+                        error->message));
+            if (G_KEY_FILE_ERROR_KEY_NOT_FOUND != error->code) {
+                print_file_name = throw_error = TRUE;
+                g_print("%s\n", error->message);
+            }
+            g_error_free(error);
+            error = NULL;
+            if (throw_error) THROW(CONFIG_SET_DAEMON_DISCOVERY_TIMEOUT_ERROR);
+        } else {
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
+                        FLOM_CONFIG_GROUP_DAEMON,
+                        FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT, ivalue));
+            flom_config_set_discovery_timeout(ivalue);
+        }
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -669,6 +700,7 @@ int flom_config_init_load(const char *config_file_name)
             case CONFIG_SET_SOCKET_NAME_ERROR:
             case CONFIG_SET_DAEMON_LIFESPAN_ERROR:
             case CONFIG_SET_DAEMON_UNICAST_PORT_ERROR:
+            case CONFIG_SET_DAEMON_DISCOVERY_TIMEOUT_ERROR:
                 ret_cod = FLOM_RC_INVALID_OPTION;
                 break;
             case NONE:

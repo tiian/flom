@@ -159,6 +159,9 @@
 /* Label of "daemon trace file" key inside config files */
 #undef _CONFIG_KEY_DAEMONTRACEFILE
 
+/* Label of "DiscoverTimeout" key inside config files */
+#undef _CONFIG_KEY_DISCOVERY_TIMEOUT
+
 /* Label of "Lifespan" key inside config files */
 #undef _CONFIG_KEY_LIFESPAN
 
@@ -189,11 +192,14 @@
 /* Label of "Wait" key inside config files */
 #undef _CONFIG_KEY_WAIT
 
-/* Default value for option daemon lifespan */
+/* Default value for option daemon lifespan (milliseconds) */
 #undef _DEFAULT_DAEMON_LIFESPAN
 
 /* Default port used to reach flom daemon using TCP and UDP (multicast) */
 #undef _DEFAULT_DAEMON_PORT
+
+/* Default discover timeout for UDP/IP (multicast) query (milliseconds) */
+#undef _DEFAULT_DISCOVERY_TIMEOUT
 
 /* String used to separate directory from file inside fully qualified path
    names */

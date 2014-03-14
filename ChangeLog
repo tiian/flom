@@ -2,6 +2,7 @@ LOG:
 
          - 0.3.1 Fixed a bug related to token "UnicastAddress" inside config
 	files
+	Added "-D, --discovery-timeout" option (see [Daemon]/DiscoverTimeout)
 
 20140309 - 0.3.0 Renamed [Communication] with [Daemon] inside configuration 
 	files

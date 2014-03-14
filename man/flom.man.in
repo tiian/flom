@@ -52,6 +52,9 @@ UDP/IP multicast port that must be used to discover the location of a running da
 .B -d, --daemon-lifespan=\fImilliseconds
 lifespan of \fBflom\fP daemon if activated, expressed using milliseconds. The value of \fImilliseconds\fP can be and integer greater than 0, equal to 0 or less than 0: values greater than 0 are interpreted as minimum daemon lifetime (in milliseconds), the value 0 is interpreted as "don't start a daemon process" and values less than 0 are interpreted as "run forever" (or until a kill message is sent to \fBflom\fP daemon). If not specified, the default value is @_DEFAULT_DAEMON_LIFESPAN@ milliseconds
 .TP
+.B -D, --discovery-timeout=\fImilliseconds
+timeout related to UDP/IP multicast auto-discovery feature: if the answer to UDP/IP multicast query does not arrive before this timeout, auto-discovery will fail. If not specified, the default value is @_DEFAULT_DISCOVERY_TIMEOUT@ milliseconds
+.TP
 .B -T, --command-trace-file=\fIFILENAME
 file destination of the trace messages produced by the command (foreground) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module
 .TP

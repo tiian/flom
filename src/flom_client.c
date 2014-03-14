@@ -484,8 +484,8 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
         }
 
         /* set time-out for receive operation */
-        timeout.tv_sec = DISCOVER_TIMEOUT_SEC;
-        timeout.tv_usec = DISCOVER_TIMEOUT_USEC;
+        timeout.tv_sec = flom_config_get_discovery_timeout()/1000;
+        timeout.tv_usec = (flom_config_get_discovery_timeout()%1000)*1000;
         if (-1 == setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
                              sizeof(timeout)))
             THROW(SETSOCKOPT_ERROR);

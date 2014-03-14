@@ -54,16 +54,6 @@
  */
 #define LOCAL_SOCKET_SIZE sizeof(((struct sockaddr_un *)NULL)->sun_path)
 /**
- * Timeout for discover receiver after it sent a multicast packet
- * (it's used for field tv_sec of struct timeval)
- */
-#define DISCOVER_TIMEOUT_SEC       1
-/**
- * Timeout for discover receiver after it sent a multicast packet
- * (it's used for field tv_usec of struct timeval)
- */
-#define DISCOVER_TIMEOUT_USEC      0
-/**
  * Used as backlog parameter for "listen" function call
  */
 #define LISTEN_BACKLOG           100
@@ -172,6 +162,10 @@ extern const gchar *FLOM_CONFIG_KEY_MULTICAST_ADDRESS;
  * Label associated to "MulticastPort" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_MULTICAST_PORT;
+/**
+ * Label associated to "DiscoveryTimeout" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT;
 
 
 
@@ -252,6 +246,10 @@ typedef struct flom_config {
      * Daemon UDP/IP multicast port
      */
     gint               multicast_port;
+    /**
+     * Discovery timeout for UDP/IP request (milliseconds)
+     */
+    gint               discovery_timeout;
 } flom_config_t;
 
 
@@ -451,6 +449,7 @@ extern "C" {
      * @param timeout IN milliseconds
      */
     static inline void flom_config_set_resource_timeout(gint timeout) {
+        if (0 > timeout) timeout = -timeout;
         global_config.resource_timeout = timeout;
     }
 
@@ -511,6 +510,7 @@ extern "C" {
      * @param port IN TCP/IP port
      */
     static inline void flom_config_set_unicast_port(gint port) {
+        if (0 > port) port = -port;
         global_config.unicast_port = port;
     }
 
@@ -551,6 +551,7 @@ extern "C" {
      * @param port IN UDP/IP port
      */
     static inline void flom_config_set_multicast_port(gint port) {
+        if (0 > port) port = -port;
         global_config.multicast_port = port;
     }
 
@@ -562,6 +563,27 @@ extern "C" {
      */
     static inline gint flom_config_get_multicast_port(void) {
         return global_config.multicast_port;
+    }
+
+
+    
+    /**
+     * Set UDP/IP discovery request timeout config parameter
+     * @param timeout IN new value
+     */
+    static inline void flom_config_set_discovery_timeout(gint timeout) {
+        if (0 > timeout) timeout = -timeout;
+        global_config.discovery_timeout = timeout;
+    }
+
+
+
+    /**
+     * Get UDP/IP discovery request timeout config parameter
+     * @return current value
+     */
+    static inline gint flom_config_get_discovery_timeout(void) {
+        return global_config.discovery_timeout;
     }
 
 

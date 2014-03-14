@@ -12,56 +12,212 @@ AT_CLEANUP
 
 AT_SETUP([Custom config file: -c, --config-file])
 AT_CHECK([cp $srcdir/../etc/@_SYSTEM_CONFIG_FILENAME@ .], [0], [ignore], [ignore])
-#AT_CHECK([echo $srcdir], [0], [ignore], [ignore])
 AT_CHECK([flom -c flom.conf -- ls], [0], [ignore], [ignore])
 AT_CHECK([flom --config-file=flom.conf -- ls], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Resource name: -r, --resource-name])
-AT_CHECK([flom -r MYRES -- ls], [0], [ignore], [ignore])
-AT_CHECK([flom --resource-name=MYRES -- ls], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_RESOURCE@]/@_CONFIG_KEY_NAME@='MYRES'
+]])
+AT_CHECK([flom -V -r MYRES -- ls | grep @_CONFIG_GROUP_RESOURCE@ | grep @_CONFIG_KEY_NAME@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --resource-name=MYRES -- ls | grep @_CONFIG_GROUP_RESOURCE@ | grep @_CONFIG_KEY_NAME@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+@_CONFIG_KEY_NAME@=MYRES
+[@_CONFIG_GROUP_DAEMON@]
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_GROUP_RESOURCE@ | grep @_CONFIG_KEY_NAME@], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Resource wait: -w, --resource-wait])
-AT_CHECK([flom -w y -- ls], [0], [ignore], [ignore])
-AT_CHECK([flom -w n -- ls], [0], [ignore], [ignore])
-AT_CHECK([flom --resource-wait=yes -- ls], [0], [ignore], [ignore])
-AT_CHECK([flom --resource-wait=no -- ls], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_RESOURCE@]/@_CONFIG_KEY_WAIT@=1
+]])
+AT_CHECK([flom -V -w y -- ls | grep @_CONFIG_KEY_WAIT@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --resource-wait=yes -- ls | grep @_CONFIG_KEY_WAIT@], [0], [expout], [ignore])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_RESOURCE@]/@_CONFIG_KEY_WAIT@=0
+]])
+AT_CHECK([flom -V -w n -- ls | grep @_CONFIG_KEY_WAIT@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --resource-wait=no -- ls | grep @_CONFIG_KEY_WAIT@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+@_CONFIG_KEY_WAIT@=no
+[@_CONFIG_GROUP_DAEMON@]
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_WAIT@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+@_CONFIG_KEY_WAIT@=yes
+[@_CONFIG_GROUP_DAEMON@]
+]])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_RESOURCE@]/@_CONFIG_KEY_WAIT@=1
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_WAIT@], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Resource timeout: -o, --resource-timeout])
-AT_CHECK([flom -o 100 -- ls], [0], [ignore], [ignore])
-AT_CHECK([flom --resource-timeout=200 -- ls], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_RESOURCE@]/@_CONFIG_KEY_TIMEOUT@=100
+]])
+AT_CHECK([flom -V -o 100 -- ls | grep @_CONFIG_GROUP_RESOURCE@ | grep @_CONFIG_KEY_TIMEOUT@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --resource-timeout=100 -- ls | grep @_CONFIG_GROUP_RESOURCE@ | grep @_CONFIG_KEY_TIMEOUT@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+@_CONFIG_KEY_TIMEOUT@=100
+[@_CONFIG_GROUP_DAEMON@]
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_GROUP_RESOURCE@ | grep @_CONFIG_KEY_TIMEOUT@], [0], [expout], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Local socket name: -s, --socket-name])
-AT_CHECK([flom -s /tmp/foo -- ls], [0], [ignore], [ignore])
-AT_CHECK([flom --socket-name=/tmp/bar -- ls], [0], [ignore], [ignore])
+AT_SETUP([Resource lock mode: -l, --lock-mode])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_RESOURCE@]/@_CONFIG_KEY_LOCK_MODE@=3
+]])
+AT_CHECK([flom -V -l PR -- ls | grep @_CONFIG_KEY_LOCK_MODE@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --lock-mode=ProtectedRead -- ls | grep @_CONFIG_KEY_LOCK_MODE@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+@_CONFIG_KEY_LOCK_MODE@=ProtectedRead
+[@_CONFIG_GROUP_DAEMON@]
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_LOCK_MODE@], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Local socket name: -s, --socket-name])A
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_DAEMON@]/@_CONFIG_KEY_SOCKET_NAME@='/tmp/foo'
+]])
+AT_CHECK([flom -V -s /tmp/foo -- ls | grep @_CONFIG_KEY_SOCKET_NAME@], [0], [expout], [ignore])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_DAEMON@]/@_CONFIG_KEY_SOCKET_NAME@='/tmp/bar'
+]])
+AT_CHECK([flom --verbose --socket-name=/tmp/bar -- ls], [0], [ignore], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+@_CONFIG_KEY_SOCKET_NAME@=/tmp/foobar
+]])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_DAEMON@]/@_CONFIG_KEY_SOCKET_NAME@='/tmp/foobar'
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_SOCKET_NAME@], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Daemon lifespan: -d, --daemon-lifespan])
-AT_CHECK([flom -d 100 -- ls], [0], [ignore], [ignore])
-AT_CHECK([flom --daemon-lifespan=200 -- ls], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_DAEMON@]/@_CONFIG_KEY_LIFESPAN@=231
+]])
+AT_CHECK([flom -V -d 231 -- ls | grep @_CONFIG_KEY_LIFESPAN@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --daemon-lifespan=231 -- ls | grep @_CONFIG_KEY_LIFESPAN@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+@_CONFIG_KEY_LIFESPAN@=231
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_LIFESPAN@], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Unicast address: -a, --unicast-address])
-AT_CHECK([flom -a localhost -- ls], [0], [ignore], [ignore])
-AT_CHECK([flom --unicast-address=localhost -- ls], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_DAEMON@]/@_CONFIG_KEY_UNICAST_ADDRESS@='localhost'
+]])
+AT_CHECK([flom -V -a localhost -- ls | grep @_CONFIG_KEY_UNICAST_ADDRESS@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --unicast-address=localhost -- ls | grep @_CONFIG_KEY_UNICAST_ADDRESS@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+@_CONFIG_KEY_UNICAST_ADDRESS@=localhost
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_UNICAST_ADDRESS@], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Unicast port: -p, --unicast-port])
-AT_CHECK([flom -p 27750 -- ls], [0], [ignore], [ignore])
-AT_CHECK([flom --unicast-port=27750 -- ls], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_DAEMON@]/@_CONFIG_KEY_UNICAST_PORT@=27750
+]])
+AT_CHECK([flom -V -p 27750 -- ls | grep @_CONFIG_KEY_UNICAST_PORT@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --unicast-port=27750 -- ls | grep @_CONFIG_KEY_UNICAST_PORT@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+@_CONFIG_KEY_UNICAST_PORT@=27750
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_UNICAST_PORT@], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Multicast address: -A, --multicast-address])
-AT_CHECK([flom -A 239.255.0.1 -- ls], [0], [ignore], [ignore])
-AT_CHECK([flom --multicast-address=239.255.0.2 -- ls], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_DAEMON@]/@_CONFIG_KEY_MULTICAST_ADDRESS@='239.255.0.1'
+]])
+AT_CHECK([flom -V -A 239.255.0.1 -- ls | grep @_CONFIG_KEY_MULTICAST_ADDRESS@], [0], [expout], [ignore])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_DAEMON@]/@_CONFIG_KEY_MULTICAST_ADDRESS@='239.255.0.2'
+]])
+AT_CHECK([flom --verbose --multicast-address=239.255.0.2 -- ls | grep @_CONFIG_KEY_MULTICAST_ADDRESS@], [0], [expout], [ignore])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_DAEMON@]/@_CONFIG_KEY_MULTICAST_ADDRESS@='239.255.0.3'
+]])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+@_CONFIG_KEY_MULTICAST_ADDRESS@=239.255.0.3
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_MULTICAST_ADDRESS@], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Multicast port: -P, --multicast-port])
-AT_CHECK([flom -P 27750 -- ls], [0], [ignore], [ignore])
-AT_CHECK([flom --multicast-port=27750 -- ls], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_DAEMON@]/@_CONFIG_KEY_MULTICAST_PORT@=27750
+]])
+AT_CHECK([flom -V -P 27750 -- ls | grep @_CONFIG_KEY_MULTICAST_PORT@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --multicast-port=27750 -- ls | grep @_CONFIG_KEY_MULTICAST_PORT@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+@_CONFIG_KEY_MULTICAST_PORT@=27750
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_MULTICAST_PORT@], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Discovery timeout: -D, --discovery-timeout])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_DAEMON@]/@_CONFIG_KEY_DISCOVERY_TIMEOUT@=12345
+]])
+AT_CHECK([flom -V -D 12345 -- ls | grep @_CONFIG_KEY_DISCOVERY_TIMEOUT@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --discovery-timeout=12345 -- ls | grep @_CONFIG_KEY_DISCOVERY_TIMEOUT@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+@_CONFIG_KEY_DISCOVERY_TIMEOUT@=12345
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_DISCOVERY_TIMEOUT@], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Command trace file: -T, --command-trace-file])

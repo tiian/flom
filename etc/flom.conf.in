@@ -77,5 +77,8 @@
 # UDP/IP multicast port used to discover flom daemon unicast address & port
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_MULTICAST_PORT@=@_DEFAULT_DAEMON_PORT@
-
+# UDP/IP multicast request timeout: the query completes successfully if answer
+# arrives before this timeout (milliseconds)
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_DISCOVERY_TIMEOUT@=@_DEFAULT_DISCOVERY_TIMEOUT@
 
