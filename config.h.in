@@ -147,6 +147,9 @@
 /* Label of "Daemon" group inside config files */
 #undef _CONFIG_GROUP_DAEMON
 
+/* Label of "Network" group inside config files */
+#undef _CONFIG_GROUP_NETWORK
+
 /* Label of "resource" group inside config files */
 #undef _CONFIG_GROUP_RESOURCE
 
@@ -180,6 +183,15 @@
 /* Label of "SocketName" key inside config files */
 #undef _CONFIG_KEY_SOCKET_NAME
 
+/* Label of "TcpKeepaliveIntvl" key inside config files */
+#undef _CONFIG_KEY_TCP_KEEPALIVE_INTVL
+
+/* Label of "TcpKeepaliveProbes" key inside config files */
+#undef _CONFIG_KEY_TCP_KEEPALIVE_PROBES
+
+/* Label of "TcpKeepaliveTime" key inside config files */
+#undef _CONFIG_KEY_TCP_KEEPALIVE_TIME
+
 /* Label of "Timeout" key inside config files */
 #undef _CONFIG_KEY_TIMEOUT
 
@@ -200,6 +212,18 @@
 
 /* Default discover timeout for UDP/IP (multicast) query (milliseconds) */
 #undef _DEFAULT_DISCOVERY_TIMEOUT
+
+/* Per socket override of tcp_keepalive_intvl parameter associated to
+   SO_KEEPALIVE */
+#undef _DEFAULT_TCP_KEEPALIVE_INTVL
+
+/* Per socket override of tcp_keepalive_probes parameter associated to
+   SO_KEEPALIVE */
+#undef _DEFAULT_TCP_KEEPALIVE_PROBES
+
+/* Per socket override of tcp_keepalive_time parameter associated to
+   SO_KEEPALIVE */
+#undef _DEFAULT_TCP_KEEPALIVE_TIME
 
 /* String used to separate directory from file inside fully qualified path
    names */

@@ -432,6 +432,16 @@ extern "C" {
     void flom_conns_trace(const flom_conns_t *conns);
 
 
+
+    /**
+     * Set SO_KEEPALIVE and correlated parameters for the socket associated
+     * to a connection
+     * @param fcd IN/OUT connection data struct
+     * @return a reason code
+     */
+    int flom_conn_data_set_keepalive(struct flom_conn_data_s *fcd);
+
+
     
 #ifdef __cplusplus
 }

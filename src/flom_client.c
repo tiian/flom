@@ -63,16 +63,20 @@ int flom_client_connect(struct flom_conn_data_s *cd)
                      , CONNECT_ERROR
                      , CLIENT_DISCOVER_UDP_ERROR2
                      , INTERNAL_ERROR
+                     , CONN_DATA_SET_KEEPALIVE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_client_connect\n"));
     TRY {
+        int local_connection = FALSE;
+        
         /* reset connection data struct */
         memset(cd, 0, sizeof(cd));
 
         /* choose and instantiate connection type */
         if (NULL != flom_config_get_socket_name()) {
+            local_connection = TRUE;
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_local(cd)))
                 THROW(CLIENT_CONNECT_LOCAL_ERROR);
         } else if (NULL != flom_config_get_unicast_address()) {
@@ -107,6 +111,10 @@ int flom_client_connect(struct flom_conn_data_s *cd)
         } else /* this condition must be impossible! */
             THROW(INTERNAL_ERROR);
 
+        if (!local_connection)
+            if (FLOM_RC_OK != (ret_cod = flom_conn_data_set_keepalive(cd)))
+                THROW(CONN_DATA_SET_KEEPALIVE_ERROR);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -122,6 +130,8 @@ int flom_client_connect(struct flom_conn_data_s *cd)
                 break;
             case INTERNAL_ERROR:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
+                break;
+            case CONN_DATA_SET_KEEPALIVE_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

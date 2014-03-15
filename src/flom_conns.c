@@ -23,10 +23,20 @@
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
+#ifdef HAVE_NETINET_TCP_H
+# include <netinet/tcp.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
 
 
 
 #include "flom_conns.h"
+#include "flom_config.h"
 #include "flom_errors.h"
 #include "flom_trace.h"
 
@@ -450,3 +460,75 @@ void flom_conns_trace(const flom_conns_t *conns)
                 "poll_array=%p\n",
                 conns->domain, conns->n, conns->array, conns->poll_array));
 }
+
+
+
+int flom_conn_data_set_keepalive(struct flom_conn_data_s *fcd)
+{
+    enum Exception { NULL_OBJECT
+                     , INVALID_OPTION
+                     , SETSOCKOPT_ERROR1
+                     , SETSOCKOPT_ERROR2
+                     , SETSOCKOPT_ERROR3
+                     , SETSOCKOPT_ERROR4
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_conn_data_set_keepalive\n"));
+    TRY {
+        int optval;
+        socklen_t optlen = sizeof(optval);
+        
+        if (NULL == fcd || NULL_FD == fcd->fd)
+            THROW(NULL_OBJECT);
+        if (SOCK_STREAM != fcd->type)
+            THROW(INVALID_OPTION);
+
+        /* set SO_KEEPALIVE feature for this socket */
+        optval = 1;
+        if (-1 == setsockopt(
+                fcd->fd, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen))
+            THROW(SETSOCKOPT_ERROR1);
+        /* set tcp_keepalive_time parameter related to SO_KEEPALIVE */
+        optval = flom_config_get_tcp_keepalive_time();
+        if (-1 == setsockopt(
+                fcd->fd, SOL_TCP, TCP_KEEPIDLE, &optval, optlen))
+            THROW(SETSOCKOPT_ERROR2);
+        /* set tcp_keepalive_intvl parameter related to SO_KEEPALIVE */
+        optval = flom_config_get_tcp_keepalive_intvl();
+        if (-1 == setsockopt(
+                fcd->fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen))
+            THROW(SETSOCKOPT_ERROR3);
+        /* set tcp_keepalive_probes parameter related to SO_KEEPALIVE */
+        optval = flom_config_get_tcp_keepalive_probes();
+        if (-1 == setsockopt(
+                fcd->fd, SOL_TCP, TCP_KEEPCNT, &optval, optlen))
+            THROW(SETSOCKOPT_ERROR4);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case INVALID_OPTION:
+                ret_cod = FLOM_RC_INVALID_OPTION;
+                break;
+            case SETSOCKOPT_ERROR1:
+            case SETSOCKOPT_ERROR2:
+            case SETSOCKOPT_ERROR3:
+            case SETSOCKOPT_ERROR4:
+                ret_cod = FLOM_RC_SETSOCKOPT_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_conn_data_set_keepalive/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

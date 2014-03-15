@@ -91,7 +91,11 @@ const gchar *FLOM_CONFIG_KEY_UNICAST_ADDRESS = _CONFIG_KEY_UNICAST_ADDRESS;
 const gchar *FLOM_CONFIG_KEY_UNICAST_PORT = _CONFIG_KEY_UNICAST_PORT;
 const gchar *FLOM_CONFIG_KEY_MULTICAST_ADDRESS = _CONFIG_KEY_MULTICAST_ADDRESS;
 const gchar *FLOM_CONFIG_KEY_MULTICAST_PORT = _CONFIG_KEY_MULTICAST_PORT;
+const gchar *FLOM_CONFIG_GROUP_NETWORK = _CONFIG_GROUP_NETWORK;
 const gchar *FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT = _CONFIG_KEY_DISCOVERY_TIMEOUT;
+const gchar *FLOM_CONFIG_KEY_TCP_KEEPALIVE_TIME = _CONFIG_KEY_TCP_KEEPALIVE_TIME;
+const gchar *FLOM_CONFIG_KEY_TCP_KEEPALIVE_INTVL = _CONFIG_KEY_TCP_KEEPALIVE_INTVL;
+const gchar *FLOM_CONFIG_KEY_TCP_KEEPALIVE_PROBES = _CONFIG_KEY_TCP_KEEPALIVE_PROBES;
 
 
 
@@ -137,6 +141,9 @@ void flom_config_reset()
     global_config.multicast_address = NULL;
     global_config.multicast_port = _DEFAULT_DAEMON_PORT;
     global_config.discovery_timeout = _DEFAULT_DISCOVERY_TIMEOUT;
+    global_config.tcp_keepalive_time = _DEFAULT_TCP_KEEPALIVE_TIME;
+    global_config.tcp_keepalive_intvl = _DEFAULT_TCP_KEEPALIVE_INTVL;
+    global_config.tcp_keepalive_probes = _DEFAULT_TCP_KEEPALIVE_PROBES;
 }
 
 
@@ -235,9 +242,18 @@ void flom_config_print()
             flom_config_get_multicast_address());
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_MULTICAST_PORT, flom_config_get_multicast_port());
-    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_NETWORK,
             FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT,
             flom_config_get_discovery_timeout());
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_NETWORK,
+            FLOM_CONFIG_KEY_TCP_KEEPALIVE_TIME,
+            flom_config_get_tcp_keepalive_time());
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_NETWORK,
+            FLOM_CONFIG_KEY_TCP_KEEPALIVE_INTVL,
+            flom_config_get_tcp_keepalive_intvl());
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_NETWORK,
+            FLOM_CONFIG_KEY_TCP_KEEPALIVE_PROBES,
+            flom_config_get_tcp_keepalive_probes());
 }
 
 
@@ -353,6 +369,9 @@ int flom_config_init_load(const char *config_file_name)
                      , CONFIG_SET_DAEMON_UNICAST_PORT_ERROR
                      , CONFIG_SET_DAEMON_MULTICAST_PORT_ERROR
                      , CONFIG_SET_DAEMON_DISCOVERY_TIMEOUT_ERROR
+                     , CONFIG_SET_NETWORK_TCP_KEEPALIVE_TIME_ERROR
+                     , CONFIG_SET_NETWORK_TCP_KEEPALIVE_INTVL_ERROR
+                     , CONFIG_SET_NETWORK_TCP_KEEPALIVE_PROBES_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int print_file_name = FALSE;
@@ -659,14 +678,14 @@ int flom_config_init_load(const char *config_file_name)
             flom_config_set_multicast_port(ivalue);
         }
         /* pick-up discovery timeout from configuration */
-        ivalue = g_key_file_get_integer(gkf, FLOM_CONFIG_GROUP_DAEMON,
+        ivalue = g_key_file_get_integer(gkf, FLOM_CONFIG_GROUP_NETWORK,
                                         FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT,
                                         &error);
         if (NULL != error) {
             int throw_error = FALSE;
             FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
                         "(...,%s,%s,...): code=%d, message='%s'\n",
-                        FLOM_CONFIG_GROUP_DAEMON,
+                        FLOM_CONFIG_GROUP_NETWORK,
                         FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT,
                         error->code,
                         error->message));
@@ -679,9 +698,85 @@ int flom_config_init_load(const char *config_file_name)
             if (throw_error) THROW(CONFIG_SET_DAEMON_DISCOVERY_TIMEOUT_ERROR);
         } else {
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
-                        FLOM_CONFIG_GROUP_DAEMON,
+                        FLOM_CONFIG_GROUP_NETWORK,
                         FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT, ivalue));
             flom_config_set_discovery_timeout(ivalue);
+        }
+        /* pick-up tcp_keepalive_time from configuration */
+        ivalue = g_key_file_get_integer(gkf, FLOM_CONFIG_GROUP_NETWORK,
+                                        FLOM_CONFIG_KEY_TCP_KEEPALIVE_TIME,
+                                        &error);
+        if (NULL != error) {
+            int throw_error = FALSE;
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_NETWORK,
+                        FLOM_CONFIG_KEY_TCP_KEEPALIVE_TIME,
+                        error->code,
+                        error->message));
+            if (G_KEY_FILE_ERROR_KEY_NOT_FOUND != error->code) {
+                print_file_name = throw_error = TRUE;
+                g_print("%s\n", error->message);
+            }
+            g_error_free(error);
+            error = NULL;
+            if (throw_error) THROW(CONFIG_SET_NETWORK_TCP_KEEPALIVE_TIME_ERROR);
+        } else {
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
+                        FLOM_CONFIG_GROUP_NETWORK,
+                        FLOM_CONFIG_KEY_TCP_KEEPALIVE_TIME, ivalue));
+            flom_config_set_tcp_keepalive_time(ivalue);
+        }
+        /* pick-up tcp_keepalive_intvl from configuration */
+        ivalue = g_key_file_get_integer(gkf, FLOM_CONFIG_GROUP_NETWORK,
+                                        FLOM_CONFIG_KEY_TCP_KEEPALIVE_INTVL,
+                                        &error);
+        if (NULL != error) {
+            int throw_error = FALSE;
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_NETWORK,
+                        FLOM_CONFIG_KEY_TCP_KEEPALIVE_INTVL,
+                        error->code,
+                        error->message));
+            if (G_KEY_FILE_ERROR_KEY_NOT_FOUND != error->code) {
+                print_file_name = throw_error = TRUE;
+                g_print("%s\n", error->message);
+            }
+            g_error_free(error);
+            error = NULL;
+            if (throw_error) THROW(CONFIG_SET_NETWORK_TCP_KEEPALIVE_INTVL_ERROR);
+        } else {
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
+                        FLOM_CONFIG_GROUP_NETWORK,
+                        FLOM_CONFIG_KEY_TCP_KEEPALIVE_INTVL, ivalue));
+            flom_config_set_tcp_keepalive_intvl(ivalue);
+        }
+        /* pick-up tcp_keepalive_probes from configuration */
+        ivalue = g_key_file_get_integer(gkf, FLOM_CONFIG_GROUP_NETWORK,
+                                        FLOM_CONFIG_KEY_TCP_KEEPALIVE_PROBES,
+                                        &error);
+        if (NULL != error) {
+            int throw_error = FALSE;
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_NETWORK,
+                        FLOM_CONFIG_KEY_TCP_KEEPALIVE_PROBES,
+                        error->code,
+                        error->message));
+            if (G_KEY_FILE_ERROR_KEY_NOT_FOUND != error->code) {
+                print_file_name = throw_error = TRUE;
+                g_print("%s\n", error->message);
+            }
+            g_error_free(error);
+            error = NULL;
+            if (throw_error)
+                THROW(CONFIG_SET_NETWORK_TCP_KEEPALIVE_PROBES_ERROR);
+        } else {
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
+                        FLOM_CONFIG_GROUP_NETWORK,
+                        FLOM_CONFIG_KEY_TCP_KEEPALIVE_PROBES, ivalue));
+            flom_config_set_tcp_keepalive_probes(ivalue);
         }
         THROW(NONE);
     } CATCH {
@@ -701,6 +796,9 @@ int flom_config_init_load(const char *config_file_name)
             case CONFIG_SET_DAEMON_LIFESPAN_ERROR:
             case CONFIG_SET_DAEMON_UNICAST_PORT_ERROR:
             case CONFIG_SET_DAEMON_DISCOVERY_TIMEOUT_ERROR:
+            case CONFIG_SET_NETWORK_TCP_KEEPALIVE_TIME_ERROR:
+            case CONFIG_SET_NETWORK_TCP_KEEPALIVE_INTVL_ERROR:
+            case CONFIG_SET_NETWORK_TCP_KEEPALIVE_PROBES_ERROR:
                 ret_cod = FLOM_RC_INVALID_OPTION;
                 break;
             case NONE:

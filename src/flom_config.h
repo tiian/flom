@@ -163,9 +163,25 @@ extern const gchar *FLOM_CONFIG_KEY_MULTICAST_ADDRESS;
  */
 extern const gchar *FLOM_CONFIG_KEY_MULTICAST_PORT;
 /**
+ * Label associated to "Network" group inside config files
+ */
+extern const gchar *FLOM_CONFIG_GROUP_NETWORK;
+/**
  * Label associated to "DiscoveryTimeout" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT;
+/**
+ * Label associated to "TcpKeepaliveTime" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_TCP_KEEPALIVE_TIME;
+/**
+ * Label associated to "TcpKeepaliveIntvl" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_TCP_KEEPALIVE_INTVL;
+/**
+ * Label associated to "TcpKeepaliveProbes" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_TCP_KEEPALIVE_PROBES;
 
 
 
@@ -250,6 +266,18 @@ typedef struct flom_config {
      * Discovery timeout for UDP/IP request (milliseconds)
      */
     gint               discovery_timeout;
+    /**
+     * per socket value of parameter tcp_keepalive_time
+     */
+    gint               tcp_keepalive_time;
+    /**
+     * per socket value of parameter tcp_keepalive_intvl
+     */
+    gint               tcp_keepalive_intvl;
+    /**
+     * per socket value of parameter tcp_keepalive_probes
+     */
+    gint               tcp_keepalive_probes;
 } flom_config_t;
 
 
@@ -584,6 +612,69 @@ extern "C" {
      */
     static inline gint flom_config_get_discovery_timeout(void) {
         return global_config.discovery_timeout;
+    }
+
+
+    
+    /**
+     * Set tcp_keepalive_time parameter value for socket SO_KEEPALIVE feature
+     * @param timeout IN new value
+     */
+    static inline void flom_config_set_tcp_keepalive_time(gint value) {
+        if (0 > value) value = -value;
+        global_config.tcp_keepalive_time = value;
+    }
+
+
+
+    /**
+     * Get tcp_keepalive_time parameter value for socket SO_KEEPALIVE feature
+     * @return current value
+     */
+    static inline gint flom_config_get_tcp_keepalive_time(void) {
+        return global_config.tcp_keepalive_time;
+    }
+
+
+    
+    /**
+     * Set tcp_keepalive_intvl parameter value for socket SO_KEEPALIVE feature
+     * @param timeout IN new value
+     */
+    static inline void flom_config_set_tcp_keepalive_intvl(gint value) {
+        if (0 > value) value = -value;
+        global_config.tcp_keepalive_intvl = value;
+    }
+
+
+
+    /**
+     * Get tcp_keepalive_intvl parameter value for socket SO_KEEPALIVE feature
+     * @return current value
+     */
+    static inline gint flom_config_get_tcp_keepalive_intvl(void) {
+        return global_config.tcp_keepalive_intvl;
+    }
+
+
+    
+    /**
+     * Set tcp_keepalive_probes parameter value for socket SO_KEEPALIVE feature
+     * @param timeout IN new value
+     */
+    static inline void flom_config_set_tcp_keepalive_probes(gint value) {
+        if (0 > value) value = -value;
+        global_config.tcp_keepalive_probes = value;
+    }
+
+
+
+    /**
+     * Get tcp_keepalive_probes parameter value for socket SO_KEEPALIVE feature
+     * @return current value
+     */
+    static inline gint flom_config_get_tcp_keepalive_probes(void) {
+        return global_config.tcp_keepalive_probes;
     }
 
 

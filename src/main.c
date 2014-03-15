@@ -55,6 +55,9 @@ static gint unicast_port = _DEFAULT_DAEMON_PORT;
 static gchar *multicast_address = NULL;
 static gint multicast_port = _DEFAULT_DAEMON_PORT;
 static gint discovery_timeout = _DEFAULT_DISCOVERY_TIMEOUT;
+static gint tcp_keepalive_time = _DEFAULT_TCP_KEEPALIVE_TIME;
+static gint tcp_keepalive_intvl = _DEFAULT_TCP_KEEPALIVE_INTVL;
+static gint tcp_keepalive_probes = _DEFAULT_TCP_KEEPALIVE_PROBES;
 static gchar *command_trace_file = NULL;
 static gchar *daemon_trace_file = NULL;
 static gchar **command_argv = NULL;
@@ -75,6 +78,9 @@ static GOptionEntry entries[] =
     { "multicast-address", 'A', 0, G_OPTION_ARG_STRING, &multicast_address, "Daemon UDP/IP (multicast) address", NULL },
     { "multicast-port", 'P', 0, G_OPTION_ARG_INT, &multicast_port, "Daemon UDP/IP (multicast) port", NULL },
     { "discovery-timeout", 'D', 0, G_OPTION_ARG_INT, &discovery_timeout, "UDP/IP (multicast) request timeout", NULL },
+    { "tcp-keepalive-time", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_time, "Local override for SO_KEEPALIVE feature", NULL },
+    { "tcp-keepalive-intvl", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_intvl, "Local override for SO_KEEPALIVE feature", NULL },
+    { "tcp-keepalive-probes", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_probes, "Local override for SO_KEEPALIVE feature", NULL },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
     { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
@@ -188,6 +194,15 @@ int main (int argc, char *argv[])
     }
     if (_DEFAULT_DISCOVERY_TIMEOUT != discovery_timeout) {
         flom_config_set_discovery_timeout(discovery_timeout);
+    }
+    if (_DEFAULT_TCP_KEEPALIVE_TIME != tcp_keepalive_time) {
+        flom_config_set_tcp_keepalive_time(tcp_keepalive_time);
+    }
+    if (_DEFAULT_TCP_KEEPALIVE_INTVL != tcp_keepalive_intvl) {
+        flom_config_set_tcp_keepalive_intvl(tcp_keepalive_intvl);
+    }
+    if (_DEFAULT_TCP_KEEPALIVE_PROBES != tcp_keepalive_probes) {
+        flom_config_set_tcp_keepalive_probes(tcp_keepalive_probes);
     }
     if (NULL != daemon_trace_file)
         flom_config_set_daemon_trace_file(daemon_trace_file);

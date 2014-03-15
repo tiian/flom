@@ -77,8 +77,38 @@
 # UDP/IP multicast port used to discover flom daemon unicast address & port
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_MULTICAST_PORT@=@_DEFAULT_DAEMON_PORT@
+
+# This section (configuration group) is related to network and communication
+# parameters 
+[@_CONFIG_GROUP_NETWORK@]
 # UDP/IP multicast request timeout: the query completes successfully if answer
 # arrives before this timeout (milliseconds)
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_DISCOVERY_TIMEOUT@=@_DEFAULT_DISCOVERY_TIMEOUT@
+# tcp_keepalive_time parameter associated to communication socket between
+# flom daemon and flom command (SO_KEEPALIVE TCP/IP feature)
+# Brief parameter explanation: "the interval between the last data packet sent
+# (simple ACKs are not considered data) and the first keepalive probe; after
+# the connection is marked to need keepalive, this counter is not used any
+# further"
+# See http://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/#usingkeepalive
+# for more information
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_TCP_KEEPALIVE_TIME@=@_DEFAULT_TCP_KEEPALIVE_TIME@
+# tcp_keepalive_intvl parameter associated to communication socket between
+# flom daemon and flom command (SO_KEEPALIVE TCP/IP feature)
+# Brief parameter explanation: "the interval between subsequential keepalive
+# probes, regardless of what the connection has exchanged in the meantime"
+# See http://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/#usingkeepalive
+# for more information
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_TCP_KEEPALIVE_INTVL@=@_DEFAULT_TCP_KEEPALIVE_INTVL@
+# tcp_keepalive_probes parameter associated to communication socket between
+# flom daemon and flom command (SO_KEEPALIVE TCP/IP feature)
+# Brief parameter explanation: "the number of unacknowledged probes to send
+# before considering the connection dead and notifying the application layer"
+# See http://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO/#usingkeepalive
+# for more information
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_TCP_KEEPALIVE_PROBES@=@_DEFAULT_TCP_KEEPALIVE_PROBES@
 
