@@ -933,6 +933,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
     enum Exception { CONNS_GET_CD_ERROR
                      , ACCEPT_ERROR
                      , SETSOCKOPT_ERROR
+                     , CONN_SET_KEEPALIVE_ERROR
                      , CONNS_ADD_ERROR
                      , MSG_RETRIEVE_ERROR
                      , CONNS_GET_MSG_ERROR
@@ -965,9 +966,13 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                         "with fd=%d\n", conn_fd));
             if (AF_INET == flom_conns_get_domain(conns)) {
                 int sock_opt = 1;
+                /* set TCP_NODELAY for socket */
                 if (0 != setsockopt(conn_fd, IPPROTO_TCP, TCP_NODELAY,
                                     (void *)(&sock_opt), sizeof(sock_opt)))
                     THROW(SETSOCKOPT_ERROR);
+                /* set SO_KEEPALIVE for socket */
+                if (FLOM_RC_OK != (ret_cod = flom_conn_set_keepalive(conn_fd)))
+                    THROW(CONN_SET_KEEPALIVE_ERROR);
             }
             if (FLOM_RC_OK != (ret_cod = flom_conns_add(
                                    conns, conn_fd, SOCK_STREAM, clilen,
@@ -1039,6 +1044,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
             case SETSOCKOPT_ERROR:
                 ret_cod = FLOM_RC_SETSOCKOPT_ERROR;
                 break;
+            case CONN_SET_KEEPALIVE_ERROR:
             case CONNS_ADD_ERROR:
             case MSG_RETRIEVE_ERROR:
             case MSG_DESERIALIZE_ERROR:

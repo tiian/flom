@@ -435,11 +435,11 @@ extern "C" {
 
     /**
      * Set SO_KEEPALIVE and correlated parameters for the socket associated
-     * to a connection
-     * @param fcd IN/OUT connection data struct
+     * to the passed file descriptor
+     * @param fd IN/OUT socket file descriptor
      * @return a reason code
      */
-    int flom_conn_data_set_keepalive(struct flom_conn_data_s *fcd);
+    int flom_conn_set_keepalive(int fd);
 
 
     
