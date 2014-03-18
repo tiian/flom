@@ -167,9 +167,17 @@ extern const gchar *FLOM_CONFIG_KEY_MULTICAST_PORT;
  */
 extern const gchar *FLOM_CONFIG_GROUP_NETWORK;
 /**
+ * Label associated to "DiscoveryAttempts" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_DISCOVERY_ATTEMPTS;
+/**
  * Label associated to "DiscoveryTimeout" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT;
+/**
+ * Label associated to "DiscoveryTTL" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_DISCOVERY_TTL;
 /**
  * Label associated to "TcpKeepaliveTime" key inside config files
  */
@@ -263,9 +271,17 @@ typedef struct flom_config {
      */
     gint               multicast_port;
     /**
+     * Discovery attempts: how many time a request will be issued
+     */
+    gint               discovery_attempts;
+    /**
      * Discovery timeout for UDP/IP request (milliseconds)
      */
     gint               discovery_timeout;
+    /**
+     * Discovery TTL: hop limit for outgoing multicast datagrams
+     */
+    gint               discovery_ttl;
     /**
      * per socket value of parameter tcp_keepalive_time
      */
@@ -596,6 +612,28 @@ extern "C" {
 
     
     /**
+     * Set UDP/IP discovery attempts config parameter
+     * @param attempts IN new value
+     */
+    static inline void flom_config_set_discovery_attempts(gint attempts) {
+        if (0 > attempts) attempts = -attempts;
+        if (0 == attempts) attempts = 1;
+        global_config.discovery_attempts = attempts;
+    }
+
+
+
+    /**
+     * Get UDP/IP discovery request attempts config parameter
+     * @return current value
+     */
+    static inline gint flom_config_get_discovery_attempts(void) {
+        return global_config.discovery_attempts;
+    }
+
+
+    
+    /**
      * Set UDP/IP discovery request timeout config parameter
      * @param timeout IN new value
      */
@@ -617,8 +655,30 @@ extern "C" {
 
     
     /**
+     * Set UDP/IP discovery request TTL config parameter
+     * @param ttl IN new value
+     */
+    static inline void flom_config_set_discovery_ttl(gint ttl) {
+        if (0 > ttl) ttl = -ttl;
+        if (0 == ttl) ttl = 1;
+        global_config.discovery_ttl = ttl;
+    }
+
+
+
+    /**
+     * Get UDP/IP discovery request ttl config parameter
+     * @return current value
+     */
+    static inline gint flom_config_get_discovery_ttl(void) {
+        return global_config.discovery_ttl;
+    }
+
+
+    
+    /**
      * Set tcp_keepalive_time parameter value for socket SO_KEEPALIVE feature
-     * @param timeout IN new value
+     * @param value IN new value
      */
     static inline void flom_config_set_tcp_keepalive_time(gint value) {
         if (0 > value) value = -value;
@@ -639,7 +699,7 @@ extern "C" {
     
     /**
      * Set tcp_keepalive_intvl parameter value for socket SO_KEEPALIVE feature
-     * @param timeout IN new value
+     * @param value IN new value
      */
     static inline void flom_config_set_tcp_keepalive_intvl(gint value) {
         if (0 > value) value = -value;
@@ -660,7 +720,7 @@ extern "C" {
     
     /**
      * Set tcp_keepalive_probes parameter value for socket SO_KEEPALIVE feature
-     * @param timeout IN new value
+     * @param value IN new value
      */
     static inline void flom_config_set_tcp_keepalive_probes(gint value) {
         if (0 > value) value = -value;

@@ -363,8 +363,8 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
     enum Exception { GETADDRINFO_ERROR
                      , CONNECT_ERROR
                      , MSG_SERIALIZE_ERROR
-                     , SENDTO_ERROR
                      , SETSOCKOPT_ERROR
+                     , SENDTO_ERROR
                      , CONNECTION_REFUSED
                      , RECVFROM_ERROR
                      , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
@@ -384,6 +384,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
         char port[100];
         int errcode;
         int found = FALSE;
+        gint i;
         const struct addrinfo *gai = result;
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
         size_t to_send;
@@ -414,6 +415,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
             THROW(GETADDRINFO_ERROR);
         } else {
             int sock_opt = 1;
+            u_char sock_opt2 = flom_config_get_discovery_ttl();
             
             FLOM_TRACE_ADDRINFO("flom_client_discover_udp/getaddrinfo(): ",
                                 result);
@@ -449,6 +451,16 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
+                } else if (-1 == setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL,
+                                            (void *)&sock_opt2,
+                                            sizeof(sock_opt2))) {
+                    FLOM_TRACE(("flom_client_discover_udp/setsockopt("
+                                "IP_MULTICAST_TTL) : "
+                                "errno=%d '%s', skipping...\n", errno,
+                                strerror(errno)));
+                    gai = gai->ai_next;
+                    close(fd);
+                    fd = NULL_FD;
                 } else if (-1 == bind(fd, (struct sockaddr *)&local_address,
                                       local_address_len)) {
                     FLOM_TRACE(("flom_client_discover_udp/bind() : "
@@ -476,16 +488,6 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                                &msg, buffer, sizeof(buffer), &to_send)))
             THROW(MSG_SERIALIZE_ERROR);
 
-        /* send discover message */
-        FLOM_TRACE(("flom_client_discover_udp: sending discover "
-                    "message...\n"));
-        if (to_send != (sent = sendto(fd, buffer, to_send, 0,
-                                      gai->ai_addr, gai->ai_addrlen))) {
-            FLOM_TRACE(("flom_client_discover_udp: sendto() to_send=%d, "
-                        "sent=%d\n", to_send, sent));
-            THROW(SENDTO_ERROR);
-        }
-
         /* set time-out for receive operation */
         timeout.tv_sec = flom_config_get_discovery_timeout()/1000;
         timeout.tv_usec = (flom_config_get_discovery_timeout()%1000)*1000;
@@ -493,22 +495,41 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                              sizeof(timeout)))
             THROW(SETSOCKOPT_ERROR);
         
-        /* retrieve answer */
-        memset(&from, 0, sizeof(from));
-        if (-1 == (received = recvfrom(fd, buffer, sizeof(buffer), 0,
-                                       (struct sockaddr *)&from, &addrlen))) {
-            if (EAGAIN == errno || EWOULDBLOCK == errno) {
-                FLOM_TRACE(("flom_client_discover_udp: no answer from "
-                            "UDP/IP multicast discovery\n"));
-                THROW(CONNECTION_REFUSED);
+        /* attempt to locate the flom daemon */
+        found = FALSE;
+        for (i=0; i<flom_config_get_discovery_attempts(); ++i) {
+            /* send discover message */
+            FLOM_TRACE(("flom_client_discover_udp: sending discovery "
+                        "message number %d...\n", i));
+            if (to_send != (sent = sendto(fd, buffer, to_send, 0,
+                                          gai->ai_addr, gai->ai_addrlen))) {
+                FLOM_TRACE(("flom_client_discover_udp: sendto() to_send=%d, "
+                            "sent=%d\n", to_send, sent));
+                THROW(SENDTO_ERROR);
             }
-            THROW(RECVFROM_ERROR);
-        }
+
+            /* retrieve answer */
+            FLOM_TRACE(("flom_client_discover_udp: waiting reply...\n"));
+            memset(&from, 0, sizeof(from));
+            if (-1 == (received = recvfrom(
+                           fd, buffer, sizeof(buffer), 0,
+                           (struct sockaddr *)&from, &addrlen))) {
+                if (EAGAIN == errno || EWOULDBLOCK == errno) {
+                    FLOM_TRACE(("flom_client_discover_udp: no answer from "
+                                "UDP/IP multicast discovery\n"));
+                } else
+                    THROW(RECVFROM_ERROR);
+            } else {
+                found = TRUE;
+                break;
+            }
+        } /* for (i=0; i<flom_config_get_discovery_attempts(); ++i) */
+        if (!found)
+            THROW(CONNECTION_REFUSED);
         FLOM_TRACE(("flom_client_discover_udp: recvfrom()='%*.*s', %d\n",
                     received, received, buffer, received));        
         FLOM_TRACE_HEX_DATA("flom_client_discover_udp: from ",
                             (void *)&from, addrlen);
-
         /* this UDP/IP socket is no more useful */
         close(fd);
         fd = NULL_FD;
@@ -564,11 +585,11 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                 break;
             case MSG_SERIALIZE_ERROR:
                 break;
-            case SENDTO_ERROR:
-                ret_cod = FLOM_RC_SENDTO_ERROR;
-                break;
             case SETSOCKOPT_ERROR:
                 ret_cod = FLOM_RC_SETSOCKOPT_ERROR;
+                break;
+            case SENDTO_ERROR:
+                ret_cod = FLOM_RC_SENDTO_ERROR;
                 break;
             case CONNECTION_REFUSED:
                 ret_cod = FLOM_RC_CONNECTION_REFUSED;

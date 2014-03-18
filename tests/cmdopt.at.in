@@ -249,11 +249,28 @@ AT_DATA([flom.conf],
 AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_MULTICAST_PORT@], [0], [expout], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Discovery timeout: -D, --discovery-timeout])
+AT_SETUP([Discovery attempts: -D, --discovery-attempts])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_NETWORK@]/@_CONFIG_KEY_DISCOVERY_ATTEMPTS@=3
+]])
+AT_CHECK([flom -V -D 3 -- ls | grep @_CONFIG_KEY_DISCOVERY_ATTEMPTS@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --discovery-attempts=3 -- ls | grep @_CONFIG_KEY_DISCOVERY_ATTEMPTS@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+[@_CONFIG_GROUP_NETWORK@]
+@_CONFIG_KEY_DISCOVERY_ATTEMPTS@=3
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_DISCOVERY_ATTEMPTS@], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Discovery timeout: -I, --discovery-timeout])
 AT_DATA([expout],
 [[[@_CONFIG_GROUP_NETWORK@]/@_CONFIG_KEY_DISCOVERY_TIMEOUT@=12345
 ]])
-AT_CHECK([flom -V -D 12345 -- ls | grep @_CONFIG_KEY_DISCOVERY_TIMEOUT@], [0], [expout], [ignore])
+AT_CHECK([flom -V -I 12345 -- ls | grep @_CONFIG_KEY_DISCOVERY_TIMEOUT@], [0], [expout], [ignore])
 AT_CHECK([flom --verbose --discovery-timeout=12345 -- ls | grep @_CONFIG_KEY_DISCOVERY_TIMEOUT@], [0], [expout], [ignore])
 AT_DATA([flom.conf],
 [[
@@ -264,6 +281,22 @@ AT_DATA([flom.conf],
 @_CONFIG_KEY_DISCOVERY_TIMEOUT@=12345
 ]])
 AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_DISCOVERY_TIMEOUT@], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Discovery TTL: --discovery-ttl])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_NETWORK@]/@_CONFIG_KEY_DISCOVERY_TTL@=4
+]])
+AT_CHECK([flom --verbose --discovery-ttl=4 -- ls | grep @_CONFIG_KEY_DISCOVERY_TTL@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+[@_CONFIG_GROUP_NETWORK@]
+@_CONFIG_KEY_DISCOVERY_TTL@=4
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_DISCOVERY_TTL@], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([SO_KEEPALIVE parameter: --tcp-keepalive-time])

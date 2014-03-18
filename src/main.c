@@ -54,7 +54,9 @@ static gchar *unicast_address = NULL;
 static gint unicast_port = _DEFAULT_DAEMON_PORT;
 static gchar *multicast_address = NULL;
 static gint multicast_port = _DEFAULT_DAEMON_PORT;
+static gint discovery_attempts = _DEFAULT_DISCOVERY_ATTEMPTS;
 static gint discovery_timeout = _DEFAULT_DISCOVERY_TIMEOUT;
+static gint discovery_ttl = _DEFAULT_DISCOVERY_TTL;
 static gint tcp_keepalive_time = _DEFAULT_TCP_KEEPALIVE_TIME;
 static gint tcp_keepalive_intvl = _DEFAULT_TCP_KEEPALIVE_INTVL;
 static gint tcp_keepalive_probes = _DEFAULT_TCP_KEEPALIVE_PROBES;
@@ -77,7 +79,9 @@ static GOptionEntry entries[] =
     { "unicast-port", 'p', 0, G_OPTION_ARG_INT, &unicast_port, "Daemon TCP/IP port", NULL },
     { "multicast-address", 'A', 0, G_OPTION_ARG_STRING, &multicast_address, "Daemon UDP/IP (multicast) address", NULL },
     { "multicast-port", 'P', 0, G_OPTION_ARG_INT, &multicast_port, "Daemon UDP/IP (multicast) port", NULL },
-    { "discovery-timeout", 'D', 0, G_OPTION_ARG_INT, &discovery_timeout, "UDP/IP (multicast) request timeout", NULL },
+    { "discovery-attempts", 'D', 0, G_OPTION_ARG_INT, &discovery_attempts, "UDP/IP (multicast) max number of requests", NULL },
+    { "discovery-timeout", 'I', 0, G_OPTION_ARG_INT, &discovery_timeout, "UDP/IP (multicast) request timeout", NULL },
+    { "discovery-ttl", 0, 0, G_OPTION_ARG_INT, &discovery_ttl, "UDP/IP (multicast) hop limit", NULL },
     { "tcp-keepalive-time", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_time, "Local override for SO_KEEPALIVE feature", NULL },
     { "tcp-keepalive-intvl", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_intvl, "Local override for SO_KEEPALIVE feature", NULL },
     { "tcp-keepalive-probes", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_probes, "Local override for SO_KEEPALIVE feature", NULL },
@@ -192,8 +196,14 @@ int main (int argc, char *argv[])
     if (_DEFAULT_DAEMON_PORT != multicast_port) {
         flom_config_set_multicast_port(multicast_port);
     }
+    if (_DEFAULT_DISCOVERY_ATTEMPTS != discovery_attempts) {
+        flom_config_set_discovery_attempts(discovery_attempts);
+    }
     if (_DEFAULT_DISCOVERY_TIMEOUT != discovery_timeout) {
         flom_config_set_discovery_timeout(discovery_timeout);
+    }
+    if (_DEFAULT_DISCOVERY_TTL != discovery_ttl) {
+        flom_config_set_discovery_ttl(discovery_ttl);
     }
     if (_DEFAULT_TCP_KEEPALIVE_TIME != tcp_keepalive_time) {
         flom_config_set_tcp_keepalive_time(tcp_keepalive_time);

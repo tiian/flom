@@ -52,8 +52,14 @@ UDP/IP multicast port that must be used to discover the location of a running da
 .B -d, --daemon-lifespan=\fImilliseconds
 lifespan of \fBflom\fP daemon if activated, expressed using milliseconds. The value of \fImilliseconds\fP can be and integer greater than 0, equal to 0 or less than 0: values greater than 0 are interpreted as minimum daemon lifetime (in milliseconds), the value 0 is interpreted as "don't start a daemon process" and values less than 0 are interpreted as "run forever" (or until a kill message is sent to \fBflom\fP daemon). If not specified, the default value is @_DEFAULT_DAEMON_LIFESPAN@ milliseconds
 .TP
-.B -D, --discovery-timeout=\fImilliseconds
-timeout related to UDP/IP multicast auto-discovery feature: if the answer to UDP/IP multicast query does not arrive before this timeout, auto-discovery will fail. If not specified, the default value is @_DEFAULT_DISCOVERY_TIMEOUT@ milliseconds
+.B -D, --discovery-attempts=\fIattempts
+number of attempts (UDP/IP multicast sent datagrams) performed to locate \fBflom\fP daemon; if the answer to UDP/IP multicast does not arrive, auto-discovery will fail. If not specified, the default value is @_DEFAULT_DISCOVERY_ATTEMPTS@
+.TP
+.B -I, --discovery-timeout=\fImilliseconds
+timeout related to UDP/IP multicast auto-discovery feature: if the answer to UDP/IP multicast query does not arrive before this timeout, another datagram is sent (until \fIattempts\fP limit is reached). If not specified, the default value is @_DEFAULT_DISCOVERY_TIMEOUT@ milliseconds
+.TP
+.B --discovery-ttl=\fITTL
+IP hop limit for outgoing UDP/IP multicast datagrams (this option may be useful if your datagrams have to traverse some router). If not specified, the default value is @_DEFAULT_DISCOVERY_TTL@
 .TP
 .B --tcp-keepalive-time=\fIseconds
 \fBflom\fP daemon sets SO_KEEPALIVE attribute to every TCP/IP socket connected with a \fBflom\fP command; this parameter allows you to change after how many connection inactivity \fIseconds\fP the kernel will start to probe the TCP/IP connection. A good explanation of \fBtcp_keepalive_time\fP kernel parameter can be found at this URL: \fIhttp://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO\fP. If not specified, the default value set by \fBflom\fP daemon is @_DEFAULT_TCP_KEEPALIVE_TIME@ seconds

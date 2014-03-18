@@ -162,8 +162,14 @@
 /* Label of "daemon trace file" key inside config files */
 #undef _CONFIG_KEY_DAEMONTRACEFILE
 
+/* Label of "DiscoverAttempts" key inside config files */
+#undef _CONFIG_KEY_DISCOVERY_ATTEMPTS
+
 /* Label of "DiscoverTimeout" key inside config files */
 #undef _CONFIG_KEY_DISCOVERY_TIMEOUT
+
+/* Label of "DiscoverTTL" key inside config files */
+#undef _CONFIG_KEY_DISCOVERY_TTL
 
 /* Label of "Lifespan" key inside config files */
 #undef _CONFIG_KEY_LIFESPAN
@@ -210,8 +216,15 @@
 /* Default port used to reach flom daemon using TCP and UDP (multicast) */
 #undef _DEFAULT_DAEMON_PORT
 
-/* Default discover timeout for UDP/IP (multicast) query (milliseconds) */
+/* Default number of attempts used to for auto discovery feature */
+#undef _DEFAULT_DISCOVERY_ATTEMPTS
+
+/* Default discovery timeout for UDP/IP (multicast) query (milliseconds) */
 #undef _DEFAULT_DISCOVERY_TIMEOUT
+
+/* Default TTL: hop limit for multicast datagrams (UDP/IP) - auto-discovery
+   query */
+#undef _DEFAULT_DISCOVERY_TTL
 
 /* Per socket override of tcp_keepalive_intvl parameter associated to
    SO_KEEPALIVE */
