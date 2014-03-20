@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.3.1 Fixed a bug related to token "UnicastAddress" inside config
+20140320 - 0.3.1 Fixed a bug related to token "UnicastAddress" inside config
 	files
 	Added "-D, --discovery-attempts" option (see [Network]/DiscoveryAttempts)
 	Added "-I, --discovery-timeout" option (see [Network]/DiscoveryTimeout)
