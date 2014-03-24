@@ -1,5 +1,8 @@
 LOG:
 
+         - 0.3.2 Fixing a bug related to "hostname -I" used in testsuite
+	scripts (some Linux systems use an older version without "-I" option)
+
 20140320 - 0.3.1 Fixed a bug related to token "UnicastAddress" inside config
 	files
 	Added "-D, --discovery-attempts" option (see [Network]/DiscoveryAttempts)

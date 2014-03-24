@@ -23,7 +23,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	incompopt.at.in \
 	usecase.at \
 	usecase-dist.at.in \
-	scripts/flom_*.sh
+	scripts/*.sh
 
 cmdopt.at: cmdopt.at.in
 	sed \

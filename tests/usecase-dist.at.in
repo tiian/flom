@@ -20,19 +20,19 @@ AT_CLEANUP
 
 AT_SETUP([Network daemon with unlimited lifespan])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(hostname -I | cut -f 1 -d ' ')"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(portable_ip_address.sh)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Network daemon not started])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(hostname -I | cut -f 1 -d ' ')"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(portable_ip_address.sh)"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Network daemon with limited lifespan])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(hostname -I | cut -f 1 -d ' ')" ; sleep 6], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(portable_ip_address.sh)" ; sleep 6], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
@@ -68,22 +68,22 @@ AT_CLEANUP
 AT_SETUP([Net daemon with autodisc and unlimited life])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(hostname -I | cut -f 1 -d ' ') -A 224.0.0.1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(portable_ip_address.sh) -A 224.0.0.1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 # start a new daemon
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(hostname -I | cut -f 1 -d ' ') -A 224.0.0.1"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(portable_ip_address.sh) -A 224.0.0.1"], [0], [ignore], [ignore])
 # connect to previously started daemon after multicast discovery (1/2)
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(hostname -I | cut -f 1 -d ' ') -A 224.0.0.1"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(portable_ip_address.sh) -A 224.0.0.1"], [0], [ignore], [ignore])
 # connect to previously started daemon after multicast discovery (2/2)
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A 224.0.0.1"], [0], [ignore], [ignore])
 # connect to previously started daemon using unicast address
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(hostname -I | cut -f 1 -d ' ')"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(portable_ip_address.sh)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Net daemon with autodisc and limited lifespan])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(hostname -I | cut -f 1 -d ' ') -A 224.0.0.1" ; sleep 6], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(portable_ip_address.sh) -A 224.0.0.1" ; sleep 6], [0], [ignore], [ignore])
 # start a new daemon
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
@@ -91,6 +91,6 @@ AT_CLEANUP
 AT_SETUP([Net daemon with autodisc not started])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(hostname -I | cut -f 1 -d ' ') -A 224.0.0.1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(portable_ip_address.sh) -A 224.0.0.1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP

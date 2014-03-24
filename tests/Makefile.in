@@ -183,7 +183,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	incompopt.at.in \
 	usecase.at \
 	usecase-dist.at.in \
-	scripts/flom_*.sh
+	scripts/*.sh
 
 TESTSUITE = $(srcdir)/testsuite
 AUTOM4TE = autom4te
