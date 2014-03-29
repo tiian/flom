@@ -595,6 +595,7 @@ int flom_listen_udp(flom_conns_t *conns)
     FLOM_TRACE(("flom_listen_udp\n"));
     TRY {
         struct addrinfo hints;
+        struct sockaddr_in local_address;
         char port[100];
         int errcode;
         int found = FALSE;
@@ -613,6 +614,11 @@ int flom_listen_udp(flom_conns_t *conns)
                     flom_config_get_multicast_port()));
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_CANONNAME;
+        /* prepare a local address structure for incoming datagrams */
+        memset(&local_address, 0, sizeof(local_address));
+        local_address.sin_family = AF_INET;
+        local_address.sin_addr.s_addr = htonl(INADDR_ANY);
+        local_address.sin_port = htons(flom_config_get_multicast_port());
         /* remove this filter to support IPV6, but most of the following
            calls must be fixed! */
         hints.ai_family = AF_INET; 
@@ -633,7 +639,6 @@ int flom_listen_udp(flom_conns_t *conns)
             /* traverse the list and try to connect... */
             gai = result;
             while (NULL != gai && !found) {
-                u_char loop = 0;
                 FLOM_TRACE_HEX_DATA("flom_listen_udp: ai_addr ",
                                     (void *)gai->ai_addr, gai->ai_addrlen);
                 if (-1 == (fd = socket(gai->ai_family, gai->ai_socktype,
@@ -652,7 +657,8 @@ int flom_listen_udp(flom_conns_t *conns)
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
-                } else if (-1 == bind(fd, gai->ai_addr, gai->ai_addrlen)) {
+                } else if (-1 == bind(fd, (struct sockaddr *)&local_address,
+                                      sizeof(local_address))) {
                     FLOM_TRACE(("flom_listen_udp/bind() : "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
@@ -670,16 +676,6 @@ int flom_listen_udp(flom_conns_t *conns)
                                             &mreq, sizeof(mreq))) {
                         FLOM_TRACE(("flom_listen_udp/setsockopt("
                                     "IP_ADD_MEMBERSHIP) : "
-                                    "errno=%d '%s', skipping...\n", errno,
-                                    strerror(errno)));
-                        gai = gai->ai_next;
-                        close(fd);
-                        fd = NULL_FD;
-                    } else if (-1 == setsockopt( /* disable loopback */
-                                   fd, IPPROTO_IP, IP_MULTICAST_LOOP,
-                                   &loop, sizeof(loop))) {
-                        FLOM_TRACE(("flom_listen_udp/setsockopt("
-                                    "IP_MULTICAST_LOOP) : "
                                     "errno=%d '%s', skipping...\n", errno,
                                     strerror(errno)));
                         gai = gai->ai_next;

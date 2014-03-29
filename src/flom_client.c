@@ -451,6 +451,16 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
+                } else if (-1 == setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF,
+                                            (void *)&local_address,
+                                            local_address_len)) {
+                    FLOM_TRACE(("flom_client_discover_udp/setsockopt("
+                                "IP_MULTICAST_IF) : "
+                                "errno=%d '%s', skipping...\n", errno,
+                                strerror(errno)));
+                    gai = gai->ai_next;
+                    close(fd);
+                    fd = NULL_FD;
                 } else if (-1 == setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL,
                                             (void *)&sock_opt2,
                                             sizeof(sock_opt2))) {

@@ -4,6 +4,8 @@ LOG:
 	scripts (some Linux systems use an older version without "-I" option);
 	fixed a bug related to [Trace]/CommandTraceFile keywork inside config
 	files
+	removed '#' from test case titles (it does not work with some m4
+	versions)
 
 20140320 - 0.3.1 Fixed a bug related to token "UnicastAddress" inside config
 	files
