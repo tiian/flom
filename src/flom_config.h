@@ -116,6 +116,10 @@ extern const gchar *FLOM_CONFIG_KEY_DAEMONTRACEFILE;
  */
 extern const gchar *FLOM_CONFIG_KEY_COMMANDTRACEFILE;
 /**
+ * Label associated to Verbose key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_VERBOSE;
+/**
  * Label associated to "Resource" group inside config files
  */
 extern const gchar *FLOM_CONFIG_GROUP_RESOURCE;
@@ -231,6 +235,10 @@ typedef struct flom_config {
      * Name of the file must be used to write trace messages from the command
      */
     gchar             *command_trace_file;
+    /**
+     * Verbose execution: more messages will be printed on console
+     */
+    gint               verbose;
     /**
      * Daemon lifespan (milliseconds):
      * < 0 infinite, = 0 don't activate a daemon, > 0 after lifespan idle time
@@ -432,6 +440,26 @@ extern "C" {
 
     
     /**
+     * Set "verbose" config parameter
+     * @param value IN new (boolean) value
+     */
+    static inline void flom_config_set_verbose(gint value) {
+        global_config.verbose = value;
+    }
+
+
+
+    /**
+     * Get "verbose" config parameter
+     * @return a boolean value
+     */
+    static inline gint flom_config_get_verbose(void) {
+        return global_config.verbose;
+    }
+
+
+    
+    /**
      * Set "daemon_lifespan" config parameter
      * @param timeout IN milliseconds
      */
@@ -470,7 +498,7 @@ extern "C" {
 
 
     /**
-     * Set "rexource_wait" config parameter
+     * Set "resource_wait" config parameter
      * @param wait IN new (boolean) value
      */
     static inline void flom_config_set_resource_wait(int wait) {

@@ -139,6 +139,12 @@ int main (int argc, char *argv[])
         exit(FLOM_ES_GENERIC_ERROR);
     }
     /* overrides configuration with command line passed arguments */
+    if (NULL != daemon_trace_file)
+        flom_config_set_daemon_trace_file(daemon_trace_file);
+    if (NULL != command_trace_file)
+        flom_config_set_command_trace_file(command_trace_file);
+    if (verbose)
+        flom_config_set_verbose(verbose);
     if (NULL != resource_name)
         if (FLOM_RC_OK != (ret_cod = flom_config_set_resource_name(
                                resource_name))) {
@@ -214,16 +220,12 @@ int main (int argc, char *argv[])
     if (_DEFAULT_TCP_KEEPALIVE_PROBES != tcp_keepalive_probes) {
         flom_config_set_tcp_keepalive_probes(tcp_keepalive_probes);
     }
-    if (NULL != daemon_trace_file)
-        flom_config_set_daemon_trace_file(daemon_trace_file);
-    if (NULL != command_trace_file)
-        flom_config_set_command_trace_file(command_trace_file);
     if (NULL != flom_config_get_command_trace_file())
         /* change trace destination if necessary */
         FLOM_TRACE_REOPEN(flom_config_get_command_trace_file());
 
     /* print configuration */
-    if (verbose)
+    if (flom_config_get_verbose())
         flom_config_print();
 
     /* check configuration */

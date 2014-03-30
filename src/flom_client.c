@@ -386,7 +386,8 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
         int found = FALSE;
         gint i;
         const struct addrinfo *gai = result;
-        char buffer[FLOM_NETWORK_BUFFER_SIZE];
+        char out_buffer[FLOM_NETWORK_BUFFER_SIZE];
+        char in_buffer[FLOM_NETWORK_BUFFER_SIZE];
         size_t to_send;
         ssize_t sent;
         struct timeval timeout;
@@ -495,7 +496,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
         msg.header.pvs.step = FLOM_MSG_STEP_INCR;
         /* serialize the request message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
-                               &msg, buffer, sizeof(buffer), &to_send)))
+                               &msg, out_buffer, sizeof(out_buffer), &to_send)))
             THROW(MSG_SERIALIZE_ERROR);
 
         /* set time-out for receive operation */
@@ -507,11 +508,16 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
         
         /* attempt to locate the flom daemon */
         found = FALSE;
+        memset(in_buffer, 0, sizeof(in_buffer));
         for (i=0; i<flom_config_get_discovery_attempts(); ++i) {
             /* send discover message */
             FLOM_TRACE(("flom_client_discover_udp: sending discovery "
                         "message number %d...\n", i));
-            if (to_send != (sent = sendto(fd, buffer, to_send, 0,
+            if (flom_config_get_verbose())
+                g_print("sending UDP multicast datagram to %s/%u ('%s')\n",
+                        flom_config_get_multicast_address(),
+                        flom_config_get_multicast_port(), out_buffer);
+            if (to_send != (sent = sendto(fd, out_buffer, to_send, 0,
                                           gai->ai_addr, gai->ai_addrlen))) {
                 FLOM_TRACE(("flom_client_discover_udp: sendto() to_send=%d, "
                             "sent=%d\n", to_send, sent));
@@ -522,22 +528,30 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
             FLOM_TRACE(("flom_client_discover_udp: waiting reply...\n"));
             memset(&from, 0, sizeof(from));
             if (-1 == (received = recvfrom(
-                           fd, buffer, sizeof(buffer), 0,
+                           fd, in_buffer, sizeof(in_buffer), 0,
                            (struct sockaddr *)&from, &addrlen))) {
                 if (EAGAIN == errno || EWOULDBLOCK == errno) {
                     FLOM_TRACE(("flom_client_discover_udp: no answer from "
                                 "UDP/IP multicast discovery\n"));
+                    if (flom_config_get_verbose())
+                        g_print("no reply from %s/%u\n",
+                        flom_config_get_multicast_address(),
+                        flom_config_get_multicast_port());
                 } else
                     THROW(RECVFROM_ERROR);
             } else {
                 found = TRUE;
+                if (flom_config_get_verbose())
+                    g_print("reply from %s/%u is '%s'\n",
+                            flom_config_get_multicast_address(),
+                            flom_config_get_multicast_port(), in_buffer);
                 break;
             }
         } /* for (i=0; i<flom_config_get_discovery_attempts(); ++i) */
         if (!found)
             THROW(CONNECTION_REFUSED);
         FLOM_TRACE(("flom_client_discover_udp: recvfrom()='%*.*s', %d\n",
-                    received, received, buffer, received));        
+                    received, received, in_buffer, received));        
         FLOM_TRACE_HEX_DATA("flom_client_discover_udp: from ",
                             (void *)&from, addrlen);
         /* this UDP/IP socket is no more useful */
@@ -554,7 +568,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
         
         /* deserialize the reply message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
-                               buffer, received, &msg, cd->gmpc)))
+                               in_buffer, received, &msg, cd->gmpc)))
             THROW(MSG_DESERIALIZE_ERROR);
 
         flom_msg_trace(&msg);        

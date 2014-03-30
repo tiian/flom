@@ -117,6 +117,9 @@
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
 
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
@@ -203,6 +206,9 @@
 
 /* Label of "UnicastPort" key inside config files */
 #undef _CONFIG_KEY_UNICAST_PORT
+
+/* Label of "Verbose" key inside config files */
+#undef _CONFIG_KEY_VERBOSE
 
 /* Label of "Wait" key inside config files */
 #undef _CONFIG_KEY_WAIT

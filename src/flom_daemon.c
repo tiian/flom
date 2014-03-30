@@ -56,6 +56,7 @@
 #include "flom_errors.h"
 #include "flom_locker.h"
 #include "flom_msg.h"
+#include "flom_syslog.h"
 
 
 
@@ -170,6 +171,7 @@ int flom_daemon(int family)
             FLOM_TRACE(("flom_daemon: now daemonized!\n"));
 
             /* activate service */
+            openlog("flom", LOG_PID, LOG_DAEMON);
             flom_conns_init(&conns, family);
             daemon_rc = flom_listen(&conns);
             
@@ -184,7 +186,6 @@ int flom_daemon(int family)
             if (FLOM_RC_OK != daemon_rc)
                 THROW(FLOM_LISTEN_ERROR);
             
-            openlog("flom", LOG_PID, LOG_DAEMON);
             syslog(LOG_NOTICE, "flom_daemon: activated!");
             if (FLOM_RC_OK != (ret_cod = flom_accept_loop(&conns)))
                 THROW(FLOM_ACCEPT_LOOP_ERROR);
@@ -321,11 +322,11 @@ int flom_listen_local(flom_conns_t *conns)
             
         if (-1 == (fd = socket(flom_conns_get_domain(conns), SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
-        if (-1 == unlink(global_config.socket_name) && ENOENT != errno)
+        if (-1 == unlink(flom_config_get_socket_name()) && ENOENT != errno)
             THROW(UNLINK_ERROR);
         memset(&servaddr, 0, sizeof(servaddr));
         servaddr.sun_family = flom_conns_get_domain(conns);
-        strcpy(servaddr.sun_path, global_config.socket_name);
+        strcpy(servaddr.sun_path, flom_config_get_socket_name());
         if (-1 == bind(fd, (struct sockaddr *) &servaddr, sizeof(servaddr)))
             THROW(BIND_ERROR);
         if (-1 == listen(fd, LISTEN_BACKLOG))
@@ -334,6 +335,7 @@ int flom_listen_local(flom_conns_t *conns)
                                conns, fd, SOCK_STREAM, sizeof(servaddr),
                                (struct sockaddr *)&servaddr, TRUE)))
             THROW(CONNS_ADD_ERROR);
+        syslog(LOG_NOTICE, FLOM_SYSLOG_FLM000I, flom_config_get_socket_name());
         THROW(NONE);
     } CATCH {
         switch (excp) {

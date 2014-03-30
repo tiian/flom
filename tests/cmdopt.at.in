@@ -50,6 +50,23 @@ AT_DATA([flom.conf],
 AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_COMMANDTRACEFILE@], [0], [expout], [ignore])
 AT_CLEANUP
 
+AT_SETUP([Verbose mode: -V, --verbose])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_TRACE@]/@_CONFIG_KEY_VERBOSE@=1
+]])
+AT_CHECK([flom -V -- ls | grep @_CONFIG_KEY_VERBOSE@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose -- ls | grep @_CONFIG_KEY_VERBOSE@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+@_CONFIG_KEY_VERBOSE@=yes
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+[@_CONFIG_GROUP_NETWORK@]
+]])
+AT_CHECK([flom -c flom.conf -- ls | grep @_CONFIG_KEY_VERBOSE@], [0], [expout], [ignore])
+AT_CLEANUP
+
 AT_SETUP([Resource name: -r, --resource-name])
 AT_DATA([expout],
 [[[@_CONFIG_GROUP_RESOURCE@]/@_CONFIG_KEY_NAME@='MYRES'
