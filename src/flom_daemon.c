@@ -186,10 +186,10 @@ int flom_daemon(int family)
             if (FLOM_RC_OK != daemon_rc)
                 THROW(FLOM_LISTEN_ERROR);
             
-            syslog(LOG_NOTICE, "flom_daemon: activated!");
+            syslog(LOG_NOTICE, FLOM_SYSLOG_FLM003N);
             if (FLOM_RC_OK != (ret_cod = flom_accept_loop(&conns)))
                 THROW(FLOM_ACCEPT_LOOP_ERROR);
-            syslog(LOG_NOTICE, "flom_daemon: exiting");
+            syslog(LOG_NOTICE, FLOM_SYSLOG_FLM004N);
             flom_listen_clean(&conns);
         }
         THROW(NONE);
@@ -375,6 +375,9 @@ int flom_listen_tcp(flom_conns_t *conns)
         ret_cod = flom_listen_tcp_configured(conns);
     else
         ret_cod = flom_listen_tcp_automatic(conns);
+    syslog(LOG_NOTICE, FLOM_SYSLOG_FLM001I,
+           flom_config_get_unicast_address(),
+           flom_config_get_unicast_port());
     FLOM_TRACE(("flom_listen_tcp/ret_cod=%d/errno=%d\n", ret_cod, errno));
     return ret_cod;
 }
@@ -533,6 +536,10 @@ int flom_listen_tcp_automatic(flom_conns_t *conns)
             THROW(GETSOCKNAME_ERROR);
         FLOM_TRACE_HEX_DATA("flom_listen_tcp_automatic: addr ",
                             (void *)&addr, addrlen);
+        /* inject address value to configuration */
+        FLOM_TRACE(("flom_listen_tcp_automatic: set unicast address to value "
+                    "'0.0.0.0'\n"));
+        flom_config_set_unicast_address("0.0.0.0");
         /* inject port value to configuration */
         unicast_port = ntohs(addr.sin_port);
         FLOM_TRACE(("flom_listen_tcp_automatic: set unicast port to value "
@@ -699,6 +706,9 @@ int flom_listen_udp(flom_conns_t *conns)
                                gai->ai_addr, TRUE)))
             THROW(CONNS_ADD_ERROR);
         fd = NULL_FD; /* avoid socket close by clean-up section */        
+        syslog(LOG_NOTICE, FLOM_SYSLOG_FLM002I,
+               flom_config_get_multicast_address(),
+               flom_config_get_multicast_port());
         
         THROW(NONE);
     } CATCH {
@@ -939,6 +949,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                      , MSG_DESERIALIZE_ERROR
                      , CONNS_CLOSE_ERROR
                      , PROTOCOL_ERROR
+                     , GETNAMEINFO_ERROR
                      , ACCEPT_DISCOVER_REPLY_ERROR
                      , ACCEPT_LOOP_TRANSFER_ERROR
                      , NONE } excp;
@@ -1016,6 +1027,16 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                     THROW(PROTOCOL_ERROR);
                 /* check the message is discover */
                 if (FLOM_MSG_VERB_DISCOVER == msg->header.pvs.verb) {
+                    char host[256];
+                    char port[25];
+                    *host = *port = '\0';
+                    if (-1 == getnameinfo((const struct sockaddr *)&src_addr,
+                                         addrlen, host, sizeof(host),
+                                         port, sizeof(port),
+                                          NI_DGRAM | NI_NUMERICHOST |
+                                          NI_NUMERICSERV))
+                        THROW(GETNAMEINFO_ERROR);
+                    syslog(LOG_INFO, FLOM_SYSLOG_FLM005I, host, port);
                     if (FLOM_RC_OK != (ret_cod = flom_accept_discover_reply(
                                            flom_conns_get_fd(conns, id),
                                            (const struct sockaddr *)&src_addr,
@@ -1055,6 +1076,9 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                 break;
             case PROTOCOL_ERROR:
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;
+                break;
+            case GETNAMEINFO_ERROR:
+                ret_cod = FLOM_RC_GETNAMEINFO_ERROR;
                 break;
             case ACCEPT_DISCOVER_REPLY_ERROR:
             case ACCEPT_LOOP_TRANSFER_ERROR:

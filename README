@@ -32,5 +32,14 @@ NOTE: do *NOT* run tests on a system that's using flom because some tests
       you are playing production workloads. DO USE A TEST SYSTEM!
 NOTE: tests needs the system is NOT overloaded because they stick on timing
       and timing breaks if the system is overloaded.
-Enjoy it!
+
+If you need some help (usage tricks, hints, etc...) please post a message in
+the forum: http://sourceforge.net/p/flom/discussion/
+If you think you have discovered a bug, please open a ticket here:
+http://sourceforge.net/p/flom/tickets/
+If you avoided to send me an e-mail I would be happy: forum posts and tickets
+can be seen by many people and I should not answer the same questions many
+times.
+
+Enjoy flom!
 Ch.F.

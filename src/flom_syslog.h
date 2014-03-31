@@ -41,8 +41,18 @@ extern "C" {
    E: LOG_ERR
    C: LOG_CRIT
 */
-#define FLOM_SYSLOG_FLM000I "FLM000I this process is a local " \
+#define FLOM_SYSLOG_FLM000I "FLM000I this process is activating a local " \
     "FLOM daemon listening UNIX socket '%s'"
+#define FLOM_SYSLOG_FLM001I "FLM001I this process is activating a network " \
+    "FLOM daemon listening TCP/IP socket %s/%u"
+#define FLOM_SYSLOG_FLM002I "FLM002I joined multicast group %s/%u to " \
+    "answer daemon location queries"
+#define FLOM_SYSLOG_FLM003N "FLM003N FLOM daemon ready to serve incoming " \
+    "requests"
+#define FLOM_SYSLOG_FLM004N "FLM004N FLOM daemon has terminated to serve " \
+    "incoming requests"
+#define FLOM_SYSLOG_FLM005I "FLM005I auto-discovery query received from " \
+    "%s/%s"
 
 
 

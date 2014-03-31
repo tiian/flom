@@ -191,89 +191,93 @@
  */
 #define FLOM_RC_GETADDRINFO_ERROR                   -107
 /**
+ * "getnameinfo" function error
+ */
+#define FLOM_RC_GETNAMEINFO_ERROR                   -108
+/**
  * "getsockname" function error
  */
-#define FLOM_RC_GETSOCKNAME_ERROR                   -108
+#define FLOM_RC_GETSOCKNAME_ERROR                   -109
 /**
  * "getsockopt" function error
  */
-#define FLOM_RC_GETSOCKOPT_ERROR                    -109
+#define FLOM_RC_GETSOCKOPT_ERROR                    -110
 /**
  * "listen" function error
  */
-#define FLOM_RC_LISTEN_ERROR                        -110
+#define FLOM_RC_LISTEN_ERROR                        -111
 /**
  * "malloc"/"g_malloc" function error
  */
-#define FLOM_RC_MALLOC_ERROR                        -111
+#define FLOM_RC_MALLOC_ERROR                        -112
 /**
  * "pipe" function error
  */
-#define FLOM_RC_PIPE_ERROR                          -112
+#define FLOM_RC_PIPE_ERROR                          -113
 /**
  * "poll" function error
  */
-#define FLOM_RC_POLL_ERROR                          -113
+#define FLOM_RC_POLL_ERROR                          -114
 /**
  * "read" function error
  */
-#define FLOM_RC_READ_ERROR                          -114
+#define FLOM_RC_READ_ERROR                          -115
 /**
  * "recv" function error
  */
-#define FLOM_RC_RECV_ERROR                          -115
+#define FLOM_RC_RECV_ERROR                          -116
 /**
  * "recvfrom" function error
  */
-#define FLOM_RC_RECVFROM_ERROR                      -116
+#define FLOM_RC_RECVFROM_ERROR                      -117
 /**
  * "regcomp" function error
  */
-#define FLOM_RC_REGCOMP_ERROR                       -117
+#define FLOM_RC_REGCOMP_ERROR                       -118
 /**
  * "regexec" function error
  */
-#define FLOM_RC_REGEXEC_ERROR                       -118
+#define FLOM_RC_REGEXEC_ERROR                       -119
 /**
  * "send" function error
  */
-#define FLOM_RC_SEND_ERROR                          -119
+#define FLOM_RC_SEND_ERROR                          -120
 /**
  * "sendto" function error
  */
-#define FLOM_RC_SENDTO_ERROR                        -120
+#define FLOM_RC_SENDTO_ERROR                        -121
 /**
  * "setsid" function error
  */
-#define FLOM_RC_SETSID_ERROR                        -121
+#define FLOM_RC_SETSID_ERROR                        -122
 /**
  * "setsockopt" function error
  */
-#define FLOM_RC_SETSOCKOPT_ERROR                    -122
+#define FLOM_RC_SETSOCKOPT_ERROR                    -123
 /**
  * "signal" function error
  */
-#define FLOM_RC_SIGNAL_ERROR                        -123
+#define FLOM_RC_SIGNAL_ERROR                        -124
 /**
  * "socket" function error
  */
-#define FLOM_RC_SOCKET_ERROR                        -124
+#define FLOM_RC_SOCKET_ERROR                        -125
 /**
  * "snprintf" function error (truncation)
  */
-#define FLOM_RC_SNPRINTF_ERROR                      -125
+#define FLOM_RC_SNPRINTF_ERROR                      -126
 /**
  * "unlink" function error
  */
-#define FLOM_RC_UNLINK_ERROR                        -126
+#define FLOM_RC_UNLINK_ERROR                        -127
 /**
  * "wait" function error
  */
-#define FLOM_RC_WAIT_ERROR                          -127
+#define FLOM_RC_WAIT_ERROR                          -128
 /**
  * "write" function error
  */
-#define FLOM_RC_WRITE_ERROR                         -128
+#define FLOM_RC_WRITE_ERROR                         -129
 
 /* GLIB related errors */
 

@@ -6,6 +6,8 @@ LOG:
 	files
 	removed '#' from test case titles (it does not work with some m4
 	versions)
+	added syslog messages and verbose console messages to help debugging 
+	network related issued
 
 20140320 - 0.3.1 Fixed a bug related to token "UnicastAddress" inside config
 	files

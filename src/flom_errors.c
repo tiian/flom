@@ -93,6 +93,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'fork' function returned an error condition";
         case FLOM_RC_GETADDRINFO_ERROR:
             return "ERROR: 'getaddrinfo' function returned an error condition";
+        case FLOM_RC_GETNAMEINFO_ERROR:
+            return "ERROR: 'getnameinfo' function returned an error condition";
         case FLOM_RC_GETSOCKNAME_ERROR:
             return "ERROR: 'getsockname' function returned an error condition";
         case FLOM_RC_GETSOCKOPT_ERROR:
