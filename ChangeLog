@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.3.2 Fixed a bug related to "hostname -I" used in testsuite
+20140403 - 0.3.2 Fixed a bug related to "hostname -I" used in testsuite
 	scripts (some Linux systems use an older version without "-I" option);
 	fixed a bug related to [Trace]/CommandTraceFile keywork inside config
 	files
