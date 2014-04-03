@@ -46,7 +46,7 @@ extern "C" {
 #define FLOM_SYSLOG_FLM001I "FLM001I this process is activating a network " \
     "FLOM daemon listening TCP/IP socket %s/%u"
 #define FLOM_SYSLOG_FLM002I "FLM002I joined multicast group %s/%u to " \
-    "answer daemon location queries"
+    "answer auto-discovery queries"
 #define FLOM_SYSLOG_FLM003N "FLM003N FLOM daemon ready to serve incoming " \
     "requests"
 #define FLOM_SYSLOG_FLM004N "FLM004N FLOM daemon has terminated to serve " \
