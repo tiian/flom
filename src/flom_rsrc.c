@@ -30,6 +30,7 @@
 #include "flom_errors.h"
 #include "flom_rsrc.h"
 #include "flom_resource_simple.h"
+#include "flom_resource_numeric.h"
 #include "flom_trace.h"
 
 
@@ -62,7 +63,9 @@ int global_res_name_preg_init()
         flom_rsrc_type_t i;
         const char *reg_str[FLOM_RSRC_TYPE_N] = {
             "^_$" /* this is a dummy value */ ,
-            "^%s$|^[[:alpha:]]([[:alpha:][:digit:]])+$" };
+            "^%s$|^[[:alpha:]]([[:alpha:][:digit:]])+$" ,
+            "^[[:alpha:]]([[:alpha:][:digit:]])+\#([[:digit:]])+$"
+        };
 
         memset(global_res_name_preg, 0, sizeof(global_res_name_preg));
         for (i=FLOM_RSRC_TYPE_NULL; i<FLOM_RSRC_TYPE_N; ++i) {
@@ -173,6 +176,14 @@ int flom_resource_init(flom_resource_t *resource,
                 resource->inmsg = flom_resource_simple_inmsg;
                 resource->clean = flom_resource_simple_clean;
                 resource->free = flom_resource_simple_free;
+                break;
+            case FLOM_RSRC_TYPE_NUMERIC:
+                resource->data.numeric.holders = NULL;
+                if (NULL == (resource->data.numeric.waitings = g_queue_new()))
+                    THROW(G_QUEUE_NEW_ERROR);
+                resource->inmsg = flom_resource_numeric_inmsg;
+                resource->clean = flom_resource_numeric_clean;
+                resource->free = flom_resource_numeric_free;
                 break;
             default:
                 THROW(UNKNOW_RESOURCE);

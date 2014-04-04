@@ -146,7 +146,7 @@ typedef enum flom_lock_mode_e {
      */
     FLOM_LOCK_MODE_PR,
     /**
-     * Protectec write / update lock mode
+     * Protected write / update lock mode
      */
     FLOM_LOCK_MODE_PW,
     /**

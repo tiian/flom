@@ -66,6 +66,10 @@ typedef enum flom_rsrc_type_e {
      */
     FLOM_RSRC_TYPE_SIMPLE,
     /**
+     * Numeric resource type (a numerical resource)
+     */
+    FLOM_RSRC_TYPE_NUMERIC,
+    /**
      * Number of managed resource types
      */
     FLOM_RSRC_TYPE_N
@@ -106,6 +110,22 @@ struct flom_rsrc_data_simple_s {
 
 
 
+/**
+ * Resource data for type "numeric" @ref FLOM_RSRC_TYPE_NUMERIC
+ */
+struct flom_rsrc_data_numeric_s {
+    /**
+     * List of connections with an acquired lock
+     */
+    GSList                 *holders;
+    /**
+     * List of connections waiting for a lock
+     */
+    GQueue                 *waitings;
+};
+
+
+
 /* necessary to declare flom_resource_t used inside the struct ("class")
    definition */
 struct flom_resource_s;
@@ -130,6 +150,7 @@ struct flom_resource_s {
      */
     union {
         struct flom_rsrc_data_simple_s       simple;
+        struct flom_rsrc_data_numeric_s      numeric;
     } data;
     /**
      * Method called to process incoming messages (it depends from resource
