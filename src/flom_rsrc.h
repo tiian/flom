@@ -115,6 +115,14 @@ struct flom_rsrc_data_simple_s {
  */
 struct flom_rsrc_data_numeric_s {
     /**
+     * Total quantity for the resource
+     */
+    gint                    total_quantity;
+    /**
+     * Locked quantity for the resource
+     */
+    gint                    locked_quantity;
+    /**
      * List of connections with an acquired lock
      */
     GSList                 *holders;
@@ -208,6 +216,16 @@ extern "C" {
      *      any resource type
      */
     flom_rsrc_type_t flom_rsrc_get_type(const gchar *resource_name);
+
+
+
+    /**
+     * Retrieve the quantity associated to a numeric resource
+     * @param resource_name IN resource name
+     * @param number OUT quantity
+     * @return a reason code
+     */
+    int flom_rsrc_get_number(const gchar *resource_name, gint *number);
 
     
 

@@ -136,6 +136,10 @@ extern const gchar *FLOM_CONFIG_KEY_WAIT;
  */
 extern const gchar *FLOM_CONFIG_KEY_TIMEOUT;
 /**
+ * Label associated to "Quantity" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_QUANTITY;
+/**
  * Label associated to "LockMode" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_LOCK_MODE;
@@ -259,6 +263,10 @@ typedef struct flom_config {
      * it will return (milliseconds as specified by poll POSIX function)
      */
     gint               resource_timeout;
+    /**
+     * Number of numeric resource to lock
+     */
+    gint               resource_quantity;
     /**
      * Lock mode as designed by VMS DLM
      */
@@ -534,6 +542,27 @@ extern "C" {
      */
     static inline gint flom_config_get_resource_timeout(void) {
         return global_config.resource_timeout;
+    }
+
+
+    
+    /**
+     * Set "resource_quantity" config parameter
+     * @param value IN number of resource to lock
+     */
+    static inline void flom_config_set_resource_quantity(gint value) {
+        if (0 > value) value = -value;
+        if (0 != value) global_config.resource_quantity = value;
+    }
+
+
+
+    /**
+     * Get "resource_quantity" config parameter
+     * @return current quantity
+     */
+    static inline gint flom_config_get_resource_quantity(void) {
+        return global_config.resource_quantity;
     }
 
 

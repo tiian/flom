@@ -46,8 +46,9 @@ static gboolean verbose = FALSE;
 static char *config_file = NULL;
 static gchar *socket_name = NULL;
 static gchar *resource_name = NULL;
-static gchar *resource_wait = NULL;
 static gint resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
+static gint resource_quantity = 0;
+static gchar *resource_wait = NULL;
 static gchar *lock_mode = NULL;
 static gint daemon_lifespan = _DEFAULT_DAEMON_LIFESPAN;
 static gchar *unicast_address = NULL;
@@ -72,6 +73,7 @@ static GOptionEntry entries[] =
     { "resource-name", 'r', 0, G_OPTION_ARG_STRING, &resource_name, "Specify the name of the resource to be locked", NULL },
     { "resource-wait", 'w', 0, G_OPTION_ARG_STRING, &resource_wait, "Specify if the command enques when the resource is already locked (accepted values 'yes', 'no')", NULL },
     { "resource-timeout", 'o', 0, G_OPTION_ARG_INT, &resource_timeout, "Specify maximum wait time (milliseconds) if a resource is already locked", NULL },
+    { "resource-quantity", 'q', 0, G_OPTION_ARG_INT, &resource_quantity, "Specify how many numeric resources must be locked", NULL },
     { "lock-mode", 'l', 0, G_OPTION_ARG_STRING, &lock_mode, "Resource lock mode ('NL', 'CR', 'CW', 'PR', 'PW', 'EX')", NULL },
     { "socket-name", 's', 0, G_OPTION_ARG_STRING, &socket_name, "Daemon/command communication socket name", NULL },
     { "daemon-lifespan", 'd', 0, G_OPTION_ARG_INT, &daemon_lifespan, "Specify minimum lifespan of the flom daemon (if activated)", NULL },
@@ -151,6 +153,12 @@ int main (int argc, char *argv[])
             g_print("flom_config_set_resource_name: ret_cod=%d\n", ret_cod);
             exit(FLOM_ES_GENERIC_ERROR);
         }
+    if (0 > resource_quantity)
+        g_warning("Resource quantity ignored because negative values (%d) "
+                  "are meaningless\n", resource_quantity);
+    else if (0 < resource_quantity)
+        flom_config_set_resource_quantity(resource_quantity);
+
     if (NULL != resource_wait) {
         flom_bool_value_t fbv;
         if (FLOM_BOOL_INVALID == (

@@ -84,6 +84,7 @@ const gchar *FLOM_CONFIG_GROUP_RESOURCE = _CONFIG_GROUP_RESOURCE;
 const gchar *FLOM_CONFIG_KEY_NAME = _CONFIG_KEY_NAME;
 const gchar *FLOM_CONFIG_KEY_WAIT = _CONFIG_KEY_WAIT;
 const gchar *FLOM_CONFIG_KEY_TIMEOUT = _CONFIG_KEY_TIMEOUT;
+const gchar *FLOM_CONFIG_KEY_QUANTITY = _CONFIG_KEY_QUANTITY;
 const gchar *FLOM_CONFIG_KEY_LOCK_MODE = _CONFIG_KEY_LOCK_MODE;
 const gchar *FLOM_CONFIG_GROUP_DAEMON = _CONFIG_GROUP_DAEMON;
 const gchar *FLOM_CONFIG_KEY_SOCKET_NAME = _CONFIG_KEY_SOCKET_NAME;
@@ -137,6 +138,7 @@ void flom_config_reset()
     global_config.resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
     global_config.resource_wait = TRUE;
     global_config.resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
+    global_config.resource_quantity = 1;
     global_config.lock_mode = FLOM_LOCK_MODE_EX;
     global_config.socket_name = NULL;
     global_config.daemon_lifespan = _DEFAULT_DAEMON_LIFESPAN;
@@ -230,6 +232,8 @@ void flom_config_print()
             FLOM_CONFIG_KEY_WAIT, flom_config_get_resource_wait());
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
             FLOM_CONFIG_KEY_TIMEOUT, flom_config_get_resource_timeout());
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
+            FLOM_CONFIG_KEY_QUANTITY, flom_config_get_resource_quantity());
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
             FLOM_CONFIG_KEY_LOCK_MODE, flom_config_get_lock_mode());
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
@@ -378,6 +382,7 @@ int flom_config_init_load(const char *config_file_name)
                      , CONFIG_SET_RESOURCE_NAME_ERROR
                      , CONFIG_SET_RESOURCE_WAIT_ERROR
                      , CONFIG_SET_RESOURCE_TIMEOUT_ERROR
+                     , CONFIG_SET_RESOURCE_QUANTITY_ERROR
                      , CONFIG_SET_LOCK_MODE_ERROR
                      , CONFIG_SET_SOCKET_NAME_ERROR
                      , CONFIG_SET_DAEMON_LIFESPAN_ERROR
@@ -560,6 +565,30 @@ int flom_config_init_load(const char *config_file_name)
                         FLOM_CONFIG_GROUP_RESOURCE,
                         FLOM_CONFIG_KEY_TIMEOUT, ivalue));
             flom_config_set_resource_timeout(ivalue);
+        }
+        /* pick-up resource quantity from configuration */
+        ivalue = g_key_file_get_integer(
+            gkf, FLOM_CONFIG_GROUP_RESOURCE, FLOM_CONFIG_KEY_QUANTITY, &error);
+        if (NULL != error) {
+            int throw_error = FALSE;
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_QUANTITY,
+                        error->code,
+                        error->message));
+            if (G_KEY_FILE_ERROR_KEY_NOT_FOUND != error->code) {
+                print_file_name = throw_error = TRUE;
+                g_print("%s\n", error->message);
+            }
+            g_error_free(error);
+            error = NULL;
+            if (throw_error) THROW(CONFIG_SET_RESOURCE_QUANTITY_ERROR);
+        } else {
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_QUANTITY, ivalue));
+            flom_config_set_resource_quantity(ivalue);
         }
         /* pick-up resource lock mode from configuration */
         if (NULL == (value = g_key_file_get_string(
@@ -887,6 +916,7 @@ int flom_config_init_load(const char *config_file_name)
             case CONFIG_SET_RESOURCE_NAME_ERROR:
             case CONFIG_SET_RESOURCE_WAIT_ERROR:
             case CONFIG_SET_RESOURCE_TIMEOUT_ERROR:
+            case CONFIG_SET_RESOURCE_QUANTITY_ERROR:
             case CONFIG_SET_LOCK_MODE_ERROR:
             case CONFIG_SET_SOCKET_NAME_ERROR:
             case CONFIG_SET_DAEMON_LIFESPAN_ERROR:

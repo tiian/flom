@@ -23,13 +23,20 @@ verbose mode execution
 user configuration file name. Flom tries to read system default configuration file @sysconfdir@/@_SYSTEM_CONFIG_FILENAME@, user default configuration file ~/@_USER_CONFIG_FILENAME@ and finally this file if specified. Definitive configuration is obtained overloading hard wired build time defaults, system defaults, user defaults, user custom, command line options.
 .TP
 .B -r, --resource-name=\fIRESOURCE
-name of the resource used for enqueing (locking). Resource name can be composed of "alpha" and "digit" characters, but the first character \fBmust be\fP of type "alpha" (example: "RA123" is \fBOK\fP, "123RA" is \fBnot\fP OK). Accepted resource names are described in function "global_res_name_preg_init": inspect source code for more details
+name of the resource used for enqueing (locking). 
+ 
+Simple resource names can be composed of "alpha" and "digit" characters, but the first character \fBmust be\fP of type "alpha" (example: "RA123" is \fBOK\fP, "123RA" is \fBnot\fP OK). Accepted resource names are described in function "global_res_name_preg_init": inspect source code for more details
+ 
+Numeric resource names are composed by simple resource names followed by one pound character ("#") and some digits (example: "foo#12", "bar#3", "RA123#23")
 .TP
 .B -w, --resource-wait=\fIyes|no
 \fBdefault\fP (\fIyes\fP): the command will enqueue if the resource is already locked by someone else, otherwise (\fIno\fP) it will return immediately
 .TP
 .B -o, --resource-timeout=\fImilliseconds
 maximum enqueue time if the resource is already locked by someone else; if the resource doesn't become free before \fItimeout milliseconds\fP the command will return. Note: "\fI-o 0\fP" is equivalent to "\fI-w no\fP"
+.TP
+.B -q, --resource-quantity=\fInumber
+\fInumber\fP of numeric resources to lock; it's meaningless if the locked resource is not of type "numeric". Note: only positive values are accepted
 .TP
 .B -l, --lock-mode=\fIMODE
 lock mode as defined by VMS DLM (Distributed Lock Manager). \fIMODE\fP can be: "NullLock", "ConcurrentRead", "ConcurrentWrite", "ProtectedRead", "ProtectedWrite", "Exclusive" (equivalent short forms are: "NL", "CR", "CW", "PR", "PW", "EX"). More information are available here \fIhttp://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes\fP

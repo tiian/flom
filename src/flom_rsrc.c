@@ -23,6 +23,9 @@
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
+#ifdef HAVE_REGEX_H
+# include <regex.h>
+#endif
 
 
 
@@ -64,7 +67,7 @@ int global_res_name_preg_init()
         const char *reg_str[FLOM_RSRC_TYPE_N] = {
             "^_$" /* this is a dummy value */ ,
             "^%s$|^[[:alpha:]]([[:alpha:][:digit:]])+$" ,
-            "^[[:alpha:]]([[:alpha:][:digit:]])+\#([[:digit:]])+$"
+            "^[[:alpha:]]([[:alpha:][:digit:]])+#([[:digit:]])+$"
         };
 
         memset(global_res_name_preg, 0, sizeof(global_res_name_preg));
@@ -150,6 +153,50 @@ flom_rsrc_type_t flom_rsrc_get_type(const gchar *resource_name)
 
 
 
+int flom_rsrc_get_number(const gchar *resource_name, gint *number)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_rsrc_get_number\n"));
+    TRY {
+        int reg_error, i;
+        char reg_errbuf[200];
+        regmatch_t regmatch[10];
+        reg_error = regexec(global_res_name_preg+FLOM_RSRC_TYPE_NUMERIC,
+                            resource_name, sizeof(regmatch)/sizeof(regmatch_t),
+                            regmatch, 0);
+        regerror(reg_error, global_res_name_preg+FLOM_RSRC_TYPE_NUMERIC,
+                 reg_errbuf, sizeof(reg_errbuf));
+        FLOM_TRACE(("flom_rsrc_get_number: regexec returned "
+                    "%d ('%s') for string '%s'\n",
+                    reg_error, reg_errbuf, resource_name));
+        for (i=0; i<sizeof(regmatch)/sizeof(regmatch_t); ++i) {
+            if (-1 != regmatch[i].rm_so) {
+                char buffer[100];
+                memset(buffer, 0, sizeof(buffer));
+                /* @@@ restart from here */
+            } else
+                break;
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_rsrc_get_number/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int flom_resource_init(flom_resource_t *resource,
                        flom_rsrc_type_t type, const gchar *name)
 {
@@ -178,6 +225,10 @@ int flom_resource_init(flom_resource_t *resource,
                 resource->free = flom_resource_simple_free;
                 break;
             case FLOM_RSRC_TYPE_NUMERIC:
+                flom_rsrc_get_number(
+                    name,
+                    &(resource->data.numeric.total_quantity));
+                resource->data.numeric.locked_quantity = 0;
                 resource->data.numeric.holders = NULL;
                 if (NULL == (resource->data.numeric.waitings = g_queue_new()))
                     THROW(G_QUEUE_NEW_ERROR);

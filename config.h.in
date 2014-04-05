@@ -186,6 +186,9 @@
 /* Label of "Name" key inside config files */
 #undef _CONFIG_KEY_NAME
 
+/* Label of "Quantity" key inside config files */
+#undef _CONFIG_KEY_QUANTITY
+
 /* Label of "SocketName" key inside config files */
 #undef _CONFIG_KEY_SOCKET_NAME
 

@@ -43,6 +43,10 @@
 # function 
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_TIMEOUT@=-1
+# Quantity of numeric resource to lock (useless if resource type is not
+# numeric)
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_QUANTITY@=1
 # Lock mode: a resource can be locked with different modes; FLOM supports
 # the same semantic introduced by VMS DLM ad described here:
 # http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
