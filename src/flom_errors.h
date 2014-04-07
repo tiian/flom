@@ -155,6 +155,10 @@
  * A routine has been invoked in an improper context
  */
 #define FLOM_RC_PROTOCOL_ERROR                       -13
+/**
+ * Specified resource name is not valid
+ */
+#define FLOM_RC_INVALID_RESOURCE_NAME                -14
 
 
 

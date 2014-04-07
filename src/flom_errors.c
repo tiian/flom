@@ -77,6 +77,8 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_PROTOCOL_ERROR:
             return "ERROR: client/server protocol error, an unexpected "
                 "packet of data was received";
+        case FLOM_RC_INVALID_RESOURCE_NAME:
+            return "ERROR: invalid name for a resource";
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";
         case FLOM_RC_BIND_ERROR:

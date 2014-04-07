@@ -743,6 +743,8 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
             THROW(G_STRDUP_ERROR);
         msg.body.lock_8.resource.mode = flom_config_get_lock_mode();
         msg.body.lock_8.resource.wait = flom_config_get_resource_wait();
+        msg.body.lock_8.resource.quantity =
+            flom_config_get_resource_quantity();
 
         /* serialize the request message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(

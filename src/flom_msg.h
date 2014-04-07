@@ -182,7 +182,11 @@ extern const gchar *FLOM_MSG_PROP_LEVEL;
  */
 extern const gchar *FLOM_MSG_PROP_NAME;
 /**
- * Label used to specify "rcp" property
+ * Label used to specify "quantity" property
+ */
+extern const gchar *FLOM_MSG_PROP_QUANTITY;
+/**
+ * Label used to specify "rc" property
  */
 extern const gchar *FLOM_MSG_PROP_RC;
 /**
@@ -289,9 +293,13 @@ struct flom_msg_body_lock_8_resource_s {
      */
     flom_lock_mode_t  mode;
     /**
-     * wait if lock is currently not available
+     * wait if sufficient resource(s) is(are) not available
      */
     int               wait;
+    /**
+     * number of resources to lock; for numeric resources only
+     */
+    gint              quantity;
 };
 
     

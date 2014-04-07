@@ -66,8 +66,8 @@ int global_res_name_preg_init()
         flom_rsrc_type_t i;
         const char *reg_str[FLOM_RSRC_TYPE_N] = {
             "^_$" /* this is a dummy value */ ,
-            "^%s$|^[[:alpha:]]([[:alpha:][:digit:]])+$" ,
-            "^[[:alpha:]]([[:alpha:][:digit:]])+#([[:digit:]])+$"
+            "^%s$|^([[:alpha:]][[:alpha:][:digit:]]*)$" ,
+            "^([[:alpha:]][[:alpha:][:digit:]]*)#([[:digit:]]+)$"
         };
 
         memset(global_res_name_preg, 0, sizeof(global_res_name_preg));
@@ -80,7 +80,7 @@ int global_res_name_preg_init()
             FLOM_TRACE(("global_res_name_preg_init: regular expression for "
                         "type %d is '%s'\n", i, reg_expr));
             reg_error = regcomp(global_res_name_preg+i, reg_expr,
-                                REG_EXTENDED|REG_NOSUB|REG_NEWLINE);
+                                REG_EXTENDED|REG_NEWLINE);
             if (0 != reg_error) {
                 regerror(reg_error, global_res_name_preg+i,
                          reg_errbuf, sizeof(reg_errbuf));
@@ -155,14 +155,18 @@ flom_rsrc_type_t flom_rsrc_get_type(const gchar *resource_name)
 
 int flom_rsrc_get_number(const gchar *resource_name, gint *number)
 {
-    enum Exception { NONE } excp;
+    enum Exception { REGEXEC_ERROR
+                     , INVALID_RESOURCE_NAME
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_rsrc_get_number\n"));
     TRY {
         int reg_error, i;
         char reg_errbuf[200];
-        regmatch_t regmatch[10];
+        regmatch_t regmatch[3];
+        for (i=0; i<sizeof(regmatch)/sizeof(regmatch_t); ++i)
+            regmatch[i].rm_so = regmatch[i].rm_eo = -1;
         reg_error = regexec(global_res_name_preg+FLOM_RSRC_TYPE_NUMERIC,
                             resource_name, sizeof(regmatch)/sizeof(regmatch_t),
                             regmatch, 0);
@@ -171,18 +175,44 @@ int flom_rsrc_get_number(const gchar *resource_name, gint *number)
         FLOM_TRACE(("flom_rsrc_get_number: regexec returned "
                     "%d ('%s') for string '%s'\n",
                     reg_error, reg_errbuf, resource_name));
+        if (0 != reg_error)
+            THROW(REGEXEC_ERROR);
+        /* debug development code
         for (i=0; i<sizeof(regmatch)/sizeof(regmatch_t); ++i) {
             if (-1 != regmatch[i].rm_so) {
-                char buffer[100];
-                memset(buffer, 0, sizeof(buffer));
-                /* @@@ restart from here */
+                char buffer[1000];
+                size_t delta = regmatch[i].rm_eo - regmatch[i].rm_so;
+                if (delta >= sizeof(buffer))
+                    delta = sizeof(buffer)-1;
+                memcpy(buffer, resource_name+regmatch[i].rm_so, delta);
+                buffer[delta] = '\0';
+                FLOM_TRACE(("flom_rsrc_get_number: regmatch[%d]='%s'\n",
+                            i, buffer));
             } else
                 break;
+        }
+        */
+        /* number must be in position 2 */
+        if (-1 == regmatch[2].rm_so) {
+            THROW(INVALID_RESOURCE_NAME);
+        } else {
+            char buffer[1000];
+            size_t delta = regmatch[2].rm_eo - regmatch[2].rm_so;
+            if (delta >= sizeof(buffer))
+                delta = sizeof(buffer)-1;
+            memcpy(buffer, resource_name+regmatch[2].rm_so, delta);
+            buffer[delta] = '\0';
+            *number = strtol(buffer, NULL, 10);
+            FLOM_TRACE(("flom_rsrc_get_number: regmatch[2]='%s', "
+                        "number=%d\n", buffer, *number));
         }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case REGEXEC_ERROR:
+                ret_cod = FLOM_RC_REGEXEC_ERROR;
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;

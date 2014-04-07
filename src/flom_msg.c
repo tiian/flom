@@ -55,6 +55,7 @@ const gchar *FLOM_MSG_HEADER              = (gchar *)"<?xml";
 const gchar *FLOM_MSG_PROP_ADDRESS        = (gchar *)"address";
 const gchar *FLOM_MSG_PROP_LEVEL          = (gchar *)"level";
 const gchar *FLOM_MSG_PROP_NAME           = (gchar *)"name";
+const gchar *FLOM_MSG_PROP_QUANTITY       = (gchar *)"quantity";
 const gchar *FLOM_MSG_PROP_RC             = (gchar *)"rc";
 const gchar *FLOM_MSG_PROP_STEP           = (gchar *)"step";
 const gchar *FLOM_MSG_PROP_MODE           = (gchar *)"mode";
@@ -642,14 +643,16 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
         
         /* <resource> */
         used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\"/>",
+                              "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
                               FLOM_MSG_TAG_RESOURCE,
                               FLOM_MSG_PROP_NAME,
                               msg->body.lock_8.resource.name,
                               FLOM_MSG_PROP_MODE,
                               msg->body.lock_8.resource.mode,
                               FLOM_MSG_PROP_WAIT,
-                              msg->body.lock_8.resource.wait);
+                              msg->body.lock_8.resource.wait,
+                              FLOM_MSG_PROP_QUANTITY,
+                              msg->body.lock_8.resource.quantity);
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT);
         *free_chars -= used_chars;
@@ -1006,11 +1009,12 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
         switch (msg->header.pvs.step) {
             case 8:
                 FLOM_TRACE(("flom_msg_trace_lock: body[resource["
-                            "name='%s',mode=%d,wait=%d]]\n",
+                            "name='%s',mode=%d,wait=%d,quantity=%d]]\n",
                             msg->body.lock_8.resource.name != NULL ?
                             msg->body.lock_8.resource.name : "",
                             msg->body.lock_8.resource.mode,
-                            msg->body.lock_8.resource.wait));
+                            msg->body.lock_8.resource.wait,
+                            msg->body.lock_8.resource.quantity));
                 break;
             case 16:
                 FLOM_TRACE(("flom_msg_trace_lock: body[answer["
@@ -1227,8 +1231,9 @@ void flom_msg_deserialize_start_element(
                      , INVALID_PROPERTY1
                      , INVALID_PROPERTY2
                      , INVALID_PROPERTY3
-                     , G_STRDUP_ERROR2
                      , INVALID_PROPERTY4
+                     , G_STRDUP_ERROR2
+                     , INVALID_PROPERTY5
                      , TAG_TYPE_ERROR
                      , NONE } excp;
     
@@ -1311,6 +1316,18 @@ void flom_msg_deserialize_start_element(
                                             *name_cursor, element_name));
                                 THROW(INVALID_PROPERTY2);
                             }
+                        } else if (!strcmp(*name_cursor,
+                                           FLOM_MSG_PROP_QUANTITY)) {
+                            if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb)
+                                msg->body.lock_8.resource.quantity =
+                                    strtol(*value_cursor, NULL, 10);
+                            else {
+                                FLOM_TRACE(("flom_msg_deserialize_start_"
+                                            "element: property '%s' is not "
+                                            "valid for verb '%s'\n",
+                                            *name_cursor, element_name));
+                                THROW(INVALID_PROPERTY3);
+                            }
                         }
                     }
                     break;
@@ -1333,7 +1350,7 @@ void flom_msg_deserialize_start_element(
                                             "element: property '%s' is not "
                                             "valid for verb '%s'\n",
                                             *name_cursor, element_name));
-                                THROW(INVALID_PROPERTY3);
+                                THROW(INVALID_PROPERTY4);
                             }
                         }
                     }
@@ -1345,7 +1362,8 @@ void flom_msg_deserialize_start_element(
                         if (!strcmp(*name_cursor, FLOM_MSG_PROP_PORT))
                             msg->body.discover_16.network.port =
                                 strtol(*value_cursor, NULL, 10);
-                        else if (!strcmp(*name_cursor, FLOM_MSG_PROP_ADDRESS)) {
+                        else if (!strcmp(*name_cursor,
+                                         FLOM_MSG_PROP_ADDRESS)) {
                             gchar *tmp = g_strdup(*value_cursor);
                             if (NULL == tmp) {
                                 FLOM_TRACE(("flom_msg_deserialize_start_"
@@ -1359,7 +1377,7 @@ void flom_msg_deserialize_start_element(
                                         "element: property '%s' is not "
                                         "valid for verb '%s'\n",
                                         *name_cursor, element_name));
-                            THROW(INVALID_PROPERTY4);
+                            THROW(INVALID_PROPERTY5);
                         }
                     }
                     break;
@@ -1381,8 +1399,9 @@ void flom_msg_deserialize_start_element(
             case INVALID_PROPERTY1:
             case INVALID_PROPERTY2:
             case INVALID_PROPERTY3:
-            case G_STRDUP_ERROR2:
             case INVALID_PROPERTY4:
+            case G_STRDUP_ERROR2:
+            case INVALID_PROPERTY5:
             case TAG_TYPE_ERROR:
                 msg->state = FLOM_MSG_STATE_INVALID;
                 break;
