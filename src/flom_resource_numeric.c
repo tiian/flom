@@ -62,7 +62,7 @@ int flom_resource_numeric_can_lock(flom_resource_t *resource,
     FLOM_TRACE(("flom_resource_numeric_can_lock: checking lock=%d\n", lock));
     p = resource->data.numeric.holders;
     while (NULL != p) {
-        old_lock = ((struct flom_rsrc_conn_lock_s *)p->data)->lock_mode;
+        old_lock = ((struct flom_rsrc_conn_lock_s *)p->data)->info.lock_mode;
         FLOM_TRACE(("flom_resource_numeric_can_lock: current_lock=%d, "
                     "asked_lock=%d, lock_table[%d][%d]=%d\n",
                     old_lock, lock, old_lock, lock,
@@ -122,7 +122,7 @@ int flom_resource_numeric_inmsg(flom_resource_t *resource,
                                  g_try_malloc(
                                      sizeof(struct flom_rsrc_conn_lock_s))))
                         THROW(G_TRY_MALLOC_ERROR1);
-                    cl->lock_mode = new_lock;
+                    cl->info.lock_mode = new_lock;
                     cl->conn = conn;
                     resource->data.numeric.holders = g_slist_prepend(
                         resource->data.numeric.holders,
@@ -140,11 +140,12 @@ int flom_resource_numeric_inmsg(flom_resource_t *resource,
                         FLOM_TRACE(("flom_resource_numeric_inmsg: asked lock "
                                     "%d can not be assigned to connection %p, "
                                     "queing...\n", new_lock, conn));
-                        if (NULL == (cl = (struct flom_rsrc_conn_lock_s *)
-                                     g_try_malloc(
-                                         sizeof(struct flom_rsrc_conn_lock_s))))
+                        if (NULL == (
+                                cl = (struct flom_rsrc_conn_lock_s *)
+                                g_try_malloc(
+                                    sizeof(struct flom_rsrc_conn_lock_s))))
                             THROW(G_TRY_MALLOC_ERROR2);
-                        cl->lock_mode = new_lock;
+                        cl->info.lock_mode = new_lock;
                         cl->conn = conn;
                         g_queue_push_tail(
                             resource->data.numeric.waitings,
@@ -257,7 +258,8 @@ int flom_resource_numeric_clean(flom_resource_t *resource,
             struct flom_rsrc_conn_lock_s *cl =
                 (struct flom_rsrc_conn_lock_s *)p->data;
             FLOM_TRACE(("flom_resource_numeric_clean: the client is holding "
-                        "a lock mode %d, removing it...\n", cl->lock_mode));
+                        "a lock mode %d, removing it...\n",
+                        cl->info.lock_mode));
             FLOM_TRACE(("flom_resource_numeric_clean: cl=%p\n", cl));
             resource->data.numeric.holders = g_slist_remove(
                 resource->data.numeric.holders, cl);
@@ -284,7 +286,7 @@ int flom_resource_numeric_clean(flom_resource_t *resource,
                     /* remove from waitings */
                     FLOM_TRACE(("flom_resource_numeric_clean: the client is "
                                 "waiting for a lock mode %d, removing "
-                                "it...\n", cl->lock_mode));
+                                "it...\n", cl->info.lock_mode));
                     cl = g_queue_pop_nth(resource->data.numeric.waitings, i);
                     if (NULL == cl) {
                         /* this should be impossibile because peek was ok
@@ -376,7 +378,7 @@ int flom_resource_numeric_waitings(flom_resource_t *resource)
             if (NULL == cl)
                 break;
             /* try to apply this lock... */
-            if (flom_resource_numeric_can_lock(resource, cl->lock_mode)) {
+            if (flom_resource_numeric_can_lock(resource, cl->info.lock_mode)) {
                 /* remove from waitings */
                 cl = g_queue_pop_nth(resource->data.numeric.waitings, i);
                 if (NULL == cl)

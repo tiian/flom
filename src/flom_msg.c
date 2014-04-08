@@ -39,6 +39,7 @@
 
 #include "flom_errors.h"
 #include "flom_msg.h"
+#include "flom_rsrc.h"
 #include "flom_trace.h"
 
 
@@ -633,26 +634,45 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                               char *buffer,
                               size_t *offset, size_t *free_chars)
 {
-    enum Exception { BUFFER_TOO_SHORT
+    enum Exception { INVALID_RESOURCE_TYPE
+                     , BUFFER_TOO_SHORT
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_msg_serialize_lock_8\n"));
     TRY {
         int used_chars;
+        flom_rsrc_type_t frt;
         
         /* <resource> */
-        used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\" %s=\"%d\"/>",
-                              FLOM_MSG_TAG_RESOURCE,
-                              FLOM_MSG_PROP_NAME,
-                              msg->body.lock_8.resource.name,
-                              FLOM_MSG_PROP_MODE,
-                              msg->body.lock_8.resource.mode,
-                              FLOM_MSG_PROP_WAIT,
-                              msg->body.lock_8.resource.wait,
-                              FLOM_MSG_PROP_QUANTITY,
-                              msg->body.lock_8.resource.quantity);
+        frt = flom_rsrc_get_type(msg->body.lock_8.resource.name);
+        switch (frt) {
+            case FLOM_RSRC_TYPE_SIMPLE:
+                used_chars = snprintf(buffer + *offset, *free_chars,
+                                      "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\"/>",
+                                      FLOM_MSG_TAG_RESOURCE,
+                                      FLOM_MSG_PROP_NAME,
+                                      msg->body.lock_8.resource.name,
+                                      FLOM_MSG_PROP_MODE,
+                                      msg->body.lock_8.resource.mode,
+                                      FLOM_MSG_PROP_WAIT,
+                                      msg->body.lock_8.resource.wait);
+                break;
+            case FLOM_RSRC_TYPE_NUMERIC:
+                used_chars = snprintf(buffer + *offset, *free_chars,
+                                      "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\"/>",
+                                      FLOM_MSG_TAG_RESOURCE,
+                                      FLOM_MSG_PROP_NAME,
+                                      msg->body.lock_8.resource.name,
+                                      FLOM_MSG_PROP_WAIT,
+                                      msg->body.lock_8.resource.wait,
+                                      FLOM_MSG_PROP_QUANTITY,
+                                      msg->body.lock_8.resource.quantity);
+                break;
+            default:
+                THROW(INVALID_RESOURCE_TYPE);
+        } /* switch (frt) */
+        
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT);
         *free_chars -= used_chars;
@@ -661,6 +681,9 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INVALID_RESOURCE_TYPE:
+                ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
+                break;
             case BUFFER_TOO_SHORT:
                 ret_cod = FLOM_RC_CONTAINER_FULL;
                 break;

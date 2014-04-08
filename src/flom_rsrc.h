@@ -78,14 +78,23 @@ typedef enum flom_rsrc_type_e {
 
 
 /**
- * Lock/connection pair: used to store which type of lock is requested by
- * a connection (a client)
+ * Lock/connection pair: used to store information related to the lock
+ * requested by a connection (a client)
  */
 struct flom_rsrc_conn_lock_s {
     /**
-     * Type of lock requested by the connection
+     * Information related to lock request
      */
-    flom_lock_mode_t            lock_mode;
+    union {
+        /**
+         * Type of lock requested by the connection
+         */
+        flom_lock_mode_t            lock_mode;
+        /**
+         * Resource quantity requested by the connection
+         */
+        gint                        quantity;
+    } info;
     /**
      * Connection requesting the lock
      */

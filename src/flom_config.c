@@ -164,6 +164,8 @@ int flom_config_check()
     
     FLOM_TRACE(("flom_config_check\n"));
     TRY {
+        flom_rsrc_type_t frt;
+        
         /* check if configuration is for LOCAL and for NETWORK: it's not
            acceptable */
         if (NULL != flom_config_get_socket_name() &&
@@ -190,6 +192,27 @@ int flom_config_check()
                 login = pwd->pw_name;
             snprintf(global_config.socket_name, LOCAL_SOCKET_SIZE,
                      "/tmp/flom-%s", login);
+        }
+        /* check options related to resource type */
+        frt = flom_rsrc_get_type(flom_config_get_resource_name());
+        /* check lock mode */
+        if (FLOM_LOCK_MODE_EX != flom_config_get_lock_mode() &&
+            FLOM_RSRC_TYPE_SIMPLE != frt) {
+            if (flom_config_get_verbose())
+                g_warning("This resource type (%d) support only exclusive "
+                          "lock mode; specified value (%d) will be ignored\n",
+                          frt, flom_config_get_lock_mode());
+            flom_config_set_lock_mode(FLOM_LOCK_MODE_EX);
+        }
+        /* check quantity */
+        if (1 != flom_config_get_resource_quantity() &&
+            FLOM_RSRC_TYPE_NUMERIC != frt) {
+            if (flom_config_get_verbose())
+                g_warning("This resource type (%d) does not support quantity "
+                          "lock option; specified value (%d) will be "
+                          "ignored\n",
+                          frt, flom_config_get_resource_quantity());
+            flom_config_set_resource_quantity(1);
         }
         
         THROW(NONE);
