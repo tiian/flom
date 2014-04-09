@@ -269,6 +269,16 @@ int main (int argc, char *argv[])
             }
             exit(FLOM_ES_RESOURCE_BUSY);
             break;
+        case FLOM_RC_LOCK_IMPOSSIBLE: /* impossible */
+            g_print("Resource will never satisfy the request, the lock "
+                    "cannot be obtained\n");
+            /* gracefully disconnect from daemon */
+            if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
+                g_print("flom_client_unlock: ret_cod=%d (%s)\n",
+                        ret_cod, flom_strerror(ret_cod));
+            }
+            exit(FLOM_ES_GENERIC_ERROR);
+            break;
         case FLOM_RC_NETWORK_TIMEOUT: /* timeout expired, busy resource */
             g_print("Resource already locked, the lock was not obtained "
                     "because timeout (%d milliseconds) expired\n",

@@ -156,7 +156,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                             THROW(MSG_BUILD_ANSWER_ERROR2);
                     } else {
                         FLOM_TRACE(("flom_resource_simple_inmsg: asked lock "
-                                    "%p can not be assigned to connection %p, "
+                                    "%d can not be assigned to connection %p, "
                                     "rejecting...\n", new_lock, conn));
                         if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                                msg, FLOM_MSG_VERB_LOCK,

@@ -36,6 +36,9 @@ const char *flom_strerror(int ret_cod)
             return "WARNING: peer is not ready to accept a connection";
         case FLOM_RC_LOCK_CANT_LOCK:
             return "INFO: the lock can not be obtained, generic issue";
+        case FLOM_RC_LOCK_IMPOSSIBLE:
+            return "INFO: the lock can not be obtained because the resource "
+                "will never satisfy the lock request";
         case FLOM_RC_LOCK_BUSY:
             return "INFO: the lock can not be obtained because the resource "
                 "is already locked";
