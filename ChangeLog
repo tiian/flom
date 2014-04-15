@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.X.Y Developing numeric resource feature
+         - 0.5.0 Developing numeric resource feature
 
 20140403 - 0.3.2 Fixed a bug related to "hostname -I" used in testsuite
 	scripts (some Linux systems use an older version without "-I" option);
