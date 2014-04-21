@@ -72,14 +72,11 @@ int flom_client_connect(struct flom_conn_data_s *cd)
     
     FLOM_TRACE(("flom_client_connect\n"));
     TRY {
-        int local_connection = FALSE;
-        
         /* reset connection data struct */
         memset(cd, 0, sizeof(cd));
 
         /* choose and instantiate connection type */
         if (NULL != flom_config_get_socket_name()) {
-            local_connection = TRUE;
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_local(cd)))
                 THROW(CLIENT_CONNECT_LOCAL_ERROR);
         } else if (NULL != flom_config_get_unicast_address()) {
