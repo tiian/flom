@@ -1,5 +1,9 @@
 AT_BANNER([Incompatible command line options check])
 
+AT_SETUP([Not existent command: -- abcdefghijklmnop])
+AT_CHECK([flom -V -- abcdefghijklmnop], [@_ES_UNABLE_TO_EXECUTE_COMMAND@], [ignore], [ignore])
+AT_CLEANUP
+
 AT_SETUP([Communication mess: -s, -a])
 AT_CHECK([flom -V -s /tmp/foo -a 192.168.1.1 -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CLEANUP

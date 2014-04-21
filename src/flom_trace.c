@@ -94,7 +94,9 @@ void flom_trace_reopen(const char *file_name)
     if (NULL != file_name) {
         tmp_trace_file = fopen(file_name, "w");
         if (NULL != tmp_trace_file) {
-            fclose(trace_file);
+            /* only if different than stderr, the file must be closed */
+            if (stderr != trace_file)
+                fclose(trace_file);
             trace_file = tmp_trace_file;
         }
     } else {

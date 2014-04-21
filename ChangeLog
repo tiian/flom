@@ -1,10 +1,5 @@
 LOG:
 
-	it seems the client socket is at file descriptor 2 and is not closed
-	after execvp (FD_CLOEXEC is not running?!)
-
-	create a test case for an unsuccessful command (like 'flop')
-
          - 0.5.0 Added numeric resource feature
 	Added "-q, --resource-quantity" option (see [Resource]/Quantity)
 

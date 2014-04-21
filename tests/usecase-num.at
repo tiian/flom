@@ -1,0 +1,66 @@
+AT_BANNER([Numeric resources use case checks])
+
+AT_SETUP([Use case 10 (1/3)])
+AT_DATA([expout],
+[[ 1 locking for 3 seconds
+ 2 locking for 3 seconds
+ 3 locking for 2 seconds
+ 1 ending
+ 2 ending
+ 3 ending
+]])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 3 "-r foo[[2]]" & flom_test_exec3.sh 2 1 3 "-r foo[[2]]" & flom_test_exec3.sh 3 2 2 "-r foo[[2]]"], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case 10 (2/3)])
+AT_DATA([expout],
+[[ 1 locking for 3 seconds
+ 2 locking for 3 seconds
+Resource already locked, the lock cannot be obtained
+ 2 ending
+]])
+AT_CHECK([flom_test_exec3.sh 1 0 3 "-r foo[[2]] -q 2" & flom_test_exec3.sh 2 1 3 "-r foo[[2]] -q 2 -w n" ; flom_test_exec1.sh 4 0 0 >/dev/null], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case 10 (3/3)])
+AT_DATA([expout],
+[[ 1 locking for 3 seconds
+ 2 locking for 3 seconds
+ 3 locking for 2 seconds
+Resource already locked, the lock cannot be obtained
+ 3 ending
+]])
+AT_CHECK([flom_test_exec3.sh 1 0 3 "-r foo[[2]]" & flom_test_exec3.sh 2 1 3 "-r foo[[2]]" & flom_test_exec3.sh 3 2 2 "-r foo[[2]] -w n" ; flom_test_exec1.sh 4 0 0 >/dev/null], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case 11 (1/2)])
+AT_DATA([expout],
+[[ 1 locking for 7 seconds
+ 2 locking for 3 seconds
+ 3 locking for 3 seconds
+ 4 locking for 2 seconds
+ 2 ending
+ 3 ending
+ 4 ending
+ 1 ending
+]])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 7 "-t /tmp/d1 -T /tmp/c1 -l PW" & flom_test_exec3.sh 2 1 3 "-t /tmp/d2f -T /tmp/c2f -l CR -- flom -t /tmp/d2c -T /tmp/c2c -r bar[[2]]" & flom_test_exec3.sh 3 2 3 "-t /tmp/d3f -T /tmp/c3f -l CR -- flom -t /tmp/d3c -T /tmp/c3c -r bar[[2]]" & flom_test_exec3.sh 4 3 2 "-t /tmp/d4f -T /tmp/c4f -l CR -- flom -t /tmp/d4c -T /tmp/c4c -r bar[[2]]" ; flom_test_exec1.sh 5 0 0 >/dev/null], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case 11 (2/2)])
+AT_DATA([expout],
+[[ 1 locking for 7 seconds
+ 2 locking for 3 seconds
+ 3 locking for 3 seconds
+ 4 locking for 2 seconds
+Resource already locked, the lock cannot be obtained
+ 4 ending
+ 2 ending
+ 3 ending
+ 1 ending
+]])
+AT_CHECK([flom_test_exec3.sh 1 0 7 "-l PW" & flom_test_exec3.sh 2 1 3 "-l CR -- flom -r bar[[2]]" & flom_test_exec3.sh 3 2 3 "-l CR -- flom -r bar[[2]]" & flom_test_exec3.sh 4 3 2 "-l CR -- flom -r bar[[2]] -w n" ; flom_test_exec1.sh 5 0 0 >/dev/null], [0], [expout], [ignore])
+AT_CLEANUP
+

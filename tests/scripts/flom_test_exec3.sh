@@ -35,20 +35,15 @@ fi
 # print start message
 ###echo -n $(date +'%s %N')
 ###echo " $1 starting and waiting $2 seconds"
-echo -n $(date +'%s %N')
-echo " $1 starting and waiting $2 seconds"
 # wait some seconds...
 sleep $2 
 # execution with duration
 ###echo -n $(date +'%s %N')
-echo -n $(date +'%s %N')
 echo " $1 locking for $3 seconds"
 ###echo "flom $4 -- sleep $3"
-echo "flom $4 -- sleep $3"
 flom $4 -- sleep $3
 EXIT_RC=$?
 # print end message
 ###echo -n $(date +'%s %N')
-echo -n $(date +'%s %N')
 echo " $1 ending"
 exit $EXIT_RC

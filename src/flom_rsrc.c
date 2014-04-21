@@ -202,6 +202,7 @@ int flom_rsrc_get_number(const gchar *resource_name, gint *number)
                 delta = sizeof(buffer)-1;
             memcpy(buffer, resource_name+regmatch[2].rm_so, delta);
             buffer[delta] = '\0';
+            /* value is always interpreted using decimal base */
             *number = strtol(buffer, NULL, 10);
             FLOM_TRACE(("flom_rsrc_get_number: regmatch[2]='%s', "
                         "number=%d\n", buffer, *number));
