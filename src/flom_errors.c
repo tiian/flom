@@ -94,6 +94,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'connect' function returned an error condition";
         case FLOM_RC_EXECVP_ERROR:
             return "ERROR: 'execvp' function returned an error condition";
+        case FLOM_RC_FCNTL_ERROR:
+            return "ERROR: 'fcntl' function returned an error condition";
         case FLOM_RC_FORK_ERROR:
             return "ERROR: 'fork' function returned an error condition";
         case FLOM_RC_GETADDRINFO_ERROR:

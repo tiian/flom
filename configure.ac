@@ -1,4 +1,4 @@
-AC_INIT([flom], [0.5.0-rc], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([flom], [0.5.0-rc2], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 # hardwired configuration
@@ -133,6 +133,7 @@ AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
 
 AC_CHECK_HEADERS(assert.h)
 AC_CHECK_HEADERS(errno.h)
+AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_HEADERS(glib.h)
 AC_CHECK_HEADERS(netdb.h netinet/in.h netinet/tcp.h)
 AC_CHECK_HEADERS(poll.h pwd.h)
@@ -144,7 +145,6 @@ AC_CHECK_HEADERS(time.h)
 AC_CHECK_HEADERS(unistd.h)
 #AC_CHECK_HEADERS(unistd.h)
 #AC_CHECK_HEADERS(arpa/inet.h assert.h)
-#AC_CHECK_HEADERS(fcntl.h)
 #AC_CHECK_HEADERS(glib.h)
 #AC_CHECK_HEADERS(libgen.h)
 #AC_CHECK_HEADERS(poll.h pthread.h regex.h)

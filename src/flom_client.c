@@ -23,6 +23,9 @@
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
+#endif
 #ifdef HAVE_NETDB_H
 # include <netdb.h>
 #endif
@@ -63,6 +66,7 @@ int flom_client_connect(struct flom_conn_data_s *cd)
                      , CONNECT_ERROR
                      , CLIENT_DISCOVER_UDP_ERROR2
                      , INTERNAL_ERROR
+                     , FCNTL_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -109,6 +113,11 @@ int flom_client_connect(struct flom_conn_data_s *cd)
             } /* switch (ret_cod) */
         } else /* this condition must be impossible! */
             THROW(INTERNAL_ERROR);
+        /* set CLOSE on EXEC to avoid this file descriptor remains open after
+           execution of controlled child command */
+        if (-1 == fcntl(cd->fd, F_SETFD, FD_CLOEXEC))
+            THROW(FCNTL_ERROR);
+        FLOM_TRACE(("flom_client_connect: set FD_CLOEXEC to fd=%d\n", cd->fd));
         
         THROW(NONE);
     } CATCH {
@@ -125,6 +134,9 @@ int flom_client_connect(struct flom_conn_data_s *cd)
                 break;
             case INTERNAL_ERROR:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
+                break;
+            case FCNTL_ERROR:
+                ret_cod = FLOM_RC_FCNTL_ERROR;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -144,7 +156,7 @@ int flom_client_connect_local(struct flom_conn_data_s *cd)
 {
     enum Exception { SOCKET_ERROR
                      , DAEMON_ERROR
-                     , DAEMON_NOT_STARTED 
+                     , DAEMON_NOT_STARTED
                      , CONNECT_ERROR1
                      , CONNECT_ERROR2
                      , NONE } excp;
@@ -186,7 +198,7 @@ int flom_client_connect_local(struct flom_conn_data_s *cd)
             } else {
                 THROW(CONNECT_ERROR2);
             }
-        }
+        } /* if (-1 == connect(cd->fd, */
 
         THROW(NONE);
     } CATCH {

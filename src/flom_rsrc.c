@@ -67,7 +67,7 @@ int global_res_name_preg_init()
         const char *reg_str[FLOM_RSRC_TYPE_N] = {
             "^_$" /* this is a dummy value */ ,
             "^%s$|^([[:alpha:]][[:alpha:][:digit:]]*)$" ,
-            "^([[:alpha:]][[:alpha:][:digit:]]*)#([[:digit:]]+)$"
+            "^([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$"
         };
 
         memset(global_res_name_preg, 0, sizeof(global_res_name_preg));

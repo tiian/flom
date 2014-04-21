@@ -83,7 +83,7 @@ int flom_exec(gchar **const command_argv, int *child_status)
             FLOM_TRACE(("flom_exec-child: path='%s'\n", path));
             for (i=0; i<num-1; ++i)
                 FLOM_TRACE(("flom_exec-child: argv[%u]='%s'\n", i, argv[i]));
-            /* execv */
+            /* execvp */
             if (-1 == execvp(path, argv)) {
                 /* print a warning on terminal */
                 g_warning("Unable to execute command '%s'\n", path);
