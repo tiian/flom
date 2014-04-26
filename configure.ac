@@ -1,4 +1,4 @@
-AC_INIT([flom], [0.5.0], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([flom], [0.5.1-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 # hardwired configuration

@@ -110,6 +110,11 @@
  */
 #define FLOM_TRACE_MOD_RESOURCE_NUMERIC   0x00000800
 
+/**
+ * trace module for resource set functions
+ */
+#define FLOM_TRACE_MOD_RESOURCE_SET       0x00001000
+
 
 
 /**

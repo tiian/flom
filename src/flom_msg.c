@@ -669,6 +669,15 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                                       FLOM_MSG_PROP_QUANTITY,
                                       msg->body.lock_8.resource.quantity);
                 break;
+            case FLOM_RSRC_TYPE_SET:
+                used_chars = snprintf(buffer + *offset, *free_chars,
+                                      "<%s %s=\"%s\" %s=\"%d\"/>",
+                                      FLOM_MSG_TAG_RESOURCE,
+                                      FLOM_MSG_PROP_NAME,
+                                      msg->body.lock_8.resource.name,
+                                      FLOM_MSG_PROP_WAIT,
+                                      msg->body.lock_8.resource.wait);
+                break;
             default:
                 THROW(INVALID_RESOURCE_TYPE);
         } /* switch (frt) */

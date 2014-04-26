@@ -70,6 +70,10 @@ typedef enum flom_rsrc_type_e {
      */
     FLOM_RSRC_TYPE_NUMERIC,
     /**
+     * Set resource type (a resource set)
+     */
+    FLOM_RSRC_TYPE_SET,
+    /**
      * Number of managed resource types
      */
     FLOM_RSRC_TYPE_N
@@ -143,6 +147,48 @@ struct flom_rsrc_data_numeric_s {
 
 
 
+/**
+ * Resource data for type "set" @ref FLOM_RSRC_TYPE_SET
+ */
+struct flom_rsrc_data_set_s {
+    /**
+     * Number of elements inside resource set
+     */
+    guint                   number;
+    /**
+     * Index of the next available member
+     */
+    guint                   index;
+    /**
+     * Array of elements in set; every element has a name and the connection
+     * of the lock holder
+     */
+    GArray                 *elements;
+    /**
+     * List of connections waiting for an element to lock
+     */
+    GQueue                 *waitings;
+};
+
+
+
+/**
+ * Every element of elements array in struct @ref flom_rsrc_data_set_s is
+ * of this type
+ */
+struct flom_rsrc_data_set_element_s {
+    /**
+     * Name of the element
+     */
+    gchar                         *name;
+    /**
+     * Connection holding the lock on the element
+     */
+    struct flom_conn_data_s       *conn;
+};
+
+
+
 /* necessary to declare flom_resource_t used inside the struct ("class")
    definition */
 struct flom_resource_s;
@@ -168,6 +214,7 @@ struct flom_resource_s {
     union {
         struct flom_rsrc_data_simple_s       simple;
         struct flom_rsrc_data_numeric_s      numeric;
+        struct flom_rsrc_data_set_s          set;
     } data;
     /**
      * Method called to process incoming messages (it depends from resource
@@ -236,7 +283,17 @@ extern "C" {
      */
     int flom_rsrc_get_number(const gchar *resource_name, gint *number);
 
-    
+
+
+    /**
+     * Split a resource set name in to distinct elements
+     * @param resource_name IN resource name
+     * @param elements OUT array of elements
+     * @return a reason code
+     */
+    int flom_rsrc_get_elements(const gchar *resource_name, GArray *elements);
+
+
 
     /**
      * Initialize a resource

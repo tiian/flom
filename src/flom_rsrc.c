@@ -32,6 +32,7 @@
 #include "flom_config.h"
 #include "flom_errors.h"
 #include "flom_rsrc.h"
+#include "flom_resource_set.h"
 #include "flom_resource_simple.h"
 #include "flom_resource_numeric.h"
 #include "flom_trace.h"
@@ -67,7 +68,8 @@ int global_res_name_preg_init()
         const char *reg_str[FLOM_RSRC_TYPE_N] = {
             "^_$" /* this is a dummy value */ ,
             "^%s$|^([[:alpha:]][[:alpha:][:digit:]]*)$" ,
-            "^([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$"
+            "^([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$",
+            "^([[:alpha:]][[:alpha:][:digit:]]*)(\\.[[:alpha:]][[:alpha:][:digit:]]*)+$"
         };
 
         memset(global_res_name_preg, 0, sizeof(global_res_name_preg));
@@ -177,21 +179,6 @@ int flom_rsrc_get_number(const gchar *resource_name, gint *number)
                     reg_error, reg_errbuf, resource_name));
         if (0 != reg_error)
             THROW(REGEXEC_ERROR);
-        /* debug development code
-        for (i=0; i<sizeof(regmatch)/sizeof(regmatch_t); ++i) {
-            if (-1 != regmatch[i].rm_so) {
-                char buffer[1000];
-                size_t delta = regmatch[i].rm_eo - regmatch[i].rm_so;
-                if (delta >= sizeof(buffer))
-                    delta = sizeof(buffer)-1;
-                memcpy(buffer, resource_name+regmatch[i].rm_so, delta);
-                buffer[delta] = '\0';
-                FLOM_TRACE(("flom_rsrc_get_number: regmatch[%d]='%s'\n",
-                            i, buffer));
-            } else
-                break;
-        }
-        */
         /* number must be in position 2 */
         if (-1 == regmatch[2].rm_so) {
             THROW(INVALID_RESOURCE_NAME);
@@ -228,11 +215,70 @@ int flom_rsrc_get_number(const gchar *resource_name, gint *number)
 
 
 
+int flom_rsrc_get_elements(const gchar *resource_name, GArray *elements)
+{
+    enum Exception { G_STRSPLIT_ERROR
+                     , G_STRDUP_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    gchar **names = NULL;
+    
+    FLOM_TRACE(("flom_rsrc_get_elements\n"));
+    TRY {
+        gchar **name;
+        
+        /* resource_name is a VALID resource set (verified by regular
+           expression before this function is called! */
+        if (NULL == (names = g_strsplit(resource_name, ".", 0)))
+            THROW(G_STRSPLIT_ERROR);
+        /* loop on list of splitted strings */
+        for (name = names; *name; name++) {
+            struct flom_rsrc_data_set_element_s element;
+            memset(&element, 0, sizeof(element));
+            if (NULL == (element.name = g_strdup(*name)))
+                THROW(G_STRDUP_ERROR);
+            element.conn = NULL;
+            FLOM_TRACE(("flom_rsrc_get_elements: adding element '%s' to "
+                        "resource set\n", element.name));
+            g_array_append_val(elements, element);
+        } /* for (name = names; *name; name++) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_STRSPLIT_ERROR:
+                ret_cod = FLOM_RC_G_STRSPLIT_ERROR;
+                break;
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* release storage */
+    if (NULL != names)
+        g_strfreev(names);
+    FLOM_TRACE(("flom_rsrc_get_elements/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int flom_resource_init(flom_resource_t *resource,
                        flom_rsrc_type_t type, const gchar *name)
 {
     enum Exception { OUT_OF_RANGE
-                     , G_QUEUE_NEW_ERROR
+                     , G_QUEUE_NEW_ERROR1
+                     , G_QUEUE_NEW_ERROR2
+                     , G_ARRAY_NEW_ERROR
+                     , RSRC_GET_ELEMENTS_ERROR
+                     , G_QUEUE_NEW_ERROR3
                      , UNKNOW_RESOURCE
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -250,26 +296,44 @@ int flom_resource_init(flom_resource_t *resource,
             case FLOM_RSRC_TYPE_SIMPLE:
                 resource->data.simple.holders = NULL;
                 if (NULL == (resource->data.simple.waitings = g_queue_new()))
-                    THROW(G_QUEUE_NEW_ERROR);
+                    THROW(G_QUEUE_NEW_ERROR1);
                 resource->inmsg = flom_resource_simple_inmsg;
                 resource->clean = flom_resource_simple_clean;
                 resource->free = flom_resource_simple_free;
                 break;
             case FLOM_RSRC_TYPE_NUMERIC:
+                /* @@@ check return code here! */
                 flom_rsrc_get_number(
                     name,
                     &(resource->data.numeric.total_quantity));
                 resource->data.numeric.locked_quantity = 0;
                 resource->data.numeric.holders = NULL;
                 if (NULL == (resource->data.numeric.waitings = g_queue_new()))
-                    THROW(G_QUEUE_NEW_ERROR);
+                    THROW(G_QUEUE_NEW_ERROR2);
                 resource->inmsg = flom_resource_numeric_inmsg;
                 resource->clean = flom_resource_numeric_clean;
                 resource->free = flom_resource_numeric_free;
                 break;
+            case FLOM_RSRC_TYPE_SET:
+                if (NULL == (resource->data.set.elements = g_array_new(
+                                 FALSE, FALSE,
+                                 sizeof(struct flom_rsrc_data_set_element_s))))
+                    THROW(G_ARRAY_NEW_ERROR);
+                if (FLOM_RC_OK != (ret_cod =
+                                   flom_rsrc_get_elements(
+                                       name, resource->data.set.elements)))
+                    THROW(RSRC_GET_ELEMENTS_ERROR);
+                resource->data.set.number = resource->data.set.elements->len;
+                resource->data.set.index = 0;
+                if (NULL == (resource->data.set.waitings = g_queue_new()))
+                    THROW(G_QUEUE_NEW_ERROR3);
+                resource->inmsg = flom_resource_set_inmsg;
+                resource->clean = flom_resource_set_clean;
+                resource->free = flom_resource_set_free;
+                break;
             default:
                 THROW(UNKNOW_RESOURCE);
-        }
+        } /* switch (resource->type) */
         
         THROW(NONE);
     } CATCH {
@@ -277,7 +341,16 @@ int flom_resource_init(flom_resource_t *resource,
             case OUT_OF_RANGE:
                 ret_cod = FLOM_RC_OUT_OF_RANGE;
                 break;
-            case G_QUEUE_NEW_ERROR:
+            case G_QUEUE_NEW_ERROR1:
+            case G_QUEUE_NEW_ERROR2:
+                ret_cod = FLOM_RC_G_QUEUE_NEW_ERROR;
+                break;
+            case G_ARRAY_NEW_ERROR:
+                ret_cod = FLOM_RC_G_ARRAY_NEW_ERROR;
+                break;
+            case RSRC_GET_ELEMENTS_ERROR:
+                break;
+            case G_QUEUE_NEW_ERROR3:
                 ret_cod = FLOM_RC_G_QUEUE_NEW_ERROR;
                 break;
             case UNKNOW_RESOURCE:

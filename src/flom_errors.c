@@ -147,6 +147,8 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_WRITE_ERROR:
             return "ERROR: 'write' function returned an error condition";
             /* GLIB related errors */
+        case FLOM_RC_G_ARRAY_NEW_ERROR:
+            return "ERROR: 'g_array_new' function returned an error condition";
         case FLOM_RC_G_KEY_FILE_LOAD_FROM_FILE_ERROR:
             return "ERROR: 'g_key_file_load_from_file' function returned "
                 "an error condition";
@@ -166,6 +168,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'g_queue_new' function returned an error condition";
         case FLOM_RC_G_STRDUP_ERROR:
             return "ERROR: 'g_strdup' function returned an error condition";
+        case FLOM_RC_G_STRSPLIT_ERROR:
+            return "ERROR: 'g_strsplit' function returned an error condition";
         case FLOM_RC_G_THREAD_CREATE_ERROR:
             return "ERROR: 'g_thread_create' function returned an error "
                 "condition";

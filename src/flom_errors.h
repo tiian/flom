@@ -296,41 +296,49 @@
 /* GLIB related errors */
 
 /**
+ * "g_array_new" function error
+ */
+#define FLOM_RC_G_ARRAY_NEW_ERROR                   -200
+/**
  * "g_key_file_load_from_file" function error
  */
-#define FLOM_RC_G_KEY_FILE_LOAD_FROM_FILE_ERROR     -200
+#define FLOM_RC_G_KEY_FILE_LOAD_FROM_FILE_ERROR     -201
 /**
  * "g_key_file_new" function error
  */
-#define FLOM_RC_G_KEY_FILE_NEW_ERROR                -201
+#define FLOM_RC_G_KEY_FILE_NEW_ERROR                -202
 /**
  * "g_markup_parse_context_new_error" function error
  */
-#define FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR    -202
+#define FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR    -203
 /**
  * "g_markup_parse_context_parse" function error
  */
-#define FLOM_RC_G_MARKUP_PARSE_CONTEXT_PARSE_ERROR  -203
+#define FLOM_RC_G_MARKUP_PARSE_CONTEXT_PARSE_ERROR  -204
 /**
  * "g_ptr_array_remove_index_fast" function error
  */
-#define FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR -204
+#define FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR -205
 /**
  * "g_queue_new" function error
  */
-#define FLOM_RC_G_QUEUE_NEW_ERROR                   -205
+#define FLOM_RC_G_QUEUE_NEW_ERROR                   -206
 /**
  * "g_strdup" function error
  */
-#define FLOM_RC_G_STRDUP_ERROR                      -206
+#define FLOM_RC_G_STRDUP_ERROR                      -207
+/**
+ * "g_strsplit" function error
+ */
+#define FLOM_RC_G_STRSPLIT_ERROR                    -208
 /**
  * "g_thread_create" function error
  */
-#define FLOM_RC_G_THREAD_CREATE_ERROR               -207
+#define FLOM_RC_G_THREAD_CREATE_ERROR               -209
 /**
  * "g_try_malloc"/"g_try_malloc0" function error
  */
-#define FLOM_RC_G_TRY_MALLOC_ERROR                  -208
+#define FLOM_RC_G_TRY_MALLOC_ERROR                  -210
 
 
 
