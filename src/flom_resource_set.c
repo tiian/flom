@@ -43,29 +43,39 @@
 
 
 
-int flom_resource_set_can_lock(flom_resource_t *resource,
-                                   gint quantity)
-{    
-    FLOM_TRACE(("flom_resource_set_can_lock: checking quantity=%d "
-                "(total_quantity=%d, locked_quantity=%d)\n",
-                quantity, resource->data.numeric.total_quantity,
-                resource->data.numeric.locked_quantity));
-    if (resource->data.numeric.total_quantity -
-        resource->data.numeric.locked_quantity >= quantity)
-        return TRUE;
-    return FALSE;
+int flom_resource_set_can_lock(flom_resource_t *resource, guint *element)
+{
+    guint i;
+    int found = FALSE;
+    
+    FLOM_TRACE(("flom_resource_set_can_lock\n"));
+    /* loop around elements starting from the index element */
+    for (i=0; i<resource->data.set.elements->len; ++i) {
+        /* i loops between 0 and len-1
+           j loops between index and index-1 traversing len-1 and 0 */
+        guint j = (i + resource->data.set.index) %
+            resource->data.set.elements->len;
+        struct flom_rsrc_data_set_element_s *rdse =
+            &g_array_index(resource->data.set.elements,
+                           struct flom_rsrc_data_set_element_s, j);
+        if (NULL == rdse->conn) {
+            *element = j;
+            found = TRUE;
+            break;
+        }
+    } /* for i */
+    return found;
 }
 
 
 
 int flom_resource_set_inmsg(flom_resource_t *resource,
-                               struct flom_conn_data_s *conn,
-                               struct flom_msg_s *msg)
+                            struct flom_conn_data_s *conn,
+                            struct flom_msg_s *msg)
 {
     enum Exception { MSG_FREE_ERROR1
-                     , G_TRY_MALLOC_ERROR1
                      , MSG_BUILD_ANSWER_ERROR1
-                     , G_TRY_MALLOC_ERROR2
+                     , G_TRY_MALLOC_ERROR
                      , MSG_BUILD_ANSWER_ERROR2
                      , MSG_BUILD_ANSWER_ERROR3
                      , INVALID_OPTION
@@ -79,40 +89,31 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
     TRY {
         int can_lock = TRUE;
         int can_wait = TRUE;
-        int impossible_lock = FALSE;
-        gint new_quantity = 0;
+        guint element;
         flom_msg_trace(msg);
         switch (msg->header.pvs.verb) {
             case FLOM_MSG_VERB_LOCK:
-                new_quantity = msg->body.lock_8.resource.quantity;
-                can_lock = flom_resource_set_can_lock(
-                    resource, new_quantity);
-                if (new_quantity > resource->data.numeric.total_quantity) {
-                    can_wait = FALSE;
-                    impossible_lock = TRUE;
-                } else
-                    can_wait = msg->body.lock_8.resource.wait;
+                can_lock = flom_resource_set_can_lock(resource, &element);
+                can_wait = msg->body.lock_8.resource.wait;
                 /* free the input message */
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(msg)))
                     THROW(MSG_FREE_ERROR1);
                 flom_msg_init(msg);
                 if (can_lock) {
                     /* get the lock */
-                    struct flom_rsrc_conn_lock_s *cl = NULL;
+                    struct flom_rsrc_data_set_element_s *rdse =
+                        &g_array_index(resource->data.set.elements,
+                                       struct flom_rsrc_data_set_element_s,
+                                       element);
                     /* put this connection in holders list */
-                    FLOM_TRACE(("flom_resource_set_inmsg: asked lock "
-                                "quantity %d can be assigned to connection "
-                                "%p\n", new_quantity, conn));
-                    if (NULL == (cl = (struct flom_rsrc_conn_lock_s *)
-                                 g_try_malloc(
-                                     sizeof(struct flom_rsrc_conn_lock_s))))
-                        THROW(G_TRY_MALLOC_ERROR1);
-                    cl->info.quantity = new_quantity;
-                    cl->conn = conn;
-                    resource->data.numeric.holders = g_slist_prepend(
-                        resource->data.numeric.holders,
-                        (gpointer)cl);
-                    resource->data.numeric.locked_quantity += new_quantity;
+                    FLOM_TRACE(("flom_resource_set_inmsg: element %u ('%s') "
+                                "can be assigned to connection %p\n",
+                                element, rdse->name, conn));
+                    /* track locker connection */
+                    rdse->conn = conn;
+                    /* move to next element for next locker (round robin) */
+                    resource->data.set.index = (resource->data.set.index + 1) %
+                        resource->data.set.elements->len;
                     if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                            msg, FLOM_MSG_VERB_LOCK,
                                            2*FLOM_MSG_STEP_INCR,
@@ -123,19 +124,17 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
                     if (can_wait) {
                         struct flom_rsrc_conn_lock_s *cl = NULL;
                         /* put this connection in waitings queue */
-                        FLOM_TRACE(("flom_resource_set_inmsg: asked "
-                                    "quantity %d can not be assigned to "
-                                    "connection %p, queing...\n",
-                                    new_quantity, conn));
+                        FLOM_TRACE(("flom_resource_set_inmsg: there is no "
+                                    "available element for "
+                                    "connection %p, queing...\n", conn));
                         if (NULL == (
                                 cl = (struct flom_rsrc_conn_lock_s *)
                                 g_try_malloc(
                                     sizeof(struct flom_rsrc_conn_lock_s))))
-                            THROW(G_TRY_MALLOC_ERROR2);
-                        cl->info.quantity = new_quantity;
+                            THROW(G_TRY_MALLOC_ERROR);
                         cl->conn = conn;
                         g_queue_push_tail(
-                            resource->data.numeric.waitings,
+                            resource->data.set.waitings,
                             (gpointer)cl);
                         if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                                msg, FLOM_MSG_VERB_LOCK,
@@ -143,15 +142,12 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
                                                FLOM_RC_LOCK_ENQUEUED)))
                             THROW(MSG_BUILD_ANSWER_ERROR2);
                     } else {
-                        FLOM_TRACE(("flom_resource_set_inmsg: asked "
-                                    "quantity %d can not be assigned to "
-                                    "connection %p, rejecting...\n",
-                                    new_quantity, conn));
+                        FLOM_TRACE(("flom_resource_set_inmsg: there is no "
+                                    "available element for connection %p, "
+                                    "rejecting...\n", conn));
                         if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                                msg, FLOM_MSG_VERB_LOCK,
                                                2*FLOM_MSG_STEP_INCR,
-                                               impossible_lock ?
-                                               FLOM_RC_LOCK_IMPOSSIBLE :
                                                FLOM_RC_LOCK_BUSY)))
                             THROW(MSG_BUILD_ANSWER_ERROR3);
                     } /* if (msg->body.lock_8.resource.wait) */
@@ -187,12 +183,9 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
         switch (excp) {
             case MSG_FREE_ERROR1:
                 break;
-            case G_TRY_MALLOC_ERROR1:
-                ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
-                break;
             case MSG_BUILD_ANSWER_ERROR1:
                 break;
-            case G_TRY_MALLOC_ERROR2:
+            case G_TRY_MALLOC_ERROR:
                 ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
                 break;
             case MSG_BUILD_ANSWER_ERROR2:
@@ -225,60 +218,53 @@ int flom_resource_set_clean(flom_resource_t *resource,
                             struct flom_conn_data_s *conn)
 {
     enum Exception { NULL_OBJECT
-                     , NUMERIC_WAITINGS_ERROR
+                     , SET_WAITINGS_ERROR
                      , INTERNAL_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_resource_set_clean\n"));
     TRY {
-        GSList *p = NULL;
+        guint element;
+        int found = FALSE;
+        struct flom_rsrc_data_set_element_s *rdse = NULL;
 
         if (NULL == resource)
             THROW(NULL_OBJECT);
         /* check if the connection keeps a lock */
-        p = resource->data.numeric.holders;
-        while (NULL != p) {
-            if (((struct flom_rsrc_conn_lock_s *)p->data)->conn == conn)
+        for (element=0; element<resource->data.set.elements->len;
+             ++element) {
+            rdse = &g_array_index(resource->data.set.elements,
+                                  struct flom_rsrc_data_set_element_s,
+                                  element);
+            if (rdse->conn == conn) {
+                found = TRUE;
                 break;
-            else
-                p = p->next;
-        } /* while (NULL != p) */
-        if (NULL != p) {
-            struct flom_rsrc_conn_lock_s *cl =
-                (struct flom_rsrc_conn_lock_s *)p->data;
+            }
+        } /* for (element=0; ... */
+        if (found) {
             FLOM_TRACE(("flom_resource_set_clean: the client is holding "
-                        "a lock with quantity %d, removing it...\n",
-                        cl->info.quantity));
-            FLOM_TRACE(("flom_resource_set_clean: cl=%p\n", cl));
-            resource->data.numeric.holders = g_slist_remove(
-                resource->data.numeric.holders, cl);
-            resource->data.numeric.locked_quantity -= cl->info.quantity;
-            /* free the now useless connection lock record */
-            g_free(cl);
-            /*
-            FLOM_TRACE(("flom_resource_set_clean: g_slist_length=%u\n",
-                        g_slist_length(resource->data.numeric.holders)));
-            */
-            /* check if some other clients can get a lock now */
+                        "element %u ('%s'), removing connection %p from "
+                        "it...\n", element, rdse->name, conn));
+            rdse->conn = NULL;
             if (FLOM_RC_OK != (ret_cod = flom_resource_set_waitings(
                                    resource)))
-                THROW(NUMERIC_WAITINGS_ERROR);
+                THROW(SET_WAITINGS_ERROR);
         } else {
             guint i = 0;
             /* check if the connection was waiting a lock */
             do {
                 struct flom_rsrc_conn_lock_s *cl =
                     (struct flom_rsrc_conn_lock_s *)
-                    g_queue_peek_nth(resource->data.numeric.waitings, i);
+                    g_queue_peek_nth(resource->data.set.waitings, i);
                 if (NULL == cl)
                     break;
                 if (cl->conn == conn) {
                     /* remove from waitings */
                     FLOM_TRACE(("flom_resource_set_clean: the client is "
-                                "waiting for a lock with quantity %d, "
-                                "removing it...\n", cl->info.quantity));
-                    cl = g_queue_pop_nth(resource->data.numeric.waitings, i);
+                                "waiting to a lock an element, "
+                                "removing it...\n"));
+                    cl = g_queue_pop_nth(resource->data.set.waitings, i);
                     if (NULL == cl) {
                         /* this should be impossibile because peek was ok
                            some rows above */
@@ -299,7 +285,7 @@ int flom_resource_set_clean(flom_resource_t *resource,
             case NULL_OBJECT:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
-            case NUMERIC_WAITINGS_ERROR:
+            case SET_WAITINGS_ERROR:
                 break;
             case INTERNAL_ERROR:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -319,29 +305,34 @@ int flom_resource_set_clean(flom_resource_t *resource,
 
 
 void flom_resource_set_free(flom_resource_t *resource)
-{    
+{
+    guint i;
     /* clean-up holders list... */
-    FLOM_TRACE(("flom_resource_set_free: cleaning-up holders list...\n"));
-    while (NULL != resource->data.numeric.holders) {
-        struct flom_conn_lock_s *cl =
-            (struct flom_conn_lock_s *)resource->data.numeric.holders->data;
-        resource->data.numeric.holders = g_slist_remove(
-            resource->data.numeric.holders, cl);
-        g_free(cl);
+    FLOM_TRACE(("flom_resource_set_free: cleaning-up elements array...\n"));
+    for (i=0; i<resource->data.set.elements->len; ++i) {
+        struct flom_rsrc_data_set_element_s *rdse =
+            &g_array_index(resource->data.set.elements,
+                           struct flom_rsrc_data_set_element_s, i);
+        FLOM_TRACE(("flom_resource_set_free: removing element %u ('%s')\n",
+                    i, rdse->name));
+        g_free(rdse->name);
+        rdse->name = NULL;
+        rdse->conn = NULL;
     }
-    resource->data.numeric.holders = NULL;
+    /* free array structure */
+    g_array_free(resource->data.set.elements, TRUE);
+    resource->data.set.elements = NULL;
     /* clean-up waitings queue... */
     FLOM_TRACE(("flom_resource_set_free: cleaning-up waitings queue...\n"));
-    while (!g_queue_is_empty(resource->data.numeric.waitings)) {
+    while (!g_queue_is_empty(resource->data.set.waitings)) {
         struct flom_conn_lock_s *cl =
             (struct flom_conn_lock_s *)g_queue_pop_head(
-                resource->data.numeric.waitings);
+                resource->data.set.waitings);
         g_free(cl);
     }
-    g_queue_free(resource->data.numeric.waitings);
-    resource->data.numeric.waitings = NULL;
-    resource->data.numeric.total_quantity =
-        resource->data.numeric.locked_quantity = 0;
+    g_queue_free(resource->data.set.waitings);
+    resource->data.set.waitings = NULL;
+    resource->data.set.index = 0;
 }
 
 
@@ -366,21 +357,26 @@ int flom_resource_set_waitings(flom_resource_t *resource)
         
         /* check if there is any connection waiting for a lock */
         do {
+            guint element;
             cl = (struct flom_rsrc_conn_lock_s *)
-                g_queue_peek_nth(resource->data.numeric.waitings, i);
+                g_queue_peek_nth(resource->data.set.waitings, i);
             if (NULL == cl)
                 break;
             /* try to apply this lock... */
-            if (flom_resource_set_can_lock(resource, cl->info.quantity)) {
+            if (flom_resource_set_can_lock(resource, &element)) {
+                struct flom_rsrc_data_set_element_s *rdse =
+                    &g_array_index(resource->data.set.elements,
+                                   struct flom_rsrc_data_set_element_s,
+                                   element);
                 /* remove from waitings */
-                cl = g_queue_pop_nth(resource->data.numeric.waitings, i);
+                cl = g_queue_pop_nth(resource->data.set.waitings, i);
                 if (NULL == cl)
                     /* this should be impossibile because peek was ok
                        some rows above */
                     THROW(INTERNAL_ERROR);
-                FLOM_TRACE(("flom_resource_set_waitings: asked lock "
-                            "quantity %d can be assigned to connection "
-                            "%p\n", cl->info.quantity, cl->conn));
+                FLOM_TRACE(("flom_resource_set_waitings: element %u ('%s') "
+                            "can be assigned to connection %p\n",
+                            element, rdse->name, cl->conn));
                 /* send a message to the client that's waiting the lock */
                 flom_msg_init(&msg);
                 if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
@@ -396,11 +392,13 @@ int flom_resource_set_waitings(flom_resource_t *resource)
                     THROW(MSG_SEND_ERROR);
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
                     THROW(MSG_FREE_ERROR);                
-                /* insert into holders */
-                resource->data.numeric.holders = g_slist_prepend(
-                    resource->data.numeric.holders,
-                    (gpointer)cl);
-                resource->data.numeric.locked_quantity += cl->info.quantity;
+                /* track locker connection */
+                rdse->conn = cl->conn;
+                /* move to next element for next locker (round robin) */
+                resource->data.set.index = (resource->data.set.index + 1) %
+                    resource->data.set.elements->len;
+                /* free cl */
+                g_free(cl);
                 cl = NULL;
             } else
                 ++i;

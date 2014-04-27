@@ -50,16 +50,17 @@ extern "C" {
     /**
      * Check if a lock can be granted on a resource
      * @param resource IN reference to resource object
-     * @param quantity IN resource quantity requested by locker
+     * @param element OUT available for lock (if an element is available
+     *        and the function return TRUE)
      * @return a boolean value
      */
     int flom_resource_set_can_lock(flom_resource_t *resource,
-                                   gint quantity);
+                                   guint *element);
 
 
     
     /**
-     * Manage an incoming message for a "numeric" resource
+     * Manage an incoming message for a resource set
      * @param resource IN/OUT reference to resource object
      * @param conn IN connection reference
      * @param msg IN reference to incoming message
