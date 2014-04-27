@@ -69,15 +69,30 @@ int global_res_name_preg_init()
             "^_$" /* this is a dummy value */ ,
             "^%s$|^([[:alpha:]][[:alpha:][:digit:]]*)$" ,
             "^([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$",
-            "^([[:alpha:]][[:alpha:][:digit:]]*)(\\.[[:alpha:]][[:alpha:][:digit:]]*)+$"
+            "^([[:alpha:]][[:alpha:][:digit:]]*)(\\%s[[:alpha:]][[:alpha:][:digit:]]*)+$"
         };
 
         memset(global_res_name_preg, 0, sizeof(global_res_name_preg));
         for (i=FLOM_RSRC_TYPE_NULL; i<FLOM_RSRC_TYPE_N; ++i) {
+            int printed;
             /* preparing regular expression */
-            if (sizeof(reg_expr) <= snprintf(
-                    reg_expr, sizeof(reg_expr), reg_str[i],
-                    DEFAULT_RESOURCE_NAME))
+            switch (i) {
+                case FLOM_RSRC_TYPE_SIMPLE:
+                    printed = snprintf(
+                        reg_expr, sizeof(reg_expr), reg_str[i],
+                        DEFAULT_RESOURCE_NAME);
+                    break;
+                case FLOM_RSRC_TYPE_SET:
+                    printed = snprintf(
+                        reg_expr, sizeof(reg_expr), reg_str[i],
+                        FLOM_RESOURCE_SET_SEPARATOR);
+                    break;
+                default:
+                    printed = snprintf(
+                        reg_expr, sizeof(reg_expr), reg_str[i], "");
+                    break;
+            } /* switch (i) */
+            if (sizeof(reg_expr) <= printed)
                 THROW(SNPRINTF_ERROR);
             FLOM_TRACE(("global_res_name_preg_init: regular expression for "
                         "type %d is '%s'\n", i, reg_expr));
@@ -230,7 +245,8 @@ int flom_rsrc_get_elements(const gchar *resource_name, GArray *elements)
         
         /* resource_name is a VALID resource set (verified by regular
            expression before this function is called! */
-        if (NULL == (names = g_strsplit(resource_name, ".", 0)))
+        if (NULL == (names = g_strsplit(resource_name,
+                                        FLOM_RESOURCE_SET_SEPARATOR, 0)))
             THROW(G_STRSPLIT_ERROR);
         /* loop on list of splitted strings */
         for (name = names; *name; name++) {
@@ -323,7 +339,6 @@ int flom_resource_init(flom_resource_t *resource,
                                    flom_rsrc_get_elements(
                                        name, resource->data.set.elements)))
                     THROW(RSRC_GET_ELEMENTS_ERROR);
-                resource->data.set.number = resource->data.set.elements->len;
                 resource->data.set.index = 0;
                 if (NULL == (resource->data.set.waitings = g_queue_new()))
                     THROW(G_QUEUE_NEW_ERROR3);

@@ -263,6 +263,9 @@
 /* Date of release */
 #undef _RELEASE_DATE
 
+/* String used to separate elements inside resource set names */
+#undef _RESOURCE_SET_SEPARATOR
+
 /* System wide configuration filename */
 #undef _SYSTEM_CONFIG_FILENAME
 

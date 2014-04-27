@@ -100,6 +100,10 @@ extern const gchar FLOM_USER_CONFIG_FILENAME[];
  * Separator used between directory and file names
  */
 extern const gchar FLOM_DIR_FILE_SEPARATOR[];
+/**
+ * Separator used among elements inside a resource set name
+ */
+extern const gchar FLOM_RESOURCE_SET_SEPARATOR[];
 
 
 

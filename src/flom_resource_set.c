@@ -222,7 +222,7 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
 
 
 int flom_resource_set_clean(flom_resource_t *resource,
-                                struct flom_conn_data_s *conn)
+                            struct flom_conn_data_s *conn)
 {
     enum Exception { NULL_OBJECT
                      , NUMERIC_WAITINGS_ERROR

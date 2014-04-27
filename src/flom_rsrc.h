@@ -152,10 +152,6 @@ struct flom_rsrc_data_numeric_s {
  */
 struct flom_rsrc_data_set_s {
     /**
-     * Number of elements inside resource set
-     */
-    guint                   number;
-    /**
      * Index of the next available member
      */
     guint                   index;

@@ -6,6 +6,7 @@ _RELEASE_DATE="2014-04-21"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"
+_RESOURCE_SET_SEPARATOR="."
 _DEFAULT_DAEMON_LIFESPAN=5000
 _DEFAULT_DAEMON_PORT=28015
 _DEFAULT_DISCOVERY_ATTEMPTS=2
@@ -46,6 +47,7 @@ AC_DEFINE_UNQUOTED([_RELEASE_DATE], ["$_RELEASE_DATE"], [Date of release])
 AC_DEFINE_UNQUOTED([_SYSTEM_CONFIG_FILENAME], ["$_SYSTEM_CONFIG_FILENAME"], [System wide configuration filename])
 AC_DEFINE_UNQUOTED([_USER_CONFIG_FILENAME], ["$_USER_CONFIG_FILENAME"], [User default configuration filename])
 AC_DEFINE_UNQUOTED([_DIR_FILE_SEPARATOR], ["$_DIR_FILE_SEPARATOR"], [String used to separate directory from file inside fully qualified path names])
+AC_DEFINE_UNQUOTED([_RESOURCE_SET_SEPARATOR], ["$_RESOURCE_SET_SEPARATOR"], [String used to separate elements inside resource set names])
 AC_DEFINE_UNQUOTED([_DEFAULT_DAEMON_LIFESPAN], [$_DEFAULT_DAEMON_LIFESPAN], [Default value for option daemon lifespan (milliseconds)])
 AC_DEFINE_UNQUOTED([_DEFAULT_DAEMON_PORT], [$_DEFAULT_DAEMON_PORT], [Default port used to reach flom daemon using TCP and UDP (multicast)])
 AC_DEFINE_UNQUOTED([_DEFAULT_DISCOVERY_ATTEMPTS], [$_DEFAULT_DISCOVERY_ATTEMPTS], [Default number of attempts used to for auto discovery feature])
