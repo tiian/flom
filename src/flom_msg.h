@@ -190,6 +190,10 @@ extern const gchar *FLOM_MSG_PROP_QUANTITY;
  */
 extern const gchar *FLOM_MSG_PROP_RC;
 /**
+ * Label used to specify "element" property
+ */
+extern const gchar *FLOM_MSG_PROP_ELEMENT;
+/**
  * Label used to specify "step" property
  */
 extern const gchar *FLOM_MSG_PROP_STEP;
@@ -275,7 +279,11 @@ struct flom_msg_body_answer_s {
     /**
      * Return code of the invoked operation
      */
-    int rc;
+    int       rc;
+    /**
+     * Locked element (resource set); optional field, NULL means "no element"
+     */
+    gchar    *element;
 };
 
 
@@ -790,12 +798,14 @@ extern "C" {
      * @param verb IN answer verb
      * @param step IN answer step
      * @param rc IN answer rc
+     * @param element IN answer element (NULL if no element is available)
      * @return a reason code
      */
     int flom_msg_build_answer(struct flom_msg_s *msg,
-                              int verb, int step, int rc);
+                              int verb, int step, int rc,
+                              const gchar *element);
 
-    
+
                               
 #ifdef __cplusplus
 }

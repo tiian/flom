@@ -722,7 +722,7 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
     enum Exception { G_STRDUP_ERROR
                      , MSG_SERIALIZE_ERROR
                      , MSG_SEND_ERROR
-                     , MSG_FREE_ERROR
+                     , MSG_FREE_ERROR1
                      , NETWORK_TIMEOUT1
                      , MSG_RETRIEVE_ERROR
                      , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
@@ -733,16 +733,19 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
                      , LOCK_BUSY
                      , LOCK_IMPOSSIBLE
                      , PROTOCOL_ERROR2
+                     , MSG_FREE_ERROR2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    struct flom_msg_s msg;
     
     FLOM_TRACE(("flom_client_lock\n"));
     TRY {
-        struct flom_msg_s msg;
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
         size_t to_send;
         ssize_t to_read;
 
+        /* initialize message */
+        flom_msg_init(&msg);
         /* prepare a request (lock) message */
         msg.header.level = FLOM_MSG_LEVEL;
         msg.header.pvs.verb = FLOM_MSG_VERB_LOCK;
@@ -767,7 +770,7 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
             THROW(MSG_SEND_ERROR);
 
         if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
-            THROW(MSG_FREE_ERROR);
+            THROW(MSG_FREE_ERROR1);
         flom_msg_init(&msg);
 
         /* retrieve the reply message */
@@ -830,6 +833,9 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
                 break;
         } /* switch (msg.body.lock_16.answer.rc) */
         
+        if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
+            THROW(MSG_FREE_ERROR2);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -838,7 +844,7 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
                 break;
             case MSG_SERIALIZE_ERROR:
             case MSG_SEND_ERROR:
-            case MSG_FREE_ERROR:
+            case MSG_FREE_ERROR1:
             case NETWORK_TIMEOUT1:
             case MSG_RETRIEVE_ERROR:
                 break;
@@ -858,6 +864,7 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
             case CONNECT_WAIT_LOCK_ERROR:
             case LOCK_BUSY:
             case LOCK_IMPOSSIBLE:
+            case MSG_FREE_ERROR2:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -872,6 +879,8 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
         g_markup_parse_context_free(cd->gmpc);
         cd->gmpc = NULL;
     }
+    if (NONE > excp)
+        flom_msg_free(&msg);        
     
     FLOM_TRACE(("flom_client_lock/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

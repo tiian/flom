@@ -130,7 +130,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                     if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                            msg, FLOM_MSG_VERB_LOCK,
                                            2*FLOM_MSG_STEP_INCR,
-                                           FLOM_RC_OK)))
+                                           FLOM_RC_OK, NULL)))
                         THROW(MSG_BUILD_ANSWER_ERROR1);
                 } else {
                     /* can't lock, enqueue */
@@ -152,7 +152,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                         if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                                msg, FLOM_MSG_VERB_LOCK,
                                                2*FLOM_MSG_STEP_INCR,
-                                               FLOM_RC_LOCK_ENQUEUED)))
+                                               FLOM_RC_LOCK_ENQUEUED, NULL)))
                             THROW(MSG_BUILD_ANSWER_ERROR2);
                     } else {
                         FLOM_TRACE(("flom_resource_simple_inmsg: asked lock "
@@ -161,7 +161,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                         if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                                msg, FLOM_MSG_VERB_LOCK,
                                                2*FLOM_MSG_STEP_INCR,
-                                               FLOM_RC_LOCK_BUSY)))
+                                               FLOM_RC_LOCK_BUSY, NULL)))
                             THROW(MSG_BUILD_ANSWER_ERROR3);
                     } /* if (msg->body.lock_8.resource.wait) */
                 } /* if (can_lock) */
@@ -389,7 +389,7 @@ int flom_resource_simple_waitings(flom_resource_t *resource)
                 if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                        &msg, FLOM_MSG_VERB_LOCK,
                                        3*FLOM_MSG_STEP_INCR,
-                                       FLOM_RC_OK)))
+                                       FLOM_RC_OK, NULL)))
                     THROW(MSG_BUILD_ANSWER_ERROR);
                 if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
                                        &msg, buffer, sizeof(buffer), &to_send)))

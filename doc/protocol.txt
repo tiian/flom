@@ -42,15 +42,15 @@ verb=1 (lock)
 
   server->client message (answer: lock obtained/not obtained/wait)
   <msg level="0" verb="1" step="16">
-    <answer rc="0/..."/>
+    <answer rc="0/..." element="XYZ"/>
   </msg>
 
   server->client message (answer: lock obtained)
   <msg level="0" verb="1" step="24">
-    <answer rc="0/..."/>
+    <answer rc="0/..." element="XYZ"/>
   </msg>
 
-  
+  NOTE: element property is optional (only resource sets use it)
 
 client 			 server		description
 verb=1,step=8 -->			ask for a lock

@@ -58,6 +58,7 @@ const gchar *FLOM_MSG_PROP_LEVEL          = (gchar *)"level";
 const gchar *FLOM_MSG_PROP_NAME           = (gchar *)"name";
 const gchar *FLOM_MSG_PROP_QUANTITY       = (gchar *)"quantity";
 const gchar *FLOM_MSG_PROP_RC             = (gchar *)"rc";
+const gchar *FLOM_MSG_PROP_ELEMENT        = (gchar *)"element";
 const gchar *FLOM_MSG_PROP_STEP           = (gchar *)"step";
 const gchar *FLOM_MSG_PROP_MODE           = (gchar *)"mode";
 const gchar *FLOM_MSG_PROP_PORT           = (gchar *)"port";
@@ -308,8 +309,17 @@ int flom_msg_free(struct flom_msg_s *msg)
                             msg->body.lock_8.resource.name = NULL;
                         }
                         break;
-                    case 2*FLOM_MSG_STEP_INCR: /* nothing to release */
+                    case 2*FLOM_MSG_STEP_INCR:
+                        if (NULL != msg->body.lock_16.answer.element) {
+                            g_free(msg->body.lock_16.answer.element);
+                            msg->body.lock_16.answer.element = NULL;
+                        }
+                        break;
                     case 3*FLOM_MSG_STEP_INCR:
+                        if (NULL != msg->body.lock_24.answer.element) {
+                            g_free(msg->body.lock_24.answer.element);
+                            msg->body.lock_24.answer.element = NULL;
+                        }
                         break;
                     default:
                         THROW(INVALID_STEP_LOCK);
@@ -723,11 +733,21 @@ int flom_msg_serialize_lock_16(const struct flom_msg_s *msg,
         int used_chars;
         
         /* <answer> */
-        used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%d\"/>",
-                              FLOM_MSG_TAG_ANSWER,
-                              FLOM_MSG_PROP_RC,
-                              msg->body.lock_16.answer.rc);
+        if (NULL == msg->body.lock_16.answer.element) {
+            used_chars = snprintf(buffer + *offset, *free_chars,
+                                  "<%s %s=\"%d\"/>",
+                                  FLOM_MSG_TAG_ANSWER,
+                                  FLOM_MSG_PROP_RC,
+                                  msg->body.lock_16.answer.rc);
+        } else {
+            used_chars = snprintf(buffer + *offset, *free_chars,
+                                  "<%s %s=\"%d\" %s=\"%s\"/>",
+                                  FLOM_MSG_TAG_ANSWER,
+                                  FLOM_MSG_PROP_RC,
+                                  msg->body.lock_16.answer.rc,
+                                  FLOM_MSG_PROP_ELEMENT,
+                                  msg->body.lock_16.answer.element);
+        } /* if (NULL == msg->body.lock_16.answer.element) */
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT);
         *free_chars -= used_chars;
@@ -766,11 +786,21 @@ int flom_msg_serialize_lock_24(const struct flom_msg_s *msg,
         int used_chars;
         
         /* <answer> */
-        used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%d\"/>",
-                              FLOM_MSG_TAG_ANSWER,
-                              FLOM_MSG_PROP_RC,
-                              msg->body.lock_24.answer.rc);
+        if (NULL == msg->body.lock_16.answer.element) {
+            used_chars = snprintf(buffer + *offset, *free_chars,
+                                  "<%s %s=\"%d\"/>",
+                                  FLOM_MSG_TAG_ANSWER,
+                                  FLOM_MSG_PROP_RC,
+                                  msg->body.lock_24.answer.rc);
+        } else {
+            used_chars = snprintf(buffer + *offset, *free_chars,
+                                  "<%s %s=\"%d\" %s=\"%s\"/>",
+                                  FLOM_MSG_TAG_ANSWER,
+                                  FLOM_MSG_PROP_RC,
+                                  msg->body.lock_24.answer.rc,
+                                  FLOM_MSG_PROP_ELEMENT,
+                                  msg->body.lock_24.answer.element);
+        } /* if (NULL == msg->body.lock_16.answer.element) */
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT);
         *free_chars -= used_chars;
@@ -1040,23 +1070,38 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
     TRY {
         switch (msg->header.pvs.step) {
             case 8:
-                FLOM_TRACE(("flom_msg_trace_lock: body[resource["
-                            "name='%s',mode=%d,wait=%d,quantity=%d]]\n",
+                FLOM_TRACE(("flom_msg_trace_lock: body[%s["
+                            "%s='%s',%s=%d,%s=%d,%s=%d]]\n",
+                            FLOM_MSG_TAG_RESOURCE,
+                            FLOM_MSG_PROP_NAME,
                             msg->body.lock_8.resource.name != NULL ?
                             msg->body.lock_8.resource.name : "",
+                            FLOM_MSG_PROP_MODE,
                             msg->body.lock_8.resource.mode,
+                            FLOM_MSG_PROP_WAIT,
                             msg->body.lock_8.resource.wait,
+                            FLOM_MSG_PROP_QUANTITY,
                             msg->body.lock_8.resource.quantity));
                 break;
             case 16:
-                FLOM_TRACE(("flom_msg_trace_lock: body[answer["
-                            "rc=%d]]\n",
-                            msg->body.lock_16.answer.rc));
+                FLOM_TRACE(("flom_msg_trace_lock: body[%s["
+                            "%s=%d,%s='%s']]\n",
+                            FLOM_MSG_TAG_RESOURCE,
+                            FLOM_MSG_PROP_RC,
+                            msg->body.lock_16.answer.rc,
+                            FLOM_MSG_PROP_ELEMENT,
+                            msg->body.lock_16.answer.element != NULL ?
+                            msg->body.lock_16.answer.element : ""));
                 break;
             case 24:
-                FLOM_TRACE(("flom_msg_trace_lock: body[answer["
-                            "rc=%d]]\n",
-                            msg->body.lock_16.answer.rc));
+                FLOM_TRACE(("flom_msg_trace_lock: body[%s["
+                            "%s=%d,%s='%s']]\n",
+                            FLOM_MSG_TAG_RESOURCE,
+                            FLOM_MSG_PROP_RC,
+                            msg->body.lock_24.answer.rc,
+                            FLOM_MSG_PROP_ELEMENT,
+                            msg->body.lock_24.answer.element != NULL ?
+                            msg->body.lock_24.answer.element : ""));
                 break;
             default:
                 THROW(INVALID_STEP);
@@ -1092,8 +1137,10 @@ int flom_msg_trace_unlock(const struct flom_msg_s *msg)
     TRY {
         switch (msg->header.pvs.step) {
             case 8:
-                FLOM_TRACE(("flom_msg_trace_unlock: body[resource["
-                            "name='%s']]\n",
+                FLOM_TRACE(("flom_msg_trace_unlock: body[%s["
+                            "%s='%s']]\n",
+                            FLOM_MSG_TAG_RESOURCE,
+                            FLOM_MSG_PROP_NAME,
                             msg->body.unlock_8.resource.name != NULL ?
                             msg->body.unlock_8.resource.name : ""));
                 break;
@@ -1265,6 +1312,7 @@ void flom_msg_deserialize_start_element(
                      , INVALID_PROPERTY3
                      , INVALID_PROPERTY4
                      , G_STRDUP_ERROR2
+                     , G_STRDUP_ERROR3
                      , INVALID_PROPERTY5
                      , TAG_TYPE_ERROR
                      , NONE } excp;
@@ -1384,6 +1432,19 @@ void flom_msg_deserialize_start_element(
                                             *name_cursor, element_name));
                                 THROW(INVALID_PROPERTY4);
                             }
+                        } else if (!strcmp(*name_cursor,
+                                           FLOM_MSG_PROP_ELEMENT)) {
+                            gchar *tmp = g_strdup(*value_cursor);
+                            if (NULL == tmp) {
+                                FLOM_TRACE(("flom_msg_deserialize_start_"
+                                            "element: unable to duplicate "
+                                            "*name_cursor\n"));
+                                THROW(G_STRDUP_ERROR2);
+                            }
+                            if (2*FLOM_MSG_STEP_INCR == msg->header.pvs.step)
+                                msg->body.lock_16.answer.element = tmp;
+                            else
+                                msg->body.lock_24.answer.element = tmp;
                         }
                     }
                     break;
@@ -1401,7 +1462,7 @@ void flom_msg_deserialize_start_element(
                                 FLOM_TRACE(("flom_msg_deserialize_start_"
                                             "element: unable to duplicate "
                                             "*value_cursor\n"));
-                                THROW(G_STRDUP_ERROR2);
+                                THROW(G_STRDUP_ERROR3);
                             }
                             msg->body.discover_16.network.address = tmp;
                         } else {
@@ -1433,6 +1494,7 @@ void flom_msg_deserialize_start_element(
             case INVALID_PROPERTY3:
             case INVALID_PROPERTY4:
             case G_STRDUP_ERROR2:
+            case G_STRDUP_ERROR3:
             case INVALID_PROPERTY5:
             case TAG_TYPE_ERROR:
                 msg->state = FLOM_MSG_STATE_INVALID;
@@ -1531,17 +1593,23 @@ void flom_msg_deserialize_end_element(GMarkupParseContext *context,
 
 
 int flom_msg_build_answer(struct flom_msg_s *msg,
-                          int verb, int step, int rc)
+                          int verb, int step, int rc, const gchar *element)
 {
     enum Exception { NULL_OBJECT
+                     , G_STRDUP_ERROR
                      , INVALID_STEP
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    gchar *tmp_element = NULL;
     
     FLOM_TRACE(("flom_msg_build_answer\n"));
-    TRY {
+    TRY {    
         if (NULL == msg)
             THROW(NULL_OBJECT);
+        if (NULL != element &&
+            NULL == (tmp_element = g_strdup(element)))
+            THROW(G_STRDUP_ERROR);
+            
         msg->state = FLOM_MSG_STATE_PARSING;
         msg->header.level = FLOM_MSG_LEVEL;
         msg->header.pvs.verb = verb;
@@ -1549,9 +1617,13 @@ int flom_msg_build_answer(struct flom_msg_s *msg,
         switch (step) {
             case 2*FLOM_MSG_STEP_INCR:
                 msg->body.lock_16.answer.rc = rc;
+                msg->body.lock_16.answer.element = tmp_element;
+                tmp_element = NULL;
                 break;
             case 3*FLOM_MSG_STEP_INCR:
                 msg->body.lock_24.answer.rc = rc;
+                msg->body.lock_24.answer.element = tmp_element;
+                tmp_element = NULL;
                 break;
             default:
                 THROW(INVALID_STEP);
@@ -1565,6 +1637,9 @@ int flom_msg_build_answer(struct flom_msg_s *msg,
             case NULL_OBJECT:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
             case INVALID_STEP:
                 ret_cod = FLOM_RC_INVALID_OPTION;
                 break;
@@ -1575,6 +1650,10 @@ int flom_msg_build_answer(struct flom_msg_s *msg,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release memory if an error occurred */
+    if (NULL != tmp_element)
+        g_free(tmp_element);
+    tmp_element = NULL;
     FLOM_TRACE(("flom_msg_build_answer/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
