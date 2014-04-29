@@ -42,7 +42,8 @@
 #define FLOM_TRACE_MODULE   FLOM_TRACE_MOD_EXEC
 
 
-int flom_exec(gchar **const command_argv, int *child_status)
+int flom_exec(gchar **const command_argv, char *const element,
+              int *child_status)
 {
     enum Exception { COMMAND_ARGV_IS_NULL
                      , FORK_ERROR
@@ -69,19 +70,28 @@ int flom_exec(gchar **const command_argv, int *child_status)
             /* child process, preparing for execv... */
             const char *path = command_argv[0];
             char **argv;
-            guint i, num;
+            guint i, num, el;
             num = g_strv_length(command_argv);
+            /* check additional option (resource set locked element) **/
+            if ('\0' == element[0])
+                el = 0;
+            else
+                el = 1;
             for (i=0; i<num; ++i)
                 FLOM_TRACE(("flom_exec-child: command_argv[%u]='%s'\n",
                             i, command_argv[i]));
-            if (NULL == (argv = (char **)malloc((++num) * sizeof(char *))))
+            if (el)
+                FLOM_TRACE(("flom_exec-child: element='%s'\n", element));
+            if (NULL == (argv = (char **)malloc((++num+el)* sizeof(char *))))
                 THROW(MALLOC_ERROR);
             for (i=0; i<num-1; ++i) {
                 argv[i] = command_argv[i];
             }
-            argv[num-1] = (char *)NULL;
+            if (el)
+                argv[num-1] = element;
+            argv[num-1+el] = (char *)NULL;
             FLOM_TRACE(("flom_exec-child: path='%s'\n", path));
-            for (i=0; i<num-1; ++i)
+            for (i=0; i<num-1+el; ++i)
                 FLOM_TRACE(("flom_exec-child: argv[%u]='%s'\n", i, argv[i]));
             /* execvp */
             if (-1 == execvp(path, argv)) {

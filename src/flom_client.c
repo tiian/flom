@@ -717,7 +717,8 @@ int flom_client_discover_udp_connect(struct flom_conn_data_s *cd,
 }
 
 
-int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
+int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
+                     char *element, size_t element_size)
 {
     enum Exception { G_STRDUP_ERROR
                      , MSG_SERIALIZE_ERROR
@@ -799,12 +800,20 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
 
         flom_msg_trace(&msg);
 
+        /* reset element name */
+        memset(element, 0, element_size);
         /* check lock answer */
         if (FLOM_MSG_VERB_LOCK != msg.header.pvs.verb ||
             2*FLOM_MSG_STEP_INCR != msg.header.pvs.step)
             THROW(PROTOCOL_ERROR1);
         switch (msg.body.lock_16.answer.rc) {
             case FLOM_RC_OK:
+                /* copy element if available */
+                if (NULL != msg.body.lock_16.answer.element) {
+                    strncpy(element, msg.body.lock_16.answer.element,
+                            element_size);
+                    element[element_size-1] = '\0';
+                }
                 break;
             case FLOM_RC_LOCK_ENQUEUED:
                 FLOM_TRACE(("flom_client_lock: resource is busy, "
@@ -812,6 +821,12 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout)
                 ret_cod = flom_client_wait_lock(cd, &msg, timeout);
                 switch (ret_cod) {
                     case FLOM_RC_OK:
+                        /* copy element if available */
+                        if (NULL != msg.body.lock_24.answer.element) {
+                            strncpy(element, msg.body.lock_24.answer.element,
+                                    element_size);
+                            element[element_size-1] = '\0';
+                        }
                         break;
                     case FLOM_RC_NETWORK_TIMEOUT:
                         THROW(NETWORK_TIMEOUT2);

@@ -102,6 +102,7 @@ int main (int argc, char *argv[])
     int child_status = 0;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     struct flom_conn_data_s cd;
+    char locked_element[100];
 
     option_context = g_option_context_new("-- command to execute");
     g_option_context_add_main_entries(option_context, entries, NULL);
@@ -256,9 +257,12 @@ int main (int argc, char *argv[])
     }
 
     /* sending lock command */
-    ret_cod = flom_client_lock(&cd, flom_config_get_resource_timeout());
+    ret_cod = flom_client_lock(&cd, flom_config_get_resource_timeout(),
+                               locked_element, sizeof(locked_element));
     switch (ret_cod) {
         case FLOM_RC_OK: /* OK, go on */
+            if (flom_config_get_verbose() && '\0' != locked_element[0])
+                g_print("Locked element is '%s'\n", locked_element);
             break;
         case FLOM_RC_LOCK_BUSY: /* busy */
             g_print("Resource already locked, the lock cannot be obtained\n");
@@ -297,7 +301,8 @@ int main (int argc, char *argv[])
     } /* switch (ret_cod) */
 
     /* execute the command */
-    if (FLOM_RC_OK != (ret_cod = flom_exec(command_argv, &child_status))) {
+    if (FLOM_RC_OK != (ret_cod = flom_exec(command_argv, locked_element,
+                                           &child_status))) {
         guint i, num;
         g_print("Unable to execute command: '");
         num = g_strv_length(command_argv);

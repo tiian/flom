@@ -55,10 +55,12 @@ extern "C" {
     /**
      * Exec the child process
      * @param command_argv IN parsed argv as prepared by g_option_context_parse
+     * @param element IN locked element if any (resource set)
      * @param child_status OUT child exit status
      * @return a reason code
      */
-    int flom_exec(gchar **const command_argv, int *child_status);
+    int flom_exec(gchar **const command_argv, char *const element,
+                  int *child_status);
 
     
 
