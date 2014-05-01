@@ -127,6 +127,14 @@ else
 	AC_MSG_RESULT([yes])
 fi
 
+# Checking glib2 level
+AC_MSG_CHECKING([glib2 version])
+$PKG_CONFIG --atleast-version=2.24.1 glib-2.0
+if test $? -ne 0
+then
+	AC_MSG_WARN([installed glib-2.0 level ($($PKG_CONFIG --modversion glib-2.0)) is under minimum tested level])
+fi
+
 # Checking pkg-config is available
 AC_CHECK_PROGS(GDB, [gdb], [])
 AC_CHECK_PROGS(VALGRIND, [valgrind], [])
