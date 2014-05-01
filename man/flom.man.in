@@ -28,6 +28,9 @@ name of the resource used for enqueing (locking).
 Simple resource names can be composed of "alpha" and "digit" characters, but the first character \fBmust be\fP of type "alpha" (example: "RA123" is \fBOK\fP, "123RA" is \fBnot\fP OK). Accepted resource names are described in function "global_res_name_preg_init": inspect source code for more details
  
 Numeric resource names are composed by simple resource names followed by an integer value enclosed in square brackets ("[ ]"); examples: "foo[12]", "bar[3]", "RA123[23]". Numbers must be expressed using decimal base)
+
+Resource set names are obtained concatenating simple resource names with character '@_RESOURCE_SET_SEPARATOR@' (example: "RED@_RESOURCE_SET_SEPARATOR@BLUE@_RESOURCE_SET_SEPARATOR@GREEN")
+
 .TP
 .B -w, --resource-wait=\fIyes|no
 \fBdefault\fP (\fIyes\fP): the command will enqueue if the resource is already locked by someone else, otherwise (\fIno\fP) it will return immediately
