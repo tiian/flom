@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.5.1 Adding resource set feature...
+         - 0.5.1 Added resource set feature
 
 20140421 - 0.5.0 Added numeric resource feature
 	Added "-q, --resource-quantity" option (see [Resource]/Quantity)
