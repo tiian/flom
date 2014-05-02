@@ -109,31 +109,18 @@ AC_ARG_ENABLE([trace],
 
 #AM_PROG_CC_C_O
 
+
 # Checking pkg-config is available
 AC_CHECK_PROGS(PKG_CONFIG, [pkg-config], [])
 if test -z $PKG_CONFIG 
 then
         AC_MSG_ERROR([cannot find pkg-config program])
 fi
-# Checking glib2 is configured with pkg-config
-AC_MSG_CHECKING([if glib2 is pkg-config configured])
-$PKG_CONFIG glib-2.0
-if test $? -ne 0
-then
-	AC_MSG_ERROR([it seems glib-2.0 is not configured with pkg-config])
-else
-	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0)"
-	GLIB_LIBS="$($PKG_CONFIG --libs glib-2.0) $($PKG_CONFIG --libs gthread-2.0)"
-	AC_MSG_RESULT([yes])
-fi
-
-# Checking glib2 level
-AC_MSG_CHECKING([glib2 version])
-$PKG_CONFIG --atleast-version=2.24.1 glib-2.0
-if test $? -ne 0
-then
-	AC_MSG_WARN([installed glib-2.0 level ($($PKG_CONFIG --modversion glib-2.0)) is under minimum tested level])
-fi
+# checking glib-2.0 and gthread-2.0 availability and compatibility using  
+# pkg-config
+PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.22 gthread-2.0 >= 2.22])
+CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
+#GLIB2_LIBS automatically set by PKG_CHECK_MODULES macro
 
 # Checking pkg-config is available
 AC_CHECK_PROGS(GDB, [gdb], [])
@@ -201,7 +188,7 @@ AC_CHECK_FUNCS(snprintf)
 AC_CHECK_FUNCS(strcasestr)
 AC_CHECK_FUNCS(vsnprintf)
 
-AC_SUBST(GLIB_LIBS)
+AC_SUBST(GLIB2_LIBS)
 AC_SUBST(HAVE_DOT)
 
 # substitution inside *.in for hardwired configuration

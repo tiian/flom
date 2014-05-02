@@ -636,7 +636,6 @@ _CONFIG_GROUP_TRACE
 _USER_CONFIG_FILENAME
 _SYSTEM_CONFIG_FILENAME
 _RELEASE_DATE
-GLIB_LIBS
 EGREP
 GREP
 CPP
@@ -644,6 +643,8 @@ HAVE_DOT
 XSLTPROC
 VALGRIND
 GDB
+GLIB2_LIBS
+GLIB2_CFLAGS
 PKG_CONFIG
 am__fastdepCC_FALSE
 am__fastdepCC_TRUE
@@ -736,6 +737,9 @@ CFLAGS
 LDFLAGS
 LIBS
 CPPFLAGS
+PKG_CONFIG
+GLIB2_CFLAGS
+GLIB2_LIBS
 CPP'
 
 
@@ -1371,6 +1375,10 @@ Some influential environment variables:
   LIBS        libraries to pass to the linker, e.g. -l<library>
   CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
               you have headers in a nonstandard directory <include dir>
+  PKG_CONFIG  path to pkg-config utility
+  GLIB2_CFLAGS
+              C compiler flags for GLIB2, overriding pkg-config
+  GLIB2_LIBS  linker flags for GLIB2, overriding pkg-config
   CPP         C preprocessor
 
 Use these variables to override the choices made by `configure' or to help
@@ -4139,6 +4147,7 @@ fi
 
 #AM_PROG_CC_C_O
 
+
 # Checking pkg-config is available
 for ac_prog in pkg-config
 do
@@ -4186,29 +4195,216 @@ if test -z $PKG_CONFIG
 then
         as_fn_error "cannot find pkg-config program" "$LINENO" 5
 fi
-# Checking glib2 is configured with pkg-config
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if glib2 is pkg-config configured" >&5
-$as_echo_n "checking if glib2 is pkg-config configured... " >&6; }
-$PKG_CONFIG glib-2.0
-if test $? -ne 0
-then
-	as_fn_error "it seems glib-2.0 is not configured with pkg-config" "$LINENO" 5
+# checking glib-2.0 and gthread-2.0 availability and compatibility using
+# pkg-config
+
+
+if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
+	if test -n "$ac_tool_prefix"; then
+  # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
+set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PKG_CONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
 else
-	CPPFLAGS="$CPPFLAGS $($PKG_CONFIG --cflags glib-2.0)"
-	GLIB_LIBS="$($PKG_CONFIG --libs glib-2.0) $($PKG_CONFIG --libs gthread-2.0)"
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
+  case $PKG_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKG_CONFIG="$PKG_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PKG_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+PKG_CONFIG=$ac_cv_path_PKG_CONFIG
+if test -n "$PKG_CONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKG_CONFIG" >&5
+$as_echo "$PKG_CONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
 
-# Checking glib2 level
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking glib2 version" >&5
-$as_echo_n "checking glib2 version... " >&6; }
-$PKG_CONFIG --atleast-version=2.24.1 glib-2.0
-if test $? -ne 0
-then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: installed glib-2.0 level ($($PKG_CONFIG --modversion glib-2.0)) is under minimum tested level" >&5
-$as_echo "$as_me: WARNING: installed glib-2.0 level ($($PKG_CONFIG --modversion glib-2.0)) is under minimum tested level" >&2;}
+
 fi
+if test -z "$ac_cv_path_PKG_CONFIG"; then
+  ac_pt_PKG_CONFIG=$PKG_CONFIG
+  # Extract the first word of "pkg-config", so it can be a program name with args.
+set dummy pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_ac_pt_PKG_CONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $ac_pt_PKG_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ac_pt_PKG_CONFIG="$ac_pt_PKG_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_ac_pt_PKG_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+ac_pt_PKG_CONFIG=$ac_cv_path_ac_pt_PKG_CONFIG
+if test -n "$ac_pt_PKG_CONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_pt_PKG_CONFIG" >&5
+$as_echo "$ac_pt_PKG_CONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+  if test "x$ac_pt_PKG_CONFIG" = x; then
+    PKG_CONFIG=""
+  else
+    case $cross_compiling:$ac_tool_warned in
+yes:)
+{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using cross tools not prefixed with host triplet" >&5
+$as_echo "$as_me: WARNING: using cross tools not prefixed with host triplet" >&2;}
+ac_tool_warned=yes ;;
+esac
+    PKG_CONFIG=$ac_pt_PKG_CONFIG
+  fi
+else
+  PKG_CONFIG="$ac_cv_path_PKG_CONFIG"
+fi
+
+fi
+if test -n "$PKG_CONFIG"; then
+	_pkg_min_version=0.9.0
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking pkg-config is at least version $_pkg_min_version" >&5
+$as_echo_n "checking pkg-config is at least version $_pkg_min_version... " >&6; }
+	if $PKG_CONFIG --atleast-pkgconfig-version $_pkg_min_version; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	else
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+		PKG_CONFIG=""
+	fi
+
+fi
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GLIB2" >&5
+$as_echo_n "checking for GLIB2... " >&6; }
+
+if test -n "$PKG_CONFIG"; then
+    if test -n "$GLIB2_CFLAGS"; then
+        pkg_cv_GLIB2_CFLAGS="$GLIB2_CFLAGS"
+    else
+        if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"glib-2.0 >= 2.22 gthread-2.0 >= 2.22\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "glib-2.0 >= 2.22 gthread-2.0 >= 2.22") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_GLIB2_CFLAGS=`$PKG_CONFIG --cflags "glib-2.0 >= 2.22 gthread-2.0 >= 2.22" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+    fi
+else
+	pkg_failed=untried
+fi
+if test -n "$PKG_CONFIG"; then
+    if test -n "$GLIB2_LIBS"; then
+        pkg_cv_GLIB2_LIBS="$GLIB2_LIBS"
+    else
+        if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"glib-2.0 >= 2.22 gthread-2.0 >= 2.22\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "glib-2.0 >= 2.22 gthread-2.0 >= 2.22") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_GLIB2_LIBS=`$PKG_CONFIG --libs "glib-2.0 >= 2.22 gthread-2.0 >= 2.22" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+    fi
+else
+	pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        GLIB2_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "glib-2.0 >= 2.22 gthread-2.0 >= 2.22"`
+        else
+	        GLIB2_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "glib-2.0 >= 2.22 gthread-2.0 >= 2.22"`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$GLIB2_PKG_ERRORS" >&5
+
+	as_fn_error "Package requirements (glib-2.0 >= 2.22 gthread-2.0 >= 2.22) were not met:
+
+$GLIB2_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables GLIB2_CFLAGS
+and GLIB2_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+" "$LINENO" 5
+elif test $pkg_failed = untried; then
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables GLIB2_CFLAGS
+and GLIB2_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details." "$LINENO" 5; }
+else
+	GLIB2_CFLAGS=$pkg_cv_GLIB2_CFLAGS
+	GLIB2_LIBS=$pkg_cv_GLIB2_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	:
+fi
+CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
+#GLIB2_LIBS automatically set by PKG_CHECK_MODULES macro
 
 # Checking pkg-config is available
 for ac_prog in gdb

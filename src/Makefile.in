@@ -90,7 +90,8 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 GDB = @GDB@
-GLIB_LIBS = @GLIB_LIBS@
+GLIB2_CFLAGS = @GLIB2_CFLAGS@
+GLIB2_LIBS = @GLIB2_LIBS@
 GREP = @GREP@
 HAVE_DOT = @HAVE_DOT@
 INSTALL = @INSTALL@
@@ -203,7 +204,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -D_SYSCONFDIR='"@sysconfdir@"'
 AM_CFLAGS = -Wall
-flom_LDADD = @GLIB_LIBS@
+flom_LDADD = @GLIB2_LIBS@
 noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_defines.h flom_errors.h flom_exec.h \
 	flom_locker.h flom_msg.h flom_resource_numeric.h flom_resource_set.h \

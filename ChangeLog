@@ -1,7 +1,8 @@
 LOG:
 
          - 0.5.1 Added resource set feature
-	Added glib2 version check in configure script
+	Added glib2 version check in configure script; minimum glib-2 version
+	is 2.22 due to function g_ptr_array_new_with_free_func
 
 20140421 - 0.5.0 Added numeric resource feature
 	Added "-q, --resource-quantity" option (see [Resource]/Quantity)
