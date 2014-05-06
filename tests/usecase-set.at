@@ -1,6 +1,6 @@
 AT_BANNER([Resource sets use case checks])
 
-AT_SETUP([Use case 12 (1/3)])
+AT_SETUP([Use case 12])
 AT_DATA([expout],
 [[ 1 locking for 3 seconds
  2 locking for 3 seconds
@@ -16,7 +16,7 @@ AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CHECK([flom_test_exec4.sh 1 0 3 "-r red.green.blue" & flom_test_exec4.sh 2 1 3 "-r red.green.blue" & flom_test_exec4.sh 3 2 3 "-r red.green.blue"], [0], [expout], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Use case 12 (2/3)])
+AT_SETUP([Use case 13 (1/2)])
 AT_DATA([expout],
 [[ 1 locking for 4 seconds
  2 locking for 4 seconds
@@ -35,7 +35,7 @@ AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CHECK([flom_test_exec4.sh 1 0 4 "-r red.green.blue" & flom_test_exec4.sh 2 1 4 "-r red.green.blue" & flom_test_exec4.sh 3 2 4 "-r red.green.blue" & flom_test_exec4.sh 4 3 1 "-w n -r red.green.blue" & flom_test_exec4.sh 5 4 3 "-r red.green.blue" >/dev/null], [0], [expout], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Use case 12 (3/3)])
+AT_SETUP([Use case 13 (2/2)])
 AT_DATA([expout],
 [[ 1 locking for 6 seconds
  2 locking for 2 seconds
