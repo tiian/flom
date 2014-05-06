@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.5.1 Added resource set feature
+20140506 - 0.5.1 Added resource set feature
 	Added glib2 version check in configure script; minimum glib-2 version
 	is 2.22 due to function g_ptr_array_new_with_free_func
 
