@@ -104,6 +104,10 @@ extern const gchar FLOM_DIR_FILE_SEPARATOR[];
  * Separator used among elements inside a resource set name
  */
 extern const gchar FLOM_RESOURCE_SET_SEPARATOR[];
+/**
+ * Separator used among elements inside a hierarchical resource name
+ */
+extern const gchar FLOM_HIER_RESOURCE_SEPARATOR[];
 
 
 

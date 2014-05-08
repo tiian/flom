@@ -92,7 +92,7 @@ typedef enum flom_msg_state_e {
  * Current protocol level; it's used to recognize incompatible client/server
  * configuration at run-time
  */
-#define FLOM_MSG_LEVEL           0
+#define FLOM_MSG_LEVEL           1
 
 
 
@@ -757,6 +757,20 @@ extern "C" {
                              GMarkupParseContext *gmpc);
 
 
+
+    /**
+     * Deserialize a resource name encoded using base64 and returns the
+     * corrisponding null terminated string
+     * @param base64 IN resource name encoded using base64 (it's a null
+     *                  terminated string)
+     * @param resource_name OUT a newly allocated null terminated string
+     *                          that contains the plain resource name
+     * @return a reason code
+     */
+    int flom_msg_deserialize_resource_name(const gchar *base64,
+                                           gchar **resource_name);
+
+    
 
     /**
      * GMarkupParser start_element callback function

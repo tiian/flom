@@ -74,6 +74,10 @@ typedef enum flom_rsrc_type_e {
      */
     FLOM_RSRC_TYPE_SET,
     /**
+     * Hierarchical resource type
+     */
+    FLOM_RSRC_TYPE_HIER,
+    /**
      * Number of managed resource types
      */
     FLOM_RSRC_TYPE_N
@@ -185,6 +189,15 @@ struct flom_rsrc_data_set_element_s {
 
 
 
+/**
+ * Resource data for type "hierarchical" @ref FLOM_RSRC_TYPE_HIER
+ */
+struct flom_rsrc_data_hier_s {
+    int dummy;
+};
+
+
+
 /* necessary to declare flom_resource_t used inside the struct ("class")
    definition */
 struct flom_resource_s;
@@ -211,6 +224,7 @@ struct flom_resource_s {
         struct flom_rsrc_data_simple_s       simple;
         struct flom_rsrc_data_numeric_s      numeric;
         struct flom_rsrc_data_set_s          set;
+        struct flom_rsrc_data_hier_s         hier;
     } data;
     /**
      * Method called to process incoming messages (it depends from resource

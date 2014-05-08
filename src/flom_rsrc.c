@@ -69,7 +69,8 @@ int global_res_name_preg_init()
             "^_$" /* this is a dummy value */ ,
             "^%s$|^([[:alpha:]][[:alpha:][:digit:]]*)$" ,
             "^([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$",
-            "^([[:alpha:]][[:alpha:][:digit:]]*)(\\%s[[:alpha:]][[:alpha:][:digit:]]*)+$"
+            "^([[:alpha:]][[:alpha:][:digit:]]*)(\\%s[[:alpha:]][[:alpha:][:digit:]]*)+$",
+            "^\\%s[^\\%s]+(\\%s[^\\%s]+)*$"
         };
 
         memset(global_res_name_preg, 0, sizeof(global_res_name_preg));
@@ -86,6 +87,14 @@ int global_res_name_preg_init()
                     printed = snprintf(
                         reg_expr, sizeof(reg_expr), reg_str[i],
                         FLOM_RESOURCE_SET_SEPARATOR);
+                    break;
+                case FLOM_RSRC_TYPE_HIER:
+                    printed = snprintf(
+                        reg_expr, sizeof(reg_expr), reg_str[i],
+                        FLOM_HIER_RESOURCE_SEPARATOR,
+                        FLOM_HIER_RESOURCE_SEPARATOR,
+                        FLOM_HIER_RESOURCE_SEPARATOR,
+                        FLOM_HIER_RESOURCE_SEPARATOR);
                     break;
                 default:
                     printed = snprintf(

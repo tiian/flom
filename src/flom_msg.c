@@ -644,16 +644,23 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                               char *buffer,
                               size_t *offset, size_t *free_chars)
 {
-    enum Exception { INVALID_RESOURCE_TYPE
+    enum Exception { G_BASE64_ENCODE_ERROR
+                     , INVALID_RESOURCE_TYPE
                      , BUFFER_TOO_SHORT
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    gchar *base64_resource_name = NULL;
     
     FLOM_TRACE(("flom_msg_serialize_lock_8\n"));
     TRY {
         int used_chars;
         flom_rsrc_type_t frt;
-        
+
+        /* encode resource name using base64 encoding */
+        if (NULL == (base64_resource_name =
+                     g_base64_encode((guchar *)msg->body.lock_8.resource.name,
+                                     strlen(msg->body.lock_8.resource.name))))
+            THROW(G_BASE64_ENCODE_ERROR);
         /* <resource> */
         frt = flom_rsrc_get_type(msg->body.lock_8.resource.name);
         switch (frt) {
@@ -662,7 +669,7 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                                       "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\"/>",
                                       FLOM_MSG_TAG_RESOURCE,
                                       FLOM_MSG_PROP_NAME,
-                                      msg->body.lock_8.resource.name,
+                                      base64_resource_name,
                                       FLOM_MSG_PROP_MODE,
                                       msg->body.lock_8.resource.mode,
                                       FLOM_MSG_PROP_WAIT,
@@ -673,7 +680,7 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                                       "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\"/>",
                                       FLOM_MSG_TAG_RESOURCE,
                                       FLOM_MSG_PROP_NAME,
-                                      msg->body.lock_8.resource.name,
+                                      base64_resource_name,
                                       FLOM_MSG_PROP_WAIT,
                                       msg->body.lock_8.resource.wait,
                                       FLOM_MSG_PROP_QUANTITY,
@@ -684,7 +691,18 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                                       "<%s %s=\"%s\" %s=\"%d\"/>",
                                       FLOM_MSG_TAG_RESOURCE,
                                       FLOM_MSG_PROP_NAME,
-                                      msg->body.lock_8.resource.name,
+                                      base64_resource_name,
+                                      FLOM_MSG_PROP_WAIT,
+                                      msg->body.lock_8.resource.wait);
+                break;
+            case FLOM_RSRC_TYPE_HIER:
+                used_chars = snprintf(buffer + *offset, *free_chars,
+                                      "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\"/>",
+                                      FLOM_MSG_TAG_RESOURCE,
+                                      FLOM_MSG_PROP_NAME,
+                                      base64_resource_name,
+                                      FLOM_MSG_PROP_MODE,
+                                      msg->body.lock_8.resource.mode,
                                       FLOM_MSG_PROP_WAIT,
                                       msg->body.lock_8.resource.wait);
                 break;
@@ -700,6 +718,9 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case G_BASE64_ENCODE_ERROR:
+                ret_cod = FLOM_RC_G_BASE64_ENCODE_ERROR;
+                break;
             case INVALID_RESOURCE_TYPE:
                 ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
                 break;
@@ -713,6 +734,11 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release memory */
+    if (NULL != base64_resource_name) {
+        g_free(base64_resource_name);
+        base64_resource_name = NULL;
+    }
     FLOM_TRACE(("flom_msg_serialize_lock_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -830,20 +856,27 @@ int flom_msg_serialize_unlock_8(const struct flom_msg_s *msg,
                                 char *buffer,
                                 size_t *offset, size_t *free_chars)
 {
-    enum Exception { BUFFER_TOO_SHORT
+    enum Exception { G_BASE64_ENCODE_ERROR
+                     , BUFFER_TOO_SHORT
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    gchar *base64_resource_name = NULL;
     
     FLOM_TRACE(("flom_msg_serialize_unlock_8\n"));
     TRY {
         int used_chars;
         
+        /* encode resource name using base64 encoding */
+        if (NULL == (base64_resource_name =
+                     g_base64_encode((guchar *)msg->body.lock_8.resource.name,
+                                     strlen(msg->body.lock_8.resource.name))))
+            THROW(G_BASE64_ENCODE_ERROR);
         /* <resource> */
         used_chars = snprintf(buffer + *offset, *free_chars,
                               "<%s %s=\"%s\"/>",
                               FLOM_MSG_TAG_RESOURCE,
                               FLOM_MSG_PROP_NAME,
-                              msg->body.unlock_8.resource.name);
+                              base64_resource_name);
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT);
         *free_chars -= used_chars;
@@ -852,6 +885,9 @@ int flom_msg_serialize_unlock_8(const struct flom_msg_s *msg,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case G_BASE64_ENCODE_ERROR:
+                ret_cod = FLOM_RC_G_BASE64_ENCODE_ERROR;
+                break;
             case BUFFER_TOO_SHORT:
                 ret_cod = FLOM_RC_CONTAINER_FULL;
                 break;
@@ -862,6 +898,11 @@ int flom_msg_serialize_unlock_8(const struct flom_msg_s *msg,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release memory */
+    if (NULL != base64_resource_name) {
+        g_free(base64_resource_name);
+        base64_resource_name = NULL;
+    }
     FLOM_TRACE(("flom_msg_serialize_unlock_8/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -1297,6 +1338,55 @@ int flom_msg_deserialize(char *buffer, size_t buffer_len,
 
 
 
+int flom_msg_deserialize_resource_name(const gchar *base64,
+                                       gchar **resource_name)
+{
+    enum Exception { G_BASE64_DECODE_ERROR
+                     , G_STRNDUP_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    guchar *buffer = NULL;
+    gchar *res_name = NULL;
+    
+    FLOM_TRACE(("flom_msg_deserialize_resource_name\n"));
+    TRY {
+        gsize out_len;
+        
+        if (NULL == (buffer = g_base64_decode(base64, &out_len)))
+            THROW(G_BASE64_DECODE_ERROR);
+        if (NULL == (res_name = g_strndup((gchar *)buffer, out_len)))
+            THROW(G_STRNDUP_ERROR);
+        *resource_name = res_name;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_BASE64_DECODE_ERROR:
+                ret_cod = FLOM_RC_G_BASE64_DECODE_ERROR;
+                break;
+            case G_STRNDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRNDUP_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* garbage collector */
+    if (NULL != buffer) {
+        g_free(buffer);
+        buffer = NULL;
+    }
+    FLOM_TRACE(("flom_msg_deserialize_resource_name/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 void flom_msg_deserialize_start_element(
     GMarkupParseContext *context,
     const gchar         *element_name,
@@ -1306,13 +1396,14 @@ void flom_msg_deserialize_start_element(
     GError             **error)
 {
     enum Exception { ALREADY_INVALID
-                     , G_STRDUP_ERROR1
+                     , PROTOCOL_LEVEL_MISMATCH
+                     , DESERIALIZE_RESOURCE_NAME_ERROR
                      , INVALID_PROPERTY1
                      , INVALID_PROPERTY2
                      , INVALID_PROPERTY3
                      , INVALID_PROPERTY4
+                     , G_STRDUP_ERROR1
                      , G_STRDUP_ERROR2
-                     , G_STRDUP_ERROR3
                      , INVALID_PROPERTY5
                      , TAG_TYPE_ERROR
                      , NONE } excp;
@@ -1349,9 +1440,11 @@ void flom_msg_deserialize_start_element(
                         "value_cursor='%s'\n", *name_cursor, *value_cursor));
             switch (tag_type) {
                 case msg_tag:
-                    if (!strcmp(*name_cursor, FLOM_MSG_PROP_LEVEL))
+                    if (!strcmp(*name_cursor, FLOM_MSG_PROP_LEVEL)) {
                         msg->header.level = strtol(*value_cursor, NULL, 10);
-                    else if (!strcmp(*name_cursor, FLOM_MSG_PROP_VERB))
+                        if (FLOM_MSG_LEVEL != msg->header.level)
+                            THROW(PROTOCOL_LEVEL_MISMATCH);
+                    } else if (!strcmp(*name_cursor, FLOM_MSG_PROP_VERB))
                         msg->header.pvs.verb = strtol(*value_cursor, NULL, 10);
                     else if (!strcmp(*name_cursor, FLOM_MSG_PROP_STEP))
                         msg->header.pvs.step = strtol(*value_cursor, NULL, 10);
@@ -1363,13 +1456,11 @@ void flom_msg_deserialize_start_element(
                         (FLOM_MSG_VERB_UNLOCK == msg->header.pvs.verb &&
                          FLOM_MSG_STEP_INCR == msg->header.pvs.step)) {
                         if (!strcmp(*name_cursor, FLOM_MSG_PROP_NAME)) {
-                            gchar *tmp = g_strdup(*value_cursor);
-                            if (NULL == tmp) {
-                                FLOM_TRACE(("flom_msg_deserialize_start_"
-                                            "element: unable to duplicate "
-                                            "*name_cursor\n"));
-                                THROW(G_STRDUP_ERROR1);
-                            }
+                            gchar *tmp;
+                            if (FLOM_RC_OK !=
+                                flom_msg_deserialize_resource_name(
+                                    *value_cursor, &tmp))
+                                THROW(DESERIALIZE_RESOURCE_NAME_ERROR);
                             if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb)
                                 msg->body.lock_8.resource.name = tmp;
                             else
@@ -1439,7 +1530,7 @@ void flom_msg_deserialize_start_element(
                                 FLOM_TRACE(("flom_msg_deserialize_start_"
                                             "element: unable to duplicate "
                                             "*name_cursor\n"));
-                                THROW(G_STRDUP_ERROR2);
+                                THROW(G_STRDUP_ERROR1);
                             }
                             if (2*FLOM_MSG_STEP_INCR == msg->header.pvs.step)
                                 msg->body.lock_16.answer.element = tmp;
@@ -1462,7 +1553,7 @@ void flom_msg_deserialize_start_element(
                                 FLOM_TRACE(("flom_msg_deserialize_start_"
                                             "element: unable to duplicate "
                                             "*value_cursor\n"));
-                                THROW(G_STRDUP_ERROR3);
+                                THROW(G_STRDUP_ERROR2);
                             }
                             msg->body.discover_16.network.address = tmp;
                         } else {
@@ -1488,13 +1579,14 @@ void flom_msg_deserialize_start_element(
         switch (excp) {
             case ALREADY_INVALID:
                 break;
-            case G_STRDUP_ERROR1:
+            case PROTOCOL_LEVEL_MISMATCH:
+            case DESERIALIZE_RESOURCE_NAME_ERROR:
             case INVALID_PROPERTY1:
             case INVALID_PROPERTY2:
             case INVALID_PROPERTY3:
             case INVALID_PROPERTY4:
+            case G_STRDUP_ERROR1:
             case G_STRDUP_ERROR2:
-            case G_STRDUP_ERROR3:
             case INVALID_PROPERTY5:
             case TAG_TYPE_ERROR:
                 msg->state = FLOM_MSG_STATE_INVALID;

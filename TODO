@@ -1,0 +1,6 @@
+implement FIFO, LIFO, FIRST FIT (for numerical resources) lock allocation policies
+
+intercept kill signal from daemon and try to terminate gracefully
+
+IPv6
+

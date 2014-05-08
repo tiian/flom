@@ -165,7 +165,10 @@
  * Specified resource name is not valid
  */
 #define FLOM_RC_INVALID_RESOURCE_NAME                -14
-
+/**
+ * Client and server are not using the same communication protocol
+ */
+#define FLOM_RC_PROTOCOL_LEVEL_MISMATCH              -15
 
 
 /**
@@ -300,45 +303,57 @@
  */
 #define FLOM_RC_G_ARRAY_NEW_ERROR                   -200
 /**
+ * "g_base64_decode" function error
+ */
+#define FLOM_RC_G_BASE64_DECODE_ERROR               -201
+/**
+ * "g_base64_encode" function error
+ */
+#define FLOM_RC_G_BASE64_ENCODE_ERROR               -202
+/**
  * "g_key_file_load_from_file" function error
  */
-#define FLOM_RC_G_KEY_FILE_LOAD_FROM_FILE_ERROR     -201
+#define FLOM_RC_G_KEY_FILE_LOAD_FROM_FILE_ERROR     -203
 /**
  * "g_key_file_new" function error
  */
-#define FLOM_RC_G_KEY_FILE_NEW_ERROR                -202
+#define FLOM_RC_G_KEY_FILE_NEW_ERROR                -204
 /**
  * "g_markup_parse_context_new_error" function error
  */
-#define FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR    -203
+#define FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR    -205
 /**
  * "g_markup_parse_context_parse" function error
  */
-#define FLOM_RC_G_MARKUP_PARSE_CONTEXT_PARSE_ERROR  -204
+#define FLOM_RC_G_MARKUP_PARSE_CONTEXT_PARSE_ERROR  -206
 /**
  * "g_ptr_array_remove_index_fast" function error
  */
-#define FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR -205
+#define FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR -207
 /**
  * "g_queue_new" function error
  */
-#define FLOM_RC_G_QUEUE_NEW_ERROR                   -206
+#define FLOM_RC_G_QUEUE_NEW_ERROR                   -208
 /**
  * "g_strdup" function error
  */
-#define FLOM_RC_G_STRDUP_ERROR                      -207
+#define FLOM_RC_G_STRDUP_ERROR                      -209
+/**
+ * "g_strndup" function error
+ */
+#define FLOM_RC_G_STRNDUP_ERROR                     -210
 /**
  * "g_strsplit" function error
  */
-#define FLOM_RC_G_STRSPLIT_ERROR                    -208
+#define FLOM_RC_G_STRSPLIT_ERROR                    -211
 /**
  * "g_thread_create" function error
  */
-#define FLOM_RC_G_THREAD_CREATE_ERROR               -209
+#define FLOM_RC_G_THREAD_CREATE_ERROR               -212
 /**
  * "g_try_malloc"/"g_try_malloc0" function error
  */
-#define FLOM_RC_G_TRY_MALLOC_ERROR                  -210
+#define FLOM_RC_G_TRY_MALLOC_ERROR                  -213
 
 
 

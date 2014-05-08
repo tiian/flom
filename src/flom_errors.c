@@ -82,6 +82,9 @@ const char *flom_strerror(int ret_cod)
                 "packet of data was received";
         case FLOM_RC_INVALID_RESOURCE_NAME:
             return "ERROR: invalid name for a resource";
+        case FLOM_RC_PROTOCOL_LEVEL_MISMATCH:
+            return "ERROR: client and server are not using the same "
+                "communication protocol";
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";
         case FLOM_RC_BIND_ERROR:
@@ -149,6 +152,12 @@ const char *flom_strerror(int ret_cod)
             /* GLIB related errors */
         case FLOM_RC_G_ARRAY_NEW_ERROR:
             return "ERROR: 'g_array_new' function returned an error condition";
+        case FLOM_RC_G_BASE64_DECODE_ERROR:
+            return "ERROR: 'g_base64_decode' function returned an error "
+                "condition";
+        case FLOM_RC_G_BASE64_ENCODE_ERROR:
+            return "ERROR: 'g_base64_encode' function returned an error "
+                "condition";
         case FLOM_RC_G_KEY_FILE_LOAD_FROM_FILE_ERROR:
             return "ERROR: 'g_key_file_load_from_file' function returned "
                 "an error condition";
@@ -168,6 +177,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'g_queue_new' function returned an error condition";
         case FLOM_RC_G_STRDUP_ERROR:
             return "ERROR: 'g_strdup' function returned an error condition";
+        case FLOM_RC_G_STRNDUP_ERROR:
+            return "ERROR: 'g_strndup' function returned an error condition";
         case FLOM_RC_G_STRSPLIT_ERROR:
             return "ERROR: 'g_strsplit' function returned an error condition";
         case FLOM_RC_G_THREAD_CREATE_ERROR:
