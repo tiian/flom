@@ -1013,6 +1013,14 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
             flom_msg_trace(msg);
             /* if the message is not valid the client must be terminated */
             if (FLOM_MSG_STATE_INVALID == msg->state) {
+                if (FLOM_MSG_LEVEL != msg->header.level) {
+                    FLOM_TRACE(("flom_accept_loop_pollin: this flom daemon "
+                                "is using communication level %d, client is "
+                                "using communication level %d\n",
+                                FLOM_MSG_LEVEL, msg->header.level));
+                    syslog(LOG_WARNING, FLOM_SYSLOG_FLM006W,
+                           FLOM_MSG_LEVEL, msg->header.level);
+                }
                 FLOM_TRACE(("flom_accept_loop_pollin: message from client %u "
                             "is invalid, disconneting...\n", id));
                 if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(

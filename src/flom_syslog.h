@@ -53,7 +53,9 @@ extern "C" {
     "incoming requests"
 #define FLOM_SYSLOG_FLM005I "FLM005I auto-discovery query received from " \
     "%s/%s"
-
+#define FLOM_SYSLOG_FLM006W "FLM006W FLOM daemon is using comm. level %d, " \
+    "FLOM client is using comm. level %d; communication can not be performed"
+    
 
 
 #ifdef __cplusplus

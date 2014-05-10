@@ -83,8 +83,10 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_INVALID_RESOURCE_NAME:
             return "ERROR: invalid name for a resource";
         case FLOM_RC_PROTOCOL_LEVEL_MISMATCH:
-            return "ERROR: client and server are not using the same "
-                "communication protocol";
+            return "ERROR: client and server are not aligned to the same "
+                "communication level";
+        case FLOM_RC_MSG_DESERIALIZE_ERROR:
+            return "ERROR: XML message deserialization";
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";
         case FLOM_RC_BIND_ERROR:

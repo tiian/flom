@@ -727,7 +727,9 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
                      , NETWORK_TIMEOUT1
                      , MSG_RETRIEVE_ERROR
                      , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
-                     , MSG_DESERIALIZE_ERROR
+                     , MSG_DESERIALIZE_ERROR1
+                     , PROTOCOL_LEVEL_MISMATCH
+                     , MSG_DESERIALIZE_ERROR2
                      , PROTOCOL_ERROR1
                      , NETWORK_TIMEOUT2
                      , CONNECT_WAIT_LOCK_ERROR
@@ -796,8 +798,17 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
         /* deserialize the reply message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
                                buffer, to_read, &msg, cd->gmpc)))
-            THROW(MSG_DESERIALIZE_ERROR);
-
+            THROW(MSG_DESERIALIZE_ERROR1);
+        /* check the parser completed without errors */
+        if (FLOM_MSG_STATE_READY != msg.state) {
+            /* check message level */
+            if (FLOM_MSG_LEVEL != msg.header.level) {
+                THROW(PROTOCOL_LEVEL_MISMATCH);
+            } else {
+                THROW(MSG_DESERIALIZE_ERROR2);
+            }
+        } /* if (FLOM_MSG_STATE_READY != msg->state) */
+        
         flom_msg_trace(&msg);
 
         /* reset element name */
@@ -866,7 +877,14 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
             case G_MARKUP_PARSE_CONTEXT_NEW_ERROR:
                 ret_cod = FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR;
                 break;
-            case MSG_DESERIALIZE_ERROR:
+            case MSG_DESERIALIZE_ERROR1:
+                ret_cod = FLOM_RC_MSG_DESERIALIZE_ERROR;
+                break;
+            case PROTOCOL_LEVEL_MISMATCH:
+                ret_cod = FLOM_RC_PROTOCOL_LEVEL_MISMATCH;
+                break;
+            case MSG_DESERIALIZE_ERROR2:
+                ret_cod = FLOM_RC_MSG_DESERIALIZE_ERROR;
                 break;
             case PROTOCOL_ERROR1:
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;

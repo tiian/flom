@@ -169,7 +169,10 @@
  * Client and server are not using the same communication protocol
  */
 #define FLOM_RC_PROTOCOL_LEVEL_MISMATCH              -15
-
+/**
+ * Error occurred while deserializing XML message
+ */
+#define FLOM_RC_MSG_DESERIALIZE_ERROR                -16
 
 /**
  * "accept" function error
