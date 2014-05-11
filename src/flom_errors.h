@@ -357,6 +357,10 @@
  * "g_try_malloc"/"g_try_malloc0" function error
  */
 #define FLOM_RC_G_TRY_MALLOC_ERROR                  -213
+/**
+ * "g_try_realloc" function error
+ */
+#define FLOM_RC_G_TRY_REALLOC_ERROR                 -2134
 
 
 

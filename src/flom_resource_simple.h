@@ -54,7 +54,18 @@ extern "C" {
                                       flom_lock_mode_t lock);
 
 
-        
+    
+    /**
+     * Initialize a new resource of type simple
+     * @param resource IN reference to resource object
+     * @param name IN resource name as asked by the client
+     * @return a reason code
+     */
+    int flom_resource_simple_init(flom_resource_t *resource,
+                                  const gchar *name);
+
+    
+
     /**
      * Manage an incoming message for a "simple" resource
      * @param resource IN/OUT reference to resource object

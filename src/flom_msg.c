@@ -1342,7 +1342,7 @@ int flom_msg_deserialize_resource_name(const gchar *base64,
                                        gchar **resource_name)
 {
     enum Exception { G_BASE64_DECODE_ERROR
-                     , G_STRNDUP_ERROR
+                     , G_TRY_REALLOC_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
@@ -1355,8 +1355,12 @@ int flom_msg_deserialize_resource_name(const gchar *base64,
         
         if (NULL == (buffer = g_base64_decode(base64, &out_len)))
             THROW(G_BASE64_DECODE_ERROR);
-        if (NULL == (res_name = g_strndup((gchar *)buffer, out_len)))
-            THROW(G_STRNDUP_ERROR);
+        /* add 1 char to append the string terminator */
+        if (NULL == (res_name = g_try_realloc((gpointer)buffer, out_len+1)))
+            THROW(G_TRY_REALLOC_ERROR);
+        res_name[out_len] = '\0';
+        FLOM_TRACE(("flom_msg_deserialize_resource_name: base64='%s', "
+                    "res_name='%s'\n", base64, res_name));
         *resource_name = res_name;
         
         THROW(NONE);
@@ -1365,8 +1369,8 @@ int flom_msg_deserialize_resource_name(const gchar *base64,
             case G_BASE64_DECODE_ERROR:
                 ret_cod = FLOM_RC_G_BASE64_DECODE_ERROR;
                 break;
-            case G_STRNDUP_ERROR:
-                ret_cod = FLOM_RC_G_STRNDUP_ERROR;
+            case G_TRY_REALLOC_ERROR:
+                ret_cod = FLOM_RC_G_TRY_REALLOC_ERROR;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -1376,7 +1380,7 @@ int flom_msg_deserialize_resource_name(const gchar *base64,
         } /* switch (excp) */
     } /* TRY-CATCH */
     /* garbage collector */
-    if (NULL != buffer) {
+    if (NULL != buffer && NONE != excp) {
         g_free(buffer);
         buffer = NULL;
     }

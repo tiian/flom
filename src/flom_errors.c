@@ -189,6 +189,9 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_G_TRY_MALLOC_ERROR:
             return "ERROR: 'g_try_malloc'/'g_try_malloc0' function returned "
                 "an error condition";
+        case FLOM_RC_G_TRY_REALLOC_ERROR:
+            return "ERROR: 'g_try_realloc' function returned "
+                "an error condition";
         default:
             return "ERROR: unknown error";
     } /* switch (ret_cod) */

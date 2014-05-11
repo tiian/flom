@@ -299,12 +299,8 @@ int flom_resource_init(flom_resource_t *resource,
                        flom_rsrc_type_t type, const gchar *name)
 {
     enum Exception { OUT_OF_RANGE
-                     , G_QUEUE_NEW_ERROR1
-                     , G_QUEUE_NEW_ERROR2
-                     , G_ARRAY_NEW_ERROR
-                     , RSRC_GET_ELEMENTS_ERROR
-                     , G_QUEUE_NEW_ERROR3
                      , UNKNOW_RESOURCE
+                     , RESOURCE_INIT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -312,45 +308,26 @@ int flom_resource_init(flom_resource_t *resource,
     TRY {
         if (FLOM_RSRC_TYPE_NULL >= type || FLOM_RSRC_TYPE_N <= type)
             THROW(OUT_OF_RANGE);
-        resource->type = type;
-        resource->name = g_strdup(name);
-        FLOM_TRACE(("flom_resource_init: initialized resource ('%s',%d)\n",
-                    resource->name, resource->type));
 
-        switch (resource->type) {
+        /* reset resource memory space */
+        memset(resource, 0, sizeof(flom_resource_t));
+
+        /* "virtual" methods */
+        switch (type) {
             case FLOM_RSRC_TYPE_SIMPLE:
-                resource->data.simple.holders = NULL;
-                if (NULL == (resource->data.simple.waitings = g_queue_new()))
-                    THROW(G_QUEUE_NEW_ERROR1);
+                resource->init = flom_resource_simple_init;
                 resource->inmsg = flom_resource_simple_inmsg;
                 resource->clean = flom_resource_simple_clean;
                 resource->free = flom_resource_simple_free;
                 break;
             case FLOM_RSRC_TYPE_NUMERIC:
-                /* @@@ check return code here! */
-                flom_rsrc_get_number(
-                    name,
-                    &(resource->data.numeric.total_quantity));
-                resource->data.numeric.locked_quantity = 0;
-                resource->data.numeric.holders = NULL;
-                if (NULL == (resource->data.numeric.waitings = g_queue_new()))
-                    THROW(G_QUEUE_NEW_ERROR2);
+                resource->init = flom_resource_numeric_init;
                 resource->inmsg = flom_resource_numeric_inmsg;
                 resource->clean = flom_resource_numeric_clean;
                 resource->free = flom_resource_numeric_free;
                 break;
             case FLOM_RSRC_TYPE_SET:
-                if (NULL == (resource->data.set.elements = g_array_new(
-                                 FALSE, FALSE,
-                                 sizeof(struct flom_rsrc_data_set_element_s))))
-                    THROW(G_ARRAY_NEW_ERROR);
-                if (FLOM_RC_OK != (ret_cod =
-                                   flom_rsrc_get_elements(
-                                       name, resource->data.set.elements)))
-                    THROW(RSRC_GET_ELEMENTS_ERROR);
-                resource->data.set.index = 0;
-                if (NULL == (resource->data.set.waitings = g_queue_new()))
-                    THROW(G_QUEUE_NEW_ERROR3);
+                resource->init = flom_resource_set_init;
                 resource->inmsg = flom_resource_set_inmsg;
                 resource->clean = flom_resource_set_clean;
                 resource->free = flom_resource_set_free;
@@ -358,6 +335,10 @@ int flom_resource_init(flom_resource_t *resource,
             default:
                 THROW(UNKNOW_RESOURCE);
         } /* switch (resource->type) */
+        /* set resource type and initialize the new resource */
+        resource->type = type;
+        if (FLOM_RC_OK != (ret_cod = resource->init(resource, name)))
+            THROW(RESOURCE_INIT_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -365,20 +346,10 @@ int flom_resource_init(flom_resource_t *resource,
             case OUT_OF_RANGE:
                 ret_cod = FLOM_RC_OUT_OF_RANGE;
                 break;
-            case G_QUEUE_NEW_ERROR1:
-            case G_QUEUE_NEW_ERROR2:
-                ret_cod = FLOM_RC_G_QUEUE_NEW_ERROR;
-                break;
-            case G_ARRAY_NEW_ERROR:
-                ret_cod = FLOM_RC_G_ARRAY_NEW_ERROR;
-                break;
-            case RSRC_GET_ELEMENTS_ERROR:
-                break;
-            case G_QUEUE_NEW_ERROR3:
-                ret_cod = FLOM_RC_G_QUEUE_NEW_ERROR;
-                break;
             case UNKNOW_RESOURCE:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
+                break;
+            case RESOURCE_INIT_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

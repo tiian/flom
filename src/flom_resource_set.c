@@ -69,6 +69,63 @@ int flom_resource_set_can_lock(flom_resource_t *resource, guint *element)
 
 
 
+int flom_resource_set_init(flom_resource_t *resource,
+                           const gchar *name)
+{
+    enum Exception { G_STRDUP_ERROR
+                     , G_ARRAY_NEW_ERROR
+                     , RSRC_GET_ELEMENTS_ERROR
+                     , G_QUEUE_NEW_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_resource_set_init\n"));
+    TRY {
+        if (NULL == (resource->name = g_strdup(name)))
+            THROW(G_STRDUP_ERROR);
+        FLOM_TRACE(("flom_resource_set_init: initialized resource ('%s')\n",
+                    resource->name));
+        
+        if (NULL == (resource->data.set.elements = g_array_new(
+                         FALSE, FALSE,
+                         sizeof(struct flom_rsrc_data_set_element_s))))
+            THROW(G_ARRAY_NEW_ERROR);
+        if (FLOM_RC_OK != (ret_cod =
+                           flom_rsrc_get_elements(
+                               name, resource->data.set.elements)))
+            THROW(RSRC_GET_ELEMENTS_ERROR);
+        resource->data.set.index = 0;
+        if (NULL == (resource->data.set.waitings = g_queue_new()))
+            THROW(G_QUEUE_NEW_ERROR);
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
+            case G_ARRAY_NEW_ERROR:
+                ret_cod = FLOM_RC_G_ARRAY_NEW_ERROR;
+                break;
+            case RSRC_GET_ELEMENTS_ERROR:
+                break;
+            case G_QUEUE_NEW_ERROR:
+                ret_cod = FLOM_RC_G_QUEUE_NEW_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_resource_set_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int flom_resource_set_inmsg(flom_resource_t *resource,
                             struct flom_conn_data_s *conn,
                             struct flom_msg_s *msg)

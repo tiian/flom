@@ -58,6 +58,56 @@ int flom_resource_numeric_can_lock(flom_resource_t *resource,
 
 
 
+int flom_resource_numeric_init(flom_resource_t *resource,
+                               const gchar *name)
+{
+    enum Exception { G_STRDUP_ERROR
+                     , RSRC_GET_NUMBER_ERROR
+                     , G_QUEUE_NEW_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_resource_numeric_init\n"));
+    TRY {
+        if (NULL == (resource->name = g_strdup(name)))
+            THROW(G_STRDUP_ERROR);
+        FLOM_TRACE(("flom_resource_numeric_init: initialized resource ('%s')\n",
+                    resource->name));
+
+        if (FLOM_RC_OK != (ret_cod = flom_rsrc_get_number(
+                               name,
+                               &(resource->data.numeric.total_quantity))))
+                    THROW(RSRC_GET_NUMBER_ERROR);
+        resource->data.numeric.locked_quantity = 0;
+        resource->data.numeric.holders = NULL;
+        if (NULL == (resource->data.numeric.waitings = g_queue_new()))
+            THROW(G_QUEUE_NEW_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
+            case RSRC_GET_NUMBER_ERROR:
+                break;
+            case G_QUEUE_NEW_ERROR:
+                ret_cod = FLOM_RC_G_QUEUE_NEW_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_resource_numeric_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int flom_resource_numeric_inmsg(flom_resource_t *resource,
                                struct flom_conn_data_s *conn,
                                struct flom_msg_s *msg)

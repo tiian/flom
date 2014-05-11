@@ -227,6 +227,10 @@ struct flom_resource_s {
         struct flom_rsrc_data_hier_s         hier;
     } data;
     /**
+     * Method called to initialize a new resource
+     */
+    int   (*init)    (flom_resource_t *resource, const gchar *name);
+    /**
      * Method called to process incoming messages (it depends from resource
      * type)
      */

@@ -60,6 +60,17 @@ extern "C" {
 
     
     /**
+     * Initialize a new resource of type set
+     * @param resource IN reference to resource object
+     * @param name IN resource name as asked by the client
+     * @return a reason code
+     */
+    int flom_resource_set_init(flom_resource_t *resource,
+                               const gchar *name);
+
+
+
+    /**
      * Manage an incoming message for a resource set
      * @param resource IN/OUT reference to resource object
      * @param conn IN connection reference
