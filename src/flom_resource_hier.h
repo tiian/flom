@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with FLOM.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef FLOM_RESOURCE_SIMPLE_H
-# define FLOM_RESOURCE_SIMPLE_H
+#ifndef FLOM_RESOURCE_HIER_H
+# define FLOM_RESOURCE_HIER_H
 
 
 
@@ -37,7 +37,7 @@
 #else
 # undef FLOM_TRACE_MODULE_SAVE
 #endif /* FLOM_TRACE_MODULE */
-#define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_RESOURCE_SIMPLE
+#define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_RESOURCE_HIER
 
 
 
@@ -50,51 +50,63 @@ extern "C" {
      * @param lock IN lock mode to check
      * @return a boolean value
      */
-    int flom_resource_simple_can_lock(flom_resource_t *resource,
+    int flom_resource_hier_can_lock(flom_resource_t *resource,
                                       flom_lock_mode_t lock);
 
 
     
     /**
-     * Initialize a new resource of type simple
+     * Initialize a new resource of type hierarchical
      * @param resource IN reference to resource object
      * @param name IN resource name as asked by the client
      * @return a reason code
      */
-    int flom_resource_simple_init(flom_resource_t *resource,
+    int flom_resource_hier_init(flom_resource_t *resource,
                                   const gchar *name);
 
     
 
     /**
-     * Manage an incoming message for a "simple" resource
+     * Manage an incoming message for a "hierarchical" resource
      * @param resource IN/OUT reference to resource object
      * @param conn IN connection reference
      * @param msg IN reference to incoming message
      * @return a reason code
      */
-    int flom_resource_simple_inmsg(flom_resource_t *resource,
+    int flom_resource_hier_inmsg(flom_resource_t *resource,
                                    struct flom_conn_data_s *conn,
                                    struct flom_msg_s *msg);
 
 
     
     /**
-     * Manage an clean-up signal for a "simple" resource
+     * Manage an clean-up signal for a "hierarchical" resource
      * @param resource IN/OUT reference to resource object
      * @param conn IN connection reference
      * @return a reason code
      */
-    int flom_resource_simple_clean(flom_resource_t *resource,
+    int flom_resource_hier_clean(flom_resource_t *resource,
                                    struct flom_conn_data_s *conn);
 
 
 
     /**
-     * Destroy a simple resource (frees holders list and waitings queue)
+     * Destroy a hierarchical resource (frees holders list and waitings queue)
      * @param resource IN/OUT reference to resource object
      */
-    void flom_resource_simple_free(flom_resource_t *resource);
+    void flom_resource_hier_free(flom_resource_t *resource);
+
+
+    
+    /**
+     * Compare the name of the current resource and an external name passed
+     * to the method
+     * @param resource IN reference to this resource object
+     * @param name IN another resource name to compare with this resource name
+     * @return -1,0,+1 as strcmp
+     */
+    int flom_resource_hier_compare_name(const flom_resource_t *resource,
+                                        const gchar *name);
 
 
 
@@ -103,7 +115,7 @@ extern "C" {
      * @param resource IN/OUT reference to resource object
      * @return a reason code
      */
-    int flom_resource_simple_waitings(flom_resource_t *resource);
+    int flom_resource_hier_waitings(flom_resource_t *resource);
 
 
 
@@ -122,4 +134,4 @@ extern "C" {
 
 
 
-#endif /* FLOM_RESOURCE_SIMPLE_H */
+#endif /* FLOM_RESOURCE_HIER_H */

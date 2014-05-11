@@ -392,6 +392,10 @@ void flom_resource_numeric_free(flom_resource_t *resource)
     resource->data.numeric.waitings = NULL;
     resource->data.numeric.total_quantity =
         resource->data.numeric.locked_quantity = 0;
+    /* releasing resource name */
+    if (NULL != resource->name)
+        g_free(resource->name);
+    resource->name = NULL;
 }
 
 

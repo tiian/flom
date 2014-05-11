@@ -390,6 +390,10 @@ void flom_resource_simple_free(flom_resource_t *resource)
     }
     g_queue_free(resource->data.simple.waitings);
     resource->data.simple.waitings = NULL;
+    /* releasing resource name */
+    if (NULL != resource->name)
+        g_free(resource->name);
+    resource->name = NULL;
 }
 
 

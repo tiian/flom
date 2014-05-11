@@ -1,3 +1,10 @@
+WIP
+substitute flom_resource_hier_compare_name with a valid implementation
+substitute flom_rsrc_data_hier_s with a valid implmentation
+
+
+
+Road map:
 implement FIFO, LIFO, FIRST FIT (for numerical resources) lock allocation policies
 
 intercept kill signal from daemon and try to terminate gracefully

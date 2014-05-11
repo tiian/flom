@@ -115,6 +115,11 @@
  */
 #define FLOM_TRACE_MOD_RESOURCE_SET       0x00001000
 
+/**
+ * trace module for hierarchical resource functions
+ */
+#define FLOM_TRACE_MOD_RESOURCE_HIER      0x00002000
+
 
 
 /**

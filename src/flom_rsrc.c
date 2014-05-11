@@ -32,9 +32,10 @@
 #include "flom_config.h"
 #include "flom_errors.h"
 #include "flom_rsrc.h"
+#include "flom_resource_hier.h"
+#include "flom_resource_numeric.h"
 #include "flom_resource_set.h"
 #include "flom_resource_simple.h"
-#include "flom_resource_numeric.h"
 #include "flom_trace.h"
 
 
@@ -319,18 +320,28 @@ int flom_resource_init(flom_resource_t *resource,
                 resource->inmsg = flom_resource_simple_inmsg;
                 resource->clean = flom_resource_simple_clean;
                 resource->free = flom_resource_simple_free;
+                resource->compare_name = flom_resource_compare_name;
                 break;
             case FLOM_RSRC_TYPE_NUMERIC:
                 resource->init = flom_resource_numeric_init;
                 resource->inmsg = flom_resource_numeric_inmsg;
                 resource->clean = flom_resource_numeric_clean;
                 resource->free = flom_resource_numeric_free;
+                resource->compare_name = flom_resource_compare_name;
                 break;
             case FLOM_RSRC_TYPE_SET:
                 resource->init = flom_resource_set_init;
                 resource->inmsg = flom_resource_set_inmsg;
                 resource->clean = flom_resource_set_clean;
                 resource->free = flom_resource_set_free;
+                resource->compare_name = flom_resource_compare_name;
+                break;
+            case FLOM_RSRC_TYPE_HIER:
+                resource->init = flom_resource_hier_init;
+                resource->inmsg = flom_resource_hier_inmsg;
+                resource->clean = flom_resource_hier_clean;
+                resource->free = flom_resource_hier_free;
+                resource->compare_name = flom_resource_hier_compare_name;
                 break;
             default:
                 THROW(UNKNOW_RESOURCE);
@@ -369,9 +380,20 @@ void flom_resource_free(flom_resource_t *resource)
 {
     FLOM_TRACE(("flom_resource_free\n"));
     /* calling the destructor */
-    resource->free(resource);
-    /* releasing resource name */
-    if (NULL != resource->name)
-        g_free(resource->name);
-    resource->name = NULL;
+    if (NULL != resource->free)
+        resource->free(resource);
+    else
+        FLOM_TRACE(("flom_resource_free: resource->free can not be called "
+                    "because it's null\n"));
+}
+
+
+
+int flom_resource_compare_name(const flom_resource_t *resource,
+                               const gchar *name)
+{
+    FLOM_TRACE(("flom_resource_compare_name: resource->name='%s', "
+                "name='%s'\n", resource->name,
+                NULL != name ? name : "null"));
+    return g_strcmp0(resource->name, name);
 }

@@ -193,7 +193,15 @@ struct flom_rsrc_data_set_element_s {
  * Resource data for type "hierarchical" @ref FLOM_RSRC_TYPE_HIER
  */
 struct flom_rsrc_data_hier_s {
-    int dummy;
+    /* @@@ fix this implementation */
+    /**
+     * List of connections with an acquired lock
+     */
+    GSList                 *holders;
+    /**
+     * List of connections waiting for a lock
+     */
+    GQueue                 *waitings;
 };
 
 
@@ -244,6 +252,11 @@ struct flom_resource_s {
      * Method called to clean-up the entire resource (it's the destructor)
      */
     void  (*free)    (flom_resource_t *);
+    /**
+     * Method called to compare the name of the current managed resource with
+     * an external supplied name
+     */
+    int   (*compare_name)   (const flom_resource_t *, const gchar *);
 };
 
 
@@ -328,7 +341,19 @@ extern "C" {
     void flom_resource_free(flom_resource_t *resource);
 
 
-    
+
+    /**
+     * Compare the name of the current resource and an external name passed
+     * to the method
+     * @param resource IN reference to this resource object
+     * @param name IN another resource name to compare with this resource name
+     * @return -1,0,+1 as strcmp
+     */
+    int flom_resource_compare_name(const flom_resource_t *resource,
+                                   const gchar *name);
+
+
+
     /**
      * Get the name of a resource
      * @param resource IN referente to resource object
