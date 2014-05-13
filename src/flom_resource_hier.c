@@ -44,8 +44,10 @@
 
 
 int flom_resource_hier_can_lock(flom_resource_t *resource,
-                                  flom_lock_mode_t lock)
+                                flom_lock_mode_t lock)
 {
+    /* @@@ fix me: parameter list must be enriched with splitted name because
+       the lock must be checked against more levels */
     static const flom_lock_mode_t lock_table[
         FLOM_LOCK_MODE_N][FLOM_LOCK_MODE_N] =
         { { TRUE,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE } ,
@@ -79,29 +81,56 @@ int flom_resource_hier_can_lock(flom_resource_t *resource,
 
 
 int flom_resource_hier_init(flom_resource_t *resource,
-                              const gchar *name)
+                            const gchar *name)
 {
-    enum Exception { G_STRDUP_ERROR
+    enum Exception { INVALID_RESOURCE_NAME
+                     , G_STRDUP_ERROR
+                     , G_STRSPLIT_ERROR
                      , G_QUEUE_NEW_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_resource_hier_init\n"));
     TRY {
+        gchar **level_name;
+        int i = 0;
+        size_t sep_len = strlen(FLOM_HIER_RESOURCE_SEPARATOR);
+        
+        if (0 != strncmp(name, FLOM_HIER_RESOURCE_SEPARATOR, sep_len)) {
+            FLOM_TRACE(("flom_resource_hier_init: '%s' does not start with "
+                        "'%s'\n", name, FLOM_HIER_RESOURCE_SEPARATOR));
+            THROW(INVALID_RESOURCE_NAME);
+        }
+            
         if (NULL == (resource->name = g_strdup(name)))
             THROW(G_STRDUP_ERROR);
         FLOM_TRACE(("flom_resource_hier_init: initialized resource ('%s')\n",
                     resource->name));
-
-        resource->data.simple.holders = NULL;
-        if (NULL == (resource->data.simple.waitings = g_queue_new()))
-            THROW(G_QUEUE_NEW_ERROR);
+        /* prepare splitted name */
+        if (NULL == (resource->data.hier.splitted_name =
+                     g_strsplit(resource->name+sep_len,
+                                FLOM_HIER_RESOURCE_SEPARATOR, 0)))
+            THROW(G_STRSPLIT_ERROR);
+        /* prepare holders array */
+        for (level_name = resource->data.hier.splitted_name;
+             *level_name; level_name++) {
+            FLOM_TRACE(("flom_resource_hier_init: level %d is '%s'\n",
+                        i, *level_name));
+            g_ptr_array_add(resource->data.hier.holders, NULL);
+            i++;
+        } /* for (name = ... */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INVALID_RESOURCE_NAME:
+                ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
+                break;
             case G_STRDUP_ERROR:
                 ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
+            case G_STRSPLIT_ERROR:
+                ret_cod = FLOM_RC_G_STRSPLIT_ERROR;
                 break;
             case G_QUEUE_NEW_ERROR:
                 ret_cod = FLOM_RC_G_QUEUE_NEW_ERROR;
@@ -121,8 +150,8 @@ int flom_resource_hier_init(flom_resource_t *resource,
 
 
 int flom_resource_hier_inmsg(flom_resource_t *resource,
-                               struct flom_conn_data_s *conn,
-                               struct flom_msg_s *msg)
+                             struct flom_conn_data_s *conn,
+                             struct flom_msg_s *msg)
 {
     enum Exception { MSG_FREE_ERROR1
                      , G_TRY_MALLOC_ERROR1
@@ -273,7 +302,7 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
 
 
 int flom_resource_hier_clean(flom_resource_t *resource,
-                               struct flom_conn_data_s *conn)
+                             struct flom_conn_data_s *conn)
 {
     enum Exception { NULL_OBJECT
                      , SIMPLE_WAITINGS_ERROR
@@ -369,17 +398,25 @@ int flom_resource_hier_clean(flom_resource_t *resource,
 
 
 void flom_resource_hier_free(flom_resource_t *resource)
-{    
-    /* clean-up holders list... */
-    FLOM_TRACE(("flom_resource_hier_free: cleaning-up holders list...\n"));
-    while (NULL != resource->data.simple.holders) {
-        struct flom_conn_lock_s *cl =
-            (struct flom_conn_lock_s *)resource->data.simple.holders->data;
-        resource->data.simple.holders = g_slist_remove(
-            resource->data.simple.holders, cl);
-        g_free(cl);
-    }
-    resource->data.simple.holders = NULL;
+{
+    guint i;
+    GSList *holders;
+    /* clean-up holders array of lists... */
+    FLOM_TRACE(("flom_resource_hier_free: cleaning-up holders array of "
+                "lists...\n"));
+    for (i=0; i<resource->data.hier.holders->len; ++i) {
+        holders = (GSList *)g_ptr_array_index(resource->data.hier.holders, i);
+        while (NULL != holders) {
+            struct flom_conn_lock_s *cl =
+                (struct flom_conn_lock_s *)holders->data;
+            holders = g_slist_remove(holders, cl);
+            g_free(cl);
+        }
+        holders = NULL;
+    } /* for (i=0; i<resource->data.hier.holders->len; ++i) */
+    g_ptr_array_free(resource->data.hier.holders, TRUE);
+    resource->data.hier.holders = NULL;
+
     /* clean-up waitings queue... */
     FLOM_TRACE(("flom_resource_hier_free: cleaning-up waitings queue...\n"));
     while (!g_queue_is_empty(resource->data.simple.waitings)) {
@@ -391,9 +428,15 @@ void flom_resource_hier_free(flom_resource_t *resource)
     g_queue_free(resource->data.simple.waitings);
     resource->data.simple.waitings = NULL;
     /* releasing resource name */
-    if (NULL != resource->name)
+    if (NULL != resource->name) {
         g_free(resource->name);
-    resource->name = NULL;
+        resource->name = NULL;
+    }
+    /* releasing splitted resource name */
+    if (NULL != resource->data.hier.splitted_name) {
+        g_strfreev(resource->data.hier.splitted_name);
+        resource->data.hier.splitted_name = NULL;
+    }
 }
 
 
@@ -401,11 +444,26 @@ void flom_resource_hier_free(flom_resource_t *resource)
 int flom_resource_hier_compare_name(const flom_resource_t *resource,
                                     const gchar *name)
 {
-    /* @@@ implement me, this code is wrong for hierarchical resources !!! */
-    FLOM_TRACE(("flom_resource_hier_compare_name: resource->name='%s', "
-                "name='%s'\n", resource->name,
-                NULL != name ? name : "null"));
-    return g_strcmp0(resource->name, name);
+    gchar **splitted_name;
+    int ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
+    size_t sep_len = strlen(FLOM_HIER_RESOURCE_SEPARATOR);
+    
+    if (0 != strncmp(name, FLOM_HIER_RESOURCE_SEPARATOR, sep_len)) {
+        FLOM_TRACE(("flom_resource_hier_init: '%s' does not start with "
+                    "'%s'\n", name, FLOM_HIER_RESOURCE_SEPARATOR));
+    } else if (NULL == (splitted_name = g_strsplit(
+                            name+sep_len, FLOM_HIER_RESOURCE_SEPARATOR, 0))) {
+        FLOM_TRACE(("flom_resource_hier_compare_name: WARNING g_strsplit "
+                    "returned NULL\n"));
+    } else {
+        FLOM_TRACE(("flom_resource_hier_compare_name: "
+                    "splitted_name[0]='%s', "
+                    "resource->..splitted_name[0]='%s'\n",
+                    splitted_name[0], resource->data.hier.splitted_name[0]));
+        ret_cod = g_strcmp0(splitted_name[0],
+                            resource->data.hier.splitted_name[0]);
+    }
+    return ret_cod;
 }
 
 

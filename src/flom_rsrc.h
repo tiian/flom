@@ -195,11 +195,17 @@ struct flom_rsrc_data_set_element_s {
 struct flom_rsrc_data_hier_s {
     /* @@@ fix this implementation */
     /**
-     * List of connections with an acquired lock
+     * Resource name broken down to an NULL-terminated array of strings
      */
-    GSList                 *holders;
+    gchar                 **splitted_name;
     /**
-     * List of connections waiting for a lock
+     * Array of list of connections with an acquired lock: for every level
+     * there's an element in the array; every element of the array is a
+     * pointer; every pointer is a GSList
+     */
+    GPtrArray              *holders;
+    /**
+     * Queue of connections waiting for a lock
      */
     GQueue                 *waitings;
 };
