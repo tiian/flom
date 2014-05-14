@@ -190,24 +190,38 @@ struct flom_rsrc_data_set_element_s {
 
 
 /**
+ * Every element of elements array (leaves) is of this struct type
+ */
+struct flom_rsrc_data_hier_element_s {
+    /**
+     * Name of the level
+     */
+    gchar                         *name;
+    /**
+     * List of connections with an acquired lock at this level
+     */
+    GSList                        *holders;
+    /**
+     * Next level elements of the same type of this one
+     */
+    GPtrArray                     *leaves;
+};
+
+
+
+/**
  * Resource data for type "hierarchical" @ref FLOM_RSRC_TYPE_HIER
+ * It's a tree with undefined levels and undefined leaves for every level
  */
 struct flom_rsrc_data_hier_s {
-    /* @@@ fix this implementation */
     /**
-     * Resource name broken down to an NULL-terminated array of strings
+     * Root element, contains the first level of the resource name
      */
-    gchar                 **splitted_name;
-    /**
-     * Array of list of connections with an acquired lock: for every level
-     * there's an element in the array; every element of the array is a
-     * pointer; every pointer is a GSList
-     */
-    GPtrArray              *holders;
+    struct flom_rsrc_data_hier_element_s  *root;
     /**
      * Queue of connections waiting for a lock
      */
-    GQueue                 *waitings;
+    GQueue                                *waitings;
 };
 
 

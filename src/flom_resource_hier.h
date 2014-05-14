@@ -99,6 +99,15 @@ extern "C" {
 
     
     /**
+     * Recursively frees all leaves elements and then this one
+     * @param element IN/OUT tree element to free
+     */
+    void flom_resource_hier_free_element(
+        struct flom_rsrc_data_hier_element_s *element);
+
+
+
+    /**
      * Compare the name of the current resource and an external name passed
      * to the method
      * @param resource IN reference to this resource object

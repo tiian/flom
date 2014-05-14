@@ -84,17 +84,22 @@ int flom_resource_hier_init(flom_resource_t *resource,
                             const gchar *name)
 {
     enum Exception { INVALID_RESOURCE_NAME
-                     , G_STRDUP_ERROR
+                     , G_STRDUP_ERROR1
                      , G_STRSPLIT_ERROR
+                     , G_TRY_MALLOC_ERROR
+                     , G_STRDUP_ERROR2
                      , G_QUEUE_NEW_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    gchar **splitted_name = NULL;
     
     FLOM_TRACE(("flom_resource_hier_init\n"));
     TRY {
         gchar **level_name;
         int i = 0;
         size_t sep_len = strlen(FLOM_HIER_RESOURCE_SEPARATOR);
+        struct flom_rsrc_data_hier_element_s *father = NULL;        
         
         if (0 != strncmp(name, FLOM_HIER_RESOURCE_SEPARATOR, sep_len)) {
             FLOM_TRACE(("flom_resource_hier_init: '%s' does not start with "
@@ -103,20 +108,37 @@ int flom_resource_hier_init(flom_resource_t *resource,
         }
             
         if (NULL == (resource->name = g_strdup(name)))
-            THROW(G_STRDUP_ERROR);
+            THROW(G_STRDUP_ERROR1);
         FLOM_TRACE(("flom_resource_hier_init: initialized resource ('%s')\n",
                     resource->name));
         /* prepare splitted name */
-        if (NULL == (resource->data.hier.splitted_name =
-                     g_strsplit(resource->name+sep_len,
-                                FLOM_HIER_RESOURCE_SEPARATOR, 0)))
+        if (NULL == (splitted_name = g_strsplit(
+                         resource->name+sep_len,
+                         FLOM_HIER_RESOURCE_SEPARATOR, 0)))
             THROW(G_STRSPLIT_ERROR);
-        /* prepare holders array */
-        for (level_name = resource->data.hier.splitted_name;
-             *level_name; level_name++) {
+        /* prepare tree structure */
+        for (level_name = splitted_name; *level_name; level_name++) {
+            struct flom_rsrc_data_hier_element_s *frdhe;
             FLOM_TRACE(("flom_resource_hier_init: level %d is '%s'\n",
                         i, *level_name));
-            g_ptr_array_add(resource->data.hier.holders, NULL);
+            /* allocating a new leaf */
+            if (NULL == (frdhe = (struct flom_rsrc_data_hier_element_s *)
+                         g_try_malloc(
+                             sizeof(struct flom_rsrc_data_hier_element_s))))
+                THROW(G_TRY_MALLOC_ERROR);
+            if (NULL == (frdhe->name = g_strdup(*level_name)))
+                THROW(G_STRDUP_ERROR2);
+            frdhe->holders = NULL;
+            frdhe->leaves = g_ptr_array_new();
+            if (!i) {
+                /* link root to this element */
+                resource->data.hier.root = frdhe;
+                father = frdhe;
+            } else {
+                /* link father to this element */
+                g_ptr_array_add(father->leaves, frdhe);
+                father = frdhe;
+            }
             i++;
         } /* for (name = ... */
         
@@ -126,11 +148,17 @@ int flom_resource_hier_init(flom_resource_t *resource,
             case INVALID_RESOURCE_NAME:
                 ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
                 break;
-            case G_STRDUP_ERROR:
+            case G_STRDUP_ERROR1:
                 ret_cod = FLOM_RC_G_STRDUP_ERROR;
                 break;
             case G_STRSPLIT_ERROR:
                 ret_cod = FLOM_RC_G_STRSPLIT_ERROR;
+                break;
+            case G_TRY_MALLOC_ERROR:
+                ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case G_STRDUP_ERROR2:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
                 break;
             case G_QUEUE_NEW_ERROR:
                 ret_cod = FLOM_RC_G_QUEUE_NEW_ERROR;
@@ -144,6 +172,10 @@ int flom_resource_hier_init(flom_resource_t *resource,
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_resource_hier_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    if (NULL != splitted_name) {
+        g_strfreev(splitted_name);
+        splitted_name = NULL;
+    }
     return ret_cod;
 }
 
@@ -399,43 +431,56 @@ int flom_resource_hier_clean(flom_resource_t *resource,
 
 void flom_resource_hier_free(flom_resource_t *resource)
 {
-    guint i;
-    GSList *holders;
-    /* clean-up holders array of lists... */
-    FLOM_TRACE(("flom_resource_hier_free: cleaning-up holders array of "
-                "lists...\n"));
-    for (i=0; i<resource->data.hier.holders->len; ++i) {
-        holders = (GSList *)g_ptr_array_index(resource->data.hier.holders, i);
-        while (NULL != holders) {
-            struct flom_conn_lock_s *cl =
-                (struct flom_conn_lock_s *)holders->data;
-            holders = g_slist_remove(holders, cl);
-            g_free(cl);
-        }
-        holders = NULL;
-    } /* for (i=0; i<resource->data.hier.holders->len; ++i) */
-    g_ptr_array_free(resource->data.hier.holders, TRUE);
-    resource->data.hier.holders = NULL;
-
+    /* removing resource tree */
+    flom_resource_hier_free_element(resource->data.hier.root);
+    
     /* clean-up waitings queue... */
     FLOM_TRACE(("flom_resource_hier_free: cleaning-up waitings queue...\n"));
-    while (!g_queue_is_empty(resource->data.simple.waitings)) {
+    while (!g_queue_is_empty(resource->data.hier.waitings)) {
         struct flom_conn_lock_s *cl =
             (struct flom_conn_lock_s *)g_queue_pop_head(
-                resource->data.simple.waitings);
+                resource->data.hier.waitings);
         g_free(cl);
     }
-    g_queue_free(resource->data.simple.waitings);
-    resource->data.simple.waitings = NULL;
+    g_queue_free(resource->data.hier.waitings);
+    resource->data.hier.waitings = NULL;
+}
+
+
+
+void flom_resource_hier_free_element(
+    struct flom_rsrc_data_hier_element_s *element)
+{
+    guint i;
+
+    FLOM_TRACE(("flom_resource_hier_free_element: diving the tree...\n"));
+    /* scan leaves and free them before */
+    if (NULL != element->leaves) {
+        for (i=0; i<element->leaves->len; ++i) {
+            flom_resource_hier_free_element(
+                g_ptr_array_index(element->leaves, i));
+        } /* for (i=0; i<element->leaves.len; ++i) */
+    } /* if (NULL != element->leaves) */
+    g_ptr_array_free(element->leaves, TRUE);
+
+    FLOM_TRACE(("flom_resource_hier_free_element: cleaning element '%s'\n",
+                element->name));    
+    
+    /* clean-up holders list... */
+    FLOM_TRACE(("flom_resource_hier_free_element: cleaning-up holders array "
+                "of lists...\n"));
+    while (NULL != element->holders) {
+        struct flom_conn_lock_s *cl =
+            (struct flom_conn_lock_s *)element->holders->data;
+        element->holders = g_slist_remove(element->holders, cl);
+        g_free(cl);
+    } /* while (NULL != element->holders) */
+    element->holders = NULL;
+
     /* releasing resource name */
-    if (NULL != resource->name) {
-        g_free(resource->name);
-        resource->name = NULL;
-    }
-    /* releasing splitted resource name */
-    if (NULL != resource->data.hier.splitted_name) {
-        g_strfreev(resource->data.hier.splitted_name);
-        resource->data.hier.splitted_name = NULL;
+    if (NULL != element->name) {
+        g_free(element->name);
+        element->name = NULL;
     }
 }
 
@@ -458,10 +503,10 @@ int flom_resource_hier_compare_name(const flom_resource_t *resource,
     } else {
         FLOM_TRACE(("flom_resource_hier_compare_name: "
                     "splitted_name[0]='%s', "
-                    "resource->..splitted_name[0]='%s'\n",
-                    splitted_name[0], resource->data.hier.splitted_name[0]));
+                    "resource->..root->name[0]='%s'\n",
+                    splitted_name[0], resource->data.hier.root->name[0]));
         ret_cod = g_strcmp0(splitted_name[0],
-                            resource->data.hier.splitted_name[0]);
+                            resource->data.hier.root->name);
     }
     return ret_cod;
 }
