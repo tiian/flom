@@ -48,10 +48,11 @@ extern "C" {
      * Check if a lock can be granted on a resource
      * @param resource IN reference to resource object
      * @param lock IN lock mode to check
+     * @param level_name IN a pointer to the current level part of the name
      * @return a boolean value
      */
-    int flom_resource_hier_can_lock(flom_resource_t *resource,
-                                      flom_lock_mode_t lock);
+    int flom_resource_hier_can_lock(struct flom_rsrc_data_hier_element_s *node,
+                                    flom_lock_mode_t lock, gchar **level_name);
 
 
     

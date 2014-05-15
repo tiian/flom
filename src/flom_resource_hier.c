@@ -43,11 +43,9 @@
 
 
 
-int flom_resource_hier_can_lock(flom_resource_t *resource,
-                                flom_lock_mode_t lock)
+int flom_resource_hier_can_lock(struct flom_rsrc_data_hier_element_s *node,
+                                flom_lock_mode_t lock, gchar **level_name)
 {
-    /* @@@ fix me: parameter list must be enriched with splitted name because
-       the lock must be checked against more levels */
     static const flom_lock_mode_t lock_table[
         FLOM_LOCK_MODE_N][FLOM_LOCK_MODE_N] =
         { { TRUE,  TRUE,  TRUE,  TRUE,  TRUE,  TRUE } ,
@@ -57,12 +55,22 @@ int flom_resource_hier_can_lock(flom_resource_t *resource,
           { TRUE,  TRUE,  FALSE, FALSE, FALSE, FALSE } ,
           { TRUE,  FALSE, FALSE, FALSE, FALSE, FALSE } };
     
-    GSList *p = NULL;
+    GSList *p;
     flom_lock_mode_t old_lock;
     int can_lock = TRUE;
     
-    FLOM_TRACE(("flom_resource_hier_can_lock: checking lock=%d\n", lock));
-    p = resource->data.simple.holders;
+    FLOM_TRACE(("flom_resource_hier_can_lock: node->name='%s', "
+                "level_name='%s', checking lock=%d\n", node->name,
+                *level_name != NULL ? *level_name : "", lock));
+    if (NULL != *level_name) {
+        if (g_strcmp0(*level_name, node->name)) {
+            FLOM_TRACE(("flom_resource_hier_can_lock: node->name is "
+                        "different than level_name, leaving...\n"));
+            return can_lock;
+        } /* if (g_strcmp0(*level_name, node->name)) */
+    } /* if (NULL != *level_name) */
+    /* check locks kept by all the holders of this level */
+    p = node->holders;
     while (NULL != p) {
         old_lock = ((struct flom_rsrc_conn_lock_s *)p->data)->info.lock_mode;
         FLOM_TRACE(("flom_resource_hier_can_lock: current_lock=%d, "
@@ -75,6 +83,19 @@ int flom_resource_hier_can_lock(flom_resource_t *resource,
         else
             p = p->next;
     } /* while (NULL != p) */
+    /* checking must go deeper? */
+    if (can_lock) {
+        guint i;
+        /* resource name levels are terminated, check the locks kept by
+           all leaves */
+        for (i=0; i<node->leaves->len; ++i) {
+            can_lock = flom_resource_hier_can_lock(
+                g_ptr_array_index(node->leaves, i), lock,
+                NULL == *level_name ? level_name : level_name+1);
+            if (!can_lock)
+                break;
+        } /* for (i=0; i<node->leaves.len; ++i) */
+    } /* if (can_lock) */
     return can_lock;
 }
 
@@ -109,7 +130,7 @@ int flom_resource_hier_init(flom_resource_t *resource,
             
         if (NULL == (resource->name = g_strdup(name)))
             THROW(G_STRDUP_ERROR1);
-        FLOM_TRACE(("flom_resource_hier_init: initialized resource ('%s')\n",
+        FLOM_TRACE(("flom_resource_hier_init: initializing resource ('%s')\n",
                     resource->name));
         /* prepare splitted name */
         if (NULL == (splitted_name = g_strsplit(
@@ -170,12 +191,13 @@ int flom_resource_hier_init(flom_resource_t *resource,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    FLOM_TRACE(("flom_resource_hier_init/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    /* free allocated memory */
     if (NULL != splitted_name) {
         g_strfreev(splitted_name);
         splitted_name = NULL;
     }
+    FLOM_TRACE(("flom_resource_hier_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
@@ -185,7 +207,8 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
                              struct flom_conn_data_s *conn,
                              struct flom_msg_s *msg)
 {
-    enum Exception { MSG_FREE_ERROR1
+    enum Exception { G_STRSPLIT_ERROR
+                     , MSG_FREE_ERROR1
                      , G_TRY_MALLOC_ERROR1
                      , MSG_BUILD_ANSWER_ERROR1
                      , G_TRY_MALLOC_ERROR2
@@ -198,6 +221,8 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
+    gchar **splitted_name = NULL;
+    
     FLOM_TRACE(("flom_resource_hier_inmsg\n"));
     TRY {
         flom_lock_mode_t new_lock = FLOM_LOCK_MODE_NL;
@@ -208,8 +233,14 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
             case FLOM_MSG_VERB_LOCK:
                 new_lock = msg->body.lock_8.resource.mode;
                 can_wait = msg->body.lock_8.resource.wait;
+                /* create resource splitted name */
+                if (NULL == (splitted_name = g_strsplit(
+                                 msg->body.lock_8.resource.name+
+                                 strlen(FLOM_HIER_RESOURCE_SEPARATOR),
+                                 FLOM_HIER_RESOURCE_SEPARATOR, 0)))
+                    THROW(G_STRSPLIT_ERROR);
                 can_lock = flom_resource_hier_can_lock(
-                    resource, new_lock);
+                    resource->data.hier.root, new_lock, splitted_name);
                 /* free the input message */
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(msg)))
                     THROW(MSG_FREE_ERROR1);
@@ -297,6 +328,9 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case G_STRSPLIT_ERROR:
+                ret_cod = FLOM_RC_G_STRSPLIT_ERROR;
+                break;
             case MSG_FREE_ERROR1:
                 break;
             case G_TRY_MALLOC_ERROR1:
@@ -326,6 +360,11 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* free allocated memory */
+    if (NULL != splitted_name) {
+        g_strfreev(splitted_name);
+        splitted_name = NULL;
+    }    
     FLOM_TRACE(("flom_resource_hier_inmsg/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -538,7 +577,7 @@ int flom_resource_hier_waitings(flom_resource_t *resource)
             if (NULL == cl)
                 break;
             /* try to apply this lock... */
-            if (flom_resource_hier_can_lock(resource, cl->info.lock_mode)) {
+            if (FALSE /* @@@ flom_resource_hier_can_lock(resource, cl->info.lock_mode) */ ) {
                 /* remove from waitings */
                 cl = g_queue_pop_nth(resource->data.simple.waitings, i);
                 if (NULL == cl)
