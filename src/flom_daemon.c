@@ -1172,14 +1172,12 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
             FLOM_TRACE(("flom_accept_loop_transfer: locker # %u is managing "
                         "resource '%s'\n", i,
                         flom_resource_get_name(&locker->resource)));
-            /*
+            /* @@@ remove me!
             if (!g_strcmp0(flom_resource_get_name(&locker->resource),
                            msg->body.lock_8.resource.name)) {
             */
-            
             if (!locker->resource.compare_name(
                     &locker->resource, msg->body.lock_8.resource.name)) {
-            
                 FLOM_TRACE(("flom_accept_loop_transfer: found locker %u for "
                             "resource '%s'\n", i,
                             msg->body.lock_8.resource.name));

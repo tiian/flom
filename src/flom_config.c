@@ -79,7 +79,7 @@ const char *FLOM_PACKAGE_DATE = _RELEASE_DATE;
 const gchar FLOM_INSTALL_SYSCONFDIR[] = _SYSCONFDIR;
 
 const char *FLOM_EMPTY_STRING = "";
-const char *FLOM_NULL_STRING = "null";
+const char *FLOM_NULL_STRING = "{null}";
 
 const gchar *FLOM_CONFIG_GROUP_TRACE = _CONFIG_GROUP_TRACE;
 const gchar *FLOM_CONFIG_KEY_DAEMONTRACEFILE = _CONFIG_KEY_DAEMONTRACEFILE;
@@ -202,7 +202,7 @@ int flom_config_check()
         frt = flom_rsrc_get_type(flom_config_get_resource_name());
         /* check lock mode */
         if (FLOM_LOCK_MODE_EX != flom_config_get_lock_mode() &&
-            FLOM_RSRC_TYPE_SIMPLE != frt) {
+            FLOM_RSRC_TYPE_SIMPLE != frt && FLOM_RSRC_TYPE_HIER != frt) {
             if (flom_config_get_verbose())
                 g_warning("This resource type (%d) support only exclusive "
                           "lock mode; specified value (%d) will be ignored\n",

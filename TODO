@@ -1,8 +1,5 @@
 WIP
-fix flom_resource_hier_inmsg and flom_resource_hier_clean and 
-    flom_resource_hier_can_lock
-substitute flom_resource_hier_compare_name with a valid implementation
-substitute flom_rsrc_data_hier_s with a valid implmentation
+fix flom_resource_hier_clean
 
 
 
