@@ -78,6 +78,9 @@ const char *FLOM_PACKAGE_DATE = _RELEASE_DATE;
 
 const gchar FLOM_INSTALL_SYSCONFDIR[] = _SYSCONFDIR;
 
+const char *FLOM_EMPTY_STRING = "";
+const char *FLOM_NULL_STRING = "null";
+
 const gchar *FLOM_CONFIG_GROUP_TRACE = _CONFIG_GROUP_TRACE;
 const gchar *FLOM_CONFIG_KEY_DAEMONTRACEFILE = _CONFIG_KEY_DAEMONTRACEFILE;
 const gchar *FLOM_CONFIG_KEY_COMMANDTRACEFILE = _CONFIG_KEY_COMMANDTRACEFILE;
@@ -241,17 +244,17 @@ void flom_config_print()
 {
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_TRACE,
             FLOM_CONFIG_KEY_DAEMONTRACEFILE,
-            NULL == flom_config_get_daemon_trace_file() ? "" :
+            NULL == flom_config_get_daemon_trace_file() ? FLOM_EMPTY_STRING :
             flom_config_get_daemon_trace_file());
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_TRACE,
             FLOM_CONFIG_KEY_COMMANDTRACEFILE,
-            NULL == flom_config_get_command_trace_file() ? "" :
+            NULL == flom_config_get_command_trace_file() ? FLOM_EMPTY_STRING :
             flom_config_get_command_trace_file());
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_TRACE,
             FLOM_CONFIG_KEY_VERBOSE, flom_config_get_verbose());
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_RESOURCE,
             FLOM_CONFIG_KEY_NAME,
-            NULL == flom_config_get_resource_name() ? "" :
+            NULL == flom_config_get_resource_name() ? FLOM_EMPTY_STRING :
             flom_config_get_resource_name());
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
             FLOM_CONFIG_KEY_WAIT, flom_config_get_resource_wait());
@@ -263,19 +266,19 @@ void flom_config_print()
             FLOM_CONFIG_KEY_LOCK_MODE, flom_config_get_lock_mode());
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_SOCKET_NAME,
-            NULL == flom_config_get_socket_name() ? "" :
+            NULL == flom_config_get_socket_name() ? FLOM_EMPTY_STRING :
             flom_config_get_socket_name());
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_LIFESPAN, flom_config_get_lifespan());
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_UNICAST_ADDRESS,
-            NULL == flom_config_get_unicast_address() ? "" :
+            NULL == flom_config_get_unicast_address() ? FLOM_EMPTY_STRING :
             flom_config_get_unicast_address());
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_UNICAST_PORT, flom_config_get_unicast_port());
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_MULTICAST_ADDRESS,
-            NULL == flom_config_get_multicast_address() ? "" :
+            NULL == flom_config_get_multicast_address() ? FLOM_EMPTY_STRING :
             flom_config_get_multicast_address());
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_MULTICAST_PORT, flom_config_get_multicast_port());

@@ -99,7 +99,8 @@ int global_res_name_preg_init()
                     break;
                 default:
                     printed = snprintf(
-                        reg_expr, sizeof(reg_expr), reg_str[i], "");
+                        reg_expr, sizeof(reg_expr), reg_str[i],
+                        FLOM_EMPTY_STRING);
                     break;
             } /* switch (i) */
             if (sizeof(reg_expr) <= printed)

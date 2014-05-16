@@ -61,7 +61,7 @@ int flom_resource_hier_can_lock(struct flom_rsrc_data_hier_element_s *node,
     
     FLOM_TRACE(("flom_resource_hier_can_lock: node->name='%s', "
                 "level_name='%s', checking lock=%d\n", node->name,
-                *level_name != NULL ? *level_name : "", lock));
+                *level_name != NULL ? *level_name : FLOM_NULL_STRING, lock));
     if (NULL != *level_name) {
         if (g_strcmp0(*level_name, node->name)) {
             FLOM_TRACE(("flom_resource_hier_can_lock: node->name is "
@@ -97,6 +97,66 @@ int flom_resource_hier_can_lock(struct flom_rsrc_data_hier_element_s *node,
         } /* for (i=0; i<node->leaves.len; ++i) */
     } /* if (can_lock) */
     return can_lock;
+}
+
+
+
+int flom_resource_hier_add_locker(flom_resource_t *resource,
+                                  struct flom_rsrc_conn_lock_s *cl,
+                                  gchar **splitted_name)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_resource_hier_add_locker\n"));
+    TRY {
+        struct flom_rsrc_data_hier_element_s *node = resource->data.hier.root;
+        gchar **level_name;
+        int found = FALSE;
+        int node_is_leaf = TRUE;
+
+        for (level_name=splitted_name; *level_name; ++level_name) {
+            FLOM_TRACE(("flom_resource_hier_add_locker: "
+                        "*level_name='%s', node->name='%s'\n",
+                        NULL != *level_name ? *level_name : FLOM_NULL_STRING,
+                        NULL != node->name ? node->name : FLOM_NULL_STRING));
+            if (!g_strcmp0(*level_name, node->name)) {
+                /* go one level depth */
+                guint i;
+                found = FALSE;
+                node_is_leaf = TRUE;
+                for (i=0; i<node->leaves->len; ++i) {
+                    struct flom_rsrc_data_hier_element_s *leaf =
+                        g_ptr_array_index(node->leaves, i);
+                    node_is_leaf = FALSE;
+                    FLOM_TRACE(("flom_resource_hier_add_locker: "
+                                "*(level_name+1)='%s', leaf->name='%s'\n",
+                                NULL != *(level_name+1) ?
+                                *(level_name+1) : FLOM_NULL_STRING,
+                                NULL != leaf->name ?
+                                leaf->name : FLOM_NULL_STRING));
+                    if (!g_strcmp0(*(level_name+1), leaf->name)) {
+                        node = leaf;
+                        found = TRUE;
+                        break;
+                    } /* if (!g_strcmp0(*(level_name+1), leaf->name)) */
+                } /* for (i=0; i<node->leaves->len; ++i) */
+            } /* if (!g_strcmp0(*level_name, node->name)) */
+        } /* for (level_name=splitted_name; *level_name; ++level_name) */
+            
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_resource_hier_add_locker/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 

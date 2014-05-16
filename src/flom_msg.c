@@ -37,6 +37,7 @@
 
 
 
+#include "flom_config.h"
 #include "flom_errors.h"
 #include "flom_msg.h"
 #include "flom_rsrc.h"
@@ -1009,7 +1010,8 @@ int flom_msg_serialize_discover_16(const struct flom_msg_s *msg,
                               FLOM_MSG_TAG_NETWORK,
                               FLOM_MSG_PROP_ADDRESS,
                               NULL != msg->body.discover_16.network.address ?
-                              msg->body.discover_16.network.address : "",
+                              msg->body.discover_16.network.address :
+                              FLOM_EMPTY_STRING,
                               FLOM_MSG_PROP_PORT,
                               msg->body.discover_16.network.port);
         if (used_chars >= *free_chars)
@@ -1116,7 +1118,7 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
                             FLOM_MSG_TAG_RESOURCE,
                             FLOM_MSG_PROP_NAME,
                             msg->body.lock_8.resource.name != NULL ?
-                            msg->body.lock_8.resource.name : "",
+                            msg->body.lock_8.resource.name : FLOM_EMPTY_STRING,
                             FLOM_MSG_PROP_MODE,
                             msg->body.lock_8.resource.mode,
                             FLOM_MSG_PROP_WAIT,
@@ -1132,7 +1134,8 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
                             msg->body.lock_16.answer.rc,
                             FLOM_MSG_PROP_ELEMENT,
                             msg->body.lock_16.answer.element != NULL ?
-                            msg->body.lock_16.answer.element : ""));
+                            msg->body.lock_16.answer.element :
+                            FLOM_EMPTY_STRING));
                 break;
             case 24:
                 FLOM_TRACE(("flom_msg_trace_lock: body[%s["
@@ -1142,7 +1145,8 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
                             msg->body.lock_24.answer.rc,
                             FLOM_MSG_PROP_ELEMENT,
                             msg->body.lock_24.answer.element != NULL ?
-                            msg->body.lock_24.answer.element : ""));
+                            msg->body.lock_24.answer.element :
+                            FLOM_EMPTY_STRING));
                 break;
             default:
                 THROW(INVALID_STEP);
@@ -1183,7 +1187,8 @@ int flom_msg_trace_unlock(const struct flom_msg_s *msg)
                             FLOM_MSG_TAG_RESOURCE,
                             FLOM_MSG_PROP_NAME,
                             msg->body.unlock_8.resource.name != NULL ?
-                            msg->body.unlock_8.resource.name : ""));
+                            msg->body.unlock_8.resource.name :
+                            FLOM_NULL_STRING));
                 break;
             default:
                 THROW(INVALID_STEP);
@@ -1264,8 +1269,8 @@ int flom_msg_trace_discover(const struct flom_msg_s *msg)
                             FLOM_MSG_TAG_NETWORK,
                             FLOM_MSG_PROP_ADDRESS,
                             NULL != msg->body.discover_16.network.address ?
-                            msg->body.discover_16.network.address : "",
-                            FLOM_MSG_PROP_PORT,
+                            msg->body.discover_16.network.address :
+                            FLOM_NULL_STRING, FLOM_MSG_PROP_PORT,
                             msg->body.discover_16.network.port));
                 break;
             default:

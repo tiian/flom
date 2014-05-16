@@ -44,6 +44,7 @@
 
 
 
+#include "flom_config.h"
 #include "flom_trace.h"
 
 
@@ -245,7 +246,7 @@ void flom_trace_addrinfo(const char *prefix, const struct addrinfo *p)
                 "ai_protocol=%d,ai_addrlen=%u,ai_canonname='%s'] ",
                 p->ai_flags, p->ai_family, p->ai_socktype, p->ai_protocol,
                 p->ai_addrlen,
-                NULL != p->ai_canonname ? p->ai_canonname : "");
+                NULL != p->ai_canonname ? p->ai_canonname : FLOM_NULL_STRING);
         p = p->ai_next;
     }
     /* close trace record */

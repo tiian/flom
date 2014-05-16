@@ -81,7 +81,14 @@ extern const char *FLOM_PACKAGE_DATE;
  * Installation configuration dir (./configure output)
  */
 extern const char FLOM_INSTALL_SYSCONFDIR[];
-
+/**
+ * Empty string for output messages
+ */
+extern const char *FLOM_EMPTY_STRING;
+/**
+ * NULL string for output messages
+ */
+extern const char *FLOM_NULL_STRING;
 
 
 /**

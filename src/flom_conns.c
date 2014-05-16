@@ -369,7 +369,7 @@ int flom_conns_clean(flom_conns_t *conns)
             FLOM_TRACE(("flom_conns_clean: i=%u, state=%d, fd=%d %s\n",
                         i, c->state, c->fd,
                         FLOM_CONN_STATE_REMOVE == c->state ?
-                        "(removing...)" : ""));
+                        "(removing...)" : FLOM_EMPTY_STRING));
             flom_conn_data_trace(c);
             if (FLOM_CONN_STATE_REMOVE == c->state) {
                 /* connections with this state are no more valid and must be

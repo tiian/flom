@@ -46,7 +46,7 @@ extern "C" {
 #endif /* __cplusplus */
     /**
      * Check if a lock can be granted on a resource
-     * @param resource IN reference to resource object
+     * @param node IN reference to root node of a resource
      * @param lock IN lock mode to check
      * @param level_name IN a pointer to the current level part of the name
      * @return a boolean value
@@ -55,7 +55,19 @@ extern "C" {
                                     flom_lock_mode_t lock, gchar **level_name);
 
 
-    
+
+    /**
+     * Add a new locker to a resource
+     * @param resource IN/OUT resource reference
+     * @param cl IN connection lock of the locker
+     * @param splitted_name IN name of the asked resource to must be locked
+     */
+    int flom_resource_hier_add_locker(flom_resource_t *resource,
+                                      struct flom_rsrc_conn_lock_s *cl,
+                                      gchar **splitted_name);
+
+
+
     /**
      * Initialize a new resource of type hierarchical
      * @param resource IN reference to resource object
