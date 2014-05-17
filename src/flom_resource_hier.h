@@ -131,6 +131,18 @@ extern "C" {
                                         const gchar *name);
 
 
+    /**
+     * Change current resource name to a new one; for hierarchical resources
+     * global name is one of the many names the resource can assume (it's a
+     * tree of names!). The name property is used as transitory
+     * @param resource IN referente to resource object
+     * @param name IN new name to be assigned
+     * @return a reason code
+     */
+    int flom_resource_hier_change_name(flom_resource_t *resource,
+                                       const gchar *name);
+
+    
 
     /**
      * Check if any of the lock waitings can get a lock

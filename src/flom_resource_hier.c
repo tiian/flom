@@ -20,6 +20,9 @@
 
 
 
+#ifdef HAVE_ASSERT_H
+# include <assert.h>
+#endif
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
@@ -122,8 +125,7 @@ int flom_resource_hier_add_locker(flom_resource_t *resource,
             node_is_leaf = TRUE;
             FLOM_TRACE(("flom_resource_hier_add_locker: "
                         "*level_name='%s', node->name='%s'\n",
-                        NULL != *level_name ? *level_name : FLOM_NULL_STRING,
-                        NULL != node->name ? node->name : FLOM_NULL_STRING));
+                        STRORNULL(*level_name), STRORNULL(node->name)));
             if (!g_strcmp0(*level_name, node->name)) {
                 /* go one level depth */
                 guint i;
@@ -134,10 +136,8 @@ int flom_resource_hier_add_locker(flom_resource_t *resource,
                     node_is_leaf = FALSE;
                     FLOM_TRACE(("flom_resource_hier_add_locker: "
                                 "*(level_name+1)='%s', leaf->name='%s'\n",
-                                NULL != *(level_name+1) ?
-                                *(level_name+1) : FLOM_NULL_STRING,
-                                NULL != leaf->name ?
-                                leaf->name : FLOM_NULL_STRING));
+                                STRORNULL(*(level_name+1)),
+                                STRORNULL(leaf->name)));
                     if (!g_strcmp0(*(level_name+1), leaf->name)) {
                         node = leaf;
                         found = TRUE;
@@ -323,6 +323,8 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
                      , G_TRY_MALLOC_ERROR2
                      , MSG_BUILD_ANSWER_ERROR2
                      , MSG_BUILD_ANSWER_ERROR3
+                     , INVALID_RESOURCE_NAME
+                     , RESOURCE_HIER_CHANGE_NAME_ERROR
                      , RESOURCE_HIER_CLEAN_ERROR
                      , MSG_FREE_ERROR2
                      , PROTOCOL_ERROR
@@ -410,6 +412,21 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
                 } /* if (can_lock) */
                 break;
             case FLOM_MSG_VERB_UNLOCK:
+                /* check resource name */
+                if (flom_resource_hier_compare_name(
+                        resource, msg->body.unlock_8.resource.name)) {
+                    FLOM_TRACE(("flom_resource_hier_inmsg: arrived unlock "
+                                "verb for resource '%s', but this locker "
+                                "is managing resource '%s'\n",
+                                STRORNULL(msg->body.unlock_8.resource.name),
+                                STRORNULL(resource->data.hier.root->name)));
+                    THROW(INVALID_RESOURCE_NAME);
+                }
+                /* set the asked unlock name at resource level */
+                if (FLOM_RC_OK != (ret_cod = flom_resource_hier_change_name(
+                                       resource,
+                                       msg->body.unlock_8.resource.name)))
+                    THROW(RESOURCE_HIER_CHANGE_NAME_ERROR);
                 /* clean lock */
                 if (FLOM_RC_OK != (ret_cod = flom_resource_hier_clean(
                                        resource, conn)))
@@ -443,6 +460,10 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
             case MSG_BUILD_ANSWER_ERROR2:
             case MSG_BUILD_ANSWER_ERROR3:
                 break;
+            case INVALID_RESOURCE_NAME:
+                ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
+                break;
+            case RESOURCE_HIER_CHANGE_NAME_ERROR:
             case RESOURCE_HIER_CLEAN_ERROR:
             case MSG_FREE_ERROR2:
                 break;
@@ -472,19 +493,64 @@ int flom_resource_hier_clean(flom_resource_t *resource,
                              struct flom_conn_data_s *conn)
 {
     enum Exception { NULL_OBJECT
+                     , G_STRSPLIT_ERROR
+                     , INVALID_RESOURCE_NAME
                      , SIMPLE_WAITINGS_ERROR
                      , INTERNAL_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
+    gchar **splitted_name = NULL;
+    
     FLOM_TRACE(("flom_resource_hier_clean\n"));
     TRY {
         GSList *p = NULL;
-
+        gchar **level_name = NULL;
+        size_t sep_len = strlen(FLOM_HIER_RESOURCE_SEPARATOR);
+        struct flom_rsrc_data_hier_element_s *node;
+            
         if (NULL == resource)
             THROW(NULL_OBJECT);
+        /* prepare splitted name */
+        if (NULL == (splitted_name = g_strsplit(
+                         resource->name+sep_len,
+                         FLOM_HIER_RESOURCE_SEPARATOR, 0)))
+            THROW(G_STRSPLIT_ERROR);
+        /* search leaf node for this resource name */
+        node = resource->data.hier.root;
+        for (level_name = splitted_name; *level_name; ++level_name) {
+            FLOM_TRACE(("flom_resource_hier_clean: *level_name='%s', "
+                        "node->name='%s'\n", STRORNULL(*level_name),
+                        STRORNULL(node->name)));
+            if (!g_strcmp0(*level_name, node->name)) {
+                /* go one level depth */
+                guint i;
+                int found = FALSE;
+                for (i=0; i<node->leaves->len; ++i) {
+                    struct flom_rsrc_data_hier_element_s *leaf =
+                        g_ptr_array_index(node->leaves, i);
+                    FLOM_TRACE(("flom_resource_hier_clean: "
+                                "*(level_name+1)='%s', leaf->name='%s'\n",
+                                STRORNULL(*(level_name+1)),
+                                STRORNULL(leaf->name)));
+                    if (!g_strcmp0(*(level_name+1), leaf->name)) {
+                        node =leaf;
+                        found = TRUE;
+                        break;
+                    } /* if (!g_strcmp0(*(level_name+1), leaf->name)) */
+                } /* for (i=0; i<node->leaves->len; ++i) */
+                if (!found && NULL != *(level_name+1)) {
+                    FLOM_TRACE(("flom_resource_hier_clean: unable to locate "
+                                "node for resource level '%s', this is an "
+                                "internal severe error!\n",
+                                STRORNULL(*(level_name+1))));
+                    THROW(INVALID_RESOURCE_NAME);
+                }
+            } /* if (!g_strcmp0(*level_name, node->name)) */
+        } /* for (level_name = splitted_name; *level_name; ++level_name) */
+        assert(NULL != node);
         /* check if the connection keeps a lock */
-        p = resource->data.simple.holders;
+        p = node->holders;
         while (NULL != p) {
             if (((struct flom_rsrc_conn_lock_s *)p->data)->conn == conn)
                 break;
@@ -498,14 +564,9 @@ int flom_resource_hier_clean(flom_resource_t *resource,
                         "a lock mode %d, removing it...\n",
                         cl->info.lock_mode));
             FLOM_TRACE(("flom_resource_hier_clean: cl=%p\n", cl));
-            resource->data.simple.holders = g_slist_remove(
-                resource->data.simple.holders, cl);
+            node->holders = g_slist_remove(node->holders, cl);
             /* free the now useless connection lock record */
             g_free(cl);
-            /*
-            FLOM_TRACE(("flom_resource_hier_clean: g_slist_length=%u\n",
-                        g_slist_length(resource->data.simple.holders)));
-            */
             /* check if some other clients can get a lock now */
             if (FLOM_RC_OK != (ret_cod = flom_resource_hier_waitings(
                                    resource)))
@@ -516,7 +577,7 @@ int flom_resource_hier_clean(flom_resource_t *resource,
             do {
                 struct flom_rsrc_conn_lock_s *cl =
                     (struct flom_rsrc_conn_lock_s *)
-                    g_queue_peek_nth(resource->data.simple.waitings, i);
+                    g_queue_peek_nth(resource->data.hier.waitings, i);
                 if (NULL == cl)
                     break;
                 if (cl->conn == conn) {
@@ -524,7 +585,7 @@ int flom_resource_hier_clean(flom_resource_t *resource,
                     FLOM_TRACE(("flom_resource_hier_clean: the client is "
                                 "waiting for a lock mode %d, removing "
                                 "it...\n", cl->info.lock_mode));
-                    cl = g_queue_pop_nth(resource->data.simple.waitings, i);
+                    cl = g_queue_pop_nth(resource->data.hier.waitings, i);
                     if (NULL == cl) {
                         /* this should be impossibile because peek was ok
                            some rows above */
@@ -545,6 +606,12 @@ int flom_resource_hier_clean(flom_resource_t *resource,
             case NULL_OBJECT:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
+            case G_STRSPLIT_ERROR:
+                ret_cod = FLOM_RC_G_STRSPLIT_ERROR;
+                break;
+            case INVALID_RESOURCE_NAME:
+                ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
+                break;
             case SIMPLE_WAITINGS_ERROR:
                 break;
             case INTERNAL_ERROR:
@@ -557,6 +624,11 @@ int flom_resource_hier_clean(flom_resource_t *resource,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* free allocated memory */
+    if (NULL != splitted_name) {
+        g_strfreev(splitted_name);
+        splitted_name = NULL;
+    }
     FLOM_TRACE(("flom_resource_hier_clean/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -579,6 +651,10 @@ void flom_resource_hier_free(flom_resource_t *resource)
     }
     g_queue_free(resource->data.hier.waitings);
     resource->data.hier.waitings = NULL;
+    if (NULL != resource->name) {
+        g_free(resource->name);
+        resource->name = NULL;
+    }
 }
 
 
@@ -643,6 +719,48 @@ int flom_resource_hier_compare_name(const flom_resource_t *resource,
         ret_cod = g_strcmp0(splitted_name[0],
                             resource->data.hier.root->name);
     }
+    return ret_cod;
+}
+
+
+
+int flom_resource_hier_change_name(flom_resource_t *resource,
+                                   const gchar *name)
+{
+    enum Exception { G_STRDUP_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_resource_hier_change_name: substituting '%s' with "
+                "'%s'\n", STRORNULL(resource->name), STRORNULL(name)));
+    TRY {
+        if (!g_strcmp0(resource->name, name)) {
+            FLOM_TRACE(("flom_resource_hier_change_name: strings are equal, "
+                        "bypassing...\n"));
+        } else {
+            if (NULL != resource->name) {
+                g_free(resource->name);
+                resource->name = NULL;
+            }
+            if (NULL == (resource->name = g_strdup(name)))
+                THROW(G_STRDUP_ERROR);
+        } /* if (!g_strcmp0(resource->name, name)) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_resource_hier_change_name/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 

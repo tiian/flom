@@ -75,6 +75,17 @@
 
 
 
+#ifndef STRORNULL
+/**
+ * STRing OR NULL:
+ * it can be used to print C strings even if they could be NULL; if passed
+ * string pointer is NULL, it returns a pointer to @ref FLOM_NULL_STRING
+ */
+# define STRORNULL(a)   (NULL != a ? a : FLOM_NULL_STRING)
+#endif
+
+
+
 /**
  * This value is the null file descriptor convention
  */
