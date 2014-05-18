@@ -430,7 +430,7 @@ int flom_resource_simple_waitings(flom_resource_t *resource)
                     /* this should be impossibile because peek was ok
                        some rows above */
                     THROW(INTERNAL_ERROR);
-                /* send a message to the client thatìs waiting the lock */
+                /* send a message to the client that is waiting the lock */
                 flom_msg_init(&msg);
                 if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                        &msg, FLOM_MSG_VERB_LOCK,

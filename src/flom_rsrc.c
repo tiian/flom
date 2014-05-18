@@ -297,6 +297,34 @@ int flom_rsrc_get_elements(const gchar *resource_name, GArray *elements)
 
 
 
+struct flom_rsrc_conn_lock_s *flom_rsrc_conn_lock_new(void)
+{
+    struct flom_rsrc_conn_lock_s *cl;
+    if (NULL == (cl = g_try_malloc(sizeof(struct flom_rsrc_conn_lock_s)))) {
+        FLOM_TRACE(("flom_rsrc_conn_lock_new: unable to allocate a struct "
+                    "of type 'flom_rsrc_conn_lock_s' with g_try_malloc\n"));
+        return NULL;
+    }
+    memset(cl, 0, sizeof(struct flom_rsrc_conn_lock_s));
+    return cl;
+}
+
+
+
+void flom_rsrc_conn_lock_delete(struct flom_rsrc_conn_lock_s *frcl)
+{
+    if (NULL == frcl) {
+        FLOM_TRACE(("flom_rsrc_conn_lock_delete: trying to delete a NULL "
+                    "struct pointer\n"));
+        return;
+    }
+    if (NULL != frcl->name)
+        g_free(frcl->name);
+    g_free(frcl);
+}
+
+
+
 int flom_resource_init(flom_resource_t *resource,
                        flom_rsrc_type_t type, const gchar *name)
 {

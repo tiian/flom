@@ -104,6 +104,11 @@ struct flom_rsrc_conn_lock_s {
         gint                        quantity;
     } info;
     /**
+     * Resource name is necessary of hierarchical resources only because
+     * the a resource is a tree of names
+     */
+    gchar                      *name;
+    /**
      * Connection requesting the lock
      */
     struct flom_conn_data_s    *conn;
@@ -341,6 +346,23 @@ extern "C" {
     int flom_rsrc_get_elements(const gchar *resource_name, GArray *elements);
 
 
+
+    /**
+     * Create a resource connection lock struct
+     * @param frcl OUT reference to a resource connection lock struct
+     * @return a valid pointer or NULL
+     */
+    struct flom_rsrc_conn_lock_s *flom_rsrc_conn_lock_new(void);
+
+    
+
+    /**
+     * Release/free/delete a resource connection lock struct
+     * @param frcl OUT reference to a resource connection lock struct
+     */
+    void flom_rsrc_conn_lock_delete(struct flom_rsrc_conn_lock_s *frcl);
+
+    
 
     /**
      * Initialize a resource
