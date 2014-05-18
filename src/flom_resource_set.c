@@ -184,10 +184,7 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
                         FLOM_TRACE(("flom_resource_set_inmsg: there is no "
                                     "available element for "
                                     "connection %p, queing...\n", conn));
-                        if (NULL == (
-                                cl = (struct flom_rsrc_conn_lock_s *)
-                                g_try_malloc(
-                                    sizeof(struct flom_rsrc_conn_lock_s))))
+                        if (NULL == (cl = flom_rsrc_conn_lock_new()))
                             THROW(G_TRY_MALLOC_ERROR);
                         cl->conn = conn;
                         g_queue_push_tail(
@@ -328,7 +325,7 @@ int flom_resource_set_clean(flom_resource_t *resource,
                         THROW(INTERNAL_ERROR);
                     } else {
                         /* free the now useless connection lock record */
-                        g_free(cl);
+                        flom_rsrc_conn_lock_delete(cl);
                     }
                     break;
                 } else
@@ -382,10 +379,10 @@ void flom_resource_set_free(flom_resource_t *resource)
     /* clean-up waitings queue... */
     FLOM_TRACE(("flom_resource_set_free: cleaning-up waitings queue...\n"));
     while (!g_queue_is_empty(resource->data.set.waitings)) {
-        struct flom_conn_lock_s *cl =
-            (struct flom_conn_lock_s *)g_queue_pop_head(
+        struct flom_rsrc_conn_lock_s *cl =
+            (struct flom_rsrc_conn_lock_s *)g_queue_pop_head(
                 resource->data.set.waitings);
-        g_free(cl);
+        flom_rsrc_conn_lock_delete(cl);
     }
     g_queue_free(resource->data.set.waitings);
     resource->data.set.waitings = NULL;
@@ -459,7 +456,7 @@ int flom_resource_set_waitings(flom_resource_t *resource)
                 resource->data.set.index = (resource->data.set.index + 1) %
                     resource->data.set.elements->len;
                 /* free cl */
-                g_free(cl);
+                flom_rsrc_conn_lock_delete(cl);
                 cl = NULL;
             } else
                 ++i;
@@ -484,7 +481,7 @@ int flom_resource_set_waitings(flom_resource_t *resource)
         } /* switch (excp) */
     } /* TRY-CATCH */
     if (NULL != cl) {
-        g_free(cl);
+        flom_rsrc_conn_lock_delete(cl);
     }
     FLOM_TRACE(("flom_resource_set_waitings/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

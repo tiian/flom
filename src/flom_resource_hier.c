@@ -270,6 +270,8 @@ int flom_resource_hier_init(flom_resource_t *resource,
             }
             i++;
         } /* for (name = ... */
+        if (NULL == (resource->data.hier.waitings = g_queue_new()))
+            THROW(G_QUEUE_NEW_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -316,14 +318,14 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
                              struct flom_msg_s *msg)
 {
     enum Exception { G_STRSPLIT_ERROR
+                     , G_STRDUP_ERROR
+                     , MSG_FREE_ERROR1
                      , G_TRY_MALLOC_ERROR1
                      , RESOURCE_HIER_ADD_LOCKER_ERROR
                      , MSG_BUILD_ANSWER_ERROR1
                      , G_TRY_MALLOC_ERROR2
-                     , G_STRDUP_ERROR
                      , MSG_BUILD_ANSWER_ERROR2
                      , MSG_BUILD_ANSWER_ERROR3
-                     , MSG_FREE_ERROR1
                      , INVALID_RESOURCE_NAME
                      , RESOURCE_HIER_CHANGE_NAME_ERROR
                      , RESOURCE_HIER_CLEAN_ERROR
@@ -333,6 +335,7 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     gchar **splitted_name = NULL;
+    gchar *resource_name = NULL;
     
     FLOM_TRACE(("flom_resource_hier_inmsg\n"));
     TRY {
@@ -350,6 +353,14 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
                                  strlen(FLOM_HIER_RESOURCE_SEPARATOR),
                                  FLOM_HIER_RESOURCE_SEPARATOR, 0)))
                     THROW(G_STRSPLIT_ERROR);
+                /* duplicate resource name before message reset */
+                if (NULL == (resource_name = g_strdup(
+                                 msg->body.lock_8.resource.name)))
+                    THROW(G_STRDUP_ERROR);
+                /* free the input message */
+                if (FLOM_RC_OK != (ret_cod = flom_msg_free(msg)))
+                    THROW(MSG_FREE_ERROR1);
+                flom_msg_init(msg);
                 can_lock = flom_resource_hier_can_lock(
                     resource->data.hier.root, new_lock, splitted_name);
                 if (can_lock) {
@@ -385,12 +396,19 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
                             THROW(G_TRY_MALLOC_ERROR2);
                         cl->info.lock_mode = new_lock;
                         cl->conn = conn;
-                        if (NULL == (cl->name = g_strdup(
-                                         msg->body.lock_8.resource.name)))
-                            THROW(G_STRDUP_ERROR);
+                        cl->name = resource_name;
+                        resource_name = NULL;
+                        FLOM_TRACE(("flom_resource_hier_inmsg: "
+                                    "g_queue_get_length()=%u (before)\n",
+                                    g_queue_get_length(
+                                        resource->data.hier.waitings)));
                         g_queue_push_tail(
                             resource->data.hier.waitings,
                             (gpointer)cl);
+                        FLOM_TRACE(("flom_resource_hier_inmsg: "
+                                    "g_queue_get_length()=%u (after)\n",
+                                    g_queue_get_length(
+                                        resource->data.hier.waitings)));
                         if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                                msg, FLOM_MSG_VERB_LOCK,
                                                2*FLOM_MSG_STEP_INCR,
@@ -407,10 +425,6 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
                             THROW(MSG_BUILD_ANSWER_ERROR3);
                     } /* if (msg->body.lock_8.resource.wait) */
                 } /* if (can_lock) */
-                /* free the input message */
-                if (FLOM_RC_OK != (ret_cod = flom_msg_free(msg)))
-                    THROW(MSG_FREE_ERROR1);
-                flom_msg_init(msg);
                 break;
             case FLOM_MSG_VERB_UNLOCK:
                 /* check resource name */
@@ -447,6 +461,11 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
             case G_STRSPLIT_ERROR:
                 ret_cod = FLOM_RC_G_STRSPLIT_ERROR;
                 break;
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
+            case MSG_FREE_ERROR1:
+                break;
             case G_TRY_MALLOC_ERROR1:
                 ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
                 break;
@@ -458,7 +477,6 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
                 break;
             case MSG_BUILD_ANSWER_ERROR2:
             case MSG_BUILD_ANSWER_ERROR3:
-            case MSG_FREE_ERROR1:
                 break;
             case INVALID_RESOURCE_NAME:
                 ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
@@ -481,7 +499,11 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
     if (NULL != splitted_name) {
         g_strfreev(splitted_name);
         splitted_name = NULL;
-    }    
+    }
+    if (NULL != resource_name) {
+        g_free(resource_name);
+        resource_name = NULL;
+    }
     FLOM_TRACE(("flom_resource_hier_inmsg/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -495,7 +517,7 @@ int flom_resource_hier_clean(flom_resource_t *resource,
     enum Exception { NULL_OBJECT
                      , G_STRSPLIT_ERROR
                      , INVALID_RESOURCE_NAME
-                     , SIMPLE_WAITINGS_ERROR
+                     , HIER_WAITINGS_ERROR
                      , INTERNAL_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -570,7 +592,7 @@ int flom_resource_hier_clean(flom_resource_t *resource,
             /* check if some other clients can get a lock now */
             if (FLOM_RC_OK != (ret_cod = flom_resource_hier_waitings(
                                    resource)))
-                THROW(SIMPLE_WAITINGS_ERROR);
+                THROW(HIER_WAITINGS_ERROR);
         } else {
             guint i = 0;
             /* check if the connection was waiting a lock */
@@ -612,7 +634,7 @@ int flom_resource_hier_clean(flom_resource_t *resource,
             case INVALID_RESOURCE_NAME:
                 ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
                 break;
-            case SIMPLE_WAITINGS_ERROR:
+            case HIER_WAITINGS_ERROR:
                 break;
             case INTERNAL_ERROR:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -769,6 +791,7 @@ int flom_resource_hier_change_name(flom_resource_t *resource,
 int flom_resource_hier_waitings(flom_resource_t *resource)
 {
     enum Exception { G_STRSPLIT_ERROR
+                     , RESOURCE_HIER_ADD_LOCKER_ERROR
                      , MSG_BUILD_ANSWER_ERROR
                      , MSG_SERIALIZE_ERROR
                      , MSG_SEND_ERROR
@@ -789,9 +812,12 @@ int flom_resource_hier_waitings(flom_resource_t *resource)
         /* check if there is any connection waiting for a lock */
         do {
             cl = (struct flom_rsrc_conn_lock_s *)
-                g_queue_peek_nth(resource->data.simple.waitings, i);
-            if (NULL == cl)
+                g_queue_peek_nth(resource->data.hier.waitings, i);
+            if (NULL == cl) {
+                FLOM_TRACE(("flom_resource_hier_waitings: NULL cl for "
+                            "i=%u\n", i));
                 break;
+            }
             assert(NULL != cl->name);
             /* prepare splitted resource name */
             if (NULL == (splitted_name = g_strsplit(
@@ -803,10 +829,14 @@ int flom_resource_hier_waitings(flom_resource_t *resource)
                     resource->data.hier.root, cl->info.lock_mode,
                     splitted_name)) {
                 /* remove from waitings */
-                cl = g_queue_pop_nth(resource->data.simple.waitings, i);
+                cl = g_queue_pop_nth(resource->data.hier.waitings, i);
                 /* this should be impossibile because peek was ok
                    some rows above */
                 assert(NULL != cl);
+                if (FLOM_RC_OK != (
+                        ret_cod = flom_resource_hier_add_locker(
+                            resource, cl, splitted_name)))
+                    THROW(RESOURCE_HIER_ADD_LOCKER_ERROR);
                 /* send a message to the client that is waiting the lock */
                 flom_msg_init(&msg);
                 if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
@@ -817,16 +847,13 @@ int flom_resource_hier_waitings(flom_resource_t *resource)
                 if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
                                        &msg, buffer, sizeof(buffer), &to_send)))
                     THROW(MSG_SERIALIZE_ERROR);
+                flom_msg_trace(&msg);
                 if (FLOM_RC_OK != (ret_cod = flom_msg_send(
                                        cl->conn->fd, buffer, to_send)))
                     THROW(MSG_SEND_ERROR);
+                cl = NULL;
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
                     THROW(MSG_FREE_ERROR);                
-                /* insert into holders */
-                resource->data.simple.holders = g_slist_prepend(
-                    resource->data.simple.holders,
-                    (gpointer)cl);
-                cl = NULL;
             } else
                 ++i;
         } while (TRUE);
@@ -837,6 +864,7 @@ int flom_resource_hier_waitings(flom_resource_t *resource)
             case G_STRSPLIT_ERROR:
                 ret_cod = FLOM_RC_G_STRSPLIT_ERROR;
                 break;
+            case RESOURCE_HIER_ADD_LOCKER_ERROR:
             case MSG_BUILD_ANSWER_ERROR:
             case MSG_SERIALIZE_ERROR:
             case MSG_SEND_ERROR:

@@ -153,9 +153,7 @@ int flom_resource_numeric_inmsg(flom_resource_t *resource,
                     FLOM_TRACE(("flom_resource_numeric_inmsg: asked lock "
                                 "quantity %d can be assigned to connection "
                                 "%p\n", new_quantity, conn));
-                    if (NULL == (cl = (struct flom_rsrc_conn_lock_s *)
-                                 g_try_malloc(
-                                     sizeof(struct flom_rsrc_conn_lock_s))))
+                    if (NULL == (cl = flom_rsrc_conn_lock_new()))
                         THROW(G_TRY_MALLOC_ERROR1);
                     cl->info.quantity = new_quantity;
                     cl->conn = conn;
@@ -177,10 +175,7 @@ int flom_resource_numeric_inmsg(flom_resource_t *resource,
                                     "quantity %d can not be assigned to "
                                     "connection %p, queing...\n",
                                     new_quantity, conn));
-                        if (NULL == (
-                                cl = (struct flom_rsrc_conn_lock_s *)
-                                g_try_malloc(
-                                    sizeof(struct flom_rsrc_conn_lock_s))))
+                        if (NULL == (cl = flom_rsrc_conn_lock_new()))
                             THROW(G_TRY_MALLOC_ERROR2);
                         cl->info.quantity = new_quantity;
                         cl->conn = conn;
@@ -305,7 +300,7 @@ int flom_resource_numeric_clean(flom_resource_t *resource,
                 resource->data.numeric.holders, cl);
             resource->data.numeric.locked_quantity -= cl->info.quantity;
             /* free the now useless connection lock record */
-            g_free(cl);
+            flom_rsrc_conn_lock_delete(cl);
             /*
             FLOM_TRACE(("flom_resource_numeric_clean: g_slist_length=%u\n",
                         g_slist_length(resource->data.numeric.holders)));
@@ -335,7 +330,7 @@ int flom_resource_numeric_clean(flom_resource_t *resource,
                         THROW(INTERNAL_ERROR);
                     } else {
                         /* free the now useless connection lock record */
-                        g_free(cl);
+                        flom_rsrc_conn_lock_delete(cl);
                     }
                     break;
                 } else
@@ -373,20 +368,21 @@ void flom_resource_numeric_free(flom_resource_t *resource)
     /* clean-up holders list... */
     FLOM_TRACE(("flom_resource_numeric_free: cleaning-up holders list...\n"));
     while (NULL != resource->data.numeric.holders) {
-        struct flom_conn_lock_s *cl =
-            (struct flom_conn_lock_s *)resource->data.numeric.holders->data;
+        struct flom_rsrc_conn_lock_s *cl =
+            (struct flom_rsrc_conn_lock_s *)
+            resource->data.numeric.holders->data;
         resource->data.numeric.holders = g_slist_remove(
             resource->data.numeric.holders, cl);
-        g_free(cl);
+        flom_rsrc_conn_lock_delete(cl);
     }
     resource->data.numeric.holders = NULL;
     /* clean-up waitings queue... */
     FLOM_TRACE(("flom_resource_numeric_free: cleaning-up waitings queue...\n"));
     while (!g_queue_is_empty(resource->data.numeric.waitings)) {
-        struct flom_conn_lock_s *cl =
-            (struct flom_conn_lock_s *)g_queue_pop_head(
+        struct flom_rsrc_conn_lock_s *cl =
+            (struct flom_rsrc_conn_lock_s *)g_queue_pop_head(
                 resource->data.numeric.waitings);
-        g_free(cl);
+        flom_rsrc_conn_lock_delete(cl);
     }
     g_queue_free(resource->data.numeric.waitings);
     resource->data.numeric.waitings = NULL;
@@ -479,7 +475,7 @@ int flom_resource_numeric_waitings(flom_resource_t *resource)
         } /* switch (excp) */
     } /* TRY-CATCH */
     if (NULL != cl) {
-        g_free(cl);
+        flom_rsrc_conn_lock_delete(cl);
     }
     FLOM_TRACE(("flom_resource_numeric_waitings/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
