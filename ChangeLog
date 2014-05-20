@@ -1,9 +1,13 @@
 LOG:
 
-         - 0.5.2 Adding hierarchical resources
+         - 0.5.2 Added hierarchical resources
 	Communication protocol switched to level=1: this release is incompatible
 	with previous releases. You have to update all the installed flom
 	utilities if used in a distributed environment.
+	Garbage collector improved: when a resource is no more useful, the
+	memory (and the thread) allocated to manage it is released faster than
+	before. This is useful for use cases that intensively allocates new
+	resources
 
 20140506 - 0.5.1 Added resource set feature
 	Added glib2 version check in configure script; minimum glib-2 version

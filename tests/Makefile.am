@@ -23,6 +23,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	incompopt.at.in \
 	usecase.at \
 	usecase-dist.at.in \
+	usecase-hier.at \
 	usecase-num.at \
 	usecase-set.at \
 	scripts/*.sh
@@ -86,6 +87,7 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/incompopt.at \
 	$(srcdir)/usecase.at \
 	$(srcdir)/usecase-dist.at \
+	$(srcdir)/usecase-hier.at \
 	$(srcdir)/usecase-num.at \
 	$(srcdir)/usecase-set.at
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at

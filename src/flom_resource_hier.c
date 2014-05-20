@@ -662,6 +662,7 @@ void flom_resource_hier_free(flom_resource_t *resource)
 {
     /* removing resource tree */
     flom_resource_hier_free_element(resource->data.hier.root);
+    g_free(resource->data.hier.root);
     
     /* clean-up waitings queue... */
     FLOM_TRACE(("flom_resource_hier_free: cleaning-up waitings queue...\n"));
@@ -692,6 +693,7 @@ void flom_resource_hier_free_element(
         for (i=0; i<element->leaves->len; ++i) {
             flom_resource_hier_free_element(
                 g_ptr_array_index(element->leaves, i));
+            g_free(g_ptr_array_index(element->leaves, i));
         } /* for (i=0; i<element->leaves.len; ++i) */
     } /* if (NULL != element->leaves) */
     g_ptr_array_free(element->leaves, TRUE);
@@ -722,7 +724,7 @@ void flom_resource_hier_free_element(
 int flom_resource_hier_compare_name(const flom_resource_t *resource,
                                     const gchar *name)
 {
-    gchar **splitted_name;
+    gchar **splitted_name = NULL;
     int ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
     size_t sep_len = strlen(FLOM_HIER_RESOURCE_SEPARATOR);
     
@@ -741,6 +743,8 @@ int flom_resource_hier_compare_name(const flom_resource_t *resource,
         ret_cod = g_strcmp0(splitted_name[0],
                             resource->data.hier.root->name);
     }
+    /* release allocated memory */
+    g_strfreev(splitted_name);
     return ret_cod;
 }
 

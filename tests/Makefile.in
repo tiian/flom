@@ -128,6 +128,7 @@ _DEFAULT_DISCOVERY_TTL = @_DEFAULT_DISCOVERY_TTL@
 _DEFAULT_TCP_KEEPALIVE_INTVL = @_DEFAULT_TCP_KEEPALIVE_INTVL@
 _DEFAULT_TCP_KEEPALIVE_PROBES = @_DEFAULT_TCP_KEEPALIVE_PROBES@
 _DEFAULT_TCP_KEEPALIVE_TIME = @_DEFAULT_TCP_KEEPALIVE_TIME@
+_DIR_FILE_SEPARATOR = @_DIR_FILE_SEPARATOR@
 _ES_GENERIC_ERROR = @_ES_GENERIC_ERROR@
 _ES_RESOURCE_BUSY = @_ES_RESOURCE_BUSY@
 _ES_UNABLE_TO_EXECUTE_COMMAND = @_ES_UNABLE_TO_EXECUTE_COMMAND@
@@ -187,6 +188,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	incompopt.at.in \
 	usecase.at \
 	usecase-dist.at.in \
+	usecase-hier.at \
 	usecase-num.at \
 	usecase-set.at \
 	scripts/*.sh
@@ -449,6 +451,7 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/incompopt.at \
 	$(srcdir)/usecase.at \
 	$(srcdir)/usecase-dist.at \
+	$(srcdir)/usecase-hier.at \
 	$(srcdir)/usecase-num.at \
 	$(srcdir)/usecase-set.at
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at

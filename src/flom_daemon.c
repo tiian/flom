@@ -791,6 +791,7 @@ int flom_accept_loop(flom_conns_t *conns)
     FLOM_TRACE(("flom_accept_loop\n"));
     TRY {
         int loop = TRUE;
+        int chklockers_again = FALSE;
 
         flom_locker_array_init(&lockers);
         
@@ -803,7 +804,9 @@ int flom_accept_loop(flom_conns_t *conns)
 
             /* the completion needs three polling cycles, so timeout must
                be a third of estimated lifespan */
-            if (3 < poll_timeout)
+            if (chklockers_again)
+                poll_timeout = 0;
+            else if (3 < poll_timeout)
                 poll_timeout /= 3;
             
             if (FLOM_RC_OK != (ret_cod = flom_conns_clean(conns)))
@@ -834,7 +837,8 @@ int flom_accept_loop(flom_conns_t *conns)
                     }
                 } else if (0 < number_of_lockers) {
                     if (FLOM_RC_OK != (ret_cod =
-                                       flom_accept_loop_chklockers(&lockers)))
+                                       flom_accept_loop_chklockers(
+                                           &lockers, &chklockers_again)))
                         THROW(ACCEPT_LOOP_CHKLOCKERS_ERROR1);
                 } else if (0 > number_of_lockers) {
                     THROW(NEGATIVE_NUMBER_OF_LOCKERS_ERROR1);
@@ -881,7 +885,8 @@ int flom_accept_loop(flom_conns_t *conns)
                         number_of_lockers));
             if (0 < number_of_lockers) {
                 if (FLOM_RC_OK != (ret_cod =
-                                   flom_accept_loop_chklockers(&lockers)))
+                                   flom_accept_loop_chklockers(
+                                       &lockers, &chklockers_again)))
                     THROW(ACCEPT_LOOP_CHKLOCKERS_ERROR2);
             } else if (0 > number_of_lockers) {
                 THROW(NEGATIVE_NUMBER_OF_LOCKERS_ERROR2);
@@ -1297,7 +1302,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
 
 
 
-int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
+int flom_accept_loop_chklockers(flom_locker_array_t *lockers, int *again)
 {
     enum Exception { NULL_LOCKER
                      , CLOSE_ERROR
@@ -1308,6 +1313,7 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
     TRY {
         guint i;
         guint number_of_lockers = flom_locker_array_count(lockers);
+        *again = FALSE;
         
         for (i=0; i<number_of_lockers; ++i) {
             struct flom_locker_s *fl = flom_locker_array_get(lockers, i);
@@ -1347,7 +1353,9 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers)
                     FLOM_TRACE(("flom_accept_loop_chklockers/g_thread_join"
                                 "(%p)=%p\n", fl->thread, thread_ret_cod));
                     flom_locker_array_del(lockers, fl);
-                    /* lockers object changed, break the loop */
+                    /* lockers object changed, break the loop, but call me
+                       as soon as possible */
+                    *again = TRUE;
                     break;
                 }
             } /* if (fl->write_sequence == fl->read_sequence && ... */

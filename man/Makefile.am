@@ -20,5 +20,6 @@ flom.man: flom.man.in
 	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
 	-e 's|@_RESOURCE_SET_SEPARATOR[@]|$(_RESOURCE_SET_SEPARATOR)|g' \
+	-e 's|@_DIR_FILE_SEPARATOR[@]|$(_DIR_FILE_SEPARATOR)|g' \
 	$< >$@
 dist_man1_MANS = flom.man.in
