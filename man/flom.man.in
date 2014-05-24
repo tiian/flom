@@ -101,7 +101,7 @@ if anything runs as expected, \fBflom\fP exit status is the same of the controll
 environment variable \fBFLOM_TRACE_MASK\fP can be used to activate internal detailed trace. The available flags are explained in file \fIflom_trace.h\fP; you can activate more than one module trace using OR operation between values
 .P
 .SH EXAMPLES
-See web page \fIhttp://sourceforge.net/p/flom/wiki/FLOM%20by%20examples/\fP for a list of detailed use cases
+A list of example use cases is avalaible at this web page \fIhttp://sourceforge.net/p/flom/wiki/FLOM%20by%20examples/\fP
 .P
 .SH CAVEATS
 .B flom -- flom --
