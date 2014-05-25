@@ -118,7 +118,6 @@ int flom_resource_hier_add_locker(flom_resource_t *resource,
     TRY {
         struct flom_rsrc_data_hier_element_s *node = resource->data.hier.root;
         gchar **level_name;
-        int found = FALSE;
         int node_is_leaf = TRUE;
 
         for (level_name=splitted_name; *level_name; ++level_name) {
@@ -129,7 +128,6 @@ int flom_resource_hier_add_locker(flom_resource_t *resource,
             if (!g_strcmp0(*level_name, node->name)) {
                 /* go one level depth */
                 guint i;
-                found = FALSE;
                 for (i=0; i<node->leaves->len; ++i) {
                     struct flom_rsrc_data_hier_element_s *leaf =
                         g_ptr_array_index(node->leaves, i);
@@ -140,7 +138,6 @@ int flom_resource_hier_add_locker(flom_resource_t *resource,
                                 STRORNULL(leaf->name)));
                     if (!g_strcmp0(*(level_name+1), leaf->name)) {
                         node = leaf;
-                        found = TRUE;
                         break;
                     } /* if (!g_strcmp0(*(level_name+1), leaf->name)) */
                 } /* for (i=0; i<node->leaves->len; ++i) */
