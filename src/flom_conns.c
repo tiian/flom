@@ -61,9 +61,9 @@ int flom_conns_check_n(flom_conns_t *conns)
     } GPtrArrayPriv;
     GPtrArrayPriv *p = (GPtrArrayPriv *)conns->array;
     
-    FLOM_TRACE(("flom_conns_check_n: p->len=%u, p->size=%u, conns->n=%u\n",
-                p->len, p->size, conns->n));
-    return conns->n == p->len;
+    FLOM_TRACE(("flom_conns_check_n: p->len=%u, p->size=%u, "
+                "conns->array->len=%u\n", p->len, p->size, conns->array->len));
+    return conns->array->len == p->len;
 }
 
 
@@ -71,7 +71,6 @@ int flom_conns_check_n(flom_conns_t *conns)
 void flom_conns_init(flom_conns_t *conns, int domain)
 {
     FLOM_TRACE(("flom_conns_init\n"));
-    conns->n = 0;
     conns->poll_array = NULL;
     conns->domain = domain;
     conns->array = g_ptr_array_new();
@@ -130,7 +129,6 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
         FLOM_TRACE(("flom_conns_add: allocated a new parser (%p)\n",
                     tmp->gmpc));
         g_ptr_array_add(conns->array, tmp);
-        conns->n++;
         
         THROW(NONE);
     } CATCH {
@@ -174,7 +172,6 @@ void flom_conns_import(flom_conns_t *conns, int fd,
     FLOM_TRACE(("flom_conns_import\n"));
     flom_conn_data_trace(cd);
     g_ptr_array_add(conns->array, cd);
-    conns->n++;
 }
     
 
@@ -188,14 +185,14 @@ struct pollfd *flom_conns_get_fds(flom_conns_t *conns)
     /* resize the previous poll array */
     if (NULL == (tmp = (struct pollfd *)realloc(
                      conns->poll_array,
-                     (size_t)(conns->n*sizeof(struct pollfd))))) {
+                     (size_t)(conns->array->len*sizeof(struct pollfd))))) {
         conns->poll_array = tmp;
         return NULL;
     }    
     /* reset the array */
-    memset(tmp, 0, (size_t)(conns->n*sizeof(struct pollfd)));
+    memset(tmp, 0, (size_t)(conns->array->len*sizeof(struct pollfd)));
     /* fill the poll array with file descriptors */
-    for (i=0; i<conns->n; ++i) {
+    for (i=0; i<conns->array->len; ++i) {
         tmp[i].fd =
             ((struct flom_conn_data_s *)g_ptr_array_index(
                 conns->array, i))->fd;
@@ -216,7 +213,7 @@ int flom_conns_set_events(flom_conns_t *conns, short events)
     FLOM_TRACE(("flom_conns_set_events\n"));
     TRY {
         guint i;
-        for (i=0; i<conns->n; ++i) {
+        for (i=0; i<conns->array->len; ++i) {
             struct flom_conn_data_s *c =
                 (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
             if (NULL_FD != c->fd)
@@ -261,7 +258,7 @@ int flom_conns_close_fd(flom_conns_t *conns, guint id)
     TRY {
         struct flom_conn_data_s *c;
         FLOM_TRACE(("flom_conns_close: closing connection id=%u\n", id));
-        if (id >= conns->n)
+        if (id >= conns->array->len)
             THROW(OUT_OF_RANGE);
         if (NULL == (c = (struct flom_conn_data_s *)
                      g_ptr_array_index(conns->array, id)))
@@ -319,7 +316,7 @@ int flom_conns_trns_fd(flom_conns_t *conns, guint id)
         struct flom_conn_data_s *c;
         FLOM_TRACE(("flom_conns_trns: marking as transferred connection "
                     "id=%u\n", id));
-        if (id >= conns->n)
+        if (id >= conns->array->len)
             THROW(OUT_OF_RANGE);
         /* update connection state */
         c = (struct flom_conn_data_s *)g_ptr_array_index(conns->array, id);
@@ -328,9 +325,8 @@ int flom_conns_trns_fd(flom_conns_t *conns, guint id)
            will be attached by a locker connections object */
         if (NULL == g_ptr_array_remove_index_fast(conns->array, id)) {
             THROW(G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR);
-        } else
-            conns->n--;
-
+        }
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -363,7 +359,7 @@ int flom_conns_clean(flom_conns_t *conns)
     
     FLOM_TRACE(("flom_conns_clean\n"));
     TRY {
-        while (i<conns->n) {
+        while (i<conns->array->len) {
             struct flom_conn_data_s *c =
                 (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
             FLOM_TRACE(("flom_conns_clean: i=%u, state=%d, fd=%d %s\n",
@@ -388,8 +384,7 @@ int flom_conns_clean(flom_conns_t *conns)
                 /* removing from array */
                 if (NULL == g_ptr_array_remove_index_fast(conns->array, i)) {
                     THROW(G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR);
-                } else
-                    conns->n--;
+                }
                 /* release connection */
                 FLOM_TRACE(("flom_conns_clean: releasing connection %p\n", c));
                 g_free(c);
@@ -420,7 +415,7 @@ void flom_conns_free(flom_conns_t *conns)
 {
     guint i;
     FLOM_TRACE(("flom_conns_free: starting...\n"));
-    for (i=0; i<conns->n; ++i)
+    for (i=0; i<conns->array->len; ++i)
         flom_conns_close_fd(conns, i);
     flom_conns_clean(conns);
     if (NULL != conns->poll_array) {
@@ -436,7 +431,6 @@ void flom_conns_free(flom_conns_t *conns)
         g_ptr_array_free(conns->array, TRUE);
         conns->array = NULL;
     }
-    conns->n = 0;
     FLOM_TRACE(("flom_conns_free: completed\n"));
 }
 
@@ -456,9 +450,10 @@ void flom_conn_data_trace(const struct flom_conn_data_s *conn)
 void flom_conns_trace(const flom_conns_t *conns)
 {
     FLOM_TRACE(("flom_conns_trace: object=%p\n", conns));
-    FLOM_TRACE(("flom_conns_trace: domain=%d, n=%u, array=%p, "
+    FLOM_TRACE(("flom_conns_trace: domain=%d, len=%u, array=%p, "
                 "poll_array=%p\n",
-                conns->domain, conns->n, conns->array, conns->poll_array));
+                conns->domain, conns->array->len, conns->array,
+                conns->poll_array));
 }
 
 

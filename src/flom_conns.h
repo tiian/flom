@@ -163,10 +163,7 @@ struct flom_conns_s {
      * flom_conn_data_s)
      */
     GPtrArray     *array;
-    /**
-     * Array size
-     */
-    guint          n;
+    /* @@@ another GPtrArray is needed for "incubator" */
 };
     
 
@@ -264,7 +261,7 @@ extern "C" {
      * @return the number of active connections
      */
     static inline guint flom_conns_get_used(const flom_conns_t *conns) {
-        return conns->n;
+        return conns->array->len;
     }
 
     
@@ -277,7 +274,7 @@ extern "C" {
      *         happens
      */
     static inline int flom_conns_get_fd(const flom_conns_t *conns, guint id) {
-        if (id < conns->n)
+        if (id < conns->array->len)
             return ((struct flom_conn_data_s *)
                     g_ptr_array_index(conns->array, id))->fd;
         else
@@ -294,7 +291,7 @@ extern "C" {
      */
     static inline int flom_conns_get_type(
         const flom_conns_t *conns, guint id) {
-        if (id < conns->n)
+        if (id < conns->array->len)
             return ((struct flom_conn_data_s *)
                     g_ptr_array_index(conns->array, id))->type;
         else
@@ -312,7 +309,7 @@ extern "C" {
      */
     static inline struct flom_conn_data_s *flom_conns_get_cd(
         const flom_conns_t *conns, guint id) {
-        if (id < conns->n)
+        if (id < conns->array->len)
             return ((struct flom_conn_data_s *)
                     g_ptr_array_index(conns->array, id));
         else
@@ -339,7 +336,7 @@ extern "C" {
      */
     static inline struct flom_msg_s *flom_conns_get_msg(
         flom_conns_t *conns, guint id) {
-        if (id < conns->n)
+        if (id < conns->array->len)
             return ((struct flom_conn_data_s *)
                     g_ptr_array_index(conns->array, id))->msg;
         else
@@ -356,7 +353,7 @@ extern "C" {
      */
     static inline GMarkupParseContext *flom_conns_get_gmpc(        
         flom_conns_t *conns, guint id) {
-        if (id < conns->n)
+        if (id < conns->array->len)
             return ((struct flom_conn_data_s *)
                     g_ptr_array_index(conns->array, id))->gmpc;
         else
