@@ -828,6 +828,8 @@ int flom_accept_loop(flom_conns_t *conns)
                             "milliseconds, number of lockers=%u\n",
                             poll_timeout, number_of_lockers));
                 if (0 == number_of_lockers) {
+                    /* @@@ insert a check for resources inside the
+                       "incubator" */
                     if (1 == flom_conns_get_used(conns) ||
                         (2 == flom_conns_get_used(conns) &&
                          SOCK_DGRAM == flom_conns_get_type(conns, 1))) {
@@ -1177,10 +1179,6 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
             FLOM_TRACE(("flom_accept_loop_transfer: locker # %u is managing "
                         "resource '%s'\n", i,
                         flom_resource_get_name(&locker->resource)));
-            /* @@@ remove me!
-            if (!g_strcmp0(flom_resource_get_name(&locker->resource),
-                           msg->body.lock_8.resource.name)) {
-            */
             if (!locker->resource.compare_name(
                     &locker->resource, msg->body.lock_8.resource.name)) {
                 FLOM_TRACE(("flom_accept_loop_transfer: found locker %u for "
@@ -1191,6 +1189,10 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
             }
         } /* for (i=0; i<lockers->n; ++i) */
         if (!found) {
+            /* @@@ check if the resource has the "no create" attribute: if the
+               answer is yes, instead of a new locker it must be put inside
+               the incubator */
+            
             /* start a new locker */
             locker = g_malloc0(sizeof(struct flom_locker_s));
             int pipefd[2];
@@ -1224,6 +1226,8 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
             }
             /* add this locker to the array of all lockers */
             flom_locker_array_add(lockers, locker);
+            /* @@@ set a boolean value "new locker created" to yes,
+               see below */
         } else
             locker_thread = locker->thread;
 
@@ -1248,6 +1252,10 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
             THROW(CONNS_TRNS_FD);
         if (sizeof(cd) != write(locker->write_pipe, &cd, sizeof(cd)))
             THROW(WRITE_ERROR2);
+
+        /* @@@ if the new locker created is set to TRUE, check the resources
+           inside the incubator: it might be some resource can be moved to
+           the new locker */
         
         THROW(NONE);
     } CATCH {

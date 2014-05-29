@@ -349,7 +349,6 @@ extern "C" {
 
     /**
      * Create a resource connection lock struct
-     * @param frcl OUT reference to a resource connection lock struct
      * @return a valid pointer or NULL
      */
     struct flom_rsrc_conn_lock_s *flom_rsrc_conn_lock_new(void);
