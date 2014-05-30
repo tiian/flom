@@ -43,6 +43,9 @@ maximum enqueue time if the resource is already locked by someone else; if the r
 .B -q, --resource-quantity=\fInumber
 \fInumber\fP of numeric resources to lock; it's meaningless if the locked resource is not of type "numeric". \fInumber\fP must be an integer positive number. Note: only positive values are accepted
 .TP
+.B -e, --resource-create=\fIyes|no
+\fBdefault\fP (\fIyes\fP): the command will create the resource if it was not already created by another command, otherwise (\fIno\fP) it will wait for resource creation or will end immediately (see \fB-w, --resource-wait\fP option)
+.TP
 .B -l, --lock-mode=\fIMODE
 lock mode as defined by VMS DLM (Distributed Lock Manager). \fIMODE\fP can be: "NullLock", "ConcurrentRead", "ConcurrentWrite", "ProtectedRead", "ProtectedWrite", "Exclusive" (equivalent short forms are: "NL", "CR", "CW", "PR", "PW", "EX"). More information are available here \fIhttp://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes\fP
 .TP

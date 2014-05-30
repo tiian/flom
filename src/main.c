@@ -49,6 +49,7 @@ static gchar *resource_name = NULL;
 static gint resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
 static gint resource_quantity = 0;
 static gchar *resource_wait = NULL;
+static gchar *resource_create = NULL;
 static gchar *lock_mode = NULL;
 static gint daemon_lifespan = _DEFAULT_DAEMON_LIFESPAN;
 static gchar *unicast_address = NULL;
@@ -74,6 +75,7 @@ static GOptionEntry entries[] =
     { "resource-wait", 'w', 0, G_OPTION_ARG_STRING, &resource_wait, "Specify if the command enques when the resource is already locked (accepted values 'yes', 'no')", NULL },
     { "resource-timeout", 'o', 0, G_OPTION_ARG_INT, &resource_timeout, "Specify maximum wait time (milliseconds) if a resource is already locked", NULL },
     { "resource-quantity", 'q', 0, G_OPTION_ARG_INT, &resource_quantity, "Specify how many numeric resources must be locked", NULL },
+    { "resource-create", 'e', 0, G_OPTION_ARG_STRING, &resource_create, "Specify if the command can create the resource to lock (accepted values 'yes', 'no')", NULL },
     { "lock-mode", 'l', 0, G_OPTION_ARG_STRING, &lock_mode, "Resource lock mode ('NL', 'CR', 'CW', 'PR', 'PW', 'EX')", NULL },
     { "socket-name", 's', 0, G_OPTION_ARG_STRING, &socket_name, "Daemon/command communication socket name", NULL },
     { "daemon-lifespan", 'd', 0, G_OPTION_ARG_INT, &daemon_lifespan, "Specify minimum lifespan of the flom daemon (if activated)", NULL },
@@ -186,6 +188,16 @@ int main (int argc, char *argv[])
             exit(FLOM_ES_GENERIC_ERROR);
         }
         flom_config_set_lock_mode(flm);
+    }
+    if (NULL != resource_create) {
+        flom_bool_value_t fbv;
+        if (FLOM_BOOL_INVALID == (
+                fbv = flom_bool_value_retrieve(resource_create))) {
+            g_print("resource-create: '%s' is an invalid value\n",
+                    resource_create);
+            exit(FLOM_ES_GENERIC_ERROR);
+        }
+        flom_config_set_resource_create(fbv);
     }
     if (NULL != socket_name) {
         if (FLOM_RC_OK != (ret_cod = flom_config_set_socket_name(

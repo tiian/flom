@@ -115,6 +115,7 @@ struct flom_conn_data_s {
      * Connection state
      */
     flom_conn_state_t     state;
+    /* @@@ add a field to mark as "incubator" the connection */
     /**
      * Client address len
      */
@@ -163,7 +164,6 @@ struct flom_conns_s {
      * flom_conn_data_s)
      */
     GPtrArray     *array;
-    /* @@@ another GPtrArray is needed for "incubator" */
 };
     
 

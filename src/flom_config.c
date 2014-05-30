@@ -86,6 +86,7 @@ const gchar *FLOM_CONFIG_KEY_DAEMONTRACEFILE = _CONFIG_KEY_DAEMONTRACEFILE;
 const gchar *FLOM_CONFIG_KEY_COMMANDTRACEFILE = _CONFIG_KEY_COMMANDTRACEFILE;
 const gchar *FLOM_CONFIG_KEY_VERBOSE = _CONFIG_KEY_VERBOSE;
 const gchar *FLOM_CONFIG_GROUP_RESOURCE = _CONFIG_GROUP_RESOURCE;
+const gchar *FLOM_CONFIG_KEY_CREATE = _CONFIG_KEY_CREATE;
 const gchar *FLOM_CONFIG_KEY_NAME = _CONFIG_KEY_NAME;
 const gchar *FLOM_CONFIG_KEY_WAIT = _CONFIG_KEY_WAIT;
 const gchar *FLOM_CONFIG_KEY_TIMEOUT = _CONFIG_KEY_TIMEOUT;
@@ -142,6 +143,7 @@ void flom_config_reset()
     global_config.verbose = FALSE;
     global_config.resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
     global_config.resource_wait = TRUE;
+    global_config.resource_create = TRUE;
     global_config.resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
     global_config.resource_quantity = 1;
     global_config.lock_mode = FLOM_LOCK_MODE_EX;
@@ -264,6 +266,8 @@ void flom_config_print()
             FLOM_CONFIG_KEY_QUANTITY, flom_config_get_resource_quantity());
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
             FLOM_CONFIG_KEY_LOCK_MODE, flom_config_get_lock_mode());
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
+            FLOM_CONFIG_KEY_CREATE, flom_config_get_resource_create());
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_SOCKET_NAME,
             NULL == flom_config_get_socket_name() ? FLOM_EMPTY_STRING :
@@ -411,7 +415,8 @@ int flom_config_init_load(const char *config_file_name)
                      , CONFIG_SET_RESOURCE_WAIT_ERROR
                      , CONFIG_SET_RESOURCE_TIMEOUT_ERROR
                      , CONFIG_SET_RESOURCE_QUANTITY_ERROR
-                     , CONFIG_SET_LOCK_MODE_ERROR
+                     , CONFIG_SET_RESOURCE_LOCK_MODE_ERROR
+                     , CONFIG_SET_RESOURCE_CREATE_ERROR
                      , CONFIG_SET_SOCKET_NAME_ERROR
                      , CONFIG_SET_DAEMON_LIFESPAN_ERROR
                      , CONFIG_SET_DAEMON_UNICAST_PORT_ERROR
@@ -645,7 +650,36 @@ int flom_config_init_load(const char *config_file_name)
             }
             g_free(value);
             value = NULL;
-            if (throw_error) THROW(CONFIG_SET_LOCK_MODE_ERROR);
+            if (throw_error) THROW(CONFIG_SET_RESOURCE_LOCK_MODE_ERROR);
+        }
+        /* pick-up resource create from configuration */
+        if (NULL == (value = g_key_file_get_string(
+                         gkf, FLOM_CONFIG_GROUP_RESOURCE,
+                         FLOM_CONFIG_KEY_CREATE, &error))) {
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_CREATE,
+                        error->code,
+                        error->message));
+            g_error_free(error);
+            error = NULL;
+        } else {
+            int throw_error = FALSE;
+            flom_bool_value_t fbv;
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_CREATE, value));
+            if (FLOM_BOOL_INVALID == (
+                    fbv = flom_bool_value_retrieve(value))) {
+                print_file_name = TRUE;
+                throw_error = TRUE;
+            } else {
+                flom_config_set_resource_create(fbv);
+            }
+            g_free(value);
+            value = NULL;
+            if (throw_error) THROW(CONFIG_SET_RESOURCE_CREATE_ERROR);
         }
         /* pick-up socket name configuration */
         if (NULL == (value = g_key_file_get_string(
@@ -898,7 +932,8 @@ int flom_config_init_load(const char *config_file_name)
             }
             g_error_free(error);
             error = NULL;
-            if (throw_error) THROW(CONFIG_SET_NETWORK_TCP_KEEPALIVE_INTVL_ERROR);
+            if (throw_error)
+                THROW(CONFIG_SET_NETWORK_TCP_KEEPALIVE_INTVL_ERROR);
         } else {
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_NETWORK,
@@ -945,7 +980,8 @@ int flom_config_init_load(const char *config_file_name)
             case CONFIG_SET_RESOURCE_WAIT_ERROR:
             case CONFIG_SET_RESOURCE_TIMEOUT_ERROR:
             case CONFIG_SET_RESOURCE_QUANTITY_ERROR:
-            case CONFIG_SET_LOCK_MODE_ERROR:
+            case CONFIG_SET_RESOURCE_LOCK_MODE_ERROR:
+            case CONFIG_SET_RESOURCE_CREATE_ERROR:
             case CONFIG_SET_SOCKET_NAME_ERROR:
             case CONFIG_SET_DAEMON_LIFESPAN_ERROR:
             case CONFIG_SET_DAEMON_UNICAST_PORT_ERROR:

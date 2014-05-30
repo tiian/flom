@@ -139,6 +139,10 @@ extern const gchar *FLOM_CONFIG_KEY_VERBOSE;
  */
 extern const gchar *FLOM_CONFIG_GROUP_RESOURCE;
 /**
+ * Label associated to "Create" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_CREATE;
+/**
  * Label associated to "Name" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_NAME;
@@ -273,6 +277,12 @@ typedef struct flom_config {
      * (boolean value)
      */
     int                resource_wait;
+    /**
+     * The resource can be create if it was not previously created by another
+     * requester
+     * (boolean value)
+     */
+    int                resource_create;
     /**
      * The requester stay blocked for a maximum time if the resource and then
      * it will return (milliseconds as specified by poll POSIX function)
@@ -522,10 +532,10 @@ extern "C" {
 
     /**
      * Set "resource_wait" config parameter
-     * @param wait IN new (boolean) value
+     * @param value IN new (boolean) value
      */
-    static inline void flom_config_set_resource_wait(int wait) {
-        global_config.resource_wait = wait;
+    static inline void flom_config_set_resource_wait(int value) {
+        global_config.resource_wait = value;
     }
 
 
@@ -536,6 +546,26 @@ extern "C" {
      */
     static inline int flom_config_get_resource_wait(void) {
         return global_config.resource_wait;
+    }
+
+
+    
+    /**
+     * Set "resource_create" config parameter
+     * @param value IN new (boolean) value
+     */
+    static inline void flom_config_set_resource_create(int value) {
+        global_config.resource_create = value;
+    }
+
+
+
+    /**
+     * Get "resource_create" config parameter
+     * @return a boolean value
+     */
+    static inline int flom_config_get_resource_create(void) {
+        return global_config.resource_create;
     }
 
 

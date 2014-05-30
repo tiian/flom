@@ -59,6 +59,10 @@
 # "Exclusive"/"EX" for Exclusive mode
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_LOCK_MODE@=Exclusive
+# Flom command will create the resource if it was not already created; valid
+# values are "yes" and "no" (case insensitive)
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_CREATE@=yes
 
 # This section (configuration group) is related to daemon and communication 
 # between flom command(s) and flom daemon
