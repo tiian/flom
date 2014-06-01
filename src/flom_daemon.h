@@ -161,6 +161,23 @@ extern "C" {
     int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                                   flom_locker_array_t *lockers);
 
+
+
+    /**
+     * Start a new locker and add it to lockers array
+     * @param lockers IN/OUT array of lockers
+     * @param msg IN message carrying the request
+     * @param flrt IN type of resource will be assigned to the new locker
+     * @param new_locker OUT new locker allocated for the resource
+     * @param new_thread OUT new thread started for the new locker
+     * @return a reason code
+     */
+    int flom_accept_loop_start_locker(flom_locker_array_t *lockers,
+                                      struct flom_msg_s *msg,
+                                      flom_rsrc_type_t flrt,
+                                      struct flom_locker_s **new_locker,
+                                      GThread **new_thread);
+
     
 
     /**

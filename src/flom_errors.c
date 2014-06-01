@@ -34,14 +34,17 @@ const char *flom_strerror(int ret_cod)
             return "WARNING: peer has closed socket connection";
         case FLOM_RC_CONNECTION_REFUSED:
             return "WARNING: peer is not ready to accept a connection";
-        case FLOM_RC_LOCK_CANT_LOCK:
-            return "INFO: the lock can not be obtained, generic issue";
         case FLOM_RC_LOCK_IMPOSSIBLE:
             return "INFO: the lock can not be obtained because the resource "
                 "will never satisfy the lock request";
+        case FLOM_RC_LOCK_CANT_WAIT:
+            return "INFO: the lock can not be obtained because the requester "
+                "can not wait resource availability";
         case FLOM_RC_LOCK_BUSY:
             return "INFO: the lock can not be obtained because the resource "
                 "is already locked";
+        case FLOM_RC_LOCK_CANT_LOCK:
+            return "INFO: the lock can not be obtained, generic issue";
         case FLOM_RC_LOCK_ENQUEUED:
             return "INFO: the lock can not be obtained now, but the "
                 "request was enqueued";

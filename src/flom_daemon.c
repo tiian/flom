@@ -828,8 +828,6 @@ int flom_accept_loop(flom_conns_t *conns)
                             "milliseconds, number of lockers=%u\n",
                             poll_timeout, number_of_lockers));
                 if (0 == number_of_lockers) {
-                    /* @@@ insert a check for resources inside the
-                       "incubator" */
                     if (1 == flom_conns_get_used(conns) ||
                         (2 == flom_conns_get_used(conns) &&
                          SOCK_DGRAM == flom_conns_get_type(conns, 1))) {
@@ -1120,9 +1118,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                      , LOCKER_CHECK_RESOURCE_NAME_ERROR
                      , NULL_OBJECT2
                      , CONNS_GET_MSG_ERROR
-                     , RESOURCE_INIT_ERROR
-                     , PIPE_ERROR
-                     , G_THREAD_CREATE_ERROR
+                     , ACCEPT_LOOP_START_LOCKER_ERROR
                      , WRITE_ERROR1
                      , CONNS_GET_CD_ERROR
                      , CONNS_TRNS_FD
@@ -1130,9 +1126,6 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
-    struct flom_locker_s *locker = NULL;
-    int locker_allocated = FALSE;
-    
     FLOM_TRACE(("flom_accept_loop_transfer\n"));
     TRY {
         guint i, n;
@@ -1142,6 +1135,8 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
         struct flom_locker_token_s flt;
         flom_rsrc_type_t flrt;
         const struct flom_conn_data_s *cd = NULL;
+        struct flom_locker_s *locker = NULL;
+        int locker_is_new = FALSE;
         /* check if there is a locker running for this request */
         if (NULL == lockers)
             THROW(NULL_OBJECT1);
@@ -1189,45 +1184,24 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
             }
         } /* for (i=0; i<lockers->n; ++i) */
         if (!found) {
-            /* @@@ check if the resource has the "no create" attribute: if the
-               answer is yes, instead of a new locker it must be put inside
-               the incubator */
-            
-            /* start a new locker */
-            locker = g_malloc0(sizeof(struct flom_locker_s));
-            int pipefd[2];
-            GError *error_thread;
-            locker_allocated = TRUE;
-            FLOM_TRACE(("flom_accept_loop_transfer: creating a new locker "
-                        "for resource '%s'...\n",
-                        msg->body.lock_8.resource.name));
-            flom_locker_init(locker);
-            if (FLOM_RC_OK != (ret_cod = flom_resource_init(
-                                   &locker->resource, flrt,
-                                   msg->body.lock_8.resource.name)))
-                THROW(RESOURCE_INIT_ERROR);
-            /* creating a communication pipe for the new thread */
-            if (0 != pipe(pipefd))
-                THROW(PIPE_ERROR);
-            locker->read_pipe = pipefd[0];
-            locker->write_pipe = pipefd[1];
-            locker_thread = g_thread_create(flom_locker_loop, (gpointer)locker,
-                                            TRUE, &error_thread);
-            if (NULL == locker_thread) {
-                FLOM_TRACE(("flom_accept_loop_transfer: "
-                            "error_thread->code=%d, "
-                            "error_thread->message='%s'\n",
-                            error_thread->code, error_thread->message));
-                g_free(error_thread);
-                THROW(G_THREAD_CREATE_ERROR);
+            /* resources with "create=0" (NO) attribute, can not start a
+               new locker, but must be kept */
+            if (!msg->body.lock_8.resource.create) {
+                /* resources with "create=0" (NO) and "wait=0" (NO) attributes,
+                   can not be kept and returns immediately to the requester */
+                if (!msg->body.lock_8.resource.wait) {
+                    /* @@@ answer "sorry"... */
+                } else {
+                    /* @@@ answer "delayed"... */
+                } /* if (!msg->body.lock_8.resource.wait) */
             } else {
-                FLOM_TRACE(("flom_accept_loop_transfer: created thread %p\n",
-                            locker_thread));
-            }
-            /* add this locker to the array of all lockers */
-            flom_locker_array_add(lockers, locker);
-            /* @@@ set a boolean value "new locker created" to yes,
-               see below */
+                /* start a new locker */
+                if (FLOM_RC_OK != (ret_cod = flom_accept_loop_start_locker(
+                                       lockers, msg, flrt, &locker,
+                                       &locker_thread)))
+                    THROW(ACCEPT_LOOP_START_LOCKER_ERROR);
+                locker_is_new = TRUE;
+            } /* if (!msg->body.lock_8.resource.create) */
         } else
             locker_thread = locker->thread;
 
@@ -1255,7 +1229,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
 
         /* @@@ if the new locker created is set to TRUE, check the resources
            inside the incubator: it might be some resource can be moved to
-           the new locker */
+           the new locker "locker_is_new" */
         
         THROW(NONE);
     } CATCH {
@@ -1272,13 +1246,6 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
             case CONNS_GET_MSG_ERROR:
-            case RESOURCE_INIT_ERROR:
-                break;
-            case PIPE_ERROR:
-                ret_cod = FLOM_RC_PIPE_ERROR;
-                break;
-            case G_THREAD_CREATE_ERROR:
-                ret_cod = FLOM_RC_G_THREAD_CREATE_ERROR;
                 break;
             case WRITE_ERROR1:
                 ret_cod = FLOM_RC_WRITE_ERROR;
@@ -1295,15 +1262,91 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
             default:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        if (NONE != excp && locker_allocated) {
-            /* clean-up locker */
-            FLOM_TRACE(("flom_accept_loop_transfer: clean-up due to excp=%d\n",
-                        excp));
-            flom_resource_free(&locker->resource);
-            g_free(locker);
-        }
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_accept_loop_transfer/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_accept_loop_start_locker(flom_locker_array_t *lockers,
+                                  struct flom_msg_s *msg,
+                                  flom_rsrc_type_t flrt,
+                                  struct flom_locker_s **new_locker,
+                                  GThread **new_thread)
+{
+    enum Exception { RESOURCE_INIT_ERROR
+                     , PIPE_ERROR
+                     , G_THREAD_CREATE_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    struct flom_locker_s *locker = NULL;
+
+    FLOM_TRACE(("flom_accept_loop_start_locker\n"));
+    TRY {
+        locker = g_malloc0(sizeof(struct flom_locker_s));
+        int pipefd[2];
+        GError *error_thread;
+        FLOM_TRACE(("flom_accept_loop_start_locker: creating a new locker "
+                    "for resource '%s'...\n",
+                    msg->body.lock_8.resource.name));
+        flom_locker_init(locker);
+        if (FLOM_RC_OK != (ret_cod = flom_resource_init(
+                               &locker->resource, flrt,
+                               msg->body.lock_8.resource.name)))
+            THROW(RESOURCE_INIT_ERROR);
+        /* creating a communication pipe for the new thread */
+        if (0 != pipe(pipefd))
+            THROW(PIPE_ERROR);
+        locker->read_pipe = pipefd[0];
+        locker->write_pipe = pipefd[1];
+        *new_thread = g_thread_create(flom_locker_loop, (gpointer)locker,
+                                        TRUE, &error_thread);
+        if (NULL == *new_thread) {
+            FLOM_TRACE(("flom_accept_loop_start_locker: "
+                        "error_thread->code=%d, "
+                        "error_thread->message='%s'\n",
+                        error_thread->code, error_thread->message));
+            g_free(error_thread);
+            THROW(G_THREAD_CREATE_ERROR);
+        } else {
+            FLOM_TRACE(("flom_accept_loop_start_locker: created thread %p\n",
+                        *new_thread));
+        }
+        /* add this locker to the array of all lockers */
+        flom_locker_array_add(lockers, locker);
+        /* return the new locker to caller function */
+        *new_locker = locker;
+        locker = NULL;
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case RESOURCE_INIT_ERROR:
+                break;
+            case PIPE_ERROR:
+                ret_cod = FLOM_RC_PIPE_ERROR;
+                break;
+            case G_THREAD_CREATE_ERROR:
+                ret_cod = FLOM_RC_G_THREAD_CREATE_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    if (NULL != locker) {
+        /* clean-up locker */
+        FLOM_TRACE(("flom_accept_start_locker: clean-up due to excp=%d\n",
+                    excp));
+        flom_resource_free(&locker->resource);
+        g_free(locker);
+    } /* if (NULL != locker) */
+    FLOM_TRACE(("flom_accept_loop_start_locker/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
