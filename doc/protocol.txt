@@ -23,21 +23,24 @@ messages and some message samples.
 
 verb=1 (lock)
 
-  level: message level, version
-  verb:  lock -> 1
-  step:  8, 16, 24
-  type:  0 = NL null lock
-         1 = CR concurrent read
-         2 = CW concurrent write
-         3 = PR/SH (protected read/shared lock)
-         4 = PW/UP (protected write/update lock)
-         5 = EX exclusive lock
-  wait:  0 = no wait
-         1 = wait if the resource can not be locked
+  level:    message level, version
+  verb:     lock -> 1
+  step:     8, 16, 24
+  mode:     0 = NL null lock
+            1 = CR concurrent read
+            2 = CW concurrent write
+            3 = PR/SH (protected read/shared lock)
+            4 = PW/UP (protected write/update lock)
+            5 = EX exclusive lock
+  wait:     0 = no wait
+            1 = wait if the resource can not be locked
+  quantity: N = number of unities to lock (numeric resources only)
+  create:   0 = don't create the resource if it does not exist 
+            1 = create a new resource if it does not exist
 
   client->server message (ask for a lock)
   <msg level="0" verb="1" step="8">
-    <resource name="_RESOURCE" type="5" wait="1"/>
+    <resource name="_RESOURCE" mode="5" wait="1" quantity="N" create="1"/>
   </msg>
 
   server->client message (answer: lock obtained/not obtained/wait)

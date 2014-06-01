@@ -174,13 +174,29 @@ extern const gchar *FLOM_MSG_HEADER;
  */
 extern const gchar *FLOM_MSG_PROP_ADDRESS;
 /**
+ * Label used to specify "create" property
+ */
+extern const gchar *FLOM_MSG_PROP_CREATE;
+/**
+ * Label used to specify "element" property
+ */
+extern const gchar *FLOM_MSG_PROP_ELEMENT;
+/**
  * Label used to specify "level" property
  */
 extern const gchar *FLOM_MSG_PROP_LEVEL;
 /**
+ * Label used to specify "mode" property
+ */
+extern const gchar *FLOM_MSG_PROP_MODE;
+/**
  * Label used to specify "name" property
  */
 extern const gchar *FLOM_MSG_PROP_NAME;
+/**
+ * Label used to specify "port" property
+ */
+extern const gchar *FLOM_MSG_PROP_PORT;
 /**
  * Label used to specify "quantity" property
  */
@@ -190,21 +206,9 @@ extern const gchar *FLOM_MSG_PROP_QUANTITY;
  */
 extern const gchar *FLOM_MSG_PROP_RC;
 /**
- * Label used to specify "element" property
- */
-extern const gchar *FLOM_MSG_PROP_ELEMENT;
-/**
  * Label used to specify "step" property
  */
 extern const gchar *FLOM_MSG_PROP_STEP;
-/**
- * Label used to specify "mode" property
- */
-extern const gchar *FLOM_MSG_PROP_MODE;
-/**
- * Label used to specify "port" property
- */
-extern const gchar *FLOM_MSG_PROP_PORT;
 /**
  * Label used to specify "verb" property
  */
@@ -308,6 +312,10 @@ struct flom_msg_body_lock_8_resource_s {
      * number of resources to lock; for numeric resources only
      */
     gint              quantity;
+    /**
+     * create if the resource does not exist
+     */
+    int               create;
 };
 
     
