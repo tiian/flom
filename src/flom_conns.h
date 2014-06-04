@@ -115,7 +115,12 @@ struct flom_conn_data_s {
      * Connection state
      */
     flom_conn_state_t     state;
-    /* @@@ add a field to mark as "incubator" the connection */
+    /**
+     * The connection is related to a client waiting for resource creation
+     * (it's logically parked inside a virtual incubator); this is a boolean
+     * property
+     */
+    int                   wait;
     /**
      * Client address len
      */

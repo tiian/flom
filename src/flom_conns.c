@@ -112,6 +112,7 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
         tmp->type = type;
         tmp->state = main_thread ?
             FLOM_CONN_STATE_DAEMON : FLOM_CONN_STATE_LOCKER;
+        tmp->wait = FALSE;
         tmp->addr_len = addr_len;
         /* reset the associated message */
         if (NULL == (tmp->msg =
@@ -362,8 +363,9 @@ int flom_conns_clean(flom_conns_t *conns)
         while (i<conns->array->len) {
             struct flom_conn_data_s *c =
                 (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
-            FLOM_TRACE(("flom_conns_clean: i=%u, state=%d, fd=%d %s\n",
-                        i, c->state, c->fd,
+            FLOM_TRACE(("flom_conns_clean: i=%u, state=%d, wait=%d, "
+                        "fd=%d %s\n",
+                        i, c->state, c->wait, c->fd,
                         FLOM_CONN_STATE_REMOVE == c->state ?
                         "(removing...)" : FLOM_EMPTY_STRING));
             flom_conn_data_trace(c);
@@ -440,9 +442,10 @@ void flom_conn_data_trace(const struct flom_conn_data_s *conn)
 {
     FLOM_TRACE(("flom_conn_data_trace: object=%p\n", conn));
     FLOM_TRACE(("flom_conn_data_trace: "
-                "fd=%d, type=%d, state=%d, msg=%p, gmpc=%p, addr_len=%d\n",
-                conn->fd, conn->type, conn->state, conn->msg, conn->gmpc,
-                conn->addr_len));
+                "fd=%d, type=%d, state=%d, wait=%d, msg=%p, gmpc=%p, "
+                "addr_len=%d\n",
+                conn->fd, conn->type, conn->state, conn->wait, conn->msg,
+                conn->gmpc, conn->addr_len));
 }
 
 

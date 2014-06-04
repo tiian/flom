@@ -162,6 +162,21 @@ extern "C" {
                                   flom_locker_array_t *lockers);
 
 
+    /**
+     * Helper function for @ref flom_accept_loop_transfer: it manages the
+     * details related to connection movement
+     * @param conns IN/OUT connections object
+     * @param id IN connection id
+     * @param locker IN/OUT locker object associated to locker thread that
+     *                      will host the connection
+     * @param cd IN connection that must be transferred to the locker
+     * @return a reason code
+     */
+    int flom_accept_loop_transfer_conn(flom_conns_t *conns, guint id,
+                                       struct flom_locker_s *locker,
+                                       struct flom_conn_data_s *cd);
+
+    
 
     /**
      * Start a new locker and add it to lockers array
@@ -191,6 +206,16 @@ extern "C" {
     int flom_accept_loop_chklockers(flom_locker_array_t *lockers, int *again);
 
 
+
+    /**
+     * Send a reply message to the to client
+     * @param cd IN client connection data
+     * @param rc IN answer return code
+     * @return a reason code
+     */
+    int flom_accept_loop_reply(const struct flom_conn_data_s *cd, int rc);
+
+    
 
     /**
      * Reply to a discover multicast message: I'm here!

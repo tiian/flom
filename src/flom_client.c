@@ -735,6 +735,7 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
                      , CONNECT_WAIT_LOCK_ERROR
                      , LOCK_BUSY
                      , LOCK_IMPOSSIBLE
+                     , LOCK_CANT_WAIT
                      , PROTOCOL_ERROR2
                      , MSG_FREE_ERROR2
                      , NONE } excp;
@@ -855,6 +856,10 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
                 ret_cod = msg.body.lock_16.answer.rc;
                 THROW(LOCK_IMPOSSIBLE);
                 break;
+            case FLOM_RC_LOCK_CANT_WAIT:
+                ret_cod = msg.body.lock_16.answer.rc;
+                THROW(LOCK_CANT_WAIT);
+                break;                
             default:
                 THROW(PROTOCOL_ERROR2);
                 break;
@@ -898,6 +903,7 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
             case CONNECT_WAIT_LOCK_ERROR:
             case LOCK_BUSY:
             case LOCK_IMPOSSIBLE:
+            case LOCK_CANT_WAIT:
             case MSG_FREE_ERROR2:
                 break;
             case NONE:
