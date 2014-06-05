@@ -45,6 +45,9 @@ const char *flom_strerror(int ret_cod)
                 "is already locked";
         case FLOM_RC_LOCK_CANT_LOCK:
             return "INFO: the lock can not be obtained, generic issue";
+        case FLOM_RC_LOCK_WAIT_RESOURCE:
+            return "INFO: the asked resource is not available, the task "
+                "must wait resource creation by a something else";
         case FLOM_RC_LOCK_ENQUEUED:
             return "INFO: the lock can not be obtained now, but the "
                 "request was enqueued";

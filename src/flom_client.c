@@ -829,8 +829,10 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
                 }
                 break;
             case FLOM_RC_LOCK_ENQUEUED:
-                FLOM_TRACE(("flom_client_lock: resource is busy, "
-                            "waiting...\n"));
+            case FLOM_RC_LOCK_WAIT_RESOURCE:
+                FLOM_TRACE(("flom_client_lock: lock can not be acquired now "
+                            "(%s), waiting...\n",
+                            flom_strerror(msg.body.lock_16.answer.rc)));
                 ret_cod = flom_client_wait_lock(cd, &msg, timeout);
                 switch (ret_cod) {
                     case FLOM_RC_OK:
@@ -935,7 +937,7 @@ int flom_client_wait_lock(struct flom_conn_data_s *cd,
     enum Exception { NETWORK_TIMEOUT
                      , MSG_RETRIEVE_ERROR
                      , MSG_DESERIALIZE_ERROR
-                     , PROTOCOL_ERROR1
+                     , PROTOCOL_ERROR
                      , LOCK_CANT_LOCK
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -944,40 +946,55 @@ int flom_client_wait_lock(struct flom_conn_data_s *cd,
     TRY {
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
         ssize_t to_read;
-        
-        /* retrieve the reply message */
-        ret_cod = flom_msg_retrieve(
-            cd->fd, cd->type, buffer, sizeof(buffer), &to_read, timeout,
-            NULL, NULL);
-        switch (ret_cod) {
-            case FLOM_RC_OK:
-                break;
-            case FLOM_RC_NETWORK_TIMEOUT:
-                THROW(NETWORK_TIMEOUT);
-                break;
-            default:
-                THROW(MSG_RETRIEVE_ERROR);
-        } /* switch (ret_cod) */
 
-        flom_msg_free(msg);
-        flom_msg_init(msg);
-        
-        /* deserialize the reply message */
-        if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
-                               buffer, to_read, msg, cd->gmpc)))
-            THROW(MSG_DESERIALIZE_ERROR);
+        /* more than one answer can arrive */
+        while (TRUE) {
+            /* retrieve the reply message */
+            ret_cod = flom_msg_retrieve(
+                cd->fd, cd->type, buffer, sizeof(buffer), &to_read, timeout,
+                NULL, NULL);
+            switch (ret_cod) {
+                case FLOM_RC_OK:
+                    break;
+                case FLOM_RC_NETWORK_TIMEOUT:
+                    THROW(NETWORK_TIMEOUT);
+                    break;
+                default:
+                    THROW(MSG_RETRIEVE_ERROR);
+            } /* switch (ret_cod) */
+            
+            flom_msg_free(msg);
+            flom_msg_init(msg);
+            
+            /* deserialize the reply message */
+            if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
+                                   buffer, to_read, msg, cd->gmpc)))
+                THROW(MSG_DESERIALIZE_ERROR);
+            
+            flom_msg_trace(msg);
 
-        flom_msg_trace(msg);
-        
-        /* check lock answer */
-        if (FLOM_MSG_VERB_LOCK != msg->header.pvs.verb ||
-            3*FLOM_MSG_STEP_INCR != msg->header.pvs.step)
-            THROW(PROTOCOL_ERROR1);
-        if (FLOM_RC_OK != msg->body.lock_24.answer.rc) {
-            FLOM_TRACE(("flom_client_wait_lock: lock can NOT be acquired, "
-                        "leaving...\n"));
-            THROW(LOCK_CANT_LOCK);
-        }   
+            /* is arriving an intermediate message (resource does not exist
+               condition)? */
+            if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb &&
+                2*FLOM_MSG_STEP_INCR == msg->header.pvs.step) {
+                if (FLOM_RC_LOCK_ENQUEUED == msg->body.lock_16.answer.rc) {
+                    FLOM_TRACE(("flom_client_wait_lock: the resource is "
+                                "busy, looping again...\n"));
+                    continue;
+                } /* if (FLOM_RC_LOCK_ENQUEUED == msg->body.lock_16... */
+            } /* if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb && */
+            /* check lock answer */
+            if (FLOM_MSG_VERB_LOCK != msg->header.pvs.verb ||
+                3*FLOM_MSG_STEP_INCR != msg->header.pvs.step)
+                THROW(PROTOCOL_ERROR);
+            if (FLOM_RC_OK != msg->body.lock_24.answer.rc) {
+                FLOM_TRACE(("flom_client_wait_lock: lock can NOT be acquired, "
+                            "leaving...\n"));
+                THROW(LOCK_CANT_LOCK);
+            } /* if (FLOM_RC_OK != msg->body.lock_24.answer.rc) */
+            /* last message was arrived, leaving the loop */
+            break;
+        } /* while (TRUE) */
         
         THROW(NONE);
     } CATCH {
@@ -986,7 +1003,7 @@ int flom_client_wait_lock(struct flom_conn_data_s *cd,
             case MSG_RETRIEVE_ERROR:
             case MSG_DESERIALIZE_ERROR:               
                 break;
-            case PROTOCOL_ERROR1:
+            case PROTOCOL_ERROR:
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;
                 break;
             case LOCK_CANT_LOCK:

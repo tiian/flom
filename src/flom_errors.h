@@ -69,34 +69,39 @@
 /**
  * A network operation timed out
  */
-#define FLOM_RC_NETWORK_TIMEOUT                       +8
+#define FLOM_RC_NETWORK_TIMEOUT                       +9
 /**
  * Peer has closed socket while expecting data
  */
-#define FLOM_RC_CONNECTION_CLOSED                     +7
+#define FLOM_RC_CONNECTION_CLOSED                     +8
 /**
  * Peer is not ready to accept a connection
  */
-#define FLOM_RC_CONNECTION_REFUSED                    +6
+#define FLOM_RC_CONNECTION_REFUSED                    +7
 /**
  * The lock can not be obtained because the resource can not host the request
  * (example: asking 12 numeric unities for a resource defined with a
  * total quantity of 9)
  */
-#define FLOM_RC_LOCK_IMPOSSIBLE                       +5
+#define FLOM_RC_LOCK_IMPOSSIBLE                       +6
 /**
  * The lock can not be obtained because the requester can not wait resource
  * availability
  */
-#define FLOM_RC_LOCK_CANT_WAIT                        +4
+#define FLOM_RC_LOCK_CANT_WAIT                        +5
 /**
  * The lock can not be obtained because the resource is already locked
  */
-#define FLOM_RC_LOCK_BUSY                             +3
+#define FLOM_RC_LOCK_BUSY                             +4
 /**
  * The lock can not be obtained, generic issue
  */
-#define FLOM_RC_LOCK_CANT_LOCK                        +2
+#define FLOM_RC_LOCK_CANT_LOCK                        +3
+/**
+ * The resource does not exist and the request must ask for resource
+ * creation
+ */
+#define FLOM_RC_LOCK_WAIT_RESOURCE                    +2
 /**
  * The lock can not be obtained now, but the request was enqueued
  */

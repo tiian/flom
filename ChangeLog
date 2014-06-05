@@ -1,5 +1,7 @@
 LOG:
 
+         - 0.7.0 Added "-e, --resource-create" option (see [Resource]/Create)
+
 20140525 - 0.5.2 Added hierarchical resources
 	Communication protocol switched to level=1: this release is incompatible
 	with previous releases. You have to update all the installed flom

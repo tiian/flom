@@ -1230,7 +1230,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                                 "create a new resource but can wait, "
                                 "putting it inside 'incubator'\n"));
                     if (FLOM_RC_OK != (ret_cod = flom_accept_loop_reply(
-                                           cd, FLOM_RC_LOCK_ENQUEUED)))
+                                           cd, FLOM_RC_LOCK_WAIT_RESOURCE)))
                         THROW(ACCEPT_LOOP_REPLY_ERROR3);
                     cd->wait = TRUE;
                     /* return to caller */
@@ -1258,9 +1258,13 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
             /* scanning incubator to retrieve clients waiting for this
                resource */
             for (i=1; i<flom_conns_get_used(conns); ++i) {
-                struct flom_conn_data_s *cd_wait = NULL;
-                if (NULL == (cd_wait = flom_conns_get_cd(conns, i)))
+                struct flom_conn_data_s *loop_cd = NULL;
+                if (NULL == (loop_cd = flom_conns_get_cd(conns, i)))
                     THROW(CONNS_GET_CD_ERROR2);
+                /* check if the connection is really waiting resource
+                   creation, else skip it */
+                if (!loop_cd->wait)
+                    continue;
                 if (!locker->resource.compare_name(
                         &locker->resource, msg->body.lock_8.resource.name)) {
                     FLOM_TRACE(("flom_accept_loop_transfer: connection %u "
@@ -1270,7 +1274,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                                 cd->msg->body.lock_8.resource.name));
                     if (FLOM_RC_OK != (ret_cod =
                                        flom_accept_loop_transfer_conn(
-                                           conns, i, locker, cd_wait)))
+                                           conns, i, locker, loop_cd)))
                         THROW(ACCEPT_LOOP_TRANSFER_CONN_ERROR2);
                 } /* if (!locker->resource.compare_name(... */
             } /* for (i=1; i<flom_conns_get_used(conns); ++i) */
@@ -1350,7 +1354,8 @@ int flom_accept_loop_transfer_conn(flom_conns_t *conns, guint id,
         flt.domain = flom_conns_get_domain(conns);
         flt.client_fd = flom_conns_get_fd(conns, id);
         flt.sequence = ++locker->write_sequence;
-        FLOM_TRACE(("flom_accept_loop_transfer: transferring connection %u "
+        FLOM_TRACE(("flom_accept_loop_transfer_conn: transferring "
+                    "connection %u "
                     "(domain=%d, client_fd=%d, sequence=%d) to thread %p "
                     "using pipe %d\n", id, flt.domain, flt.client_fd,
                     flt.sequence, locker_thread, locker->write_pipe));
@@ -1433,6 +1438,7 @@ int flom_accept_loop_start_locker(flom_locker_array_t *lockers,
             g_free(error_thread);
             THROW(G_THREAD_CREATE_ERROR);
         } else {
+            locker->thread = *new_thread;
             FLOM_TRACE(("flom_accept_loop_start_locker: created thread %p\n",
                         *new_thread));
         }
