@@ -1,0 +1,34 @@
+AT_BANNER([Long term resources use case checks])
+
+AT_SETUP([Use case XXX (1/)])
+AT_DATA([expout],
+[[ 1 locking for 2 seconds
+ 2 locking for 1 seconds
+ 1 ending
+ 2 ending
+]])
+AT_CHECK([flom_test_exec3.sh 1 0 2 "-e y" & flom_test_exec3.sh 2 1 1 "-e n" & flom_test_exec3.sh 3 2 0 "-e y" >/dev/null], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case XXX (2/)])
+AT_DATA([expout],
+[[ 1 locking for 1 seconds
+ 2 locking for 1 seconds
+ 2 ending
+ 1 ending
+]])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n" & flom_test_exec3.sh 2 1 1 "-e y" & flom_test_exec3.sh 3 2 0 "-e y" >/dev/null], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case XXX (3/)])
+AT_DATA([expout],
+[[ 1 locking for 1 seconds
+ 2 locking for 1 seconds
+ 2 ending
+ 1 ending
+]])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n -w n"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CLEANUP
+

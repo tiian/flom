@@ -24,6 +24,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	usecase.at \
 	usecase-dist.at.in \
 	usecase-hier.at \
+	usecase-lt.at.in \
 	usecase-num.at \
 	usecase-set.at \
 	scripts/*.sh
@@ -70,6 +71,11 @@ usecase-dist.at: usecase-dist.at.in
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
 	$< >$@
 
+usecase-lt.at: usecase-lt.at.in
+	sed \
+	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
+	$< >$@
+
 TESTSUITE = $(srcdir)/testsuite
 
 check-local: atconfig atlocal $(TESTSUITE)
@@ -88,6 +94,7 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/incompopt.at \
 	$(srcdir)/usecase.at \
 	$(srcdir)/usecase-dist.at \
+	$(srcdir)/usecase-lt.at \
 	$(srcdir)/usecase-hier.at \
 	$(srcdir)/usecase-num.at \
 	$(srcdir)/usecase-set.at
@@ -95,4 +102,4 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	mv $@.tmp $@
 
 DISTCLEANFILES = atconfig
-CLEANFILES = cmdopt.at incompopt.at usecase-dist.at
+CLEANFILES = cmdopt.at incompopt.at usecase-dist.at usecase-lt.at
