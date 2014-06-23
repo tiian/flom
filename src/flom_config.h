@@ -163,6 +163,10 @@ extern const gchar *FLOM_CONFIG_KEY_QUANTITY;
  */
 extern const gchar *FLOM_CONFIG_KEY_LOCK_MODE;
 /**
+ * Label associated to "IdleLifespan" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_IDLE_LIFESPAN;
+/**
  * Label associated to "Daemon" group inside config files
  */
 extern const gchar *FLOM_CONFIG_GROUP_DAEMON;
@@ -283,6 +287,11 @@ typedef struct flom_config {
      * (boolean value)
      */
     int                resource_create;
+    /**
+     * The resource will be kept for at least this milliseconds value after
+     * last usage
+     */
+    gint               resource_idle_lifespan;
     /**
      * The requester stay blocked for a maximum time if the resource and then
      * it will return (milliseconds as specified by poll POSIX function)
@@ -628,6 +637,27 @@ extern "C" {
      */
     static inline flom_lock_mode_t flom_config_get_lock_mode(void) {
         return global_config.lock_mode;
+    }
+
+
+    
+    /**
+     * Set "resource_idle_lifespan" config parameter
+     * @param value IN number of resource to lock
+     */
+    static inline void flom_config_set_resource_idle_lifespan(gint value) {
+        if (0 > value) value = -value;
+        if (0 != value) global_config.resource_idle_lifespan = value;
+    }
+
+
+
+    /**
+     * Get "resource_idle_lifespan" config parameter
+     * @return current quantity
+     */
+    static inline gint flom_config_get_resource_idle_lifespan(void) {
+        return global_config.resource_idle_lifespan;
     }
 
 

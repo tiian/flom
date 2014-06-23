@@ -50,6 +50,7 @@ static gint resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
 static gint resource_quantity = 0;
 static gchar *resource_wait = NULL;
 static gchar *resource_create = NULL;
+static gint resource_idle_lifespan = 0;
 static gchar *lock_mode = NULL;
 static gint daemon_lifespan = _DEFAULT_DAEMON_LIFESPAN;
 static gchar *unicast_address = NULL;
@@ -76,6 +77,7 @@ static GOptionEntry entries[] =
     { "resource-timeout", 'o', 0, G_OPTION_ARG_INT, &resource_timeout, "Specify maximum wait time (milliseconds) if a resource is already locked", NULL },
     { "resource-quantity", 'q', 0, G_OPTION_ARG_INT, &resource_quantity, "Specify how many numeric resources must be locked", NULL },
     { "resource-create", 'e', 0, G_OPTION_ARG_STRING, &resource_create, "Specify if the command can create the resource to lock (accepted values 'yes', 'no')", NULL },
+    { "resource-idle-lifespan", 'i', 0, G_OPTION_ARG_INT, &resource_idle_lifespan, "Specify how long (milliseconds) a resource will be kept after usage termination", NULL },
     { "lock-mode", 'l', 0, G_OPTION_ARG_STRING, &lock_mode, "Resource lock mode ('NL', 'CR', 'CW', 'PR', 'PW', 'EX')", NULL },
     { "socket-name", 's', 0, G_OPTION_ARG_STRING, &socket_name, "Daemon/command communication socket name", NULL },
     { "daemon-lifespan", 'd', 0, G_OPTION_ARG_INT, &daemon_lifespan, "Specify minimum lifespan of the flom daemon (if activated)", NULL },
@@ -284,6 +286,16 @@ int main (int argc, char *argv[])
                         ret_cod, flom_strerror(ret_cod));
             }
             exit(FLOM_ES_RESOURCE_BUSY);
+            break;
+        case FLOM_RC_LOCK_CANT_WAIT: /* can't wait, leaving... */
+            g_print("The resource could be available in the future, but the "
+                    "requester can't wait\n");
+            /* gracefully disconnect from daemon */
+            if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
+                g_print("flom_client_unlock: ret_cod=%d (%s)\n",
+                        ret_cod, flom_strerror(ret_cod));
+            }
+            exit(FLOM_ES_REQUESTER_CANT_WAIT);
             break;
         case FLOM_RC_LOCK_IMPOSSIBLE: /* impossible */
             g_print("Resource will never satisfy the request, the lock "

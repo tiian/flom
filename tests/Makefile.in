@@ -106,6 +106,7 @@ _CONFIG_KEY_DAEMONTRACEFILE = @_CONFIG_KEY_DAEMONTRACEFILE@
 _CONFIG_KEY_DISCOVERY_ATTEMPTS = @_CONFIG_KEY_DISCOVERY_ATTEMPTS@
 _CONFIG_KEY_DISCOVERY_TIMEOUT = @_CONFIG_KEY_DISCOVERY_TIMEOUT@
 _CONFIG_KEY_DISCOVERY_TTL = @_CONFIG_KEY_DISCOVERY_TTL@
+_CONFIG_KEY_IDLE_LIFESPAN = @_CONFIG_KEY_IDLE_LIFESPAN@
 _CONFIG_KEY_LIFESPAN = @_CONFIG_KEY_LIFESPAN@
 _CONFIG_KEY_LOCK_MODE = @_CONFIG_KEY_LOCK_MODE@
 _CONFIG_KEY_MULTICAST_ADDRESS = @_CONFIG_KEY_MULTICAST_ADDRESS@
@@ -131,6 +132,7 @@ _DEFAULT_TCP_KEEPALIVE_PROBES = @_DEFAULT_TCP_KEEPALIVE_PROBES@
 _DEFAULT_TCP_KEEPALIVE_TIME = @_DEFAULT_TCP_KEEPALIVE_TIME@
 _DIR_FILE_SEPARATOR = @_DIR_FILE_SEPARATOR@
 _ES_GENERIC_ERROR = @_ES_GENERIC_ERROR@
+_ES_REQUESTER_CANT_WAIT = @_ES_REQUESTER_CANT_WAIT@
 _ES_RESOURCE_BUSY = @_ES_RESOURCE_BUSY@
 _ES_UNABLE_TO_EXECUTE_COMMAND = @_ES_UNABLE_TO_EXECUTE_COMMAND@
 _RELEASE_DATE = @_RELEASE_DATE@
@@ -187,7 +189,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	testsuite.at \
 	cmdopt.at.in \
 	incompopt.at.in \
-	usecase.at \
+	usecase.at.in \
 	usecase-dist.at.in \
 	usecase-hier.at \
 	usecase-lt.at.in \
@@ -199,7 +201,7 @@ TESTSUITE = $(srcdir)/testsuite
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 DISTCLEANFILES = atconfig
-CLEANFILES = cmdopt.at incompopt.at usecase-dist.at usecase-lt.at
+CLEANFILES = cmdopt.at incompopt.at usecase.at usecase-dist.at usecase-lt.at
 all: all-am
 
 .SUFFIXES:
@@ -436,6 +438,11 @@ incompopt.at: incompopt.at.in
 	-e 's|@_ES_UNABLE_TO_EXECUTE_COMMAND[@]|$(_ES_UNABLE_TO_EXECUTE_COMMAND)|g' \
 	$< >$@
 
+usecase.at: usecase.at.in
+	sed \
+	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
+	$< >$@
+
 usecase-dist.at: usecase-dist.at.in
 	sed \
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
@@ -444,6 +451,7 @@ usecase-dist.at: usecase-dist.at.in
 usecase-lt.at: usecase-lt.at.in
 	sed \
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
+	-e 's|@_ES_REQUESTER_CANT_WAIT[@]|$(_ES_REQUESTER_CANT_WAIT)|g' \
 	$< >$@
 
 check-local: atconfig atlocal $(TESTSUITE)

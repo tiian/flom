@@ -1,6 +1,8 @@
 LOG:
 
          - 0.7.0 Added "-e, --resource-create" option (see [Resource]/Create)
+	Added "requester cant wait" exit code: it's returned especially when
+	the command line option "-w, --resource-wait" is set to "no"
 
 20140525 - 0.5.2 Added hierarchical resources
 	Communication protocol switched to level=1: this release is incompatible

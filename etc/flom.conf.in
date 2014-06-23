@@ -63,6 +63,10 @@
 # values are "yes" and "no" (case insensitive)
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_CREATE@=yes
+# Flom daemon will destroy a useless resource (a resource no requester is
+# locking or waiting for) after this idle time expressed in milliseconds
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_IDLE_LIFESPAN@=0
 
 # This section (configuration group) is related to daemon and communication 
 # between flom command(s) and flom daemon

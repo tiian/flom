@@ -21,7 +21,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	testsuite.at \
 	cmdopt.at.in \
 	incompopt.at.in \
-	usecase.at \
+	usecase.at.in \
 	usecase-dist.at.in \
 	usecase-hier.at \
 	usecase-lt.at.in \
@@ -66,6 +66,11 @@ incompopt.at: incompopt.at.in
 	-e 's|@_ES_UNABLE_TO_EXECUTE_COMMAND[@]|$(_ES_UNABLE_TO_EXECUTE_COMMAND)|g' \
 	$< >$@
 
+usecase.at: usecase.at.in
+	sed \
+	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
+	$< >$@
+
 usecase-dist.at: usecase-dist.at.in
 	sed \
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
@@ -74,6 +79,7 @@ usecase-dist.at: usecase-dist.at.in
 usecase-lt.at: usecase-lt.at.in
 	sed \
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
+	-e 's|@_ES_REQUESTER_CANT_WAIT[@]|$(_ES_REQUESTER_CANT_WAIT)|g' \
 	$< >$@
 
 TESTSUITE = $(srcdir)/testsuite
@@ -102,4 +108,4 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	mv $@.tmp $@
 
 DISTCLEANFILES = atconfig
-CLEANFILES = cmdopt.at incompopt.at usecase-dist.at usecase-lt.at
+CLEANFILES = cmdopt.at incompopt.at usecase.at usecase-dist.at usecase-lt.at

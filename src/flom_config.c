@@ -92,6 +92,7 @@ const gchar *FLOM_CONFIG_KEY_WAIT = _CONFIG_KEY_WAIT;
 const gchar *FLOM_CONFIG_KEY_TIMEOUT = _CONFIG_KEY_TIMEOUT;
 const gchar *FLOM_CONFIG_KEY_QUANTITY = _CONFIG_KEY_QUANTITY;
 const gchar *FLOM_CONFIG_KEY_LOCK_MODE = _CONFIG_KEY_LOCK_MODE;
+const gchar *FLOM_CONFIG_KEY_IDLE_LIFESPAN = _CONFIG_KEY_IDLE_LIFESPAN;
 const gchar *FLOM_CONFIG_GROUP_DAEMON = _CONFIG_GROUP_DAEMON;
 const gchar *FLOM_CONFIG_KEY_SOCKET_NAME = _CONFIG_KEY_SOCKET_NAME;
 const gchar *FLOM_CONFIG_KEY_LIFESPAN = _CONFIG_KEY_LIFESPAN;
@@ -147,6 +148,7 @@ void flom_config_reset()
     global_config.resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
     global_config.resource_quantity = 1;
     global_config.lock_mode = FLOM_LOCK_MODE_EX;
+    global_config.resource_idle_lifespan = 0;
     global_config.socket_name = NULL;
     global_config.daemon_lifespan = _DEFAULT_DAEMON_LIFESPAN;
     global_config.unicast_address = NULL;
@@ -268,6 +270,9 @@ void flom_config_print()
             FLOM_CONFIG_KEY_LOCK_MODE, flom_config_get_lock_mode());
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
             FLOM_CONFIG_KEY_CREATE, flom_config_get_resource_create());
+    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
+            FLOM_CONFIG_KEY_IDLE_LIFESPAN,
+            flom_config_get_resource_idle_lifespan());
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_SOCKET_NAME,
             NULL == flom_config_get_socket_name() ? FLOM_EMPTY_STRING :
@@ -417,6 +422,7 @@ int flom_config_init_load(const char *config_file_name)
                      , CONFIG_SET_RESOURCE_QUANTITY_ERROR
                      , CONFIG_SET_RESOURCE_LOCK_MODE_ERROR
                      , CONFIG_SET_RESOURCE_CREATE_ERROR
+                     , CONFIG_SET_RESOURCE_IDLE_LIFESPAN_ERROR
                      , CONFIG_SET_SOCKET_NAME_ERROR
                      , CONFIG_SET_DAEMON_LIFESPAN_ERROR
                      , CONFIG_SET_DAEMON_UNICAST_PORT_ERROR
@@ -680,6 +686,31 @@ int flom_config_init_load(const char *config_file_name)
             g_free(value);
             value = NULL;
             if (throw_error) THROW(CONFIG_SET_RESOURCE_CREATE_ERROR);
+        }
+        /* pick-up resource idle lifespan from configuration */
+        ivalue = g_key_file_get_integer(
+            gkf, FLOM_CONFIG_GROUP_RESOURCE, FLOM_CONFIG_KEY_IDLE_LIFESPAN,
+            &error);
+        if (NULL != error) {
+            int throw_error = FALSE;
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_IDLE_LIFESPAN,
+                        error->code,
+                        error->message));
+            if (G_KEY_FILE_ERROR_KEY_NOT_FOUND != error->code) {
+                print_file_name = throw_error = TRUE;
+                g_print("%s\n", error->message);
+            }
+            g_error_free(error);
+            error = NULL;
+            if (throw_error) THROW(CONFIG_SET_RESOURCE_IDLE_LIFESPAN_ERROR);
+        } else {
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
+                        FLOM_CONFIG_GROUP_RESOURCE,
+                        FLOM_CONFIG_KEY_IDLE_LIFESPAN, ivalue));
+            flom_config_set_resource_idle_lifespan(ivalue);
         }
         /* pick-up socket name configuration */
         if (NULL == (value = g_key_file_get_string(
@@ -982,6 +1013,7 @@ int flom_config_init_load(const char *config_file_name)
             case CONFIG_SET_RESOURCE_QUANTITY_ERROR:
             case CONFIG_SET_RESOURCE_LOCK_MODE_ERROR:
             case CONFIG_SET_RESOURCE_CREATE_ERROR:
+            case CONFIG_SET_RESOURCE_IDLE_LIFESPAN_ERROR:
             case CONFIG_SET_SOCKET_NAME_ERROR:
             case CONFIG_SET_DAEMON_LIFESPAN_ERROR:
             case CONFIG_SET_DAEMON_UNICAST_PORT_ERROR:

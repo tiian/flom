@@ -177,6 +177,9 @@
 /* Label of "DiscoverTTL" key inside config files */
 #undef _CONFIG_KEY_DISCOVERY_TTL
 
+/* Label of "IdleLifespan" key inside config files */
+#undef _CONFIG_KEY_IDLE_LIFESPAN
+
 /* Label of "Lifespan" key inside config files */
 #undef _CONFIG_KEY_LIFESPAN
 
@@ -256,6 +259,9 @@
 
 /* Exit status for generic error */
 #undef _ES_GENERIC_ERROR
+
+/* Exit status for can't wait condition */
+#undef _ES_REQUESTER_CANT_WAIT
 
 /* Exit status for busy resource condition */
 #undef _ES_RESOURCE_BUSY

@@ -34,6 +34,11 @@
 
 
 /**
+ * Exit status when FLOM is unable to immediately lock a resource (it could be
+ * at a later time, but not at current time)
+ */
+#define FLOM_ES_REQUESTER_CANT_WAIT         _ES_REQUESTER_CANT_WAIT
+/**
  * Exit status when FLOM is unable to execute the command
  */
 #define FLOM_ES_UNABLE_TO_EXECUTE_COMMAND   _ES_UNABLE_TO_EXECUTE_COMMAND

@@ -29,6 +29,6 @@ AT_DATA([expout],
  1 ending
 ]])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n -w n"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n -w n"], [@_ES_REQUESTER_CANT_WAIT@], [ignore], [ignore])
 AT_CLEANUP
 
