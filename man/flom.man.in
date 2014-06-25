@@ -46,6 +46,9 @@ maximum enqueue time if the resource is already locked by someone else; if the r
 .B -e, --resource-create=\fIyes|no
 \fBdefault\fP (\fIyes\fP): the command will create the resource if it was not already created by another command, otherwise (\fIno\fP) it will wait for resource creation or will end immediately (see \fB-w, --resource-wait\fP option)
 .TP
+.B -i, --resource-idle-lifespan=\fImilliseconds
+how long a resource will be kept after last usage, default value is \fB0 milliseconds\fP; this option can be used to avoid a following job that specifies \fB-e n, --resource-create=no\fP will wait undefinitely just because the previous task termited earliest. \fBWarning:\fP too many long lasting resources can waste memory and threads inside \fIflom daemon\fP
+.TP
 .B -l, --lock-mode=\fIMODE
 lock mode as defined by VMS DLM (Distributed Lock Manager). \fIMODE\fP can be: "NullLock", "ConcurrentRead", "ConcurrentWrite", "ProtectedRead", "ProtectedWrite", "Exclusive" (equivalent short forms are: "NL", "CR", "CW", "PR", "PW", "EX"). More information are available here \fIhttp://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes\fP
 .TP

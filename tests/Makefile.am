@@ -79,6 +79,7 @@ usecase-dist.at: usecase-dist.at.in
 usecase-lt.at: usecase-lt.at.in
 	sed \
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
+	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
 	-e 's|@_ES_REQUESTER_CANT_WAIT[@]|$(_ES_REQUESTER_CANT_WAIT)|g' \
 	$< >$@
 

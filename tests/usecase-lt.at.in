@@ -22,13 +22,12 @@ AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n" & flom_test_exec3.sh 2 1 1 "-e y" & fl
 AT_CLEANUP
 
 AT_SETUP([Use case XXX (3/)])
-AT_DATA([expout],
-[[ 1 locking for 1 seconds
- 2 locking for 1 seconds
- 2 ending
- 1 ending
-]])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n -w n"], [@_ES_REQUESTER_CANT_WAIT@], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case XXX (4/)])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n -o 100"], [@_ES_RESOURCE_BUSY@], [ignore], [ignore])
 AT_CLEANUP
 
