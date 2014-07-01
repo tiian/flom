@@ -87,6 +87,11 @@ struct flom_locker_s {
      */
     int                      idle_periods;
     /**
+     * Minimum number of milliseconds a resource (and a locker) must be kept
+     * after last usage
+     */
+    int                      idle_lifespan;
+    /**
      * Resource managed by the locker
      */
     flom_resource_t          resource;

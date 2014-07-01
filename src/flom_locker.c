@@ -146,6 +146,7 @@ gpointer flom_locker_loop(gpointer data)
             int ready_fd;
             guint i, n;
             struct pollfd *fds;
+            int timeout = FLOM_LOCKER_POLL_TIMEOUT;
             if (FLOM_RC_OK != (ret_cod = flom_conns_clean(&conns)))
                 THROW(CONNS_CLEAN_ERROR);
             if (flom_conns_get_used(&conns) == 0) {
@@ -160,9 +161,14 @@ gpointer flom_locker_loop(gpointer data)
             if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(
                                    &conns, POLLIN)))
                 THROW(CONNS_SET_EVENTS_ERROR);
-            FLOM_TRACE(("flom_locker_loop: entering poll...\n"));
-            ready_fd = poll(fds, flom_conns_get_used(&conns),
-                            FLOM_LOCKER_POLL_TIMEOUT);
+            /* set a specific timeout only if termination phase is not yet
+               started and if specified lifespan is not null */
+            if (locker->idle_periods == 0 &&
+                locker->idle_lifespan > 0)
+                timeout = locker->idle_lifespan;
+            FLOM_TRACE(("flom_locker_loop: entering poll using %d "
+                        "timeout milliseconds...\n", timeout));
+            ready_fd = poll(fds, flom_conns_get_used(&conns), timeout);
             FLOM_TRACE(("flom_locker_loop: ready_fd=%d\n", ready_fd));
             /* error on poll function */
             if (0 > ready_fd)
@@ -170,8 +176,7 @@ gpointer flom_locker_loop(gpointer data)
             /* poll exited due to time out */
             if (0 == ready_fd) {
                 FLOM_TRACE(("flom_locker_loop: idle time exceeded %d "
-                            "milliseconds\n",
-                            FLOM_LOCKER_POLL_TIMEOUT));
+                            "milliseconds\n", timeout));
                 if (1 == flom_conns_get_used(&conns)) {
                     locker->idle_periods++;
                     FLOM_TRACE(("flom_locker_loop: only control connection "

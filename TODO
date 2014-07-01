@@ -1,7 +1,5 @@
 Road map:
-check command line option and config file key for "resource idle lifespan"
-implement "resource idle lifespan" 
-check "resource idle lifespan" code
+check "resource idle lifespan" code: implement test cases
 
 implement FIFO, LIFO, FIRST FIT (for numerical resources) lock allocation policies
 

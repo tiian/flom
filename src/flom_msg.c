@@ -58,6 +58,7 @@ const gchar *FLOM_MSG_PROP_ADDRESS        = (gchar *)"address";
 const gchar *FLOM_MSG_PROP_CREATE         = (gchar *)"create";
 const gchar *FLOM_MSG_PROP_ELEMENT        = (gchar *)"element";
 const gchar *FLOM_MSG_PROP_LEVEL          = (gchar *)"level";
+const gchar *FLOM_MSG_PROP_LIFESPAN       = (gchar *)"lifespan";
 const gchar *FLOM_MSG_PROP_MODE           = (gchar *)"mode";
 const gchar *FLOM_MSG_PROP_NAME           = (gchar *)"name";
 const gchar *FLOM_MSG_PROP_PORT           = (gchar *)"port";
@@ -669,7 +670,7 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
             case FLOM_RSRC_TYPE_SIMPLE:
                 used_chars = snprintf(buffer + *offset, *free_chars,
                                       "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\" "
-                                      "%s=\"%d\"/>",
+                                      "%s=\"%d\" %s=\"%d\"/>",
                                       FLOM_MSG_TAG_RESOURCE,
                                       FLOM_MSG_PROP_NAME,
                                       base64_resource_name,
@@ -678,12 +679,14 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                                       FLOM_MSG_PROP_WAIT,
                                       msg->body.lock_8.resource.wait,
                                       FLOM_MSG_PROP_CREATE,
-                                      msg->body.lock_8.resource.create);
+                                      msg->body.lock_8.resource.create,
+                                      FLOM_MSG_PROP_LIFESPAN,
+                                      msg->body.lock_8.resource.lifespan);
                 break;
             case FLOM_RSRC_TYPE_NUMERIC:
                 used_chars = snprintf(buffer + *offset, *free_chars,
                                       "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\" "
-                                      "%s=\"%d\"/>",
+                                      "%s=\"%d\" %s=\"%d\"/>",
                                       FLOM_MSG_TAG_RESOURCE,
                                       FLOM_MSG_PROP_NAME,
                                       base64_resource_name,
@@ -692,23 +695,28 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                                       FLOM_MSG_PROP_QUANTITY,
                                       msg->body.lock_8.resource.quantity,
                                       FLOM_MSG_PROP_CREATE,
-                                      msg->body.lock_8.resource.create);
+                                      msg->body.lock_8.resource.create,
+                                      FLOM_MSG_PROP_LIFESPAN,
+                                      msg->body.lock_8.resource.lifespan);
                 break;
             case FLOM_RSRC_TYPE_SET:
                 used_chars = snprintf(buffer + *offset, *free_chars,
-                                      "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\"/>",
+                                      "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\" "
+                                      "%s=\"%d\"/>",
                                       FLOM_MSG_TAG_RESOURCE,
                                       FLOM_MSG_PROP_NAME,
                                       base64_resource_name,
                                       FLOM_MSG_PROP_WAIT,
                                       msg->body.lock_8.resource.wait,
                                       FLOM_MSG_PROP_CREATE,
-                                      msg->body.lock_8.resource.create);
+                                      msg->body.lock_8.resource.create,
+                                      FLOM_MSG_PROP_LIFESPAN,
+                                      msg->body.lock_8.resource.lifespan);
                 break;
             case FLOM_RSRC_TYPE_HIER:
                 used_chars = snprintf(buffer + *offset, *free_chars,
                                       "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\" "
-                                      "%s=\"%d\"/>",
+                                      "%s=\"%d\" %s=\"%d\"/>",
                                       FLOM_MSG_TAG_RESOURCE,
                                       FLOM_MSG_PROP_NAME,
                                       base64_resource_name,
@@ -717,7 +725,9 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                                       FLOM_MSG_PROP_WAIT,
                                       msg->body.lock_8.resource.wait,
                                       FLOM_MSG_PROP_CREATE,
-                                      msg->body.lock_8.resource.create);
+                                      msg->body.lock_8.resource.create,
+                                      FLOM_MSG_PROP_LIFESPAN,
+                                      msg->body.lock_8.resource.lifespan);
                 break;
             default:
                 THROW(INVALID_RESOURCE_TYPE);
@@ -1126,7 +1136,7 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
         switch (msg->header.pvs.step) {
             case 8:
                 FLOM_TRACE(("flom_msg_trace_lock: body[%s["
-                            "%s='%s',%s=%d,%s=%d,%s=%d,%s=%d]]\n",
+                            "%s='%s',%s=%d,%s=%d,%s=%d,%s=%d,%s=%d]]\n",
                             FLOM_MSG_TAG_RESOURCE,
                             FLOM_MSG_PROP_NAME,
                             msg->body.lock_8.resource.name != NULL ?
@@ -1138,7 +1148,9 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
                             FLOM_MSG_PROP_QUANTITY,
                             msg->body.lock_8.resource.quantity,
                             FLOM_MSG_PROP_CREATE,
-                            msg->body.lock_8.resource.create));
+                            msg->body.lock_8.resource.create,
+                            FLOM_MSG_PROP_LIFESPAN,
+                            msg->body.lock_8.resource.lifespan));
                 break;
             case 16:
                 FLOM_TRACE(("flom_msg_trace_lock: body[%s["
@@ -1426,9 +1438,10 @@ void flom_msg_deserialize_start_element(
                      , INVALID_PROPERTY3
                      , INVALID_PROPERTY4
                      , INVALID_PROPERTY5
+                     , INVALID_PROPERTY6
                      , G_STRDUP_ERROR1
                      , G_STRDUP_ERROR2
-                     , INVALID_PROPERTY6
+                     , INVALID_PROPERTY7
                      , TAG_TYPE_ERROR
                      , NONE } excp;
     
@@ -1535,6 +1548,18 @@ void flom_msg_deserialize_start_element(
                                             *name_cursor, element_name));
                                 THROW(INVALID_PROPERTY4);
                             }
+                        } else if (!strcmp(*name_cursor,
+                                           FLOM_MSG_PROP_LIFESPAN)) {
+                            if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb)
+                                msg->body.lock_8.resource.lifespan =
+                                    strtol(*value_cursor, NULL, 10);
+                            else {
+                                FLOM_TRACE(("flom_msg_deserialize_start_"
+                                            "element: property '%s' is not "
+                                            "valid for verb '%s'\n",
+                                            *name_cursor, element_name));
+                                THROW(INVALID_PROPERTY5);
+                            }
                         }
                     }
                     break;
@@ -1557,7 +1582,7 @@ void flom_msg_deserialize_start_element(
                                             "element: property '%s' is not "
                                             "valid for verb '%s'\n",
                                             *name_cursor, element_name));
-                                THROW(INVALID_PROPERTY5);
+                                THROW(INVALID_PROPERTY6);
                             }
                         } else if (!strcmp(*name_cursor,
                                            FLOM_MSG_PROP_ELEMENT)) {
@@ -1597,7 +1622,7 @@ void flom_msg_deserialize_start_element(
                                         "element: property '%s' is not "
                                         "valid for verb '%s'\n",
                                         *name_cursor, element_name));
-                            THROW(INVALID_PROPERTY6);
+                            THROW(INVALID_PROPERTY7);
                         }
                     }
                     break;
@@ -1622,9 +1647,10 @@ void flom_msg_deserialize_start_element(
             case INVALID_PROPERTY3:
             case INVALID_PROPERTY4:
             case INVALID_PROPERTY5:
+            case INVALID_PROPERTY6:
             case G_STRDUP_ERROR1:
             case G_STRDUP_ERROR2:
-            case INVALID_PROPERTY6:
+            case INVALID_PROPERTY7:
             case TAG_TYPE_ERROR:
                 msg->state = FLOM_MSG_STATE_INVALID;
                 break;

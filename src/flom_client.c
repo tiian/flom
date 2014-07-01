@@ -763,6 +763,8 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
         msg.body.lock_8.resource.quantity =
             flom_config_get_resource_quantity();
         msg.body.lock_8.resource.create = flom_config_get_resource_create();
+        msg.body.lock_8.resource.lifespan =
+            flom_config_get_resource_idle_lifespan();
 
         /* serialize the request message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(

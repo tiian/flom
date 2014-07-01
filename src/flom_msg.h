@@ -186,6 +186,10 @@ extern const gchar *FLOM_MSG_PROP_ELEMENT;
  */
 extern const gchar *FLOM_MSG_PROP_LEVEL;
 /**
+ * Label used to specify "lifespan" property
+ */
+extern const gchar *FLOM_MSG_PROP_LIFESPAN;
+/**
  * Label used to specify "mode" property
  */
 extern const gchar *FLOM_MSG_PROP_MODE;
@@ -316,6 +320,11 @@ struct flom_msg_body_lock_8_resource_s {
      * create if the resource does not exist
      */
     int               create;
+    /**
+     * minimum number of milliseconds a resource must be kept after last
+     * usage
+     */
+    gint              lifespan;
 };
 
     

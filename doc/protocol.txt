@@ -37,10 +37,12 @@ verb=1 (lock)
   quantity: N = number of unities to lock (numeric resources only)
   create:   0 = don't create the resource if it does not exist 
             1 = create a new resource if it does not exist
+  lifespan: N = number of milliseconds to keep the resource after last usage
 
   client->server message (ask for a lock)
   <msg level="0" verb="1" step="8">
-    <resource name="_RESOURCE" mode="5" wait="1" quantity="N" create="1"/>
+    <resource name="_RESOURCE" mode="5" wait="1" quantity="N" create="1"
+      lifespan="5000"/>
   </msg>
 
   server->client message (answer: lock obtained/not obtained/wait)

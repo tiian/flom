@@ -201,6 +201,7 @@ int main (int argc, char *argv[])
         }
         flom_config_set_resource_create(fbv);
     }
+    flom_config_set_resource_idle_lifespan(resource_idle_lifespan);
     if (NULL != socket_name) {
         if (FLOM_RC_OK != (ret_cod = flom_config_set_socket_name(
                                socket_name))) {
