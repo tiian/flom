@@ -163,7 +163,7 @@ extern "C" {
 
 
     /**
-     * Helper function for @ref flom_accept_loop_transfer: it manages the
+     * Helper function for flom_accept_loop_transfer: it manages the
      * details related to connection movement
      * @param conns IN/OUT connections object
      * @param id IN connection id

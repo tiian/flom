@@ -823,6 +823,7 @@ int flom_accept_loop(flom_conns_t *conns)
                 THROW(POLL_ERROR);
             /* poll exited due to time out */
             if (0 == ready_fd) {
+                chklockers_again = FALSE;
                 number_of_lockers = flom_locker_array_count(&lockers);
                 FLOM_TRACE(("flom_accept_loop: idle time exceeded %d "
                             "milliseconds, number of lockers=%u\n",
@@ -1266,12 +1267,13 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                 if (!loop_cd->wait)
                     continue;
                 if (!locker->resource.compare_name(
-                        &locker->resource, msg->body.lock_8.resource.name)) {
+                        &locker->resource,
+                        loop_cd->msg->body.lock_8.resource.name)) {
                     FLOM_TRACE(("flom_accept_loop_transfer: connection %u "
                                 "(fd=%d) is waiting for resource '%s' and "
                                 "can be transferred to this locker\n",
-                                i, cd->fd,
-                                cd->msg->body.lock_8.resource.name));
+                                i, loop_cd->fd,
+                                loop_cd->msg->body.lock_8.resource.name));
                     if (FLOM_RC_OK != (ret_cod =
                                        flom_accept_loop_transfer_conn(
                                            conns, i, locker, loop_cd)))
