@@ -45,7 +45,7 @@ AT_SETUP([Use case 4 (1/2)])
 AT_DATA([expout],
 [[ 2 locking for 3 seconds
  1 locking for 1 seconds
-Resource already locked, the lock was not obtained because timeout (1000 milliseconds) expired
+The lock was not obtained because timeout (1000 milliseconds) expired
  1 ending
  2 ending
 ]])

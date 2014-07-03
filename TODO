@@ -1,5 +1,4 @@
 Road map:
-fix test case "Use case XXX (5/)"
 check "resource create" with every type of resource... :)
 check "resource idle lifespan" code: implement test cases
 

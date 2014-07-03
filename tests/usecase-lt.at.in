@@ -29,8 +29,14 @@ AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n -o 100 -r /CDE"], [@_ES_RESOURCE_BUSY@]
 AT_CLEANUP
 
 AT_SETUP([Use case XXX (5/)])
-AT_CHECK([flom_test_exec3.sh 1 0 1 "-e y -r /foo -i 2000" &], [0], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 2 0 1 "-e n -r /bar -o 100"], [@_ES_RESOURCE_BUSY@], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 3 1 0 "-e n -r /foo"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-e y -r /foo -i 2000"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 2 0 0 "-e n -r /bar -o 100"], [@_ES_RESOURCE_BUSY@], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 3 0 0 "-e n -r /foo -o 500"], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case XXX (6/)])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-e y -r /bar -i 2000"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 2 0 0 "-e n -r /bar/foo -o 500"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 3 1 0 "-e n -r /bar/foo/goofy -o 500"], [0], [ignore], [ignore])
 AT_CLEANUP
 

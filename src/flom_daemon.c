@@ -778,7 +778,8 @@ int flom_accept_loop(flom_conns_t *conns)
                      , POLL_ERROR
                      , ACCEPT_LOOP_CHKLOCKERS_ERROR1
                      , NEGATIVE_NUMBER_OF_LOCKERS_ERROR1
-                     , CONNS_CLOSE_ERROR
+                     , CONNS_CLOSE_ERROR1
+                     , CONNS_CLOSE_ERROR2
                      , ACCEPT_LOOP_POLLIN_ERROR
                      , NETWORK_ERROR
                      , INTERNAL_ERROR
@@ -861,15 +862,25 @@ int flom_accept_loop(flom_conns_t *conns)
                                 "before categorization!\n", i));
                     if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                            conns, i)))
-                        THROW(CONNS_CLOSE_ERROR);
+                        THROW(CONNS_CLOSE_ERROR1);
                     /* this file descriptor is no more valid, continue to
                        next one */
                     continue;
                 }
                 if (fds[i].revents & POLLIN) {
                     int conn_moved = FALSE;
-                    if (FLOM_RC_OK != (ret_cod = flom_accept_loop_pollin(
-                                           conns, i, &lockers, &conn_moved)))
+                    ret_cod = flom_accept_loop_pollin(
+                        conns, i, &lockers, &conn_moved);
+                    if (FLOM_RC_CONNECTION_CLOSED == ret_cod) {
+                        FLOM_TRACE(("flom_accept_loop: peer closed the "
+                                    "connection, terminating it...\n"));
+                        if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
+                                               conns, i)))
+                            THROW(CONNS_CLOSE_ERROR2);
+                        /* this file descriptor is no more valid, continue to
+                           next one */
+                        continue;
+                    } else if (FLOM_RC_OK != ret_cod)
                         THROW(ACCEPT_LOOP_POLLIN_ERROR);
                     if (conn_moved)
                         /* connection is no more available for main thread,
@@ -911,7 +922,8 @@ int flom_accept_loop(flom_conns_t *conns)
             case NEGATIVE_NUMBER_OF_LOCKERS_ERROR1:
                 ret_cod = FLOM_RC_OBJ_CORRUPTED;
                 break;
-            case CONNS_CLOSE_ERROR:
+            case CONNS_CLOSE_ERROR1:
+            case CONNS_CLOSE_ERROR2:
             case ACCEPT_LOOP_POLLIN_ERROR:
                 break;
             case NETWORK_ERROR:
@@ -950,6 +962,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                      , CONN_SET_KEEPALIVE_ERROR
                      , CONNS_ADD_ERROR
                      , MSG_RETRIEVE_ERROR
+                     , EMPTY_MESSAGE
                      , CONNS_GET_MSG_ERROR
                      , CONNS_GET_GMPC_ERROR
                      , MSG_DESERIALIZE_ERROR
@@ -1006,6 +1019,14 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                                    &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT,
                                    (struct sockaddr *)&src_addr, &addrlen)))
                 THROW(MSG_RETRIEVE_ERROR);
+
+            /* has the client disconnected in the meantime? */
+            if (0 == read_bytes) {
+                FLOM_TRACE(("flom_accept_loop_pollin: returned 0 bytes, it "
+                            "the client has probably disconnected, "
+                            "leaving...\n"));
+                THROW(EMPTY_MESSAGE);
+            }
 
             if (NULL == (msg = flom_conns_get_msg(conns, id)))
                 THROW(CONNS_GET_MSG_ERROR);
@@ -1080,6 +1101,10 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
             case CONN_SET_KEEPALIVE_ERROR:
             case CONNS_ADD_ERROR:
             case MSG_RETRIEVE_ERROR:
+                break;
+            case EMPTY_MESSAGE:
+                ret_cod = FLOM_RC_CONNECTION_CLOSED;
+                break;
             case MSG_DESERIALIZE_ERROR:
                 break;
             case CONNS_GET_MSG_ERROR:
