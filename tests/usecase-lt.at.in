@@ -1,6 +1,6 @@
 AT_BANNER([Long term resources use case checks])
 
-AT_SETUP([Use case XXX (1/)])
+AT_SETUP([Use case 16 (1/4)])
 AT_DATA([expout],
 [[ 1 locking for 2 seconds
  2 locking for 1 seconds
@@ -10,7 +10,7 @@ AT_DATA([expout],
 AT_CHECK([flom_test_exec3.sh 1 0 2 "-e y" & flom_test_exec3.sh 2 1 1 "-e n" & flom_test_exec3.sh 3 2 0 "-e y" >/dev/null], [0], [expout], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Use case XXX (2/)])
+AT_SETUP([Use case 16 (2/4)])
 AT_DATA([expout],
 [[ 1 locking for 1 seconds
  2 locking for 1 seconds
@@ -20,21 +20,21 @@ AT_DATA([expout],
 AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n -r ABC[[1]]" & flom_test_exec3.sh 2 1 1 "-e y -r ABC[[1]]" & flom_test_exec3.sh 3 2 0 "-e y -r ABC[[1]]" >/dev/null], [0], [expout], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Use case XXX (3/)])
+AT_SETUP([Use case 16 (3/4)])
 AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n -w n -r B.C.D"], [@_ES_REQUESTER_CANT_WAIT@], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Use case XXX (4/)])
+AT_SETUP([Use case 16 (4/4)])
 AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n -o 100 -r /CDE"], [@_ES_RESOURCE_BUSY@], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Use case XXX (5/)])
+AT_SETUP([Use case 17 (1/2)])
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-e y -r /foo -i 2000"], [0], [ignore], [ignore])
 AT_CHECK([flom_test_exec3.sh 2 0 0 "-e n -r /bar -o 100"], [@_ES_RESOURCE_BUSY@], [ignore], [ignore])
 AT_CHECK([flom_test_exec3.sh 3 0 0 "-e n -r /foo -o 500"], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Use case XXX (6/)])
+AT_SETUP([Use case 17 (2/2)])
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-e y -r /bar -i 2000"], [0], [ignore], [ignore])
 AT_CHECK([flom_test_exec3.sh 2 0 0 "-e n -r /bar/foo -o 500"], [0], [ignore], [ignore])
 AT_CHECK([flom_test_exec3.sh 3 1 0 "-e n -r /bar/foo/goofy -o 500"], [0], [ignore], [ignore])
