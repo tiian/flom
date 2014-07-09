@@ -144,6 +144,14 @@ struct flom_conn_data_s {
      */
     struct flom_msg_s     *msg;
     /**
+     * Step of the last sent message
+     */
+    int                    last_step_sent;
+    /**
+     * Step of the last received message
+     */
+    int                    last_step_received;
+    /**
      * GMarkup Parser context (allocated by g_markup_parse_context_new)
      */
     GMarkupParseContext   *gmpc;

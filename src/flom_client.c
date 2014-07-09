@@ -73,7 +73,7 @@ int flom_client_connect(struct flom_conn_data_s *cd)
     FLOM_TRACE(("flom_client_connect\n"));
     TRY {
         /* reset connection data struct */
-        memset(cd, 0, sizeof(cd));
+        memset(cd, 0, sizeof(struct flom_conn_data_s));
 
         /* choose and instantiate connection type */
         if (NULL != flom_config_get_socket_name()) {

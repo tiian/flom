@@ -512,10 +512,8 @@ extern "C" {
      *                 SOCK_DGRAM (see recvfrom man page)
      * @return a reason code
      */
-    int flom_msg_retrieve(int fd, int type,
-                          char *buf, size_t buf_size,
-                          ssize_t *read_bytes,
-                          int timeout,
+    int flom_msg_retrieve(int fd, int type, char *buf, size_t buf_size,
+                          ssize_t *read_bytes, int timeout,
                           struct sockaddr *src_addr, socklen_t *addrlen);
 
 
