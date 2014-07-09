@@ -173,7 +173,8 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
                         resource->data.set.elements->len;
                     if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                            msg, FLOM_MSG_VERB_LOCK,
-                                           2*FLOM_MSG_STEP_INCR,
+                                           conn->last_step +
+                                           FLOM_MSG_STEP_INCR,
                                            FLOM_RC_OK, rdse->name)))
                         THROW(MSG_BUILD_ANSWER_ERROR1);
                 } else {
@@ -448,6 +449,7 @@ int flom_resource_set_waitings(flom_resource_t *resource)
                 if (FLOM_RC_OK != (ret_cod = flom_msg_send(
                                        cl->conn->fd, buffer, to_send)))
                     THROW(MSG_SEND_ERROR);
+                cl->conn->last_step = msg.header.pvs.step;
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
                     THROW(MSG_FREE_ERROR);                
                 /* track locker connection */

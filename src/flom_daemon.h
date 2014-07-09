@@ -209,11 +209,11 @@ extern "C" {
 
     /**
      * Send a reply message to the to client
-     * @param cd IN client connection data
+     * @param cd IN/OUT client connection data
      * @param rc IN answer return code
      * @return a reason code
      */
-    int flom_accept_loop_reply(const struct flom_conn_data_s *cd, int rc);
+    int flom_accept_loop_reply(struct flom_conn_data_s *cd, int rc);
 
     
 

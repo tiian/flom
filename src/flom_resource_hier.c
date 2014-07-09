@@ -852,6 +852,7 @@ int flom_resource_hier_waitings(flom_resource_t *resource)
                 if (FLOM_RC_OK != (ret_cod = flom_msg_send(
                                        cl->conn->fd, buffer, to_send)))
                     THROW(MSG_SEND_ERROR);
+                cl->conn->last_step = msg.header.pvs.step;
                 cl = NULL;
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
                     THROW(MSG_FREE_ERROR);                

@@ -1037,6 +1037,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
             if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
                                    buffer, read_bytes, msg, gmpc)))
                 THROW(MSG_DESERIALIZE_ERROR);
+            c->last_step = msg->header.pvs.step;
             flom_msg_trace(msg);
             /* if the message is not valid the client must be terminated */
             if (FLOM_MSG_STATE_INVALID == msg->state) {
@@ -1590,7 +1591,7 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers, int *again)
 
 
 
-int flom_accept_loop_reply(const struct flom_conn_data_s *cd, int rc)
+int flom_accept_loop_reply(struct flom_conn_data_s *cd, int rc)
 {
     enum Exception { MSG_BUILD_ANSWER_ERROR
                      , MSG_SERIALIZE_ERROR
@@ -1619,6 +1620,7 @@ int flom_accept_loop_reply(const struct flom_conn_data_s *cd, int rc)
         if (FLOM_RC_OK != (ret_cod = flom_msg_send(
                                cd->fd, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
+        cd->last_step = msg.header.pvs.step;
         /* free message dynamic allocated memory (if any) */
         if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
             THROW(MSG_FREE_ERROR);

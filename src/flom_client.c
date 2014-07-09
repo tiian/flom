@@ -775,7 +775,8 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
         if (FLOM_RC_OK != (ret_cod = flom_msg_send(
                                cd->fd, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
-
+        cd->last_step = msg.header.pvs.step;
+        
         if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
             THROW(MSG_FREE_ERROR1);
         flom_msg_init(&msg);
@@ -803,6 +804,7 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
         if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
                                buffer, to_read, &msg, cd->gmpc)))
             THROW(MSG_DESERIALIZE_ERROR1);
+        cd->last_step = msg.header.pvs.step;
         /* check the parser completed without errors */
         if (FLOM_MSG_STATE_READY != msg.state) {
             /* check message level */
@@ -972,7 +974,7 @@ int flom_client_wait_lock(struct flom_conn_data_s *cd,
             if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
                                    buffer, to_read, msg, cd->gmpc)))
                 THROW(MSG_DESERIALIZE_ERROR);
-            
+            cd->last_step = msg->header.pvs.step;
             flom_msg_trace(msg);
 
             /* is arriving an intermediate message (resource does not exist
@@ -1058,7 +1060,8 @@ int flom_client_unlock(struct flom_conn_data_s *cd)
         if (FLOM_RC_OK != (ret_cod = flom_msg_send(
                                cd->fd, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
-
+        cd->last_step = msg.header.pvs.step;
+        
         if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
             THROW(MSG_FREE_ERROR);
         

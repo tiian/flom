@@ -130,10 +130,8 @@ flom_lock_mode_t flom_lock_mode_retrieve(const gchar *text)
 
 
 
-int flom_msg_retrieve(int fd, int type,
-                      char *buf, size_t buf_size,
-                      ssize_t *read_bytes,
-                      int timeout,
+int flom_msg_retrieve(int fd, int type, char *buf, size_t buf_size,
+                      ssize_t *read_bytes, int timeout,
                       struct sockaddr *src_addr, socklen_t *addrlen)
 {
     enum Exception { POLL_ERROR
@@ -190,7 +188,7 @@ int flom_msg_retrieve(int fd, int type,
         FLOM_TRACE(("flom_msg_retrieve: fd=%d returned "
                     SSIZE_T_FORMAT " bytes '%*.*s'\n", fd, *read_bytes,
                     *read_bytes, *read_bytes, buf));
-        
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -1757,7 +1755,7 @@ int flom_msg_build_answer(struct flom_msg_s *msg,
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     gchar *tmp_element = NULL;
     
-    FLOM_TRACE(("flom_msg_build_answer\n"));
+    FLOM_TRACE(("flom_msg_build_answer: verb=%d, step=%d\n", verb, step));
     TRY {    
         if (NULL == msg)
             THROW(NULL_OBJECT);

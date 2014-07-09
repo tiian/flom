@@ -382,6 +382,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
                                        buffer, read_bytes, msg, gmpc)))
                     THROW(MSG_DESERIALIZE_ERROR);
+                curr_cd->last_step = msg->header.pvs.step;
                 /* if the message is not valid the client must be terminated */
                 if (FLOM_MSG_STATE_INVALID == msg->state) {
                     FLOM_TRACE(("flom_locker_loop_pollin: message from client "
@@ -419,6 +420,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                                     "poll loop...\n"));
                     } else if (FLOM_RC_OK != ret_cod)
                         THROW(MSG_SEND_ERROR);
+                    curr_cd->last_step = msg->header.pvs.step;
                 } /* if (FLOM_MSG_STATE_READY == msg->state) */
             } else {
                 /* Implement ping message here... */
