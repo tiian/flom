@@ -1,5 +1,13 @@
 Road map:
-fix test "Use case 16 (3bis/4)"
+add a new step for lock: 32
+fix the client side protocol, this sequence is now valid:
+step=8, lock request
+step=16, rc=2 (resource does not exist)
+step=24, rc=1 (resource exists, but it's busy)
+step=32, rc=0 (resource exists and is free, assigned)
+
+implement Use Case 16 (7/6 and 8/6 for simple and hierarchical resources)
+
 check "resource create" with every type of resource... :)
 
 put inside function flom_accept_loop_chklockers a check if the thread associated to the locker is really active; it the thread leaved (due to an error), make a clean-up phase. This avoid a daemon crash after a thread terminated with an error, but listener thread has a "locker object" already active

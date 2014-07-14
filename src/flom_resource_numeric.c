@@ -163,7 +163,8 @@ int flom_resource_numeric_inmsg(flom_resource_t *resource,
                     resource->data.numeric.locked_quantity += new_quantity;
                     if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                            msg, FLOM_MSG_VERB_LOCK,
-                                           2*FLOM_MSG_STEP_INCR,
+                                           conn->last_step +
+                                           FLOM_MSG_STEP_INCR,
                                            FLOM_RC_OK, NULL)))
                         THROW(MSG_BUILD_ANSWER_ERROR1);
                 } else {
@@ -184,7 +185,8 @@ int flom_resource_numeric_inmsg(flom_resource_t *resource,
                             (gpointer)cl);
                         if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                                msg, FLOM_MSG_VERB_LOCK,
-                                               2*FLOM_MSG_STEP_INCR,
+                                               conn->last_step +
+                                               FLOM_MSG_STEP_INCR,
                                                FLOM_RC_LOCK_ENQUEUED, NULL)))
                             THROW(MSG_BUILD_ANSWER_ERROR2);
                     } else {
@@ -194,7 +196,8 @@ int flom_resource_numeric_inmsg(flom_resource_t *resource,
                                     new_quantity, conn));
                         if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                                msg, FLOM_MSG_VERB_LOCK,
-                                               2*FLOM_MSG_STEP_INCR,
+                                               conn->last_step +
+                                               FLOM_MSG_STEP_INCR,
                                                impossible_lock ?
                                                FLOM_RC_LOCK_IMPOSSIBLE :
                                                FLOM_RC_LOCK_BUSY, NULL)))

@@ -1284,14 +1284,17 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
         if (locker_is_new) {
             /* scanning incubator to retrieve clients waiting for this
                resource */
-            for (i=1; i<flom_conns_get_used(conns); ++i) {
+            i=1;
+            while (i < flom_conns_get_used(conns)) {
                 struct flom_conn_data_s *loop_cd = NULL;
                 if (NULL == (loop_cd = flom_conns_get_cd(conns, i)))
                     THROW(CONNS_GET_CD_ERROR2);
                 /* check if the connection is really waiting resource
                    creation, else skip it */
-                if (!loop_cd->wait)
+                if (!loop_cd->wait) {
+                    i++;
                     continue;
+                }
                 if (!locker->resource.compare_name(
                         &locker->resource,
                         loop_cd->msg->body.lock_8.resource.name)) {
@@ -1304,8 +1307,9 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                                        flom_accept_loop_transfer_conn(
                                            conns, i, locker, loop_cd)))
                         THROW(ACCEPT_LOOP_TRANSFER_CONN_ERROR2);
-                } /* if (!locker->resource.compare_name(... */
-            } /* for (i=1; i<flom_conns_get_used(conns); ++i) */
+                } else
+                    i++;
+            } /* while (i < flom_conns_get_used(conns))) */
         } /* if (locker_is_new) */
         
         THROW(NONE);
