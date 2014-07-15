@@ -731,6 +731,7 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
                      , PROTOCOL_LEVEL_MISMATCH
                      , MSG_DESERIALIZE_ERROR2
                      , PROTOCOL_ERROR1
+                     , INTERNAL_ERROR
                      , NETWORK_TIMEOUT2
                      , CONNECT_WAIT_LOCK_ERROR
                      , LOCK_BUSY
@@ -841,11 +842,22 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
                 switch (ret_cod) {
                     case FLOM_RC_OK:
                         /* copy element if available */
-                        if (NULL != msg.body.lock_24.answer.element) {
-                            strncpy(element, msg.body.lock_24.answer.element,
-                                    element_size);
-                            element[element_size-1] = '\0';
-                        }
+                        if (3*FLOM_MSG_STEP_INCR == cd->last_step) {
+                            if (NULL != msg.body.lock_24.answer.element) {
+                                strncpy(element,
+                                        msg.body.lock_24.answer.element,
+                                        element_size);
+                                element[element_size-1] = '\0';
+                            }
+                        } else if (4*FLOM_MSG_STEP_INCR == cd->last_step) {
+                            if (NULL != msg.body.lock_24.answer.element) {
+                                strncpy(element,
+                                        msg.body.lock_24.answer.element,
+                                        element_size);
+                                element[element_size-1] = '\0';
+                            }
+                        } else
+                            THROW(INTERNAL_ERROR);
                         break;
                     case FLOM_RC_NETWORK_TIMEOUT:
                         THROW(NETWORK_TIMEOUT2);
@@ -891,6 +903,9 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
                 break;
             case MSG_DESERIALIZE_ERROR1:
                 ret_cod = FLOM_RC_MSG_DESERIALIZE_ERROR;
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
                 break;
             case PROTOCOL_LEVEL_MISMATCH:
                 ret_cod = FLOM_RC_PROTOCOL_LEVEL_MISMATCH;
@@ -950,6 +965,7 @@ int flom_client_wait_lock(struct flom_conn_data_s *cd,
     TRY {
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
         ssize_t to_read;
+        struct flom_msg_body_answer_s mba;
 
         /* more than one answer can arrive */
         while (TRUE) {
@@ -979,23 +995,34 @@ int flom_client_wait_lock(struct flom_conn_data_s *cd,
 
             /* is arriving an intermediate message (resource does not exist
                condition)? */
-            if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb &&
-                2*FLOM_MSG_STEP_INCR == msg->header.pvs.step) {
-                if (FLOM_RC_LOCK_ENQUEUED == msg->body.lock_16.answer.rc) {
-                    FLOM_TRACE(("flom_client_wait_lock: the resource is "
-                                "busy, looping again...\n"));
-                    continue;
-                } /* if (FLOM_RC_LOCK_ENQUEUED == msg->body.lock_16... */
-            } /* if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb && */
-            /* check lock answer */
-            if (FLOM_MSG_VERB_LOCK != msg->header.pvs.verb ||
-                3*FLOM_MSG_STEP_INCR != msg->header.pvs.step)
-                THROW(PROTOCOL_ERROR);
-            if (FLOM_RC_OK != msg->body.lock_24.answer.rc) {
-                FLOM_TRACE(("flom_client_wait_lock: lock can NOT be acquired, "
-                            "leaving...\n"));
-                THROW(LOCK_CANT_LOCK);
-            } /* if (FLOM_RC_OK != msg->body.lock_24.answer.rc) */
+            if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb) {
+                switch (msg->header.pvs.step) {
+                    case 2*FLOM_MSG_STEP_INCR:
+                        mba = msg->body.lock_16.answer;
+                        break;
+                    case 3*FLOM_MSG_STEP_INCR:
+                        mba = msg->body.lock_24.answer;
+                        break;
+                    case 4*FLOM_MSG_STEP_INCR:
+                        /* last step, MUST be OK */
+                        mba = msg->body.lock_32.answer;
+                        if (FLOM_RC_OK != mba.rc) {
+                            FLOM_TRACE(("flom_client_wait_lock: lock can "
+                                        "NOT be acquired, leaving...\n"));
+                            THROW(LOCK_CANT_LOCK);
+                        } /* if (FLOM_RC_OK != mba.rc) */
+                        break;
+                    default:
+                        THROW(PROTOCOL_ERROR);
+                        break;
+                } /* switch (msg->header.pvs.step) */
+            } /* if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb) */
+            
+            if (FLOM_RC_LOCK_ENQUEUED == mba.rc) {
+                FLOM_TRACE(("flom_client_wait_lock: the resource is "
+                            "busy, looping again...\n"));
+                continue;
+            } /* if (FLOM_RC_LOCK_ENQUEUED == mba.rc */
             /* last message was arrived, leaving the loop */
             break;
         } /* while (TRUE) */

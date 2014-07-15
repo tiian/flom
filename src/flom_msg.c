@@ -322,6 +322,12 @@ int flom_msg_free(struct flom_msg_s *msg)
                             msg->body.lock_24.answer.element = NULL;
                         }
                         break;
+                    case 4*FLOM_MSG_STEP_INCR:
+                        if (NULL != msg->body.lock_32.answer.element) {
+                            g_free(msg->body.lock_32.answer.element);
+                            msg->body.lock_32.answer.element = NULL;
+                        }
+                        break;
                     default:
                         THROW(INVALID_STEP_LOCK);
                 }
@@ -462,6 +468,7 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
                      , SERIALIZE_LOCK_8_ERROR
                      , SERIALIZE_LOCK_16_ERROR
                      , SERIALIZE_LOCK_24_ERROR
+                     , SERIALIZE_LOCK_32_ERROR
                      , INVALID_LOCK_STEP
                      , SERIALIZE_UNLOCK_8_ERROR
                      , INVALID_UNLOCK_STEP
@@ -507,26 +514,33 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
         switch (msg->header.pvs.verb) {
             case FLOM_MSG_VERB_LOCK:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case FLOM_MSG_STEP_INCR:
                         if (FLOM_RC_OK != (
                                 ret_cod =
                                 flom_msg_serialize_lock_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_LOCK_8_ERROR);
                         break;
-                    case 16:
+                    case 2*FLOM_MSG_STEP_INCR:
                         if (FLOM_RC_OK != (
                                 ret_cod =
                                 flom_msg_serialize_lock_16(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_LOCK_16_ERROR);
                         break;
-                    case 24:
+                    case 3*FLOM_MSG_STEP_INCR:
                         if (FLOM_RC_OK != (
                                 ret_cod =
                                 flom_msg_serialize_lock_24(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_LOCK_24_ERROR);
+                        break;
+                    case 4*FLOM_MSG_STEP_INCR:
+                        if (FLOM_RC_OK != (
+                                ret_cod =
+                                flom_msg_serialize_lock_32(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_LOCK_32_ERROR);
                         break;
                     default:
                         THROW(INVALID_LOCK_STEP);
@@ -534,7 +548,7 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
                 break;
             case FLOM_MSG_VERB_UNLOCK:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case FLOM_MSG_STEP_INCR:
                         if (FLOM_RC_OK != (
                                 ret_cod =
                                 flom_msg_serialize_unlock_8(
@@ -547,14 +561,14 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
                 break;
             case FLOM_MSG_VERB_PING:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case FLOM_MSG_STEP_INCR:
                         if (FLOM_RC_OK != (
                                 ret_cod =
                                 flom_msg_serialize_ping_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_PING_8_ERROR);
                         break;
-                    case 16:
+                    case 2*FLOM_MSG_STEP_INCR:
                         if (FLOM_RC_OK != (
                                 ret_cod =
                                 flom_msg_serialize_ping_16(
@@ -567,14 +581,14 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
                 break;
             case FLOM_MSG_VERB_DISCOVER:
                 switch (msg->header.pvs.step) {
-                    case 8:
+                    case FLOM_MSG_STEP_INCR:
                         if (FLOM_RC_OK != (
                                 ret_cod =
                                 flom_msg_serialize_discover_8(
                                     msg, buffer, &offset, &free_chars)))
                             THROW(SERIALIZE_DISCOVER_8_ERROR);
                         break;
-                    case 16:
+                    case 2*FLOM_MSG_STEP_INCR:
                         if (FLOM_RC_OK != (
                                 ret_cod =
                                 flom_msg_serialize_discover_16(
@@ -611,6 +625,7 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
             case SERIALIZE_LOCK_8_ERROR:
             case SERIALIZE_LOCK_16_ERROR:
             case SERIALIZE_LOCK_24_ERROR:
+            case SERIALIZE_LOCK_32_ERROR:
             case SERIALIZE_UNLOCK_8_ERROR:
             case SERIALIZE_PING_8_ERROR:
             case SERIALIZE_PING_16_ERROR:
@@ -833,7 +848,7 @@ int flom_msg_serialize_lock_24(const struct flom_msg_s *msg,
         int used_chars;
         
         /* <answer> */
-        if (NULL == msg->body.lock_16.answer.element) {
+        if (NULL == msg->body.lock_24.answer.element) {
             used_chars = snprintf(buffer + *offset, *free_chars,
                                   "<%s %s=\"%d\"/>",
                                   FLOM_MSG_TAG_ANSWER,
@@ -867,6 +882,59 @@ int flom_msg_serialize_lock_24(const struct flom_msg_s *msg,
         } /* switch (excp) */
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_msg_serialize_lock_24/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_msg_serialize_lock_32(const struct flom_msg_s *msg,
+                               char *buffer,
+                               size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_msg_serialize_lock_32\n"));
+    TRY {
+        int used_chars;
+        
+        /* <answer> */
+        if (NULL == msg->body.lock_32.answer.element) {
+            used_chars = snprintf(buffer + *offset, *free_chars,
+                                  "<%s %s=\"%d\"/>",
+                                  FLOM_MSG_TAG_ANSWER,
+                                  FLOM_MSG_PROP_RC,
+                                  msg->body.lock_32.answer.rc);
+        } else {
+            used_chars = snprintf(buffer + *offset, *free_chars,
+                                  "<%s %s=\"%d\" %s=\"%s\"/>",
+                                  FLOM_MSG_TAG_ANSWER,
+                                  FLOM_MSG_PROP_RC,
+                                  msg->body.lock_32.answer.rc,
+                                  FLOM_MSG_PROP_ELEMENT,
+                                  msg->body.lock_32.answer.element);
+        } /* if (NULL == msg->body.lock_16.answer.element) */
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT:
+                ret_cod = FLOM_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_msg_serialize_lock_32/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -1132,7 +1200,7 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
     FLOM_TRACE(("flom_msg_trace_lock\n"));
     TRY {
         switch (msg->header.pvs.step) {
-            case 8:
+            case FLOM_MSG_STEP_INCR:
                 FLOM_TRACE(("flom_msg_trace_lock: body[%s["
                             "%s='%s',%s=%d,%s=%d,%s=%d,%s=%d,%s=%d]]\n",
                             FLOM_MSG_TAG_RESOURCE,
@@ -1150,7 +1218,7 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
                             FLOM_MSG_PROP_LIFESPAN,
                             msg->body.lock_8.resource.lifespan));
                 break;
-            case 16:
+            case 2*FLOM_MSG_STEP_INCR:
                 FLOM_TRACE(("flom_msg_trace_lock: body[%s["
                             "%s=%d,%s='%s']]\n",
                             FLOM_MSG_TAG_RESOURCE,
@@ -1161,7 +1229,7 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
                             msg->body.lock_16.answer.element :
                             FLOM_EMPTY_STRING));
                 break;
-            case 24:
+            case 3*FLOM_MSG_STEP_INCR:
                 FLOM_TRACE(("flom_msg_trace_lock: body[%s["
                             "%s=%d,%s='%s']]\n",
                             FLOM_MSG_TAG_RESOURCE,
@@ -1170,6 +1238,17 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
                             FLOM_MSG_PROP_ELEMENT,
                             msg->body.lock_24.answer.element != NULL ?
                             msg->body.lock_24.answer.element :
+                            FLOM_EMPTY_STRING));
+                break;
+            case 4*FLOM_MSG_STEP_INCR:
+                FLOM_TRACE(("flom_msg_trace_lock: body[%s["
+                            "%s=%d,%s='%s']]\n",
+                            FLOM_MSG_TAG_RESOURCE,
+                            FLOM_MSG_PROP_RC,
+                            msg->body.lock_32.answer.rc,
+                            FLOM_MSG_PROP_ELEMENT,
+                            msg->body.lock_32.answer.element != NULL ?
+                            msg->body.lock_32.answer.element :
                             FLOM_EMPTY_STRING));
                 break;
             default:
@@ -1205,7 +1284,7 @@ int flom_msg_trace_unlock(const struct flom_msg_s *msg)
     FLOM_TRACE(("flom_msg_trace_unlock\n"));
     TRY {
         switch (msg->header.pvs.step) {
-            case 8:
+            case FLOM_MSG_STEP_INCR:
                 FLOM_TRACE(("flom_msg_trace_unlock: body[%s["
                             "%s='%s']]\n",
                             FLOM_MSG_TAG_RESOURCE,
@@ -1247,8 +1326,8 @@ int flom_msg_trace_ping(const struct flom_msg_s *msg)
     FLOM_TRACE(("flom_msg_trace_ping\n"));
     TRY {
         switch (msg->header.pvs.step) {
-            case 8:
-            case 16:
+            case FLOM_MSG_STEP_INCR:
+            case 2*FLOM_MSG_STEP_INCR:
                 FLOM_TRACE(("flom_msg_trace_ping: body[null]\n"));
                 break;
             default:
@@ -1284,10 +1363,10 @@ int flom_msg_trace_discover(const struct flom_msg_s *msg)
     FLOM_TRACE(("flom_msg_trace_discover\n"));
     TRY {
         switch (msg->header.pvs.step) {
-            case 8:
+            case FLOM_MSG_STEP_INCR:
                 FLOM_TRACE(("flom_msg_trace_discover: body[null]\n"));
                 break;
-            case 16:
+            case 2*FLOM_MSG_STEP_INCR:
                 FLOM_TRACE(("flom_msg_trace_discover: body[%s["
                             "%s='%s',%s=%hu]]\n",
                             FLOM_MSG_TAG_NETWORK,
@@ -1566,7 +1645,9 @@ void flom_msg_deserialize_start_element(
                     if ((FLOM_MSG_VERB_LOCK == msg->header.pvs.verb &&
                          2*FLOM_MSG_STEP_INCR == msg->header.pvs.step) ||
                         (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb &&
-                         3*FLOM_MSG_STEP_INCR == msg->header.pvs.step)) {
+                         3*FLOM_MSG_STEP_INCR == msg->header.pvs.step) ||
+                        (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb &&
+                         4*FLOM_MSG_STEP_INCR == msg->header.pvs.step)) {
                         if (!strcmp(*name_cursor, FLOM_MSG_PROP_RC)) {
                             if (2*FLOM_MSG_STEP_INCR == msg->header.pvs.step)
                                 msg->body.lock_16.answer.rc =
@@ -1574,6 +1655,10 @@ void flom_msg_deserialize_start_element(
                             else if (3*FLOM_MSG_STEP_INCR ==
                                      msg->header.pvs.step)
                                 msg->body.lock_24.answer.rc =
+                                    strtol(*value_cursor, NULL, 10);
+                            else if (4*FLOM_MSG_STEP_INCR ==
+                                     msg->header.pvs.step)
+                                msg->body.lock_32.answer.rc =
                                     strtol(*value_cursor, NULL, 10);
                             else {
                                 FLOM_TRACE(("flom_msg_deserialize_start_"
@@ -1776,6 +1861,11 @@ int flom_msg_build_answer(struct flom_msg_s *msg,
             case 3*FLOM_MSG_STEP_INCR:
                 msg->body.lock_24.answer.rc = rc;
                 msg->body.lock_24.answer.element = tmp_element;
+                tmp_element = NULL;
+                break;
+            case 4*FLOM_MSG_STEP_INCR:
+                msg->body.lock_32.answer.rc = rc;
+                msg->body.lock_32.answer.element = tmp_element;
                 tmp_element = NULL;
                 break;
             default:

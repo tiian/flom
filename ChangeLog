@@ -5,6 +5,9 @@ LOG:
 	the command line option "-w, --resource-wait" is set to "no"
 	Added "-i, --resource-idle-lifespan" option 
 	(see [Resource]/IdleLifespan)
+	Communication protocol switched to level=2: this release is incompatible
+	with previous releases. You have to update all the installed flom
+	utilities if used in a distributed environment.
 
 20140525 - 0.5.2 Added hierarchical resources
 	Communication protocol switched to level=1: this release is incompatible

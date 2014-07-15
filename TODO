@@ -1,12 +1,7 @@
 Road map:
-add a new step for lock: 32
-fix the client side protocol, this sequence is now valid:
-step=8, lock request
-step=16, rc=2 (resource does not exist)
-step=24, rc=1 (resource exists, but it's busy)
-step=32, rc=0 (resource exists and is free, assigned)
 
-implement Use Case 16 (7/6 and 8/6 for simple and hierarchical resources)
+implement Use Case 16 (7/8 and 8/8 for simple and hierarchical resources)
+add autodiscovery to Use Case 16
 
 check "resource create" with every type of resource... :)
 

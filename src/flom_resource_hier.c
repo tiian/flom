@@ -354,6 +354,9 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
                 if (NULL == (resource_name = g_strdup(
                                  msg->body.lock_8.resource.name)))
                     THROW(G_STRDUP_ERROR);
+                FLOM_TRACE(("flom_resource_hier_inmsg: connection %p wants "
+                            "to lock resource '%s' using mode %d\n",
+                            conn, resource_name, new_lock));
                 /* free the input message */
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(msg)))
                     THROW(MSG_FREE_ERROR1);

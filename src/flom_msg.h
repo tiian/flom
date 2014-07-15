@@ -92,7 +92,7 @@ typedef enum flom_msg_state_e {
  * Current protocol level; it's used to recognize incompatible client/server
  * configuration at run-time
  */
-#define FLOM_MSG_LEVEL           1
+#define FLOM_MSG_LEVEL           2
 
 
 
@@ -357,6 +357,15 @@ struct flom_msg_body_lock_24_s {
 
 
 /**
+ * Message body for verb "lock", step "32"
+ */
+struct flom_msg_body_lock_32_s {
+    struct flom_msg_body_answer_s            answer;
+};
+
+
+
+/**
  * Convenience struct for @ref flom_msg_body_unlock_8_s
  */
 struct flom_msg_body_unlock_8_resource_s {
@@ -462,6 +471,7 @@ struct flom_msg_s {
         struct flom_msg_body_lock_8_s         lock_8;
         struct flom_msg_body_lock_16_s        lock_16;
         struct flom_msg_body_lock_24_s        lock_24;
+        struct flom_msg_body_lock_32_s        lock_32;
         struct flom_msg_body_unlock_8_s       unlock_8;
         struct flom_msg_body_ping_8_s         ping_8;
         struct flom_msg_body_ping_16_s        ping_16;
@@ -618,6 +628,24 @@ extern "C" {
      * @return a reason code
      */
     int flom_msg_serialize_lock_24(const struct flom_msg_s *msg,
+                                   char *buffer,
+                                   size_t *offset, size_t *free_chars);
+
+
+    
+    /**
+     * Serialize the "lock_32" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int flom_msg_serialize_lock_32(const struct flom_msg_s *msg,
                                    char *buffer,
                                    size_t *offset, size_t *free_chars);
 
