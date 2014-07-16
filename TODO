@@ -1,6 +1,7 @@
 Road map:
 
-implement Use Case 16 (7/8 and 8/8 for simple and hierarchical resources)
+debug hierarchical resource issue
+inspect what happens with flom_resource_hier_clean... it seems it does not clean the leaf if the number of holders becomes 0
 add autodiscovery to Use Case 16
 
 check "resource create" with every type of resource... :)

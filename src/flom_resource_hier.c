@@ -120,6 +120,7 @@ int flom_resource_hier_add_locker(flom_resource_t *resource,
         gchar **level_name;
         int node_is_leaf = TRUE;
 
+        flom_resource_hier_trace(resource);
         for (level_name=splitted_name; *level_name; ++level_name) {
             node_is_leaf = TRUE;
             FLOM_TRACE(("flom_resource_hier_add_locker: "
@@ -179,6 +180,8 @@ int flom_resource_hier_add_locker(flom_resource_t *resource,
            new resource is exactly matches a previous one, "node" points
            to a leaf tree node */
         node->holders = g_slist_prepend(node->holders, (gpointer)cl);
+
+        flom_resource_hier_trace(resource);
         
         THROW(NONE);
     } CATCH {
@@ -536,6 +539,9 @@ int flom_resource_hier_clean(flom_resource_t *resource,
             
         if (NULL == resource)
             THROW(NULL_OBJECT);
+        FLOM_TRACE(("flom_resource_hier_clean: removing resource '%s'\n",
+                    resource->name));
+        flom_resource_hier_trace(resource);
         /* prepare splitted name */
         if (NULL == (splitted_name = g_strsplit(
                          resource->name+sep_len,
@@ -559,8 +565,10 @@ int flom_resource_hier_clean(flom_resource_t *resource,
                                 STRORNULL(*(level_name+1)),
                                 STRORNULL(leaf->name)));
                     if (!g_strcmp0(*(level_name+1), leaf->name)) {
-                        node =leaf;
+                        node = leaf;
                         found = TRUE;
+                        FLOM_TRACE(("flom_resource_hier_clean: "
+                                    "*(level_name+1)==leaf->name\n"));
                         break;
                     } /* if (!g_strcmp0(*(level_name+1), leaf->name)) */
                 } /* for (i=0; i<node->leaves->len; ++i) */
@@ -624,6 +632,7 @@ int flom_resource_hier_clean(flom_resource_t *resource,
                     ++i;
             } while (TRUE);
         } /* if (NULL != p) */
+        flom_resource_hier_trace(resource);
                 
         THROW(NONE);
     } CATCH {
@@ -899,3 +908,54 @@ int flom_resource_hier_waitings(flom_resource_t *resource)
     return ret_cod;
 }
 
+
+
+void flom_resource_hier_trace(const flom_resource_t *resource)
+{
+    FLOM_TRACE(("flom_resource_hier_trace: name='%s', type=%d\n",
+                resource->name, resource->type));
+    assert(FLOM_RSRC_TYPE_HIER == resource->type);
+    /* bypass the recursive CPU intensive function if the module is not
+       traced */
+    if (FLOM_TRACE_MODULE & flom_trace_mask)
+        flom_resource_hier_trace_node(resource->data.hier.root, 0);
+}
+
+
+void flom_resource_hier_trace_node(
+    struct flom_rsrc_data_hier_element_s *node, int level)
+{
+    int leaf_id, holders;
+    char *tabs;
+    GSList *p;
+
+    switch (level) {
+        case 0: tabs = ""; break;
+        case 1: tabs = "  "; break;
+        case 2: tabs = "    "; break;
+        case 3: tabs = "      "; break;
+        case 4: tabs = "        "; break;
+        case 5: tabs = "          "; break;
+        case 6: tabs = "            "; break;
+        case 7: tabs = "              "; break;
+        case 8: tabs = "                "; break;
+        case 9: tabs = "                  "; break;
+        case 10: tabs = "                    "; break;
+        default: tabs = "---------------------+"; break;
+    } /* switch (level) */
+    /* compute number of holders */
+    p = node->holders;
+    holders = 0;
+    while (NULL != p) {
+        holders++;
+        p = p->next;
+    }
+    FLOM_TRACE(("flom_resource_hier_trace_node: %s%s%s (holders=%d)\n",
+                tabs, FLOM_HIER_RESOURCE_SEPARATOR, node->name, holders));
+    /* looping on all leafs */
+    for (leaf_id=0; leaf_id<node->leaves->len; ++leaf_id) {
+        struct flom_rsrc_data_hier_element_s *leaf =
+            g_ptr_array_index(node->leaves, leaf_id);
+        flom_resource_hier_trace_node(leaf, level+1);
+    } /* for (leaf_id=0; leaf_id<node->leaves->len; ++leaf_id) */
+}

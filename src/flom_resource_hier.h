@@ -153,6 +153,25 @@ extern "C" {
 
 
 
+    /**
+     * Trace the content of a hierarchical resource
+     * @param resource IN reference to resource object
+     */
+    void flom_resource_hier_trace(const flom_resource_t *resource);
+
+
+
+    /**
+     * Trace the content of a hierarchical resource (recursive helper function
+     * for flom_resource_hier_trace)
+     * @param node IN reference to node object
+     * @param level IN level of node to trace
+     */
+    void flom_resource_hier_trace_node(
+        struct flom_rsrc_data_hier_element_s *node, int level);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
