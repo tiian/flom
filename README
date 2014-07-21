@@ -1,7 +1,22 @@
 	FLOM, Free LOck Manager, a free and open source lock manager
 
 FLOM (Free LOck Manager) is an open source and free lock manager designed to
-serialize shell command execution.
+serialize ans synchronize shell command execution.
+
+A list of well known use cases are listed at this URL: 
+http://sourceforge.net/p/flom/wiki/FLOM%20by%20examples/
+This is a brief list of the available features:
+- synchronization of shell commands to avoid conflicts on files, directories,
+  abstract resources
+- enforcement of command order execution to avoid one command is executed
+  before another one
+- resource utilization leveling to avoid too many similar tasks run at the
+  same time 
+- all the synchronization features are available inside a single host or in
+  a distributed environment using TCP/IP networking
+- an autodiscovery feature is available to reduce deployment complexity in a
+  distributed environment (every node at any time may become a "server" for
+  the others node)
 
  * FLOM is free software: you can redistribute it and/or modify under the terms
  * of GNU General Public License version 2 as published by the Free Software

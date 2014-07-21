@@ -1,16 +1,12 @@
 Road map:
 
-debug hierarchical resource issue
-inspect what happens with flom_resource_hier_clean... it seems it does not clean the leaf if the number of holders becomes 0
-add autodiscovery to Use Case 16
-
-check "resource create" with every type of resource... :)
+review hierarchical resource behavior (FLOM_TRACE_MASK=0x2000) because it seems there's something not clear in that code... inspect what happens with flom_resource_hier_clean... it seems it does not clean the leaf if the number of holders becomes 0
 
 put inside function flom_accept_loop_chklockers a check if the thread associated to the locker is really active; it the thread leaved (due to an error), make a clean-up phase. This avoid a daemon crash after a thread terminated with an error, but listener thread has a "locker object" already active
 
-implement FIFO, LIFO, FIRST FIT (for numerical resources) lock allocation policies
-
 intercept kill signal from daemon and try to terminate gracefully
+
+implement FIFO, LIFO, FIRST FIT (for numerical resources) lock allocation policies
 
 IPv6
 
