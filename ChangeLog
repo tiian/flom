@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.7.0 Added "-e, --resource-create" option (see [Resource]/Create)
+20140722 - 0.7.0 Added "-e, --resource-create" option (see [Resource]/Create)
 	Added "requester cant wait" exit code: it's returned especially when
 	the command line option "-w, --resource-wait" is set to "no"
 	Added "-i, --resource-idle-lifespan" option 
