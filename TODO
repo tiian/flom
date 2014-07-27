@@ -1,7 +1,5 @@
 Road map:
 
-activate flom_resource_hier_gc in flom_resource_hier_clean (see @@@) and debug the memory leak that appears after garbage collection activation
-
 put inside function flom_accept_loop_chklockers a check if the thread associated to the locker is really active; it the thread leaved (due to an error), make a clean-up phase. This avoid a daemon crash after a thread terminated with an error, but listener thread has a "locker object" already active
 
 intercept kill signal from daemon and try to terminate gracefully

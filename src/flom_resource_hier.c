@@ -529,26 +529,30 @@ void flom_resource_hier_gc(
     if (NULL != element->leaves) {
         FLOM_TRACE(("flom_resource_hier_gc: element '%s' has %u children\n",
                     element->name, element->leaves->len));
-        for (i=0; i<element->leaves->len; ++i) {
-            struct flom_rsrc_data_hier_element_s *node =
+        i = 0;
+        while (i<element->leaves->len) {
+            struct flom_rsrc_data_hier_element_s *child =
                 g_ptr_array_index(element->leaves, i);
-            flom_resource_hier_gc(node);
+            flom_resource_hier_gc(child);
             /* check if the leaf is really a leaf or an internal node */
-            if (NULL == node->leaves || 0 == node->leaves->len) {
-                FLOM_TRACE(("flom_resource_hier_gc: node '%s' is a terminal "
+            if (NULL == child->leaves || 0 == child->leaves->len) {
+                FLOM_TRACE(("flom_resource_hier_gc: child '%s' is a terminal "
                             "node (a leaf) with holders=%p\n",
-                            node->name, node->holders));
-                if (NULL == node->holders) {
+                            child->name, child->holders));
+                if (NULL == child->holders) {
                     FLOM_TRACE(("flom_resource_hier_gc: releasing leaf '%s'\n",
-                                node->name));
-                    g_free(node->name);
-                    node->name = NULL;
-                    if (NULL != node->leaves)
-                        g_free(node->leaves);
+                                child->name));
+                    g_free(child->name);
+                    child->name = NULL;
+                    if (NULL != child->leaves)
+                        g_ptr_array_free(child->leaves, TRUE);
                     g_ptr_array_remove_index(element->leaves, i);
+                    g_free(child);
+                    continue;
                 } /* if (NULL == node->holders) */
             } /* if (NULL == node->leaves || 0 == node->leaves->len) */
-        } /* for (i=0; i<element->leaves.len; ++i) */
+            i++;
+        } /* while (i<element->leaves.len) */
     } /* if (NULL != element->leaves) */
 }
     
@@ -672,9 +676,7 @@ int flom_resource_hier_clean(flom_resource_t *resource,
         FLOM_TRACE(("flom_resource_hier_clean: node->holders=%p\n",
                     node->holders));
         /* calling garbage collector */
-        /* @@@ activate me and debug me with Valgrind... 
         flom_resource_hier_gc(resource->data.hier.root);
-        */
         flom_resource_hier_trace(resource);
                 
         THROW(NONE);

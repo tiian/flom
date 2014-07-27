@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.7.1 Implementing a garbage collector for hierarchical resources
+         - 0.7.1 Implemented a garbage collector for hierarchical resources
 
 20140722 - 0.7.0 Added "-e, --resource-create" option (see [Resource]/Create)
 	Added "requester cant wait" exit code: it's returned especially when
