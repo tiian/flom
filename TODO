@@ -1,6 +1,6 @@
 Road map:
 
-review hierarchical resource behavior (FLOM_TRACE_MASK=0x2000) because it seems there's something not clear in that code... inspect what happens with flom_resource_hier_clean... it seems it does not clean the leaf if the number of holders becomes 0
+activate flom_resource_hier_gc in flom_resource_hier_clean (see @@@) and debug the memory leak that appears after garbage collection activation
 
 put inside function flom_accept_loop_chklockers a check if the thread associated to the locker is really active; it the thread leaved (due to an error), make a clean-up phase. This avoid a daemon crash after a thread terminated with an error, but listener thread has a "locker object" already active
 

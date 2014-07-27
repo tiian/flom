@@ -520,6 +520,40 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
 
 
 
+void flom_resource_hier_gc(
+    struct flom_rsrc_data_hier_element_s *element)
+{
+    guint i;
+
+    /* scan leaves before */
+    if (NULL != element->leaves) {
+        FLOM_TRACE(("flom_resource_hier_gc: element '%s' has %u children\n",
+                    element->name, element->leaves->len));
+        for (i=0; i<element->leaves->len; ++i) {
+            struct flom_rsrc_data_hier_element_s *node =
+                g_ptr_array_index(element->leaves, i);
+            flom_resource_hier_gc(node);
+            /* check if the leaf is really a leaf or an internal node */
+            if (NULL == node->leaves || 0 == node->leaves->len) {
+                FLOM_TRACE(("flom_resource_hier_gc: node '%s' is a terminal "
+                            "node (a leaf) with holders=%p\n",
+                            node->name, node->holders));
+                if (NULL == node->holders) {
+                    FLOM_TRACE(("flom_resource_hier_gc: releasing leaf '%s'\n",
+                                node->name));
+                    g_free(node->name);
+                    node->name = NULL;
+                    if (NULL != node->leaves)
+                        g_free(node->leaves);
+                    g_ptr_array_remove_index(element->leaves, i);
+                } /* if (NULL == node->holders) */
+            } /* if (NULL == node->leaves || 0 == node->leaves->len) */
+        } /* for (i=0; i<element->leaves.len; ++i) */
+    } /* if (NULL != element->leaves) */
+}
+    
+
+    
 int flom_resource_hier_clean(flom_resource_t *resource,
                              struct flom_conn_data_s *conn)
 {
@@ -577,10 +611,10 @@ int flom_resource_hier_clean(flom_resource_t *resource,
                 } /* for (i=0; i<node->leaves->len; ++i) */
                 if (!found && NULL != *(level_name+1)) {
                     FLOM_TRACE(("flom_resource_hier_clean: unable to locate "
-                                "node for resource level '%s', this is an "
-                                "internal severe error!\n",
+                                "node for resource level '%s', it was "
+                                "probably already cleaned-up\n",
                                 STRORNULL(*(level_name+1))));
-                    THROW(INVALID_RESOURCE_NAME);
+                    break;
                 }
             } /* if (!g_strcmp0(*level_name, node->name)) */
         } /* for (level_name = splitted_name; *level_name; ++level_name) */
@@ -635,6 +669,12 @@ int flom_resource_hier_clean(flom_resource_t *resource,
                     ++i;
             } while (TRUE);
         } /* if (NULL != p) */
+        FLOM_TRACE(("flom_resource_hier_clean: node->holders=%p\n",
+                    node->holders));
+        /* calling garbage collector */
+        /* @@@ activate me and debug me with Valgrind... 
+        flom_resource_hier_gc(resource->data.hier.root);
+        */
         flom_resource_hier_trace(resource);
                 
         THROW(NONE);

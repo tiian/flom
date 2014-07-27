@@ -104,6 +104,15 @@ extern "C" {
 
 
     /**
+     * Garbage collector: it removes useless leaves from the tree
+     * @param element IN/OUT tree element to free
+     */
+    void flom_resource_hier_gc(
+        struct flom_rsrc_data_hier_element_s *element);
+
+
+
+    /**
      * Destroy a hierarchical resource (frees holders list and waitings queue)
      * @param resource IN/OUT reference to resource object
      */
