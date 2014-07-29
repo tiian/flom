@@ -43,6 +43,38 @@
 
 
 
+/**
+ * Requested shutdown type
+ */
+enum shutdown_e {
+    /**
+     * Do not start shutdown procedure
+     */
+    FLOM_SHUTDOWN_NOSHUT,
+    /**
+     * Quiesce shutdown: do not accept new connections, keep active ones
+     */
+    FLOM_SHUTDOWN_QUIESCE,
+    /**
+     * Immediate shutdown: close all current connections and exit
+     */
+    FLOM_SHUTDOWN_IMMEDIATE,
+    /**
+     * Forced shutdown: leaving immediately using exit function
+     */
+    FLOM_SHUTDOWN_FORCE
+};
+
+
+
+/**
+ * Normally set to value @ref FLOM_SHUTDOWN_NOSHUT, it is changed by signal
+ * handler to a different value if shutdown is requested by the user
+ */
+extern enum shutdown_e asked_shutdown;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -133,6 +165,14 @@ extern "C" {
      */
     int flom_accept_loop(flom_conns_t *conns);
 
+
+
+    /**
+     * Manage server shutdown
+     * @param conns IN/OUT connections object
+     * @return a reason code
+     */
+    int flom_accept_shutdown(flom_conns_t *conns);
 
     
 
@@ -226,6 +266,22 @@ extern "C" {
      */
     int flom_accept_discover_reply(int fd, const struct sockaddr *src_addr,
                                    socklen_t addrlen);
+
+
+
+    /**
+     * Set signal handler
+     * @return a reason code
+     */
+    int flom_daemon_signal(void);
+
+
+
+    /**
+     * Signal action associated to intercepted signals
+     * @param signo IN signal number received by the process
+     */
+    void flom_daemon_signal_action(int signo);
 
 
     

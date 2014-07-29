@@ -42,20 +42,25 @@ extern "C" {
    C: LOG_CRIT
 */
 #define FLOM_SYSLOG_FLM000I "FLM000I this process is activating a local " \
-    "FLOM daemon listening UNIX socket '%s'"
+    "FLoM daemon listening UNIX socket '%s'"
 #define FLOM_SYSLOG_FLM001I "FLM001I this process is activating a network " \
-    "FLOM daemon listening TCP/IP socket %s/%u"
+    "FLoM daemon listening TCP/IP socket %s/%u"
 #define FLOM_SYSLOG_FLM002I "FLM002I joined multicast group %s/%u to " \
     "answer auto-discovery queries"
-#define FLOM_SYSLOG_FLM003N "FLM003N FLOM daemon ready to serve incoming " \
+#define FLOM_SYSLOG_FLM003N "FLM003N FLoM daemon ready to serve incoming " \
     "requests"
-#define FLOM_SYSLOG_FLM004N "FLM004N FLOM daemon has terminated to serve " \
+#define FLOM_SYSLOG_FLM004N "FLM004N FLoM daemon has terminated to serve " \
     "incoming requests"
 #define FLOM_SYSLOG_FLM005I "FLM005I auto-discovery query received from " \
     "%s/%s"
-#define FLOM_SYSLOG_FLM006W "FLM006W FLOM daemon is using comm. level %d, " \
+#define FLOM_SYSLOG_FLM006W "FLM006W FLoM daemon is using comm. level %d, " \
     "FLOM client is using comm. level %d; communication can not be performed"
-    
+#define FLOM_SYSLOG_FLM007N "FLM007N FLoM daemon received signal SIGTERM, " \
+    "starting QUIESCE shutdown..."
+#define FLOM_SYSLOG_FLM008N "FLM008N FLoM daemon received signal " \
+    "SIGINT, starting IMMEDIATE shutdown..."
+#define FLOM_SYSLOG_FLM009W "FLM009W FLoM daemon received unexpected " \
+    "signal %d, ignoring it"
 
 
 #ifdef __cplusplus

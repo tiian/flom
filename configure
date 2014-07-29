@@ -5081,6 +5081,18 @@ fi
 
 done
 
+for ac_header in signal.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "signal.h" "ac_cv_header_signal_h" "$ac_includes_default"
+if test "x$ac_cv_header_signal_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SIGNAL_H 1
+_ACEOF
+
+fi
+
+done
+
 for ac_header in stdarg.h stdint.h stdio.h stdlib.h string.h syslog.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
@@ -5402,6 +5414,17 @@ _ACEOF
 #AC_CHECK_SIZEOF([uintptr_t])
 #AC_CHECK_SIZEOF([uint32_t])
 #AC_CHECK_SIZEOF([uuid_t], [], [[#include <uuid/uuid.h>]])
+
+for ac_func in sigaction
+do :
+  ac_fn_c_check_func "$LINENO" "sigaction" "ac_cv_func_sigaction"
+if test "x$ac_cv_func_sigaction" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SIGACTION 1
+_ACEOF
+
+fi
+done
 
 for ac_func in snprintf
 do :

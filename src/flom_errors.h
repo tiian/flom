@@ -290,29 +290,33 @@
  */
 #define FLOM_RC_SETSOCKOPT_ERROR                    -124
 /**
+ * "sigaction" function error
+ */
+#define FLOM_RC_SIGACTION_ERROR                     -125
+/**
  * "signal" function error
  */
-#define FLOM_RC_SIGNAL_ERROR                        -125
+#define FLOM_RC_SIGNAL_ERROR                        -126
 /**
  * "socket" function error
  */
-#define FLOM_RC_SOCKET_ERROR                        -126
+#define FLOM_RC_SOCKET_ERROR                        -127
 /**
  * "snprintf" function error (truncation)
  */
-#define FLOM_RC_SNPRINTF_ERROR                      -127
+#define FLOM_RC_SNPRINTF_ERROR                      -128
 /**
  * "unlink" function error
  */
-#define FLOM_RC_UNLINK_ERROR                        -128
+#define FLOM_RC_UNLINK_ERROR                        -129
 /**
  * "wait" function error
  */
-#define FLOM_RC_WAIT_ERROR                          -129
+#define FLOM_RC_WAIT_ERROR                          -130
 /**
  * "write" function error
  */
-#define FLOM_RC_WRITE_ERROR                         -130
+#define FLOM_RC_WRITE_ERROR                         -131
 
 /* GLIB related errors */
 

@@ -1,8 +1,14 @@
 Road map:
 
-put inside function flom_accept_loop_chklockers a check if the thread associated to the locker is really active; it the thread leaved (due to an error), make a clean-up phase. This avoid a daemon crash after a thread terminated with an error, but listener thread has a "locker object" already active
+implementing signals... intercept signal condition in locker as well as in
+main thread
 
-intercept kill signal from daemon and try to terminate gracefully
+document termination modes:
+SIGTERM: quiesce
+SIGINT: immediate
+SIGQUIT: default behavior
+
+put inside function flom_accept_loop_chklockers a check if the thread associated to the locker is really active; it the thread leaved (due to an error), make a clean-up phase. This avoid a daemon crash after a thread terminated with an error, but listener thread has a "locker object" already active
 
 implement FIFO, LIFO, FIRST FIT (for numerical resources) lock allocation policies
 
