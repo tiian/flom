@@ -191,7 +191,7 @@ AC_CHECK_SIZEOF([ssize_t])
 #AC_CHECK_SIZEOF([uint32_t])
 #AC_CHECK_SIZEOF([uuid_t], [], [[#include <uuid/uuid.h>]])
 
-AC_CHECK_FUNCS(sigaction)
+AC_CHECK_FUNCS(signal)
 AC_CHECK_FUNCS(snprintf)
 AC_CHECK_FUNCS(strcasestr)
 AC_CHECK_FUNCS(vsnprintf)

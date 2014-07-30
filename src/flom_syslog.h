@@ -55,12 +55,6 @@ extern "C" {
     "%s/%s"
 #define FLOM_SYSLOG_FLM006W "FLM006W FLoM daemon is using comm. level %d, " \
     "FLOM client is using comm. level %d; communication can not be performed"
-#define FLOM_SYSLOG_FLM007N "FLM007N FLoM daemon received signal SIGTERM, " \
-    "starting QUIESCE shutdown..."
-#define FLOM_SYSLOG_FLM008N "FLM008N FLoM daemon received signal " \
-    "SIGINT, starting IMMEDIATE shutdown..."
-#define FLOM_SYSLOG_FLM009W "FLM009W FLoM daemon received unexpected " \
-    "signal %d, ignoring it"
 
 
 #ifdef __cplusplus

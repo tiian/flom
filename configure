@@ -5415,12 +5415,12 @@ _ACEOF
 #AC_CHECK_SIZEOF([uint32_t])
 #AC_CHECK_SIZEOF([uuid_t], [], [[#include <uuid/uuid.h>]])
 
-for ac_func in sigaction
+for ac_func in signal
 do :
-  ac_fn_c_check_func "$LINENO" "sigaction" "ac_cv_func_sigaction"
-if test "x$ac_cv_func_sigaction" = x""yes; then :
+  ac_fn_c_check_func "$LINENO" "signal" "ac_cv_func_signal"
+if test "x$ac_cv_func_signal" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_SIGACTION 1
+#define HAVE_SIGNAL 1
 _ACEOF
 
 fi

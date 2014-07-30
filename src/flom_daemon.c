@@ -71,10 +71,6 @@
 
 
 
-enum shutdown_e asked_shutdown = FLOM_SHUTDOWN_NOSHUT;
-
-
-
 int flom_daemon(int family)
 {
     enum Exception { PIPE_ERROR
@@ -178,10 +174,6 @@ int flom_daemon(int family)
             FLOM_TRACE_REOPEN(flom_config_get_daemon_trace_file());
             FLOM_TRACE(("flom_daemon: now daemonized!\n"));
 
-            /* set signal handler */
-            if (FLOM_RC_OK != (ret_cod = flom_daemon_signal()))
-                THROW(FLOM_DAEMON_SIGNAL_ERROR);
-            
             /* activate service */
             openlog("flom", LOG_PID, LOG_DAEMON);
             flom_conns_init(&conns, family);
@@ -835,13 +827,7 @@ int flom_accept_loop(flom_conns_t *conns)
             FLOM_TRACE(("flom_accept_loop: ready_fd=%d\n", ready_fd));
             /* error on poll function */
             if (0 > ready_fd) {
-                if (EINTR == errno) {
-                    FLOM_TRACE(("flom_accept_loop: poll interrupted by a "
-                                "signal\n"));
-                    flom_accept_shutdown(conns);
-                    /* @@@ implement me! */
-                } else
-                    THROW(POLL_ERROR);
+                THROW(POLL_ERROR);
             }
             /* poll exited due to time out */
             if (0 == ready_fd) {
@@ -967,31 +953,6 @@ int flom_accept_loop(flom_conns_t *conns)
     } /* TRY-CATCH */
     flom_locker_array_free(&lockers);
     FLOM_TRACE(("flom_accept_loop/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-int flom_accept_shutdown(flom_conns_t *conns)
-{
-    enum Exception { NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
-    FLOM_TRACE(("flom_accept_shutdown\n"));
-    TRY {
-        /* @@@ implement me */
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("flom_accept_shutdown/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -1764,68 +1725,3 @@ int flom_accept_discover_reply(int fd, const struct sockaddr *src_addr,
 
 
 
-int flom_daemon_signal(void)
-{
-    enum Exception { SIGACTION_SIGINT_ERROR
-                     , SIGACTION_SIGTERM_ERROR
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
-    FLOM_TRACE(("flom_daemon_signal\n"));
-    TRY {
-        struct sigaction act;
-
-        act.sa_handler = flom_daemon_signal_action;
-        sigemptyset(&act.sa_mask);
-        act.sa_flags = SA_RESTART;
-        if (0 > sigaction(SIGINT, &act, NULL))
-            THROW(SIGACTION_SIGINT_ERROR);
-        if (0 > sigaction(SIGTERM, &act, NULL))
-            THROW(SIGACTION_SIGTERM_ERROR);
-        /* SIGQUIT leaved as original behavior */
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case SIGACTION_SIGINT_ERROR:
-            case SIGACTION_SIGTERM_ERROR:
-                ret_cod = FLOM_RC_SIGACTION_ERROR;
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("flom_daemon_signal/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-void flom_daemon_signal_action(int signo)
-{
-    FLOM_TRACE(("flom_daemon_signal_action: signo=%d\n", signo));
-    switch (signo) {
-        case SIGTERM:
-            FLOM_TRACE(("flom_daemon_signal_action: SIGTERM, starting "
-                        "QUIESCE shutdown\n"));
-            syslog(LOG_NOTICE, FLOM_SYSLOG_FLM007N);
-            asked_shutdown = FLOM_SHUTDOWN_QUIESCE;
-            break;
-        case SIGINT:
-            FLOM_TRACE(("flom_daemon_signal_action: SIGINT, starting "
-                        "IMMEDIATE shutdown\n"));
-            syslog(LOG_NOTICE, FLOM_SYSLOG_FLM008N);
-            asked_shutdown = FLOM_SHUTDOWN_IMMEDIATE;
-            break;
-        default:
-            FLOM_TRACE(("flom_daemon_signal_action: ignoring signal %d\n",
-                        signo));
-            syslog(LOG_WARNING, FLOM_SYSLOG_FLM009W, signo);
-            break;
-    }
-    return;
-}
