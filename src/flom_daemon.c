@@ -1029,7 +1029,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
 
             /* has the client disconnected in the meantime? */
             if (0 == read_bytes) {
-                FLOM_TRACE(("flom_accept_loop_pollin: returned 0 bytes, it "
+                FLOM_TRACE(("flom_accept_loop_pollin: returned 0 bytes, "
                             "the client has probably disconnected, "
                             "leaving...\n"));
                 THROW(EMPTY_MESSAGE);

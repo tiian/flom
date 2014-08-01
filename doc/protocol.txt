@@ -100,7 +100,7 @@ verb=3 (ping)
 
 verb=4 (discover)
 
-  level: message leve, version
+  level: message level, version
   verb:  discover -> 4
   step:  8, 16
 
@@ -118,3 +118,17 @@ verb=4 (discover)
         address
   Note2: client extracts address from reply datagram, but port may be different
          (use choosed different ports for TCP/IP unicast and UDP/IP multicast)
+
+***************************************************************************
+
+verb=5 (management)
+
+  level: message level, version
+  verb:  management -> 5
+  step:  8
+
+  client->server message (action)
+  <msg level="0" verb="5" step="8">
+    <shutdown immediate="1"/>
+  </msg>
+

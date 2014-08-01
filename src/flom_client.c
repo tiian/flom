@@ -2,7 +2,7 @@
  * Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
- * This file is part of FLOM.
+ * This file is part of FLoM.
  *
  * FLOM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as published
@@ -57,13 +57,14 @@
 
 
 
-int flom_client_connect(struct flom_conn_data_s *cd)
+int flom_client_connect(struct flom_conn_data_s *cd, int start_daemon)
 {
     enum Exception { CLIENT_CONNECT_LOCAL_ERROR
                      , CLIENT_CONNECT_TCP_ERROR
                      , DAEMON_ERROR
                      , CLIENT_DISCOVER_UDP_ERROR1
                      , CONNECT_ERROR
+                     , DAEMON_NOT_STARTED
                      , CLIENT_DISCOVER_UDP_ERROR2
                      , INTERNAL_ERROR
                      , FCNTL_ERROR
@@ -77,33 +78,41 @@ int flom_client_connect(struct flom_conn_data_s *cd)
 
         /* choose and instantiate connection type */
         if (NULL != flom_config_get_socket_name()) {
-            if (FLOM_RC_OK != (ret_cod = flom_client_connect_local(cd)))
+            if (FLOM_RC_OK != (ret_cod = flom_client_connect_local(
+                                   cd, start_daemon)))
                 THROW(CLIENT_CONNECT_LOCAL_ERROR);
         } else if (NULL != flom_config_get_unicast_address()) {
-            if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(cd)))
+            if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(
+                                   cd, start_daemon)))
                 THROW(CLIENT_CONNECT_TCP_ERROR);
         } else if (NULL != flom_config_get_multicast_address()) {
-            ret_cod = flom_client_discover_udp(cd);
+            ret_cod = flom_client_discover_udp(cd, start_daemon);
             switch (ret_cod) {
                 case FLOM_RC_OK:
                     break;
                 case FLOM_RC_CONNECTION_REFUSED:
-                    if (0 != flom_config_get_lifespan()) {
-                        FLOM_TRACE(("flom_client_connect: connection "
-                                    "failed, activating a new daemon\n"));
-                        /* try to start a daemon on this node */
-                        if (FLOM_RC_OK != (ret_cod = flom_daemon(AF_INET)))
-                            THROW(DAEMON_ERROR);
-                        /* try to discover again */
-                        if (FLOM_RC_OK != (ret_cod =
-                                           flom_client_discover_udp(cd)))
-                            THROW(CLIENT_DISCOVER_UDP_ERROR1);
+                    if (start_daemon) {
+                        if (0 != flom_config_get_lifespan()) {
+                            FLOM_TRACE(("flom_client_connect: connection "
+                                        "failed, activating a new daemon\n"));
+                            /* try to start a daemon on this node */
+                            if (FLOM_RC_OK != (ret_cod = flom_daemon(AF_INET)))
+                                THROW(DAEMON_ERROR);
+                            /* try to discover again */
+                            if (FLOM_RC_OK != (ret_cod =
+                                               flom_client_discover_udp(
+                                                   cd, start_daemon)))
+                                THROW(CLIENT_DISCOVER_UDP_ERROR1);
+                        } else {
+                            FLOM_TRACE(("flom_client_connect: connection "
+                                        "failed, a new daemon can not be "
+                                        "started "
+                                        "because daemon lifespan is 0\n"));
+                            THROW(CONNECT_ERROR);
+                        }
                     } else {
-                        FLOM_TRACE(("flom_client_connect: connection "
-                                    "failed, a new daemon can not be started "
-                                    "because daemon lifespan is 0\n"));
-                        THROW(CONNECT_ERROR);
-                    }
+                        THROW(DAEMON_NOT_STARTED);
+                    } /* if (start_daemon) */
                     break;
                 default:
                     THROW(CLIENT_DISCOVER_UDP_ERROR2);
@@ -127,6 +136,9 @@ int flom_client_connect(struct flom_conn_data_s *cd)
             case CONNECT_ERROR:
                 ret_cod = FLOM_RC_CONNECT_ERROR;
                 break;
+            case DAEMON_NOT_STARTED:
+                ret_cod = FLOM_RC_DAEMON_NOT_STARTED;
+                break;
             case CLIENT_DISCOVER_UDP_ERROR2:
                 break;
             case INTERNAL_ERROR:
@@ -149,12 +161,14 @@ int flom_client_connect(struct flom_conn_data_s *cd)
 
 
 
-int flom_client_connect_local(struct flom_conn_data_s *cd)
+int flom_client_connect_local(struct flom_conn_data_s *cd,
+                              int start_daemon)
 {
     enum Exception { SOCKET_ERROR
                      , DAEMON_ERROR
-                     , DAEMON_NOT_STARTED
+                     , DAEMON_NOT_STARTED1
                      , CONNECT_ERROR1
+                     , DAEMON_NOT_STARTED2
                      , CONNECT_ERROR2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -173,25 +187,29 @@ int flom_client_connect_local(struct flom_conn_data_s *cd)
         if (-1 == connect(cd->fd, (struct sockaddr *)&cd->saun,
                           cd->addr_len)) {
             if (ENOENT == errno || ECONNREFUSED == errno) {
-                if (0 != flom_config_get_lifespan()) {
-                    FLOM_TRACE(("flom_client_connect_local: connection "
-                                "failed, activating a new daemon\n"));
-                    /* daemon is not active, starting it... */
-                    if (FLOM_RC_OK != (ret_cod = flom_daemon(
-                                           cd->saun.sun_family)))
-                        THROW(DAEMON_ERROR);
-                    /* trying to connect again... */
-                    if (-1 == connect(cd->fd, (struct sockaddr *)&cd->saun,
-                                      cd->addr_len))
-                        THROW(DAEMON_NOT_STARTED);
-                    FLOM_TRACE(("flom_client_connect_local: connected to "
-                                "flom daemon\n"));
+                if (start_daemon) {
+                    if (0 != flom_config_get_lifespan()) {
+                        FLOM_TRACE(("flom_client_connect_local: connection "
+                                    "failed, activating a new daemon\n"));
+                        /* daemon is not active, starting it... */
+                        if (FLOM_RC_OK != (ret_cod = flom_daemon(
+                                               cd->saun.sun_family)))
+                            THROW(DAEMON_ERROR);
+                        /* trying to connect again... */
+                        if (-1 == connect(cd->fd, (struct sockaddr *)&cd->saun,
+                                          cd->addr_len))
+                            THROW(DAEMON_NOT_STARTED1);
+                        FLOM_TRACE(("flom_client_connect_local: connected to "
+                                    "flom daemon\n"));
+                    } else {
+                        FLOM_TRACE(("flom_client_connect_local: connection "
+                                    "failed, a new daemon can not be started "
+                                    "because daemon lifespan is 0\n"));
+                        THROW(CONNECT_ERROR1);
+                    } /* if (0 != flom_config_get_lifespan()) */
                 } else {
-                    FLOM_TRACE(("flom_client_connect_local: connection "
-                                "failed, a new daemon can not be started "
-                                "because daemon lifespan is 0\n"));
-                    THROW(CONNECT_ERROR1);
-                }
+                    THROW(DAEMON_NOT_STARTED2);
+                } /* if (start_daemon) */
             } else {
                 THROW(CONNECT_ERROR2);
             }
@@ -205,10 +223,15 @@ int flom_client_connect_local(struct flom_conn_data_s *cd)
                 break;
             case DAEMON_ERROR:
                 break;
-            case DAEMON_NOT_STARTED:
+            case DAEMON_NOT_STARTED1:
                 ret_cod = FLOM_RC_DAEMON_NOT_STARTED;
                 break;
             case CONNECT_ERROR1:
+                ret_cod = FLOM_RC_CONNECT_ERROR;
+                break;
+            case DAEMON_NOT_STARTED2:
+                ret_cod = FLOM_RC_DAEMON_NOT_STARTED;
+                break;                
             case CONNECT_ERROR2:
                 ret_cod = FLOM_RC_CONNECT_ERROR;
                 break;
@@ -226,12 +249,13 @@ int flom_client_connect_local(struct flom_conn_data_s *cd)
 
 
 
-int flom_client_connect_tcp(struct flom_conn_data_s *cd)
+int flom_client_connect_tcp(struct flom_conn_data_s *cd, int start_daemon)
 {
     enum Exception { GETADDRINFO_ERROR
                      , DAEMON_ERROR
-                     , DAEMON_NOT_STARTED
+                     , DAEMON_NOT_STARTED1
                      , CONNECT_ERROR1
+                     , DAEMON_NOT_STARTED2
                      , SETSOCKOPT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -269,22 +293,27 @@ int flom_client_connect_tcp(struct flom_conn_data_s *cd)
                                 result);
             p = flom_client_connect_tcp_try(result, &fd);
             if (NULL == p) {
-                if (0 != flom_config_get_lifespan()) {
-                    FLOM_TRACE(("flom_client_connect_tcp: connection "
-                                "failed, activating a new daemon\n"));
-                    /* daemon is not active, starting it... */
-                    if (FLOM_RC_OK != (ret_cod = flom_daemon(hints.ai_family)))
-                        THROW(DAEMON_ERROR);
-                    /* trying to connect again... */
-                    p = flom_client_connect_tcp_try(result, &fd);
-                    if (NULL == p)
-                        THROW(DAEMON_NOT_STARTED);
+                if (start_daemon) {
+                    if (0 != flom_config_get_lifespan()) {
+                        FLOM_TRACE(("flom_client_connect_tcp: connection "
+                                    "failed, activating a new daemon\n"));
+                        /* daemon is not active, starting it... */
+                        if (FLOM_RC_OK != (ret_cod = flom_daemon(
+                                               hints.ai_family)))
+                            THROW(DAEMON_ERROR);
+                        /* trying to connect again... */
+                        p = flom_client_connect_tcp_try(result, &fd);
+                        if (NULL == p)
+                            THROW(DAEMON_NOT_STARTED1);
+                    } else {
+                        FLOM_TRACE(("flom_client_connect_tcp: connection "
+                                    "failed, a new daemon can not be started "
+                                    "because daemon lifespan is 0\n"));
+                        THROW(CONNECT_ERROR1);
+                    }
                 } else {
-                    FLOM_TRACE(("flom_client_connect_tcp: connection "
-                                "failed, a new daemon can not be started "
-                                "because daemon lifespan is 0\n"));
-                    THROW(CONNECT_ERROR1);
-                }
+                    THROW(DAEMON_NOT_STARTED2)
+                } /* if (start_daemon) */
             }
         } /* if (0 != (errcode = getaddrinfo( */
         if (0 != setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
@@ -307,11 +336,14 @@ int flom_client_connect_tcp(struct flom_conn_data_s *cd)
                 break;
             case DAEMON_ERROR:
                 break;
-            case DAEMON_NOT_STARTED:
+            case DAEMON_NOT_STARTED1:
                 ret_cod = FLOM_RC_DAEMON_NOT_STARTED;
                 break;
             case CONNECT_ERROR1:
                 ret_cod = FLOM_RC_CONNECT_ERROR;
+                break;
+            case DAEMON_NOT_STARTED2:
+                ret_cod = FLOM_RC_DAEMON_NOT_STARTED;
                 break;
             case SETSOCKOPT_ERROR:
                 ret_cod = FLOM_RC_SETSOCKOPT_ERROR;
@@ -367,7 +399,7 @@ const struct addrinfo *flom_client_connect_tcp_try(
 
 
 
-int flom_client_discover_udp(struct flom_conn_data_s *cd)
+int flom_client_discover_udp(struct flom_conn_data_s *cd, int start_daemon)
 {
     enum Exception { GETADDRINFO_ERROR
                      , CONNECT_ERROR
@@ -596,7 +628,8 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd)
             flom_config_set_unicast_port(
                 msg.body.discover_16.network.port);
             /* switch to normal TCP connect phase */
-            if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(cd)))
+            if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(
+                                   cd, start_daemon)))
                 THROW(CLIENT_CONNECT_TCP_ERROR);
         } else {
             /* connect to discovered server using IP source address and
@@ -1154,3 +1187,45 @@ int flom_client_disconnect(struct flom_conn_data_s *cd)
     return ret_cod;
 }
 
+
+
+int flom_client_shutdown(int immediate)
+{
+    enum Exception { CLIENT_CONNECT_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    struct flom_conn_data_s cd;
+    
+    FLOM_TRACE(("flom_client_shutdown\n"));
+    TRY {
+        ret_cod = flom_client_connect(&cd, FALSE);
+        switch (ret_cod) {
+            case FLOM_RC_OK:
+                FLOM_TRACE(("flom_client_shutdown: shutdown message sent "
+                            "to daemon\n"));
+                break;
+            case FLOM_RC_DAEMON_NOT_STARTED:
+                FLOM_TRACE(("flom_client_shutdown: the daemon is not "
+                            "running and cannot be stopped\n"));
+                break;
+            default:
+                THROW(CLIENT_CONNECT_ERROR);
+        } /* switch (ret_cod) */
+        /* @@@ */
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case CLIENT_CONNECT_ERROR:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_client_shutdown/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}

@@ -58,6 +58,7 @@ const gchar *FLOM_MSG_PROP_ADDRESS        = (gchar *)"address";
 const gchar *FLOM_MSG_PROP_CREATE         = (gchar *)"create";
 const gchar *FLOM_MSG_PROP_ELEMENT        = (gchar *)"element";
 const gchar *FLOM_MSG_PROP_LEVEL          = (gchar *)"level";
+const gchar *FLOM_MSG_PROP_IMMEDIATE      = (gchar *)"immediate";
 const gchar *FLOM_MSG_PROP_LIFESPAN       = (gchar *)"lifespan";
 const gchar *FLOM_MSG_PROP_MODE           = (gchar *)"mode";
 const gchar *FLOM_MSG_PROP_NAME           = (gchar *)"name";
@@ -71,6 +72,7 @@ const gchar *FLOM_MSG_TAG_ANSWER          = (gchar *)"answer";
 const gchar *FLOM_MSG_TAG_MSG             = (gchar *)"msg";
 const gchar *FLOM_MSG_TAG_NETWORK         = (gchar *)"network";
 const gchar *FLOM_MSG_TAG_RESOURCE        = (gchar *)"resource";
+const gchar *FLOM_MSG_TAG_SHUTDOWN        = (gchar *)"shutdown";
 
 
 
@@ -292,6 +294,7 @@ int flom_msg_free(struct flom_msg_s *msg)
                      , INVALID_STEP_UNLOCK
                      , INVALID_STEP_PING
                      , INVALID_STEP_DISCOVER
+                     , INVALID_STEP_MNGMNT
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -369,6 +372,14 @@ int flom_msg_free(struct flom_msg_s *msg)
                         THROW(INVALID_STEP_DISCOVER);
                 }
                 break;
+            case FLOM_MSG_VERB_MNGMNT: /* nothing to release */
+                switch (msg->header.pvs.step) {
+                    case FLOM_MSG_STEP_INCR: /* nothing to release */
+                        break;
+                    default:
+                        THROW(INVALID_STEP_MNGMNT);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         } /* switch (msg->header.pvs.verb) */
@@ -380,6 +391,7 @@ int flom_msg_free(struct flom_msg_s *msg)
             case INVALID_STEP_UNLOCK:
             case INVALID_STEP_PING:
             case INVALID_STEP_DISCOVER:
+            case INVALID_STEP_MNGMNT:
             case INVALID_VERB:
                 FLOM_TRACE(("flom_msg_free: verb=%d, step=%d\n",
                             msg->header.pvs.verb, msg->header.pvs.step));
@@ -411,6 +423,7 @@ int flom_msg_check_protocol(const struct flom_msg_s *msg, int client)
                     break;
                 case 2*FLOM_MSG_STEP_INCR:
                 case 3*FLOM_MSG_STEP_INCR:
+                case 4*FLOM_MSG_STEP_INCR:
                     ret_cod = client ? FALSE : TRUE;
                     break;
                 default:
@@ -450,6 +463,14 @@ int flom_msg_check_protocol(const struct flom_msg_s *msg, int client)
                     break;
             } /* switch (msg->header.pvs.step) */                
             break;
+        case FLOM_MSG_VERB_MNGMNT:
+            switch(msg->header.pvs.step) {
+                case FLOM_MSG_STEP_INCR:
+                    ret_cod = client ? TRUE : FALSE;
+                    break;
+                default:
+                    break;
+            } /* switch(msg->header.pvs.step) */
         default:
             break;
     } /* switch (msg->header.pvs.verb) */
@@ -478,6 +499,8 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
                      , SERIALIZE_DISCOVER_8_ERROR
                      , SERIALIZE_DISCOVER_16_ERROR
                      , INVALID_DISCOVER_STEP
+                     , SERIALIZE_MNGMNT_8_ERROR
+                     , INVALID_MNGMNT_STEP
                      , INVALID_VERB
                      , BUFFER_TOO_SHORT3
                      , NONE } excp;
@@ -599,6 +622,19 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
                         THROW(INVALID_DISCOVER_STEP);
                 }
                 break;
+            case FLOM_MSG_VERB_MNGMNT:
+                switch (msg->header.pvs.step) {
+                    case FLOM_MSG_STEP_INCR:
+                        if (FLOM_RC_OK != (
+                                ret_cod =
+                                flom_msg_serialize_mngmnt_8(
+                                    msg, buffer, &offset, &free_chars)))
+                            THROW(SERIALIZE_MNGMNT_8_ERROR);
+                        break;
+                    default:
+                        THROW(INVALID_MNGMNT_STEP);
+                }
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -631,11 +667,13 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
             case SERIALIZE_PING_16_ERROR:
             case SERIALIZE_DISCOVER_8_ERROR:
             case SERIALIZE_DISCOVER_16_ERROR:
+            case SERIALIZE_MNGMNT_8_ERROR:
                 break;
             case INVALID_LOCK_STEP:
             case INVALID_UNLOCK_STEP:
             case INVALID_PING_STEP:
             case INVALID_DISCOVER_STEP:
+            case INVALID_MNGMNT_STEP:
             case INVALID_VERB:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
                 break;
@@ -1127,12 +1165,56 @@ int flom_msg_serialize_discover_16(const struct flom_msg_s *msg,
 
 
 
+int flom_msg_serialize_mngmnt_8(const struct flom_msg_s *msg,
+                                char *buffer,
+                                size_t *offset, size_t *free_chars)
+{
+    enum Exception { BUFFER_TOO_SHORT
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_msg_serialize_mngmnt_8\n"));
+    TRY {
+        int used_chars;
+        
+        /* <network> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%d\"/>",
+                              FLOM_MSG_TAG_SHUTDOWN,
+                              FLOM_MSG_PROP_IMMEDIATE,
+                              msg->body.mngmnt_8.shutdown.immediate);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT);
+        *free_chars -= used_chars;
+        *offset += used_chars;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case BUFFER_TOO_SHORT:
+                ret_cod = FLOM_RC_CONTAINER_FULL;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_msg_serialize_discover_16/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int flom_msg_trace(const struct flom_msg_s *msg)
 {
     enum Exception { TRACE_LOCK_ERROR
                      , TRACE_UNLOCK_ERROR
                      , TRACE_PING_ERROR
                      , TRACE_DISCOVER_ERROR
+                     , TRACE_MNGMNT_ERROR
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -1162,6 +1244,10 @@ int flom_msg_trace(const struct flom_msg_s *msg)
                 if (FLOM_RC_OK != (ret_cod = flom_msg_trace_discover(msg)))
                     THROW(TRACE_DISCOVER_ERROR);
                 break;
+            case FLOM_MSG_VERB_MNGMNT: /* mngmnt */
+                if (FLOM_RC_OK != (ret_cod = flom_msg_trace_mngmnt(msg)))
+                    THROW(TRACE_MNGMNT_ERROR);
+                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -1173,6 +1259,7 @@ int flom_msg_trace(const struct flom_msg_s *msg)
             case TRACE_UNLOCK_ERROR:
             case TRACE_PING_ERROR:
             case TRACE_DISCOVER_ERROR:
+            case TRACE_MNGMNT_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = FLOM_RC_INVALID_PROPERTY_VALUE;
@@ -1400,6 +1487,46 @@ int flom_msg_trace_discover(const struct flom_msg_s *msg)
 
 
     
+int flom_msg_trace_mngmnt(const struct flom_msg_s *msg)
+{
+    enum Exception { INVALID_STEP
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_msg_trace_mngmnt\n"));
+    TRY {
+        switch (msg->header.pvs.step) {
+            case FLOM_MSG_STEP_INCR:
+                FLOM_TRACE(("flom_msg_trace_mngmnt: body[%s["
+                            "%s=%d]]\n",
+                            FLOM_MSG_TAG_SHUTDOWN,
+                            FLOM_MSG_PROP_IMMEDIATE,
+                            msg->body.mngmnt_8.shutdown.immediate));
+                break;
+            default:
+                THROW(INVALID_STEP);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INVALID_STEP:
+                ret_cod = FLOM_RC_INVALID_PROPERTY_VALUE;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_msg_trace_discover/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+    
 int flom_msg_deserialize(char *buffer, size_t buffer_len,
                          struct flom_msg_s *msg,
                          GMarkupParseContext *gmpc)
@@ -1519,11 +1646,12 @@ void flom_msg_deserialize_start_element(
                      , G_STRDUP_ERROR1
                      , G_STRDUP_ERROR2
                      , INVALID_PROPERTY7
+                     , INVALID_PROPERTY8
                      , TAG_TYPE_ERROR
                      , NONE } excp;
     
     enum {dummy_tag, msg_tag, resource_tag,
-          answer_tag, network_tag } tag_type = dummy_tag;
+          answer_tag, network_tag, shutdown_tag } tag_type = dummy_tag;
     /* deserialized message */
     struct flom_msg_s *msg = (struct flom_msg_s *)user_data;
     
@@ -1549,6 +1677,8 @@ void flom_msg_deserialize_start_element(
             tag_type = answer_tag;
         else if (!strcmp(element_name, FLOM_MSG_TAG_NETWORK))
             tag_type = network_tag;
+        else if (!strcmp(element_name, FLOM_MSG_TAG_SHUTDOWN))
+            tag_type = shutdown_tag;
         while (*name_cursor) {
             FLOM_TRACE(("flom_msg_deserialize_start_element: name_cursor='%s' "
                         "value_cursor='%s'\n", *name_cursor, *value_cursor));
@@ -1709,6 +1839,22 @@ void flom_msg_deserialize_start_element(
                         }
                     }
                     break;
+                case shutdown_tag:
+                    /* check if this tag is OK for the current message */
+                    if (FLOM_MSG_VERB_MNGMNT == msg->header.pvs.verb &&
+                        FLOM_MSG_STEP_INCR == msg->header.pvs.step) {
+                        if (!strcmp(*name_cursor, FLOM_MSG_PROP_IMMEDIATE)) {
+                            msg->body.mngmnt_8.shutdown.immediate =
+                                strtol(*value_cursor, NULL, 10);
+                        } else {
+                            FLOM_TRACE(("flom_msg_deserialize_start_"
+                                        "element: property '%s' is not "
+                                        "valid for verb '%s'\n",
+                                        *name_cursor, element_name));
+                            THROW(INVALID_PROPERTY8);
+                        }
+                    }
+                    break;
                 default:
                     FLOM_TRACE(("flom_msg_deserialize_start_element: ERROR, "
                                 "tag_type=%d\n", tag_type));
@@ -1734,6 +1880,7 @@ void flom_msg_deserialize_start_element(
             case G_STRDUP_ERROR1:
             case G_STRDUP_ERROR2:
             case INVALID_PROPERTY7:
+            case INVALID_PROPERTY8:
             case TAG_TYPE_ERROR:
                 msg->state = FLOM_MSG_STATE_INVALID;
                 break;

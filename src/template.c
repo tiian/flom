@@ -2,7 +2,7 @@
  * Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
- * This file is part of FLOM.
+ * This file is part of FLoM.
  *
  * FLOM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as published

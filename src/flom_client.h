@@ -2,7 +2,7 @@
  * Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
- * This file is part of FLOM.
+ * This file is part of FLoM.
  *
  * FLOM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as published
@@ -51,27 +51,32 @@ extern "C" {
     /**
      * Try to connect to flom daemon
      * @param cd OUT connection data
+     * @param start_daemon IN try to start a new daemon if connection fails
      * @result a reason code
      */
-    int flom_client_connect(struct flom_conn_data_s *cd);
+    int flom_client_connect(struct flom_conn_data_s *cd, int start_daemon);
     
 
 
     /**
      * Try to connect to flom daemon using local (AF_LOCAL) socket
      * @param cd OUT connection data
+     * @param start_daemon IN try to start a new daemon if connection fails
      * @result a reason code
      */
-    int flom_client_connect_local(struct flom_conn_data_s *cd);
+    int flom_client_connect_local(struct flom_conn_data_s *cd,
+                                  int start_daemon);
     
 
 
     /**
      * Try to connect to flom daemon using network (TCP/IP) socket
      * @param cd OUT connection data
+     * @param start_daemon IN try to start a new daemon if connection fails
      * @result a reason code
      */
-    int flom_client_connect_tcp(struct flom_conn_data_s *cd);
+    int flom_client_connect_tcp(struct flom_conn_data_s *cd,
+                                int start_daemon);
 
 
 
@@ -90,9 +95,11 @@ extern "C" {
     /**
      * Discover flom daemon address using multicast UDP
      * @param cd IN/OUT connection data
+     * @param start_daemon IN try to start a new daemon if connection fails
      * @return a reason code
      */
-    int flom_client_discover_udp(struct flom_conn_data_s *cd);
+    int flom_client_discover_udp(struct flom_conn_data_s *cd,
+                                 int start_daemon);
 
 
 
@@ -156,6 +163,15 @@ extern "C" {
 
 
 
+    /**
+     * Connect to daemon and send a shutdown message
+     * @param immediate IN is the shutdown immediate (else it's quiesce)
+     * @return a reason code
+     */
+    int flom_client_shutdown(int immediate);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

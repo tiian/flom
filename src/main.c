@@ -2,7 +2,7 @@
  * Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
- * This file is part of FLOM.
+ * This file is part of FLoM.
  *
  * FLOM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as published
@@ -63,6 +63,8 @@ static gint discovery_ttl = _DEFAULT_DISCOVERY_TTL;
 static gint tcp_keepalive_time = _DEFAULT_TCP_KEEPALIVE_TIME;
 static gint tcp_keepalive_intvl = _DEFAULT_TCP_KEEPALIVE_INTVL;
 static gint tcp_keepalive_probes = _DEFAULT_TCP_KEEPALIVE_PROBES;
+static gint quiesce_exit = 0;
+static gint immediate_exit = 0;
 static gchar *command_trace_file = NULL;
 static gchar *daemon_trace_file = NULL;
 static gchar **command_argv = NULL;
@@ -93,6 +95,8 @@ static GOptionEntry entries[] =
     { "tcp-keepalive-probes", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_probes, "Local override for SO_KEEPALIVE feature", NULL },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
     { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
+    { "quiesce-exit", 'x', 0, G_OPTION_ARG_NONE, &quiesce_exit, "Start daemon termination completing current requests", NULL },
+    { "immediate-exit", 'X', 0, G_OPTION_ARG_NONE, &immediate_exit, "Start daemon termination immediately and interrupting current requests", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
     { NULL }
 };
@@ -117,7 +121,7 @@ int main (int argc, char *argv[])
     g_option_context_free(option_context);
 
     if (print_version) {
-        g_print("FLOM: Free LOck Manager\n"
+        g_print("FLoM: Free LOck Manager\n"
                 "Copyright (c) 2013-2014, Christian Ferrari; "
                 "all rights reserved.\n"
                 "License: GPL (GNU Public License) version 2\n"
@@ -257,6 +261,14 @@ int main (int argc, char *argv[])
         g_warning("Configuration is not valid, cannot go on!\n");
         exit(FLOM_ES_GENERIC_ERROR);        
     }
+
+    /* check if the command is asking daemon termination */
+    if (quiesce_exit || immediate_exit) {
+        g_print("Starting FLoM daemon %s shutdown...\n",
+                immediate_exit ? "immediate" : "quiesce");
+        flom_client_shutdown(immediate_exit);
+        exit(0);
+    }
     
     /* check the command is not null */
     if (NULL == command_argv) {
@@ -265,7 +277,7 @@ int main (int argc, char *argv[])
     }
 
     /* open connection to a valid flom lock manager... */
-    if (FLOM_RC_OK != (ret_cod = flom_client_connect(&cd))) {
+    if (FLOM_RC_OK != (ret_cod = flom_client_connect(&cd, TRUE))) {
         g_print("flom_client_connect: ret_cod=%d (%s)\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(FLOM_ES_GENERIC_ERROR);

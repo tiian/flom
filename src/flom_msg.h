@@ -117,6 +117,10 @@ typedef enum flom_msg_state_e {
  * Id assigned to verb "discover"
  */
 #define FLOM_MSG_VERB_DISCOVER  4
+/**
+ * Id assigned to verb "management"
+ */
+#define FLOM_MSG_VERB_MNGMNT    5
 
 /**
  * Default increment for message step
@@ -182,6 +186,10 @@ extern const gchar *FLOM_MSG_PROP_CREATE;
  */
 extern const gchar *FLOM_MSG_PROP_ELEMENT;
 /**
+ * Label used to specify "immediate" property
+ */
+extern const gchar *FLOM_MSG_PROP_IMMEDIATE;
+/**
  * Label used to specify "level" property
  */
 extern const gchar *FLOM_MSG_PROP_LEVEL;
@@ -237,6 +245,10 @@ extern const gchar *FLOM_MSG_TAG_NETWORK;
  * Label used to specify "resource" tag
  */
 extern const gchar *FLOM_MSG_TAG_RESOURCE;
+/**
+ * Label used to specify "shutdown" tag
+ */
+extern const gchar *FLOM_MSG_TAG_SHUTDOWN;
 
 
 
@@ -450,6 +462,24 @@ struct flom_msg_body_discover_16_s {
 
 
 /**
+ * Convenience struct for @ref flom_msg_body_mngmnt_8_s
+ */
+struct flom_msg_body_mngmnt_8_shutdown_s {
+    int    immediate;
+};
+
+
+
+/**
+ * Message body for verb "management", step "8"
+ */
+struct flom_msg_body_mngmnt_8_s {
+    struct flom_msg_body_mngmnt_8_shutdown_s     shutdown;
+};
+
+
+
+/**
  * This structure maps the messages flowing between FLOM client and
  * FLOM server (daemon). The struct is not used for the transmission over the
  * network, but only inside the client and the server.
@@ -477,6 +507,7 @@ struct flom_msg_s {
         struct flom_msg_body_ping_16_s        ping_16;
         struct flom_msg_body_discover_8_s     discover_8;
         struct flom_msg_body_discover_16_s    discover_16;
+        struct flom_msg_body_mngmnt_8_s       mngmnt_8;
     } body;
 };
 
@@ -742,6 +773,24 @@ extern "C" {
 
 
     /**
+     * Serialize the "mngmnt_8" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int flom_msg_serialize_mngmnt_8(const struct flom_msg_s *msg,
+                                    char *buffer,
+                                    size_t *offset, size_t *free_chars);
+
+
+
+    /**
      * Display the content of a message
      * @param msg IN the message must be massaged
      * @return a reason code
@@ -783,6 +832,15 @@ extern "C" {
      * @return a reason code
      */
     int flom_msg_trace_discover(const struct flom_msg_s *msg);
+
+    
+    
+    /**
+     * Display the content of a management message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int flom_msg_trace_mngmnt(const struct flom_msg_s *msg);
 
     
     
