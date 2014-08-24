@@ -1,8 +1,7 @@
 Road map:
 
 implement graceful shutdown with a message sent by client to server; signal handling is not a good choice because the process is threaded and every syscall could potentially receive EINTR. Leaving default signal behavior
-
-if the daemon is running with -d 1 (infinite life) and a client breaks the connection, daemon closes after connection shutdown: this is not the expected behavior! It does not happen when using dynamic (multicast only) network mode :(
+	client send the message (-x, -X), but daemon does not yet handle it
 
 put inside function flom_accept_loop_chklockers a check if the thread associated to the locker is really active; it the thread leaved (due to an error), make a clean-up phase. This avoid a daemon crash after a thread terminated with an error, but listener thread has a "locker object" already active
 

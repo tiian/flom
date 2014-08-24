@@ -836,7 +836,7 @@ int flom_accept_loop(flom_conns_t *conns)
                 FLOM_TRACE(("flom_accept_loop: idle time exceeded %d "
                             "milliseconds, number of lockers=%u\n",
                             poll_timeout, number_of_lockers));
-                if (0 == number_of_lockers) {
+                if (0 == number_of_lockers && 0 < poll_timeout) {
                     if (1 == flom_conns_get_used(conns) ||
                         (2 == flom_conns_get_used(conns) &&
                          SOCK_DGRAM == flom_conns_get_type(conns, 1))) {

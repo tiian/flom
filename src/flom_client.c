@@ -1163,7 +1163,7 @@ int flom_client_disconnect(struct flom_conn_data_s *cd)
                         "('%s')\n", cd->fd, errno, strerror(errno)));
         /* pick-up socket close/error but does not wait */
         if (-1 == recv(cd->fd, buffer, sizeof(buffer), 0 /* MSG_DONTWAIT */)) 
-            FLOM_TRACE(("flom_client_disconnect/recv(%d,,%u,MSG_DONTWAIT)=%d "
+            FLOM_TRACE(("flom_client_disconnect/recv(%d,,%u,0)=%d "
                         "('%s')\n", cd->fd, sizeof(buffer),
                         errno, strerror(errno)));
         /* shutdown read half socket */
@@ -1191,32 +1191,81 @@ int flom_client_disconnect(struct flom_conn_data_s *cd)
 
 int flom_client_shutdown(int immediate)
 {
-    enum Exception { CLIENT_CONNECT_ERROR
+    enum Exception { DAEMON_NOT_STARTED
+                     , CLIENT_CONNECT_ERROR
+                     , MSG_SERIALIZE_ERROR
+                     , MSG_SEND_ERROR
+                     , CLIENT_DISCONNECT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     struct flom_conn_data_s cd;
+    struct flom_msg_s msg;
     
     FLOM_TRACE(("flom_client_shutdown\n"));
     TRY {
+        char buffer[FLOM_NETWORK_BUFFER_SIZE];
+        size_t to_send;
+        
+        /* initializing */
+        flom_msg_init(&msg);
+
+        /* connect to daemon */
         ret_cod = flom_client_connect(&cd, FALSE);
         switch (ret_cod) {
             case FLOM_RC_OK:
-                FLOM_TRACE(("flom_client_shutdown: shutdown message sent "
-                            "to daemon\n"));
+                FLOM_TRACE(("flom_client_shutdown: connection with daemon "
+                            "obtained...\n"));
                 break;
             case FLOM_RC_DAEMON_NOT_STARTED:
                 FLOM_TRACE(("flom_client_shutdown: the daemon is not "
                             "running and cannot be stopped\n"));
+                THROW(DAEMON_NOT_STARTED);
                 break;
             default:
                 THROW(CLIENT_CONNECT_ERROR);
         } /* switch (ret_cod) */
+
+        /* prepare a shutdoen message */
+        /* header values */
+        msg.header.level = FLOM_MSG_LEVEL;
+        msg.header.pvs.verb = FLOM_MSG_VERB_MNGMNT;
+        msg.header.pvs.step = FLOM_MSG_STEP_INCR;
+        /* body values */
+        msg.body.mngmnt_8.shutdown.immediate = immediate;
+        
+        /* serialize the request message */
+        if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
+                               &msg, buffer, sizeof(buffer), &to_send)))
+            THROW(MSG_SERIALIZE_ERROR);
+
+        /* send the request message */
+        if (FLOM_RC_OK != (ret_cod = flom_msg_send(cd.fd, buffer, to_send)))
+            THROW(MSG_SEND_ERROR);
+        cd.last_step = msg.header.pvs.step;
+        FLOM_TRACE(("flom_client_shutdown: shutdown message sent "
+                    "to daemon...\n"));
+
+        /* gracefully disconnect from daemon */
+        ret_cod = flom_client_disconnect(&cd);
+        switch (ret_cod) {
+            case FLOM_RC_OK:
+                FLOM_TRACE(("flom_client_shutdown: disconnected "
+                            "from daemon\n"));
+                break;
+            default:
+                THROW(CLIENT_DISCONNECT_ERROR);
+        } /* switch (ret_cod) */
+        
         /* @@@ */
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case DAEMON_NOT_STARTED:
             case CLIENT_CONNECT_ERROR:
+            case MSG_SERIALIZE_ERROR:
+            case MSG_SEND_ERROR:
+            case CLIENT_DISCONNECT_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -1225,6 +1274,10 @@ int flom_client_shutdown(int immediate)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+
+    /* release msg dynamically allocated memory */
+    flom_msg_free(&msg);
+    
     FLOM_TRACE(("flom_client_shutdown/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
