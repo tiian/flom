@@ -120,6 +120,11 @@
  */
 #define FLOM_TRACE_MOD_RESOURCE_HIER      0x00002000
 
+/**
+ * trace module for daemon management functions
+ */
+#define FLOM_TRACE_MOD_DAEMON_MNGMNT      0x00004000
+
 
 
 /**

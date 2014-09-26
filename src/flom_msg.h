@@ -471,10 +471,39 @@ struct flom_msg_body_mngmnt_8_shutdown_s {
 
 
 /**
+ * Action that can be performed by a management message
+ */
+typedef enum flom_msg_mngmnt_action_e {
+    /**
+     * Null action
+     */
+    FLOM_MSG_MNGMNT_ACTION_NULL,
+    /**
+     * Shutdown
+     */
+    FLOM_MSG_MNGMNT_ACTION_SHUTDOWN,
+    /**
+     * Special value used to encode an invalid value
+     */
+    FLOM_MSG_MNGMNT_ACTION_INVALID
+} flom_msg_mngmnt_action_t;
+
+
+
+/**
  * Message body for verb "management", step "8"
  */
 struct flom_msg_body_mngmnt_8_s {
-    struct flom_msg_body_mngmnt_8_shutdown_s     shutdown;
+    /**
+     * management action
+     */
+    flom_msg_mngmnt_action_t                       action;
+    /**
+     * action data, it depends on action field
+     */
+    union {
+        struct flom_msg_body_mngmnt_8_shutdown_s   shutdown;
+    } action_data;
 };
 
 

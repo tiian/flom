@@ -1175,14 +1175,15 @@ int flom_msg_serialize_mngmnt_8(const struct flom_msg_s *msg,
     
     FLOM_TRACE(("flom_msg_serialize_mngmnt_8\n"));
     TRY {
-        int used_chars;
+        int used_chars = 0;
         
-        /* <network> */
-        used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%d\"/>",
-                              FLOM_MSG_TAG_SHUTDOWN,
-                              FLOM_MSG_PROP_IMMEDIATE,
-                              msg->body.mngmnt_8.shutdown.immediate);
+        /* shutdown action */
+        if (FLOM_MSG_MNGMNT_ACTION_SHUTDOWN == msg->body.mngmnt_8.action) {
+            used_chars = snprintf(
+                buffer + *offset, *free_chars, "<%s %s=\"%d\"/>",
+                FLOM_MSG_TAG_SHUTDOWN, FLOM_MSG_PROP_IMMEDIATE,
+                msg->body.mngmnt_8.action_data.shutdown.immediate);
+        }
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT);
         *free_chars -= used_chars;
@@ -1497,11 +1498,13 @@ int flom_msg_trace_mngmnt(const struct flom_msg_s *msg)
     TRY {
         switch (msg->header.pvs.step) {
             case FLOM_MSG_STEP_INCR:
-                FLOM_TRACE(("flom_msg_trace_mngmnt: body[%s["
-                            "%s=%d]]\n",
-                            FLOM_MSG_TAG_SHUTDOWN,
-                            FLOM_MSG_PROP_IMMEDIATE,
-                            msg->body.mngmnt_8.shutdown.immediate));
+                if (FLOM_MSG_MNGMNT_ACTION_SHUTDOWN ==
+                    msg->body.mngmnt_8.action) {
+                    FLOM_TRACE(
+                        ("flom_msg_trace_mngmnt: body[%s[%s=%d]]\n",
+                         FLOM_MSG_TAG_SHUTDOWN, FLOM_MSG_PROP_IMMEDIATE,
+                         msg->body.mngmnt_8.action_data.shutdown.immediate));
+                }
                 break;
             default:
                 THROW(INVALID_STEP);
@@ -1520,7 +1523,7 @@ int flom_msg_trace_mngmnt(const struct flom_msg_s *msg)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    FLOM_TRACE(("flom_msg_trace_discover/excp=%d/"
+    FLOM_TRACE(("flom_msg_trace_mngmnt/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -1844,7 +1847,9 @@ void flom_msg_deserialize_start_element(
                     if (FLOM_MSG_VERB_MNGMNT == msg->header.pvs.verb &&
                         FLOM_MSG_STEP_INCR == msg->header.pvs.step) {
                         if (!strcmp(*name_cursor, FLOM_MSG_PROP_IMMEDIATE)) {
-                            msg->body.mngmnt_8.shutdown.immediate =
+                            msg->body.mngmnt_8.action =
+                                FLOM_MSG_MNGMNT_ACTION_SHUTDOWN;
+                            msg->body.mngmnt_8.action_data.shutdown.immediate =
                                 strtol(*value_cursor, NULL, 10);
                         } else {
                             FLOM_TRACE(("flom_msg_deserialize_start_"

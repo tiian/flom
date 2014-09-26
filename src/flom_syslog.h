@@ -47,7 +47,7 @@ extern "C" {
     "FLoM daemon listening TCP/IP socket %s/%u"
 #define FLOM_SYSLOG_FLM002I "FLM002I joined multicast group %s/%u to " \
     "answer auto-discovery queries"
-#define FLOM_SYSLOG_FLM003N "FLM003N FLoM daemon ready to serve incoming " \
+#define FLOM_SYSLOG_FLM003N "FLM003N FLoM daemon is ready to serve incoming " \
     "requests"
 #define FLOM_SYSLOG_FLM004N "FLM004N FLoM daemon has terminated to serve " \
     "incoming requests"
@@ -55,7 +55,12 @@ extern "C" {
     "%s/%s"
 #define FLOM_SYSLOG_FLM006W "FLM006W FLoM daemon is using comm. level %d, " \
     "FLOM client is using comm. level %d; communication can not be performed"
-
+#define FLOM_SYSLOG_FLM007N "FLM007N FLoM daemon is starting immediate " \
+    "shutdown"
+#define FLOM_SYSLOG_FLM008N "FLM008N FLoM daemon is starting quiesce " \
+    "shutdown"
+    
+    
 
 #ifdef __cplusplus
 }

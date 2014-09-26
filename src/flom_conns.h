@@ -2,9 +2,9 @@
  * Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
- * This file is part of FLOM.
+ * This file is part of FLoM.
  *
- * FLOM is free software: you can redistribute it and/or modify
+ * FLoM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as published
  * by the Free Software Foundation.
  *
@@ -14,7 +14,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FLOM.  If not, see <http://www.gnu.org/licenses/>.
+ * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef FLOM_CONNS_H
 # define FLOM_CONNS_H

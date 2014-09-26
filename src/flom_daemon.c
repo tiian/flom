@@ -56,6 +56,7 @@
 
 #include "flom_conns.h"
 #include "flom_daemon.h"
+#include "flom_daemon_mngmnt.h"
 #include "flom_errors.h"
 #include "flom_locker.h"
 #include "flom_msg.h"
@@ -977,6 +978,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                      , PROTOCOL_ERROR
                      , GETNAMEINFO_ERROR
                      , ACCEPT_DISCOVER_REPLY_ERROR
+                     , DAEMON_MANAGEMENT_ERROR
                      , ACCEPT_LOOP_TRANSFER_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -1068,7 +1070,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                 /* check the message is protocol correct */
                 if (!flom_msg_check_protocol(msg, TRUE))
                     THROW(PROTOCOL_ERROR);
-                /* check the message is discover */
+                /* is the message a discover message? */
                 if (FLOM_MSG_VERB_DISCOVER == msg->header.pvs.verb) {
                     char host[256];
                     char port[25];
@@ -1085,6 +1087,11 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                                            (const struct sockaddr *)&src_addr,
                                            addrlen)))
                         THROW(ACCEPT_DISCOVER_REPLY_ERROR);
+                } else if (FLOM_MSG_VERB_MNGMNT == msg->header.pvs.verb) {
+                    /* this is a management message, not a lock request */
+                    if (FLOM_RC_OK != (ret_cod = flom_daemon_mngmnt(
+                                           conns, id)))
+                        THROW(DAEMON_MANAGEMENT_ERROR);
                 } else {
                     if (FLOM_RC_OK != (ret_cod = flom_accept_loop_transfer(
                                            conns, id, lockers)))
@@ -1129,6 +1136,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                 break;
             case ACCEPT_DISCOVER_REPLY_ERROR:
             case ACCEPT_LOOP_TRANSFER_ERROR:
+            case DAEMON_MANAGEMENT_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

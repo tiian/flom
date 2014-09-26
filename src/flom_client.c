@@ -1232,7 +1232,8 @@ int flom_client_shutdown(int immediate)
         msg.header.pvs.verb = FLOM_MSG_VERB_MNGMNT;
         msg.header.pvs.step = FLOM_MSG_STEP_INCR;
         /* body values */
-        msg.body.mngmnt_8.shutdown.immediate = immediate;
+        msg.body.mngmnt_8.action = FLOM_MSG_MNGMNT_ACTION_SHUTDOWN;
+        msg.body.mngmnt_8.action_data.shutdown.immediate = immediate;
         
         /* serialize the request message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
@@ -1257,7 +1258,6 @@ int flom_client_shutdown(int immediate)
                 THROW(CLIENT_DISCONNECT_ERROR);
         } /* switch (ret_cod) */
         
-        /* @@@ */
         THROW(NONE);
     } CATCH {
         switch (excp) {
