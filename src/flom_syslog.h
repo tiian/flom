@@ -2,19 +2,19 @@
  * Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
- * This file is part of FLOM.
+ * This file is part of FLoM.
  *
- * FLOM is free software: you can redistribute it and/or modify
+ * FLoM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as published
  * by the Free Software Foundation.
  *
- * FLOM is distributed in the hope that it will be useful,
+ * FLoM is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FLOM.  If not, see <http://www.gnu.org/licenses/>.
+ * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef FLOM_SYSLOG_H
 # define FLOM_SYSLOG_H
@@ -55,8 +55,8 @@ extern "C" {
     "%s/%s"
 #define FLOM_SYSLOG_FLM006W "FLM006W FLoM daemon is using comm. level %d, " \
     "FLOM client is using comm. level %d; communication can not be performed"
-#define FLOM_SYSLOG_FLM007N "FLM007N FLoM daemon is starting immediate " \
-    "shutdown"
+#define FLOM_SYSLOG_FLM007N "FLM007N FLoM daemon is exiting due to " \
+    "immediate shutdown request"
 #define FLOM_SYSLOG_FLM008N "FLM008N FLoM daemon is starting quiesce " \
     "shutdown"
     

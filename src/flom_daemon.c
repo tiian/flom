@@ -2,19 +2,19 @@
  * Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
- * This file is part of FLOM.
+ * This file is part of FLoM.
  *
- * FLOM is free software: you can redistribute it and/or modify
+ * FLoM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as published
  * by the Free Software Foundation.
  *
- * FLOM is distributed in the hope that it will be useful,
+ * FLoM is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FLOM.  If not, see <http://www.gnu.org/licenses/>.
+ * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <config.h>
 
@@ -1546,7 +1546,7 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers, int *again)
             if (NULL == fl)
                 THROW(NULL_LOCKER);
             if (fl->write_sequence == fl->read_sequence &&
-                fl->idle_periods > 1) {
+                fl->idle_periods > FLOM_LOCKER_MAX_IDLE_PERIODS) {
                 if (fl->write_pipe != NULL_FD) {
                     FLOM_TRACE(("flom_accept_loop_chklockers: starting "
                                 "termination for locker %u (thread=%p, "

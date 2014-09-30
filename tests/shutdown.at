@@ -1,0 +1,20 @@
+AT_BANNER([Shutdown command line checks])
+
+AT_SETUP([Quiesce shutdown (1/2)])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1"], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [0], [ignore], [ignore])
+AT_CHECK([flom -x], [ignore], [ignore], [ignore])
+AT_CHECK([sleep 3 && pgrep flom], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Quiesce shutdown (2/2)])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1"], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 2 1 2 "-d 0" &], [0], [ignore], [ignore])
+AT_CHECK([sleep 1], [ignore], [ignore], [ignore])
+AT_CHECK([flom -x], [ignore], [ignore], [ignore])
+AT_CHECK([sleep 5 && pgrep flom], [1], [ignore], [ignore])
+AT_CLEANUP
+

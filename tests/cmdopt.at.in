@@ -436,6 +436,16 @@ AT_DATA([flom.conf],
 AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_TCP_KEEPALIVE_PROBES@], [0], [expout], [ignore])
 AT_CLEANUP
 
+AT_SETUP([Quiesce shutdown: -x, --quiesce-exit])
+AT_CHECK([flom -x], [0], [ignore], [ignore])
+AT_CHECK([flom --quiesce-exit], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Immediate shutdown: -X, --immediate-exit])
+AT_CHECK([flom -X], [0], [ignore], [ignore])
+AT_CHECK([flom --immediate-exit], [0], [ignore], [ignore])
+AT_CLEANUP
+
 AT_SETUP([Invalid option: -Z, --ZZZ-ZZZ])
 AT_CHECK([flom -z FOO -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([flom --ZZZ-ZZZ=BAR -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])

@@ -23,9 +23,13 @@
 #ifdef HAVE_SYSLOG_H
 # include <syslog.h>
 #endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 
 
 
+#include "flom_config.h"
 #include "flom_conns.h"
 #include "flom_daemon_mngmnt.h"
 #include "flom_errors.h"
@@ -118,15 +122,15 @@ int flom_daemon_mngmnt_shutdown(struct flom_msg_s *msg)
         int immediate = msg->body.mngmnt_8.action_data.shutdown.immediate;
 
         if (immediate) {
-            FLOM_TRACE(("flom_daemon_mngmnt_shutdown: immediate shutdown in "
-                        "progress...\n"));
+            FLOM_TRACE(("flom_daemon_mngmnt_shutdown: immediate shutdown, "
+                        "exiting...\n"));
             syslog(LOG_NOTICE, FLOM_SYSLOG_FLM007N);
-            /* @@@ implement me */
+            exit(0);
         } else {
             FLOM_TRACE(("flom_daemon_mngmnt_shutdown: quiesce shutdown in "
                         "progress...\n"));
             syslog(LOG_NOTICE, FLOM_SYSLOG_FLM008N);
-            /* @@@ implement me */
+            flom_config_set_lifespan(FLOM_SHUTDOWN_QUIESCE_GRACE_TIME);
         }
         
         THROW(NONE);

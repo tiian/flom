@@ -20,6 +20,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	package.m4 \
 	testsuite.at \
 	cmdopt.at.in \
+	shutdown.at \
 	incompopt.at.in \
 	usecase.at.in \
 	usecase-dist.at.in \
@@ -99,6 +100,7 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/testsuite.at \
 	$(srcdir)/cmdopt.at \
+	$(srcdir)/shutdown.at \
 	$(srcdir)/incompopt.at \
 	$(srcdir)/usecase.at \
 	$(srcdir)/usecase-dist.at \

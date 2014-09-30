@@ -2,19 +2,19 @@
  * Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
- * This file is part of FLOM.
+ * This file is part of FLoM.
  *
- * FLOM is free software: you can redistribute it and/or modify
+ * FLoM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as published
  * by the Free Software Foundation.
  *
- * FLOM is distributed in the hope that it will be useful,
+ * FLoM is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FLOM.  If not, see <http://www.gnu.org/licenses/>.
+ * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <config.h>
 
@@ -164,8 +164,15 @@ gpointer flom_locker_loop(gpointer data)
             /* set a specific timeout only if termination phase is not yet
                started and if specified lifespan is not null */
             if (locker->idle_periods == 0 &&
-                locker->idle_lifespan > 0)
+                locker->idle_lifespan > 0) {
                 timeout = locker->idle_lifespan;
+                FLOM_TRACE(("flom_locker_loop: resource timeout asked by "
+                            "caller (%d milliseconds)\n", timeout));
+            } else if (locker->idle_periods > FLOM_LOCKER_MAX_IDLE_PERIODS) {
+                FLOM_TRACE(("flom_locker_loop: locker termination already "
+                            "started, using infinite poll timeout...\n"));
+                timeout = -1;
+            }
             FLOM_TRACE(("flom_locker_loop: entering poll using %d "
                         "timeout milliseconds...\n", timeout));
             ready_fd = poll(fds, flom_conns_get_used(&conns), timeout);
