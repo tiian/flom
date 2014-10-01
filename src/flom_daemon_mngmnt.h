@@ -54,10 +54,11 @@ extern "C" {
 
     /**
      * Shutdown management function
-     * @param msg IN management message
+     * @param conns IN/OUT connections object
+     * @param id IN connection id
      * @return a reason code
      */
-    int flom_daemon_mngmnt_shutdown(struct flom_msg_s *msg);
+    int flom_daemon_mngmnt_shutdown(flom_conns_t *conns, guint id);
 
     
 

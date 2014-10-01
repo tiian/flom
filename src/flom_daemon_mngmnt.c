@@ -74,7 +74,7 @@ int flom_daemon_mngmnt(flom_conns_t *conns, guint id)
         switch (msg->body.mngmnt_8.action) {
             case FLOM_MSG_MNGMNT_ACTION_SHUTDOWN:
                 if (FLOM_RC_OK != (ret_cod =
-                                   flom_daemon_mngmnt_shutdown(msg)))
+                                   flom_daemon_mngmnt_shutdown(conns, id)))
                     THROW(DAEMON_MNGMNT_SHUTDOWN_ERROR);
                 break;
             default:
@@ -112,15 +112,16 @@ int flom_daemon_mngmnt(flom_conns_t *conns, guint id)
 
 
 
-int flom_daemon_mngmnt_shutdown(struct flom_msg_s *msg)
+int flom_daemon_mngmnt_shutdown(flom_conns_t *conns, guint id)
 {
     enum Exception { NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_daemon_mngmnt_shutdown\n"));
     TRY {
+        struct flom_msg_s *msg = flom_conns_get_msg(conns, id);
         int immediate = msg->body.mngmnt_8.action_data.shutdown.immediate;
-
+        
         if (immediate) {
             FLOM_TRACE(("flom_daemon_mngmnt_shutdown: immediate shutdown, "
                         "exiting...\n"));

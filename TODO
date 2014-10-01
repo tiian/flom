@@ -1,11 +1,18 @@
 Road map:
 
-implement graceful shutdown with a message sent by client to server; signal handling is not a good choice because the process is threaded and every syscall could potentially receive EINTR. Leaving default signal behavior
-	client send the message (-x, -X), but daemon does not yet handle it
+client library
+
+IPv6
+
+SSL 
+
+Java (client)
+
+sequences
+
+transactional sequences (no holes sequences)
 
 put inside function flom_accept_loop_chklockers a check if the thread associated to the locker is really active; it the thread leaved (due to an error), make a clean-up phase. This avoid a daemon crash after a thread terminated with an error, but listener thread has a "locker object" already active
 
 implement FIFO, LIFO, FIRST FIT (for numerical resources) lock allocation policies
-
-IPv6
 

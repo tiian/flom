@@ -756,8 +756,10 @@ int flom_listen_clean(flom_conns_t *conns)
     
     FLOM_TRACE(("flom_listen_clean\n"));
     TRY {
+        int domain = flom_conns_get_domain(conns);
         flom_conns_free(conns);
-        if (-1 == unlink(global_config.socket_name)) {
+        if (AF_LOCAL == domain &&
+            -1 == unlink(flom_config_get_socket_name())) {
             FLOM_TRACE(("flom_listen_clean: unlink errno=%d\n", errno));
         }
         

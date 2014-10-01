@@ -5,7 +5,7 @@
 flom \- serialize command execution
 .SH SYNOPSIS
 .B "flom"
-[\fIOPTION\fP] -- [\fICOMMAND\fP [\fIARG\fP]...]
+[\fIOPTION\fP] [-- [\fICOMMAND\fP [\fIARG\fP]...]]
 .SH DESCRIPTION
 Run COMMAND serializing it with other commands executed by flom.
 .SH OPTIONS
@@ -15,6 +15,12 @@ show help options
 .TP
 .B -v, --version
 print flom version and exit
+.TP
+.B -x, --quiesce-exit
+stop the running daemon after current activity completion
+.TP
+.B -X, --immediate-exit
+stop the running daemon immediately without any quiesce time
 .TP
 .B -V, --verbose
 verbose mode execution

@@ -146,7 +146,7 @@ gpointer flom_locker_loop(gpointer data)
             int ready_fd;
             guint i, n;
             struct pollfd *fds;
-            int timeout = FLOM_LOCKER_POLL_TIMEOUT;
+            int timeout;
             if (FLOM_RC_OK != (ret_cod = flom_conns_clean(&conns)))
                 THROW(CONNS_CLEAN_ERROR);
             if (flom_conns_get_used(&conns) == 0) {
@@ -163,6 +163,7 @@ gpointer flom_locker_loop(gpointer data)
                 THROW(CONNS_SET_EVENTS_ERROR);
             /* set a specific timeout only if termination phase is not yet
                started and if specified lifespan is not null */
+            /* @@@ remove me, old code ;) 
             if (locker->idle_periods == 0 &&
                 locker->idle_lifespan > 0) {
                 timeout = locker->idle_lifespan;
@@ -173,6 +174,30 @@ gpointer flom_locker_loop(gpointer data)
                             "started, using infinite poll timeout...\n"));
                 timeout = -1;
             }
+            */
+            /* default time-out */
+            timeout = FLOM_LOCKER_POLL_TIMEOUT;
+            if (locker->idle_periods > FLOM_LOCKER_MAX_IDLE_PERIODS) {
+                /* the only possible event comes from main thread, using
+                   a shorter time-out would be useless */
+                timeout = -1;
+                FLOM_TRACE(("flom_locker_loop: locker termination already "
+                            "started, using infinite poll timeout...\n"));
+            } else if (locker->idle_periods > 0) {
+                /* there's a chance this locker would start termination
+                   because there are no connected clients */
+                timeout = FLOM_LOCKER_POLL_TIMEOUT;
+                FLOM_TRACE(("flom_locker_loop: possible locker termination "
+                            "in the next few milliseconds, using a short "
+                            "poll timeout...\n"));
+            } else if (locker->idle_periods == 0 &&
+                       locker->idle_lifespan > 0) {
+                /* time-out must be fixed to resource lifespan as requested
+                   by the client */
+                timeout = locker->idle_lifespan;
+                FLOM_TRACE(("flom_locker_loop: resource timeout asked by "
+                            "caller (%d milliseconds)\n", timeout));
+            } 
             FLOM_TRACE(("flom_locker_loop: entering poll using %d "
                         "timeout milliseconds...\n", timeout));
             ready_fd = poll(fds, flom_conns_get_used(&conns), timeout);
