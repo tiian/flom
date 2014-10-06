@@ -20,8 +20,13 @@
 
 
 
+#include "flom.h"
+#include "flom_trace.h"
+
+
+
 /* set module trace flag */
 #ifdef FLOM_TRACE_MODULE
 # undef FLOM_TRACE_MODULE
 #endif /* FLOM_TRACE_MODULE */
-#define FLOM_TRACE_MODULE   FLOM_TRACE_MOD_
+#define FLOM_TRACE_MODULE   FLOM_TRACE_MOD_API

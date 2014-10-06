@@ -1,5 +1,18 @@
-AC_INIT([FLoM], [0.7.1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [0.9.0-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
+
+AC_PROG_LIBTOOL
+AM_PROG_LIBTOOL
+
+# LT Version numbers, remember to change them just *before* a release.
+#   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)
+#   (Interfaces added:      CURRENT++, AGE++, REVISION=0)
+#   (No interfaces changed:                   REVISION++)
+#
+# libflom library version
+LT_CURRENT=0
+LT_AGE=0
+LT_REVISION=0
 
 # hardwired configuration
 _RELEASE_DATE="2014-10-03"
@@ -198,6 +211,11 @@ AC_CHECK_FUNCS(vsnprintf)
 
 AC_SUBST(GLIB2_LIBS)
 AC_SUBST(HAVE_DOT)
+
+# substitution of LibTool values for library version
+AC_SUBST(LT_CURRENT)
+AC_SUBST(LT_AGE)
+AC_SUBST(LT_REVISION)
 
 # substitution inside *.in for hardwired configuration
 AC_SUBST(_RELEASE_DATE)

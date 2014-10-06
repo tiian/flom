@@ -1,11 +1,14 @@
 LOG:
 
-         - 0.7.1 Implemented a garbage collector for hierarchical resources
+         - 0.9.0 Client library API
+
+20141003 - 0.7.1 Implemented a garbage collector for hierarchical resources
 	Fixed a subtle bug exploited by "-d -1" option on the daemon side when
 	a client connected and disconnected without a valid command in the 
 	the middle
 	Optimized CPU consumption related to idle resources ready to be
 	destroyed
+	Added "-x, --quiesce-exit" and "-X, --immediate-exit" option
 
 20140722 - 0.7.0 Added "-e, --resource-create" option (see [Resource]/Create)
 	Added "requester cant wait" exit code: it's returned especially when

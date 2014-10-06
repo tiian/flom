@@ -4,17 +4,17 @@
  *
  * This file is part of FLoM.
  *
- * FLOM is free software: you can redistribute it and/or modify
+ * FLoM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as published
  * by the Free Software Foundation.
  *
- * FLOM is distributed in the hope that it will be useful,
+ * FLoM is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FLOM.  If not, see <http://www.gnu.org/licenses/>.
+ * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <config.h>
 
@@ -112,7 +112,7 @@ int main (int argc, char *argv[])
     struct flom_conn_data_s cd;
     char locked_element[100];
 
-    option_context = g_option_context_new("-- command to execute");
+    option_context = g_option_context_new("[-- command to execute]");
     g_option_context_add_main_entries(option_context, entries, NULL);
     if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
         g_print("option parsing failed: %s\n", error->message);

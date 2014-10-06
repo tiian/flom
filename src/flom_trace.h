@@ -125,6 +125,11 @@
  */
 #define FLOM_TRACE_MOD_DAEMON_MNGMNT      0x00004000
 
+/**
+ * trace module for API (Application Programming Interface) client library
+ */
+#define FLOM_TRACE_MOD_API                0x00008000
+
 
 
 /**
