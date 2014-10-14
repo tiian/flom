@@ -73,7 +73,7 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libflom_la_LIBADD =
-am_libflom_la_OBJECTS = flom.lo
+am_libflom_la_OBJECTS = flom.lo flom_errors.lo flom_trace.lo
 libflom_la_OBJECTS = $(am_libflom_la_OBJECTS)
 libflom_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -82,11 +82,10 @@ PROGRAMS = $(bin_PROGRAMS)
 am_flom_OBJECTS = main.$(OBJEXT) flom_client.$(OBJEXT) \
 	flom_config.$(OBJEXT) flom_conns.$(OBJEXT) \
 	flom_daemon.$(OBJEXT) flom_daemon_mngmnt.$(OBJEXT) \
-	flom_errors.$(OBJEXT) flom_exec.$(OBJEXT) \
-	flom_locker.$(OBJEXT) flom_msg.$(OBJEXT) \
+	flom_exec.$(OBJEXT) flom_locker.$(OBJEXT) flom_msg.$(OBJEXT) \
 	flom_resource_hier.$(OBJEXT) flom_resource_numeric.$(OBJEXT) \
 	flom_resource_set.$(OBJEXT) flom_resource_simple.$(OBJEXT) \
-	flom_rsrc.$(OBJEXT) flom_trace.$(OBJEXT)
+	flom_rsrc.$(OBJEXT)
 flom_OBJECTS = $(am_flom_OBJECTS)
 flom_DEPENDENCIES = libflom.la
 flom_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -290,12 +289,11 @@ noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_resource_simple.h flom_rsrc.h \
 	flom_syslog.h flom_trace.h
 
-libflom_la_SOURCES = flom.c
+libflom_la_SOURCES = flom.c flom_errors.c flom_trace.c
 flom_SOURCES = main.c flom_client.c flom_config.c flom_conns.c flom_daemon.c \
-	flom_daemon_mngmnt.c \
-	flom_errors.c flom_exec.c flom_locker.c flom_msg.c \
+	flom_daemon_mngmnt.c flom_exec.c flom_locker.c flom_msg.c \
 	flom_resource_hier.c flom_resource_numeric.c flom_resource_set.c \
-	flom_resource_simple.c flom_rsrc.c flom_trace.c
+	flom_resource_simple.c flom_rsrc.c
 
 all: all-am
 
@@ -423,7 +421,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_conns.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon_mngmnt.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_errors.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_errors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_exec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_locker.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_msg.Po@am__quote@
@@ -432,7 +430,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_resource_set.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_resource_simple.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_rsrc.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_trace.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_trace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 
 .c.o:

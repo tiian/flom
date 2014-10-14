@@ -161,20 +161,6 @@ gpointer flom_locker_loop(gpointer data)
             if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(
                                    &conns, POLLIN)))
                 THROW(CONNS_SET_EVENTS_ERROR);
-            /* set a specific timeout only if termination phase is not yet
-               started and if specified lifespan is not null */
-            /* @@@ remove me, old code ;) 
-            if (locker->idle_periods == 0 &&
-                locker->idle_lifespan > 0) {
-                timeout = locker->idle_lifespan;
-                FLOM_TRACE(("flom_locker_loop: resource timeout asked by "
-                            "caller (%d milliseconds)\n", timeout));
-            } else if (locker->idle_periods > FLOM_LOCKER_MAX_IDLE_PERIODS) {
-                FLOM_TRACE(("flom_locker_loop: locker termination already "
-                            "started, using infinite poll timeout...\n"));
-                timeout = -1;
-            }
-            */
             /* default time-out */
             timeout = FLOM_LOCKER_POLL_TIMEOUT;
             if (locker->idle_periods > FLOM_LOCKER_MAX_IDLE_PERIODS) {

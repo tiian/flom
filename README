@@ -48,7 +48,8 @@ NOTE: do *NOT* run tests on a system that's using flom because some tests
       you are playing production workloads. DO USE A TEST SYSTEM!
 NOTE: tests needs the system is NOT overloaded because they stick on timing
       and timing breaks if the system is overloaded.
-
+NOTE: FLoM must be installed with "sudo make install" before tests can 
+      proceed (this is a library path issue...)
 If you need some help (usage tricks, hints, etc...) please post a message in
 the forum: http://sourceforge.net/p/flom/discussion/
 If you think you have discovered a bug, please open a ticket here:
