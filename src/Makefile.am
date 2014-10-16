@@ -3,7 +3,7 @@ AM_CFLAGS = -Wall
 lib_LTLIBRARIES = libflom.la
 libflom_la_LDFLAGS = -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
 flom_LDADD=@GLIB2_LIBS@ libflom.la
-flom_LDFLAGS = -Wl,-rpath -Wl,$(libdir)
+#flom_LDFLAGS = -Wl,-rpath -Wl,$(libdir)
 bin_PROGRAMS = flom
 
 include_HEADERS = flom.h
@@ -14,9 +14,9 @@ noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_resource_numeric.h flom_resource_set.h \
 	flom_resource_simple.h flom_rsrc.h \
 	flom_syslog.h flom_trace.h
-libflom_la_SOURCES = flom.c flom_errors.c flom_trace.c
-flom_SOURCES = main.c flom_client.c flom_config.c flom_conns.c flom_daemon.c \
-	flom_daemon_mngmnt.c flom_exec.c flom_locker.c flom_msg.c \
+libflom_la_SOURCES = flom.c flom_config.c flom_errors.c flom_msg.c \
 	flom_resource_hier.c flom_resource_numeric.c flom_resource_set.c \
-	flom_resource_simple.c flom_rsrc.c
+	flom_resource_simple.c flom_rsrc.c flom_trace.c
+flom_SOURCES = main.c flom_client.c flom_conns.c flom_daemon.c \
+	flom_daemon_mngmnt.c flom_exec.c flom_locker.c
 

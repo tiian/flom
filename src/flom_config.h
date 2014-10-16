@@ -5,15 +5,15 @@
  * This file is part of FLoM.
  *
  * FLoM is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as published
- * by the Free Software Foundation.
+ * it under the terms of the GNU Lesser General Public License version 2.1 as
+ * published by the Free Software Foundation.
  *
  * FLoM is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef FLOM_CONFIG_H
@@ -413,6 +413,7 @@ extern "C" {
      * Initialize configuration (global) object retrieving data from
      * configuration files
      * @param custom_config_filename IN filename of user configuration file
+     *        (NULL means there's no a custom configuration file)
      * @return a reason code
      */
     int flom_config_init(const char *custom_config_filename);

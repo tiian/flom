@@ -11649,7 +11649,7 @@ fi
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files Makefile doc/Makefile etc/Makefile man/Makefile src/Makefile tests/Makefile tests/atlocal"
+ac_config_files="$ac_config_files Makefile doc/Makefile etc/Makefile man/Makefile src/Makefile tests/atlocal tests/Makefile tests/src/Makefile"
 
 ac_config_commands="$ac_config_commands tests/atconfig"
 
@@ -13594,8 +13594,9 @@ do
     "etc/Makefile") CONFIG_FILES="$CONFIG_FILES etc/Makefile" ;;
     "man/Makefile") CONFIG_FILES="$CONFIG_FILES man/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
-    "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "tests/atlocal") CONFIG_FILES="$CONFIG_FILES tests/atlocal" ;;
+    "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
+    "tests/src/Makefile") CONFIG_FILES="$CONFIG_FILES tests/src/Makefile" ;;
     "tests/atconfig") CONFIG_COMMANDS="$CONFIG_COMMANDS tests/atconfig" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

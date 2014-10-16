@@ -111,8 +111,9 @@ AC_CONFIG_FILES([
   etc/Makefile
   man/Makefile
   src/Makefile
-  tests/Makefile
   tests/atlocal
+  tests/Makefile
+  tests/src/Makefile
 ])
 AC_CONFIG_TESTDIR([tests])
 

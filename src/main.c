@@ -143,7 +143,7 @@ int main (int argc, char *argv[])
 
     /* reset global configuration */
     flom_config_reset();
-    /* initialize configuration with standard system, statndard user and
+    /* initialize configuration with standard system, standard user and
        user customized config files */
     if (FLOM_RC_OK != (ret_cod = flom_config_init(config_file))) {
         g_print("flom_config_init: ret_cod=%d\n", ret_cod);

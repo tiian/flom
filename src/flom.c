@@ -21,7 +21,9 @@
 
 
 #include "flom.h"
+#include "flom_config.h"
 #include "flom_errors.h"
+#include "flom_rsrc.h"
 #include "flom_trace.h"
 
 
@@ -63,6 +65,8 @@ int flom_lock()
     
     FLOM_TRACE(("flom_lock\n"));
     TRY {
+        /* @@@ restart from here */
+            
         
         THROW(NONE);
     } CATCH {
@@ -117,18 +121,37 @@ int flom_init_check(void)
     
     /* initialize only if not already initialized! */
     if (!flom_init_flag) {
+        /* this is a synchronization hole... see below */
         /* synchronize this critical section */
         g_static_mutex_lock(&flom_init_mutex);
         mutex_locked = TRUE;
-        /* stop if another thread performed initialized in the meantime
-           (unlikely but not impossible) */
-        if (!flom_init_flag) {
+        /* dummy loop, necessary because I need break instruction ;) */
+        while (TRUE) {
+            /* stop if another thread performed initialization in the
+               during synchronization hole (unlikely but not impossible) */
+            if (flom_init_flag)
+                break;
             /* initialize trace component */
             FLOM_TRACE_INIT;
+            /* initialize regular expression table */
+            if (FLOM_RC_OK != (ret_cod = global_res_name_preg_init()))
+                break;
+            /* reset global configuration */
+            flom_config_reset();
+            /* initialize configuration with standard system, standard
+               user and user customized config files */
+            if (FLOM_RC_OK != (ret_cod = flom_config_init(NULL)))
+                break;
+            if (NULL != flom_config_get_command_trace_file())
+                /* change trace destination if necessary */
+                FLOM_TRACE_REOPEN(flom_config_get_command_trace_file());
+            /* check configuration */
+            if (FLOM_RC_OK != (ret_cod = flom_config_check()))
+                break;
+            /* exit loop after exactly one cycle */
+            break; 
+        } /* while (TRUE) */
 
-            /* @@@ restart from here */
-            
-        } /* if (!flom_init_flag) */
     } /* if (!flom_init_flag) */
     
     if (mutex_locked)

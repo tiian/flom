@@ -1,3 +1,5 @@
+SUBDIRS = src
+
 # Interrupt the test at first failure
 TESTSUITEFLAGS = "-e"
 
