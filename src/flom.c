@@ -22,6 +22,8 @@
 
 #include "flom.h"
 #include "flom_config.h"
+#include "flom_conns.h"
+#include "flom_client.h"
 #include "flom_errors.h"
 #include "flom_rsrc.h"
 #include "flom_trace.h"
@@ -54,9 +56,82 @@ int flom_init_check(void);
 
 
 
-int flom_lock()
+int flom_handle_init(flom_handle_t *handle)
+{
+    enum Exception { G_TRY_MALLOC_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    /* check flom library is initialized */
+    if (FLOM_RC_OK != (ret_cod = flom_init_check()))
+        return ret_cod;
+    
+    FLOM_TRACE(("flom_handle_init\n"));
+    TRY {
+        /* memory reset */
+        memset(handle, 0, sizeof(flom_handle_t));
+        /* allocate memory for connection data structure */
+        if (NULL == (handle->conn_data = g_try_malloc0(
+                         sizeof(struct flom_conn_data_s))))
+            THROW(G_TRY_MALLOC_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_TRY_MALLOC_ERROR:
+                ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_handle_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_handle_clean(flom_handle_t *handle)
 {
     enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    /* check flom library is initialized */
+    if (FLOM_RC_OK != (ret_cod = flom_init_check()))
+        return ret_cod;
+    
+    FLOM_TRACE(("flom_handle_clean\n"));
+    TRY {
+        /* release memory of connection data structure */
+        g_free(handle->conn_data);
+        handle->conn_data = NULL;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_handle_clean/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_lock(flom_handle_t *handle)
+{
+    enum Exception { NULL_OBJECT
+                     , CLIENT_CONNECT_ERROR
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     /* check flom library is initialized */
@@ -65,12 +140,25 @@ int flom_lock()
     
     FLOM_TRACE(("flom_lock\n"));
     TRY {
-        /* @@@ restart from here */
-            
+        struct flom_conn_data_s *cd =
+            (struct flom_conn_data_s *)handle->conn_data;
+        /* check the connection data pointer is not NULL (we can't be sure
+           it's a valid pointer) */
+        if (NULL == handle->conn_data)
+            THROW(NULL_OBJECT);
+        /* open a connection to a valid lock manager */
+        if (FLOM_RC_OK != (ret_cod = flom_client_connect(cd, TRUE)))
+            THROW(CLIENT_CONNECT_ERROR);
         
+        /* @@@ restart from here */
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case CLIENT_CONNECT_ERROR:
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -85,7 +173,7 @@ int flom_lock()
 
 
 
-int flom_unlock()
+int flom_unlock(flom_handle_t *handle)
 {
     enum Exception { NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -111,6 +199,12 @@ int flom_unlock()
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+/*
+ * Internal library methods not intended for application development
+ */
 
 
 
@@ -148,6 +242,8 @@ int flom_init_check(void)
             /* check configuration */
             if (FLOM_RC_OK != (ret_cod = flom_config_check()))
                 break;
+            /* initialization completed */
+            flom_init_flag = TRUE;
             /* exit loop after exactly one cycle */
             break; 
         } /* while (TRUE) */

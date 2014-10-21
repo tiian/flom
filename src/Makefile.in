@@ -38,7 +38,7 @@ build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = flom$(EXEEXT)
 subdir = src
-DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
+DIST_COMMON = $(dist_include_HEADERS) $(noinst_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -70,11 +70,13 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(includedir)"
+	"$(DESTDIR)$(includedir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libflom_la_LIBADD =
-am_libflom_la_OBJECTS = flom.lo flom_config.lo flom_errors.lo \
-	flom_msg.lo flom_resource_hier.lo flom_resource_numeric.lo \
+am_libflom_la_OBJECTS = flom.lo flom_client.lo flom_config.lo \
+	flom_conns.lo flom_daemon.lo flom_daemon_mngmnt.lo \
+	flom_errors.lo flom_locker.lo flom_msg.lo \
+	flom_resource_hier.lo flom_resource_numeric.lo \
 	flom_resource_set.lo flom_resource_simple.lo flom_rsrc.lo \
 	flom_trace.lo
 libflom_la_OBJECTS = $(am_libflom_la_OBJECTS)
@@ -82,10 +84,7 @@ libflom_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libflom_la_LDFLAGS) $(LDFLAGS) -o $@
 PROGRAMS = $(bin_PROGRAMS)
-am_flom_OBJECTS = main.$(OBJEXT) flom_client.$(OBJEXT) \
-	flom_conns.$(OBJEXT) flom_daemon.$(OBJEXT) \
-	flom_daemon_mngmnt.$(OBJEXT) flom_exec.$(OBJEXT) \
-	flom_locker.$(OBJEXT)
+am_flom_OBJECTS = main.$(OBJEXT) flom_exec.$(OBJEXT)
 flom_OBJECTS = $(am_flom_OBJECTS)
 flom_DEPENDENCIES = libflom.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -103,7 +102,8 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libflom_la_SOURCES) $(flom_SOURCES)
 DIST_SOURCES = $(libflom_la_SOURCES) $(flom_SOURCES)
-HEADERS = $(include_HEADERS) $(noinst_HEADERS)
+HEADERS = $(dist_include_HEADERS) $(nodist_include_HEADERS) \
+	$(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -276,22 +276,24 @@ AM_CFLAGS = -Wall
 lib_LTLIBRARIES = libflom.la
 libflom_la_LDFLAGS = -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
 flom_LDADD = @GLIB2_LIBS@ libflom.la
-include_HEADERS = flom.h
+EXTRA_DIST = flom_errors.h.in
+dist_include_HEADERS = flom.h
+nodist_include_HEADERS = flom_errors.h
 noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_daemon_mngmnt.h \
-	flom_defines.h flom_errors.h flom_exec.h \
+	flom_defines.h flom_exec.h \
 	flom_locker.h flom_msg.h flom_resource_hier.h \
 	flom_resource_numeric.h flom_resource_set.h \
 	flom_resource_simple.h flom_rsrc.h \
 	flom_syslog.h flom_trace.h
 
-libflom_la_SOURCES = flom.c flom_config.c flom_errors.c flom_msg.c \
+libflom_la_SOURCES = flom.c flom_client.c flom_config.c flom_conns.c \
+	flom_daemon.c flom_daemon_mngmnt.c flom_errors.c flom_locker.c \
+	flom_msg.c \
 	flom_resource_hier.c flom_resource_numeric.c flom_resource_set.c \
-	flom_resource_simple.c flom_rsrc.c flom_trace.c
+	flom_resource_simple.c flom_rsrc.c flom_trace.c 
 
-flom_SOURCES = main.c flom_client.c flom_conns.c flom_daemon.c \
-	flom_daemon_mngmnt.c flom_exec.c flom_locker.c
-
+flom_SOURCES = main.c flom_exec.c
 all: all-am
 
 .SUFFIXES:
@@ -413,14 +415,14 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_client.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_config.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_conns.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon_mngmnt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_conns.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon_mngmnt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_errors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_exec.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_locker.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_locker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_msg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_resource_hier.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_resource_numeric.Plo@am__quote@
@@ -456,10 +458,10 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-includeHEADERS: $(include_HEADERS)
+install-dist_includeHEADERS: $(dist_include_HEADERS)
 	@$(NORMAL_INSTALL)
 	test -z "$(includedir)" || $(MKDIR_P) "$(DESTDIR)$(includedir)"
-	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
+	@list='$(dist_include_HEADERS)'; test -n "$(includedir)" || list=; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
@@ -469,9 +471,29 @@ install-includeHEADERS: $(include_HEADERS)
 	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(includedir)" || exit $$?; \
 	done
 
-uninstall-includeHEADERS:
+uninstall-dist_includeHEADERS:
 	@$(NORMAL_UNINSTALL)
-	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
+	@list='$(dist_include_HEADERS)'; test -n "$(includedir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(includedir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(includedir)" && rm -f $$files
+install-nodist_includeHEADERS: $(nodist_include_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(includedir)" || $(MKDIR_P) "$(DESTDIR)$(includedir)"
+	@list='$(nodist_include_HEADERS)'; test -n "$(includedir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(includedir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(includedir)" || exit $$?; \
+	done
+
+uninstall-nodist_includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_include_HEADERS)'; test -n "$(includedir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(includedir)' && rm -f" $$files ")"; \
@@ -565,7 +587,7 @@ all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
 install-binPROGRAMS: install-libLTLIBRARIES
 
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -616,7 +638,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-includeHEADERS
+install-data-am: install-dist_includeHEADERS \
+	install-nodist_includeHEADERS
 
 install-dvi: install-dvi-am
 
@@ -662,8 +685,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS \
-	uninstall-libLTLIBRARIES
+uninstall-am: uninstall-binPROGRAMS uninstall-dist_includeHEADERS \
+	uninstall-libLTLIBRARIES uninstall-nodist_includeHEADERS
 
 .MAKE: install-am install-strip
 
@@ -672,17 +695,27 @@ uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS \
 	distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-includeHEADERS install-info install-info-am \
-	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
+	install-data install-data-am install-dist_includeHEADERS \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-libLTLIBRARIES install-man \
+	install-nodist_includeHEADERS install-pdf install-pdf-am \
 	install-ps install-ps-am install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-includeHEADERS uninstall-libLTLIBRARIES
+	uninstall-dist_includeHEADERS uninstall-libLTLIBRARIES \
+	uninstall-nodist_includeHEADERS
 
+
+flom_errors.h: flom_errors.h.in
+	sed \
+	-e 's|@_ES_REQUESTER_CANT_WAIT[@]|$(_ES_REQUESTER_CANT_WAIT)|g' \
+	-e 's|@_ES_UNABLE_TO_EXECUTE_COMMAND[@]|$(_ES_UNABLE_TO_EXECUTE_COMMAND)|g' \
+	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
+	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
+	$< >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -4,11 +4,11 @@
  *
  * This file is part of FLoM.
  *
- * FLOM is free software: you can redistribute it and/or modify
+ * FLoM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 2.1 as
  * published by the Free Software Foundation.
  *
- * FLOM is distributed in the hope that it will be useful,
+ * FLoM is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
@@ -16,10 +16,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/*
+ * IMPORTANT NOTE: flom_errors.h is generate at build time from
+ *                 flom_errors.h.in; do NOT change flom_errors.h, the right
+ *                 file is flom_errors.h.in!
+ */
+
 #ifndef FLOM_ERRORS_H
 # define FLOM_ERRORS_H
-
-#include <config.h>
 
 
 
@@ -37,20 +42,20 @@
  * Exit status when FLOM is unable to immediately lock a resource (it could be
  * at a later time, but not at current time)
  */
-#define FLOM_ES_REQUESTER_CANT_WAIT         _ES_REQUESTER_CANT_WAIT
+#define FLOM_ES_REQUESTER_CANT_WAIT         @_ES_REQUESTER_CANT_WAIT@
 /**
  * Exit status when FLOM is unable to execute the command
  */
-#define FLOM_ES_UNABLE_TO_EXECUTE_COMMAND   _ES_UNABLE_TO_EXECUTE_COMMAND
+#define FLOM_ES_UNABLE_TO_EXECUTE_COMMAND   @_ES_UNABLE_TO_EXECUTE_COMMAND@
 /**
  * Exit status when FLOM is unable to lock a resource already locked by
  * someone else
  */
-#define FLOM_ES_RESOURCE_BUSY               _ES_RESOURCE_BUSY
+#define FLOM_ES_RESOURCE_BUSY               @_ES_RESOURCE_BUSY@
 /**
  * Exit status when FLOM pick-up an error
  */
-#define FLOM_ES_GENERIC_ERROR               _ES_GENERIC_ERROR
+#define FLOM_ES_GENERIC_ERROR               @_ES_GENERIC_ERROR@
 /**
  * Exit status when FLOM terminates without errors (and without executing
  * some process)
@@ -136,8 +141,8 @@
  */
 #define FLOM_RC_NETWORK_EVENT_ERROR                   -3
 /**
- * A passed object/option/arg is NULL and it can NOT be inferred from a default
- * value
+ * A passed object/option/arg is NULL and it can NOT be inferred from
+ * a default value
  */
 #define FLOM_RC_NULL_OBJECT                           -4
 /**
@@ -379,7 +384,7 @@
 /**
  * "g_try_realloc" function error
  */
-#define FLOM_RC_G_TRY_REALLOC_ERROR                 -2134
+#define FLOM_RC_G_TRY_REALLOC_ERROR                 -214
 
 
 

@@ -1,0 +1,19 @@
+The C source files contained in this directory are used as test cases for
+libflom (flom library) usage and can be used as programming examples.
+Makefile automatically compiles them; if you want to compile one of these
+examples for your own purpose, you shall use a command like the following one
+(the example referes to "case0000.c" source program):
+
+gcc -I /usr/local/include/ $(pkg-config --cflags glib-2.0) \
+	-L /usr/local/lib/ -l flom $(pkg-config --libs glib-2.0 gthread-2.0) \
+	-o case0000 case0000.c
+
+Note:
+0. you must install flom (sudo make install) before starting to build your own
+   program using libflom
+1. /usr/local/include is the default installation path of libflom headers
+   (change it according to your configuration if you changed the default)
+2. /usr/local/lib is the default installation path of libflom library
+   (change it according to your configuration if you changed the default)
+3. glib-2.0 and gthread-2.0 compile and link flags are retrieved using
+   pkg-config utility
