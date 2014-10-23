@@ -93,6 +93,8 @@ const char *flom_strerror(int ret_cod)
                 "communication level";
         case FLOM_RC_MSG_DESERIALIZE_ERROR:
             return "ERROR: XML message deserialization";
+        case FLOM_RC_API_INVALID_SEQUENCE:
+            return "ERROR: API function called using an invalid sequence";
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";
         case FLOM_RC_BIND_ERROR:
