@@ -193,6 +193,10 @@
  * Error occurred while deserializing XML message
  */
 #define FLOM_RC_MSG_DESERIALIZE_ERROR                -16
+/**
+ * An API function was called using an invalid sequence
+ */
+#define FLOM_RC_API_INVALID_SEQUENCE                 -17
 
 /**
  * "accept" function error
