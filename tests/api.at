@@ -1,0 +1,6 @@
+AT_BANNER([API checks])
+
+AT_SETUP([case0000])
+AT_CHECK([case0000], [0], [ignore], [ignore])
+AT_CLEANUP
+

@@ -21,6 +21,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	package.m4 \
 	testsuite.at \
+	api.at \
 	cmdopt.at.in \
 	shutdown.at \
 	incompopt.at.in \
@@ -101,6 +102,7 @@ AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/testsuite.at \
+	$(srcdir)/api.at \
 	$(srcdir)/cmdopt.at \
 	$(srcdir)/shutdown.at \
 	$(srcdir)/incompopt.at \

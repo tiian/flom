@@ -97,9 +97,45 @@ int flom_handle_init(flom_handle_t *handle)
 
 
 
+flom_handle_t *flom_handle_new(void)
+{
+    flom_handle_t *tmp_handle = NULL;
+
+    /* dummy loop */
+    while (TRUE) {
+        int ret_cod;
+        
+        /* check flom library is initialized */
+        if (FLOM_RC_OK != flom_init_check())
+            break;
+        FLOM_TRACE(("flom_handle_new\n"));
+        /* try to allocate a new handle object */
+        if (NULL == (tmp_handle = (flom_handle_t *)g_try_malloc(
+                         sizeof(flom_handle_t)))) {
+            FLOM_TRACE(("flom_handle_new: g_try_malloc returned NULL\n"));
+            break;
+        }
+        /* initialize the new handle */
+        if (FLOM_RC_OK != (ret_cod = flom_handle_init(tmp_handle))) {
+            FLOM_TRACE(("flom_handle_new: flom_handle_init returned %d\n",
+                        ret_cod));
+            g_free(tmp_handle);
+            tmp_handle = NULL;
+            break;
+        }
+        /* exit the loop after one cycle */
+        break;
+    } /* while (TRUE) */
+    FLOM_TRACE(("flom_handle_new: return %p\n", tmp_handle));
+    return tmp_handle;
+}
+
+
+
 int flom_handle_clean(flom_handle_t *handle)
 {
-    enum Exception { NONE } excp;
+    enum Exception { API_INVALID_SEQUENCE
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     /* check flom library is initialized */
@@ -108,15 +144,25 @@ int flom_handle_clean(flom_handle_t *handle)
     
     FLOM_TRACE(("flom_handle_clean\n"));
     TRY {
+        /* check handle state */
+        if (FLOM_HANDLE_STATE_INIT != handle->state &&
+            FLOM_HANDLE_STATE_DISCONNECTED != handle->state) {
+            FLOM_TRACE(("flom_handle_clean: handle->state=%d\n",
+                        handle->state));
+            THROW(API_INVALID_SEQUENCE);
+        }
         /* release memory of connection data structure */
         g_free(handle->conn_data);
         handle->conn_data = NULL;
         /* clean handle state */
-        handle->state = FLOM_HANDLE_STATE_DISCONNECTED;
+        handle->state = FLOM_HANDLE_STATE_CLEANED;
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case API_INVALID_SEQUENCE:
+                ret_cod = FLOM_RC_API_INVALID_SEQUENCE;
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -131,10 +177,42 @@ int flom_handle_clean(flom_handle_t *handle)
 
 
 
+void flom_handle_delete(flom_handle_t *handle)
+{
+    /* dummy loop */
+    while (TRUE) {
+        int ret_cod;
+        
+        /* check flom library is initialized */
+        if (FLOM_RC_OK != flom_init_check())
+            break;
+        FLOM_TRACE(("flom_handle_delete: handle=%p\n", handle));
+        /* check handle is not NULL */
+        if (NULL == handle) {
+            FLOM_TRACE(("flom_handle_delete: handle is null, skipping...\n"));
+            break;
+        }
+        /* clean object handle */
+        if (FLOM_RC_OK != (ret_cod = flom_handle_clean(handle))) {
+            FLOM_TRACE(("flom_handle_new: flom_handle_clean returned %d, "
+                        "ignoring it and going on...\n", ret_cod));
+        }
+        /* reset the object handle to prevent misuse of the associated
+           memory */
+        memset(handle, 0, sizeof(flom_handle_t));
+        /* remove object handle */
+        g_free(handle);
+        /* exit the loop after one cycle */
+        break;
+    } /* while (TRUE) */
+    FLOM_TRACE(("flom_handle_delete: exiting\n"));
+}
+
+
 int flom_lock(flom_handle_t *handle, char *element, size_t element_size)
 {
-    enum Exception { NULL_OBJECT
-                     , API_INVALID_SEQUENCE
+    enum Exception { API_INVALID_SEQUENCE
+                     , NULL_OBJECT
                      , CLIENT_CONNECT_ERROR
                      , CLIENT_LOCK_ERROR
                      , NONE } excp;
@@ -148,10 +226,6 @@ int flom_lock(flom_handle_t *handle, char *element, size_t element_size)
     TRY {
         struct flom_conn_data_s *cd =
             (struct flom_conn_data_s *)handle->conn_data;
-        /* check the connection data pointer is not NULL (we can't be sure
-           it's a valid pointer) */
-        if (NULL == handle->conn_data)
-            THROW(NULL_OBJECT);
         /* check handle state */
         if (FLOM_HANDLE_STATE_INIT != handle->state &&
             FLOM_HANDLE_STATE_CONNECTED != handle->state &&
@@ -159,6 +233,10 @@ int flom_lock(flom_handle_t *handle, char *element, size_t element_size)
             FLOM_TRACE(("flom_lock: handle->state=%d\n", handle->state));
             THROW(API_INVALID_SEQUENCE);
         }
+        /* check the connection data pointer is not NULL (we can't be sure
+           it's a valid pointer) */
+        if (NULL == handle->conn_data)
+            THROW(NULL_OBJECT);
         /* open a connection to a valid lock manager */
         if (FLOM_HANDLE_STATE_CONNECTED != handle->state) {
             if (FLOM_RC_OK != (ret_cod = flom_client_connect(cd, TRUE)))
@@ -180,11 +258,11 @@ int flom_lock(flom_handle_t *handle, char *element, size_t element_size)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case NULL_OBJECT:
-                ret_cod = FLOM_RC_NULL_OBJECT;
-                break;
             case API_INVALID_SEQUENCE:
                 ret_cod = FLOM_RC_API_INVALID_SEQUENCE;
+                break;
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
             case CLIENT_CONNECT_ERROR:
             case CLIENT_LOCK_ERROR:
@@ -205,8 +283,8 @@ int flom_lock(flom_handle_t *handle, char *element, size_t element_size)
 
 int flom_unlock(flom_handle_t *handle)
 {
-    enum Exception { NULL_OBJECT
-                     , API_INVALID_SEQUENCE
+    enum Exception { API_INVALID_SEQUENCE
+                     , NULL_OBJECT
                      , CLIENT_UNLOCK_ERROR
                      , CLIENT_DISCONNECT_ERROR
                      , NONE } excp;
@@ -220,16 +298,16 @@ int flom_unlock(flom_handle_t *handle)
     TRY {
         struct flom_conn_data_s *cd =
             (struct flom_conn_data_s *)handle->conn_data;
-        /* check the connection data pointer is not NULL (we can't be sure
-           it's a valid pointer) */
-        if (NULL == handle->conn_data)
-            THROW(NULL_OBJECT);
         /* check handle state */
         if (FLOM_HANDLE_STATE_LOCKED != handle->state &&
             FLOM_HANDLE_STATE_CONNECTED != handle->state) {
             FLOM_TRACE(("flom_unlock: handle->state=%d\n", handle->state));
             THROW(API_INVALID_SEQUENCE);
         }
+        /* check the connection data pointer is not NULL (we can't be sure
+           it's a valid pointer) */
+        if (NULL == handle->conn_data)
+            THROW(NULL_OBJECT);
         if (FLOM_HANDLE_STATE_LOCKED == handle->state) {
             /* lock release */
             if (FLOM_RC_OK != (ret_cod = flom_client_unlock(cd)))
@@ -249,11 +327,11 @@ int flom_unlock(flom_handle_t *handle)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case NULL_OBJECT:
-                ret_cod = FLOM_RC_NULL_OBJECT;
-                break;
             case API_INVALID_SEQUENCE:
                 ret_cod = FLOM_RC_API_INVALID_SEQUENCE;
+                break;
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
             case CLIENT_UNLOCK_ERROR:
             case CLIENT_DISCONNECT_ERROR:

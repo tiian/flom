@@ -36,7 +36,7 @@ typedef enum flom_handle_state_e {
     /**
      * Initial state
      */
-    FLOM_HANDLE_STATE_INIT,
+    FLOM_HANDLE_STATE_INIT = 22,
     /**
      * The client is connected to the daemon and the resource is NOT locked
      */
@@ -82,10 +82,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* @@@
- * introduce methods: flom_handle_new and flom_handle_delete that use
- * dynamic memory instead of pre-allocated structures.
- *
  * create API case tests, stressing the protocol sequence (handle->state)
+ * for dynamic handles
  *
  * move configuration from "global" to "local"
  */
@@ -102,6 +100,14 @@ extern "C" {
 
 
     /**
+     * Allocate and initialize (@ref flom_handle_init) a new object handle
+     * @return a new object handle or NULL if any error happens
+     */
+    flom_handle_t *flom_handle_new(void);
+
+
+    
+    /**
      * Clean an object handle; this function MUST be called before the out of
      * scope of an handle; if this method is not called a memory leak will
      * be generated. For every object initialized with @ref flom_handle_init
@@ -113,6 +119,14 @@ extern "C" {
     
 
 
+    /**
+     * Clean (@ref flom_handle_clean) and deallocate an object handle
+     * @param handle IN the object handle to delete
+     */
+    void flom_handle_delete(flom_handle_t *handle);
+
+
+    
     /**
      * Lock a resource
      * @param handle IN/OUT library handle

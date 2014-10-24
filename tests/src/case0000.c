@@ -23,11 +23,14 @@
 
 
 
-int main(int argc, char *argv[]) {
+/*
+ * Happy path usage with a static handle
+ */
+void static_handle_happy_path(void) {
     int ret_cod;
     flom_handle_t my_handle;
     char locked_element[100];
-
+    
     /* initialize a new handle */
     if (FLOM_RC_OK != (ret_cod = flom_handle_init(&my_handle))) {
         fprintf(stderr, "flom_handle_init() returned %d, '%s'\n",
@@ -53,6 +56,158 @@ int main(int argc, char *argv[]) {
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
+}
+
+
+
+/*
+ * Stress test with a static handle, missing flom_handle_init method
+ */
+void static_handle_missing_init(void) {
+    int ret_cod;
+    flom_handle_t my_handle;
+    char locked_element[100];
+
+    /* lock acquisition */
+    if (FLOM_RC_API_INVALID_SEQUENCE != (
+            ret_cod = flom_lock(&my_handle, locked_element,
+                                sizeof(locked_element)))) {
+        fprintf(stderr, "flom_lock() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }     
+    /* lock release */
+    if (FLOM_RC_API_INVALID_SEQUENCE != (
+            ret_cod = flom_unlock(&my_handle))) {
+        fprintf(stderr, "flom_unlock() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* handle clean-up (memory release) */
+    if (FLOM_RC_API_INVALID_SEQUENCE != (
+            ret_cod = flom_handle_clean(&my_handle))) {
+        fprintf(stderr, "flom_handle_clean() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+}
+
+
+
+/*
+ * Stress test with a static handle, missing flom_lock method
+ */
+void static_handle_missing_lock(void) {
+    int ret_cod;
+    flom_handle_t my_handle;
+
+    /* initialize a new handle */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_init(&my_handle))) {
+        fprintf(stderr, "flom_handle_init() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* lock release */
+    if (FLOM_RC_API_INVALID_SEQUENCE != (
+            ret_cod = flom_unlock(&my_handle))) {
+        fprintf(stderr, "flom_unlock() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* handle clean-up (memory release) */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_clean(&my_handle))) {
+        fprintf(stderr, "flom_handle_clean() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+}
+
+
+
+/*
+ * Stress test with a static handle, missing flom_unlock method
+ */
+void static_handle_missing_unlock(void) {
+    int ret_cod;
+    flom_handle_t my_handle;
+    char locked_element[100];
+
+    /* initialize a new handle */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_init(&my_handle))) {
+        fprintf(stderr, "flom_handle_init() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* lock acquisition */
+    if (FLOM_RC_OK != (ret_cod = flom_lock(&my_handle, locked_element,
+                                           sizeof(locked_element)))) {
+        fprintf(stderr, "flom_lock() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    } 
+    /* handle clean-up (memory release) */
+    if (FLOM_RC_API_INVALID_SEQUENCE != (
+            ret_cod = flom_handle_clean(&my_handle))) {
+        fprintf(stderr, "flom_handle_clean() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* lock release */
+    if (FLOM_RC_OK != (ret_cod = flom_unlock(&my_handle))) {
+        fprintf(stderr, "flom_unlock() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* handle clean-up (memory release) */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_clean(&my_handle))) {
+        fprintf(stderr, "flom_handle_clean() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+}
+
+
+
+/*
+ * Happy path usage with a dynamic handle
+ */
+void dynamic_handle_happy_path(void) {
+    int ret_cod;
+    flom_handle_t *my_handle;
+    char locked_element[100];
+
+    /* create a new handle */
+    if (NULL == (my_handle = flom_handle_new())) {
+        fprintf(stderr, "flom_handle_init() returned %p\n", my_handle);
+        exit(1);
+    }    
+    /* lock acquisition */
+    if (FLOM_RC_OK != (ret_cod = flom_lock(my_handle, locked_element,
+                                           sizeof(locked_element)))) {
+        fprintf(stderr, "flom_lock() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    } 
+    /* lock release */
+    if (FLOM_RC_OK != (ret_cod = flom_unlock(my_handle))) {
+        fprintf(stderr, "flom_unlock() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* delete the handle */
+    flom_handle_delete(my_handle);
+}
+
+
+
+int main(int argc, char *argv[]) {
+    /* static handle tests */
+    static_handle_happy_path();
+    static_handle_missing_init();
+    static_handle_missing_lock();
+    static_handle_missing_unlock();
+    /* dynamic handle test */
+    dynamic_handle_happy_path();
     /* exit */
     return 0;
 }
