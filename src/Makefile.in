@@ -73,9 +73,9 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(includedir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libflom_la_LIBADD =
-am_libflom_la_OBJECTS = flom.lo flom_client.lo flom_config.lo \
-	flom_conns.lo flom_daemon.lo flom_daemon_mngmnt.lo \
-	flom_errors.lo flom_locker.lo flom_msg.lo \
+am_libflom_la_OBJECTS = flom_client.lo flom_config.lo flom_conns.lo \
+	flom_daemon.lo flom_daemon_mngmnt.lo flom_errors.lo \
+	flom_locker.lo flom_msg.lo flom_handle.lo \
 	flom_resource_hier.lo flom_resource_numeric.lo \
 	flom_resource_set.lo flom_resource_simple.lo flom_rsrc.lo \
 	flom_trace.lo
@@ -277,7 +277,7 @@ lib_LTLIBRARIES = libflom.la
 libflom_la_LDFLAGS = -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
 flom_LDADD = @GLIB2_LIBS@ libflom.la
 EXTRA_DIST = flom_errors.h.in
-dist_include_HEADERS = flom.h
+dist_include_HEADERS = flom.h flom_handle.h
 nodist_include_HEADERS = flom_errors.h
 noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_daemon_mngmnt.h \
@@ -287,9 +287,9 @@ noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_resource_simple.h flom_rsrc.h \
 	flom_syslog.h flom_trace.h
 
-libflom_la_SOURCES = flom.c flom_client.c flom_config.c flom_conns.c \
+libflom_la_SOURCES = flom_client.c flom_config.c flom_conns.c \
 	flom_daemon.c flom_daemon_mngmnt.c flom_errors.c flom_locker.c \
-	flom_msg.c \
+	flom_msg.c flom_handle.c \
 	flom_resource_hier.c flom_resource_numeric.c flom_resource_set.c \
 	flom_resource_simple.c flom_rsrc.c flom_trace.c 
 
@@ -414,7 +414,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_client.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_config.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_conns.Plo@am__quote@
@@ -422,6 +421,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon_mngmnt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_errors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_exec.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_handle.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_locker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_msg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_resource_hier.Plo@am__quote@

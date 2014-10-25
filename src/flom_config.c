@@ -136,36 +136,38 @@ flom_bool_value_t flom_bool_value_retrieve(const gchar *text)
 
 
 
-void flom_config_reset()
+void flom_config_reset(flom_config_t *config)
 {
     FLOM_TRACE(("flom_config_reset\n"));
-    global_config.daemon_trace_file = NULL;
-    global_config.command_trace_file = NULL;
-    global_config.verbose = FALSE;
-    global_config.resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
-    global_config.resource_wait = TRUE;
-    global_config.resource_create = TRUE;
-    global_config.resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
-    global_config.resource_quantity = 1;
-    global_config.lock_mode = FLOM_LOCK_MODE_EX;
-    global_config.resource_idle_lifespan = 0;
-    global_config.socket_name = NULL;
-    global_config.daemon_lifespan = _DEFAULT_DAEMON_LIFESPAN;
-    global_config.unicast_address = NULL;
-    global_config.unicast_port = _DEFAULT_DAEMON_PORT;
-    global_config.multicast_address = NULL;
-    global_config.multicast_port = _DEFAULT_DAEMON_PORT;
-    global_config.discovery_attempts = _DEFAULT_DISCOVERY_ATTEMPTS;
-    global_config.discovery_timeout = _DEFAULT_DISCOVERY_TIMEOUT;
-    global_config.discovery_ttl = _DEFAULT_DISCOVERY_TTL;
-    global_config.tcp_keepalive_time = _DEFAULT_TCP_KEEPALIVE_TIME;
-    global_config.tcp_keepalive_intvl = _DEFAULT_TCP_KEEPALIVE_INTVL;
-    global_config.tcp_keepalive_probes = _DEFAULT_TCP_KEEPALIVE_PROBES;
+    if (NULL == config)
+        config = &global_config;
+    config->daemon_trace_file = NULL;
+    config->command_trace_file = NULL;
+    config->verbose = FALSE;
+    config->resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
+    config->resource_wait = TRUE;
+    config->resource_create = TRUE;
+    config->resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
+    config->resource_quantity = 1;
+    config->lock_mode = FLOM_LOCK_MODE_EX;
+    config->resource_idle_lifespan = 0;
+    config->socket_name = NULL;
+    config->daemon_lifespan = _DEFAULT_DAEMON_LIFESPAN;
+    config->unicast_address = NULL;
+    config->unicast_port = _DEFAULT_DAEMON_PORT;
+    config->multicast_address = NULL;
+    config->multicast_port = _DEFAULT_DAEMON_PORT;
+    config->discovery_attempts = _DEFAULT_DISCOVERY_ATTEMPTS;
+    config->discovery_timeout = _DEFAULT_DISCOVERY_TIMEOUT;
+    config->discovery_ttl = _DEFAULT_DISCOVERY_TTL;
+    config->tcp_keepalive_time = _DEFAULT_TCP_KEEPALIVE_TIME;
+    config->tcp_keepalive_intvl = _DEFAULT_TCP_KEEPALIVE_INTVL;
+    config->tcp_keepalive_probes = _DEFAULT_TCP_KEEPALIVE_PROBES;
 }
 
 
 
-int flom_config_check()
+int flom_config_check(flom_config_t *config)
 {
     enum Exception { INVALID_OPTION
                      , NONE } excp;
@@ -174,7 +176,9 @@ int flom_config_check()
     FLOM_TRACE(("flom_config_check\n"));
     TRY {
         flom_rsrc_type_t frt;
-        
+
+        if (NULL == config)
+            config = &global_config;
         /* check if configuration is for LOCAL and for NETWORK: it's not
            acceptable */
         if (NULL != flom_config_get_socket_name() &&
@@ -193,13 +197,13 @@ int flom_config_check()
             struct passwd *pwd = NULL;
             char *login = NULL;
             /* set UNIX socket name */
-            global_config.socket_name = g_malloc(LOCAL_SOCKET_SIZE);
+            config->socket_name = g_malloc(LOCAL_SOCKET_SIZE);
             pwd = getpwuid(getuid());
             if (NULL == pwd || NULL == pwd->pw_name)
                 login = "nobody";
             else
                 login = pwd->pw_name;
-            snprintf(global_config.socket_name, LOCAL_SOCKET_SIZE,
+            snprintf(config->socket_name, LOCAL_SOCKET_SIZE,
                      "/tmp/flom-%s", login);
         }
         /* check options related to resource type */
@@ -244,7 +248,7 @@ int flom_config_check()
 
 
 
-void flom_config_print()
+void flom_config_print(flom_config_t *config)
 {
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_TRACE,
             FLOM_CONFIG_KEY_DAEMONTRACEFILE,
@@ -313,20 +317,22 @@ void flom_config_print()
 
 
 
-void flom_config_free()
+void flom_config_free(flom_config_t *config)
 {
     FLOM_TRACE(("flom_config_free\n"));
-    if (NULL != global_config.daemon_trace_file) {
-        g_free(global_config.daemon_trace_file);
-        global_config.daemon_trace_file = NULL;
+    if (NULL == config)
+        config = &global_config;
+    if (NULL != config->daemon_trace_file) {
+        g_free(config->daemon_trace_file);
+        config->daemon_trace_file = NULL;
     }
-    if (NULL != global_config.command_trace_file) {
-        g_free(global_config.command_trace_file);
-        global_config.command_trace_file = NULL;
+    if (NULL != config->command_trace_file) {
+        g_free(config->command_trace_file);
+        config->command_trace_file = NULL;
     }
-    if (NULL != global_config.resource_name) {
-        g_free(global_config.resource_name);
-        global_config.resource_name = NULL;
+    if (NULL != config->resource_name) {
+        g_free(config->resource_name);
+        config->resource_name = NULL;
     }
 }
 

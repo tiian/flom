@@ -38,15 +38,15 @@ void static_handle_happy_path(void) {
         exit(1);
     }    
     /* lock acquisition */
-    if (FLOM_RC_OK != (ret_cod = flom_lock(&my_handle, locked_element,
+    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle, locked_element,
                                            sizeof(locked_element)))) {
-        fprintf(stderr, "flom_lock() returned %d, '%s'\n",
+        fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     } 
     /* lock release */
-    if (FLOM_RC_OK != (ret_cod = flom_unlock(&my_handle))) {
-        fprintf(stderr, "flom_unlock() returned %d, '%s'\n",
+    if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(&my_handle))) {
+        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
@@ -70,16 +70,16 @@ void static_handle_missing_init(void) {
 
     /* lock acquisition */
     if (FLOM_RC_API_INVALID_SEQUENCE != (
-            ret_cod = flom_lock(&my_handle, locked_element,
+            ret_cod = flom_handle_lock(&my_handle, locked_element,
                                 sizeof(locked_element)))) {
-        fprintf(stderr, "flom_lock() returned %d, '%s'\n",
+        fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }     
     /* lock release */
     if (FLOM_RC_API_INVALID_SEQUENCE != (
-            ret_cod = flom_unlock(&my_handle))) {
-        fprintf(stderr, "flom_unlock() returned %d, '%s'\n",
+            ret_cod = flom_handle_unlock(&my_handle))) {
+        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
@@ -95,7 +95,7 @@ void static_handle_missing_init(void) {
 
 
 /*
- * Stress test with a static handle, missing flom_lock method
+ * Stress test with a static handle, missing flom_handle_lock method
  */
 void static_handle_missing_lock(void) {
     int ret_cod;
@@ -109,8 +109,8 @@ void static_handle_missing_lock(void) {
     }
     /* lock release */
     if (FLOM_RC_API_INVALID_SEQUENCE != (
-            ret_cod = flom_unlock(&my_handle))) {
-        fprintf(stderr, "flom_unlock() returned %d, '%s'\n",
+            ret_cod = flom_handle_unlock(&my_handle))) {
+        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
@@ -125,7 +125,7 @@ void static_handle_missing_lock(void) {
 
 
 /*
- * Stress test with a static handle, missing flom_unlock method
+ * Stress test with a static handle, missing flom_handle_unlock method
  */
 void static_handle_missing_unlock(void) {
     int ret_cod;
@@ -139,9 +139,9 @@ void static_handle_missing_unlock(void) {
         exit(1);
     }
     /* lock acquisition */
-    if (FLOM_RC_OK != (ret_cod = flom_lock(&my_handle, locked_element,
+    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle, locked_element,
                                            sizeof(locked_element)))) {
-        fprintf(stderr, "flom_lock() returned %d, '%s'\n",
+        fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     } 
@@ -153,8 +153,8 @@ void static_handle_missing_unlock(void) {
         exit(1);
     }
     /* lock release */
-    if (FLOM_RC_OK != (ret_cod = flom_unlock(&my_handle))) {
-        fprintf(stderr, "flom_unlock() returned %d, '%s'\n",
+    if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(&my_handle))) {
+        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
@@ -173,7 +173,7 @@ void static_handle_missing_unlock(void) {
  */
 void dynamic_handle_happy_path(void) {
     int ret_cod;
-    flom_handle_t *my_handle;
+    flom_handle_t *my_handle = NULL;
     char locked_element[100];
 
     /* create a new handle */
@@ -182,18 +182,95 @@ void dynamic_handle_happy_path(void) {
         exit(1);
     }    
     /* lock acquisition */
-    if (FLOM_RC_OK != (ret_cod = flom_lock(my_handle, locked_element,
-                                           sizeof(locked_element)))) {
-        fprintf(stderr, "flom_lock() returned %d, '%s'\n",
+    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle, locked_element,
+                                                  sizeof(locked_element)))) {
+        fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     } 
     /* lock release */
-    if (FLOM_RC_OK != (ret_cod = flom_unlock(my_handle))) {
-        fprintf(stderr, "flom_unlock() returned %d, '%s'\n",
+    if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(my_handle))) {
+        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
+    /* delete the handle */
+    flom_handle_delete(my_handle);
+}
+
+
+
+/*
+ * Stress test with a dynamic handle, missing flom_handle_new method
+ */
+void dynamic_handle_missing_new(void) {
+    int ret_cod;
+    flom_handle_t *my_handle = NULL;
+    char locked_element[100];
+
+    /* lock acquisition */
+    if (FLOM_RC_NULL_OBJECT != (
+            ret_cod = flom_handle_lock(my_handle, locked_element,
+                                       sizeof(locked_element)))) {
+        fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    } 
+    /* lock release */
+    if (FLOM_RC_NULL_OBJECT != (
+            ret_cod = flom_handle_unlock(my_handle))) {
+        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* delete the handle */
+    flom_handle_delete(my_handle);
+}
+
+
+
+/*
+ * Stress test with a dynamic handle, missing flom_handle_lock method
+ */
+void dynamic_handle_missing_lock(void) {
+    int ret_cod;
+    flom_handle_t *my_handle = NULL;
+
+    /* create a new handle */
+    if (NULL == (my_handle = flom_handle_new())) {
+        fprintf(stderr, "flom_handle_init() returned %p\n", my_handle);
+        exit(1);
+    }    
+    /* lock release */
+    if (FLOM_RC_API_INVALID_SEQUENCE != (
+            ret_cod = flom_handle_unlock(my_handle))) {
+        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* delete the handle */
+    flom_handle_delete(my_handle);
+}
+
+
+
+void dynamic_handle_missing_unlock(void) {
+    int ret_cod;
+    flom_handle_t *my_handle = NULL;
+    char locked_element[100];
+
+    /* create a new handle */
+    if (NULL == (my_handle = flom_handle_new())) {
+        fprintf(stderr, "flom_handle_init() returned %p\n", my_handle);
+        exit(1);
+    }    
+    /* lock acquisition */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle, locked_element,
+                                                  sizeof(locked_element)))) {
+        fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    } 
     /* delete the handle */
     flom_handle_delete(my_handle);
 }
@@ -208,6 +285,9 @@ int main(int argc, char *argv[]) {
     static_handle_missing_unlock();
     /* dynamic handle test */
     dynamic_handle_happy_path();
+    dynamic_handle_missing_new();
+    dynamic_handle_missing_lock();
+    dynamic_handle_missing_unlock();
     /* exit */
     return 0;
 }

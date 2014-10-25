@@ -381,31 +381,35 @@ extern "C" {
 
     /**
      * Reset config
+     * @param config OUT configuration object, NULL for global config
      */
-    void flom_config_reset();
+    void flom_config_reset(flom_config_t *config);
     
 
 
     /**
      * Check configuration after config file values and command line option
      * overrides
+     * @param config IN configuration object, NULL for global config
      * @return a reason code
      */
-    int flom_config_check();
+    int flom_config_check(flom_config_t *config);
 
 
     
     /**
      * Print config using "g_print"
+     * @param config IN configuration object, NULL for global config
      */
-    void flom_config_print();
+    void flom_config_print(flom_config_t *config);
 
 
 
     /**
-     * Release all memory allocated by global config object
+     * Release all memory allocated by a config object
+     * @param config IN/OUT configuration object, NULL for global config
      */
-    void flom_config_free();
+    void flom_config_free(flom_config_t *config);
 
 
     

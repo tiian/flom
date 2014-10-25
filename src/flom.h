@@ -16,145 +16,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/*
+ * Use this header file to include the stuff necessary to use libflom library
+ */
+
 #ifndef FLOM_H
 # define FLOM_H
+# include "flom_errors.h"
+# include "flom_handle.h"
+#endif /* FLOM_HANDLE_H */
 
 
-
-#include <glib.h>
-
-
-
-#include "flom_errors.h"
-
-
-
-/**
- * This scalar type is used to represent the state of an handle
- */
-typedef enum flom_handle_state_e {
-    /**
-     * Initial state
-     */
-    FLOM_HANDLE_STATE_INIT = 22,
-    /**
-     * The client is connected to the daemon and the resource is NOT locked
-     */
-    FLOM_HANDLE_STATE_CONNECTED,
-    /**
-     * The client is connected to the daemon and the resource is locked
-     */
-    FLOM_HANDLE_STATE_LOCKED,
-    /**
-     * The client is NOT connected to the daemon
-     */
-    FLOM_HANDLE_STATE_DISCONNECTED,
-    /**
-     * The handle memory was released and the handle itself can NOT be used
-     * without a call to @ref flom_handle_init method
-     */
-    FLOM_HANDLE_STATE_CLEANED
-} flom_handle_state_t;
-
-
-
-/**
- * This object is used to save all the necessary context to interact with
- * libflom library.
- * Some fields use "void *" type to avoid useless internal details exposure
- * (flom methods proxies the correct types)
- */
-typedef struct flom_handle_s {
-    /**
-     * Handle state
-     */
-    flom_handle_state_t   state;
-    /**
-     * Connection data
-     */
-    gpointer              conn_data;
-} flom_handle_t;
-
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 
 /* @@@
- * create API case tests, stressing the protocol sequence (handle->state)
- * for dynamic handles
- *
- * move configuration from "global" to "local"
+ * move configuration from "global" to "local":
+ * introducing a parameter in every flom_config method, then duplicate config
+ * for client library
  */
-    
-    /**
-     * Initialize an object handle; this function MUST be called before the
-     * first usage of a new handle or after an handle has been cleaned up with
-     * @ref flom_handle_clean
-     * @param handle IN/OUT the object to initialize
-     * @return a reason code
-     */
-    int flom_handle_init(flom_handle_t *handle);
-    
-
-
-    /**
-     * Allocate and initialize (@ref flom_handle_init) a new object handle
-     * @return a new object handle or NULL if any error happens
-     */
-    flom_handle_t *flom_handle_new(void);
-
-
-    
-    /**
-     * Clean an object handle; this function MUST be called before the out of
-     * scope of an handle; if this method is not called a memory leak will
-     * be generated. For every object initialized with @ref flom_handle_init
-     * there must be a call to this method.
-     * @param handle IN/OUT the object to initialize
-     * @return a reason code
-     */
-    int flom_handle_clean(flom_handle_t *handle);
-    
-
-
-    /**
-     * Clean (@ref flom_handle_clean) and deallocate an object handle
-     * @param handle IN the object handle to delete
-     */
-    void flom_handle_delete(flom_handle_t *handle);
-
-
-    
-    /**
-     * Lock a resource
-     * @param handle IN/OUT library handle
-     * @param element OUT contains the name of the locked element if the
-     *        resource is a resource set; set it to NULL if you are not
-     *        interested in it
-     * @param element_size IN maximum number of characters (null terminator
-     *        included) that can be used by the function to store the name
-     *        of the locked element
-     * @return a reason code
-     */
-    int flom_lock(flom_handle_t *handle, char *element, size_t element_size);
-
-
-
-    /**
-     * Unlock a resource
-     * @param handle IN/OUT library handle
-     * @return a reason code
-     */
-    int flom_unlock(flom_handle_t *handle);
-
-
-    
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-
-
-#endif /* FLOM_H */

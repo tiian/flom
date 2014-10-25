@@ -142,7 +142,7 @@ int main (int argc, char *argv[])
     }
 
     /* reset global configuration */
-    flom_config_reset();
+    flom_config_reset(NULL);
     /* initialize configuration with standard system, standard user and
        user customized config files */
     if (FLOM_RC_OK != (ret_cod = flom_config_init(config_file))) {
@@ -254,10 +254,10 @@ int main (int argc, char *argv[])
 
     /* print configuration */
     if (flom_config_get_verbose())
-        flom_config_print();
+        flom_config_print(NULL);
 
     /* check configuration */
-    if (FLOM_RC_OK != (ret_cod = flom_config_check())) {
+    if (FLOM_RC_OK != (ret_cod = flom_config_check(NULL))) {
         g_warning("Configuration is not valid, cannot go on!\n");
         exit(FLOM_ES_GENERIC_ERROR);        
     }
@@ -366,7 +366,7 @@ int main (int argc, char *argv[])
     command_argv = NULL;
 
     /* release config data */
-    flom_config_free();
+    flom_config_free(NULL);
     /* release regular expression data */
     global_res_name_preg_free();
     

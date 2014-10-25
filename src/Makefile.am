@@ -15,7 +15,7 @@ flom_errors.h: flom_errors.h.in
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
 	$< >$@
 
-dist_include_HEADERS = flom.h
+dist_include_HEADERS = flom.h flom_handle.h
 nodist_include_HEADERS = flom_errors.h
 noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_daemon_mngmnt.h \
@@ -25,9 +25,9 @@ noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_resource_simple.h flom_rsrc.h \
 	flom_syslog.h flom_trace.h
 
-libflom_la_SOURCES = flom.c flom_client.c flom_config.c flom_conns.c \
+libflom_la_SOURCES = flom_client.c flom_config.c flom_conns.c \
 	flom_daemon.c flom_daemon_mngmnt.c flom_errors.c flom_locker.c \
-	flom_msg.c \
+	flom_msg.c flom_handle.c \
 	flom_resource_hier.c flom_resource_numeric.c flom_resource_set.c \
 	flom_resource_simple.c flom_rsrc.c flom_trace.c 
 
