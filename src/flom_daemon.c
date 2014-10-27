@@ -172,7 +172,7 @@ int flom_daemon(int family)
                 if (i != pipefd[0] && i != pipefd[1])
                     close(i);
 
-            FLOM_TRACE_REOPEN(flom_config_get_daemon_trace_file());
+            FLOM_TRACE_REOPEN(flom_config_get_daemon_trace_file(NULL));
             FLOM_TRACE(("flom_daemon: now daemonized!\n"));
 
             /* activate service */
@@ -329,11 +329,11 @@ int flom_listen_local(flom_conns_t *conns)
             
         if (-1 == (fd = socket(flom_conns_get_domain(conns), SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
-        if (-1 == unlink(flom_config_get_socket_name()) && ENOENT != errno)
+        if (-1 == unlink(flom_config_get_socket_name(NULL)) && ENOENT != errno)
             THROW(UNLINK_ERROR);
         memset(&servaddr, 0, sizeof(servaddr));
         servaddr.sun_family = flom_conns_get_domain(conns);
-        strcpy(servaddr.sun_path, flom_config_get_socket_name());
+        strcpy(servaddr.sun_path, flom_config_get_socket_name(NULL));
         if (-1 == bind(fd, (struct sockaddr *) &servaddr, sizeof(servaddr)))
             THROW(BIND_ERROR);
         if (-1 == listen(fd, LISTEN_BACKLOG))
@@ -342,7 +342,8 @@ int flom_listen_local(flom_conns_t *conns)
                                conns, fd, SOCK_STREAM, sizeof(servaddr),
                                (struct sockaddr *)&servaddr, TRUE)))
             THROW(CONNS_ADD_ERROR);
-        syslog(LOG_NOTICE, FLOM_SYSLOG_FLM000I, flom_config_get_socket_name());
+        syslog(LOG_NOTICE, FLOM_SYSLOG_FLM000I,
+               flom_config_get_socket_name(NULL));
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -759,7 +760,7 @@ int flom_listen_clean(flom_conns_t *conns)
         int domain = flom_conns_get_domain(conns);
         flom_conns_free(conns);
         if (AF_LOCAL == domain &&
-            -1 == unlink(flom_config_get_socket_name())) {
+            -1 == unlink(flom_config_get_socket_name(NULL))) {
             FLOM_TRACE(("flom_listen_clean: unlink errno=%d\n", errno));
         }
         
@@ -810,7 +811,7 @@ int flom_accept_loop(flom_conns_t *conns)
             guint i, n;
             struct pollfd *fds;
             guint number_of_lockers;
-            int poll_timeout = flom_config_get_lifespan();
+            int poll_timeout = flom_config_get_lifespan(NULL);
 
             /* the completion needs three polling cycles, so timeout must
                be a third of estimated lifespan */

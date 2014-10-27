@@ -77,7 +77,7 @@ int flom_client_connect(struct flom_conn_data_s *cd, int start_daemon)
         memset(cd, 0, sizeof(struct flom_conn_data_s));
 
         /* choose and instantiate connection type */
-        if (NULL != flom_config_get_socket_name()) {
+        if (NULL != flom_config_get_socket_name(NULL)) {
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_local(
                                    cd, start_daemon)))
                 THROW(CLIENT_CONNECT_LOCAL_ERROR);
@@ -92,7 +92,7 @@ int flom_client_connect(struct flom_conn_data_s *cd, int start_daemon)
                     break;
                 case FLOM_RC_CONNECTION_REFUSED:
                     if (start_daemon) {
-                        if (0 != flom_config_get_lifespan()) {
+                        if (0 != flom_config_get_lifespan(NULL)) {
                             FLOM_TRACE(("flom_client_connect: connection "
                                         "failed, activating a new daemon\n"));
                             /* try to start a daemon on this node */
@@ -176,7 +176,7 @@ int flom_client_connect_local(struct flom_conn_data_s *cd,
     FLOM_TRACE(("flom_client_connect_local\n"));
     TRY {
         FLOM_TRACE(("flom_client_connect_local: connecting to socket '%s'\n",
-                    flom_config_get_socket_name()));
+                    flom_config_get_socket_name(NULL)));
 
         if (-1 == (cd->fd = socket(AF_LOCAL, SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
@@ -188,7 +188,7 @@ int flom_client_connect_local(struct flom_conn_data_s *cd,
                           cd->addr_len)) {
             if (ENOENT == errno || ECONNREFUSED == errno) {
                 if (start_daemon) {
-                    if (0 != flom_config_get_lifespan()) {
+                    if (0 != flom_config_get_lifespan(NULL)) {
                         FLOM_TRACE(("flom_client_connect_local: connection "
                                     "failed, activating a new daemon\n"));
                         /* daemon is not active, starting it... */
@@ -294,7 +294,7 @@ int flom_client_connect_tcp(struct flom_conn_data_s *cd, int start_daemon)
             p = flom_client_connect_tcp_try(result, &fd);
             if (NULL == p) {
                 if (start_daemon) {
-                    if (0 != flom_config_get_lifespan()) {
+                    if (0 != flom_config_get_lifespan(NULL)) {
                         FLOM_TRACE(("flom_client_connect_tcp: connection "
                                     "failed, activating a new daemon\n"));
                         /* daemon is not active, starting it... */
@@ -554,7 +554,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd, int start_daemon)
             /* send discover message */
             FLOM_TRACE(("flom_client_discover_udp: sending discovery "
                         "message number %d...\n", i));
-            if (flom_config_get_verbose())
+            if (flom_config_get_verbose(NULL))
                 g_print("sending UDP multicast datagram to %s/%u ('%s')\n",
                         flom_config_get_multicast_address(),
                         flom_config_get_multicast_port(), out_buffer);
@@ -574,7 +574,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd, int start_daemon)
                 if (EAGAIN == errno || EWOULDBLOCK == errno) {
                     FLOM_TRACE(("flom_client_discover_udp: no answer from "
                                 "UDP/IP multicast discovery\n"));
-                    if (flom_config_get_verbose())
+                    if (flom_config_get_verbose(NULL))
                         g_print("no reply from %s/%u\n",
                         flom_config_get_multicast_address(),
                         flom_config_get_multicast_port());
@@ -582,7 +582,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd, int start_daemon)
                     THROW(RECVFROM_ERROR);
             } else {
                 found = TRUE;
-                if (flom_config_get_verbose())
+                if (flom_config_get_verbose(NULL))
                     g_print("reply from %s/%u is '%s'\n",
                             flom_config_get_multicast_address(),
                             flom_config_get_multicast_port(), in_buffer);

@@ -131,7 +131,7 @@ int flom_daemon_mngmnt_shutdown(flom_conns_t *conns, guint id)
             FLOM_TRACE(("flom_daemon_mngmnt_shutdown: quiesce shutdown in "
                         "progress...\n"));
             syslog(LOG_NOTICE, FLOM_SYSLOG_FLM008N);
-            flom_config_set_lifespan(FLOM_SHUTDOWN_QUIESCE_GRACE_TIME);
+            flom_config_set_lifespan(NULL, FLOM_SHUTDOWN_QUIESCE_GRACE_TIME);
         }
         
         THROW(NONE);

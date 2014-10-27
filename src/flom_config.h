@@ -416,120 +416,148 @@ extern "C" {
     /**
      * Initialize configuration (global) object retrieving data from
      * configuration files
+     * @param config IN/OUT configuration object, NULL for global config
      * @param custom_config_filename IN filename of user configuration file
      *        (NULL means there's no a custom configuration file)
      * @return a reason code
      */
-    int flom_config_init(const char *custom_config_filename);
+    int flom_config_init(flom_config_t *config,
+                         const char *custom_config_filename);
 
 
 
     /**
      * Load a configuration file, parse it and initialize global configuration
      * as described in the config file
+     * @param config IN/OUT configuration object, NULL for global config
      * @param config_file_name IN configuration file to open and parse
      * @return a reason code
      */
-    int flom_config_init_load(const char *config_file_name);
+    int flom_config_init_load(flom_config_t *config,
+                              const char *config_file_name);
 
 
     
     /**
      * Set daemon_socket_name
+     * @param config IN/OUT configuration object, NULL for global config
      * @param socket_name IN set the new value for socket_name properties
      * @return a reason code
      */
-    int flom_config_set_socket_name(gchar *socket_name);
+    int flom_config_set_socket_name(flom_config_t *config,
+                                    gchar *socket_name);
 
 
 
     /**
      * Retrieve the socket_name specified for daemon process
+     * @param config IN/OUT configuration object, NULL for global config
      * @return socket_name
      */
-    static inline const gchar *flom_config_get_socket_name(void) {
-        return global_config.socket_name; }
+    static inline const gchar *flom_config_get_socket_name(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.socket_name : config->socket_name;
+    }
 
 
     
     /**
      * Set trace_file in config object
+     * @param config IN/OUT configuration object, NULL for global config
      * @param daemon_trace_file IN set the new value for trace_file properties
      */
-    static inline void flom_config_set_daemon_trace_file(
-        gchar *daemon_trace_file) {
-        if (NULL != global_config.daemon_trace_file)
-            g_free(global_config.daemon_trace_file);
-        global_config.daemon_trace_file = daemon_trace_file; }
+    void flom_config_set_daemon_trace_file(
+        flom_config_t *config, gchar *daemon_trace_file);
 
 
 
     /**
      * Retrieve the trace file specified for daemon process
+     * @param config IN/OUT configuration object, NULL for global config
      * @return trace file name
      */
-    static inline const gchar *flom_config_get_daemon_trace_file(void) {
-        return global_config.daemon_trace_file; }
+    static inline const gchar *flom_config_get_daemon_trace_file(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.daemon_trace_file : config->daemon_trace_file;
+    }
 
 
     
     /**
      * Set trace_file in config object
+     * @param config IN/OUT configuration object, NULL for global config
      * @param command_trace_file IN set the new value for trace_file properties
      */
-    static inline void flom_config_set_command_trace_file(
-        gchar *command_trace_file) {
-        if (NULL != global_config.command_trace_file)
-            g_free(global_config.command_trace_file);
-        global_config.command_trace_file = command_trace_file; }
+    void flom_config_set_command_trace_file(
+        flom_config_t *config, gchar *command_trace_file);
 
 
 
     /**
      * Retrieve the trace file specified for command process
+     * @param config IN/OUT configuration object, NULL for global config
      * @return trace file name
      */
-    static inline const gchar *flom_config_get_command_trace_file(void) {
-        return global_config.command_trace_file; }
+    static inline const gchar *flom_config_get_command_trace_file(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.command_trace_file : config->command_trace_file;
+    }
 
 
     
     /**
      * Set "verbose" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @param value IN new (boolean) value
      */
-    static inline void flom_config_set_verbose(gint value) {
-        global_config.verbose = value;
+    static inline void flom_config_set_verbose(flom_config_t *config,
+                                               gint value) {
+        if (NULL == config)
+            global_config.verbose = value;
+        else
+            config->verbose = value;
     }
 
 
 
     /**
      * Get "verbose" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @return a boolean value
      */
-    static inline gint flom_config_get_verbose(void) {
-        return global_config.verbose;
+    static inline gint flom_config_get_verbose(flom_config_t *config) {
+        return NULL == config ?
+            global_config.verbose : config->verbose;
     }
 
 
     
     /**
      * Set "daemon_lifespan" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @param timeout IN milliseconds
      */
-    static inline void flom_config_set_lifespan(gint timeout) {
-        global_config.daemon_lifespan = timeout;
+    static inline void flom_config_set_lifespan(
+        flom_config_t *config, gint timeout) {
+        if (NULL == config)
+            global_config.daemon_lifespan = timeout;
+        else
+            config->daemon_lifespan = timeout;
     }
 
 
 
     /**
      * Get "daemon_lifespan" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @return current timeout in milliseconds
      */
-    static inline gint flom_config_get_lifespan(void) {
-        return global_config.daemon_lifespan;
+    static inline gint flom_config_get_lifespan(flom_config_t *config) {
+        return NULL == config ?
+            global_config.daemon_lifespan : config->daemon_lifespan;
     }
 
 

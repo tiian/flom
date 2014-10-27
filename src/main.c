@@ -145,17 +145,17 @@ int main (int argc, char *argv[])
     flom_config_reset(NULL);
     /* initialize configuration with standard system, standard user and
        user customized config files */
-    if (FLOM_RC_OK != (ret_cod = flom_config_init(config_file))) {
+    if (FLOM_RC_OK != (ret_cod = flom_config_init(NULL, config_file))) {
         g_print("flom_config_init: ret_cod=%d\n", ret_cod);
         exit(FLOM_ES_GENERIC_ERROR);
     }
     /* overrides configuration with command line passed arguments */
     if (NULL != daemon_trace_file)
-        flom_config_set_daemon_trace_file(daemon_trace_file);
+        flom_config_set_daemon_trace_file(NULL, daemon_trace_file);
     if (NULL != command_trace_file)
-        flom_config_set_command_trace_file(command_trace_file);
+        flom_config_set_command_trace_file(NULL, command_trace_file);
     if (verbose)
-        flom_config_set_verbose(verbose);
+        flom_config_set_verbose(NULL, verbose);
     if (NULL != resource_name)
         if (FLOM_RC_OK != (ret_cod = flom_config_set_resource_name(
                                resource_name))) {
@@ -208,7 +208,7 @@ int main (int argc, char *argv[])
     flom_config_set_resource_idle_lifespan(resource_idle_lifespan);
     if (NULL != socket_name) {
         if (FLOM_RC_OK != (ret_cod = flom_config_set_socket_name(
-                               socket_name))) {
+                               NULL, socket_name))) {
             g_print("socket-name: '%s' is an invalid value\n", socket_name);
             g_print("flom_client_connect: ret_cod=%d (%s)\n",
                     ret_cod, flom_strerror(ret_cod));
@@ -216,7 +216,7 @@ int main (int argc, char *argv[])
         }
     }
     if (_DEFAULT_DAEMON_LIFESPAN != daemon_lifespan) {
-        flom_config_set_lifespan(daemon_lifespan);
+        flom_config_set_lifespan(NULL, daemon_lifespan);
     }
     if (NULL != unicast_address) {
         flom_config_set_unicast_address(unicast_address);
@@ -248,12 +248,12 @@ int main (int argc, char *argv[])
     if (_DEFAULT_TCP_KEEPALIVE_PROBES != tcp_keepalive_probes) {
         flom_config_set_tcp_keepalive_probes(tcp_keepalive_probes);
     }
-    if (NULL != flom_config_get_command_trace_file())
+    if (NULL != flom_config_get_command_trace_file(NULL))
         /* change trace destination if necessary */
-        FLOM_TRACE_REOPEN(flom_config_get_command_trace_file());
+        FLOM_TRACE_REOPEN(flom_config_get_command_trace_file(NULL));
 
     /* print configuration */
-    if (flom_config_get_verbose())
+    if (flom_config_get_verbose(NULL))
         flom_config_print(NULL);
 
     /* check configuration */
@@ -288,7 +288,7 @@ int main (int argc, char *argv[])
                                locked_element, sizeof(locked_element));
     switch (ret_cod) {
         case FLOM_RC_OK: /* OK, go on */
-            if (flom_config_get_verbose() && '\0' != locked_element[0])
+            if (flom_config_get_verbose(NULL) && '\0' != locked_element[0])
                 g_print("Locked element is '%s'\n", locked_element);
             break;
         case FLOM_RC_LOCK_BUSY: /* busy */

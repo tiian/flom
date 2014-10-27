@@ -403,11 +403,11 @@ int flom_init_check(void)
             flom_config_reset(NULL);
             /* initialize configuration with standard system, standard
                user and user customized config files */
-            if (FLOM_RC_OK != (ret_cod = flom_config_init(NULL)))
+            if (FLOM_RC_OK != (ret_cod = flom_config_init(NULL, NULL)))
                 break;
-            if (NULL != flom_config_get_command_trace_file())
+            if (NULL != flom_config_get_command_trace_file(NULL))
                 /* change trace destination if necessary */
-                FLOM_TRACE_REOPEN(flom_config_get_command_trace_file());
+                FLOM_TRACE_REOPEN(flom_config_get_command_trace_file(NULL));
             /* check configuration */
             if (FLOM_RC_OK != (ret_cod = flom_config_check(NULL)))
                 break;

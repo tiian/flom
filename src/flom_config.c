@@ -181,7 +181,7 @@ int flom_config_check(flom_config_t *config)
             config = &global_config;
         /* check if configuration is for LOCAL and for NETWORK: it's not
            acceptable */
-        if (NULL != flom_config_get_socket_name() &&
+        if (NULL != flom_config_get_socket_name(NULL) &&
             (NULL != flom_config_get_unicast_address() ||
              NULL != flom_config_get_multicast_address())) {
             g_print("ERROR: flom can not be configured for local "
@@ -191,7 +191,7 @@ int flom_config_check(flom_config_t *config)
         }
         /* if neither local nor network communication were configured,
            use default local */
-        if (NULL == flom_config_get_socket_name() &&
+        if (NULL == flom_config_get_socket_name(NULL) &&
             NULL == flom_config_get_unicast_address() &&
             NULL == flom_config_get_multicast_address()) {
             struct passwd *pwd = NULL;
@@ -211,7 +211,7 @@ int flom_config_check(flom_config_t *config)
         /* check lock mode */
         if (FLOM_LOCK_MODE_EX != flom_config_get_lock_mode() &&
             FLOM_RSRC_TYPE_SIMPLE != frt && FLOM_RSRC_TYPE_HIER != frt) {
-            if (flom_config_get_verbose())
+            if (flom_config_get_verbose(config))
                 g_warning("This resource type (%d) support only exclusive "
                           "lock mode; specified value (%d) will be ignored\n",
                           frt, flom_config_get_lock_mode());
@@ -220,7 +220,7 @@ int flom_config_check(flom_config_t *config)
         /* check quantity */
         if (1 != flom_config_get_resource_quantity() &&
             FLOM_RSRC_TYPE_NUMERIC != frt) {
-            if (flom_config_get_verbose())
+            if (flom_config_get_verbose(config))
                 g_warning("This resource type (%d) does not support quantity "
                           "lock option; specified value (%d) will be "
                           "ignored\n",
@@ -250,16 +250,21 @@ int flom_config_check(flom_config_t *config)
 
 void flom_config_print(flom_config_t *config)
 {
+    /* default config */
+    if (NULL == config)
+        config = &global_config;
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_TRACE,
             FLOM_CONFIG_KEY_DAEMONTRACEFILE,
-            NULL == flom_config_get_daemon_trace_file() ? FLOM_EMPTY_STRING :
-            flom_config_get_daemon_trace_file());
+            NULL == flom_config_get_daemon_trace_file(config) ?
+            FLOM_EMPTY_STRING :
+            flom_config_get_daemon_trace_file(config));
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_TRACE,
             FLOM_CONFIG_KEY_COMMANDTRACEFILE,
-            NULL == flom_config_get_command_trace_file() ? FLOM_EMPTY_STRING :
-            flom_config_get_command_trace_file());
+            NULL == flom_config_get_command_trace_file(config) ?
+            FLOM_EMPTY_STRING :
+            flom_config_get_command_trace_file(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_TRACE,
-            FLOM_CONFIG_KEY_VERBOSE, flom_config_get_verbose());
+            FLOM_CONFIG_KEY_VERBOSE, flom_config_get_verbose(config));
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_RESOURCE,
             FLOM_CONFIG_KEY_NAME,
             NULL == flom_config_get_resource_name() ? FLOM_EMPTY_STRING :
@@ -279,10 +284,10 @@ void flom_config_print(flom_config_t *config)
             flom_config_get_resource_idle_lifespan());
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_SOCKET_NAME,
-            NULL == flom_config_get_socket_name() ? FLOM_EMPTY_STRING :
-            flom_config_get_socket_name());
+            NULL == flom_config_get_socket_name(config) ? FLOM_EMPTY_STRING :
+            flom_config_get_socket_name(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
-            FLOM_CONFIG_KEY_LIFESPAN, flom_config_get_lifespan());
+            FLOM_CONFIG_KEY_LIFESPAN, flom_config_get_lifespan(config));
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_UNICAST_ADDRESS,
             NULL == flom_config_get_unicast_address() ? FLOM_EMPTY_STRING :
@@ -338,7 +343,8 @@ void flom_config_free(flom_config_t *config)
 
 
 
-int flom_config_init(const char *custom_config_filename)
+int flom_config_init(flom_config_t *config,
+                     const char *custom_config_filename)
 {
     enum Exception { CONFIG_INIT_LOAD_ERROR1
                      , CONFIG_INIT_LOAD_ERROR2
@@ -356,13 +362,16 @@ int flom_config_init(const char *custom_config_filename)
     FLOM_TRACE(("flom_config_init\n"));
     TRY {
         gsize ucf_size;
-        
+
+        /* default config object */
+        if (NULL == config)
+            config = &global_config;
         /* building system configuration filename */
         strcpy(system_config_filename, FLOM_INSTALL_SYSCONFDIR);
         strcat(system_config_filename, FLOM_DIR_FILE_SEPARATOR);
         strcat(system_config_filename, FLOM_SYSTEM_CONFIG_FILENAME);
         assert(sizeof(system_config_filename)>strlen(system_config_filename));
-        ret_cod = flom_config_init_load(system_config_filename);
+        ret_cod = flom_config_init_load(config, system_config_filename);
         if (FLOM_RC_OK != ret_cod &&
             FLOM_RC_G_KEY_FILE_LOAD_FROM_FILE_ERROR != ret_cod)
             THROW(CONFIG_INIT_LOAD_ERROR1);
@@ -379,7 +388,7 @@ int flom_config_init(const char *custom_config_filename)
                 FLOM_DIR_FILE_SEPARATOR),
             FLOM_USER_CONFIG_FILENAME);
         assert(ucf_size > strlen(user_config_filename));
-        ret_cod = flom_config_init_load(user_config_filename);
+        ret_cod = flom_config_init_load(config, user_config_filename);
         if (FLOM_RC_OK != ret_cod &&
             FLOM_RC_G_KEY_FILE_LOAD_FROM_FILE_ERROR != ret_cod)
             THROW(CONFIG_INIT_LOAD_ERROR2);
@@ -387,7 +396,7 @@ int flom_config_init(const char *custom_config_filename)
         user_config_filename = NULL;
         /* using custom config filename */
         if (NULL != custom_config_filename) {
-            ret_cod = flom_config_init_load(custom_config_filename);
+            ret_cod = flom_config_init_load(config, custom_config_filename);
             if (FLOM_RC_G_KEY_FILE_LOAD_FROM_FILE_ERROR == ret_cod)
                 g_print("ERROR: error while loading file '%s'\n",
                         custom_config_filename);
@@ -417,7 +426,8 @@ int flom_config_init(const char *custom_config_filename)
 
 
 
-int flom_config_init_load(const char *config_file_name)
+int flom_config_init_load(flom_config_t *config,
+                          const char *config_file_name)
 {
     enum Exception { G_KEY_FILE_NEW_ERROR
                      , G_KEY_FILE_LOAD_FROM_FILE_ERROR
@@ -450,6 +460,9 @@ int flom_config_init_load(const char *config_file_name)
     
     FLOM_TRACE(("flom_config_init_load\n"));
     TRY {
+        /* default config object */
+        if (NULL == config)
+            config = &global_config;
         /* create g_key_file object */
         if (NULL == (gkf = g_key_file_new()))
             THROW(G_KEY_FILE_NEW_ERROR);
@@ -483,7 +496,7 @@ int flom_config_init_load(const char *config_file_name)
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_TRACE,
                         FLOM_CONFIG_KEY_DAEMONTRACEFILE, value));
-            flom_config_set_daemon_trace_file(value);
+            flom_config_set_daemon_trace_file(config, value);
             value = NULL;
         }
         /* pick-up command trace configuration */
@@ -502,7 +515,7 @@ int flom_config_init_load(const char *config_file_name)
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_TRACE,
                         FLOM_CONFIG_KEY_COMMANDTRACEFILE, value));
-            flom_config_set_command_trace_file(value);
+            flom_config_set_command_trace_file(config, value);
             value = NULL;
         }
         /* pick-up verbose mode from configuration */
@@ -528,7 +541,7 @@ int flom_config_init_load(const char *config_file_name)
                 print_file_name = TRUE;
                 throw_error = TRUE;
             } else {
-                flom_config_set_verbose(fbv);
+                flom_config_set_verbose(config, fbv);
             }
             g_free(value);
             value = NULL;
@@ -734,7 +747,8 @@ int flom_config_init_load(const char *config_file_name)
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_DAEMON,
                         FLOM_CONFIG_KEY_SOCKET_NAME, value));
-            if (FLOM_RC_OK != (ret_cod = flom_config_set_socket_name(value))) {
+            if (FLOM_RC_OK != (ret_cod = flom_config_set_socket_name(
+                                   config, value))) {
                 print_file_name = TRUE;
                 THROW(CONFIG_SET_SOCKET_NAME_ERROR);
             } else
@@ -762,7 +776,7 @@ int flom_config_init_load(const char *config_file_name)
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_DAEMON,
                         FLOM_CONFIG_KEY_LIFESPAN, ivalue));
-            flom_config_set_lifespan(ivalue);
+            flom_config_set_lifespan(config, ivalue);
         }
         /* pick-up unicast address configuration */
         if (NULL == (value = g_key_file_get_string(
@@ -1052,14 +1066,46 @@ int flom_config_init_load(const char *config_file_name)
 
 
 
-int flom_config_set_socket_name(gchar *socket_name) {
+int flom_config_set_socket_name(flom_config_t *config,
+                                gchar *socket_name) {
     FLOM_TRACE(("flom_config_set_socket_name(%s)\n", socket_name));
+    /* default config object */
+    if (NULL == config)
+        config = &global_config;
     if (LOCAL_SOCKET_SIZE <= strlen(socket_name))
         return FLOM_RC_BUFFER_OVERFLOW;
-    if (NULL != global_config.socket_name)
-        g_free(global_config.socket_name);
-    global_config.socket_name = socket_name;
+    if (NULL != config->socket_name)
+        g_free(config->socket_name);
+    config->socket_name = socket_name;
     return FLOM_RC_OK;
+}
+
+
+
+void flom_config_set_daemon_trace_file(
+    flom_config_t *config, gchar *daemon_trace_file)
+{
+    FLOM_TRACE(("flom_config_set_daemon_trace_file(%s)\n", daemon_trace_file));
+    /* default config object */
+    if (NULL == config)
+        config = &global_config;
+    if (NULL != config->daemon_trace_file)
+        g_free(config->daemon_trace_file);
+    config->daemon_trace_file = daemon_trace_file;
+}
+
+
+
+void flom_config_set_command_trace_file(
+    flom_config_t *config, gchar *command_trace_file) {
+    FLOM_TRACE(("flom_config_set_command_trace_file(%s)\n",
+                command_trace_file));
+    /* default config object */
+    if (NULL == config)
+        config = &global_config;
+    if (NULL != config->command_trace_file)
+        g_free(config->command_trace_file);
+    config->command_trace_file = command_trace_file;
 }
 
 
