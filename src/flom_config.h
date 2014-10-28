@@ -513,8 +513,8 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param value IN new (boolean) value
      */
-    static inline void flom_config_set_verbose(flom_config_t *config,
-                                               gint value) {
+    static inline void flom_config_set_verbose(
+        flom_config_t *config, gint value) {
         if (NULL == config)
             global_config.verbose = value;
         else
@@ -564,162 +564,233 @@ extern "C" {
     
     /**
      * Set resource_name in config object
+     * @param config IN/OUT configuration object, NULL for global config
      * @param resource_name IN set the new value for resource_name properties
      * @return a reason code
      */
-    int flom_config_set_resource_name(gchar *resource_name);
+    int flom_config_set_resource_name(flom_config_t *config,
+                                      gchar *resource_name);
 
 
 
     /**
      * Retrieve the trace file specified for command process
+     * @param config IN/OUT configuration object, NULL for global config
      * @return trace file name
      */
-    static inline const gchar *flom_config_get_resource_name(void) {
-        return global_config.resource_name; }
+    static inline const gchar *flom_config_get_resource_name(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.resource_name : config->resource_name;
+    }
 
 
 
     /**
      * Set "resource_wait" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @param value IN new (boolean) value
      */
-    static inline void flom_config_set_resource_wait(int value) {
-        global_config.resource_wait = value;
+    static inline void flom_config_set_resource_wait(
+        flom_config_t *config, int value) {
+        if (NULL == config)
+            global_config.resource_wait = value;
+        else
+            config->resource_wait = value;
     }
 
 
 
     /**
      * Get "resource_wait" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @return a boolean value
      */
-    static inline int flom_config_get_resource_wait(void) {
-        return global_config.resource_wait;
+    static inline int flom_config_get_resource_wait(flom_config_t *config) {
+        return NULL == config ?
+            global_config.resource_wait : config->resource_wait;
     }
 
 
     
     /**
      * Set "resource_create" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @param value IN new (boolean) value
      */
-    static inline void flom_config_set_resource_create(int value) {
-        global_config.resource_create = value;
+    static inline void flom_config_set_resource_create(
+        flom_config_t *config, int value) {
+        if (NULL == config)
+            global_config.resource_create = value;
+        else
+            config->resource_create = value;
     }
 
 
 
     /**
      * Get "resource_create" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @return a boolean value
      */
-    static inline int flom_config_get_resource_create(void) {
-        return global_config.resource_create;
+    static inline int flom_config_get_resource_create(flom_config_t *config) {
+        return NULL == config ?
+            global_config.resource_create : config->resource_create;
     }
 
 
     
     /**
      * Set "resource_timeout" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @param timeout IN milliseconds
      */
-    static inline void flom_config_set_resource_timeout(gint timeout) {
+    static inline void flom_config_set_resource_timeout(
+        flom_config_t *config, gint timeout) {
         if (0 > timeout) timeout = -timeout;
-        global_config.resource_timeout = timeout;
+        if (NULL == config)
+            global_config.resource_timeout = timeout;
+        else
+            config->resource_timeout = timeout;
     }
 
 
 
     /**
      * Get "resource_timeout" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @return current timeout in milliseconds
      */
-    static inline gint flom_config_get_resource_timeout(void) {
-        return global_config.resource_timeout;
+    static inline gint flom_config_get_resource_timeout(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.resource_timeout : config->resource_timeout;
     }
 
 
     
     /**
      * Set "resource_quantity" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @param value IN number of resource to lock
      */
-    static inline void flom_config_set_resource_quantity(gint value) {
+    static inline void flom_config_set_resource_quantity(
+        flom_config_t *config, gint value) {
         if (0 > value) value = -value;
-        if (0 != value) global_config.resource_quantity = value;
+        if (0 != value) {
+            if (NULL == config)
+                global_config.resource_quantity = value;
+            else
+                config->resource_quantity = value;
+        }
     }
 
 
 
     /**
      * Get "resource_quantity" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @return current quantity
      */
-    static inline gint flom_config_get_resource_quantity(void) {
-        return global_config.resource_quantity;
+    static inline gint flom_config_get_resource_quantity(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.resource_quantity : config->resource_quantity;
     }
 
 
     
     /**
      * Set "lock_mode" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @param lock_mode IN lock mode
      */
-    static inline void flom_config_set_lock_mode(flom_lock_mode_t lock_mode) {
-        global_config.lock_mode = lock_mode;
+    static inline void flom_config_set_lock_mode(
+        flom_config_t *config, flom_lock_mode_t lock_mode) {
+        if (NULL == config)
+            global_config.lock_mode = lock_mode;
+        else
+            config->lock_mode = lock_mode;
     }
 
 
 
     /**
      * Get "lock_mode" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @return current lock mode
      */
-    static inline flom_lock_mode_t flom_config_get_lock_mode(void) {
-        return global_config.lock_mode;
+    static inline flom_lock_mode_t flom_config_get_lock_mode(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.lock_mode : config->lock_mode;
     }
 
 
     
     /**
      * Set "resource_idle_lifespan" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @param value IN number of resource to lock
      */
-    static inline void flom_config_set_resource_idle_lifespan(gint value) {
+    static inline void flom_config_set_resource_idle_lifespan(
+        flom_config_t *config, gint value) {
         if (0 > value) value = -value;
-        if (0 != value) global_config.resource_idle_lifespan = value;
+        if (0 != value) {
+            if (NULL == config)
+                global_config.resource_idle_lifespan = value;
+            else
+                config->resource_idle_lifespan = value;
+        }
     }
 
 
 
     /**
      * Get "resource_idle_lifespan" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @return current quantity
      */
-    static inline gint flom_config_get_resource_idle_lifespan(void) {
-        return global_config.resource_idle_lifespan;
+    static inline gint flom_config_get_resource_idle_lifespan(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.resource_idle_lifespan :
+            config->resource_idle_lifespan;
     }
 
 
     
     /**
      * Set unicast_address in config object
+     * @param config IN/OUT configuration object, NULL for global config
      * @param address IN set the new value for unicast_address property
      */
-    static inline void flom_config_set_unicast_address(gchar *address) {
-        if (NULL != global_config.unicast_address)
-            g_free(global_config.unicast_address);
-        global_config.unicast_address = address; }
+    static inline void flom_config_set_unicast_address(
+        flom_config_t *config, gchar *address) {
+        if (NULL == config) {
+            if (NULL != global_config.unicast_address)
+                g_free(global_config.unicast_address);
+            global_config.unicast_address = address;
+        } else {
+            if (NULL != config->unicast_address)
+                g_free(config->unicast_address);
+            config->unicast_address = address;
+        }
+    }
+        
 
 
 
     /**
      * Retrieve the unicast address specified for daemon process
+     * @param config IN/OUT configuration object, NULL for global config
      * @return TCP/IP unicast address
      */
-    static inline const gchar *flom_config_get_unicast_address(void) {
-        return global_config.unicast_address; }
+    static inline const gchar *flom_config_get_unicast_address(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.unicast_address : config->unicast_address;
+    }
 
 
     

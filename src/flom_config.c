@@ -181,8 +181,8 @@ int flom_config_check(flom_config_t *config)
             config = &global_config;
         /* check if configuration is for LOCAL and for NETWORK: it's not
            acceptable */
-        if (NULL != flom_config_get_socket_name(NULL) &&
-            (NULL != flom_config_get_unicast_address() ||
+        if (NULL != flom_config_get_socket_name(config) &&
+            (NULL != flom_config_get_unicast_address(config) ||
              NULL != flom_config_get_multicast_address())) {
             g_print("ERROR: flom can not be configured for local "
                     "(UNIX socket) and network (TCP-UDP/IP) communication "
@@ -191,8 +191,8 @@ int flom_config_check(flom_config_t *config)
         }
         /* if neither local nor network communication were configured,
            use default local */
-        if (NULL == flom_config_get_socket_name(NULL) &&
-            NULL == flom_config_get_unicast_address() &&
+        if (NULL == flom_config_get_socket_name(config) &&
+            NULL == flom_config_get_unicast_address(config) &&
             NULL == flom_config_get_multicast_address()) {
             struct passwd *pwd = NULL;
             char *login = NULL;
@@ -207,25 +207,25 @@ int flom_config_check(flom_config_t *config)
                      "/tmp/flom-%s", login);
         }
         /* check options related to resource type */
-        frt = flom_rsrc_get_type(flom_config_get_resource_name());
+        frt = flom_rsrc_get_type(flom_config_get_resource_name(config));
         /* check lock mode */
-        if (FLOM_LOCK_MODE_EX != flom_config_get_lock_mode() &&
+        if (FLOM_LOCK_MODE_EX != flom_config_get_lock_mode(config) &&
             FLOM_RSRC_TYPE_SIMPLE != frt && FLOM_RSRC_TYPE_HIER != frt) {
             if (flom_config_get_verbose(config))
                 g_warning("This resource type (%d) support only exclusive "
                           "lock mode; specified value (%d) will be ignored\n",
-                          frt, flom_config_get_lock_mode());
-            flom_config_set_lock_mode(FLOM_LOCK_MODE_EX);
+                          frt, flom_config_get_lock_mode(config));
+            flom_config_set_lock_mode(config, FLOM_LOCK_MODE_EX);
         }
         /* check quantity */
-        if (1 != flom_config_get_resource_quantity() &&
+        if (1 != flom_config_get_resource_quantity(config) &&
             FLOM_RSRC_TYPE_NUMERIC != frt) {
             if (flom_config_get_verbose(config))
                 g_warning("This resource type (%d) does not support quantity "
                           "lock option; specified value (%d) will be "
                           "ignored\n",
-                          frt, flom_config_get_resource_quantity());
-            flom_config_set_resource_quantity(1);
+                          frt, flom_config_get_resource_quantity(config));
+            flom_config_set_resource_quantity(config, 1);
         }
         
         THROW(NONE);
@@ -267,21 +267,22 @@ void flom_config_print(flom_config_t *config)
             FLOM_CONFIG_KEY_VERBOSE, flom_config_get_verbose(config));
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_RESOURCE,
             FLOM_CONFIG_KEY_NAME,
-            NULL == flom_config_get_resource_name() ? FLOM_EMPTY_STRING :
-            flom_config_get_resource_name());
+            NULL == flom_config_get_resource_name(config) ? FLOM_EMPTY_STRING :
+            flom_config_get_resource_name(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
-            FLOM_CONFIG_KEY_WAIT, flom_config_get_resource_wait());
+            FLOM_CONFIG_KEY_WAIT, flom_config_get_resource_wait(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
-            FLOM_CONFIG_KEY_TIMEOUT, flom_config_get_resource_timeout());
+            FLOM_CONFIG_KEY_TIMEOUT, flom_config_get_resource_timeout(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
-            FLOM_CONFIG_KEY_QUANTITY, flom_config_get_resource_quantity());
+            FLOM_CONFIG_KEY_QUANTITY,
+            flom_config_get_resource_quantity(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
-            FLOM_CONFIG_KEY_LOCK_MODE, flom_config_get_lock_mode());
+            FLOM_CONFIG_KEY_LOCK_MODE, flom_config_get_lock_mode(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
-            FLOM_CONFIG_KEY_CREATE, flom_config_get_resource_create());
+            FLOM_CONFIG_KEY_CREATE, flom_config_get_resource_create(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
             FLOM_CONFIG_KEY_IDLE_LIFESPAN,
-            flom_config_get_resource_idle_lifespan());
+            flom_config_get_resource_idle_lifespan(config));
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_SOCKET_NAME,
             NULL == flom_config_get_socket_name(config) ? FLOM_EMPTY_STRING :
@@ -290,8 +291,9 @@ void flom_config_print(flom_config_t *config)
             FLOM_CONFIG_KEY_LIFESPAN, flom_config_get_lifespan(config));
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_UNICAST_ADDRESS,
-            NULL == flom_config_get_unicast_address() ? FLOM_EMPTY_STRING :
-            flom_config_get_unicast_address());
+            NULL == flom_config_get_unicast_address(config) ?
+            FLOM_EMPTY_STRING :
+            flom_config_get_unicast_address(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_UNICAST_PORT, flom_config_get_unicast_port());
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
@@ -564,7 +566,7 @@ int flom_config_init_load(flom_config_t *config,
                         FLOM_CONFIG_GROUP_RESOURCE,
                         FLOM_CONFIG_KEY_NAME, value));
             if (FLOM_RC_OK != (ret_cod =
-                               flom_config_set_resource_name(value))) {
+                               flom_config_set_resource_name(config, value))) {
                 print_file_name = TRUE;
                 THROW(CONFIG_SET_RESOURCE_NAME_ERROR);
             } else {
@@ -594,7 +596,7 @@ int flom_config_init_load(flom_config_t *config,
                 print_file_name = TRUE;
                 throw_error = TRUE;
             } else {
-                flom_config_set_resource_wait(fbv);
+                flom_config_set_resource_wait(config, fbv);
             }
             g_free(value);
             value = NULL;
@@ -622,7 +624,7 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_RESOURCE,
                         FLOM_CONFIG_KEY_TIMEOUT, ivalue));
-            flom_config_set_resource_timeout(ivalue);
+            flom_config_set_resource_timeout(config, ivalue);
         }
         /* pick-up resource quantity from configuration */
         ivalue = g_key_file_get_integer(
@@ -646,7 +648,7 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_RESOURCE,
                         FLOM_CONFIG_KEY_QUANTITY, ivalue));
-            flom_config_set_resource_quantity(ivalue);
+            flom_config_set_resource_quantity(config, ivalue);
         }
         /* pick-up resource lock mode from configuration */
         if (NULL == (value = g_key_file_get_string(
@@ -671,7 +673,7 @@ int flom_config_init_load(flom_config_t *config,
                 print_file_name = TRUE;
                 throw_error = TRUE;
             } else {
-                flom_config_set_lock_mode(flm);
+                flom_config_set_lock_mode(config, flm);
             }
             g_free(value);
             value = NULL;
@@ -700,7 +702,7 @@ int flom_config_init_load(flom_config_t *config,
                 print_file_name = TRUE;
                 throw_error = TRUE;
             } else {
-                flom_config_set_resource_create(fbv);
+                flom_config_set_resource_create(config, fbv);
             }
             g_free(value);
             value = NULL;
@@ -729,7 +731,7 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_RESOURCE,
                         FLOM_CONFIG_KEY_IDLE_LIFESPAN, ivalue));
-            flom_config_set_resource_idle_lifespan(ivalue);
+            flom_config_set_resource_idle_lifespan(config, ivalue);
         }
         /* pick-up socket name configuration */
         if (NULL == (value = g_key_file_get_string(
@@ -794,7 +796,7 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_DAEMON,
                         FLOM_CONFIG_KEY_UNICAST_ADDRESS, value));
-            flom_config_set_unicast_address(value);
+            flom_config_set_unicast_address(config, value);
             value = NULL;
         }
         /* pick-up unicast port from configuration */
@@ -1110,11 +1112,15 @@ void flom_config_set_command_trace_file(
 
 
 
-int flom_config_set_resource_name(gchar *resource_name)
+int flom_config_set_resource_name(flom_config_t *config,
+                                  gchar *resource_name)
 {
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_config_set_resource_name(%s)\n", resource_name));
+    /* default config object */
+    if (NULL == config)
+        config = &global_config;
     /* check resource name is not the default (reserved) */
     if (!strncmp(resource_name, DEFAULT_RESOURCE_NAME,
                  sizeof(DEFAULT_RESOURCE_NAME))) {

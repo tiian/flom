@@ -258,7 +258,7 @@ int flom_handle_lock(flom_handle_t *handle, char *element, size_t element_size)
         }
         /* lock acquisition */
         if (FLOM_RC_OK != (ret_cod = flom_client_lock(
-                               cd, flom_config_get_resource_timeout(),
+                               cd, flom_config_get_resource_timeout(NULL),
                                element, element_size)))
             THROW(CLIENT_LOCK_ERROR);
         /* state update */

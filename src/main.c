@@ -158,7 +158,7 @@ int main (int argc, char *argv[])
         flom_config_set_verbose(NULL, verbose);
     if (NULL != resource_name)
         if (FLOM_RC_OK != (ret_cod = flom_config_set_resource_name(
-                               resource_name))) {
+                               NULL, resource_name))) {
             g_print("flom_config_set_resource_name: ret_cod=%d\n", ret_cod);
             exit(FLOM_ES_GENERIC_ERROR);
         }
@@ -166,7 +166,7 @@ int main (int argc, char *argv[])
         g_warning("Resource quantity ignored because negative values (%d) "
                   "are meaningless\n", resource_quantity);
     else if (0 < resource_quantity)
-        flom_config_set_resource_quantity(resource_quantity);
+        flom_config_set_resource_quantity(NULL, resource_quantity);
 
     if (NULL != resource_wait) {
         flom_bool_value_t fbv;
@@ -176,15 +176,15 @@ int main (int argc, char *argv[])
                     resource_wait);
             exit(FLOM_ES_GENERIC_ERROR);
         }
-        flom_config_set_resource_wait(fbv);
+        flom_config_set_resource_wait(NULL, fbv);
     }
     if (FLOM_NETWORK_WAIT_TIMEOUT != resource_timeout) {
         /* timeout is useless if no wait was specified */
-        if (FLOM_BOOL_NO == flom_config_get_resource_wait())
+        if (FLOM_BOOL_NO == flom_config_get_resource_wait(NULL))
             g_warning("Timeout ignored because 'no wait' behavior was "
                       "specified\n");
         else
-            flom_config_set_resource_timeout(resource_timeout);
+            flom_config_set_resource_timeout(NULL, resource_timeout);
     }
     if (NULL != lock_mode) {
         flom_lock_mode_t flm;
@@ -193,7 +193,7 @@ int main (int argc, char *argv[])
             g_print("lock-mode: '%s' is an invalid value\n", lock_mode);
             exit(FLOM_ES_GENERIC_ERROR);
         }
-        flom_config_set_lock_mode(flm);
+        flom_config_set_lock_mode(NULL, flm);
     }
     if (NULL != resource_create) {
         flom_bool_value_t fbv;
@@ -203,9 +203,9 @@ int main (int argc, char *argv[])
                     resource_create);
             exit(FLOM_ES_GENERIC_ERROR);
         }
-        flom_config_set_resource_create(fbv);
+        flom_config_set_resource_create(NULL, fbv);
     }
-    flom_config_set_resource_idle_lifespan(resource_idle_lifespan);
+    flom_config_set_resource_idle_lifespan(NULL, resource_idle_lifespan);
     if (NULL != socket_name) {
         if (FLOM_RC_OK != (ret_cod = flom_config_set_socket_name(
                                NULL, socket_name))) {
@@ -219,7 +219,7 @@ int main (int argc, char *argv[])
         flom_config_set_lifespan(NULL, daemon_lifespan);
     }
     if (NULL != unicast_address) {
-        flom_config_set_unicast_address(unicast_address);
+        flom_config_set_unicast_address(NULL, unicast_address);
     }
     if (_DEFAULT_DAEMON_PORT != unicast_port) {
         flom_config_set_unicast_port(unicast_port);
@@ -284,7 +284,7 @@ int main (int argc, char *argv[])
     }
 
     /* sending lock command */
-    ret_cod = flom_client_lock(&cd, flom_config_get_resource_timeout(),
+    ret_cod = flom_client_lock(&cd, flom_config_get_resource_timeout(NULL),
                                locked_element, sizeof(locked_element));
     switch (ret_cod) {
         case FLOM_RC_OK: /* OK, go on */
@@ -323,7 +323,7 @@ int main (int argc, char *argv[])
         case FLOM_RC_NETWORK_TIMEOUT: /* timeout expired, busy resource */
             g_print("The lock was not obtained because timeout "
                     "(%d milliseconds) expired\n",
-                    flom_config_get_resource_timeout());
+                    flom_config_get_resource_timeout(NULL));
             /* gracefully disconnect from daemon */
             if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
                 g_print("flom_client_unlock: ret_cod=%d (%s)\n",

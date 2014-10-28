@@ -379,12 +379,12 @@ int flom_listen_tcp(flom_conns_t *conns)
 {
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     FLOM_TRACE(("flom_listen_tcp\n"));
-    if (NULL != flom_config_get_unicast_address())
+    if (NULL != flom_config_get_unicast_address(NULL))
         ret_cod = flom_listen_tcp_configured(conns);
     else
         ret_cod = flom_listen_tcp_automatic(conns);
     syslog(LOG_NOTICE, FLOM_SYSLOG_FLM001I,
-           flom_config_get_unicast_address(),
+           flom_config_get_unicast_address(NULL),
            flom_config_get_unicast_port());
     FLOM_TRACE(("flom_listen_tcp/ret_cod=%d/errno=%d\n", ret_cod, errno));
     return ret_cod;
@@ -417,10 +417,10 @@ int flom_listen_tcp_configured(flom_conns_t *conns)
         hints.ai_protocol = IPPROTO_TCP;
         snprintf(port, sizeof(port), "%u", flom_config_get_unicast_port());
         FLOM_TRACE(("flom_listen_tcp_configured: binding address '%s' "
-                    "and port %s\n", flom_config_get_unicast_address(),
+                    "and port %s\n", flom_config_get_unicast_address(NULL),
                     port));
 
-        if (0 != (errcode = getaddrinfo(flom_config_get_unicast_address(),
+        if (0 != (errcode = getaddrinfo(flom_config_get_unicast_address(NULL),
                                         port, &hints, &result))) {
             FLOM_TRACE(("flom_listen_tcp_configured/getaddrinfo(): "
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
@@ -547,7 +547,7 @@ int flom_listen_tcp_automatic(flom_conns_t *conns)
         /* inject address value to configuration */
         FLOM_TRACE(("flom_listen_tcp_automatic: set unicast address to value "
                     "'0.0.0.0'\n"));
-        flom_config_set_unicast_address("0.0.0.0");
+        flom_config_set_unicast_address(NULL, "0.0.0.0");
         /* inject port value to configuration */
         unicast_port = ntohs(addr.sin_port);
         FLOM_TRACE(("flom_listen_tcp_automatic: set unicast port to value "
@@ -1692,9 +1692,9 @@ int flom_accept_discover_reply(int fd, const struct sockaddr *src_addr,
         msg.header.pvs.step = 2*FLOM_MSG_STEP_INCR;
         msg.body.discover_16.network.port =
             (in_port_t)flom_config_get_unicast_port();
-        if (NULL != flom_config_get_unicast_address())
+        if (NULL != flom_config_get_unicast_address(NULL))
             msg.body.discover_16.network.address = g_strdup(
-                flom_config_get_unicast_address());
+                flom_config_get_unicast_address(NULL));
         /* serialize the request message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
                                &msg, buffer, sizeof(buffer), &to_send)))

@@ -81,7 +81,7 @@ int flom_client_connect(struct flom_conn_data_s *cd, int start_daemon)
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_local(
                                    cd, start_daemon)))
                 THROW(CLIENT_CONNECT_LOCAL_ERROR);
-        } else if (NULL != flom_config_get_unicast_address()) {
+        } else if (NULL != flom_config_get_unicast_address(NULL)) {
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(
                                    cd, start_daemon)))
                 THROW(CLIENT_CONNECT_TCP_ERROR);
@@ -271,7 +271,7 @@ int flom_client_connect_tcp(struct flom_conn_data_s *cd, int start_daemon)
         char port_string[100];
         
         FLOM_TRACE(("flom_client_connect_tcp: connecting to address '%s' "
-                    "and port %d\n", flom_config_get_unicast_address(),
+                    "and port %d\n", flom_config_get_unicast_address(NULL),
                     flom_config_get_unicast_port()));
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_CANONNAME;
@@ -283,7 +283,7 @@ int flom_client_connect_tcp(struct flom_conn_data_s *cd, int start_daemon)
         snprintf(port_string, sizeof(port_string), "%u",
                  flom_config_get_unicast_port());
 
-        if (0 != (errcode = getaddrinfo(flom_config_get_unicast_address(),
+        if (0 != (errcode = getaddrinfo(flom_config_get_unicast_address(NULL),
                                         port_string, &hints, &result))) {
             FLOM_TRACE(("flom_client_connect_tcp/getaddrinfo(): "
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
@@ -624,7 +624,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd, int start_daemon)
         if (0 < strlen(msg.body.discover_16.network.address)) {
             /* update global configuration */
             flom_config_set_unicast_address(
-                msg.body.discover_16.network.address);
+                NULL, msg.body.discover_16.network.address);
             flom_config_set_unicast_port(
                 msg.body.discover_16.network.port);
             /* switch to normal TCP connect phase */
@@ -792,13 +792,14 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
         if (NULL == (msg.body.lock_8.resource.name =
                      g_strdup(global_config.resource_name)))
             THROW(G_STRDUP_ERROR);
-        msg.body.lock_8.resource.mode = flom_config_get_lock_mode();
-        msg.body.lock_8.resource.wait = flom_config_get_resource_wait();
+        msg.body.lock_8.resource.mode = flom_config_get_lock_mode(NULL);
+        msg.body.lock_8.resource.wait = flom_config_get_resource_wait(NULL);
         msg.body.lock_8.resource.quantity =
-            flom_config_get_resource_quantity();
-        msg.body.lock_8.resource.create = flom_config_get_resource_create();
+            flom_config_get_resource_quantity(NULL);
+        msg.body.lock_8.resource.create =
+            flom_config_get_resource_create(NULL);
         msg.body.lock_8.resource.lifespan =
-            flom_config_get_resource_idle_lifespan();
+            flom_config_get_resource_idle_lifespan(NULL);
 
         /* serialize the request message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
