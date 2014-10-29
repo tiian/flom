@@ -31,6 +31,7 @@
 
 /* @@@
  * move configuration from "global" to "local":
- * introducing a parameter in every flom_config method, then duplicate config
- * for client library
+ * flom_init_check: pass a config pointer (from handle) and initialize it
+ * with global values (create ad hoc method in flom_config to copy from
+ * global to local config)
  */

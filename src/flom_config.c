@@ -183,7 +183,7 @@ int flom_config_check(flom_config_t *config)
            acceptable */
         if (NULL != flom_config_get_socket_name(config) &&
             (NULL != flom_config_get_unicast_address(config) ||
-             NULL != flom_config_get_multicast_address())) {
+             NULL != flom_config_get_multicast_address(config))) {
             g_print("ERROR: flom can not be configured for local "
                     "(UNIX socket) and network (TCP-UDP/IP) communication "
                     "at the same time.\n");
@@ -193,7 +193,7 @@ int flom_config_check(flom_config_t *config)
            use default local */
         if (NULL == flom_config_get_socket_name(config) &&
             NULL == flom_config_get_unicast_address(config) &&
-            NULL == flom_config_get_multicast_address()) {
+            NULL == flom_config_get_multicast_address(config)) {
             struct passwd *pwd = NULL;
             char *login = NULL;
             /* set UNIX socket name */
@@ -295,31 +295,34 @@ void flom_config_print(flom_config_t *config)
             FLOM_EMPTY_STRING :
             flom_config_get_unicast_address(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
-            FLOM_CONFIG_KEY_UNICAST_PORT, flom_config_get_unicast_port());
+            FLOM_CONFIG_KEY_UNICAST_PORT,
+            flom_config_get_unicast_port(config));
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_MULTICAST_ADDRESS,
-            NULL == flom_config_get_multicast_address() ? FLOM_EMPTY_STRING :
-            flom_config_get_multicast_address());
+            NULL == flom_config_get_multicast_address(config) ?
+            FLOM_EMPTY_STRING :
+            flom_config_get_multicast_address(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
-            FLOM_CONFIG_KEY_MULTICAST_PORT, flom_config_get_multicast_port());
+            FLOM_CONFIG_KEY_MULTICAST_PORT,
+            flom_config_get_multicast_port(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_NETWORK,
             FLOM_CONFIG_KEY_DISCOVERY_ATTEMPTS,
-            flom_config_get_discovery_attempts());
+            flom_config_get_discovery_attempts(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_NETWORK,
             FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT,
-            flom_config_get_discovery_timeout());
+            flom_config_get_discovery_timeout(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_NETWORK,
             FLOM_CONFIG_KEY_DISCOVERY_TTL,
-            flom_config_get_discovery_ttl());
+            flom_config_get_discovery_ttl(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_NETWORK,
             FLOM_CONFIG_KEY_TCP_KEEPALIVE_TIME,
-            flom_config_get_tcp_keepalive_time());
+            flom_config_get_tcp_keepalive_time(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_NETWORK,
             FLOM_CONFIG_KEY_TCP_KEEPALIVE_INTVL,
-            flom_config_get_tcp_keepalive_intvl());
+            flom_config_get_tcp_keepalive_intvl(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_NETWORK,
             FLOM_CONFIG_KEY_TCP_KEEPALIVE_PROBES,
-            flom_config_get_tcp_keepalive_probes());
+            flom_config_get_tcp_keepalive_probes(config));
 }
 
 
@@ -821,7 +824,7 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_DAEMON,
                         FLOM_CONFIG_KEY_UNICAST_PORT, ivalue));
-            flom_config_set_unicast_port(ivalue);
+            flom_config_set_unicast_port(config, ivalue);
         }
         /* pick-up mulicast address configuration */
         if (NULL == (value = g_key_file_get_string(
@@ -839,7 +842,7 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_DAEMON,
                         FLOM_CONFIG_KEY_MULTICAST_ADDRESS, value));
-            flom_config_set_multicast_address(value);
+            flom_config_set_multicast_address(config, value);
             value = NULL;
         }
         /* pick-up multicast port from configuration */
@@ -865,7 +868,7 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_DAEMON,
                         FLOM_CONFIG_KEY_MULTICAST_PORT, ivalue));
-            flom_config_set_multicast_port(ivalue);
+            flom_config_set_multicast_port(config, ivalue);
         }
         /* pick-up discovery attempts from configuration */
         ivalue = g_key_file_get_integer(gkf, FLOM_CONFIG_GROUP_NETWORK,
@@ -890,7 +893,7 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_NETWORK,
                         FLOM_CONFIG_KEY_DISCOVERY_ATTEMPTS, ivalue));
-            flom_config_set_discovery_attempts(ivalue);
+            flom_config_set_discovery_attempts(config, ivalue);
         }
         /* pick-up discovery timeout from configuration */
         ivalue = g_key_file_get_integer(gkf, FLOM_CONFIG_GROUP_NETWORK,
@@ -915,7 +918,7 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_NETWORK,
                         FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT, ivalue));
-            flom_config_set_discovery_timeout(ivalue);
+            flom_config_set_discovery_timeout(config, ivalue);
         }
         /* pick-up discovery timeout from configuration */
         ivalue = g_key_file_get_integer(gkf, FLOM_CONFIG_GROUP_NETWORK,
@@ -940,7 +943,7 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_NETWORK,
                         FLOM_CONFIG_KEY_DISCOVERY_TTL, ivalue));
-            flom_config_set_discovery_ttl(ivalue);
+            flom_config_set_discovery_ttl(config, ivalue);
         }
         /* pick-up tcp_keepalive_time from configuration */
         ivalue = g_key_file_get_integer(gkf, FLOM_CONFIG_GROUP_NETWORK,
@@ -965,7 +968,7 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_NETWORK,
                         FLOM_CONFIG_KEY_TCP_KEEPALIVE_TIME, ivalue));
-            flom_config_set_tcp_keepalive_time(ivalue);
+            flom_config_set_tcp_keepalive_time(config, ivalue);
         }
         /* pick-up tcp_keepalive_intvl from configuration */
         ivalue = g_key_file_get_integer(gkf, FLOM_CONFIG_GROUP_NETWORK,
@@ -991,7 +994,7 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_NETWORK,
                         FLOM_CONFIG_KEY_TCP_KEEPALIVE_INTVL, ivalue));
-            flom_config_set_tcp_keepalive_intvl(ivalue);
+            flom_config_set_tcp_keepalive_intvl(config, ivalue);
         }
         /* pick-up tcp_keepalive_probes from configuration */
         ivalue = g_key_file_get_integer(gkf, FLOM_CONFIG_GROUP_NETWORK,
@@ -1017,7 +1020,7 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%d'\n",
                         FLOM_CONFIG_GROUP_NETWORK,
                         FLOM_CONFIG_KEY_TCP_KEEPALIVE_PROBES, ivalue));
-            flom_config_set_tcp_keepalive_probes(ivalue);
+            flom_config_set_tcp_keepalive_probes(config, ivalue);
         }
         THROW(NONE);
     } CATCH {

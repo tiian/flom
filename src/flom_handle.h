@@ -73,6 +73,10 @@ typedef struct flom_handle_s {
      * Connection data
      */
     gpointer              conn_data;
+    /**
+     * Configuration data
+     */
+    gpointer              config;
 } flom_handle_t;
 
 

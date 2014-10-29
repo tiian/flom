@@ -222,31 +222,31 @@ int main (int argc, char *argv[])
         flom_config_set_unicast_address(NULL, unicast_address);
     }
     if (_DEFAULT_DAEMON_PORT != unicast_port) {
-        flom_config_set_unicast_port(unicast_port);
+        flom_config_set_unicast_port(NULL, unicast_port);
     }
     if (NULL != multicast_address) {
-        flom_config_set_multicast_address(multicast_address);
+        flom_config_set_multicast_address(NULL, multicast_address);
     }
     if (_DEFAULT_DAEMON_PORT != multicast_port) {
-        flom_config_set_multicast_port(multicast_port);
+        flom_config_set_multicast_port(NULL, multicast_port);
     }
     if (_DEFAULT_DISCOVERY_ATTEMPTS != discovery_attempts) {
-        flom_config_set_discovery_attempts(discovery_attempts);
+        flom_config_set_discovery_attempts(NULL, discovery_attempts);
     }
     if (_DEFAULT_DISCOVERY_TIMEOUT != discovery_timeout) {
-        flom_config_set_discovery_timeout(discovery_timeout);
+        flom_config_set_discovery_timeout(NULL, discovery_timeout);
     }
     if (_DEFAULT_DISCOVERY_TTL != discovery_ttl) {
-        flom_config_set_discovery_ttl(discovery_ttl);
+        flom_config_set_discovery_ttl(NULL, discovery_ttl);
     }
     if (_DEFAULT_TCP_KEEPALIVE_TIME != tcp_keepalive_time) {
-        flom_config_set_tcp_keepalive_time(tcp_keepalive_time);
+        flom_config_set_tcp_keepalive_time(NULL, tcp_keepalive_time);
     }
     if (_DEFAULT_TCP_KEEPALIVE_INTVL != tcp_keepalive_intvl) {
-        flom_config_set_tcp_keepalive_intvl(tcp_keepalive_intvl);
+        flom_config_set_tcp_keepalive_intvl(NULL, tcp_keepalive_intvl);
     }
     if (_DEFAULT_TCP_KEEPALIVE_PROBES != tcp_keepalive_probes) {
-        flom_config_set_tcp_keepalive_probes(tcp_keepalive_probes);
+        flom_config_set_tcp_keepalive_probes(NULL, tcp_keepalive_probes);
     }
     if (NULL != flom_config_get_command_trace_file(NULL))
         /* change trace destination if necessary */

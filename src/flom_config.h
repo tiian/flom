@@ -796,190 +796,267 @@ extern "C" {
     
     /**
      * Set TCP/IP unicast port config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @param port IN TCP/IP port
      */
-    static inline void flom_config_set_unicast_port(gint port) {
+    static inline void flom_config_set_unicast_port(
+        flom_config_t *config, gint port) {
         if (0 > port) port = -port;
-        global_config.unicast_port = port;
+        if (NULL == config)
+            global_config.unicast_port = port;
+        else
+            config->unicast_port = port;
     }
 
 
 
     /**
      * Get TCP/IP unicast port config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @return current unicast port
      */
-    static inline gint flom_config_get_unicast_port(void) {
-        return global_config.unicast_port;
+    static inline gint flom_config_get_unicast_port(flom_config_t *config) {
+        return NULL == config ?
+            global_config.unicast_port : config->unicast_port;
     }
 
 
     
     /**
      * Set multicast_address in config object
+     * @param config IN/OUT configuration object, NULL for global config
      * @param address IN set the new value for multicast_address property
      */
-    static inline void flom_config_set_multicast_address(gchar *address) {
-        if (NULL != global_config.multicast_address)
-            g_free(global_config.multicast_address);
-        global_config.multicast_address = address; }
+    static inline void flom_config_set_multicast_address(
+        flom_config_t *config, gchar *address) {
+        if (NULL == config) {
+            if (NULL != global_config.multicast_address)
+                g_free(global_config.multicast_address);
+            global_config.multicast_address = address;
+        } else {
+            if (NULL != config->multicast_address)
+                g_free(config->multicast_address);
+            config->multicast_address = address;
+        }
+    }
 
 
 
     /**
      * Retrieve the multicast address specified for daemon process
+     * @param config IN/OUT configuration object, NULL for global config
      * @return UDP/IP multicast address
      */
-    static inline const gchar *flom_config_get_multicast_address(void) {
-        return global_config.multicast_address; }
+    static inline const gchar *flom_config_get_multicast_address(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.multicast_address : config->multicast_address;
+    }
 
 
     
     /**
      * Set UDP/IP multicast port config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @param port IN UDP/IP port
      */
-    static inline void flom_config_set_multicast_port(gint port) {
+    static inline void flom_config_set_multicast_port(
+        flom_config_t *config, gint port) {
         if (0 > port) port = -port;
-        global_config.multicast_port = port;
+        if (NULL == config)
+            global_config.multicast_port = port;
+        else
+            config->multicast_port = port;
     }
 
 
 
     /**
      * Get UDP/IP multicast port config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @return current multicast port
      */
-    static inline gint flom_config_get_multicast_port(void) {
-        return global_config.multicast_port;
+    static inline gint flom_config_get_multicast_port(
+        flom_config_t *config) {
+        if (NULL == config)
+            return global_config.multicast_port;
+        else
+            return config->multicast_port;
     }
 
 
     
     /**
      * Set UDP/IP discovery attempts config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @param attempts IN new value
      */
-    static inline void flom_config_set_discovery_attempts(gint attempts) {
+    static inline void flom_config_set_discovery_attempts(
+        flom_config_t *config, gint attempts) {
         if (0 > attempts) attempts = -attempts;
         if (0 == attempts) attempts = 1;
-        global_config.discovery_attempts = attempts;
+        if (NULL == config)
+            global_config.discovery_attempts = attempts;
+        else
+            config->discovery_attempts = attempts;
     }
 
 
 
     /**
      * Get UDP/IP discovery request attempts config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @return current value
      */
-    static inline gint flom_config_get_discovery_attempts(void) {
-        return global_config.discovery_attempts;
+    static inline gint flom_config_get_discovery_attempts(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.discovery_attempts : config->discovery_attempts;
     }
 
 
     
     /**
      * Set UDP/IP discovery request timeout config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @param timeout IN new value
      */
-    static inline void flom_config_set_discovery_timeout(gint timeout) {
+    static inline void flom_config_set_discovery_timeout(
+        flom_config_t *config, gint timeout) {
         if (0 > timeout) timeout = -timeout;
-        global_config.discovery_timeout = timeout;
+        if (NULL == config)
+            global_config.discovery_timeout = timeout;
+        else
+            config->discovery_timeout = timeout;
     }
 
 
 
     /**
      * Get UDP/IP discovery request timeout config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @return current value
      */
-    static inline gint flom_config_get_discovery_timeout(void) {
-        return global_config.discovery_timeout;
+    static inline gint flom_config_get_discovery_timeout(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.discovery_timeout : config->discovery_timeout;
     }
 
 
     
     /**
      * Set UDP/IP discovery request TTL config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @param ttl IN new value
      */
-    static inline void flom_config_set_discovery_ttl(gint ttl) {
+    static inline void flom_config_set_discovery_ttl(
+        flom_config_t *config, gint ttl) {
         if (0 > ttl) ttl = -ttl;
         if (0 == ttl) ttl = 1;
-        global_config.discovery_ttl = ttl;
+        if (NULL == config)
+            global_config.discovery_ttl = ttl;
+        else
+            config->discovery_ttl = ttl;
     }
 
 
 
     /**
      * Get UDP/IP discovery request ttl config parameter
+     * @param config IN/OUT configuration object, NULL for global config
      * @return current value
      */
-    static inline gint flom_config_get_discovery_ttl(void) {
-        return global_config.discovery_ttl;
+    static inline gint flom_config_get_discovery_ttl(flom_config_t *config) {
+        return NULL == config ?
+            global_config.discovery_ttl : config->discovery_ttl;
     }
 
 
     
     /**
      * Set tcp_keepalive_time parameter value for socket SO_KEEPALIVE feature
+     * @param config IN/OUT configuration object, NULL for global config
      * @param value IN new value
      */
-    static inline void flom_config_set_tcp_keepalive_time(gint value) {
+    static inline void flom_config_set_tcp_keepalive_time(
+        flom_config_t *config, gint value) {
         if (0 > value) value = -value;
-        global_config.tcp_keepalive_time = value;
+        if (NULL == config)
+            global_config.tcp_keepalive_time = value;
+        else
+            config->tcp_keepalive_time = value;
     }
 
 
 
     /**
      * Get tcp_keepalive_time parameter value for socket SO_KEEPALIVE feature
+     * @param config IN/OUT configuration object, NULL for global config
      * @return current value
      */
-    static inline gint flom_config_get_tcp_keepalive_time(void) {
-        return global_config.tcp_keepalive_time;
+    static inline gint flom_config_get_tcp_keepalive_time(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.tcp_keepalive_time : config->tcp_keepalive_time;
     }
 
 
     
     /**
      * Set tcp_keepalive_intvl parameter value for socket SO_KEEPALIVE feature
+     * @param config IN/OUT configuration object, NULL for global config
      * @param value IN new value
      */
-    static inline void flom_config_set_tcp_keepalive_intvl(gint value) {
+    static inline void flom_config_set_tcp_keepalive_intvl(
+        flom_config_t *config, gint value) {
         if (0 > value) value = -value;
-        global_config.tcp_keepalive_intvl = value;
+        if (NULL == config)
+            global_config.tcp_keepalive_intvl = value;
+        else
+            config->tcp_keepalive_intvl = value;
     }
 
 
 
     /**
      * Get tcp_keepalive_intvl parameter value for socket SO_KEEPALIVE feature
+     * @param config IN/OUT configuration object, NULL for global config
      * @return current value
      */
-    static inline gint flom_config_get_tcp_keepalive_intvl(void) {
-        return global_config.tcp_keepalive_intvl;
+    static inline gint flom_config_get_tcp_keepalive_intvl(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.tcp_keepalive_intvl : config->tcp_keepalive_intvl;
     }
 
 
     
     /**
      * Set tcp_keepalive_probes parameter value for socket SO_KEEPALIVE feature
+     * @param config IN/OUT configuration object, NULL for global config
      * @param value IN new value
      */
-    static inline void flom_config_set_tcp_keepalive_probes(gint value) {
+    static inline void flom_config_set_tcp_keepalive_probes(
+        flom_config_t *config, gint value) {
         if (0 > value) value = -value;
-        global_config.tcp_keepalive_probes = value;
+        if (NULL == config)
+            global_config.tcp_keepalive_probes = value;
+        else
+            config->tcp_keepalive_probes = value;
     }
 
 
 
     /**
      * Get tcp_keepalive_probes parameter value for socket SO_KEEPALIVE feature
+     * @param config IN/OUT configuration object, NULL for global config
      * @return current value
      */
-    static inline gint flom_config_get_tcp_keepalive_probes(void) {
-        return global_config.tcp_keepalive_probes;
+    static inline gint flom_config_get_tcp_keepalive_probes(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.tcp_keepalive_probes : config->tcp_keepalive_probes;
     }
 
 

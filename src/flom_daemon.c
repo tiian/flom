@@ -385,7 +385,7 @@ int flom_listen_tcp(flom_conns_t *conns)
         ret_cod = flom_listen_tcp_automatic(conns);
     syslog(LOG_NOTICE, FLOM_SYSLOG_FLM001I,
            flom_config_get_unicast_address(NULL),
-           flom_config_get_unicast_port());
+           flom_config_get_unicast_port(NULL));
     FLOM_TRACE(("flom_listen_tcp/ret_cod=%d/errno=%d\n", ret_cod, errno));
     return ret_cod;
 }
@@ -415,7 +415,8 @@ int flom_listen_tcp_configured(flom_conns_t *conns)
         hints.ai_family = flom_conns_get_domain(conns);
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = IPPROTO_TCP;
-        snprintf(port, sizeof(port), "%u", flom_config_get_unicast_port());
+        snprintf(port, sizeof(port), "%u",
+                 flom_config_get_unicast_port(NULL));
         FLOM_TRACE(("flom_listen_tcp_configured: binding address '%s' "
                     "and port %s\n", flom_config_get_unicast_address(NULL),
                     port));
@@ -552,7 +553,7 @@ int flom_listen_tcp_automatic(flom_conns_t *conns)
         unicast_port = ntohs(addr.sin_port);
         FLOM_TRACE(("flom_listen_tcp_automatic: set unicast port to value "
                     "%d\n", unicast_port));
-        flom_config_set_unicast_port(unicast_port);
+        flom_config_set_unicast_port(NULL, unicast_port);
         /* add connection to pool */
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
                                conns, fd, SOCK_STREAM, addrlen,
@@ -618,7 +619,7 @@ int flom_listen_udp(flom_conns_t *conns)
         int found = FALSE;
         const struct addrinfo *gai = result;
         
-        if (NULL == flom_config_get_multicast_address()) {
+        if (NULL == flom_config_get_multicast_address(NULL)) {
             FLOM_TRACE(("flom_listen_udp: no multicast address specified, "
                         "this listener will not answer to daemon location "
                         "inquiries\n"));
@@ -627,24 +628,26 @@ int flom_listen_udp(flom_conns_t *conns)
 
         FLOM_TRACE(("flom_listen_udp: creating multicast daemon locator "
                     "using address '%s' and port %d\n",
-                    flom_config_get_multicast_address(),
-                    flom_config_get_multicast_port()));
+                    flom_config_get_multicast_address(NULL),
+                    flom_config_get_multicast_port(NULL)));
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_CANONNAME;
         /* prepare a local address structure for incoming datagrams */
         memset(&local_address, 0, sizeof(local_address));
         local_address.sin_family = AF_INET;
         local_address.sin_addr.s_addr = htonl(INADDR_ANY);
-        local_address.sin_port = htons(flom_config_get_multicast_port());
+        local_address.sin_port = htons(flom_config_get_multicast_port(NULL));
         /* remove this filter to support IPV6, but most of the following
            calls must be fixed! */
         hints.ai_family = AF_INET; 
         hints.ai_socktype = SOCK_DGRAM;
         hints.ai_protocol = IPPROTO_UDP;
-        snprintf(port, sizeof(port), "%u", flom_config_get_multicast_port());
+        snprintf(port, sizeof(port), "%u",
+                 flom_config_get_multicast_port(NULL));
 
-        if (0 != (errcode = getaddrinfo(flom_config_get_multicast_address(),
-                                        port, &hints, &result))) {
+        if (0 != (errcode = getaddrinfo(
+                      flom_config_get_multicast_address(NULL),
+                      port, &hints, &result))) {
             FLOM_TRACE(("flom_listen_udp/getaddrinfo(): "
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
             THROW(GETADDRINFO_ERROR);
@@ -715,8 +718,8 @@ int flom_listen_udp(flom_conns_t *conns)
             THROW(CONNS_ADD_ERROR);
         fd = NULL_FD; /* avoid socket close by clean-up section */        
         syslog(LOG_NOTICE, FLOM_SYSLOG_FLM002I,
-               flom_config_get_multicast_address(),
-               flom_config_get_multicast_port());
+               flom_config_get_multicast_address(NULL),
+               flom_config_get_multicast_port(NULL));
         
         THROW(NONE);
     } CATCH {
@@ -1691,7 +1694,7 @@ int flom_accept_discover_reply(int fd, const struct sockaddr *src_addr,
         msg.header.pvs.verb = FLOM_MSG_VERB_DISCOVER;
         msg.header.pvs.step = 2*FLOM_MSG_STEP_INCR;
         msg.body.discover_16.network.port =
-            (in_port_t)flom_config_get_unicast_port();
+            (in_port_t)flom_config_get_unicast_port(NULL);
         if (NULL != flom_config_get_unicast_address(NULL))
             msg.body.discover_16.network.address = g_strdup(
                 flom_config_get_unicast_address(NULL));

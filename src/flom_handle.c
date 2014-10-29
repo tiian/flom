@@ -58,7 +58,8 @@ int flom_init_check(void);
 
 int flom_handle_init(flom_handle_t *handle)
 {
-    enum Exception { G_TRY_MALLOC_ERROR
+    enum Exception { G_TRY_MALLOC_ERROR1
+                     , G_TRY_MALLOC_ERROR2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -73,14 +74,19 @@ int flom_handle_init(flom_handle_t *handle)
         /* allocate memory for connection data structure */
         if (NULL == (handle->conn_data = g_try_malloc0(
                          sizeof(struct flom_conn_data_s))))
-            THROW(G_TRY_MALLOC_ERROR);
+            THROW(G_TRY_MALLOC_ERROR1);
+        /* allocate memory for configuration data structure */
+        if (NULL == (handle->config = g_try_malloc0(
+                         sizeof(flom_config_t))))
+            THROW(G_TRY_MALLOC_ERROR2);
         /* state reset */
         handle->state = FLOM_HANDLE_STATE_INIT;
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case G_TRY_MALLOC_ERROR:
+            case G_TRY_MALLOC_ERROR1:
+            case G_TRY_MALLOC_ERROR2:
                 ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
                 break;
             case NONE:
@@ -90,6 +96,17 @@ int flom_handle_init(flom_handle_t *handle)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* clean memory if an error occurred */
+    if (NONE != excp) {
+        if (NULL != handle->config) {
+            g_free(handle->config);
+            handle->config = NULL;
+        } /* if (NULL != handle->config) */
+        if (NULL != handle->conn_data) {
+            g_free(handle->conn_data);
+            handle->conn_data = NULL;
+        } /* if (NULL != handle->conn_data) */
+    } /* if (NONE != excp) */
     FLOM_TRACE(("flom_handle_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -154,6 +171,10 @@ int flom_handle_clean(flom_handle_t *handle)
                         handle->state));
             THROW(API_INVALID_SEQUENCE);
         }
+        /* release memory allocated for configuration object */
+        flom_config_free(handle->config);
+        g_free(handle->config);
+        handle->config = NULL;
         /* release memory of connection data structure */
         g_free(handle->conn_data);
         handle->conn_data = NULL;
