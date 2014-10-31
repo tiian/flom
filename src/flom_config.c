@@ -502,6 +502,7 @@ int flom_config_init_load(flom_config_t *config,
                         FLOM_CONFIG_GROUP_TRACE,
                         FLOM_CONFIG_KEY_DAEMONTRACEFILE, value));
             flom_config_set_daemon_trace_file(config, value);
+            g_free(value);
             value = NULL;
         }
         /* pick-up command trace configuration */
@@ -521,6 +522,7 @@ int flom_config_init_load(flom_config_t *config,
                         FLOM_CONFIG_GROUP_TRACE,
                         FLOM_CONFIG_KEY_COMMANDTRACEFILE, value));
             flom_config_set_command_trace_file(config, value);
+            g_free(value);
             value = NULL;
         }
         /* pick-up verbose mode from configuration */
@@ -573,6 +575,7 @@ int flom_config_init_load(flom_config_t *config,
                 print_file_name = TRUE;
                 THROW(CONFIG_SET_RESOURCE_NAME_ERROR);
             } else {
+                g_free(value);
                 value = NULL;
             }
         }
@@ -757,6 +760,7 @@ int flom_config_init_load(flom_config_t *config,
                 print_file_name = TRUE;
                 THROW(CONFIG_SET_SOCKET_NAME_ERROR);
             } else
+                g_free(value);
                 value = NULL;
         }
         /* pick-up daemon lifespan from configuration */
@@ -800,6 +804,7 @@ int flom_config_init_load(flom_config_t *config,
                         FLOM_CONFIG_GROUP_DAEMON,
                         FLOM_CONFIG_KEY_UNICAST_ADDRESS, value));
             flom_config_set_unicast_address(config, value);
+            g_free(value);
             value = NULL;
         }
         /* pick-up unicast port from configuration */
@@ -843,6 +848,7 @@ int flom_config_init_load(flom_config_t *config,
                         FLOM_CONFIG_GROUP_DAEMON,
                         FLOM_CONFIG_KEY_MULTICAST_ADDRESS, value));
             flom_config_set_multicast_address(config, value);
+            g_free(value);
             value = NULL;
         }
         /* pick-up multicast port from configuration */
@@ -1071,6 +1077,48 @@ int flom_config_init_load(flom_config_t *config,
 
 
 
+int flom_config_clone(flom_config_t *config)
+{
+    enum Exception { NULL_OBJECT
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_config_clone\n"));
+    TRY {
+        /* target object can't be NULL! */
+        if (NULL == config)
+            THROW(NULL_OBJECT);
+        /* cloning the whole struct */
+        memcpy(config, &global_config, sizeof(flom_config_t));
+        /* duplicating dynamically allocated objects (strings) */
+        config->daemon_trace_file = g_strdup(global_config.daemon_trace_file);
+        config->command_trace_file =
+            g_strdup(global_config.command_trace_file);
+        config->resource_name = g_strdup(global_config.resource_name);
+        config->socket_name = g_strdup(global_config.socket_name);
+        config->unicast_address = g_strdup(global_config.unicast_address);
+        config->multicast_address = g_strdup(global_config.multicast_address);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_config_clone/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int flom_config_set_socket_name(flom_config_t *config,
                                 gchar *socket_name) {
     FLOM_TRACE(("flom_config_set_socket_name(%s)\n", socket_name));
@@ -1081,14 +1129,14 @@ int flom_config_set_socket_name(flom_config_t *config,
         return FLOM_RC_BUFFER_OVERFLOW;
     if (NULL != config->socket_name)
         g_free(config->socket_name);
-    config->socket_name = socket_name;
+    config->socket_name = g_strdup(socket_name);
     return FLOM_RC_OK;
 }
 
 
 
 void flom_config_set_daemon_trace_file(
-    flom_config_t *config, gchar *daemon_trace_file)
+    flom_config_t *config, const gchar *daemon_trace_file)
 {
     FLOM_TRACE(("flom_config_set_daemon_trace_file(%s)\n", daemon_trace_file));
     /* default config object */
@@ -1096,13 +1144,13 @@ void flom_config_set_daemon_trace_file(
         config = &global_config;
     if (NULL != config->daemon_trace_file)
         g_free(config->daemon_trace_file);
-    config->daemon_trace_file = daemon_trace_file;
+    config->daemon_trace_file = g_strdup(daemon_trace_file);
 }
 
 
 
 void flom_config_set_command_trace_file(
-    flom_config_t *config, gchar *command_trace_file) {
+    flom_config_t *config, const gchar *command_trace_file) {
     FLOM_TRACE(("flom_config_set_command_trace_file(%s)\n",
                 command_trace_file));
     /* default config object */
@@ -1110,7 +1158,7 @@ void flom_config_set_command_trace_file(
         config = &global_config;
     if (NULL != config->command_trace_file)
         g_free(config->command_trace_file);
-    config->command_trace_file = command_trace_file;
+    config->command_trace_file = g_strdup(command_trace_file);
 }
 
 
@@ -1137,9 +1185,9 @@ int flom_config_set_resource_name(flom_config_t *config,
                 resource_name);
         ret_cod = FLOM_RC_INVALID_OPTION;
     } else {
-        if (NULL != global_config.resource_name)
-            g_free(global_config.resource_name);
-        global_config.resource_name = resource_name;
+        if (NULL != config->resource_name)
+            g_free(config->resource_name);
+        config->resource_name = g_strdup(resource_name);
         ret_cod = FLOM_RC_OK;
     }
     return ret_cod;

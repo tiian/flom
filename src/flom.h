@@ -31,7 +31,9 @@
 
 /* @@@
  * move configuration from "global" to "local":
- * flom_init_check: pass a config pointer (from handle) and initialize it
- * with global values (create ad hoc method in flom_config to copy from
- * global to local config)
+ * flom_config_close has been created, use it inside flom_handle_init
+ *
+ * investigate why valgrind rants about 40 indirectly loss bytes if these
+ * config options are all disabled (commented): "SocketName", "UnicastAddress",
+ * "MulticastAddress"
  */

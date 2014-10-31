@@ -437,6 +437,15 @@ extern "C" {
                               const char *config_file_name);
 
 
+
+    /**
+     * Clone global configuration to a local configuration object
+     * @param config IN destination configuration object
+     * @return a reason code
+     */
+    int flom_config_clone(flom_config_t *config);
+    
+
     
     /**
      * Set daemon_socket_name
@@ -468,7 +477,7 @@ extern "C" {
      * @param daemon_trace_file IN set the new value for trace_file properties
      */
     void flom_config_set_daemon_trace_file(
-        flom_config_t *config, gchar *daemon_trace_file);
+        flom_config_t *config, const gchar *daemon_trace_file);
 
 
 
@@ -491,7 +500,7 @@ extern "C" {
      * @param command_trace_file IN set the new value for trace_file properties
      */
     void flom_config_set_command_trace_file(
-        flom_config_t *config, gchar *command_trace_file);
+        flom_config_t *config, const gchar *command_trace_file);
 
 
 
@@ -774,7 +783,7 @@ extern "C" {
         } else {
             if (NULL != config->unicast_address)
                 g_free(config->unicast_address);
-            config->unicast_address = address;
+            config->unicast_address = g_strdup(address);
         }
     }
         
@@ -836,7 +845,7 @@ extern "C" {
         } else {
             if (NULL != config->multicast_address)
                 g_free(config->multicast_address);
-            config->multicast_address = address;
+            config->multicast_address = g_strdup(address);
         }
     }
 

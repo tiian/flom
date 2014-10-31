@@ -60,6 +60,7 @@ int flom_handle_init(flom_handle_t *handle)
 {
     enum Exception { G_TRY_MALLOC_ERROR1
                      , G_TRY_MALLOC_ERROR2
+                     , CONFIG_INIT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -79,6 +80,9 @@ int flom_handle_init(flom_handle_t *handle)
         if (NULL == (handle->config = g_try_malloc0(
                          sizeof(flom_config_t))))
             THROW(G_TRY_MALLOC_ERROR2);
+        /* initialize config object */
+        if (FLOM_RC_OK != (ret_cod = flom_config_init(handle->config, NULL)))
+            THROW(CONFIG_INIT_ERROR);
         /* state reset */
         handle->state = FLOM_HANDLE_STATE_INIT;
         
@@ -88,6 +92,8 @@ int flom_handle_init(flom_handle_t *handle)
             case G_TRY_MALLOC_ERROR1:
             case G_TRY_MALLOC_ERROR2:
                 ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case CONFIG_INIT_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -99,6 +105,7 @@ int flom_handle_init(flom_handle_t *handle)
     /* clean memory if an error occurred */
     if (NONE != excp) {
         if (NULL != handle->config) {
+            flom_config_free(handle->config);
             g_free(handle->config);
             handle->config = NULL;
         } /* if (NULL != handle->config) */
