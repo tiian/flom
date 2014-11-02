@@ -81,7 +81,7 @@ int flom_handle_init(flom_handle_t *handle)
                          sizeof(flom_config_t))))
             THROW(G_TRY_MALLOC_ERROR2);
         /* initialize config object */
-        if (FLOM_RC_OK != (ret_cod = flom_config_init(handle->config, NULL)))
+        if (FLOM_RC_OK != (ret_cod = flom_config_clone(handle->config)))
             THROW(CONFIG_INIT_ERROR);
         /* state reset */
         handle->state = FLOM_HANDLE_STATE_INIT;

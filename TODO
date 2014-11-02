@@ -1,9 +1,5 @@
 Road map:
 
-put a flag in build procedure to avoid library fixed path at build time:
-flom_LDFLAGS = -Wl,-rpath -Wl,$(libdir)
-must can be avoided by power user
-
 client library
 
 IPv6
