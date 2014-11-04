@@ -266,7 +266,7 @@ int main (int argc, char *argv[])
     if (quiesce_exit || immediate_exit) {
         g_print("Starting FLoM daemon %s shutdown...\n",
                 immediate_exit ? "immediate" : "quiesce");
-        flom_client_shutdown(immediate_exit);
+        flom_client_shutdown(NULL, immediate_exit);
         exit(0);
     }
     
@@ -277,7 +277,7 @@ int main (int argc, char *argv[])
     }
 
     /* open connection to a valid flom lock manager... */
-    if (FLOM_RC_OK != (ret_cod = flom_client_connect(&cd, TRUE))) {
+    if (FLOM_RC_OK != (ret_cod = flom_client_connect(NULL, &cd, TRUE))) {
         g_print("flom_client_connect: ret_cod=%d (%s)\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(FLOM_ES_GENERIC_ERROR);

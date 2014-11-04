@@ -50,11 +50,13 @@ extern "C" {
 
     /**
      * Try to connect to flom daemon
+     * @param config IN configuration object, NULL for global config
      * @param cd OUT connection data
      * @param start_daemon IN try to start a new daemon if connection fails
      * @result a reason code
      */
-    int flom_client_connect(struct flom_conn_data_s *cd, int start_daemon);
+    int flom_client_connect(flom_config_t *config,
+                            struct flom_conn_data_s *cd, int start_daemon);
     
 
 
@@ -165,10 +167,11 @@ extern "C" {
 
     /**
      * Connect to daemon and send a shutdown message
+     * @param config IN configuration object, NULL for global config
      * @param immediate IN is the shutdown immediate (else it's quiesce)
      * @return a reason code
      */
-    int flom_client_shutdown(int immediate);
+    int flom_client_shutdown(flom_config_t *config, int immediate);
 
 
     

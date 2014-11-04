@@ -267,7 +267,8 @@ int flom_handle_lock(flom_handle_t *handle, char *element, size_t element_size)
         if (FLOM_HANDLE_STATE_INIT != handle->state &&
             FLOM_HANDLE_STATE_CONNECTED != handle->state &&
             FLOM_HANDLE_STATE_DISCONNECTED != handle->state) {
-            FLOM_TRACE(("flom_handle_lock: handle->state=%d\n", handle->state));
+            FLOM_TRACE(("flom_handle_lock: handle->state=%d\n",
+                        handle->state));
             THROW(API_INVALID_SEQUENCE);
         }
         /* check the connection data pointer is not NULL (we can't be sure
@@ -276,7 +277,8 @@ int flom_handle_lock(flom_handle_t *handle, char *element, size_t element_size)
             THROW(OBJ_CORRUPTED);
         /* open a connection to a valid lock manager */
         if (FLOM_HANDLE_STATE_CONNECTED != handle->state) {
-            if (FLOM_RC_OK != (ret_cod = flom_client_connect(cd, TRUE)))
+            if (FLOM_RC_OK != (ret_cod = flom_client_connect(
+                                   handle->config, cd, TRUE)))
                 THROW(CLIENT_CONNECT_ERROR);
             /* state update */
             handle->state = FLOM_HANDLE_STATE_CONNECTED;

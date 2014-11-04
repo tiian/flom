@@ -57,7 +57,8 @@
 
 
 
-int flom_client_connect(struct flom_conn_data_s *cd, int start_daemon)
+int flom_client_connect(flom_config_t *config,
+                        struct flom_conn_data_s *cd, int start_daemon)
 {
     enum Exception { CLIENT_CONNECT_LOCAL_ERROR
                      , CLIENT_CONNECT_TCP_ERROR
@@ -77,7 +78,7 @@ int flom_client_connect(struct flom_conn_data_s *cd, int start_daemon)
         memset(cd, 0, sizeof(struct flom_conn_data_s));
 
         /* choose and instantiate connection type */
-        if (NULL != flom_config_get_socket_name(NULL)) {
+        if (NULL != flom_config_get_socket_name(config)) {
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_local(
                                    cd, start_daemon)))
                 THROW(CLIENT_CONNECT_LOCAL_ERROR);
@@ -1192,7 +1193,7 @@ int flom_client_disconnect(struct flom_conn_data_s *cd)
 
 
 
-int flom_client_shutdown(int immediate)
+int flom_client_shutdown(flom_config_t *config, int immediate)
 {
     enum Exception { DAEMON_NOT_STARTED
                      , CLIENT_CONNECT_ERROR
@@ -1214,7 +1215,7 @@ int flom_client_shutdown(int immediate)
         flom_msg_init(&msg);
 
         /* connect to daemon */
-        ret_cod = flom_client_connect(&cd, FALSE);
+        ret_cod = flom_client_connect(config, &cd, FALSE);
         switch (ret_cod) {
             case FLOM_RC_OK:
                 FLOM_TRACE(("flom_client_shutdown: connection with daemon "
