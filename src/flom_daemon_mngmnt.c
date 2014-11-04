@@ -46,7 +46,7 @@
 
 
 
-int flom_daemon_mngmnt(flom_conns_t *conns, guint id)
+int flom_daemon_mngmnt(flom_config_t *config, flom_conns_t *conns, guint id)
 {
     enum Exception { CONNS_GET_MSG_ERROR
                      , INTERNAL_ERROR
@@ -73,8 +73,9 @@ int flom_daemon_mngmnt(flom_conns_t *conns, guint id)
         /* check management action */
         switch (msg->body.mngmnt_8.action) {
             case FLOM_MSG_MNGMNT_ACTION_SHUTDOWN:
-                if (FLOM_RC_OK != (ret_cod =
-                                   flom_daemon_mngmnt_shutdown(conns, id)))
+                if (FLOM_RC_OK != (
+                        ret_cod = flom_daemon_mngmnt_shutdown(
+                            config, conns, id)))
                     THROW(DAEMON_MNGMNT_SHUTDOWN_ERROR);
                 break;
             default:
@@ -112,7 +113,8 @@ int flom_daemon_mngmnt(flom_conns_t *conns, guint id)
 
 
 
-int flom_daemon_mngmnt_shutdown(flom_conns_t *conns, guint id)
+int flom_daemon_mngmnt_shutdown(flom_config_t *config,
+                                flom_conns_t *conns, guint id)
 {
     enum Exception { NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;

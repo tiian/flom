@@ -80,29 +80,30 @@ int flom_client_connect(flom_config_t *config,
         /* choose and instantiate connection type */
         if (NULL != flom_config_get_socket_name(config)) {
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_local(
-                                   cd, start_daemon)))
+                                   config, cd, start_daemon)))
                 THROW(CLIENT_CONNECT_LOCAL_ERROR);
         } else if (NULL != flom_config_get_unicast_address(NULL)) {
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(
-                                   cd, start_daemon)))
+                                   config, cd, start_daemon)))
                 THROW(CLIENT_CONNECT_TCP_ERROR);
         } else if (NULL != flom_config_get_multicast_address(NULL)) {
-            ret_cod = flom_client_discover_udp(cd, start_daemon);
+            ret_cod = flom_client_discover_udp(config, cd, start_daemon);
             switch (ret_cod) {
                 case FLOM_RC_OK:
                     break;
                 case FLOM_RC_CONNECTION_REFUSED:
                     if (start_daemon) {
-                        if (0 != flom_config_get_lifespan(NULL)) {
+                        if (0 != flom_config_get_lifespan(config)) {
                             FLOM_TRACE(("flom_client_connect: connection "
                                         "failed, activating a new daemon\n"));
                             /* try to start a daemon on this node */
-                            if (FLOM_RC_OK != (ret_cod = flom_daemon(AF_INET)))
+                            if (FLOM_RC_OK != (ret_cod = flom_daemon(
+                                                   config, AF_INET)))
                                 THROW(DAEMON_ERROR);
                             /* try to discover again */
-                            if (FLOM_RC_OK != (ret_cod =
-                                               flom_client_discover_udp(
-                                                   cd, start_daemon)))
+                            if (FLOM_RC_OK != (
+                                    ret_cod = flom_client_discover_udp(
+                                        config, cd, start_daemon)))
                                 THROW(CLIENT_DISCOVER_UDP_ERROR1);
                         } else {
                             FLOM_TRACE(("flom_client_connect: connection "
@@ -162,7 +163,8 @@ int flom_client_connect(flom_config_t *config,
 
 
 
-int flom_client_connect_local(struct flom_conn_data_s *cd,
+int flom_client_connect_local(flom_config_t *config,
+                              struct flom_conn_data_s *cd,
                               int start_daemon)
 {
     enum Exception { SOCKET_ERROR
@@ -177,7 +179,7 @@ int flom_client_connect_local(struct flom_conn_data_s *cd,
     FLOM_TRACE(("flom_client_connect_local\n"));
     TRY {
         FLOM_TRACE(("flom_client_connect_local: connecting to socket '%s'\n",
-                    flom_config_get_socket_name(NULL)));
+                    flom_config_get_socket_name(config)));
 
         if (-1 == (cd->fd = socket(AF_LOCAL, SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
@@ -189,12 +191,12 @@ int flom_client_connect_local(struct flom_conn_data_s *cd,
                           cd->addr_len)) {
             if (ENOENT == errno || ECONNREFUSED == errno) {
                 if (start_daemon) {
-                    if (0 != flom_config_get_lifespan(NULL)) {
+                    if (0 != flom_config_get_lifespan(config)) {
                         FLOM_TRACE(("flom_client_connect_local: connection "
                                     "failed, activating a new daemon\n"));
                         /* daemon is not active, starting it... */
                         if (FLOM_RC_OK != (ret_cod = flom_daemon(
-                                               cd->saun.sun_family)))
+                                               config, cd->saun.sun_family)))
                             THROW(DAEMON_ERROR);
                         /* trying to connect again... */
                         if (-1 == connect(cd->fd, (struct sockaddr *)&cd->saun,
@@ -250,7 +252,8 @@ int flom_client_connect_local(struct flom_conn_data_s *cd,
 
 
 
-int flom_client_connect_tcp(struct flom_conn_data_s *cd, int start_daemon)
+int flom_client_connect_tcp(flom_config_t *config,
+                            struct flom_conn_data_s *cd, int start_daemon)
 {
     enum Exception { GETADDRINFO_ERROR
                      , DAEMON_ERROR
@@ -295,12 +298,12 @@ int flom_client_connect_tcp(struct flom_conn_data_s *cd, int start_daemon)
             p = flom_client_connect_tcp_try(result, &fd);
             if (NULL == p) {
                 if (start_daemon) {
-                    if (0 != flom_config_get_lifespan(NULL)) {
+                    if (0 != flom_config_get_lifespan(config)) {
                         FLOM_TRACE(("flom_client_connect_tcp: connection "
                                     "failed, activating a new daemon\n"));
                         /* daemon is not active, starting it... */
                         if (FLOM_RC_OK != (ret_cod = flom_daemon(
-                                               hints.ai_family)))
+                                               config, hints.ai_family)))
                             THROW(DAEMON_ERROR);
                         /* trying to connect again... */
                         p = flom_client_connect_tcp_try(result, &fd);
@@ -400,7 +403,8 @@ const struct addrinfo *flom_client_connect_tcp_try(
 
 
 
-int flom_client_discover_udp(struct flom_conn_data_s *cd, int start_daemon)
+int flom_client_discover_udp(flom_config_t *config,
+                             struct flom_conn_data_s *cd, int start_daemon)
 {
     enum Exception { GETADDRINFO_ERROR
                      , CONNECT_ERROR
@@ -557,7 +561,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd, int start_daemon)
             /* send discover message */
             FLOM_TRACE(("flom_client_discover_udp: sending discovery "
                         "message number %d...\n", i));
-            if (flom_config_get_verbose(NULL))
+            if (flom_config_get_verbose(config))
                 g_print("sending UDP multicast datagram to %s/%u ('%s')\n",
                         flom_config_get_multicast_address(NULL),
                         flom_config_get_multicast_port(NULL), out_buffer);
@@ -577,7 +581,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd, int start_daemon)
                 if (EAGAIN == errno || EWOULDBLOCK == errno) {
                     FLOM_TRACE(("flom_client_discover_udp: no answer from "
                                 "UDP/IP multicast discovery\n"));
-                    if (flom_config_get_verbose(NULL))
+                    if (flom_config_get_verbose(config))
                         g_print("no reply from %s/%u\n",
                         flom_config_get_multicast_address(NULL),
                         flom_config_get_multicast_port(NULL));
@@ -585,7 +589,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd, int start_daemon)
                     THROW(RECVFROM_ERROR);
             } else {
                 found = TRUE;
-                if (flom_config_get_verbose(NULL))
+                if (flom_config_get_verbose(config))
                     g_print("reply from %s/%u is '%s'\n",
                             flom_config_get_multicast_address(NULL),
                             flom_config_get_multicast_port(NULL), in_buffer);
@@ -632,7 +636,7 @@ int flom_client_discover_udp(struct flom_conn_data_s *cd, int start_daemon)
                 NULL, msg.body.discover_16.network.port);
             /* switch to normal TCP connect phase */
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(
-                                   cd, start_daemon)))
+                                   config, cd, start_daemon)))
                 THROW(CLIENT_CONNECT_TCP_ERROR);
         } else {
             /* connect to discovered server using IP source address and

@@ -570,6 +570,8 @@ extern "C" {
     }
 
 
+    /* @@@ restart from flom_config_set_resource_name the process to pick-up
+       NULL calls */
     
     /**
      * Set resource_name in config object

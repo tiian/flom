@@ -44,21 +44,25 @@ extern "C" {
 
     /**
      * Main daemon management function (entry point)
+     * @param config IN configuration object, NULL for global config
      * @param conns IN/OUT connections object
      * @param id IN connection id
      * @return a reason code
      */
-    int flom_daemon_mngmnt(flom_conns_t *conns, guint id);
+    int flom_daemon_mngmnt(flom_config_t *config,
+                           flom_conns_t *conns, guint id);
 
     
 
     /**
      * Shutdown management function
+     * @param config IN configuration object, NULL for global config
      * @param conns IN/OUT connections object
      * @param id IN connection id
      * @return a reason code
      */
-    int flom_daemon_mngmnt_shutdown(flom_conns_t *conns, guint id);
+    int flom_daemon_mngmnt_shutdown(flom_config_t *config,
+                                    flom_conns_t *conns, guint id);
 
     
 

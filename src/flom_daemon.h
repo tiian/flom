@@ -51,28 +51,31 @@ extern "C" {
 
     /**
      * Create a lock daemon
+     * @param config IN configuration object, NULL for global config
      * @param family IN socket family, socket domain (AF_LOCAL, AF_INET, ...)
      * @result a reason code
      */
-    int flom_daemon(int family);
+    int flom_daemon(flom_config_t *config, int family);
     
 
     
     /**
      * Create a listen socket to serve the clients
+     * @param config IN configuration object, NULL for global config
      * @param conns OUT connections object
      * @result a reason code
      */
-    int flom_listen(flom_conns_t *conns);
+    int flom_listen(flom_config_t *config, flom_conns_t *conns);
 
 
 
     /**
      * Create a listen local (AF_LOCAL) socket to serve the clients
+     * @param config IN configuration object, NULL for global config
      * @param conns OUT connections object
      * @result a reason code
      */
-    int flom_listen_local(flom_conns_t *conns);
+    int flom_listen_local(flom_config_t *config, flom_conns_t *conns);
 
 
 
@@ -118,25 +121,28 @@ extern "C" {
 
     /**
      * Clean-up the listen socket before daemon termination
+     * @param config IN configuration object, NULL for global config
      * @param conns IN/OUT connections object
      * @result a reason code     
      */
-    int flom_listen_clean(flom_conns_t *conns);
+    int flom_listen_clean(flom_config_t *config, flom_conns_t *conns);
 
 
     
     /**
      * Possible infinite accept loop: every incoming connection will be
      * processed; after idle time, it will leave
+     * @param config IN configuration object, NULL for global config
      * @param conns IN/OUT connections object
      * @result a reason code
      */
-    int flom_accept_loop(flom_conns_t *conns);
+    int flom_accept_loop(flom_config_t *config, flom_conns_t *conns);
 
 
 
     /**
      * Manager POLLIN event received from listener daemon
+     * @param config IN configuration object, NULL for global config
      * @param conns IN/OUT connections object
      * @param id IN connection id
      * @param lockers IN/OUT array of lockers serving the connected clients
@@ -144,7 +150,8 @@ extern "C" {
      *                  a locker thread, FALSE the connection is still valid
      * @return a reason code
      */
-    int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
+    int flom_accept_loop_pollin(flom_config_t *config,
+                                flom_conns_t *conns, guint id,
                                 flom_locker_array_t *lockers,
                                 int *moved);
 

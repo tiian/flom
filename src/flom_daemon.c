@@ -72,7 +72,7 @@
 
 
 
-int flom_daemon(int family)
+int flom_daemon(flom_config_t *config, int family)
 {
     enum Exception { PIPE_ERROR
                      , FORK_ERROR
@@ -172,13 +172,13 @@ int flom_daemon(int family)
                 if (i != pipefd[0] && i != pipefd[1])
                     close(i);
 
-            FLOM_TRACE_REOPEN(flom_config_get_daemon_trace_file(NULL));
+            FLOM_TRACE_REOPEN(flom_config_get_daemon_trace_file(config));
             FLOM_TRACE(("flom_daemon: now daemonized!\n"));
 
             /* activate service */
             openlog("flom", LOG_PID, LOG_DAEMON);
             flom_conns_init(&conns, family);
-            daemon_rc = flom_listen(&conns);
+            daemon_rc = flom_listen(config, &conns);
             
             /* sending reason code to father process */
             if (sizeof(daemon_rc) != write(pipefd[1], &daemon_rc,
@@ -192,10 +192,10 @@ int flom_daemon(int family)
                 THROW(FLOM_LISTEN_ERROR);
             
             syslog(LOG_NOTICE, FLOM_SYSLOG_FLM003N);
-            if (FLOM_RC_OK != (ret_cod = flom_accept_loop(&conns)))
+            if (FLOM_RC_OK != (ret_cod = flom_accept_loop(config, &conns)))
                 THROW(FLOM_ACCEPT_LOOP_ERROR);
             syslog(LOG_NOTICE, FLOM_SYSLOG_FLM004N);
-            flom_listen_clean(&conns);
+            flom_listen_clean(config, &conns);
         }
         THROW(NONE);
     } CATCH {
@@ -260,7 +260,7 @@ int flom_daemon(int family)
 
 
 
-int flom_listen(flom_conns_t *conns)
+int flom_listen(flom_config_t *config, flom_conns_t *conns)
 {
     enum Exception { LISTEN_LOCAL_ERROR
                      , LISTEN_TCP_ERROR
@@ -273,7 +273,8 @@ int flom_listen(flom_conns_t *conns)
     TRY {
         switch (flom_conns_get_domain(conns)) {
             case AF_LOCAL:
-                if (FLOM_RC_OK != (ret_cod = flom_listen_local(conns)))
+                if (FLOM_RC_OK != (ret_cod = flom_listen_local(
+                                       config, conns)))
                     THROW(LISTEN_LOCAL_ERROR);
                 break;
             case AF_INET:
@@ -311,7 +312,7 @@ int flom_listen(flom_conns_t *conns)
 
 
 
-int flom_listen_local(flom_conns_t *conns)
+int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
 {
     enum Exception { SOCKET_ERROR
                      , UNLINK_ERROR
@@ -329,11 +330,12 @@ int flom_listen_local(flom_conns_t *conns)
             
         if (-1 == (fd = socket(flom_conns_get_domain(conns), SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
-        if (-1 == unlink(flom_config_get_socket_name(NULL)) && ENOENT != errno)
+        if (-1 == unlink(flom_config_get_socket_name(config)) &&
+            ENOENT != errno)
             THROW(UNLINK_ERROR);
         memset(&servaddr, 0, sizeof(servaddr));
         servaddr.sun_family = flom_conns_get_domain(conns);
-        strcpy(servaddr.sun_path, flom_config_get_socket_name(NULL));
+        strcpy(servaddr.sun_path, flom_config_get_socket_name(config));
         if (-1 == bind(fd, (struct sockaddr *) &servaddr, sizeof(servaddr)))
             THROW(BIND_ERROR);
         if (-1 == listen(fd, LISTEN_BACKLOG))
@@ -343,7 +345,7 @@ int flom_listen_local(flom_conns_t *conns)
                                (struct sockaddr *)&servaddr, TRUE)))
             THROW(CONNS_ADD_ERROR);
         syslog(LOG_NOTICE, FLOM_SYSLOG_FLM000I,
-               flom_config_get_socket_name(NULL));
+               flom_config_get_socket_name(config));
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -753,7 +755,7 @@ int flom_listen_udp(flom_conns_t *conns)
 
 
 
-int flom_listen_clean(flom_conns_t *conns)
+int flom_listen_clean(flom_config_t *config, flom_conns_t *conns)
 {
     enum Exception { NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -763,7 +765,7 @@ int flom_listen_clean(flom_conns_t *conns)
         int domain = flom_conns_get_domain(conns);
         flom_conns_free(conns);
         if (AF_LOCAL == domain &&
-            -1 == unlink(flom_config_get_socket_name(NULL))) {
+            -1 == unlink(flom_config_get_socket_name(config))) {
             FLOM_TRACE(("flom_listen_clean: unlink errno=%d\n", errno));
         }
         
@@ -783,7 +785,7 @@ int flom_listen_clean(flom_conns_t *conns)
 }
 
 
-int flom_accept_loop(flom_conns_t *conns)
+int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
 {
     enum Exception { CONNS_CLEAN_ERROR
                      , CONNS_GET_FDS_ERROR
@@ -814,7 +816,7 @@ int flom_accept_loop(flom_conns_t *conns)
             guint i, n;
             struct pollfd *fds;
             guint number_of_lockers;
-            int poll_timeout = flom_config_get_lifespan(NULL);
+            int poll_timeout = flom_config_get_lifespan(config);
 
             /* the completion needs three polling cycles, so timeout must
                be a third of estimated lifespan */
@@ -884,7 +886,7 @@ int flom_accept_loop(flom_conns_t *conns)
                 if (fds[i].revents & POLLIN) {
                     int conn_moved = FALSE;
                     ret_cod = flom_accept_loop_pollin(
-                        conns, i, &lockers, &conn_moved);
+                        config, conns, i, &lockers, &conn_moved);
                     if (FLOM_RC_CONNECTION_CLOSED == ret_cod) {
                         FLOM_TRACE(("flom_accept_loop: peer closed the "
                                     "connection, terminating it...\n"));
@@ -966,7 +968,8 @@ int flom_accept_loop(flom_conns_t *conns)
 
 
 
-int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
+int flom_accept_loop_pollin(flom_config_t *config,
+                            flom_conns_t *conns, guint id,
                             flom_locker_array_t *lockers,
                             int *moved)
 {
@@ -1096,7 +1099,7 @@ int flom_accept_loop_pollin(flom_conns_t *conns, guint id,
                 } else if (FLOM_MSG_VERB_MNGMNT == msg->header.pvs.verb) {
                     /* this is a management message, not a lock request */
                     if (FLOM_RC_OK != (ret_cod = flom_daemon_mngmnt(
-                                           conns, id)))
+                                           config, conns, id)))
                         THROW(DAEMON_MANAGEMENT_ERROR);
                 } else {
                     if (FLOM_RC_OK != (ret_cod = flom_accept_loop_transfer(

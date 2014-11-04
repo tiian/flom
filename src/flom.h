@@ -31,6 +31,5 @@
 
 /* @@@
  * move configuration from "global" to "local":
- * flom_config_clone has been created, use it inside flom_handle_init
  *
  */

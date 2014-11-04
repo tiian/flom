@@ -62,22 +62,26 @@ extern "C" {
 
     /**
      * Try to connect to flom daemon using local (AF_LOCAL) socket
+     * @param config IN configuration object, NULL for global config
      * @param cd OUT connection data
      * @param start_daemon IN try to start a new daemon if connection fails
      * @result a reason code
      */
-    int flom_client_connect_local(struct flom_conn_data_s *cd,
+    int flom_client_connect_local(flom_config_t *config,
+                                  struct flom_conn_data_s *cd,
                                   int start_daemon);
     
 
 
     /**
      * Try to connect to flom daemon using network (TCP/IP) socket
+     * @param config IN configuration object, NULL for global config
      * @param cd OUT connection data
      * @param start_daemon IN try to start a new daemon if connection fails
      * @result a reason code
      */
-    int flom_client_connect_tcp(struct flom_conn_data_s *cd,
+    int flom_client_connect_tcp(flom_config_t *config,
+                                struct flom_conn_data_s *cd,
                                 int start_daemon);
 
 
@@ -96,11 +100,13 @@ extern "C" {
 
     /**
      * Discover flom daemon address using multicast UDP
+     * @param config IN configuration object, NULL for global config
      * @param cd IN/OUT connection data
      * @param start_daemon IN try to start a new daemon if connection fails
      * @return a reason code
      */
-    int flom_client_discover_udp(struct flom_conn_data_s *cd,
+    int flom_client_discover_udp(flom_config_t *config,
+                                 struct flom_conn_data_s *cd,
                                  int start_daemon);
 
 
