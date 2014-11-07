@@ -570,8 +570,6 @@ extern "C" {
     }
 
 
-    /* @@@ restart from flom_config_set_resource_name the process to pick-up
-       NULL calls */
     
     /**
      * Set resource_name in config object
@@ -585,7 +583,7 @@ extern "C" {
 
 
     /**
-     * Retrieve the trace file specified for command process
+     * Get "resource_name" config parameter
      * @param config IN/OUT configuration object, NULL for global config
      * @return trace file name
      */
@@ -770,6 +768,7 @@ extern "C" {
     }
 
 
+    /* @@@ restart from here the process to pick-up NULL calls */
     
     /**
      * Set unicast_address in config object

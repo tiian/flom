@@ -284,7 +284,8 @@ int main (int argc, char *argv[])
     }
 
     /* sending lock command */
-    ret_cod = flom_client_lock(&cd, flom_config_get_resource_timeout(NULL),
+    ret_cod = flom_client_lock(NULL, &cd,
+                               flom_config_get_resource_timeout(NULL),
                                locked_element, sizeof(locked_element));
     switch (ret_cod) {
         case FLOM_RC_OK: /* OK, go on */
@@ -350,7 +351,7 @@ int main (int argc, char *argv[])
     }
     
     /* sending unlock command */
-    if (FLOM_RC_OK != (ret_cod = flom_client_unlock(&cd))) {
+    if (FLOM_RC_OK != (ret_cod = flom_client_unlock(NULL, &cd))) {
         g_print("flom_client_unlock: ret_cod=%d (%s)\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(FLOM_ES_GENERIC_ERROR);

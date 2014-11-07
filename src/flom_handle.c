@@ -288,7 +288,9 @@ int flom_handle_lock(flom_handle_t *handle, char *element, size_t element_size)
         }
         /* lock acquisition */
         if (FLOM_RC_OK != (ret_cod = flom_client_lock(
-                               cd, flom_config_get_resource_timeout(NULL),
+                               handle->config, cd,
+                               flom_config_get_resource_timeout(
+                                   handle->config),
                                element, element_size)))
             THROW(CLIENT_LOCK_ERROR);
         /* state update */
@@ -358,7 +360,8 @@ int flom_handle_unlock(flom_handle_t *handle)
             THROW(OBJ_CORRUPTED);
         if (FLOM_HANDLE_STATE_LOCKED == handle->state) {
             /* lock release */
-            if (FLOM_RC_OK != (ret_cod = flom_client_unlock(cd)))
+            if (FLOM_RC_OK != (ret_cod = flom_client_unlock(
+                                   handle->config, cd)))
                 THROW(CLIENT_UNLOCK_ERROR);
             /* state update */
             handle->state = FLOM_HANDLE_STATE_CONNECTED;

@@ -134,6 +134,7 @@ extern "C" {
 
     /**
      * Send lock command to the daemon
+     * @param config IN configuration object
      * @param cd IN connection data
      * @param timeout IN maximum wait time for lock acquisition
      * @param element OUT the obtained element if the locked resource is of
@@ -145,8 +146,8 @@ extern "C" {
      *        returned element
      * @return a reason code
      */
-    int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
-                         char *element, size_t element_size);
+    int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
+                         int timeout, char *element, size_t element_size);
 
 
 
@@ -158,16 +159,18 @@ extern "C" {
      * @return a reason code
      */     
     int flom_client_wait_lock(struct flom_conn_data_s *cd,
-                               struct flom_msg_s *msg, int timeout);
+                              struct flom_msg_s *msg, int timeout);
     
 
     
     /**
      * Send unlock command to the daemon
+     * @param config IN configuration object
      * @param cd IN connection data
      * @return a reason code
      */
-    int flom_client_unlock(struct flom_conn_data_s *cd);
+    int flom_client_unlock(flom_config_t *config,
+                           struct flom_conn_data_s *cd);
 
 
 

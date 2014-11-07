@@ -185,7 +185,7 @@ int flom_client_connect_local(flom_config_t *config,
             THROW(SOCKET_ERROR);
         cd->type = SOCK_STREAM;
         cd->saun.sun_family = AF_LOCAL;
-        strcpy(cd->saun.sun_path, global_config.socket_name);
+        strcpy(cd->saun.sun_path, flom_config_get_socket_name(config));
         cd->addr_len = sizeof(cd->saun);
         if (-1 == connect(cd->fd, (struct sockaddr *)&cd->saun,
                           cd->addr_len)) {
@@ -757,8 +757,8 @@ int flom_client_discover_udp_connect(struct flom_conn_data_s *cd,
 }
 
 
-int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
-                     char *element, size_t element_size)
+int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
+                     int timeout, char *element, size_t element_size)
 {
     enum Exception { G_STRDUP_ERROR
                      , MSG_SERIALIZE_ERROR
@@ -797,16 +797,16 @@ int flom_client_lock(struct flom_conn_data_s *cd, int timeout,
         msg.header.pvs.step = FLOM_MSG_STEP_INCR;
 
         if (NULL == (msg.body.lock_8.resource.name =
-                     g_strdup(global_config.resource_name)))
+                     g_strdup(flom_config_get_resource_name(config))))
             THROW(G_STRDUP_ERROR);
-        msg.body.lock_8.resource.mode = flom_config_get_lock_mode(NULL);
-        msg.body.lock_8.resource.wait = flom_config_get_resource_wait(NULL);
+        msg.body.lock_8.resource.mode = flom_config_get_lock_mode(config);
+        msg.body.lock_8.resource.wait = flom_config_get_resource_wait(config);
         msg.body.lock_8.resource.quantity =
-            flom_config_get_resource_quantity(NULL);
+            flom_config_get_resource_quantity(config);
         msg.body.lock_8.resource.create =
-            flom_config_get_resource_create(NULL);
+            flom_config_get_resource_create(config);
         msg.body.lock_8.resource.lifespan =
-            flom_config_get_resource_idle_lifespan(NULL);
+            flom_config_get_resource_idle_lifespan(config);
 
         /* serialize the request message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
@@ -1095,7 +1095,8 @@ int flom_client_wait_lock(struct flom_conn_data_s *cd,
 
 
 
-int flom_client_unlock(struct flom_conn_data_s *cd)
+int flom_client_unlock(flom_config_t *config,
+                       struct flom_conn_data_s *cd)
 {
     enum Exception { G_STRDUP_ERROR
                      , MSG_SERIALIZE_ERROR
@@ -1116,7 +1117,7 @@ int flom_client_unlock(struct flom_conn_data_s *cd)
         msg.header.pvs.step = FLOM_MSG_STEP_INCR;
 
         if (NULL == (msg.body.lock_8.resource.name =
-                     g_strdup(global_config.resource_name)))
+                     g_strdup(flom_config_get_resource_name(config))))
             THROW(G_STRDUP_ERROR);
 
         /* serialize the request message */

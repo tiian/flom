@@ -570,8 +570,8 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_RESOURCE,
                         FLOM_CONFIG_KEY_NAME, value));
-            if (FLOM_RC_OK != (ret_cod =
-                               flom_config_set_resource_name(config, value))) {
+            if (FLOM_RC_OK != (
+                    ret_cod = flom_config_set_resource_name(config, value))) {
                 print_file_name = TRUE;
                 THROW(CONFIG_SET_RESOURCE_NAME_ERROR);
             } else {
