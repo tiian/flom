@@ -82,11 +82,11 @@ int flom_client_connect(flom_config_t *config,
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_local(
                                    config, cd, start_daemon)))
                 THROW(CLIENT_CONNECT_LOCAL_ERROR);
-        } else if (NULL != flom_config_get_unicast_address(NULL)) {
+        } else if (NULL != flom_config_get_unicast_address(config)) {
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(
                                    config, cd, start_daemon)))
                 THROW(CLIENT_CONNECT_TCP_ERROR);
-        } else if (NULL != flom_config_get_multicast_address(NULL)) {
+        } else if (NULL != flom_config_get_multicast_address(config)) {
             ret_cod = flom_client_discover_udp(config, cd, start_daemon);
             switch (ret_cod) {
                 case FLOM_RC_OK:
@@ -275,8 +275,8 @@ int flom_client_connect_tcp(flom_config_t *config,
         char port_string[100];
         
         FLOM_TRACE(("flom_client_connect_tcp: connecting to address '%s' "
-                    "and port %d\n", flom_config_get_unicast_address(NULL),
-                    flom_config_get_unicast_port(NULL)));
+                    "and port %d\n", flom_config_get_unicast_address(config),
+                    flom_config_get_unicast_port(config)));
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_CANONNAME;
         /* remove this filter to support IPV6, but most of the following
@@ -285,9 +285,10 @@ int flom_client_connect_tcp(flom_config_t *config,
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = IPPROTO_TCP;
         snprintf(port_string, sizeof(port_string), "%u",
-                 flom_config_get_unicast_port(NULL));
+                 flom_config_get_unicast_port(config));
 
-        if (0 != (errcode = getaddrinfo(flom_config_get_unicast_address(NULL),
+                 if (0 != (errcode = getaddrinfo(
+                               flom_config_get_unicast_address(config),
                                         port_string, &hints, &result))) {
             FLOM_TRACE(("flom_client_connect_tcp/getaddrinfo(): "
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
@@ -444,8 +445,8 @@ int flom_client_discover_udp(flom_config_t *config,
         flom_msg_init(&msg);
         
         FLOM_TRACE(("flom_client_discover_udp: using address '%s' "
-                    "and port %d\n", flom_config_get_multicast_address(NULL),
-                    flom_config_get_multicast_port(NULL)));
+                    "and port %d\n", flom_config_get_multicast_address(config),
+                    flom_config_get_multicast_port(config)));
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_CANONNAME;
         /* remove this filter to support IPV6, but most of the following
@@ -454,17 +455,17 @@ int flom_client_discover_udp(flom_config_t *config,
         hints.ai_socktype = SOCK_DGRAM;
         hints.ai_protocol = IPPROTO_UDP;
         snprintf(port, sizeof(port), "%u",
-                 flom_config_get_multicast_port(NULL));
+                 flom_config_get_multicast_port(config));
 
         if (0 != (errcode = getaddrinfo(
-                      flom_config_get_multicast_address(NULL),
+                      flom_config_get_multicast_address(config),
                       port, &hints, &result))) {
             FLOM_TRACE(("flom_client_discover_udp/getaddrinfo(): "
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
             THROW(GETADDRINFO_ERROR);
         } else {
             int sock_opt = 1;
-            u_char sock_opt2 = flom_config_get_discovery_ttl(NULL);
+            u_char sock_opt2 = flom_config_get_discovery_ttl(config);
             
             FLOM_TRACE_ADDRINFO("flom_client_discover_udp/getaddrinfo(): ",
                                 result);
@@ -548,8 +549,8 @@ int flom_client_discover_udp(flom_config_t *config,
             THROW(MSG_SERIALIZE_ERROR);
 
         /* set time-out for receive operation */
-        timeout.tv_sec = flom_config_get_discovery_timeout(NULL)/1000;
-        timeout.tv_usec = (flom_config_get_discovery_timeout(NULL)%1000)*1000;
+        timeout.tv_sec = flom_config_get_discovery_timeout(config)/1000;
+        timeout.tv_usec = (flom_config_get_discovery_timeout(config)%1000)*1000;
         if (-1 == setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
                              sizeof(timeout)))
             THROW(SETSOCKOPT_ERROR);
@@ -557,14 +558,14 @@ int flom_client_discover_udp(flom_config_t *config,
         /* attempt to locate the flom daemon */
         found = FALSE;
         memset(in_buffer, 0, sizeof(in_buffer));
-        for (i=0; i<flom_config_get_discovery_attempts(NULL); ++i) {
+        for (i=0; i<flom_config_get_discovery_attempts(config); ++i) {
             /* send discover message */
             FLOM_TRACE(("flom_client_discover_udp: sending discovery "
                         "message number %d...\n", i));
             if (flom_config_get_verbose(config))
                 g_print("sending UDP multicast datagram to %s/%u ('%s')\n",
-                        flom_config_get_multicast_address(NULL),
-                        flom_config_get_multicast_port(NULL), out_buffer);
+                        flom_config_get_multicast_address(config),
+                        flom_config_get_multicast_port(config), out_buffer);
             if (to_send != (sent = sendto(fd, out_buffer, to_send, 0,
                                           gai->ai_addr, gai->ai_addrlen))) {
                 FLOM_TRACE(("flom_client_discover_udp: sendto() to_send=%d, "
@@ -583,16 +584,16 @@ int flom_client_discover_udp(flom_config_t *config,
                                 "UDP/IP multicast discovery\n"));
                     if (flom_config_get_verbose(config))
                         g_print("no reply from %s/%u\n",
-                        flom_config_get_multicast_address(NULL),
-                        flom_config_get_multicast_port(NULL));
+                                flom_config_get_multicast_address(config),
+                                flom_config_get_multicast_port(config));
                 } else
                     THROW(RECVFROM_ERROR);
             } else {
                 found = TRUE;
                 if (flom_config_get_verbose(config))
                     g_print("reply from %s/%u is '%s'\n",
-                            flom_config_get_multicast_address(NULL),
-                            flom_config_get_multicast_port(NULL), in_buffer);
+                            flom_config_get_multicast_address(config),
+                            flom_config_get_multicast_port(config), in_buffer);
                 break;
             }
         } /* for (i=0; i<flom_config_get_discovery_attempts(); ++i) */
@@ -631,9 +632,9 @@ int flom_client_discover_udp(flom_config_t *config,
         if (0 < strlen(msg.body.discover_16.network.address)) {
             /* update global configuration */
             flom_config_set_unicast_address(
-                NULL, msg.body.discover_16.network.address);
+                config, msg.body.discover_16.network.address);
             flom_config_set_unicast_port(
-                NULL, msg.body.discover_16.network.port);
+                config, msg.body.discover_16.network.port);
             /* switch to normal TCP connect phase */
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(
                                    config, cd, start_daemon)))

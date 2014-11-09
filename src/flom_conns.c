@@ -461,7 +461,7 @@ void flom_conns_trace(const flom_conns_t *conns)
 
 
 
-int flom_conn_set_keepalive(int fd)
+int flom_conn_set_keepalive(flom_config_t *config, int fd)
 {
     enum Exception { NULL_OBJECT
                      , SETSOCKOPT_ERROR1
@@ -486,15 +486,15 @@ int flom_conn_set_keepalive(int fd)
         if (-1 == setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen))
             THROW(SETSOCKOPT_ERROR1);
         /* set tcp_keepalive_time parameter related to SO_KEEPALIVE */
-        optval = flom_config_get_tcp_keepalive_time(NULL);
+        optval = flom_config_get_tcp_keepalive_time(config);
         if (-1 == setsockopt(fd, SOL_TCP, TCP_KEEPIDLE, &optval, optlen))
             THROW(SETSOCKOPT_ERROR2);
         /* set tcp_keepalive_intvl parameter related to SO_KEEPALIVE */
-        optval = flom_config_get_tcp_keepalive_intvl(NULL);
+        optval = flom_config_get_tcp_keepalive_intvl(config);
         if (-1 == setsockopt(fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen))
             THROW(SETSOCKOPT_ERROR3);
         /* set tcp_keepalive_probes parameter related to SO_KEEPALIVE */
-        optval = flom_config_get_tcp_keepalive_probes(NULL);
+        optval = flom_config_get_tcp_keepalive_probes(config);
         if (-1 == setsockopt(fd, SOL_TCP, TCP_KEEPCNT, &optval, optlen))
             THROW(SETSOCKOPT_ERROR4);
         

@@ -81,20 +81,22 @@ extern "C" {
 
     /**
      * Create a listen network (AF_INET, TCP/IP) socket to serve the clients
+     * @param config IN configuration object, NULL for global config
      * @param conns OUT connections object
      * @result a reason code
      */
-    int flom_listen_tcp(flom_conns_t *conns);
+    int flom_listen_tcp(flom_config_t *config, flom_conns_t *conns);
 
 
 
     /**
      * Create a listen network (AF_INET, TCP/IP) socket to serve the clients;
      * it uses the configured TCP/IP unicast address
+     * @param config IN configuration object, NULL for global config
      * @param conns OUT connections object
      * @result a reason code
      */
-    int flom_listen_tcp_configured(flom_conns_t *conns);
+    int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns);
 
 
 
@@ -102,20 +104,22 @@ extern "C" {
      * Create a listen network (AF_INET, TCP/IP) socket to serve the clients;
      * it uses an automatic TCP/IP unicast address using INADDR_ANY and an
      * ephemeral port
+     * @param config IN configuration object, NULL for global config
      * @param conns OUT connections object
      * @result a reason code
      */
-    int flom_listen_tcp_automatic(flom_conns_t *conns);
+    int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns);
 
 
 
     /**
      * Create a listen network (AF_INET, UDP/IP, multicast) to answer
      * location inquiry from other flom commands
+     * @param config IN configuration object, NULL for global config
      * @param conns OUT connections object
      * @result a reason code
      */     
-    int flom_listen_udp(flom_conns_t *conns);
+    int flom_listen_udp(flom_config_t *config, flom_conns_t *conns);
 
     
 
@@ -225,12 +229,14 @@ extern "C" {
 
     /**
      * Reply to a discover multicast message: I'm here!
+     * @param config IN configuration object, NULL for global config
      * @param fd IN file descriptor that must be used to reply to client
      * @param src_addr IN address extracted from discover packet
      * @param addrlen IN size of src_addr structure
      * @return a reason code
      */
-    int flom_accept_discover_reply(int fd, const struct sockaddr *src_addr,
+    int flom_accept_discover_reply(flom_config_t *config, int fd,
+                                   const struct sockaddr *src_addr,
                                    socklen_t addrlen);
 
 

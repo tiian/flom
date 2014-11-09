@@ -257,7 +257,7 @@ typedef enum flom_bool_value_e {
 /**
  * This struct contains all the values necessary for configuration
  */
-typedef struct flom_config {
+typedef struct flom_config_s {
     /**
      * Path of UNIX socket / IP name or address used for connection
      */
@@ -768,7 +768,6 @@ extern "C" {
     }
 
 
-    /* @@@ restart from here the process to pick-up NULL calls */
     
     /**
      * Set unicast_address in config object

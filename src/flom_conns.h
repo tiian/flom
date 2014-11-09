@@ -46,6 +46,7 @@
 
 
 
+#include "flom_config.h"
 #include "flom_msg.h"
 
 
@@ -442,10 +443,11 @@ extern "C" {
     /**
      * Set SO_KEEPALIVE and correlated parameters for the socket associated
      * to the passed file descriptor
+     * @param config IN configuration object, NULL for global config
      * @param fd IN/OUT socket file descriptor
      * @return a reason code
      */
-    int flom_conn_set_keepalive(int fd);
+    int flom_conn_set_keepalive(flom_config_t *config, int fd);
 
 
     

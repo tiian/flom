@@ -29,7 +29,3 @@
 
 
 
-/* @@@
- * move configuration from "global" to "local":
- *
- */
