@@ -83,6 +83,10 @@ int flom_handle_init(flom_handle_t *handle)
         /* initialize config object */
         if (FLOM_RC_OK != (ret_cod = flom_config_clone(handle->config)))
             THROW(CONFIG_INIT_ERROR);
+        /* clients can not fork a new flom daemon: this restriction is
+         * necessary to avoid the side effects related to daemonization that
+         * can affect a general purpose environment... This is a CLIENT!!! */
+        flom_config_set_lifespan(handle->config, 0);
         /* state reset */
         handle->state = FLOM_HANDLE_STATE_INIT;
         
@@ -400,6 +404,26 @@ int flom_handle_unlock(flom_handle_t *handle)
     FLOM_TRACE(("flom_handle_unlock/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+/*
+ * Getter/setter methods to manage config
+ */
+
+
+
+int flom_handle_set_socket_name(flom_handle_t *handle,
+                                const char *socket_name) {
+    return flom_config_set_socket_name(
+        handle->config, (const gchar *)socket_name);
+}
+
+
+
+const char *flom_handle_get_socket_name(flom_handle_t *handle) {
+    return (const char *)flom_config_get_socket_name(handle->config);
 }
 
 

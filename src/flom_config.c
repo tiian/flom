@@ -1120,7 +1120,7 @@ int flom_config_clone(flom_config_t *config)
 
 
 int flom_config_set_socket_name(flom_config_t *config,
-                                gchar *socket_name) {
+                                const gchar *socket_name) {
     FLOM_TRACE(("flom_config_set_socket_name(%s)\n", socket_name));
     /* default config object */
     if (NULL == config)

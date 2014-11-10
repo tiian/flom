@@ -21,9 +21,6 @@
 
 
 
-#include <glib.h>
-
-
 
 #include "flom_errors.h"
 
@@ -72,11 +69,11 @@ typedef struct flom_handle_s {
     /**
      * Connection data
      */
-    gpointer              conn_data;
+    void                 *conn_data;
     /**
      * Configuration data
      */
-    gpointer              config;
+    void                 *config;
 } flom_handle_t;
 
 
@@ -150,6 +147,26 @@ extern "C" {
     int flom_handle_unlock(flom_handle_t *handle);
 
 
+
+    /**
+     * Set UNIX (AF_LOCAL) socket name for client/server communication
+     * @param handle IN/OUT library handle
+     * @param socket_name IN the name that must be used for the socket
+     * @return a reason code
+     */
+    int flom_handle_set_socket_name(flom_handle_t *handle,
+                                    const char *socket_name);
+
+
+    
+    /**
+     * Get UNIX (AF_LOCAL) socket name for client/server communication
+     * @param handle IN/OUT library handle
+     * @return the name that must be used for the socket
+     */
+    const char *flom_handle_get_socket_name(flom_handle_t *handle);
+
+    
     
 #ifdef __cplusplus
 }

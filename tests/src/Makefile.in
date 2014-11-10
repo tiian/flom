@@ -34,7 +34,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = case0000$(EXEEXT)
+noinst_PROGRAMS = case0000$(EXEEXT) case0001$(EXEEXT) \
+	case0002$(EXEEXT)
 subdir = tests/src
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -50,6 +51,14 @@ am_case0000_OBJECTS = case0000.$(OBJEXT)
 case0000_OBJECTS = $(am_case0000_OBJECTS)
 case0000_LDADD = $(LDADD)
 case0000_DEPENDENCIES = ../../src/libflom.la
+am_case0001_OBJECTS = case0001.$(OBJEXT)
+case0001_OBJECTS = $(am_case0001_OBJECTS)
+case0001_LDADD = $(LDADD)
+case0001_DEPENDENCIES = ../../src/libflom.la
+am_case0002_OBJECTS = case0002.$(OBJEXT)
+case0002_OBJECTS = $(am_case0002_OBJECTS)
+case0002_LDADD = $(LDADD)
+case0002_DEPENDENCIES = ../../src/libflom.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -63,8 +72,9 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(case0000_SOURCES)
-DIST_SOURCES = $(case0000_SOURCES)
+SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) $(case0002_SOURCES)
+DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
+	$(case0002_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -236,6 +246,8 @@ AM_CPPFLAGS = -I../../src
 AM_CFLAGS = -Wall
 LDADD = @GLIB2_LIBS@ ../../src/libflom.la
 case0000_SOURCES = case0000.c
+case0001_SOURCES = case0001.c
+case0002_SOURCES = case0002.c
 all: all-am
 
 .SUFFIXES:
@@ -282,6 +294,12 @@ clean-noinstPROGRAMS:
 case0000$(EXEEXT): $(case0000_OBJECTS) $(case0000_DEPENDENCIES) 
 	@rm -f case0000$(EXEEXT)
 	$(LINK) $(case0000_OBJECTS) $(case0000_LDADD) $(LIBS)
+case0001$(EXEEXT): $(case0001_OBJECTS) $(case0001_DEPENDENCIES) 
+	@rm -f case0001$(EXEEXT)
+	$(LINK) $(case0001_OBJECTS) $(case0001_LDADD) $(LIBS)
+case0002$(EXEEXT): $(case0002_OBJECTS) $(case0002_DEPENDENCIES) 
+	@rm -f case0002$(EXEEXT)
+	$(LINK) $(case0002_OBJECTS) $(case0002_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -290,6 +308,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0000.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0001.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0002.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

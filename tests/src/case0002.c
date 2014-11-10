@@ -30,13 +30,26 @@ void static_handle_happy_path(void) {
     int ret_cod;
     flom_handle_t my_handle;
     char locked_element[100];
-    
+
     /* initialize a new handle */
     if (FLOM_RC_OK != (ret_cod = flom_handle_init(&my_handle))) {
         fprintf(stderr, "flom_handle_init() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
-    }    
+    }
+    /* get current AF_UNIX/PF_LOCAL socket_name */
+    printf("flom_handle_get_socket_name() = '%s'\n",
+           flom_handle_get_socket_name(&my_handle));
+    /* set a new AF_UNIX/PF_LOCAL socket_name */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_socket_name(
+                           &my_handle, "/tmp/foo_socket_name"))) {
+        fprintf(stderr, "flom_handle_set_socket_name() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* get current AF_UNIX/PF_LOCAL socket_name again */
+    printf("flom_handle_get_socket_name() = '%s'\n",
+           flom_handle_get_socket_name(&my_handle));
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle, locked_element,
                                            sizeof(locked_element)))) {

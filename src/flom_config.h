@@ -454,7 +454,7 @@ extern "C" {
      * @return a reason code
      */
     int flom_config_set_socket_name(flom_config_t *config,
-                                    gchar *socket_name);
+                                    const gchar *socket_name);
 
 
 
