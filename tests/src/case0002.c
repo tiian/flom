@@ -42,14 +42,56 @@ void static_handle_happy_path(void) {
            flom_handle_get_socket_name(&my_handle));
     /* set a new AF_UNIX/PF_LOCAL socket_name */
     if (FLOM_RC_OK != (ret_cod = flom_handle_set_socket_name(
-                           &my_handle, "/tmp/foo_socket_name"))) {
+                           &my_handle, "/tmp/flom_socket_name"))) {
         fprintf(stderr, "flom_handle_set_socket_name() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
-    /* get current AF_UNIX/PF_LOCAL socket_name again */
+    /* get new AF_UNIX/PF_LOCAL socket_name */
     printf("flom_handle_get_socket_name() = '%s'\n",
            flom_handle_get_socket_name(&my_handle));
+    /* get current trace filename */
+    printf("flom_handle_get_trace_filename() = '%s'\n",
+           flom_handle_get_trace_filename(&my_handle));
+    /* set a new trace filename */
+    flom_handle_set_trace_filename(&my_handle, "/tmp/flom.trc");
+    /* get new trace filename */
+    printf("flom_handle_get_trace_filename() = '%s'\n",
+           flom_handle_get_trace_filename(&my_handle));
+    /* get current resource name */
+    printf("flom_handle_get_resource_name() = '%s'\n",
+           flom_handle_get_resource_name(&my_handle));
+    /* set a new resource name */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_resource_name(
+                           &my_handle, "myResource"))) {
+        fprintf(stderr, "flom_handle_set_resource_name() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* get new resource name */
+    printf("flom_handle_get_resource_name() = '%s'\n",
+           flom_handle_get_resource_name(&my_handle));
+    /* get current value for resource create property */
+    printf("flom_handle_get_resource_create() = %d\n",
+           flom_handle_get_resource_create(&my_handle));
+    /* set a new value for resource create property */
+    flom_handle_set_resource_create(&my_handle, FALSE);
+    /* get new value for resource create property */
+    printf("flom_handle_get_resource_create() = %d\n",
+           flom_handle_get_resource_create(&my_handle));
+    /* set a new value for resource create property */
+    flom_handle_set_resource_create(&my_handle, TRUE);
+    /* get new value for resource create property */
+    printf("flom_handle_get_resource_create() = %d\n",
+           flom_handle_get_resource_create(&my_handle));
+    /* get current value for resource timeout property */
+    printf("flom_handle_get_resource_timeout() = %d\n",
+           flom_handle_get_resource_timeout(&my_handle));
+    /* set a new value for resource timeout property */
+    flom_handle_set_resource_timeout(&my_handle, 1000);
+    /* get new value for resource timeout property */
+    printf("flom_handle_get_resource_timeout() = %d\n",
+           flom_handle_get_resource_timeout(&my_handle));
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle, locked_element,
                                            sizeof(locked_element)))) {
@@ -86,6 +128,61 @@ void dynamic_handle_happy_path(void) {
         fprintf(stderr, "flom_handle_init() returned %p\n", my_handle);
         exit(1);
     }    
+    /* get current AF_UNIX/PF_LOCAL socket_name */
+    printf("flom_handle_get_socket_name() = '%s'\n",
+           flom_handle_get_socket_name(my_handle));
+    /* set a new AF_UNIX/PF_LOCAL socket_name */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_socket_name(
+                           my_handle, "/tmp/flom_socket_name"))) {
+        fprintf(stderr, "flom_handle_set_socket_name() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* get new AF_UNIX/PF_LOCAL socket_name */
+    printf("flom_handle_get_socket_name() = '%s'\n",
+           flom_handle_get_socket_name(my_handle));
+    /* get current trace filename */
+    printf("flom_handle_get_trace_filename() = '%s'\n",
+           flom_handle_get_trace_filename(my_handle));
+    /* set a new trace filename */
+    flom_handle_set_trace_filename(my_handle, "/tmp/flom.trc");
+    /* get new trace filename */
+    printf("flom_handle_get_trace_filename() = '%s'\n",
+           flom_handle_get_trace_filename(my_handle));
+    /* get current resource name */
+    printf("flom_handle_get_resource_name() = '%s'\n",
+           flom_handle_get_resource_name(my_handle));
+    /* set a new resource name */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_resource_name(
+                           my_handle, "myResource"))) {
+        fprintf(stderr, "flom_handle_set_resource_name() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* get new resource name */
+    printf("flom_handle_get_resource_name() = '%s'\n",
+           flom_handle_get_resource_name(my_handle));
+    /* get current value for resource create property */
+    printf("flom_handle_get_resource_create() = %d\n",
+           flom_handle_get_resource_create(my_handle));
+    /* set a new value for resource create property */
+    flom_handle_set_resource_create(my_handle, FALSE);
+    /* get new value for resource create property */
+    printf("flom_handle_get_resource_create() = %d\n",
+           flom_handle_get_resource_create(my_handle));
+    /* set a new value for resource create property */
+    flom_handle_set_resource_create(my_handle, TRUE);
+    /* get new value for resource create property */
+    printf("flom_handle_get_resource_create() = %d\n",
+           flom_handle_get_resource_create(my_handle));
+    /* get current value for resource timeout property */
+    printf("flom_handle_get_resource_timeout() = %d\n",
+           flom_handle_get_resource_timeout(my_handle));
+    /* set a new value for resource timeout property */
+    flom_handle_set_resource_timeout(my_handle, 1000);
+    /* get new value for resource timeout property */
+    printf("flom_handle_get_resource_timeout() = %d\n",
+           flom_handle_get_resource_timeout(my_handle));
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle, locked_element,
                                                   sizeof(locked_element)))) {

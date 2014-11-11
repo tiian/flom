@@ -2,6 +2,8 @@
 
 FLoM (Free Lock Manager) is an open source and free lock manager designed to
 serialize and synchronize shell command execution.
+Since version 0.9.0 it's a library to synchronize your own program too; basic
+usage is shown by examples in tests/src directory.
 
 A list of implemented use cases is listed at this URL: 
 http://sourceforge.net/p/flom/wiki/FLOM%20by%20examples/
@@ -26,6 +28,11 @@ This is a brief list of the available features:
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+
+Note: libflom is the library distributed along with FLoM; it's free software:
+      you can redistribute it and/or modify under the terms of GNU Lesser
+      General Public License version 2.1 as published by the Free Software
+      Foundation.
 
 Download the tarball from SourceForge: https://sourceforge.net/projects/flom/
 and install FLoM using standard GNU build chain: 

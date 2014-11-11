@@ -151,22 +151,113 @@ extern "C" {
     /**
      * Set UNIX (AF_LOCAL) socket name for client/server communication
      * @param handle IN/OUT library handle
-     * @param socket_name IN the name that must be used for the socket
+     * @param value IN the name that must be used for the socket
      * @return a reason code
      */
     int flom_handle_set_socket_name(flom_handle_t *handle,
-                                    const char *socket_name);
+                                    const char *value);
 
 
     
     /**
      * Get UNIX (AF_LOCAL) socket name for client/server communication
-     * @param handle IN/OUT library handle
+     * @param handle IN library handle
      * @return the name that must be used for the socket
      */
-    const char *flom_handle_get_socket_name(flom_handle_t *handle);
+    const char *flom_handle_get_socket_name(const flom_handle_t *handle);
 
     
+    
+    /**
+     * Set trace filename
+     * @param handle IN/OUT library handle
+     * @param value IN the new name for trace file
+     */
+    void flom_handle_set_trace_filename(
+        flom_handle_t *handle, const char *value);
+
+
+
+    /**
+     * Get trace filename
+     * @param handle IN library handle
+     * @return the current value for trace_file properties
+     */
+    const char *flom_handle_get_trace_filename(const flom_handle_t *handle);
+
+
+    
+    /**
+     * Set resource name (the name of the resource that can be locked and
+     * unlocked)
+     * @param handle IN/OUT library handle
+     * @param value IN name of the resource that can be locked and unlocked
+     * @return a reason code
+     */
+    int flom_handle_set_resource_name(flom_handle_t *handle,
+                                      const char *value);
+
+
+    
+    /**
+     * Get resource name (the name of the resource that can be locked and
+     * unlocked)
+     * @param handle IN library handle
+     * @return the name of the resource that can be locked and unlocked
+     */
+    const char *flom_handle_get_resource_name(const flom_handle_t *handle);
+
+    
+
+    /**
+     * Set resource_create boolean property
+     * @param handle IN/OUT library handle
+     * @param value IN new value of the attribute: if TRUE,
+     *              @ref flom_handle_lock will create a new resource if it's
+     *              not yet available; if FALSE, @ref flom_handle_lock will
+     *              not create a new resource if it's not available
+     */
+    void flom_handle_set_resource_create(flom_handle_t *handle, int value);
+
+
+
+    /**
+     * Get resource_create boolean property
+     * @param handle IN library handle
+     * return the value value of the attribute: if TRUE, @ref flom_handle_lock
+     * will create a new resource if it's not yet available; if FALSE,
+     * @ref flom_handle_lock will not create a new resource if it's not
+     * available
+     */
+    int flom_handle_get_resource_create(const flom_handle_t *handle);
+
+
+    
+    /**
+     * Set resource_timeout property: how long a lock operation will wait if
+     * the resource is locked by another client
+     * @param handle IN/OUT library handle
+     * @param value IN new value of the attribute: <BR>
+     *        0: no wait <BR>
+     *        >0: maximum number of milliseconds to wait <BR>
+     *        <0: infinite number of milliseconds to wait
+     */
+    void flom_handle_set_resource_timeout(flom_handle_t *handle, int value);
+
+
+
+    /**
+     * Get resource_time property: how long a lock operation will wait if
+     * the resource is locked by another client
+     * @param handle IN library handle
+     * @return the current value of the attribute: <BR>
+     *        0: no wait <BR>
+     *        >0: maximum number of milliseconds to wait <BR>
+     *        <0: infinite number of milliseconds to wait
+     */
+    int flom_handle_get_resource_timeout(const flom_handle_t *handle);
+
+
     
 #ifdef __cplusplus
 }

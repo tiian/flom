@@ -1164,7 +1164,7 @@ void flom_config_set_command_trace_file(
 
 
 int flom_config_set_resource_name(flom_config_t *config,
-                                  gchar *resource_name)
+                                  const gchar *resource_name)
 {
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     

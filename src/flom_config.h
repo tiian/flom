@@ -578,7 +578,7 @@ extern "C" {
      * @return a reason code
      */
     int flom_config_set_resource_name(flom_config_t *config,
-                                      gchar *resource_name);
+                                      const gchar *resource_name);
 
 
 

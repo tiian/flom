@@ -10,6 +10,7 @@ AT_CHECK([case0001], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Getter and setter methods])
-AT_CHECK([flom -d -1 -s /tmp/foo_socket_name -- true], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [0], [ignore], [ignore])
+AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
 AT_CHECK([case0002], [0], [ignore], [ignore])
 AT_CLEANUP
