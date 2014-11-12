@@ -656,7 +656,6 @@ extern "C" {
      */
     static inline void flom_config_set_resource_timeout(
         flom_config_t *config, gint timeout) {
-        if (0 > timeout) timeout = -timeout;
         if (NULL == config)
             global_config.resource_timeout = timeout;
         else

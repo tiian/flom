@@ -1,6 +1,7 @@
 Road map:
 
 client library: create test cases to check the real behavior of setter methods
+remove config property resource_wait; remove from man page too
 
 IPv6
 

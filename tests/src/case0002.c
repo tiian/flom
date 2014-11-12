@@ -88,7 +88,7 @@ void static_handle_happy_path(void) {
     printf("flom_handle_get_resource_timeout() = %d\n",
            flom_handle_get_resource_timeout(&my_handle));
     /* set a new value for resource timeout property */
-    flom_handle_set_resource_timeout(&my_handle, 1000);
+    flom_handle_set_resource_timeout(&my_handle, -1);
     /* get new value for resource timeout property */
     printf("flom_handle_get_resource_timeout() = %d\n",
            flom_handle_get_resource_timeout(&my_handle));
@@ -179,7 +179,7 @@ void dynamic_handle_happy_path(void) {
     printf("flom_handle_get_resource_timeout() = %d\n",
            flom_handle_get_resource_timeout(my_handle));
     /* set a new value for resource timeout property */
-    flom_handle_set_resource_timeout(my_handle, 1000);
+    flom_handle_set_resource_timeout(my_handle, -1);
     /* get new value for resource timeout property */
     printf("flom_handle_get_resource_timeout() = %d\n",
            flom_handle_get_resource_timeout(my_handle));

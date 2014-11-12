@@ -133,6 +133,20 @@ AT_DATA([flom.conf],
 [@_CONFIG_GROUP_NETWORK@]
 ]])
 AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_GROUP_RESOURCE@ | grep @_CONFIG_KEY_TIMEOUT@], [0], [expout], [ignore])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_RESOURCE@]/@_CONFIG_KEY_TIMEOUT@=-100
+]])
+AT_CHECK([flom -V -o -100 -- ls | grep @_CONFIG_GROUP_RESOURCE@ | grep @_CONFIG_KEY_TIMEOUT@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --resource-timeout=-100 -- ls | grep @_CONFIG_GROUP_RESOURCE@ | grep @_CONFIG_KEY_TIMEOUT@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+@_CONFIG_KEY_TIMEOUT@=-100
+[@_CONFIG_GROUP_DAEMON@]
+[@_CONFIG_GROUP_NETWORK@]
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_GROUP_RESOURCE@ | grep @_CONFIG_KEY_TIMEOUT@], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Resource quantity: -q, --resource-quantity])
