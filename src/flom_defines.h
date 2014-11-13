@@ -229,6 +229,13 @@
 
 
 
+/**
+ * String equivalent of IP4 INADDR_ANY constant
+ */
+#define FLOM_INADDR_ANY_STRING     "0.0.0.0"
+
+
+
 #ifdef HAVE_STRCASESTR
 /**
  * If "strcasstr" is available, strings are checked case insensitive; else
