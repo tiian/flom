@@ -3,6 +3,8 @@ LOG:
          - 0.9.0 Client library API
 	Fixed a bug related to negative resource timeouts, for example 
 	"-o -100" or "--resource-timeout=-100"
+	Fixing this bug: 
+	https://sourceforge.net/p/flom/discussion/general/thread/cf59b6dc/
 
 20141003 - 0.7.1 Implemented a garbage collector for hierarchical resources
 	Fixed a subtle bug exploited by "-d -1" option on the daemon side when

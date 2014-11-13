@@ -277,7 +277,7 @@ lib_LTLIBRARIES = libflom.la
 libflom_la_LDFLAGS = -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
 flom_LDADD = @GLIB2_LIBS@ libflom.la
 EXTRA_DIST = flom_errors.h.in
-dist_include_HEADERS = flom.h flom_handle.h
+dist_include_HEADERS = flom.h flom_handle.h flom_types.h
 nodist_include_HEADERS = flom_errors.h
 noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_daemon_mngmnt.h \

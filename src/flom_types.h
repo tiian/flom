@@ -16,14 +16,49 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef FLOM_TYPES_H
+# define FLOM_TYPES_H
 
-/*
- * Use this header file to include the stuff necessary to use libflom library
+
+
+/**
+ * Lock mode that can be asked for a resource
  */
+typedef enum flom_lock_mode_e {
+    /**
+     * Null lock mode
+     */
+    FLOM_LOCK_MODE_NL,
+    /**
+     * Concurrent read lock mode
+     */
+    FLOM_LOCK_MODE_CR,
+    /**
+     * Concurrent write lock mode
+     */
+    FLOM_LOCK_MODE_CW,
+    /**
+     * Protected read / shared lock mode
+     */
+    FLOM_LOCK_MODE_PR,
+    /**
+     * Protected write / update lock mode
+     */
+    FLOM_LOCK_MODE_PW,
+    /**
+     * Exclusive lock mode
+     */
+    FLOM_LOCK_MODE_EX,
+    /**
+     * Number of lock modes
+     */
+    FLOM_LOCK_MODE_N,
+    /**
+     * Special value used to encode an invalid value
+     */
+    FLOM_LOCK_MODE_INVALID
+} flom_lock_mode_t;
 
-#ifndef FLOM_H
-# define FLOM_H
-# include "flom_errors.h"
-# include "flom_handle.h"
-# include "flom_types.h"
+
+
 #endif /* FLOM_HANDLE_H */

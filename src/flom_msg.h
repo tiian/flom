@@ -43,6 +43,10 @@
 
 
 
+#include "flom_types.h"
+
+
+
 /* save old FLOM_TRACE_MODULE and set a new value */
 #ifdef FLOM_TRACE_MODULE
 # define FLOM_TRACE_MODULE_SAVE FLOM_TRACE_MODULE
@@ -126,46 +130,6 @@ typedef enum flom_msg_state_e {
  * Default increment for message step
  */
 #define FLOM_MSG_STEP_INCR      8
-
-
-
-/**
- * Lock mode that can be asked for a resource
- */
-typedef enum flom_lock_mode_e {
-    /**
-     * Null lock mode
-     */
-    FLOM_LOCK_MODE_NL,
-    /**
-     * Concurrent read lock mode
-     */
-    FLOM_LOCK_MODE_CR,
-    /**
-     * Concurrent write lock mode
-     */
-    FLOM_LOCK_MODE_CW,
-    /**
-     * Protected read / shared lock mode
-     */
-    FLOM_LOCK_MODE_PR,
-    /**
-     * Protected write / update lock mode
-     */
-    FLOM_LOCK_MODE_PW,
-    /**
-     * Exclusive lock mode
-     */
-    FLOM_LOCK_MODE_EX,
-    /**
-     * Number of lock modes
-     */
-    FLOM_LOCK_MODE_N,
-    /**
-     * Special value used to encode an invalid value
-     */
-    FLOM_LOCK_MODE_INVALID
-} flom_lock_mode_t;
 
 
 

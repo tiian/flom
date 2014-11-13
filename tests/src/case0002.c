@@ -92,6 +92,22 @@ void static_handle_happy_path(void) {
     /* get new value for resource timeout property */
     printf("flom_handle_get_resource_timeout() = %d\n",
            flom_handle_get_resource_timeout(&my_handle));
+    /* get current value for resource quantity property */
+    printf("flom_handle_get_resource_quantity() = %d\n",
+           flom_handle_get_resource_quantity(&my_handle));
+    /* set a new value for resource quantity property */
+    flom_handle_set_resource_quantity(&my_handle, 3);
+    /* get new value for resource quantity property */
+    printf("flom_handle_get_resource_quantity() = %d\n",
+           flom_handle_get_resource_quantity(&my_handle));
+    /* get current value for resource lock mode property */
+    printf("flom_handle_get_lock_mode() = %d\n",
+           flom_handle_get_lock_mode(&my_handle));
+    /* set a new value for resource lock mode property */
+    flom_handle_set_lock_mode(&my_handle, FLOM_LOCK_MODE_PW);
+    /* get new value for resource lock mode property */
+    printf("flom_handle_get_lock_mode() = %d\n",
+           flom_handle_get_lock_mode(&my_handle));
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle, locked_element,
                                            sizeof(locked_element)))) {
@@ -183,6 +199,22 @@ void dynamic_handle_happy_path(void) {
     /* get new value for resource timeout property */
     printf("flom_handle_get_resource_timeout() = %d\n",
            flom_handle_get_resource_timeout(my_handle));
+    /* get current value for resource quantity property */
+    printf("flom_handle_get_resource_quantity() = %d\n",
+           flom_handle_get_resource_quantity(my_handle));
+    /* set a new value for resource quantity property */
+    flom_handle_set_resource_quantity(my_handle, 3);
+    /* get new value for resource quantity property */
+    printf("flom_handle_get_resource_quantity() = %d\n",
+           flom_handle_get_resource_quantity(my_handle));
+    /* get current value for resource lock mode property */
+    printf("flom_handle_get_lock_mode() = %d\n",
+           flom_handle_get_lock_mode(my_handle));
+    /* set a new value for resource lock mode property */
+    flom_handle_set_lock_mode(my_handle, FLOM_LOCK_MODE_PW);
+    /* get new value for resource lock mode property */
+    printf("flom_handle_get_lock_mode() = %d\n",
+           flom_handle_get_lock_mode(my_handle));
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle, locked_element,
                                                   sizeof(locked_element)))) {

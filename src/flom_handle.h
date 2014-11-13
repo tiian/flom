@@ -21,8 +21,8 @@
 
 
 
-
 #include "flom_errors.h"
+#include "flom_types.h"
 
 
 
@@ -256,6 +256,49 @@ extern "C" {
      *        <0: infinite number of milliseconds to wait
      */
     int flom_handle_get_resource_timeout(const flom_handle_t *handle);
+
+
+    
+    /**
+     * Set resource_quantity property: how many numeric resources you will
+     * lock when calling @ref flom_handle_lock
+     * @param handle IN/OUT library handle
+     * @param value IN the new value for the attribute
+     */
+    void flom_handle_set_resource_quantity(flom_handle_t *handle, int value);
+
+
+
+    /**
+     * Get resource_quantity property: how many numeric resources you will
+     * lock when calling @ref flom_handle_lock
+     * @param handle IN library handle
+     * @return the current value of the attribute: <BR>
+     */
+    int flom_handle_get_resource_quantity(const flom_handle_t *handle);
+
+
+    
+    /**
+     * Set lock_mode property: how a simple or hierarchical resource will
+     * be locked when calling @ref flom_handle_lock; lock modes are explained
+     * here: http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
+     * @param config IN/OUT configuration object, NULL for global config
+     * @param value IN the new value for the attribute
+     */
+    void flom_handle_set_lock_mode(flom_handle_t *handle,
+                                   flom_lock_mode_t value);
+
+
+
+    /**
+     * Get lock_mode property: how a simple or hierarchical resource will
+     * be locked when calling @ref flom_handle_lock; lock modes are explained
+     * here: http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
+     * @param config IN configuration object, NULL for global config
+     * @return current lock mode
+     */
+    flom_lock_mode_t flom_handle_get_lock_mode(const flom_handle_t *handle);
 
 
     

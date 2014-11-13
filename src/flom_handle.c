@@ -499,6 +499,41 @@ int flom_handle_get_resource_timeout(const flom_handle_t *handle) {
 
 
 
+void flom_handle_set_resource_quantity(flom_handle_t *handle, int value) {
+    FLOM_TRACE(("flom_handle_set_resource_quantity: "
+                "old value=%d, new value=%d'\n",
+                flom_config_get_resource_quantity(handle->config), value));
+    flom_config_set_resource_quantity(handle->config, (int)value);
+}
+
+
+
+int flom_handle_get_resource_quantity(const flom_handle_t *handle) {
+    FLOM_TRACE(("flom_handle_get_resource_quantity: value=%d\n",
+                flom_config_get_resource_quantity(handle->config)));
+    return (int)flom_config_get_resource_quantity(handle->config);
+}
+
+
+
+void flom_handle_set_lock_mode(flom_handle_t *handle,
+                               flom_lock_mode_t value) {
+    FLOM_TRACE(("flom_handle_set_lock_mode: "
+                "old value=%d, new value=%d'\n",
+                flom_config_get_lock_mode(handle->config), value));
+    flom_config_set_lock_mode(handle->config, value);
+}
+
+
+
+flom_lock_mode_t flom_handle_get_lock_mode(const flom_handle_t *handle) {
+    FLOM_TRACE(("flom_handle_get_lock_mode: value=%d\n",
+                flom_config_get_lock_mode(handle->config)));
+    return flom_config_get_lock_mode(handle->config);
+}
+
+
+
 /*
  * Internal library methods not intended for application development
  */
