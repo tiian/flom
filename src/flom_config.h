@@ -600,13 +600,7 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param value IN new (boolean) value
      */
-    static inline void flom_config_set_resource_wait(
-        flom_config_t *config, int value) {
-        if (NULL == config)
-            global_config.resource_wait = value;
-        else
-            config->resource_wait = value;
-    }
+    void flom_config_set_resource_wait(flom_config_t *config, int value);
 
 
 
@@ -627,13 +621,7 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param value IN new (boolean) value
      */
-    static inline void flom_config_set_resource_create(
-        flom_config_t *config, int value) {
-        if (NULL == config)
-            global_config.resource_create = value;
-        else
-            config->resource_create = value;
-    }
+    void flom_config_set_resource_create(flom_config_t *config, int value);
 
 
 
@@ -654,13 +642,7 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param timeout IN milliseconds
      */
-    static inline void flom_config_set_resource_timeout(
-        flom_config_t *config, gint timeout) {
-        if (NULL == config)
-            global_config.resource_timeout = timeout;
-        else
-            config->resource_timeout = timeout;
-    }
+    void flom_config_set_resource_timeout(flom_config_t *config, gint timeout);
 
 
 
@@ -682,16 +664,7 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param value IN number of resource to lock
      */
-    static inline void flom_config_set_resource_quantity(
-        flom_config_t *config, gint value) {
-        if (0 > value) value = -value;
-        if (0 != value) {
-            if (NULL == config)
-                global_config.resource_quantity = value;
-            else
-                config->resource_quantity = value;
-        }
-    }
+    void flom_config_set_resource_quantity(flom_config_t *config, gint value);
 
 
 
@@ -713,13 +686,8 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param lock_mode IN lock mode
      */
-    static inline void flom_config_set_lock_mode(
-        flom_config_t *config, flom_lock_mode_t lock_mode) {
-        if (NULL == config)
-            global_config.lock_mode = lock_mode;
-        else
-            config->lock_mode = lock_mode;
-    }
+    void flom_config_set_lock_mode(flom_config_t *config,
+                                   flom_lock_mode_t lock_mode);
 
 
 
@@ -741,16 +709,8 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param value IN number of resource to lock
      */
-    static inline void flom_config_set_resource_idle_lifespan(
-        flom_config_t *config, gint value) {
-        if (0 > value) value = -value;
-        if (0 != value) {
-            if (NULL == config)
-                global_config.resource_idle_lifespan = value;
-            else
-                config->resource_idle_lifespan = value;
-        }
-    }
+    void flom_config_set_resource_idle_lifespan(flom_config_t *config,
+                                                gint value);
 
 
 
@@ -773,20 +733,9 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param address IN set the new value for unicast_address property
      */
-    static inline void flom_config_set_unicast_address(
-        flom_config_t *config, const gchar *address) {
-        if (NULL == config) {
-            if (NULL != global_config.unicast_address)
-                g_free(global_config.unicast_address);
-            global_config.unicast_address = g_strdup(address);
-        } else {
-            if (NULL != config->unicast_address)
-                g_free(config->unicast_address);
-            config->unicast_address = g_strdup(address);
-        }
-    }
+    void flom_config_set_unicast_address(flom_config_t *config,
+                                         const gchar *address);
         
-
 
 
     /**
@@ -807,14 +756,7 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param port IN TCP/IP port
      */
-    static inline void flom_config_set_unicast_port(
-        flom_config_t *config, gint port) {
-        if (0 > port) port = -port;
-        if (NULL == config)
-            global_config.unicast_port = port;
-        else
-            config->unicast_port = port;
-    }
+    void flom_config_set_unicast_port(flom_config_t *config, gint port);
 
 
 
@@ -835,18 +777,8 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param address IN set the new value for multicast_address property
      */
-    static inline void flom_config_set_multicast_address(
-        flom_config_t *config, gchar *address) {
-        if (NULL == config) {
-            if (NULL != global_config.multicast_address)
-                g_free(global_config.multicast_address);
-            global_config.multicast_address = address;
-        } else {
-            if (NULL != config->multicast_address)
-                g_free(config->multicast_address);
-            config->multicast_address = g_strdup(address);
-        }
-    }
+    void flom_config_set_multicast_address(
+        flom_config_t *config, gchar *address);
 
 
 
@@ -868,14 +800,7 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param port IN UDP/IP port
      */
-    static inline void flom_config_set_multicast_port(
-        flom_config_t *config, gint port) {
-        if (0 > port) port = -port;
-        if (NULL == config)
-            global_config.multicast_port = port;
-        else
-            config->multicast_port = port;
-    }
+    void flom_config_set_multicast_port(flom_config_t *config, gint port);
 
 
 
@@ -884,12 +809,9 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @return current multicast port
      */
-    static inline gint flom_config_get_multicast_port(
-        flom_config_t *config) {
-        if (NULL == config)
-            return global_config.multicast_port;
-        else
-            return config->multicast_port;
+    static inline gint flom_config_get_multicast_port(flom_config_t *config) {
+        return NULL == config ?
+            global_config.multicast_port : config->multicast_port;
     }
 
 
@@ -899,15 +821,8 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param attempts IN new value
      */
-    static inline void flom_config_set_discovery_attempts(
-        flom_config_t *config, gint attempts) {
-        if (0 > attempts) attempts = -attempts;
-        if (0 == attempts) attempts = 1;
-        if (NULL == config)
-            global_config.discovery_attempts = attempts;
-        else
-            config->discovery_attempts = attempts;
-    }
+    void flom_config_set_discovery_attempts(flom_config_t *config,
+                                            gint attempts);
 
 
 
@@ -929,14 +844,8 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param timeout IN new value
      */
-    static inline void flom_config_set_discovery_timeout(
-        flom_config_t *config, gint timeout) {
-        if (0 > timeout) timeout = -timeout;
-        if (NULL == config)
-            global_config.discovery_timeout = timeout;
-        else
-            config->discovery_timeout = timeout;
-    }
+    void flom_config_set_discovery_timeout(flom_config_t *config,
+                                           gint timeout);
 
 
 
@@ -958,15 +867,7 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param ttl IN new value
      */
-    static inline void flom_config_set_discovery_ttl(
-        flom_config_t *config, gint ttl) {
-        if (0 > ttl) ttl = -ttl;
-        if (0 == ttl) ttl = 1;
-        if (NULL == config)
-            global_config.discovery_ttl = ttl;
-        else
-            config->discovery_ttl = ttl;
-    }
+    void flom_config_set_discovery_ttl(flom_config_t *config, gint ttl);
 
 
 
@@ -987,14 +888,7 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param value IN new value
      */
-    static inline void flom_config_set_tcp_keepalive_time(
-        flom_config_t *config, gint value) {
-        if (0 > value) value = -value;
-        if (NULL == config)
-            global_config.tcp_keepalive_time = value;
-        else
-            config->tcp_keepalive_time = value;
-    }
+    void flom_config_set_tcp_keepalive_time(flom_config_t *config, gint value);
 
 
 
@@ -1016,14 +910,8 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param value IN new value
      */
-    static inline void flom_config_set_tcp_keepalive_intvl(
-        flom_config_t *config, gint value) {
-        if (0 > value) value = -value;
-        if (NULL == config)
-            global_config.tcp_keepalive_intvl = value;
-        else
-            config->tcp_keepalive_intvl = value;
-    }
+    void flom_config_set_tcp_keepalive_intvl(flom_config_t *config,
+                                             gint value);
 
 
 
@@ -1045,14 +933,8 @@ extern "C" {
      * @param config IN/OUT configuration object, NULL for global config
      * @param value IN new value
      */
-    static inline void flom_config_set_tcp_keepalive_probes(
-        flom_config_t *config, gint value) {
-        if (0 > value) value = -value;
-        if (NULL == config)
-            global_config.tcp_keepalive_probes = value;
-        else
-            config->tcp_keepalive_probes = value;
-    }
+    void flom_config_set_tcp_keepalive_probes(flom_config_t *config,
+                                              gint value);
 
 
 

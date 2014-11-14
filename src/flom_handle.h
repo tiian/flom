@@ -301,6 +301,68 @@ extern "C" {
     flom_lock_mode_t flom_handle_get_lock_mode(const flom_handle_t *handle);
 
 
+
+    /**
+     * Set resource idle lifespan property: how many milliseconds a resource
+     * will be kept after the last locker released it
+     * @param handle IN/OUT library handle
+     * @param value IN new value for the property
+     */
+    void flom_handle_set_resource_idle_lifespan(flom_handle_t *handle,
+                                                int value);
+
+
+
+    /**
+     * Get resource idle lifespan property: how many milliseconds a resource
+     * will be kept after the last locker released it
+     * @param handle IN library handle
+     * @return the current value
+     */
+    int flom_handle_get_resource_idle_lifespan(const flom_handle_t *handle);
+
+
+    
+    /**
+     * Set unicast address property: the IP address (or the name resolved
+     * by the system) of the host that must be contacted to reach the flom
+     * daemon (server)
+     * @param handle IN/OUT library handle
+     * @param value IN the new value for the property
+     */
+    void flom_handle_set_unicast_address(flom_handle_t *handle,
+                                         const char *value);
+
+
+    
+    /**
+     * Get unicast address property: the IP address (or the name resolved
+     * by the system) of the host that must be contacted to reach the flom
+     * daemon (server)
+     * @param handle IN library handle
+     * @return the current value
+     */
+    const char *flom_handle_get_unicast_address(const flom_handle_t *handle);
+
+
+
+    /**
+     * Set TCP/IP unicast port that must be used to contact the flom daemon
+     * @param handle IN/OUT library handle
+     * @param value IN new value for the property
+     */
+    void flom_handle_set_unicast_port(flom_handle_t *handle, int value);
+
+
+
+    /**
+     * Get TCP/IP unicast port that must be used to contact the flom daemon
+     * @param handle IN library handle
+     * @return the current value
+     */
+    int flom_handle_get_unicast_port(const flom_handle_t *handle);
+
+
     
 #ifdef __cplusplus
 }

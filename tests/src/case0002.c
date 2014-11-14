@@ -108,6 +108,37 @@ void static_handle_happy_path(void) {
     /* get new value for resource lock mode property */
     printf("flom_handle_get_lock_mode() = %d\n",
            flom_handle_get_lock_mode(&my_handle));
+    /* get current value for resource idle lifespan */
+    printf("flom_handle_get_resource_idle_lifespan() = %d\n",
+           flom_handle_get_resource_idle_lifespan(&my_handle));
+    /* set a new value for resource idle lifespan */
+    flom_handle_set_resource_idle_lifespan(&my_handle, 10000);
+    /* get new value for resource idle lifespan */
+    printf("flom_handle_get_resource_idle_lifespan() = %d\n",
+           flom_handle_get_resource_idle_lifespan(&my_handle));
+    /* get current unicast address */
+    printf("flom_handle_get_unicast_address() = '%s'\n",
+           flom_handle_get_unicast_address(&my_handle));
+    /* set a new unicast_address */
+    flom_handle_set_unicast_address(&my_handle, "127.0.0.1");
+    /* get new unicast address */
+    printf("flom_handle_get_unicast_address() = '%s'\n",
+           flom_handle_get_unicast_address(&my_handle));
+    /* set AF_UNIX/PF_LOCAL socket_name again */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_socket_name(
+                           &my_handle, "/tmp/flom_socket_name"))) {
+        fprintf(stderr, "flom_handle_set_socket_name() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }    
+    /* get current value for unicast port */
+    printf("flom_handle_get_unicast_port() = %d\n",
+           flom_handle_get_unicast_port(&my_handle));
+    /* set a new value for unicast_port */
+    flom_handle_set_unicast_port(&my_handle, 7777);
+    /* get new value for unicast port */
+    printf("flom_handle_get_unicast_port() = %d\n",
+           flom_handle_get_unicast_port(&my_handle));
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle, locked_element,
                                            sizeof(locked_element)))) {
@@ -215,6 +246,37 @@ void dynamic_handle_happy_path(void) {
     /* get new value for resource lock mode property */
     printf("flom_handle_get_lock_mode() = %d\n",
            flom_handle_get_lock_mode(my_handle));
+    /* get current value for resource idle lifespan */
+    printf("flom_handle_get_resource_idle_lifespan() = %d\n",
+           flom_handle_get_resource_idle_lifespan(my_handle));
+    /* set a new value for resource idle lifespan */
+    flom_handle_set_resource_idle_lifespan(my_handle, 10000);
+    /* get new value for resource idle lifespan */
+    printf("flom_handle_get_resource_idle_lifespan() = %d\n",
+           flom_handle_get_resource_idle_lifespan(my_handle));
+    /* get current unicast address */
+    printf("flom_handle_get_unicast_address() = '%s'\n",
+           flom_handle_get_unicast_address(my_handle));
+    /* set a new unicast_address */
+    flom_handle_set_unicast_address(my_handle, "127.0.0.1");
+    /* get new unicast address */
+    printf("flom_handle_get_unicast_address() = '%s'\n",
+           flom_handle_get_unicast_address(my_handle));
+    /* set AF_UNIX/PF_LOCAL socket_name again */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_socket_name(
+                           my_handle, "/tmp/flom_socket_name"))) {
+        fprintf(stderr, "flom_handle_set_socket_name() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }    
+    /* get current value for unicast port */
+    printf("flom_handle_get_unicast_port() = %d\n",
+           flom_handle_get_unicast_port(my_handle));
+    /* set a new value for unicast_port */
+    flom_handle_set_unicast_port(my_handle, 7777);
+    /* get new value for unicast port */
+    printf("flom_handle_get_unicast_port() = %d\n",
+           flom_handle_get_unicast_port(my_handle));
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle, locked_element,
                                                   sizeof(locked_element)))) {
