@@ -332,18 +332,18 @@ void flom_config_free(flom_config_t *config)
     FLOM_TRACE(("flom_config_free\n"));
     if (NULL == config)
         config = &global_config;
-    if (NULL != config->daemon_trace_file) {
-        g_free(config->daemon_trace_file);
-        config->daemon_trace_file = NULL;
-    }
-    if (NULL != config->command_trace_file) {
-        g_free(config->command_trace_file);
-        config->command_trace_file = NULL;
-    }
-    if (NULL != config->resource_name) {
-        g_free(config->resource_name);
-        config->resource_name = NULL;
-    }
+    g_free(config->daemon_trace_file);
+    config->daemon_trace_file = NULL;
+    g_free(config->command_trace_file);
+    config->command_trace_file = NULL;
+    g_free(config->resource_name);
+    config->resource_name = NULL;
+    g_free(config->socket_name);
+    config->socket_name = NULL;
+    g_free(config->unicast_address);
+    config->unicast_address = NULL;
+    g_free(config->multicast_address);
+    config->multicast_address = NULL;    
 }
 
 
@@ -1286,11 +1286,12 @@ void flom_config_set_unicast_port(flom_config_t *config, gint port)
 
 
 
-void flom_config_set_multicast_address(flom_config_t *config, gchar *address)
+void flom_config_set_multicast_address(flom_config_t *config,
+                                       const gchar *address)
 {
     if (NULL == config) {
         g_free(global_config.multicast_address);
-        global_config.multicast_address = address;
+        global_config.multicast_address = g_strdup(address);
     } else {
         g_free(config->multicast_address);
         config->multicast_address = g_strdup(address);

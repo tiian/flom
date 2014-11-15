@@ -778,7 +778,7 @@ extern "C" {
      * @param address IN set the new value for multicast_address property
      */
     void flom_config_set_multicast_address(
-        flom_config_t *config, gchar *address);
+        flom_config_t *config, const gchar *address);
 
 
 

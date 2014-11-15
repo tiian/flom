@@ -283,7 +283,7 @@ extern "C" {
      * Set lock_mode property: how a simple or hierarchical resource will
      * be locked when calling @ref flom_handle_lock; lock modes are explained
      * here: http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
-     * @param config IN/OUT configuration object, NULL for global config
+     * @param handle IN/OUT library handle
      * @param value IN the new value for the attribute
      */
     void flom_handle_set_lock_mode(flom_handle_t *handle,
@@ -295,7 +295,7 @@ extern "C" {
      * Get lock_mode property: how a simple or hierarchical resource will
      * be locked when calling @ref flom_handle_lock; lock modes are explained
      * here: http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
-     * @param config IN configuration object, NULL for global config
+     * @param handle IN library handle
      * @return current lock mode
      */
     flom_lock_mode_t flom_handle_get_lock_mode(const flom_handle_t *handle);
@@ -363,6 +363,105 @@ extern "C" {
     int flom_handle_get_unicast_port(const flom_handle_t *handle);
 
 
+    
+    /**
+     * Set multicast address property: the IP address (or the name resolved
+     * by the system) of the IP multicast group that must be contacted to
+     * reach the flom daemon (server)
+     * @param handle IN/OUT library handle
+     * @param value IN the new value for the property
+     */
+    void flom_handle_set_multicast_address(flom_handle_t *handle,
+                                           const char *value);
+
+
+    
+    /**
+     * Get unicast address property: the IP address (or the name resolved
+     * by the system) of the IP multicast group that must be contacted to
+     * reach the flom daemon (server)
+     * @param handle IN library handle
+     * @return the current value
+     */
+    const char *flom_handle_get_multicast_address(const flom_handle_t *handle);
+
+
+
+    /**
+     * Set UDP/IP multicast port that must be used to contact the flom daemon
+     * @param handle IN/OUT library handle
+     * @param value IN new value for the property
+     */
+    void flom_handle_set_multicast_port(flom_handle_t *handle, int value);
+
+
+
+    /**
+     * Get UDP/IP multicast port that must be used to contact the flom daemon
+     * @param handle IN library handle
+     * @return the current value
+     */
+    int flom_handle_get_multicast_port(const flom_handle_t *handle);
+
+
+
+    /**
+     * Set the maximum number of attempts that will be tryed during
+     * auto-discovery phase using UDP/IP multicast
+     * @param handle IN/OUT library handle
+     * @param value IN new value
+     */
+    void flom_handle_set_discovery_attempts(flom_handle_t *handle, int value);
+
+
+
+    /**
+     * Get the maximum number of attempts that will be tryed during
+     * auto-discovery phase using UDP/IP multicast
+     * @param handle IN library handle
+     * @return the current value
+     */
+    int flom_handle_get_discovery_attempts(const flom_handle_t *handle);
+
+    
+    
+    /**
+     * Set the number of milliseconds between two consecutive attempts that
+     * will be tryed during auto-discovery phase using UDP/IP multicast
+     * @param handle IN/OUT library handle
+     * @param value IN new value
+     */
+    void flom_handle_set_discovery_timeout(flom_handle_t *handle, int value);
+
+
+
+    /**
+     * Get the number of milliseconds between two consecutive attempts that
+     * will be tryed during auto-discovery phase using UDP/IP multicast
+     * @param handle IN library handle
+     * @return the current value
+     */
+    int flom_handle_get_discovery_timeout(const flom_handle_t *handle);
+
+    
+    
+    /**
+     * Set UDP/IP multicast TTL parameter used during auto-discovery phase
+     * @param handle IN/OUT library handle
+     * @param value IN new value
+     */
+    void flom_handle_set_discovery_ttl(flom_handle_t *handle, int value);
+
+
+
+    /**
+     * Get UDP/IP multicast TTL parameter used during auto-discovery phase
+     * @param handle IN library handle
+     * @return the current value
+     */
+    int flom_handle_get_discovery_ttl(const flom_handle_t *handle);
+
+    
     
 #ifdef __cplusplus
 }
