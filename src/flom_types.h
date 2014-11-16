@@ -21,6 +21,27 @@
 
 
 
+/***********************************************************************
+ *                                                                     *
+ * Boolean macros                                                      *
+ *                                                                     *
+ ***********************************************************************/
+#ifndef TRUE
+/**
+ * Label (macro) for boolean true value
+ */
+# define TRUE 1
+#endif /* TRUE */
+
+#ifndef FALSE
+/**
+ * Label (macro) for boolean false value
+ */
+# define FALSE 0
+#endif /* FALSE */
+
+
+
 /**
  * Lock mode that can be asked for a resource
  */

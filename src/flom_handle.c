@@ -414,6 +414,127 @@ int flom_handle_unlock(flom_handle_t *handle)
 
 
 
+int flom_handle_get_discovery_attempts(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_discovery_attempts: value=%d\n",
+                flom_config_get_discovery_attempts(handle->config)));
+    return (int)flom_config_get_discovery_attempts(handle->config);
+}
+
+
+
+void flom_handle_set_discovery_attempts(flom_handle_t *handle, int value)
+{
+    FLOM_TRACE(("flom_handle_set_discovery_attempts: "
+                "old value=%d, new value=%d\n",
+                flom_config_get_discovery_attempts(handle->config), value));
+    flom_config_set_discovery_attempts(handle->config, (gint)value);
+}
+
+
+
+int flom_handle_get_discovery_timeout(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_discovery_timeout: value=%d\n",
+                flom_config_get_discovery_timeout(handle->config)));
+    return (int)flom_config_get_discovery_timeout(handle->config);
+}
+
+
+
+void flom_handle_set_discovery_timeout(flom_handle_t *handle, int value)
+{
+    FLOM_TRACE(("flom_handle_set_discovery_timeout: "
+                "old value=%d, new value=%d\n",
+                flom_config_get_discovery_timeout(handle->config), value));
+    flom_config_set_discovery_timeout(handle->config, (gint)value);
+}
+
+
+
+int flom_handle_get_discovery_ttl(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_discovery_ttl: value=%d\n",
+                flom_config_get_discovery_ttl(handle->config)));
+    return (int)flom_config_get_discovery_ttl(handle->config);
+}
+
+
+
+void flom_handle_set_discovery_ttl(flom_handle_t *handle, int value)
+{
+    FLOM_TRACE(("flom_handle_set_discovery_ttl: "
+                "old value=%d, new value=%d\n",
+                flom_config_get_discovery_ttl(handle->config), value));
+    flom_config_set_discovery_ttl(handle->config, (gint)value);
+}
+
+
+
+flom_lock_mode_t flom_handle_get_lock_mode(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_lock_mode: value=%d\n",
+                flom_config_get_lock_mode(handle->config)));
+    return flom_config_get_lock_mode(handle->config);
+}
+
+
+
+void flom_handle_set_lock_mode(flom_handle_t *handle, flom_lock_mode_t value)
+{
+    FLOM_TRACE(("flom_handle_set_lock_mode: "
+                "old value=%d, new value=%d\n",
+                flom_config_get_lock_mode(handle->config), value));
+    flom_config_set_lock_mode(handle->config, value);
+}
+
+
+
+const char *flom_handle_get_multicast_address(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_multicast_address: value='%s'\n",
+                STRORNULL(flom_config_get_multicast_address(handle->config))));
+    return (const char *)flom_config_get_multicast_address(handle->config);
+}
+
+
+
+void flom_handle_set_multicast_address(flom_handle_t *handle,
+                                       const char *value)
+{
+    FLOM_TRACE(("flom_handle_set_multicast_address: "
+                "old value='%s', new value='%s'\n",
+                STRORNULL(flom_config_get_multicast_address(handle->config)),
+                STRORNULL(value)));
+    flom_config_set_multicast_address(handle->config, (const gchar *)value);
+    /* reset socket name and unicast address */
+    if (NULL != value) {
+        flom_handle_set_socket_name(handle, NULL);
+        flom_handle_set_unicast_address(handle, NULL);
+    } /* if (NULL != value) */
+}
+
+
+
+int flom_handle_get_multicast_port(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_multicast_port: value=%d\n",
+                flom_config_get_multicast_port(handle->config)));
+    return (int)flom_config_get_multicast_port(handle->config);
+}
+
+
+
+void flom_handle_set_multicast_port(flom_handle_t *handle, int value)
+{
+    FLOM_TRACE(("flom_handle_set_multicast_port: "
+                "old value=%d, new value=%d\n",
+                flom_config_get_multicast_port(handle->config), value));
+    flom_config_set_multicast_port(handle->config, (gint)value);
+}
+
+
+
 int flom_handle_set_socket_name(flom_handle_t *handle, const char *value)
 {
     FLOM_TRACE(("flom_handle_set_socket_name: "
@@ -537,25 +658,6 @@ int flom_handle_get_resource_quantity(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_lock_mode(flom_handle_t *handle, flom_lock_mode_t value)
-{
-    FLOM_TRACE(("flom_handle_set_lock_mode: "
-                "old value=%d, new value=%d\n",
-                flom_config_get_lock_mode(handle->config), value));
-    flom_config_set_lock_mode(handle->config, value);
-}
-
-
-
-flom_lock_mode_t flom_handle_get_lock_mode(const flom_handle_t *handle)
-{
-    FLOM_TRACE(("flom_handle_get_lock_mode: value=%d\n",
-                flom_config_get_lock_mode(handle->config)));
-    return flom_config_get_lock_mode(handle->config);
-}
-
-
-
 void flom_handle_set_resource_idle_lifespan(flom_handle_t *handle, int value)
 {
     FLOM_TRACE(("flom_handle_set_resource_idle_lifespan: "
@@ -616,108 +718,6 @@ int flom_handle_get_unicast_port(const flom_handle_t *handle)
     FLOM_TRACE(("flom_handle_get_unicast_port: value=%d\n",
                 flom_config_get_unicast_port(handle->config)));
     return (int)flom_config_get_unicast_port(handle->config);
-}
-
-
-
-void flom_handle_set_multicast_address(flom_handle_t *handle,
-                                       const char *value)
-{
-    FLOM_TRACE(("flom_handle_set_multicast_address: "
-                "old value='%s', new value='%s'\n",
-                STRORNULL(flom_config_get_multicast_address(handle->config)),
-                STRORNULL(value)));
-    flom_config_set_multicast_address(handle->config, (const gchar *)value);
-    /* reset socket name and unicast address */
-    if (NULL != value) {
-        flom_handle_set_socket_name(handle, NULL);
-        flom_handle_set_unicast_address(handle, NULL);
-    } /* if (NULL != value) */
-}
-
-
-
-const char *flom_handle_get_multicast_address(const flom_handle_t *handle)
-{
-    FLOM_TRACE(("flom_handle_get_multicast_address: value='%s'\n",
-                STRORNULL(flom_config_get_multicast_address(handle->config))));
-    return (const char *)flom_config_get_multicast_address(handle->config);
-}
-
-
-
-void flom_handle_set_multicast_port(flom_handle_t *handle, int value)
-{
-    FLOM_TRACE(("flom_handle_set_multicast_port: "
-                "old value=%d, new value=%d\n",
-                flom_config_get_multicast_port(handle->config), value));
-    flom_config_set_multicast_port(handle->config, (gint)value);
-}
-
-
-
-int flom_handle_get_multicast_port(const flom_handle_t *handle)
-{
-    FLOM_TRACE(("flom_handle_get_multicast_port: value=%d\n",
-                flom_config_get_multicast_port(handle->config)));
-    return (int)flom_config_get_multicast_port(handle->config);
-}
-
-
-
-void flom_handle_set_discovery_attempts(flom_handle_t *handle, int value)
-{
-    FLOM_TRACE(("flom_handle_set_discovery_attempts: "
-                "old value=%d, new value=%d\n",
-                flom_config_get_discovery_attempts(handle->config), value));
-    flom_config_set_discovery_attempts(handle->config, (gint)value);
-}
-
-
-
-int flom_handle_get_discovery_attempts(const flom_handle_t *handle)
-{
-    FLOM_TRACE(("flom_handle_get_discovery_attempts: value=%d\n",
-                flom_config_get_discovery_attempts(handle->config)));
-    return (int)flom_config_get_discovery_attempts(handle->config);
-}
-
-
-
-void flom_handle_set_discovery_timeout(flom_handle_t *handle, int value)
-{
-    FLOM_TRACE(("flom_handle_set_discovery_timeout: "
-                "old value=%d, new value=%d\n",
-                flom_config_get_discovery_timeout(handle->config), value));
-    flom_config_set_discovery_timeout(handle->config, (gint)value);
-}
-
-
-
-int flom_handle_get_discovery_timeout(const flom_handle_t *handle)
-{
-    FLOM_TRACE(("flom_handle_get_discovery_timeout: value=%d\n",
-                flom_config_get_discovery_timeout(handle->config)));
-    return (int)flom_config_get_discovery_timeout(handle->config);
-}
-
-
-
-void flom_handle_set_discovery_ttl(flom_handle_t *handle, int value)
-{
-    FLOM_TRACE(("flom_handle_set_discovery_ttl: "
-                "old value=%d, new value=%d\n",
-                flom_config_get_discovery_ttl(handle->config), value));
-    flom_config_set_discovery_ttl(handle->config, (gint)value);
-}
-
-
-
-int flom_handle_get_discovery_ttl(const flom_handle_t *handle)
-{
-    FLOM_TRACE(("flom_handle_get_discovery_ttl: value=%d\n",
-                flom_config_get_discovery_ttl(handle->config)));
-    return (int)flom_config_get_discovery_ttl(handle->config);
 }
 
 

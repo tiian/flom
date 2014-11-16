@@ -85,18 +85,33 @@ extern "C" {
 
 
     /**
-     * Initialize an object handle; this function MUST be called before the
-     * first usage of a new handle or after an handle has been cleaned up with
-     * @ref flom_handle_clean
-     * @param handle IN/OUT the object to initialize
-     * @return a reason code
+     * Initializes an object handle; this function MUST be called before the
+     * first usage of a new statically allocated handle or after an handle
+     * has been cleaned up with function @ref flom_handle_clean
+     * @param handle (Input/Output): a statically allocated object to
+     * initialize
+     * @return a reason code (see file @ref flom_errors.h)
      */
     int flom_handle_init(flom_handle_t *handle);
     
 
 
     /**
-     * Allocate and initialize (@ref flom_handle_init) a new object handle
+     * Cleans an object handle; this function MUST be called before the handle
+     * will go out of scope of an handle;
+     * if this method is not called a memory leak will be generated.
+     * For every object initialized with @ref flom_handle_init
+     * there must be a call to this method.
+     * @param handle (Input/Output): a statically allocated object to clean
+     * @return a reason code (see file @ref flom_errors.h)
+     */
+    int flom_handle_clean(flom_handle_t *handle);
+    
+
+
+    /**
+     * Allocates and initializes (using function @ref flom_handle_init) a
+     * new dynamically allocated object handle
      * @return a new object handle or NULL if any error happens
      */
     flom_handle_t *flom_handle_new(void);
@@ -104,35 +119,26 @@ extern "C" {
 
     
     /**
-     * Clean an object handle; this function MUST be called before the out of
-     * scope of an handle; if this method is not called a memory leak will
-     * be generated. For every object initialized with @ref flom_handle_init
-     * there must be a call to this method.
-     * @param handle IN/OUT the object to initialize
-     * @return a reason code
-     */
-    int flom_handle_clean(flom_handle_t *handle);
-    
-
-
-    /**
-     * Clean (@ref flom_handle_clean) and deallocate an object handle
-     * @param handle IN the object handle to delete
+     * Cleans (using function @ref flom_handle_clean) and deallocates an
+     * object allocated (created) with function @ref flom_handle_new
+     * @param handle (Input): a dynamically allocated object to delete
      */
     void flom_handle_delete(flom_handle_t *handle);
 
 
     
     /**
-     * Lock a resource
-     * @param handle IN/OUT library handle
-     * @param element OUT contains the name of the locked element if the
-     *        resource is a resource set; set it to NULL if you are not
-     *        interested in it
-     * @param element_size IN maximum number of characters (null terminator
-     *        included) that can be used by the function to store the name
-     *        of the locked element
-     * @return a reason code
+     * Locks the (logical) resource linked to an handle; the resource MUST
+     * be unlocked using function @ref flom_handle_unlock when the lock
+     * condition is no more necessary
+     * @param handle (Input/Output): a valid object handle
+     * @param element (Output): contains the name of the locked element if
+     *        the resource is of type "resource set"; set it to NULL if you
+     *        are not interested to retrieve an element name
+     * @param element_size (Input): maximum number of characters (null
+     *        terminator included) that can be used by the function to store
+     *        the name of the locked element
+     * @return a reason code (see file @ref flom_errors.h)
      */
     int flom_handle_lock(flom_handle_t *handle,
                          char *element, size_t element_size);
@@ -140,13 +146,183 @@ extern "C" {
 
 
     /**
-     * Unlock a resource
-     * @param handle IN/OUT library handle
-     * @return a reason code
+     * Unlocks the (logical) resource linked to an handle; the resource MUST
+     * be previously locked using function @ref flom_handle_lock
+     * @param handle (Input/Output): a valid object handle
+     * @return a reason code (see file @ref flom_errors.h)
      */
     int flom_handle_unlock(flom_handle_t *handle);
 
 
+
+    /**
+     * Gets the maximum number of attempts that will be tryed during
+     * auto-discovery phase using UDP/IP multicast (see
+     *         @ref flom_handle_get_multicast_address,
+     *         @ref flom_handle_get_multicast_port).
+     * The current value can be altered using function
+     *         @ref flom_handle_set_discovery_attempts
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    int flom_handle_get_discovery_attempts(const flom_handle_t *handle);
+
+    
+    
+    /**
+     * Sets the maximum number of attempts that will be tryed during
+     * auto-discovery phase using UDP/IP multicast (see
+     *         @ref flom_handle_set_multicast_address,
+     *         @ref flom_handle_set_multicast_port).
+     * The current value can be inspected using function
+     *         @ref flom_handle_get_discovery_attempts
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
+     */
+    void flom_handle_set_discovery_attempts(flom_handle_t *handle, int value);
+
+
+
+    /**
+     * Gets the number of milliseconds between two consecutive attempts that
+     * will be tryed during auto-discovery phase using UDP/IP multicast (see
+     *         @ref flom_handle_get_multicast_address,
+     *         @ref flom_handle_get_multicast_port).
+     * The current value can be altered using function
+     *         @ref flom_handle_set_discovery_timeout
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    int flom_handle_get_discovery_timeout(const flom_handle_t *handle);
+
+    
+    
+    /**
+     * Sets the number of milliseconds between two consecutive attempts that
+     * will be tryed during auto-discovery phase using UDP/IP multicast (see
+     *         @ref flom_handle_set_multicast_address,
+     *         @ref flom_handle_set_multicast_port).
+     * The current value can be inspected using function
+     *         @ref flom_handle_get_discovery_timeout.
+     * @param handle (Input): a valid object handle
+     * @param value (Input): the new value
+     */
+    void flom_handle_set_discovery_timeout(flom_handle_t *handle, int value);
+
+
+
+    /**
+     * Gets the UDP/IP multicast TTL parameter used during auto-discovery
+     * phase; for a definition of the parameter, see
+     * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html
+     * . The current value can be altered using function
+     *         @ref flom_handle_set_discovery_ttl
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    int flom_handle_get_discovery_ttl(const flom_handle_t *handle);
+
+    
+    
+    /**
+     * Sets the UDP/IP multicast TTL parameter used during auto-discovery
+     * phase; for a definition of the parameter, see
+     * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html 
+     * . The current value can be inspected using function
+     *         @ref flom_handle_get_discovery_ttl.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
+     */
+    void flom_handle_set_discovery_ttl(flom_handle_t *handle, int value);
+
+
+
+    /**
+     * Gets lock mode property: how a simple or hierarchical resource will
+     * be locked when function @ref flom_handle_lock is called; FLoM
+     * supports the same lock mode semantic proposed by DLM, see
+     * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
+     * for a detailed explanation
+     * . The current value can be altered using function
+     *         @ref flom_handle_set_lock_mode
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    flom_lock_mode_t flom_handle_get_lock_mode(const flom_handle_t *handle);
+
+
+
+    /**
+     * Sets lock mode property: how a simple or hierarchical resource will
+     * be locked when function @ref flom_handle_lock is called; FLoM
+     * supports the same lock mode semantic proposed by DLM, see
+     * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
+     * for a detailed explanation
+     * . The current value can be inspected using function
+     *         @ref flom_handle_get_lock_mode
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
+     */
+    void flom_handle_set_lock_mode(flom_handle_t *handle,
+                                   flom_lock_mode_t value);
+
+
+
+    /**
+     * Gets multicast address: the IP address (or a network name that the
+     * system can resolve) of the IP multicast group that must be contacted
+     * to reach FLoM daemon (server) using UDP/IP; see also
+     *         @ref flom_handle_get_multicast_port.
+     * The current value can be altered using function
+     *         @ref flom_handle_set_multicast_address.
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    const char *flom_handle_get_multicast_address(const flom_handle_t *handle);
+
+
+
+    /**
+     * Sets multicast address: the IP address (or a network name that the
+     * system can resolve) of the IP multicast group that must be contacted
+     * to reach FLoM daemon (server) using UDP/IP; see also
+     *         @ref flom_handle_set_multicast_port.
+     * The current value can be inspected using function
+     *         @ref flom_handle_get_multicast_address.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
+     */
+    void flom_handle_set_multicast_address(flom_handle_t *handle,
+                                           const char *value);
+
+
+    
+    /**
+     * Gets UDP/IP multicast port that must be used to contact the FLoM
+     * daemon (server) using UDP/IP; see also
+     *         @ref flom_handle_get_multicast_address.
+     * The current value can be altered using function
+     *         @ref flom_handle_set_multicast_port.
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    int flom_handle_get_multicast_port(const flom_handle_t *handle);
+
+
+
+    /**
+     * Sets UDP/IP multicast port that must be used to contact the FLoM
+     * daemon (server) using UDP/IP; see also
+     *         @ref flom_handle_set_multicast_address.
+     * The current value can be inspected using function
+     *         @ref flom_handle_get_multicast_port.
+     * @param handle (Input): a valid object handle
+     * @param value (Input): the new value
+     */
+    void flom_handle_set_multicast_port(flom_handle_t *handle, int value);
+
+
+    /* @@@ restart from here; above function documentation already revised */
 
     /**
      * Set UNIX (AF_LOCAL) socket name for client/server communication
@@ -280,29 +456,6 @@ extern "C" {
 
     
     /**
-     * Set lock_mode property: how a simple or hierarchical resource will
-     * be locked when calling @ref flom_handle_lock; lock modes are explained
-     * here: http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
-     * @param handle IN/OUT library handle
-     * @param value IN the new value for the attribute
-     */
-    void flom_handle_set_lock_mode(flom_handle_t *handle,
-                                   flom_lock_mode_t value);
-
-
-
-    /**
-     * Get lock_mode property: how a simple or hierarchical resource will
-     * be locked when calling @ref flom_handle_lock; lock modes are explained
-     * here: http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
-     * @param handle IN library handle
-     * @return current lock mode
-     */
-    flom_lock_mode_t flom_handle_get_lock_mode(const flom_handle_t *handle);
-
-
-
-    /**
      * Set resource idle lifespan property: how many milliseconds a resource
      * will be kept after the last locker released it
      * @param handle IN/OUT library handle
@@ -363,105 +516,6 @@ extern "C" {
     int flom_handle_get_unicast_port(const flom_handle_t *handle);
 
 
-    
-    /**
-     * Set multicast address property: the IP address (or the name resolved
-     * by the system) of the IP multicast group that must be contacted to
-     * reach the flom daemon (server)
-     * @param handle IN/OUT library handle
-     * @param value IN the new value for the property
-     */
-    void flom_handle_set_multicast_address(flom_handle_t *handle,
-                                           const char *value);
-
-
-    
-    /**
-     * Get unicast address property: the IP address (or the name resolved
-     * by the system) of the IP multicast group that must be contacted to
-     * reach the flom daemon (server)
-     * @param handle IN library handle
-     * @return the current value
-     */
-    const char *flom_handle_get_multicast_address(const flom_handle_t *handle);
-
-
-
-    /**
-     * Set UDP/IP multicast port that must be used to contact the flom daemon
-     * @param handle IN/OUT library handle
-     * @param value IN new value for the property
-     */
-    void flom_handle_set_multicast_port(flom_handle_t *handle, int value);
-
-
-
-    /**
-     * Get UDP/IP multicast port that must be used to contact the flom daemon
-     * @param handle IN library handle
-     * @return the current value
-     */
-    int flom_handle_get_multicast_port(const flom_handle_t *handle);
-
-
-
-    /**
-     * Set the maximum number of attempts that will be tryed during
-     * auto-discovery phase using UDP/IP multicast
-     * @param handle IN/OUT library handle
-     * @param value IN new value
-     */
-    void flom_handle_set_discovery_attempts(flom_handle_t *handle, int value);
-
-
-
-    /**
-     * Get the maximum number of attempts that will be tryed during
-     * auto-discovery phase using UDP/IP multicast
-     * @param handle IN library handle
-     * @return the current value
-     */
-    int flom_handle_get_discovery_attempts(const flom_handle_t *handle);
-
-    
-    
-    /**
-     * Set the number of milliseconds between two consecutive attempts that
-     * will be tryed during auto-discovery phase using UDP/IP multicast
-     * @param handle IN/OUT library handle
-     * @param value IN new value
-     */
-    void flom_handle_set_discovery_timeout(flom_handle_t *handle, int value);
-
-
-
-    /**
-     * Get the number of milliseconds between two consecutive attempts that
-     * will be tryed during auto-discovery phase using UDP/IP multicast
-     * @param handle IN library handle
-     * @return the current value
-     */
-    int flom_handle_get_discovery_timeout(const flom_handle_t *handle);
-
-    
-    
-    /**
-     * Set UDP/IP multicast TTL parameter used during auto-discovery phase
-     * @param handle IN/OUT library handle
-     * @param value IN new value
-     */
-    void flom_handle_set_discovery_ttl(flom_handle_t *handle, int value);
-
-
-
-    /**
-     * Get UDP/IP multicast TTL parameter used during auto-discovery phase
-     * @param handle IN library handle
-     * @return the current value
-     */
-    int flom_handle_get_discovery_ttl(const flom_handle_t *handle);
-
-    
     
 #ifdef __cplusplus
 }
