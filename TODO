@@ -1,6 +1,9 @@
 Road map:
 
-continue with API documentation
+move doxygen to parent dir (/doc instead of /doc/html) and fix Makefile
+behavior; doc must be distributed and generated only if doxygen is available;
+version must be fixed; dependencies must be fixed...
+
 client library: create test cases to check the real behavior of setter methods
 
 C++ header (interface): header only implementation!

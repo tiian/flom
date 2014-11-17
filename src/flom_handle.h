@@ -269,7 +269,7 @@ extern "C" {
 
 
     /**
-     * Gets multicast address: the IP address (or a network name that the
+     * Gets the multicast address: the IP address (or a network name that the
      * system can resolve) of the IP multicast group that must be contacted
      * to reach FLoM daemon (server) using UDP/IP; see also
      *         @ref flom_handle_get_multicast_port.
@@ -283,7 +283,7 @@ extern "C" {
 
 
     /**
-     * Sets multicast address: the IP address (or a network name that the
+     * Sets the multicast address: the IP address (or a network name that the
      * system can resolve) of the IP multicast group that must be contacted
      * to reach FLoM daemon (server) using UDP/IP; see also
      *         @ref flom_handle_set_multicast_port.
@@ -298,7 +298,7 @@ extern "C" {
 
     
     /**
-     * Gets UDP/IP multicast port that must be used to contact the FLoM
+     * Gets the UDP/IP multicast port that must be used to contact the FLoM
      * daemon (server) using UDP/IP; see also
      *         @ref flom_handle_get_multicast_address.
      * The current value can be altered using function
@@ -311,7 +311,7 @@ extern "C" {
 
 
     /**
-     * Sets UDP/IP multicast port that must be used to contact the FLoM
+     * Sets the UDP/IP multicast port that must be used to contact the FLoM
      * daemon (server) using UDP/IP; see also
      *         @ref flom_handle_set_multicast_address.
      * The current value can be inspected using function
@@ -322,154 +322,40 @@ extern "C" {
     void flom_handle_set_multicast_port(flom_handle_t *handle, int value);
 
 
-    /* @@@ restart from here; above function documentation already revised */
 
     /**
-     * Set UNIX (AF_LOCAL) socket name for client/server communication
-     * @param handle IN/OUT library handle
-     * @param value IN the name that must be used for the socket
-     * @return a reason code
-     */
-    int flom_handle_set_socket_name(flom_handle_t *handle,
-                                    const char *value);
-
-
-    
-    /**
-     * Get UNIX (AF_LOCAL) socket name for client/server communication
-     * @param handle IN library handle
-     * @return the name that must be used for the socket
-     */
-    const char *flom_handle_get_socket_name(const flom_handle_t *handle);
-
-    
-    
-    /**
-     * Set trace filename
-     * @param handle IN/OUT library handle
-     * @param value IN the new name for trace file
-     */
-    void flom_handle_set_trace_filename(
-        flom_handle_t *handle, const char *value);
-
-
-
-    /**
-     * Get trace filename
-     * @param handle IN library handle
-     * @return the current value for trace_file properties
-     */
-    const char *flom_handle_get_trace_filename(const flom_handle_t *handle);
-
-
-    
-    /**
-     * Set resource name (the name of the resource that can be locked and
-     * unlocked)
-     * @param handle IN/OUT library handle
-     * @param value IN name of the resource that can be locked and unlocked
-     * @return a reason code
-     */
-    int flom_handle_set_resource_name(flom_handle_t *handle,
-                                      const char *value);
-
-
-    
-    /**
-     * Get resource name (the name of the resource that can be locked and
-     * unlocked)
-     * @param handle IN library handle
-     * @return the name of the resource that can be locked and unlocked
-     */
-    const char *flom_handle_get_resource_name(const flom_handle_t *handle);
-
-    
-
-    /**
-     * Set resource_create boolean property
-     * @param handle IN/OUT library handle
-     * @param value IN new value of the attribute: if TRUE,
-     *              @ref flom_handle_lock will create a new resource if it's
-     *              not yet available; if FALSE, @ref flom_handle_lock will
-     *              not create a new resource if it's not available
-     */
-    void flom_handle_set_resource_create(flom_handle_t *handle, int value);
-
-
-
-    /**
-     * Get resource_create boolean property
-     * @param handle IN library handle
-     * return the value value of the attribute: if TRUE, @ref flom_handle_lock
-     * will create a new resource if it's not yet available; if FALSE,
-     * @ref flom_handle_lock will not create a new resource if it's not
-     * available
+     * Gets "resource create" boolean property: it specifies if function
+     * @ref flom_handle_lock can create a new resource when the specified
+     * one is not defined; the default value is TRUE. 
+     * The current value can be altered using function
+     *     @ref flom_handle_set_resource_create.
+     * @param handle (Input): a valid object handle
+     * @return the current value
      */
     int flom_handle_get_resource_create(const flom_handle_t *handle);
 
 
     
     /**
-     * Set resource_timeout property: how long a lock operation will wait if
-     * the resource is locked by another client
-     * @param handle IN/OUT library handle
-     * @param value IN new value of the attribute: <BR>
-     *        0: no wait <BR>
-     *        >0: maximum number of milliseconds to wait <BR>
-     *        <0: infinite number of milliseconds to wait
+     * Sets "resource create" boolean property: it specifies if function
+     * @ref flom_handle_lock can create a new resource when the specified
+     * one is not defined.
+     * The current value can be inspected using function
+     *         @ref flom_handle_get_resource_create.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
      */
-    void flom_handle_set_resource_timeout(flom_handle_t *handle, int value);
+    void flom_handle_set_resource_create(flom_handle_t *handle, int value);
 
 
 
     /**
-     * Get resource_time property: how long a lock operation will wait if
-     * the resource is locked by another client
-     * @param handle IN library handle
-     * @return the current value of the attribute: <BR>
-     *        0: no wait <BR>
-     *        >0: maximum number of milliseconds to wait <BR>
-     *        <0: infinite number of milliseconds to wait
-     */
-    int flom_handle_get_resource_timeout(const flom_handle_t *handle);
-
-
-    
-    /**
-     * Set resource_quantity property: how many numeric resources you will
-     * lock when calling @ref flom_handle_lock
-     * @param handle IN/OUT library handle
-     * @param value IN the new value for the attribute
-     */
-    void flom_handle_set_resource_quantity(flom_handle_t *handle, int value);
-
-
-
-    /**
-     * Get resource_quantity property: how many numeric resources you will
-     * lock when calling @ref flom_handle_lock
-     * @param handle IN library handle
-     * @return the current value of the attribute: <BR>
-     */
-    int flom_handle_get_resource_quantity(const flom_handle_t *handle);
-
-
-    
-    /**
-     * Set resource idle lifespan property: how many milliseconds a resource
-     * will be kept after the last locker released it
-     * @param handle IN/OUT library handle
-     * @param value IN new value for the property
-     */
-    void flom_handle_set_resource_idle_lifespan(flom_handle_t *handle,
-                                                int value);
-
-
-
-    /**
-     * Get resource idle lifespan property: how many milliseconds a resource
-     * will be kept after the last locker released it
-     * @param handle IN library handle
+     * Gets "resource idle lifespan" property: it specifies how many
+     * milliseconds a resource will be kept after the last locker released it;
+     * the expiration is necessary to avoid useless resource allocation.
+     * The current value can be altered using function
+     *     @ref flom_handle_set_resource_idle_lifespan.
+     * @param handle (Input): a valid object handle
      * @return the current value
      */
     int flom_handle_get_resource_idle_lifespan(const flom_handle_t *handle);
@@ -477,22 +363,169 @@ extern "C" {
 
     
     /**
-     * Set unicast address property: the IP address (or the name resolved
-     * by the system) of the host that must be contacted to reach the flom
-     * daemon (server)
-     * @param handle IN/OUT library handle
-     * @param value IN the new value for the property
+     * Sets "resource idle lifespan" property: it specifies how many
+     * milliseconds a resource will be kept after the last locker released it;
+     * the expiration is necessary to avoid useless resource allocation.
+     * The current value can be inspected using function
+     *     @ref flom_handle_get_resource_idle_lifespan.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
      */
-    void flom_handle_set_unicast_address(flom_handle_t *handle,
-                                         const char *value);
+    void flom_handle_set_resource_idle_lifespan(flom_handle_t *handle,
+                                                int value);
+
+
+
+    /**
+     * Gets the resource name: the name of the resource that can be locked and
+     * unlocked using @ref flom_handle_lock and @ref flom_handle_unlock
+     * functions.
+     * The current value can be altered using function
+     *     @ref flom_handle_set_resource_name.
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    const char *flom_handle_get_resource_name(const flom_handle_t *handle);
 
 
     
     /**
-     * Get unicast address property: the IP address (or the name resolved
-     * by the system) of the host that must be contacted to reach the flom
-     * daemon (server)
-     * @param handle IN library handle
+     * Sets the resource name: the name of the resource that can be locked and
+     * unlocked using @ref flom_handle_lock and @ref flom_handle_unlock
+     * functions.
+     * The current value can be inspected using function
+     *     @ref flom_handle_get_resource_name.
+     * NOTE: the resource type is determined by its name; take a look to
+     * flom command man page (-r, --resource-name option) for an
+     * explanation of the resource name grammar.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
+     * @return a reason code (see file @ref flom_errors.h)
+     */
+    int flom_handle_set_resource_name(flom_handle_t *handle,
+                                      const char *value);
+
+
+    
+    /**
+     * Gets "resource quantity" property: the number of units that will be
+     * locked and unlocked using @ref flom_handle_lock and
+     * @ref flom_handle_unlock functions.
+     * The current value can be altered using function
+     *     @ref flom_handle_set_resource_quantity.
+     * NOTE: this property applies to "numeric resources" only.
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    int flom_handle_get_resource_quantity(const flom_handle_t *handle);
+
+    
+
+    /**
+     * Sets "resource quantity" property: the number of units that will be
+     * locked and unlocked using @ref flom_handle_lock and
+     * @ref flom_handle_unlock functions.
+     * The current value can be inspected using function
+     *     @ref flom_handle_get_resource_quantity.
+     * NOTE: this property applies to "numeric resources" only.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
+     */
+    void flom_handle_set_resource_quantity(flom_handle_t *handle, int value);
+
+
+    
+    /**
+     * Gets "resource timeout" property: how long a lock operation
+     * (see @ref flom_handle_lock) will wait if the resource is locked
+     * by another requester.
+     * The current value can be altered using function
+     *     @ref flom_handle_set_resource_timeout.
+     * @param handle (Input): a valid object handle
+     * @return the current value: <BR>
+     *        0: no wait <BR>
+     *        >0: maximum number of milliseconds to wait <BR>
+     *        <0: unlimited wait
+     */
+    int flom_handle_get_resource_timeout(const flom_handle_t *handle);
+
+
+    
+    /**
+     * Sets "resource timeout" property: how long a lock operation
+     * (see @ref flom_handle_lock) will wait if the resource is locked
+     * by another requester.
+     * The current value can be inspected using function
+     *     @ref flom_handle_get_resource_timeout.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value: <BR>
+     *        0: no wait <BR>
+     *        >0: maximum number of milliseconds to wait <BR>
+     *        <0: unlimited wait
+     */
+    void flom_handle_set_resource_timeout(flom_handle_t *handle, int value);
+
+
+
+    /**
+     * Gets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+     * used to contact a local FLoM daemon (server).
+     * The current value can be altered using function
+     *         @ref flom_handle_set_socket_name.
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    const char *flom_handle_get_socket_name(const flom_handle_t *handle);
+
+    
+
+    /**
+     * Sets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+     * used to contact a local FLoM daemon (server).
+     * The current value can be inspected using function
+     *         @ref flom_handle_get_socket_name.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
+     * @return a reason code (see file @ref flom_errors.h)
+     */
+    int flom_handle_set_socket_name(flom_handle_t *handle,
+                                    const char *value);
+
+
+    
+    /**
+     * Gets the trace filename: the name (absolute or relative path) used
+     * by libflom (FLoM client library) to record trace messages.
+     * The current value can be altered using function
+     *     @ref flom_handle_set_trace_filename.
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    const char *flom_handle_get_trace_filename(const flom_handle_t *handle);
+
+
+    
+    /**
+     * Sets the trace filename: the name (absolute or relative path) used
+     * by libflom (FLoM client library) to record trace messages.
+     * The current value can be inspected using function
+     *     @ref flom_handle_get_trace_filename.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
+     */
+    void flom_handle_set_trace_filename(flom_handle_t *handle,
+                                        const char *value);
+
+
+
+    /**
+     * Gets the unicast address: the IP address (or a network name that the
+     * system can resolve) of the host that must be contacted
+     * to reach FLoM daemon (server) using TCP/IP; see also
+     *         @ref flom_handle_get_unicast_port.
+     * The current value can be altered using function
+     *         @ref flom_handle_set_unicast_address.
+     * @param handle (Input): a valid object handle
      * @return the current value
      */
     const char *flom_handle_get_unicast_address(const flom_handle_t *handle);
@@ -500,23 +533,46 @@ extern "C" {
 
 
     /**
-     * Set TCP/IP unicast port that must be used to contact the flom daemon
-     * @param handle IN/OUT library handle
-     * @param value IN new value for the property
+     * Sets the unicast address: the IP address (or a network name that the
+     * system can resolve) of the host that must be contacted
+     * to reach FLoM daemon (server) using TCP/IP; see also
+     *         @ref flom_handle_set_unicast_port.
+     * The current value can be inspected using function
+     *         @ref flom_handle_get_unicast_address.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
      */
-    void flom_handle_set_unicast_port(flom_handle_t *handle, int value);
+    void flom_handle_set_unicast_address(flom_handle_t *handle,
+                                         const char *value);
 
 
-
+    
     /**
-     * Get TCP/IP unicast port that must be used to contact the flom daemon
-     * @param handle IN library handle
+     * Gets the TCP/IP unicast port that must be used to contact the FLoM
+     * daemon (server) using TCP/IP; see also
+     *         @ref flom_handle_get_unicast_address.
+     * The current value can be altered using function
+     *         @ref flom_handle_set_unicast_port.
+     * @param handle (Input): a valid object handle
      * @return the current value
      */
     int flom_handle_get_unicast_port(const flom_handle_t *handle);
 
 
     
+    /**
+     * Sets the TCP/IP unicast port that must be used to contact the FLoM
+     * daemon (server) using TCP/IP; see also
+     *         @ref flom_handle_set_unicast_address.
+     * The current value can be inspected using function
+     *         @ref flom_handle_get_unicast_port.
+     * @param handle (Input): a valid object handle
+     * @param value (Input): the new value
+     */
+    void flom_handle_set_unicast_port(flom_handle_t *handle, int value);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

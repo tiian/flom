@@ -11649,7 +11649,7 @@ fi
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files Makefile doc/Makefile etc/Makefile man/Makefile src/Makefile tests/atlocal tests/Makefile tests/src/Makefile"
+ac_config_files="$ac_config_files Makefile doc/Makefile doc/html/Makefile etc/Makefile man/Makefile src/Makefile tests/atlocal tests/Makefile tests/src/Makefile"
 
 ac_config_commands="$ac_config_commands tests/atconfig"
 
@@ -13591,6 +13591,7 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
+    "doc/html/Makefile") CONFIG_FILES="$CONFIG_FILES doc/html/Makefile" ;;
     "etc/Makefile") CONFIG_FILES="$CONFIG_FILES etc/Makefile" ;;
     "man/Makefile") CONFIG_FILES="$CONFIG_FILES man/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;

@@ -535,6 +535,112 @@ void flom_handle_set_multicast_port(flom_handle_t *handle, int value)
 
 
 
+int flom_handle_get_resource_create(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_resource_create: value=%d\n",
+                flom_config_get_resource_create(handle->config)));
+    return flom_config_get_resource_create(handle->config);
+}
+
+
+
+void flom_handle_set_resource_create(flom_handle_t *handle, int value)
+{
+    FLOM_TRACE(("flom_handle_set_resource_create: "
+                "old value=%d, new value=%d\n",
+                flom_config_get_resource_create(handle->config), value));
+    return flom_config_set_resource_create(handle->config, value);
+}
+
+
+
+int flom_handle_get_resource_idle_lifespan(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_resource_idle_lifespan: value=%d\n",
+                flom_config_get_resource_idle_lifespan(handle->config)));
+    return (int)flom_config_get_resource_idle_lifespan(handle->config);
+}
+
+
+
+void flom_handle_set_resource_idle_lifespan(flom_handle_t *handle, int value)
+{
+    FLOM_TRACE(("flom_handle_set_resource_idle_lifespan: "
+                "old value=%d, new value=%d\n",
+                flom_config_get_resource_idle_lifespan(handle->config),
+                value));
+    flom_config_set_resource_idle_lifespan(handle->config, (gint)value);
+}
+
+
+
+const char *flom_handle_get_resource_name(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_resource_name: value='%s'\n",
+                STRORNULL(flom_config_get_resource_name(handle->config))));
+    return (const char *)flom_config_get_resource_name(handle->config);
+}
+
+
+
+int flom_handle_set_resource_name(flom_handle_t *handle, const char *value)
+{
+    FLOM_TRACE(("flom_handle_set_resource_name: "
+                "old value='%s', new value='%s'\n",
+                STRORNULL(flom_config_get_resource_name(handle->config)),
+                STRORNULL(value)));
+    return flom_config_set_resource_name(handle->config, (const gchar *)value);
+}
+
+
+
+int flom_handle_get_resource_quantity(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_resource_quantity: value=%d\n",
+                flom_config_get_resource_quantity(handle->config)));
+    return (int)flom_config_get_resource_quantity(handle->config);
+}
+
+
+
+void flom_handle_set_resource_quantity(flom_handle_t *handle, int value)
+{
+    FLOM_TRACE(("flom_handle_set_resource_quantity: "
+                "old value=%d, new value=%d\n",
+                flom_config_get_resource_quantity(handle->config), value));
+    flom_config_set_resource_quantity(handle->config, (int)value);
+}
+
+
+
+int flom_handle_get_resource_timeout(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_resource_timeout: value=%d\n",
+                flom_config_get_resource_timeout(handle->config)));
+    return (int)flom_config_get_resource_timeout(handle->config);
+}
+
+
+
+void flom_handle_set_resource_timeout(flom_handle_t *handle, int value)
+{
+    FLOM_TRACE(("flom_handle_set_resource_timeout: "
+                "old value=%d, new value=%d\n",
+                flom_config_get_resource_timeout(handle->config), value));
+    return flom_config_set_resource_timeout(handle->config, (int)value);
+}
+
+
+
+const char *flom_handle_get_socket_name(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_socket_name: value='%s'\n",
+                STRORNULL(flom_config_get_socket_name(handle->config))));
+    return (const char *)flom_config_get_socket_name(handle->config);
+}
+
+
+
 int flom_handle_set_socket_name(flom_handle_t *handle, const char *value)
 {
     FLOM_TRACE(("flom_handle_set_socket_name: "
@@ -551,11 +657,12 @@ int flom_handle_set_socket_name(flom_handle_t *handle, const char *value)
 
 
 
-const char *flom_handle_get_socket_name(const flom_handle_t *handle)
+const char *flom_handle_get_trace_filename(const flom_handle_t *handle)
 {
-    FLOM_TRACE(("flom_handle_get_socket_name: value='%s'\n",
-                STRORNULL(flom_config_get_socket_name(handle->config))));
-    return (const char *)flom_config_get_socket_name(handle->config);
+    FLOM_TRACE(("flom_handle_get_trace_filename: value='%s'\n",
+                STRORNULL(flom_config_get_command_trace_file(
+                              handle->config))));
+    return (const char *)flom_config_get_command_trace_file(handle->config);
 }
 
 
@@ -571,109 +678,11 @@ void flom_handle_set_trace_filename(flom_handle_t *handle, const char *value)
 
 
 
-const char *flom_handle_get_trace_filename(const flom_handle_t *handle)
+const char *flom_handle_get_unicast_address(const flom_handle_t *handle)
 {
-    FLOM_TRACE(("flom_handle_get_trace_filename: value='%s'\n",
-                STRORNULL(flom_config_get_command_trace_file(
-                              handle->config))));
-    return (const char *)flom_config_get_command_trace_file(handle->config);
-}
-
-
-
-int flom_handle_set_resource_name(flom_handle_t *handle, const char *value)
-{
-    FLOM_TRACE(("flom_handle_set_resource_name: "
-                "old value='%s', new value='%s'\n",
-                STRORNULL(flom_config_get_resource_name(handle->config)),
-                STRORNULL(value)));
-    return flom_config_set_resource_name(handle->config, (const gchar *)value);
-}
-
-
-
-const char *flom_handle_get_resource_name(const flom_handle_t *handle)
-{
-    FLOM_TRACE(("flom_handle_get_resource_name: value='%s'\n",
-                STRORNULL(flom_config_get_resource_name(handle->config))));
-    return (const char *)flom_config_get_resource_name(handle->config);
-}
-
-
-
-void flom_handle_set_resource_create(flom_handle_t *handle, int value)
-{
-    FLOM_TRACE(("flom_handle_set_resource_create: "
-                "old value=%d, new value=%d\n",
-                flom_config_get_resource_create(handle->config), value));
-    return flom_config_set_resource_create(handle->config, value);
-}
-
-
-
-int flom_handle_get_resource_create(const flom_handle_t *handle)
-{
-    FLOM_TRACE(("flom_handle_get_resource_create: value=%d\n",
-                flom_config_get_resource_create(handle->config)));
-    return flom_config_get_resource_create(handle->config);
-}
-
-
-
-void flom_handle_set_resource_timeout(flom_handle_t *handle, int value)
-{
-    FLOM_TRACE(("flom_handle_set_resource_timeout: "
-                "old value=%d, new value=%d\n",
-                flom_config_get_resource_timeout(handle->config), value));
-    return flom_config_set_resource_timeout(handle->config, (int)value);
-}
-
-
-
-int flom_handle_get_resource_timeout(const flom_handle_t *handle)
-{
-    FLOM_TRACE(("flom_handle_get_resource_timeout: value=%d\n",
-                flom_config_get_resource_timeout(handle->config)));
-    return (int)flom_config_get_resource_timeout(handle->config);
-}
-
-
-
-void flom_handle_set_resource_quantity(flom_handle_t *handle, int value)
-{
-    FLOM_TRACE(("flom_handle_set_resource_quantity: "
-                "old value=%d, new value=%d\n",
-                flom_config_get_resource_quantity(handle->config), value));
-    flom_config_set_resource_quantity(handle->config, (int)value);
-}
-
-
-
-int flom_handle_get_resource_quantity(const flom_handle_t *handle)
-{
-    FLOM_TRACE(("flom_handle_get_resource_quantity: value=%d\n",
-                flom_config_get_resource_quantity(handle->config)));
-    return (int)flom_config_get_resource_quantity(handle->config);
-}
-
-
-
-void flom_handle_set_resource_idle_lifespan(flom_handle_t *handle, int value)
-{
-    FLOM_TRACE(("flom_handle_set_resource_idle_lifespan: "
-                "old value=%d, new value=%d\n",
-                flom_config_get_resource_idle_lifespan(handle->config),
-                value));
-    flom_config_set_resource_idle_lifespan(handle->config, (gint)value);
-}
-
-
-
-int flom_handle_get_resource_idle_lifespan(const flom_handle_t *handle)
-{
-    FLOM_TRACE(("flom_handle_get_resource_idle_lifespan: value=%d\n",
-                flom_config_get_resource_idle_lifespan(handle->config)));
-    return (int)flom_config_get_resource_idle_lifespan(handle->config);
+    FLOM_TRACE(("flom_handle_get_unicast_address: value='%s'\n",
+                STRORNULL(flom_config_get_unicast_address(handle->config))));
+    return (const char *)flom_config_get_unicast_address(handle->config);
 }
 
 
@@ -694,11 +703,11 @@ void flom_handle_set_unicast_address(flom_handle_t *handle, const char *value)
 
 
 
-const char *flom_handle_get_unicast_address(const flom_handle_t *handle)
+int flom_handle_get_unicast_port(const flom_handle_t *handle)
 {
-    FLOM_TRACE(("flom_handle_get_unicast_address: value='%s'\n",
-                STRORNULL(flom_config_get_unicast_address(handle->config))));
-    return (const char *)flom_config_get_unicast_address(handle->config);
+    FLOM_TRACE(("flom_handle_get_unicast_port: value=%d\n",
+                flom_config_get_unicast_port(handle->config)));
+    return (int)flom_config_get_unicast_port(handle->config);
 }
 
 
@@ -709,15 +718,6 @@ void flom_handle_set_unicast_port(flom_handle_t *handle, int value)
                 "old value=%d, new value=%d\n",
                 flom_config_get_unicast_port(handle->config), value));
     flom_config_set_unicast_port(handle->config, (gint)value);
-}
-
-
-
-int flom_handle_get_unicast_port(const flom_handle_t *handle)
-{
-    FLOM_TRACE(("flom_handle_get_unicast_port: value=%d\n",
-                flom_config_get_unicast_port(handle->config)));
-    return (int)flom_config_get_unicast_port(handle->config);
 }
 
 
