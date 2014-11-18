@@ -1,8 +1,6 @@
 Road map:
 
-move doxygen to parent dir (/doc instead of /doc/html) and fix Makefile
-behavior; doc must be distributed and generated only if doxygen is available;
-version must be fixed; dependencies must be fixed...
+fix Makefile documentation distribution and installation: HTML files should go inside a dedicated html directory...
 
 client library: create test cases to check the real behavior of setter methods
 

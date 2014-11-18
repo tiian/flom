@@ -143,10 +143,8 @@ PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.22 gthread-2.0 >= 2.22])
 CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
 #GLIB2_LIBS automatically set by PKG_CHECK_MODULES macro
 
-# Checking pkg-config is available
-AC_CHECK_PROGS(GDB, [gdb], [])
-AC_CHECK_PROGS(VALGRIND, [valgrind], [])
-AC_CHECK_PROGS(XSLTPROC, [xsltproc], [])
+# Checking the availability of some utility programs
+AC_CHECK_PROGS(DOXYGEN, [doxygen], [true])
 AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
 
 AC_CHECK_HEADERS(assert.h)
