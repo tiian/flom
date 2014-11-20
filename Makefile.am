@@ -1,7 +1,7 @@
 SUBDIRS = src man etc doc tests
-dist_data_DATA = doxygen.conf.in
-nodist_data_DATA = doxygen.conf
-dist_doc_DATA = README
+dist_noinst_DATA = doxygen.conf.in
+nodist_noinst_DATA = doxygen.conf
+dist_doc_DATA = README COPYING COPYING_LGPL ChangeLog
 CLEANFILES = doxygen.conf
 
 doxygen.conf: doxygen.conf.in

@@ -35,8 +35,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = doc/html
-DIST_COMMON = $(dist_data_DATA) $(dist_doc_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+DIST_COMMON = $(dist_html_DATA) $(dist_noinst_DATA) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -68,9 +68,8 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(datadir)" "$(DESTDIR)$(docdir)" \
-	"$(DESTDIR)$(datadir)"
-DATA = $(dist_data_DATA) $(dist_doc_DATA) $(nodist_data_DATA)
+am__installdirs = "$(DESTDIR)$(htmldir)"
+DATA = $(dist_html_DATA) $(dist_noinst_DATA) $(nodist_noinst_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -210,7 +209,7 @@ host_alias = @host_alias@
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
-htmldir = @htmldir@
+htmldir = $(docdir)/html
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
@@ -234,11 +233,11 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_data_DATA = doxygen.conf.in doxygen_header.htm doxygen_footer.htm \
+dist_noinst_DATA = doxygen.conf.in doxygen_header.htm doxygen_footer.htm \
 	Makefile.am
 
-nodist_data_DATA = doxygen.conf
-dist_doc_DATA = *.html *.css *.png *.gif
+nodist_noinst_DATA = doxygen.conf
+dist_html_DATA = *.html *.css *.png *.gif
 CLEANFILES = doxygen.conf
 all: all-am
 
@@ -279,66 +278,26 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-dist_dataDATA: $(dist_data_DATA)
+install-dist_htmlDATA: $(dist_html_DATA)
 	@$(NORMAL_INSTALL)
-	test -z "$(datadir)" || $(MKDIR_P) "$(DESTDIR)$(datadir)"
-	@list='$(dist_data_DATA)'; test -n "$(datadir)" || list=; \
+	test -z "$(htmldir)" || $(MKDIR_P) "$(DESTDIR)$(htmldir)"
+	@list='$(dist_html_DATA)'; test -n "$(htmldir)" || list=; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
 	done | $(am__base_list) | \
 	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(datadir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(datadir)" || exit $$?; \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(htmldir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(htmldir)" || exit $$?; \
 	done
 
-uninstall-dist_dataDATA:
+uninstall-dist_htmlDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(dist_data_DATA)'; test -n "$(datadir)" || list=; \
+	@list='$(dist_html_DATA)'; test -n "$(htmldir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(datadir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(datadir)" && rm -f $$files
-install-dist_docDATA: $(dist_doc_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(docdir)" || $(MKDIR_P) "$(DESTDIR)$(docdir)"
-	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(docdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(docdir)" || exit $$?; \
-	done
-
-uninstall-dist_docDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(docdir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(docdir)" && rm -f $$files
-install-nodist_dataDATA: $(nodist_data_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(datadir)" || $(MKDIR_P) "$(DESTDIR)$(datadir)"
-	@list='$(nodist_data_DATA)'; test -n "$(datadir)" || list=; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(datadir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(datadir)" || exit $$?; \
-	done
-
-uninstall-nodist_dataDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(nodist_data_DATA)'; test -n "$(datadir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(datadir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(datadir)" && rm -f $$files
+	echo " ( cd '$(DESTDIR)$(htmldir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(htmldir)" && rm -f $$files
 tags: TAGS
 TAGS:
 
@@ -380,7 +339,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(datadir)" "$(DESTDIR)$(docdir)" "$(DESTDIR)$(datadir)"; do \
+	for dir in "$(DESTDIR)$(htmldir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -429,8 +388,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_dataDATA install-dist_docDATA \
-	install-nodist_dataDATA
+install-data-am: install-dist_htmlDATA
 
 install-dvi: install-dvi-am
 
@@ -474,24 +432,21 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_dataDATA uninstall-dist_docDATA \
-	uninstall-nodist_dataDATA
+uninstall-am: uninstall-dist_htmlDATA
 
 .MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	distclean distclean-generic distclean-libtool distdir dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dist_dataDATA \
-	install-dist_docDATA install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-nodist_dataDATA \
+	install-data install-data-am install-dist_htmlDATA install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
 	install-pdf install-pdf-am install-ps install-ps-am \
 	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	uninstall uninstall-am uninstall-dist_dataDATA \
-	uninstall-dist_docDATA uninstall-nodist_dataDATA
+	uninstall uninstall-am uninstall-dist_htmlDATA
 
 
 doxygen.conf:	doxygen.conf.in

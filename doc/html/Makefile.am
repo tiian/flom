@@ -1,7 +1,8 @@
-dist_data_DATA = doxygen.conf.in doxygen_header.htm doxygen_footer.htm \
+htmldir = $(docdir)/html
+dist_noinst_DATA = doxygen.conf.in doxygen_header.htm doxygen_footer.htm \
 	Makefile.am
-nodist_data_DATA = doxygen.conf
-dist_doc_DATA = *.html *.css *.png *.gif
+nodist_noinst_DATA = doxygen.conf
+dist_html_DATA = *.html *.css *.png *.gif
 CLEANFILES = doxygen.conf
 
 doxygen.conf:	doxygen.conf.in

@@ -35,11 +35,12 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = .
-DIST_COMMON = README $(am__configure_deps) $(dist_data_DATA) \
-	$(dist_doc_DATA) $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/config.h.in $(top_srcdir)/configure AUTHORS COPYING \
-	ChangeLog INSTALL NEWS TODO config.guess config.sub depcomp \
-	install-sh ltmain.sh missing
+DIST_COMMON = README $(am__configure_deps) $(dist_doc_DATA) \
+	$(dist_noinst_DATA) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
+	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
+	TODO config.guess config.sub depcomp install-sh ltmain.sh \
+	missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -80,9 +81,8 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(datadir)" "$(DESTDIR)$(docdir)" \
-	"$(DESTDIR)$(datadir)"
-DATA = $(dist_data_DATA) $(dist_doc_DATA) $(nodist_data_DATA)
+am__installdirs = "$(DESTDIR)$(docdir)"
+DATA = $(dist_doc_DATA) $(dist_noinst_DATA) $(nodist_noinst_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
@@ -290,9 +290,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = src man etc doc tests
-dist_data_DATA = doxygen.conf.in
-nodist_data_DATA = doxygen.conf
-dist_doc_DATA = README
+dist_noinst_DATA = doxygen.conf.in
+nodist_noinst_DATA = doxygen.conf
+dist_doc_DATA = README COPYING COPYING_LGPL ChangeLog
 CLEANFILES = doxygen.conf
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -358,26 +358,6 @@ clean-libtool:
 
 distclean-libtool:
 	-rm -f libtool config.lt
-install-dist_dataDATA: $(dist_data_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(datadir)" || $(MKDIR_P) "$(DESTDIR)$(datadir)"
-	@list='$(dist_data_DATA)'; test -n "$(datadir)" || list=; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(datadir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(datadir)" || exit $$?; \
-	done
-
-uninstall-dist_dataDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(dist_data_DATA)'; test -n "$(datadir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(datadir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(datadir)" && rm -f $$files
 install-dist_docDATA: $(dist_doc_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(docdir)" || $(MKDIR_P) "$(DESTDIR)$(docdir)"
@@ -398,26 +378,6 @@ uninstall-dist_docDATA:
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(docdir)' && rm -f" $$files ")"; \
 	cd "$(DESTDIR)$(docdir)" && rm -f $$files
-install-nodist_dataDATA: $(nodist_data_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(datadir)" || $(MKDIR_P) "$(DESTDIR)$(datadir)"
-	@list='$(nodist_data_DATA)'; test -n "$(datadir)" || list=; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(datadir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(datadir)" || exit $$?; \
-	done
-
-uninstall-nodist_dataDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(nodist_data_DATA)'; test -n "$(datadir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(datadir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(datadir)" && rm -f $$files
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.
@@ -734,7 +694,7 @@ check: check-recursive
 all-am: Makefile $(DATA) config.h
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(datadir)" "$(DESTDIR)$(docdir)" "$(DESTDIR)$(datadir)"; do \
+	for dir in "$(DESTDIR)$(docdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -785,8 +745,7 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-dist_dataDATA install-dist_docDATA \
-	install-nodist_dataDATA
+install-data-am: install-dist_docDATA
 
 install-dvi: install-dvi-recursive
 
@@ -832,8 +791,7 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-dist_dataDATA uninstall-dist_docDATA \
-	uninstall-nodist_dataDATA
+uninstall-am: uninstall-dist_docDATA
 
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) all \
 	ctags-recursive install-am install-strip tags-recursive
@@ -846,16 +804,14 @@ uninstall-am: uninstall-dist_dataDATA uninstall-dist_docDATA \
 	distclean-libtool distclean-tags distcleancheck distdir \
 	distuninstallcheck dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am \
-	install-dist_dataDATA install-dist_docDATA install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-nodist_dataDATA install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs installdirs-am maintainer-clean \
+	install-dist_docDATA install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am uninstall-dist_dataDATA \
-	uninstall-dist_docDATA uninstall-nodist_dataDATA
+	uninstall uninstall-am uninstall-dist_docDATA
 
 
 doxygen.conf: doxygen.conf.in

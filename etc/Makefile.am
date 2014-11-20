@@ -1,10 +1,6 @@
-# flom.conf.in should be distributed but not installed
-# flom.conf should be installed but not distributed
-# the best I was able to obtain was:
-#	flom.conf.in is distributed and installed
-#	flom.conf    is installed but not distributed
-dist_doc_DATA = flom.conf.in
-nodist_doc_DATA = flom.conf 
+confdir = $(pkgdatadir)/etc
+dist_noinst_DATA = flom.conf.in
+nodist_conf_DATA = flom.conf 
 CLEANFILES = flom.conf
 flom.conf : flom.conf.in
 	sed \

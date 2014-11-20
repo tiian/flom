@@ -1,5 +1,10 @@
 # Doxyfile 1.5.5
 
+#
+# This Doxygen configuration file is not the file that must be used to
+# produce libflom API documentation: see doc/html instead
+#
+
 # This file describes the settings to be used by the documentation system
 # doxygen (www.doxygen.org) for a project
 #

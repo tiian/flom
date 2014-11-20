@@ -1,8 +1,13 @@
 Road map:
 
-fix Makefile documentation distribution and installation: HTML files should go inside a dedicated html directory...
-
 client library: create test cases to check the real behavior of setter methods
+client library: create real sample programs
+fix this wiki page:
+http://sourceforge.net/p/flom/wiki/Configuration/
+this path:
+/usr/local/share/doc/flom/flom.conf
+must be changed with this path:
+/usr/local/share/flom/etc/flom.conf
 
 C++ header (interface): header only implementation!
 
