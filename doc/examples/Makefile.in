@@ -34,9 +34,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = etc
-DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+subdir = doc/examples
+DIST_COMMON = README $(dist_examples_DATA) $(dist_noinst_DATA) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -68,8 +68,8 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(docdir)"
-DATA = $(dist_noinst_DATA) $(nodist_doc_DATA)
+am__installdirs = "$(DESTDIR)$(examplesdir)"
+DATA = $(dist_examples_DATA) $(dist_noinst_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -233,9 +233,11 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_noinst_DATA = flom.conf.in
-nodist_doc_DATA = flom.conf 
-CLEANFILES = flom.conf
+examplesdir = $(docdir)/examples
+dist_noinst_DATA = Makefile.am
+dist_examples_DATA = README basic_static.c basic_dynamic.c \
+	advanced_static.c advanced_dynamic.c example_makefile
+
 all: all-am
 
 .SUFFIXES:
@@ -248,9 +250,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu etc/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu doc/examples/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu etc/Makefile
+	  $(AUTOMAKE) --gnu doc/examples/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -275,26 +277,26 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-nodist_docDATA: $(nodist_doc_DATA)
+install-dist_examplesDATA: $(dist_examples_DATA)
 	@$(NORMAL_INSTALL)
-	test -z "$(docdir)" || $(MKDIR_P) "$(DESTDIR)$(docdir)"
-	@list='$(nodist_doc_DATA)'; test -n "$(docdir)" || list=; \
+	test -z "$(examplesdir)" || $(MKDIR_P) "$(DESTDIR)$(examplesdir)"
+	@list='$(dist_examples_DATA)'; test -n "$(examplesdir)" || list=; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
 	done | $(am__base_list) | \
 	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(docdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(docdir)" || exit $$?; \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(examplesdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(examplesdir)" || exit $$?; \
 	done
 
-uninstall-nodist_docDATA:
+uninstall-dist_examplesDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(nodist_doc_DATA)'; test -n "$(docdir)" || list=; \
+	@list='$(dist_examples_DATA)'; test -n "$(examplesdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(docdir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(docdir)" && rm -f $$files
+	echo " ( cd '$(DESTDIR)$(examplesdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(examplesdir)" && rm -f $$files
 tags: TAGS
 TAGS:
 
@@ -336,7 +338,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(docdir)"; do \
+	for dir in "$(DESTDIR)$(examplesdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -356,7 +358,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -385,7 +386,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-nodist_docDATA
+install-data-am: install-dist_examplesDATA
 
 install-dvi: install-dvi-am
 
@@ -429,61 +430,22 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-nodist_docDATA
+uninstall-am: uninstall-dist_examplesDATA
 
 .MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	distclean distclean-generic distclean-libtool distdir dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man \
-	install-nodist_docDATA install-pdf install-pdf-am install-ps \
+	install-data install-data-am install-dist_examplesDATA \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
 	install-ps-am install-strip installcheck installcheck-am \
 	installdirs maintainer-clean maintainer-clean-generic \
 	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am uninstall uninstall-am uninstall-nodist_docDATA
+	ps ps-am uninstall uninstall-am uninstall-dist_examplesDATA
 
-flom.conf : flom.conf.in
-	sed \
-        -e 's|@sysconfdir[@]|$(sysconfdir)|g' \
-        -e 's|@_USER_CONFIG_FILENAME[@]|$(_USER_CONFIG_FILENAME)|g' \
-	-e 's|@_CONFIG_GROUP_TRACE[@]|$(_CONFIG_GROUP_TRACE)|g' \
-	-e 's|@_CONFIG_KEY_DAEMONTRACEFILE[@]|$(_CONFIG_KEY_DAEMONTRACEFILE)|g' \
-	-e 's|@_CONFIG_KEY_COMMANDTRACEFILE[@]|$(_CONFIG_KEY_COMMANDTRACEFILE)|g' \
-	-e 's|@_CONFIG_KEY_VERBOSE[@]|$(_CONFIG_KEY_VERBOSE)|g' \
-	-e 's|@_CONFIG_GROUP_RESOURCE[@]|$(_CONFIG_GROUP_RESOURCE)|g' \
-	-e 's|@_CONFIG_KEY_CREATE[@]|$(_CONFIG_KEY_CREATE)|g' \
-	-e 's|@_CONFIG_KEY_NAME[@]|$(_CONFIG_KEY_NAME)|g' \
-	-e 's|@_CONFIG_KEY_WAIT[@]|$(_CONFIG_KEY_WAIT)|g' \
-	-e 's|@_CONFIG_KEY_TIMEOUT[@]|$(_CONFIG_KEY_TIMEOUT)|g' \
-	-e 's|@_CONFIG_KEY_QUANTITY[@]|$(_CONFIG_KEY_QUANTITY)|g' \
-	-e 's|@_CONFIG_KEY_LOCK_MODE[@]|$(_CONFIG_KEY_LOCK_MODE)|g' \
-	-e 's|@_CONFIG_KEY_IDLE_LIFESPAN[@]|$(_CONFIG_KEY_IDLE_LIFESPAN)|g' \
-	-e 's|@_CONFIG_GROUP_DAEMON[@]|$(_CONFIG_GROUP_DAEMON)|g' \
-	-e 's|@_CONFIG_KEY_SOCKET_NAME[@]|$(_CONFIG_KEY_SOCKET_NAME)|g' \
-	-e 's|@_CONFIG_KEY_LIFESPAN[@]|$(_CONFIG_KEY_LIFESPAN)|g' \
-	-e 's|@_CONFIG_KEY_UNICAST_ADDRESS[@]|$(_CONFIG_KEY_UNICAST_ADDRESS)|g' \
-	-e 's|@_CONFIG_KEY_UNICAST_PORT[@]|$(_CONFIG_KEY_UNICAST_PORT)|g' \
-	-e 's|@_CONFIG_KEY_MULTICAST_ADDRESS[@]|$(_CONFIG_KEY_MULTICAST_ADDRESS)|g' \
-	-e 's|@_CONFIG_KEY_MULTICAST_PORT[@]|$(_CONFIG_KEY_MULTICAST_PORT)|g' \
-	-e 's|@_CONFIG_KEY_DISCOVERY_ATTEMPTS[@]|$(_CONFIG_KEY_DISCOVERY_ATTEMPTS)|g' \
-	-e 's|@_CONFIG_KEY_DISCOVERY_TIMEOUT[@]|$(_CONFIG_KEY_DISCOVERY_TIMEOUT)|g' \
-	-e 's|@_CONFIG_KEY_DISCOVERY_TTL[@]|$(_CONFIG_KEY_DISCOVERY_TTL)|g' \
-	-e 's|@_DEFAULT_DAEMON_LIFESPAN[@]|$(_DEFAULT_DAEMON_LIFESPAN)|g' \
-	-e 's|@_DEFAULT_DAEMON_PORT[@]|$(_DEFAULT_DAEMON_PORT)|g' \
-	-e 's|@_CONFIG_GROUP_NETWORK[@]|$(_CONFIG_GROUP_NETWORK)|g' \
-	-e 's|@_DEFAULT_DISCOVERY_ATTEMPTS[@]|$(_DEFAULT_DISCOVERY_ATTEMPTS)|g' \
-	-e 's|@_DEFAULT_DISCOVERY_TIMEOUT[@]|$(_DEFAULT_DISCOVERY_TIMEOUT)|g' \
-	-e 's|@_DEFAULT_DISCOVERY_TTL[@]|$(_DEFAULT_DISCOVERY_TTL)|g' \
-	-e 's|@_CONFIG_KEY_TCP_KEEPALIVE_TIME[@]|$(_CONFIG_KEY_TCP_KEEPALIVE_TIME)|g' \
-	-e 's|@_CONFIG_KEY_TCP_KEEPALIVE_INTVL[@]|$(_CONFIG_KEY_TCP_KEEPALIVE_INTVL)|g' \
-	-e 's|@_CONFIG_KEY_TCP_KEEPALIVE_PROBES[@]|$(_CONFIG_KEY_TCP_KEEPALIVE_PROBES)|g' \
-	-e 's|@_DEFAULT_TCP_KEEPALIVE_TIME[@]|$(_DEFAULT_TCP_KEEPALIVE_TIME)|g' \
-	-e 's|@_DEFAULT_TCP_KEEPALIVE_INTVL[@]|$(_DEFAULT_TCP_KEEPALIVE_INTVL)|g' \
-	-e 's|@_DEFAULT_TCP_KEEPALIVE_PROBES[@]|$(_DEFAULT_TCP_KEEPALIVE_PROBES)|g' \
-	$< >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

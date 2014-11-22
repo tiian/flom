@@ -1,0 +1,21 @@
+# This is an example makefile that must probably be fixed with your local
+# settings
+GLIB2_LIBS=$$(pkg-config --libs glib-2.0 gthread-2.0)
+all:	basic_static basic_dynamic advanced_static advanced_dynamic
+
+basic_static:	basic_static.c
+	gcc basic_static.c -l flom -L /usr/local/lib $(GLIB2_LIBS) \
+		-o basic_static
+
+basic_dynamic:	basic_dynamic.c
+	gcc basic_dynamic.c -l flom -L /usr/local/lib $(GLIB2_LIBS) \
+		-o basic_dynamic
+
+advanced_static:	advanced_static.c
+	gcc advanced_static.c -l flom -L /usr/local/lib $(GLIB2_LIBS) \
+		-o advanced_static
+
+advanced_dynamic:	advanced_dynamic.c
+	gcc advanced_dynamic.c -l flom -L /usr/local/lib $(GLIB2_LIBS) \
+		-o advanced_dynamic
+

@@ -1,0 +1,19 @@
+This directory contains the example programs: choose the programming language
+of your interest and pick-up the example you can use as a starting point to
+develop your own custom software that uses libflom API.
+
+C examples: basic_static.c basic_dynamic.c advanced_static.c advanced_dynamic.c
+How to compile:
+	gcc basic_static.c -l flom -L /usr/local/lib \
+		$(pkg-config --libs glib-2.0 gthread-2.0) -o basic_static
+	gcc basic_dynamic.c -l flom -L /usr/local/lib \
+		$(pkg-config --libs glib-2.0 gthread-2.0) -o basic_dynamic
+	gcc advanced_static.c -l flom -L /usr/local/lib \
+		$(pkg-config --libs glib-2.0 gthread-2.0) -o advanced_static
+	gcc advanced_dynamic.c -l flom -L /usr/local/lib \
+		$(pkg-config --libs glib-2.0 gthread-2.0) -o advanced_dynamic
+or alternatively:
+	make -f example_makefile basic_static
+	make -f example_makefile basic_dynamic
+	make -f example_makefile advanced_static
+	make -f example_makefile advanced_dynamic

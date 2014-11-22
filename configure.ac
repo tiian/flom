@@ -108,6 +108,7 @@ AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
   Makefile
   doc/Makefile
+  doc/examples/Makefile
   doc/html/Makefile
   etc/Makefile
   man/Makefile

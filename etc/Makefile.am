@@ -1,6 +1,5 @@
-confdir = $(pkgdatadir)/etc
 dist_noinst_DATA = flom.conf.in
-nodist_conf_DATA = flom.conf 
+nodist_doc_DATA = flom.conf 
 CLEANFILES = flom.conf
 flom.conf : flom.conf.in
 	sed \

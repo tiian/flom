@@ -18,9 +18,20 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "flom.h"
 
+
+
+/*
+ * Non default values used for tests
+ */
+const char *nd_socket_name = "/tmp/flom_socket_name";
+const char *nd_trace_filename = "/tmp/flom.trc";
+const char *nd_resource_name = "myResource";
+const char *nd_unicast_address = "127.0.0.1";
+const char *nd_multicast_address = "224.0.0.1";
 
 
 /*
@@ -42,7 +53,7 @@ void static_handle_happy_path(void) {
            flom_handle_get_socket_name(&my_handle));
     /* set a new AF_UNIX/PF_LOCAL socket_name */
     if (FLOM_RC_OK != (ret_cod = flom_handle_set_socket_name(
-                           &my_handle, "/tmp/flom_socket_name"))) {
+                           &my_handle, nd_socket_name))) {
         fprintf(stderr, "flom_handle_set_socket_name() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
@@ -50,20 +61,35 @@ void static_handle_happy_path(void) {
     /* get new AF_UNIX/PF_LOCAL socket_name */
     printf("flom_handle_get_socket_name() = '%s'\n",
            flom_handle_get_socket_name(&my_handle));
+    /* check socket name */
+    if (strcmp(nd_socket_name, flom_handle_get_socket_name(&my_handle))) {
+        fprintf(stderr,
+                "Unexpected result form flom_handle_set/get_socket_name\n");
+        exit(1);
+    }
+
     /* get current trace filename */
     printf("flom_handle_get_trace_filename() = '%s'\n",
            flom_handle_get_trace_filename(&my_handle));
     /* set a new trace filename */
-    flom_handle_set_trace_filename(&my_handle, "/tmp/flom.trc");
+    flom_handle_set_trace_filename(&my_handle, nd_trace_filename);
     /* get new trace filename */
     printf("flom_handle_get_trace_filename() = '%s'\n",
            flom_handle_get_trace_filename(&my_handle));
+    /* check trace filename */
+    if (strcmp(nd_trace_filename,
+               flom_handle_get_trace_filename(&my_handle))) {
+        fprintf(stderr,
+                "Unexpected result form flom_handle_set/get_trace_filename\n");
+        exit(1);
+    }
+    
     /* get current resource name */
     printf("flom_handle_get_resource_name() = '%s'\n",
            flom_handle_get_resource_name(&my_handle));
     /* set a new resource name */
     if (FLOM_RC_OK != (ret_cod = flom_handle_set_resource_name(
-                           &my_handle, "myResource"))) {
+                           &my_handle, nd_resource_name))) {
         fprintf(stderr, "flom_handle_set_resource_name() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
@@ -71,6 +97,14 @@ void static_handle_happy_path(void) {
     /* get new resource name */
     printf("flom_handle_get_resource_name() = '%s'\n",
            flom_handle_get_resource_name(&my_handle));
+    /* check resource name */
+    if (strcmp(nd_resource_name,
+               flom_handle_get_resource_name(&my_handle))) {
+        fprintf(stderr,
+                "Unexpected result form flom_handle_set/get_resource_name\n");
+        exit(1);
+    }
+    
     /* get current value for resource create property */
     printf("flom_handle_get_resource_create() = %d\n",
            flom_handle_get_resource_create(&my_handle));
@@ -79,11 +113,24 @@ void static_handle_happy_path(void) {
     /* get new value for resource create property */
     printf("flom_handle_get_resource_create() = %d\n",
            flom_handle_get_resource_create(&my_handle));
+    /* check resource create 1/2 */
+    if (flom_handle_get_resource_create(&my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_resource_create\n");
+        exit(1);
+    }
     /* set a new value for resource create property */
     flom_handle_set_resource_create(&my_handle, TRUE);
     /* get new value for resource create property */
     printf("flom_handle_get_resource_create() = %d\n",
            flom_handle_get_resource_create(&my_handle));
+    /* check resource create 2/2 */
+    if (!flom_handle_get_resource_create(&my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_resource_create\n");
+        exit(1);
+    }
+    
     /* get current value for resource timeout property */
     printf("flom_handle_get_resource_timeout() = %d\n",
            flom_handle_get_resource_timeout(&my_handle));
@@ -92,6 +139,13 @@ void static_handle_happy_path(void) {
     /* get new value for resource timeout property */
     printf("flom_handle_get_resource_timeout() = %d\n",
            flom_handle_get_resource_timeout(&my_handle));
+    /* check resource timeout */
+    if (-1 != flom_handle_get_resource_timeout(&my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_resource_timeout\n");
+        exit(1);
+    }
+    
     /* get current value for resource quantity property */
     printf("flom_handle_get_resource_quantity() = %d\n",
            flom_handle_get_resource_quantity(&my_handle));
@@ -100,6 +154,13 @@ void static_handle_happy_path(void) {
     /* get new value for resource quantity property */
     printf("flom_handle_get_resource_quantity() = %d\n",
            flom_handle_get_resource_quantity(&my_handle));
+    /* check resource quantity */
+    if (3 != flom_handle_get_resource_quantity(&my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_resource_quantity\n");
+        exit(1);
+    }
+    
     /* get current value for resource lock mode property */
     printf("flom_handle_get_lock_mode() = %d\n",
            flom_handle_get_lock_mode(&my_handle));
@@ -108,6 +169,13 @@ void static_handle_happy_path(void) {
     /* get new value for resource lock mode property */
     printf("flom_handle_get_lock_mode() = %d\n",
            flom_handle_get_lock_mode(&my_handle));
+    /* check resource lock mode */
+    if (FLOM_LOCK_MODE_PW != flom_handle_get_lock_mode(&my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_lock_mode\n");
+        exit(1);
+    }
+    
     /* get current value for resource idle lifespan */
     printf("flom_handle_get_resource_idle_lifespan() = %d\n",
            flom_handle_get_resource_idle_lifespan(&my_handle));
@@ -116,25 +184,48 @@ void static_handle_happy_path(void) {
     /* get new value for resource idle lifespan */
     printf("flom_handle_get_resource_idle_lifespan() = %d\n",
            flom_handle_get_resource_idle_lifespan(&my_handle));
+    /* check resource idle lifespan */
+    if (10000 != flom_handle_get_resource_idle_lifespan(&my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_resource_idle_lifespan\n");
+        exit(1);
+    }
+    
     /* get current unicast address */
     printf("flom_handle_get_unicast_address() = '%s'\n",
            flom_handle_get_unicast_address(&my_handle));
     /* set a new unicast_address */
-    flom_handle_set_unicast_address(&my_handle, "127.0.0.1");
+    flom_handle_set_unicast_address(&my_handle, nd_unicast_address);
     /* get new unicast address */
     printf("flom_handle_get_unicast_address() = '%s'\n",
            flom_handle_get_unicast_address(&my_handle));
+    /* check unicast address */
+    if (strcmp(nd_unicast_address,
+               flom_handle_get_unicast_address(&my_handle))) {
+        fprintf(stderr,
+                "Unexpected result form flom_handle_set/get_unicast_address\n");
+        exit(1);
+    }
+    
     /* get current multicast address */
     printf("flom_handle_get_multicast_address() = '%s'\n",
            flom_handle_get_multicast_address(&my_handle));
     /* set a new multicast_address */
-    flom_handle_set_multicast_address(&my_handle, "224.0.0.1");
+    flom_handle_set_multicast_address(&my_handle, nd_multicast_address);
     /* get new multicast address */
     printf("flom_handle_get_multicast_address() = '%s'\n",
            flom_handle_get_multicast_address(&my_handle));
+    /* check multicast address */
+    if (strcmp(nd_multicast_address,
+               flom_handle_get_multicast_address(&my_handle))) {
+        fprintf(stderr,
+                "Unexpected result form flom_handle_set/get_multicast_address\n");
+        exit(1);
+    }
+    
     /* set AF_UNIX/PF_LOCAL socket_name again */
     if (FLOM_RC_OK != (ret_cod = flom_handle_set_socket_name(
-                           &my_handle, "/tmp/flom_socket_name"))) {
+                           &my_handle, nd_socket_name))) {
         fprintf(stderr, "flom_handle_set_socket_name() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
@@ -147,14 +238,28 @@ void static_handle_happy_path(void) {
     /* get new value for unicast port */
     printf("flom_handle_get_unicast_port() = %d\n",
            flom_handle_get_unicast_port(&my_handle));
+    /* check unicast port */
+    if (7777 != flom_handle_get_unicast_port(&my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_unicast_port\n");
+        exit(1);
+    }
+    
     /* get current value for multicast port */
     printf("flom_handle_get_multicast_port() = %d\n",
            flom_handle_get_multicast_port(&my_handle));
     /* set a new value for multicast_port */
-    flom_handle_set_multicast_port(&my_handle, 7777);
+    flom_handle_set_multicast_port(&my_handle, 8888);
     /* get new value for multicast port */
     printf("flom_handle_get_multicast_port() = %d\n",
            flom_handle_get_multicast_port(&my_handle));
+    /* check multicast port */
+    if (8888 != flom_handle_get_multicast_port(&my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_multicast_port\n");
+        exit(1);
+    }
+    
     /* get current value for discovery attempts property */
     printf("flom_handle_get_discovery_attempts() = %d\n",
            flom_handle_get_discovery_attempts(&my_handle));
@@ -163,6 +268,13 @@ void static_handle_happy_path(void) {
     /* get new value for discovery attempts */
     printf("flom_handle_get_discovery_attempts() = %d\n",
            flom_handle_get_discovery_attempts(&my_handle));
+    /* check discovery attempts */
+    if (5 != flom_handle_get_discovery_attempts(&my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_discovery_attempts\n");
+        exit(1);
+    }
+    
     /* get current value for discovery timeout property */
     printf("flom_handle_get_discovery_timeout() = %d\n",
            flom_handle_get_discovery_timeout(&my_handle));
@@ -171,6 +283,13 @@ void static_handle_happy_path(void) {
     /* get new value for discovery timeout */
     printf("flom_handle_get_discovery_timeout() = %d\n",
            flom_handle_get_discovery_timeout(&my_handle));
+    /* check discovery timeout */
+    if (750 != flom_handle_get_discovery_timeout(&my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_discovery_timeout\n");
+        exit(1);
+    }
+    
     /* get current value for discovery ttl property */
     printf("flom_handle_get_discovery_ttl() = %d\n",
            flom_handle_get_discovery_ttl(&my_handle));
@@ -179,6 +298,13 @@ void static_handle_happy_path(void) {
     /* get new value for discovery ttl */
     printf("flom_handle_get_discovery_ttl() = %d\n",
            flom_handle_get_discovery_ttl(&my_handle));
+    /* check discovery ttl */
+    if (2 != flom_handle_get_discovery_ttl(&my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_discovery_ttl\n");
+        exit(1);
+    }
+    
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle, locked_element,
                                            sizeof(locked_element)))) {
@@ -220,7 +346,7 @@ void dynamic_handle_happy_path(void) {
            flom_handle_get_socket_name(my_handle));
     /* set a new AF_UNIX/PF_LOCAL socket_name */
     if (FLOM_RC_OK != (ret_cod = flom_handle_set_socket_name(
-                           my_handle, "/tmp/flom_socket_name"))) {
+                           my_handle, nd_socket_name))) {
         fprintf(stderr, "flom_handle_set_socket_name() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
@@ -228,20 +354,35 @@ void dynamic_handle_happy_path(void) {
     /* get new AF_UNIX/PF_LOCAL socket_name */
     printf("flom_handle_get_socket_name() = '%s'\n",
            flom_handle_get_socket_name(my_handle));
+    /* check socket name */
+    if (strcmp(nd_socket_name, flom_handle_get_socket_name(my_handle))) {
+        fprintf(stderr,
+                "Unexpected result form flom_handle_set/get_socket_name\n");
+        exit(1);
+    }
+
     /* get current trace filename */
     printf("flom_handle_get_trace_filename() = '%s'\n",
            flom_handle_get_trace_filename(my_handle));
     /* set a new trace filename */
-    flom_handle_set_trace_filename(my_handle, "/tmp/flom.trc");
+    flom_handle_set_trace_filename(my_handle, nd_trace_filename);
     /* get new trace filename */
     printf("flom_handle_get_trace_filename() = '%s'\n",
            flom_handle_get_trace_filename(my_handle));
+    /* check trace filename */
+    if (strcmp(nd_trace_filename,
+               flom_handle_get_trace_filename(my_handle))) {
+        fprintf(stderr,
+                "Unexpected result form flom_handle_set/get_trace_filename\n");
+        exit(1);
+    }
+    
     /* get current resource name */
     printf("flom_handle_get_resource_name() = '%s'\n",
            flom_handle_get_resource_name(my_handle));
     /* set a new resource name */
     if (FLOM_RC_OK != (ret_cod = flom_handle_set_resource_name(
-                           my_handle, "myResource"))) {
+                           my_handle, nd_resource_name))) {
         fprintf(stderr, "flom_handle_set_resource_name() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
@@ -249,6 +390,14 @@ void dynamic_handle_happy_path(void) {
     /* get new resource name */
     printf("flom_handle_get_resource_name() = '%s'\n",
            flom_handle_get_resource_name(my_handle));
+    /* check resource name */
+    if (strcmp(nd_resource_name,
+               flom_handle_get_resource_name(my_handle))) {
+        fprintf(stderr,
+                "Unexpected result form flom_handle_set/get_resource_name\n");
+        exit(1);
+    }
+    
     /* get current value for resource create property */
     printf("flom_handle_get_resource_create() = %d\n",
            flom_handle_get_resource_create(my_handle));
@@ -257,11 +406,24 @@ void dynamic_handle_happy_path(void) {
     /* get new value for resource create property */
     printf("flom_handle_get_resource_create() = %d\n",
            flom_handle_get_resource_create(my_handle));
+    /* check resource create 1/2 */
+    if (flom_handle_get_resource_create(my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_resource_create\n");
+        exit(1);
+    }    
     /* set a new value for resource create property */
     flom_handle_set_resource_create(my_handle, TRUE);
     /* get new value for resource create property */
     printf("flom_handle_get_resource_create() = %d\n",
            flom_handle_get_resource_create(my_handle));
+    /* check resource create 2/2 */
+    if (!flom_handle_get_resource_create(my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_resource_create\n");
+        exit(1);
+    }
+        
     /* get current value for resource timeout property */
     printf("flom_handle_get_resource_timeout() = %d\n",
            flom_handle_get_resource_timeout(my_handle));
@@ -270,6 +432,13 @@ void dynamic_handle_happy_path(void) {
     /* get new value for resource timeout property */
     printf("flom_handle_get_resource_timeout() = %d\n",
            flom_handle_get_resource_timeout(my_handle));
+    /* check resource timeout */
+    if (-1 != flom_handle_get_resource_timeout(my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_resource_timeout\n");
+        exit(1);
+    }
+    
     /* get current value for resource quantity property */
     printf("flom_handle_get_resource_quantity() = %d\n",
            flom_handle_get_resource_quantity(my_handle));
@@ -278,6 +447,13 @@ void dynamic_handle_happy_path(void) {
     /* get new value for resource quantity property */
     printf("flom_handle_get_resource_quantity() = %d\n",
            flom_handle_get_resource_quantity(my_handle));
+    /* check resource quantity */
+    if (3 != flom_handle_get_resource_quantity(my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_resource_quantity\n");
+        exit(1);
+    }
+    
     /* get current value for resource lock mode property */
     printf("flom_handle_get_lock_mode() = %d\n",
            flom_handle_get_lock_mode(my_handle));
@@ -286,6 +462,13 @@ void dynamic_handle_happy_path(void) {
     /* get new value for resource lock mode property */
     printf("flom_handle_get_lock_mode() = %d\n",
            flom_handle_get_lock_mode(my_handle));
+    /* check resource lock mode */
+    if (FLOM_LOCK_MODE_PW != flom_handle_get_lock_mode(my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_lock_mode\n");
+        exit(1);
+    }
+    
     /* get current value for resource idle lifespan */
     printf("flom_handle_get_resource_idle_lifespan() = %d\n",
            flom_handle_get_resource_idle_lifespan(my_handle));
@@ -297,22 +480,45 @@ void dynamic_handle_happy_path(void) {
     /* get current unicast address */
     printf("flom_handle_get_unicast_address() = '%s'\n",
            flom_handle_get_unicast_address(my_handle));
+    /* check resource idle lifespan */
+    if (10000 != flom_handle_get_resource_idle_lifespan(my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_resource_idle_lifespan\n");
+        exit(1);
+    }
+    
     /* set a new unicast_address */
-    flom_handle_set_unicast_address(my_handle, "127.0.0.1");
+    flom_handle_set_unicast_address(my_handle, nd_unicast_address);
     /* get new unicast address */
     printf("flom_handle_get_unicast_address() = '%s'\n",
            flom_handle_get_unicast_address(my_handle));
+    /* check unicast address */
+    if (strcmp(nd_unicast_address,
+               flom_handle_get_unicast_address(my_handle))) {
+        fprintf(stderr,
+                "Unexpected result form flom_handle_set/get_unicast_address\n");
+        exit(1);
+    }
+    
     /* get current multicast address */
     printf("flom_handle_get_multicast_address() = '%s'\n",
            flom_handle_get_multicast_address(my_handle));
     /* set a new multicast_address */
-    flom_handle_set_multicast_address(my_handle, "224.0.0.1");
+    flom_handle_set_multicast_address(my_handle, nd_multicast_address);
     /* get new multicast address */
     printf("flom_handle_get_multicast_address() = '%s'\n",
            flom_handle_get_multicast_address(my_handle));
+    /* check multicast address */
+    if (strcmp(nd_multicast_address,
+               flom_handle_get_multicast_address(my_handle))) {
+        fprintf(stderr,
+                "Unexpected result form flom_handle_set/get_multicast_address\n");
+        exit(1);
+    }
+    
     /* set AF_UNIX/PF_LOCAL socket_name again */
     if (FLOM_RC_OK != (ret_cod = flom_handle_set_socket_name(
-                           my_handle, "/tmp/flom_socket_name"))) {
+                           my_handle, nd_socket_name))) {
         fprintf(stderr, "flom_handle_set_socket_name() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
@@ -325,14 +531,28 @@ void dynamic_handle_happy_path(void) {
     /* get new value for unicast port */
     printf("flom_handle_get_unicast_port() = %d\n",
            flom_handle_get_unicast_port(my_handle));
+    /* check unicast port */
+    if (7777 != flom_handle_get_unicast_port(my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_unicast_port\n");
+        exit(1);
+    }
+    
     /* get current value for multicast port */
     printf("flom_handle_get_multicast_port() = %d\n",
            flom_handle_get_multicast_port(my_handle));
     /* set a new value for multicast_port */
-    flom_handle_set_multicast_port(my_handle, 7777);
+    flom_handle_set_multicast_port(my_handle, 8888);
     /* get new value for multicast port */
     printf("flom_handle_get_multicast_port() = %d\n",
            flom_handle_get_multicast_port(my_handle));
+    /* check multicast port */
+    if (8888 != flom_handle_get_multicast_port(my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_multicast_port\n");
+        exit(1);
+    }
+    
     /* get current value for discovery attempts property */
     printf("flom_handle_get_discovery_attempts() = %d\n",
            flom_handle_get_discovery_attempts(my_handle));
@@ -341,6 +561,13 @@ void dynamic_handle_happy_path(void) {
     /* get new value for discovery attempts */
     printf("flom_handle_get_discovery_attempts() = %d\n",
            flom_handle_get_discovery_attempts(my_handle));
+    /* check discovery attempts */
+    if (5 != flom_handle_get_discovery_attempts(my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_discovery_attempts\n");
+        exit(1);
+    }
+    
     /* get current value for discovery timeout property */
     printf("flom_handle_get_discovery_timeout() = %d\n",
            flom_handle_get_discovery_timeout(my_handle));
@@ -349,6 +576,13 @@ void dynamic_handle_happy_path(void) {
     /* get new value for discovery timeout */
     printf("flom_handle_get_discovery_timeout() = %d\n",
            flom_handle_get_discovery_timeout(my_handle));
+    /* check discovery timeout */
+    if (750 != flom_handle_get_discovery_timeout(my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_discovery_timeout\n");
+        exit(1);
+    }
+    
     /* get current value for discovery ttl property */
     printf("flom_handle_get_discovery_ttl() = %d\n",
            flom_handle_get_discovery_ttl(my_handle));
@@ -357,6 +591,13 @@ void dynamic_handle_happy_path(void) {
     /* get new value for discovery ttl */
     printf("flom_handle_get_discovery_ttl() = %d\n",
            flom_handle_get_discovery_ttl(my_handle));
+    /* check discovery ttl */
+    if (2 != flom_handle_get_discovery_ttl(my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/get_discovery_ttl\n");
+        exit(1);
+    }
+    
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle, locked_element,
                                                   sizeof(locked_element)))) {
