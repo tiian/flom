@@ -17,3 +17,12 @@ or alternatively:
 	make -f example_makefile basic_dynamic
 	make -f example_makefile advanced_static
 	make -f example_makefile advanced_dynamic
+
+The directory /usr/local/lib may be already in your standard library path; in
+the case it's not, you can use LD_LIBRARY_PATH environment variable before
+executing the compiled programs:
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+	./basic_static
+	./basic_dynamic
+	./advanced_static
+	./advanced_dynamic

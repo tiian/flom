@@ -3,6 +3,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
+AC_CONFIG_MACRO_DIR([m4])
 
 # LT Version numbers, remember to change them just *before* a release.
 #   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)
@@ -140,8 +141,11 @@ then
 fi
 # checking glib-2.0 and gthread-2.0 availability and compatibility using  
 # pkg-config
-#PKG_CHECK_MODULES([GLIB2], [gthread-2.0 >= 2.22 glib-2.0 >= 2.22])
-PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.22])
+#
+# This work with Ubuntu 10.04
+PKG_CHECK_MODULES([GLIB2], [gthread-2.0 >= 2.22 glib-2.0 >= 2.22])
+# This work with Ubuntu 12.04
+#PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.22])
 CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
 #GLIB2_LIBS automatically set by PKG_CHECK_MODULES macro
 

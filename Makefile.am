@@ -1,3 +1,4 @@
+ACLOCAL_AMFLAGS="-I m4"
 SUBDIRS = src man etc doc tests
 dist_noinst_DATA = doxygen.conf.in
 nodist_noinst_DATA = doxygen.conf
