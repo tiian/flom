@@ -7,6 +7,7 @@ flom_LDFLAGS = -Wl,-rpath -Wl,$(libdir)
 bin_PROGRAMS = flom
 EXTRA_DIST = flom_errors.h.in
 BUILT_SOURCES = flom_errors.h
+CLEANFILES = flom_errors.h
 
 flom_errors.h: flom_errors.h.in
 	sed \

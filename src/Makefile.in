@@ -167,6 +167,7 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
+PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
@@ -279,6 +280,7 @@ flom_LDADD = @GLIB2_LIBS@ libflom.la
 flom_LDFLAGS = -Wl,-rpath -Wl,$(libdir)
 EXTRA_DIST = flom_errors.h.in
 BUILT_SOURCES = flom_errors.h
+CLEANFILES = flom_errors.h
 dist_include_HEADERS = flom.h flom_handle.h flom_types.h
 nodist_include_HEADERS = flom_errors.h
 noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
@@ -612,6 +614,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
