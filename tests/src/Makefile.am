@@ -1,6 +1,6 @@
 AM_CPPFLAGS = -I../../src
 AM_CFLAGS = -Wall
-LDADD = @GLIB2_LIBS@ ../../src/libflom.la
+LDADD = ../../src/libflom.la @GLIB2_LIBS@
 
 noinst_PROGRAMS = case0000 case0001 case0002
 

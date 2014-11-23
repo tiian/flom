@@ -140,7 +140,8 @@ then
 fi
 # checking glib-2.0 and gthread-2.0 availability and compatibility using  
 # pkg-config
-PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.22 gthread-2.0 >= 2.22])
+#PKG_CHECK_MODULES([GLIB2], [gthread-2.0 >= 2.22 glib-2.0 >= 2.22])
+PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.22])
 CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
 #GLIB2_LIBS automatically set by PKG_CHECK_MODULES macro
 
