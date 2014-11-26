@@ -674,10 +674,10 @@ extern "C" {
      * Set unicast_address in config object
      * @param address IN set the new value for unicast_address property
      */
-    static inline void flom_config_set_unicast_address(gchar *address) {
+    static inline void flom_config_set_unicast_address(const gchar *address) {
         if (NULL != global_config.unicast_address)
             g_free(global_config.unicast_address);
-        global_config.unicast_address = address; }
+        global_config.unicast_address = g_strdup(address); }
 
 
 
