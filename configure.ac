@@ -3,7 +3,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
-AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_MACRO_DIR(m4)
 
 # LT Version numbers, remember to change them just *before* a release.
 #   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)
@@ -143,7 +143,18 @@ fi
 # pkg-config
 #
 # This work with Ubuntu 10.04
-PKG_CHECK_MODULES([GLIB2], [gthread-2.0 >= 2.22 glib-2.0 >= 2.22])
+PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.22])
+PKG_CHECK_MODULES([GTHREAD2], [gthread-2.0 >= 2.22])
+#
+# REMOVE ME!!!
+#
+#pkg-config --exists 'glib-2.0 <= 2.24.1'
+#if test $? -eq 0
+#then
+#	PKG_CHECK_MODULES([GTHREAD2], [gthread-2.0 >= 2.22])
+#else
+#	GTHREAD2_LIBS=""
+#fi
 # This work with Ubuntu 12.04
 #PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.22])
 CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
@@ -216,6 +227,7 @@ AC_CHECK_FUNCS(strcasestr)
 AC_CHECK_FUNCS(vsnprintf)
 
 AC_SUBST(GLIB2_LIBS)
+AC_SUBST(GTHREAD2_LIBS)
 AC_SUBST(HAVE_DOT)
 
 # substitution of LibTool values for library version

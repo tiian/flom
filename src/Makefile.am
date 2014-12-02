@@ -2,7 +2,7 @@ AM_CPPFLAGS = -D_SYSCONFDIR='"@sysconfdir@"'
 AM_CFLAGS = -Wall
 lib_LTLIBRARIES = libflom.la
 libflom_la_LDFLAGS = -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
-flom_LDADD=@GLIB2_LIBS@ libflom.la
+flom_LDADD=@GLIB2_LIBS@ @GTHREAD2_LIBS@ libflom.la
 flom_LDFLAGS = -Wl,-rpath -Wl,$(libdir)
 bin_PROGRAMS = flom
 EXTRA_DIST = flom_errors.h.in
