@@ -34,9 +34,8 @@
  * 5. release the lock using function flom_handle_unlock()
  * 6. clean-up the allocated handle using function flom_handle_clean()
  *
- * Compilation command is:
- *     gcc basic_static.c -l flom -L /usr/local/lib \
- *       $(pkg-config --libs glib-2.0 gthread-2.0) -o basic_static
+ * Compilation command:
+ *     make -f example_makefile basic_static
  *
  * Note: this program needs an already started FLoM daemon, for instance:
  * flom -d -1 -- true

@@ -36,9 +36,8 @@
  * 6. delete (clean-up and deallocate) the handle using function
  *    flom_handle_delete()
  *
- * Compilation command is:
- *     gcc basic_dynamic.c -l flom -L /usr/local/lib \
- *       $(pkg-config --libs glib-2.0 gthread-2.0) -o basic_dynamic
+ * Compilation command:
+ *     make -f example_makefile basic_dynamic
  *
  * Note: this program needs an already started FLoM daemon, for instance:
  * flom -d -1 -- true

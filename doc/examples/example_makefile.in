@@ -1,0 +1,26 @@
+# This is an example makefile that must probably be fixed with your local
+# settings; it has been developed for Ubuntu Linux
+#
+GLIB2_LIBS=@GLIB2_LIBS@
+# -Wl,-rpath -Wl,... avoids to specify LD_LIBRARY_PATH or equivalent
+# variable to execute the produced executable
+LDFLAGS=-L@libdir@ -Wl,-rpath -Wl,@libdir@
+
+all:	basic_static basic_dynamic advanced_static advanced_dynamic
+
+basic_static:	basic_static.c
+	gcc basic_static.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+		-o basic_static
+
+basic_dynamic:	basic_dynamic.c
+	gcc basic_dynamic.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+		-o basic_dynamic
+
+advanced_static:	advanced_static.c
+	gcc advanced_static.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+		-o advanced_static
+
+advanced_dynamic:	advanced_dynamic.c
+	gcc advanced_dynamic.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+		-o advanced_dynamic
+

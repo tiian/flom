@@ -38,9 +38,8 @@
  * 6. release the lock using function flom_handle_unlock()
  * 7. clean-up the allocated handle using function flom_handle_clean()
  *
- * Compilation command is:
- *     gcc advanced_static.c -l flom -L /usr/local/lib \
- *       $(pkg-config --libs glib-2.0 gthread-2.0) -o advanced_static
+ * Compilation command:
+ *     make -f example_makefile advanced_static
  *
  * Note: this program needs an already started FLoM daemon, for instance:
  * flom -s /tmp/my_socket_name -d -1 -- true

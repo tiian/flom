@@ -71,8 +71,10 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(examplesdir)"
-DATA = $(dist_examples_DATA) $(dist_noinst_DATA)
+am__installdirs = "$(DESTDIR)$(examplesdir)" \
+	"$(DESTDIR)$(examplesdir)"
+DATA = $(dist_examples_DATA) $(dist_noinst_DATA) \
+	$(nodist_examples_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -101,7 +103,6 @@ FGREP = @FGREP@
 GLIB2_CFLAGS = @GLIB2_CFLAGS@
 GLIB2_LIBS = @GLIB2_LIBS@
 GREP = @GREP@
-GTHREAD2_CFLAGS = @GTHREAD2_CFLAGS@
 GTHREAD2_LIBS = @GTHREAD2_LIBS@
 HAVE_DOT = @HAVE_DOT@
 INSTALL = @INSTALL@
@@ -239,10 +240,11 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 examplesdir = $(docdir)/examples
-dist_noinst_DATA = Makefile.am
+dist_noinst_DATA = Makefile.am example_makefile.in
 dist_examples_DATA = README basic_static.c basic_dynamic.c \
-	advanced_static.c advanced_dynamic.c example_makefile
+	advanced_static.c advanced_dynamic.c
 
+nodist_examples_DATA = example_makefile
 all: all-am
 
 .SUFFIXES:
@@ -302,6 +304,26 @@ uninstall-dist_examplesDATA:
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(examplesdir)' && rm -f" $$files ")"; \
 	cd "$(DESTDIR)$(examplesdir)" && rm -f $$files
+install-nodist_examplesDATA: $(nodist_examples_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(examplesdir)" || $(MKDIR_P) "$(DESTDIR)$(examplesdir)"
+	@list='$(nodist_examples_DATA)'; test -n "$(examplesdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(examplesdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(examplesdir)" || exit $$?; \
+	done
+
+uninstall-nodist_examplesDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_examples_DATA)'; test -n "$(examplesdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(examplesdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(examplesdir)" && rm -f $$files
 tags: TAGS
 TAGS:
 
@@ -343,7 +365,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(examplesdir)"; do \
+	for dir in "$(DESTDIR)$(examplesdir)" "$(DESTDIR)$(examplesdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -391,7 +413,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_examplesDATA
+install-data-am: install-dist_examplesDATA install-nodist_examplesDATA
 
 install-dvi: install-dvi-am
 
@@ -435,7 +457,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_examplesDATA
+uninstall-am: uninstall-dist_examplesDATA \
+	uninstall-nodist_examplesDATA
 
 .MAKE: install-am install-strip
 
@@ -445,12 +468,18 @@ uninstall-am: uninstall-dist_examplesDATA
 	install-data install-data-am install-dist_examplesDATA \
 	install-dvi install-dvi-am install-exec install-exec-am \
 	install-html install-html-am install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am uninstall uninstall-am uninstall-dist_examplesDATA
+	install-man install-nodist_examplesDATA install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
+	uninstall-dist_examplesDATA uninstall-nodist_examplesDATA
 
+example_makefile: example_makefile.in
+	sed \
+	-e 's|@GLIB2_LIBS[@]|$(GLIB2_LIBS)|g' \
+	-e 's|@libdir[@]|$(libdir)|g' \
+	$< >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

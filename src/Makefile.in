@@ -140,7 +140,6 @@ FGREP = @FGREP@
 GLIB2_CFLAGS = @GLIB2_CFLAGS@
 GLIB2_LIBS = @GLIB2_LIBS@
 GREP = @GREP@
-GTHREAD2_CFLAGS = @GTHREAD2_CFLAGS@
 GTHREAD2_LIBS = @GTHREAD2_LIBS@
 HAVE_DOT = @HAVE_DOT@
 INSTALL = @INSTALL@
@@ -281,7 +280,7 @@ AM_CPPFLAGS = -D_SYSCONFDIR='"@sysconfdir@"'
 AM_CFLAGS = -Wall
 lib_LTLIBRARIES = libflom.la
 libflom_la_LDFLAGS = -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
-flom_LDADD = @GLIB2_LIBS@ @GTHREAD2_LIBS@ libflom.la
+flom_LDADD = @GLIB2_LIBS@ libflom.la
 flom_LDFLAGS = -Wl,-rpath -Wl,$(libdir)
 EXTRA_DIST = flom_errors.h.in
 BUILT_SOURCES = flom_errors.h

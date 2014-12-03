@@ -792,10 +792,9 @@ _RELEASE_DATE
 LT_REVISION
 LT_AGE
 LT_CURRENT
+GTHREAD2_LIBS
 HAVE_DOT
 DOXYGEN
-GTHREAD2_LIBS
-GTHREAD2_CFLAGS
 GLIB2_LIBS
 GLIB2_CFLAGS
 PKG_CONFIG
@@ -927,9 +926,7 @@ CPPFLAGS
 CPP
 PKG_CONFIG
 GLIB2_CFLAGS
-GLIB2_LIBS
-GTHREAD2_CFLAGS
-GTHREAD2_LIBS'
+GLIB2_LIBS'
 
 
 # Initialize some variables set by options.
@@ -1585,10 +1582,6 @@ Some influential environment variables:
   GLIB2_CFLAGS
               C compiler flags for GLIB2, overriding pkg-config
   GLIB2_LIBS  linker flags for GLIB2, overriding pkg-config
-  GTHREAD2_CFLAGS
-              C compiler flags for GTHREAD2, overriding pkg-config
-  GTHREAD2_LIBS
-              linker flags for GTHREAD2, overriding pkg-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -4769,13 +4762,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4772: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4765: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4775: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4768: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4778: output\"" >&5)
+  (eval echo "\"\$as_me:4771: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -5981,7 +5974,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5984 "configure"' > conftest.$ac_ext
+  echo '#line 5977 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7511,11 +7504,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7514: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7507: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7518: \$? = $ac_status" >&5
+   echo "$as_me:7511: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7850,11 +7843,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7853: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7846: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7857: \$? = $ac_status" >&5
+   echo "$as_me:7850: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7955,11 +7948,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7958: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7951: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7962: \$? = $ac_status" >&5
+   echo "$as_me:7955: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8010,11 +8003,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8013: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8006: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8017: \$? = $ac_status" >&5
+   echo "$as_me:8010: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10394,7 +10387,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10397 "configure"
+#line 10390 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10490,7 +10483,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10493 "configure"
+#line 10486 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11732,8 +11725,13 @@ then
 fi
 # checking glib-2.0 and gthread-2.0 availability and compatibility using
 # pkg-config
-#
-# This work with Ubuntu 10.04
+# Starting with glib 2.32, gthread must no more been specified as documented
+# here: https://developer.gnome.org/glib/2.32/glib-compiling.html
+# Until glib 2.30, gthread must be specified as documented here:
+# https://developer.gnome.org/glib/2.30/glib-compiling.html
+pkg-config --atleast-version=2.32 glib-2.0
+if test $? -eq 0
+then
 
 
 if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
@@ -11860,12 +11858,12 @@ if test -n "$PKG_CONFIG"; then
         pkg_cv_GLIB2_CFLAGS="$GLIB2_CFLAGS"
     else
         if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"glib-2.0 >= 2.22\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "glib-2.0 >= 2.22") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"glib-2.0 >= 2.32\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "glib-2.0 >= 2.32") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GLIB2_CFLAGS=`$PKG_CONFIG --cflags "glib-2.0 >= 2.22" 2>/dev/null`
+  pkg_cv_GLIB2_CFLAGS=`$PKG_CONFIG --cflags "glib-2.0 >= 2.32" 2>/dev/null`
 else
   pkg_failed=yes
 fi
@@ -11878,12 +11876,12 @@ if test -n "$PKG_CONFIG"; then
         pkg_cv_GLIB2_LIBS="$GLIB2_LIBS"
     else
         if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"glib-2.0 >= 2.22\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "glib-2.0 >= 2.22") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"glib-2.0 >= 2.32\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "glib-2.0 >= 2.32") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GLIB2_LIBS=`$PKG_CONFIG --libs "glib-2.0 >= 2.22" 2>/dev/null`
+  pkg_cv_GLIB2_LIBS=`$PKG_CONFIG --libs "glib-2.0 >= 2.32" 2>/dev/null`
 else
   pkg_failed=yes
 fi
@@ -11902,14 +11900,14 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        GLIB2_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "glib-2.0 >= 2.22"`
+	        GLIB2_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "glib-2.0 >= 2.32"`
         else
-	        GLIB2_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "glib-2.0 >= 2.22"`
+	        GLIB2_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "glib-2.0 >= 2.32"`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$GLIB2_PKG_ERRORS" >&5
 
-	as_fn_error "Package requirements (glib-2.0 >= 2.22) were not met:
+	as_fn_error "Package requirements (glib-2.0 >= 2.32) were not met:
 
 $GLIB2_PKG_ERRORS
 
@@ -11940,14 +11938,16 @@ else
 $as_echo "yes" >&6; }
 	:
 fi
+else
+#	PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.22 gthread-2.0 >= 2.22])
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GTHREAD2" >&5
-$as_echo_n "checking for GTHREAD2... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GLIB2" >&5
+$as_echo_n "checking for GLIB2... " >&6; }
 
 if test -n "$PKG_CONFIG"; then
-    if test -n "$GTHREAD2_CFLAGS"; then
-        pkg_cv_GTHREAD2_CFLAGS="$GTHREAD2_CFLAGS"
+    if test -n "$GLIB2_CFLAGS"; then
+        pkg_cv_GLIB2_CFLAGS="$GLIB2_CFLAGS"
     else
         if test -n "$PKG_CONFIG" && \
     { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gthread-2.0 >= 2.22\""; } >&5
@@ -11955,7 +11955,7 @@ if test -n "$PKG_CONFIG"; then
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GTHREAD2_CFLAGS=`$PKG_CONFIG --cflags "gthread-2.0 >= 2.22" 2>/dev/null`
+  pkg_cv_GLIB2_CFLAGS=`$PKG_CONFIG --cflags "gthread-2.0 >= 2.22" 2>/dev/null`
 else
   pkg_failed=yes
 fi
@@ -11964,8 +11964,8 @@ else
 	pkg_failed=untried
 fi
 if test -n "$PKG_CONFIG"; then
-    if test -n "$GTHREAD2_LIBS"; then
-        pkg_cv_GTHREAD2_LIBS="$GTHREAD2_LIBS"
+    if test -n "$GLIB2_LIBS"; then
+        pkg_cv_GLIB2_LIBS="$GLIB2_LIBS"
     else
         if test -n "$PKG_CONFIG" && \
     { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gthread-2.0 >= 2.22\""; } >&5
@@ -11973,7 +11973,7 @@ if test -n "$PKG_CONFIG"; then
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GTHREAD2_LIBS=`$PKG_CONFIG --libs "gthread-2.0 >= 2.22" 2>/dev/null`
+  pkg_cv_GLIB2_LIBS=`$PKG_CONFIG --libs "gthread-2.0 >= 2.22" 2>/dev/null`
 else
   pkg_failed=yes
 fi
@@ -11992,22 +11992,22 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        GTHREAD2_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "gthread-2.0 >= 2.22"`
+	        GLIB2_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "gthread-2.0 >= 2.22"`
         else
-	        GTHREAD2_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "gthread-2.0 >= 2.22"`
+	        GLIB2_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "gthread-2.0 >= 2.22"`
         fi
 	# Put the nasty error message in config.log where it belongs
-	echo "$GTHREAD2_PKG_ERRORS" >&5
+	echo "$GLIB2_PKG_ERRORS" >&5
 
 	as_fn_error "Package requirements (gthread-2.0 >= 2.22) were not met:
 
-$GTHREAD2_PKG_ERRORS
+$GLIB2_PKG_ERRORS
 
 Consider adjusting the PKG_CONFIG_PATH environment variable if you
 installed software in a non-standard prefix.
 
-Alternatively, you may set the environment variables GTHREAD2_CFLAGS
-and GTHREAD2_LIBS to avoid the need to call pkg-config.
+Alternatively, you may set the environment variables GLIB2_CFLAGS
+and GLIB2_LIBS to avoid the need to call pkg-config.
 See the pkg-config man page for more details.
 " "$LINENO" 5
 elif test $pkg_failed = untried; then
@@ -12017,31 +12017,20 @@ as_fn_error "The pkg-config script could not be found or is too old.  Make sure 
 is in your PATH or set the PKG_CONFIG environment variable to the full
 path to pkg-config.
 
-Alternatively, you may set the environment variables GTHREAD2_CFLAGS
-and GTHREAD2_LIBS to avoid the need to call pkg-config.
+Alternatively, you may set the environment variables GLIB2_CFLAGS
+and GLIB2_LIBS to avoid the need to call pkg-config.
 See the pkg-config man page for more details.
 
 To get pkg-config, see <http://pkg-config.freedesktop.org/>.
 See \`config.log' for more details." "$LINENO" 5; }
 else
-	GTHREAD2_CFLAGS=$pkg_cv_GTHREAD2_CFLAGS
-	GTHREAD2_LIBS=$pkg_cv_GTHREAD2_LIBS
+	GLIB2_CFLAGS=$pkg_cv_GLIB2_CFLAGS
+	GLIB2_LIBS=$pkg_cv_GLIB2_LIBS
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 	:
 fi
-#
-# REMOVE ME!!!
-#
-#pkg-config --exists 'glib-2.0 <= 2.24.1'
-#if test $? -eq 0
-#then
-#	PKG_CHECK_MODULES([GTHREAD2], [gthread-2.0 >= 2.22])
-#else
-#	GTHREAD2_LIBS=""
-#fi
-# This work with Ubuntu 12.04
-#PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.22])
+fi
 CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
 #GLIB2_LIBS automatically set by PKG_CHECK_MODULES macro
 

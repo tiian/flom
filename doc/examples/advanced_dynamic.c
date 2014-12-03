@@ -40,9 +40,8 @@
  * 7. delete (clean-up and deallocate) the handle using function
  *    flom_handle_delete()
  *
- * Compilation command is:
- *     gcc advanced_dynamic.c -l flom -L /usr/local/lib \
- *       $(pkg-config --libs glib-2.0 gthread-2.0) -o advanced_dynamic
+ * Compilation command:
+ *     make -f example_makefile advanced_dynamic
  *
  * Note: this program needs an already started FLoM daemon, for instance:
  * flom -s /tmp/my_socket_name -d -1 -- true
