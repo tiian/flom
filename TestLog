@@ -1,0 +1,8 @@
+Release: 0.9.0
+Date:    2014-12-04
+Ubuntu 10.04 / x86 / physical
+Ubuntu 12.04 / x86_64 / virtual (Azure)
+Ubuntu 14.04 / x86_64 / virtual (Azure)
+SLES 11SP3 / x86_64 / virtual (Azure)
+OpenLogic 6.5 / x86_64 / virtual (Azure)
+OpenLogic 7.0 / x86_64 / virtual (Azure); note: disable firewall to allow IP multicast

@@ -1,6 +1,6 @@
 LOG:
 
-         - 0.9.0 Client library API: libflom
+20141204 - 0.9.0 Client library API: libflom
 	Fixed a bug related to negative resource timeouts, for example 
 	"-o -100" or "--resource-timeout=-100"
 	Fixed this bug: 
