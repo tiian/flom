@@ -545,8 +545,8 @@ int flom_listen_tcp_automatic(flom_conns_t *conns)
                             (void *)&addr, addrlen);
         /* inject address value to configuration */
         FLOM_TRACE(("flom_listen_tcp_automatic: set unicast address to value "
-                    "'0.0.0.0'\n"));
-        flom_config_set_unicast_address("0.0.0.0");
+                    "'%s'\n", FLOM_INADDR_ANY_STRING));
+        flom_config_set_unicast_address(FLOM_INADDR_ANY_STRING);
         /* inject port value to configuration */
         unicast_port = ntohs(addr.sin_port);
         FLOM_TRACE(("flom_listen_tcp_automatic: set unicast port to value "
@@ -1689,9 +1689,13 @@ int flom_accept_discover_reply(int fd, const struct sockaddr *src_addr,
         msg.header.level = FLOM_MSG_LEVEL;
         msg.header.pvs.verb = FLOM_MSG_VERB_DISCOVER;
         msg.header.pvs.step = 2*FLOM_MSG_STEP_INCR;
+        FLOM_TRACE(("flom_accept_discover_reply: unicast_address=%p (%s)\n",
+            flom_config_get_unicast_address(),
+            flom_config_get_unicast_address()));
         msg.body.discover_16.network.port =
             (in_port_t)flom_config_get_unicast_port();
-        if (NULL != flom_config_get_unicast_address())
+        if (NULL != flom_config_get_unicast_address() &&
+            0 != g_strcmp0(FLOM_INADDR_ANY_STRING, flom_config_get_unicast_address()))
             msg.body.discover_16.network.address = g_strdup(
                 flom_config_get_unicast_address());
         /* serialize the request message */
