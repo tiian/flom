@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [0.7.1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [0.7.2-fix], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 # hardwired configuration
@@ -124,7 +124,17 @@ then
 fi
 # checking glib-2.0 and gthread-2.0 availability and compatibility using  
 # pkg-config
-PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.22 gthread-2.0 >= 2.22])
+# Starting with glib 2.32, gthread must no more been specified as documented
+# here: https://developer.gnome.org/glib/2.32/glib-compiling.html
+# Until glib 2.30, gthread must be specified as documented here:
+# https://developer.gnome.org/glib/2.30/glib-compiling.html
+pkg-config --atleast-version=2.32 glib-2.0
+if test $? -eq 0
+then
+	PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.32])
+else
+	PKG_CHECK_MODULES([GLIB2], [gthread-2.0 >= 2.22])
+fi
 CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
 #GLIB2_LIBS automatically set by PKG_CHECK_MODULES macro
 
