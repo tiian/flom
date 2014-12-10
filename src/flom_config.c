@@ -145,7 +145,7 @@ void flom_config_reset()
     global_config.resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
     global_config.resource_wait = TRUE;
     global_config.resource_create = TRUE;
-    global_config.resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
+    global_config.resource_timeout = -1;
     global_config.resource_quantity = 1;
     global_config.lock_mode = FLOM_LOCK_MODE_EX;
     global_config.resource_idle_lifespan = 0;

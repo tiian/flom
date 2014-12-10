@@ -1,8 +1,11 @@
 LOG:
 
- - 0.7.2 Fixed bug related to dynamic network mode:
+20141210 - 0.7.2 Fixed bug related to dynamic network mode:
 	http://sourceforge.net/p/flom/discussion/general/thread/cf59b6dc/
 	Fixed a bug related to build on systems with newer GLIB2 library
+	Fixed a bug related to negative resource timeouts, for example 
+	"-o -100" or "--resource-timeout=-100"
+	Fixed test case "Use case 3 (2/2)" (it was a synchronization bug)
 
 20141003 - 0.7.1 Implemented a garbage collector for hierarchical resources
 	Fixed a subtle bug exploited by "-d -1" option on the daemon side when

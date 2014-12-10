@@ -592,7 +592,6 @@ extern "C" {
      * @param timeout IN milliseconds
      */
     static inline void flom_config_set_resource_timeout(gint timeout) {
-        if (0 > timeout) timeout = -timeout;
         global_config.resource_timeout = timeout;
     }
 
