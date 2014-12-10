@@ -36,8 +36,8 @@ AT_CHECK([flom_test_exec3.sh 1 1 1 "-w n" & flom_test_exec1.sh 2 0 2 ; flom_test
 AT_CLEANUP
 
 AT_SETUP([Use case 3 (2/2)])
-AT_CHECK([flom_test_exec1.sh 1 0 1 &], [0], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 2 0 1 "-w n"], [@_ES_RESOURCE_BUSY@], [ignore], [ignore])
+AT_CHECK([flom_test_exec1.sh 1 0 2 &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 2 1 1 "-w n"], [@_ES_RESOURCE_BUSY@], [ignore], [ignore])
 AT_CHECK([flom_test_exec1.sh 3 0 0 >/dev/null], [0], [ignore], [ignore])
 AT_CLEANUP
 
