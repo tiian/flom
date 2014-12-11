@@ -6,7 +6,7 @@ Since version 0.9.0 it's a library to synchronize your own program too; basic
 usage examples are in doc/examples directory (default installation path is
 /usr/local/share/doc/flom/examples/)
 API documentation is distributed in directory doc/html/ (default installation
-path is /usr/local/share/doc/flom/html/)
+path is /usr/local/share/doc/flom/html/) and on the web at http://flom.sourceforge.net/
 
 A list of implemented use cases is listed at this URL: 
 http://sourceforge.net/p/flom/wiki/FLOM%20by%20examples/
@@ -24,6 +24,8 @@ This is a brief list of the available features:
   the others node)
 - easy API (Application Programming Interface) to synchronize your own C
   programs with shell executed flom commands
+
+FLoM central documentation site is hosted by SourceForge Wiki: https://sourceforge.net/p/flom/wiki/Home/
 
  * FLoM is free software: you can redistribute it and/or modify under the terms
  * of GNU General Public License version 2 as published by the Free Software
