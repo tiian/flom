@@ -16,45 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef TEMPLATE_H
-# define TEMPLATE_H
+#include "flom.hh"
 
 
 
-#include <config.h>
-
-
-
-/* save old FLOM_TRACE_MODULE and set a new value */
-#ifdef FLOM_TRACE_MODULE
-# define FLOM_TRACE_MODULE_SAVE FLOM_TRACE_MODULE
-# undef FLOM_TRACE_MODULE
-#else
-# undef FLOM_TRACE_MODULE_SAVE
-#endif /* FLOM_TRACE_MODULE */
-#define FLOM_TRACE_MODULE      FLOM_TRACE_MOD_
-
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-
-
-#ifdef __cplusplus
+int main(int argc, char *argv[]) {
+    return 0;
 }
-#endif /* __cplusplus */
-
-
-
-/* restore old value of FLOM_TRACE_MODULE */
-#ifdef FLOM_TRACE_MODULE_SAVE
-# undef FLOM_TRACE_MODULE
-# define FLOM_TRACE_MODULE FLOM_TRACE_MODULE_SAVE
-# undef FLOM_TRACE_MODULE_SAVE
-#endif /* FLOM_TRACE_MODULE_SAVE */
-
-
-
-#endif /* TEMPLATE_H */

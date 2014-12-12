@@ -11,20 +11,20 @@
  * FLoM is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Use this header file to include the stuff necessary to use libflom library
- * with C programming language
- */
+#ifndef FLOMHANDLE_HH
+# define FLOMHANDLE_HH
 
-#ifndef FLOM_H
-# define FLOM_H
-# include "flom_errors.h"
-# include "flom_handle.h"
-# include "flom_types.h"
-#endif /* FLOM_H */
+
+
+class FlomHandle {
+};
+
+
+
+#endif /* FLOMHANDLE_HH */

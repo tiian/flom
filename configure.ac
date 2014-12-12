@@ -105,6 +105,7 @@ AC_DEFINE_UNQUOTED([_ES_RESOURCE_BUSY], [$_ES_RESOURCE_BUSY], [Exit status for b
 AC_DEFINE_UNQUOTED([_ES_GENERIC_ERROR], [$_ES_GENERIC_ERROR], [Exit status for generic error])
 
 AC_PROG_CC
+AC_PROG_CXX
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
   Makefile
@@ -129,9 +130,13 @@ AC_ARG_ENABLE([trace],
         AS_HELP_STRING([--disable-trace],
                 [disable trace feature (not suggested)]),
         [_TRACE="no"], [_TRACE="yes"; CPPFLAGS="$CPPFLAGS -D_TRACE"] )
-
+AC_ARG_ENABLE([cppapi],
+	AS_HELP_STRING([--disable-cppapi],
+		[do not prepare C++ API]),
+	[CPPAPI="no"], [CPPAPI="yes"])
 #AM_PROG_CC_C_O
-
+# C++ stuff is conditional
+AM_CONDITIONAL([COND_CPPAPI], [test "$CPPAPI" = "yes"])
 
 # Checking pkg-config is available
 AC_CHECK_PROGS(PKG_CONFIG, [pkg-config], [])

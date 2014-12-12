@@ -21,6 +21,10 @@
 
 
 
+#include <stdlib.h>
+
+
+
 #include "flom_errors.h"
 #include "flom_types.h"
 
