@@ -516,7 +516,9 @@ WARN_LOGFILE           =
 INPUT                  = @top_srcdir@/src/flom.h \
 			@top_srcdir@/src/flom_errors.h \
 			@top_srcdir@/src/flom_handle.h \
-			@top_srcdir@/src/flom_types.h
+			@top_srcdir@/src/flom_types.h \
+			@top_srcdir@/src/flom.hh \
+			@top_srcdir@/src/FlomHandle.hh
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 

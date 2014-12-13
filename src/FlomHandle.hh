@@ -22,7 +22,367 @@
 
 
 
+#include "flom_handle.h"
+
+
+
+/**
+ * This class provides C++ abstraction to C @ref flom_handle_t type
+ */
 class FlomHandle {
+    private:
+    /**
+     * C FLoM handle object
+     */
+    flom_handle_t handle;
+
+
+    
+    public:
+    FlomHandle() {
+        flom_handle_init(&handle); }
+    ~FlomHandle() {
+        flom_handle_clean(&handle); }
+
+    /**
+     * Locks the (logical) resource linked to this handle; the resource MUST
+     * be unlocked using method @ref unlock when the lock condition is no more
+     * necessary
+     * @param element (Output): contains the name of the locked element if
+     *        the resource is of type "resource set"; set it to NULL if you
+     *        are not interested to retrieve an element name
+     * @param element_size (Input): maximum number of characters (null
+     *        terminator included) that can be used by the function to store
+     *        the name of the locked element
+     * @return a reason code (see file @ref flom_errors.h)
+     */
+    int lock(char *element, size_t element_size) {
+        return flom_handle_lock(&handle, element, element_size); }
+    
+    /**
+     * Unlocks the (logical) resource linked to this handle; the resource MUST
+     * be previously locked using method @ref lock
+     * @return a reason code (see file @ref flom_errors.h)
+     */
+    int unlock() {
+        return flom_handle_unlock(&handle); }
+    
+    /**
+     * Gets the maximum number of attempts that will be tryed during
+     * auto-discovery phase using UDP/IP multicast (see
+     *         @ref getMulticastAddress, @ref getMulticastPort).
+     * The current value can be altered using method @ref setDiscoveryAttempts
+     * @return the current value
+     */
+    int getDiscoveryAttempts() {
+        return flom_handle_get_discovery_attempts(&handle); }
+    
+    /**
+     * Sets the maximum number of attempts that will be tryed during
+     * auto-discovery phase using UDP/IP multicast (see
+     *         @ref setMulticastAddress, @ref setMulticastPort).
+     * The current value can be inspected using method
+     *         @ref getDiscoveryAttempts
+     * @param value (Input): the new value
+     */
+    void setDiscoveryAttempts(int value) {
+        flom_handle_set_discovery_attempts(&handle, value); }
+    
+    /**
+     * Gets the number of milliseconds between two consecutive attempts that
+     * will be tryed during auto-discovery phase using UDP/IP multicast (see
+     * @ref getMulticastAddress, @ref getMulticastPort).
+     * The current value can be altered using method @ref setDiscoveryTimeout
+     * @return the current value
+     */
+    int getDiscoveryTimeout() {
+        return flom_handle_get_discovery_timeout(&handle); }
+    
+    /**
+     * Sets the number of milliseconds between two consecutive attempts that
+     * will be tryed during auto-discovery phase using UDP/IP multicast (see
+     * @ref setMulticastAddress, @ref setMulticastPort).
+     * The current value can be inspected using method
+     * @ref getDiscoveryTimeout.
+     * @param value (Input): the new value
+     */
+    void setDiscoveryTimeout(int value) {
+        flom_handle_set_discovery_timeout(&handle, value); }
+    
+    /**
+     * Gets the UDP/IP multicast TTL parameter used during auto-discovery
+     * phase; for a definition of the parameter, see
+     * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html
+     * . The current value can be altered using method @ref setDiscoveryTtl
+     * @return the current value
+     */
+    int getDiscoveryTtl() {
+        flom_handle_get_discovery_ttl(&handle); }
+    
+    /**
+     * Sets the UDP/IP multicast TTL parameter used during auto-discovery
+     * phase; for a definition of the parameter, see
+     * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html 
+     * . The current value can be inspected using method @ref getDiscoveryTtl.
+     * @param value (Input): the new value
+     */
+    void setDiscoveryTtl(int value) {
+        flom_handle_set_discovery_ttl(&handle, value); }
+    
+    /**
+     * Gets lock mode property: how a simple or hierarchical resource will
+     * be locked when method @ref lock is called; FLoM
+     * supports the same lock mode semantic proposed by DLM, see
+     * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
+     * for a detailed explanation
+     * . The current value can be altered using method @ref setLockMode
+     * @return the current value
+     */
+    flom_lock_mode_t getLockMode() {
+        return flom_handle_get_lock_mode(&handle); }
+
+    /**
+     * Sets lock mode property: how a simple or hierarchical resource will
+     * be locked when method @ref lock is called; FLoM
+     * supports the same lock mode semantic proposed by DLM, see
+     * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
+     * for a detailed explanation
+     * . The current value can be inspected using method @ref getLockMode
+     * @param value (Input): the new value
+     */
+    void setLockMode(flom_lock_mode_t value) {
+        flom_handle_set_lock_mode(&handle, value); }
+
+    /**
+     * Gets the multicast address: the IP address (or a network name that the
+     * system can resolve) of the IP multicast group that must be contacted
+     * to reach FLoM daemon (server) using UDP/IP; see also
+     *         @ref getMulticastPort.
+     * The current value can be altered using function
+     *         @ref setMulticastAddress.
+     * @return the current value
+     */
+    const char *getMulticastAddress() {
+        return flom_handle_get_multicast_address(&handle); }
+
+    /**
+     * Sets the multicast address: the IP address (or a network name that the
+     * system can resolve) of the IP multicast group that must be contacted
+     * to reach FLoM daemon (server) using UDP/IP; see also
+     * @ref setMulticastPort.
+     * The current value can be inspected using method
+     * @ref getMulticastAddress.
+     * @param value (Input): the new value
+     */
+    void setMulticastAddress(const char *value) {
+        flom_handle_set_multicast_address(&handle, value); }
+
+    /**
+     * Gets the UDP/IP multicast port that must be used to contact the FLoM
+     * daemon (server) using UDP/IP; see also @ref getMulticastAddress.
+     * The current value can be altered using method @ref setMulticastPort.
+     * @return the current value
+     */
+    int getMulticastPort() {
+        return flom_handle_get_multicast_port(&handle); }
+
+    /**
+     * Sets the UDP/IP multicast port that must be used to contact the FLoM
+     * daemon (server) using UDP/IP; see also @ref setMulticastAddress.
+     * The current value can be inspected using method @ref getMulticastPort.
+     * @param value (Input): the new value
+     */
+    void setMulticastPort(int value) {
+        flom_handle_set_multicast_port(&handle, value); }
+
+    /**
+     * Gets "resource create" boolean property: it specifies if method
+     * @ref lock can create a new resource when the specified
+     * one is not defined; the default value is TRUE. 
+     * The current value can be altered using method 
+     *     @ref setResourceCreate.
+     * @return the current value
+     */
+    int getResourceCreate() {
+        return flom_handle_get_resource_create(&handle); }
+
+    /**
+     * Sets "resource create" boolean property: it specifies if method
+     * @ref lock can create a new resource when the specified
+     * one is not defined.
+     * The current value can be inspected using method @ref getResourceCreate.
+     * @param value (Input): the new value
+     */
+    void setResourceCreate(int value) {
+        flom_handle_set_resource_create(&handle, value); }
+
+    /**
+     * Gets "resource idle lifespan" property: it specifies how many
+     * milliseconds a resource will be kept after the last locker released it;
+     * the expiration is necessary to avoid useless resource allocation.
+     * The current value can be altered using method
+     *     @ref setResourceIdleLifespan.
+     * @return the current value
+     */
+    int getResourceIdleLifespan() {
+        return flom_handle_get_resource_idle_lifespan(&handle); }
+
+    /**
+     * Sets "resource idle lifespan" property: it specifies how many
+     * milliseconds a resource will be kept after the last locker released it;
+     * the expiration is necessary to avoid useless resource allocation.
+     * The current value can be inspected using method
+     *     @ref getResourceIdleLifespan.
+     * @param value (Input): the new value
+     */
+    void setResourceIdleLifespan(int value) {
+        flom_handle_set_resource_idle_lifespan(&handle, value); }
+
+    /**
+     * Gets the resource name: the name of the resource that can be locked and
+     * unlocked using @ref lock and @ref unlock methods.
+     * The current value can be altered using method @ref setResourceName.
+     * @return the current value
+     */
+    const char *getResourceName() {
+        return flom_handle_get_resource_name(&handle); }
+
+    /**
+     * Sets the resource name: the name of the resource that can be locked and
+     * unlocked using @ref lock and @ref unlock methods.
+     * The current value can be inspected using method @ref getResourceName.
+     * NOTE: the resource type is determined by its name; take a look to
+     * flom command man page (-r, --resource-name option) for an
+     * explanation of the resource name grammar.
+     * @param value (Input): the new value
+     * @return a reason code (see file @ref flom_errors.h)
+     */
+    int setResourceName(const char *value) {
+        return flom_handle_set_resource_name(&handle, value); }
+
+    /**
+     * Gets "resource quantity" property: the number of units that will be
+     * locked and unlocked using @ref lock and @ref unlock methods.
+     * The current value can be altered using method @ref setResourceQuantity.
+     * NOTE: this property applies to "numeric resources" only.
+     * @return the current value
+     */
+    int getResourceQuantity() {
+        return flom_handle_get_resource_quantity(&handle); }
+
+    /**
+     * Sets "resource quantity" property: the number of units that will be
+     * locked and unlocked using @ref lock and @ref unlock methods.
+     * The current value can be inspected using method
+     * @ref getResourceQuantity.
+     * NOTE: this property applies to "numeric resources" only.
+     * @param value (Input): the new value
+     */
+    void setResourceQuantity(int value) {
+        flom_handle_set_resource_quantity(&handle, value); }
+
+    /**
+     * Gets "resource timeout" property: how long a lock operation
+     * (see @ref lock) will wait if the resource is locked
+     * by another requester.
+     * The current value can be altered using method @ref setResourceTimeout.
+     * @return the current value: <BR>
+     *        0: no wait <BR>
+     *        >0: maximum number of milliseconds to wait <BR>
+     *        <0: unlimited wait
+     */
+    int getResourceTimeout() {
+        return flom_handle_get_resource_timeout(&handle); }
+
+    /**
+     * Sets "resource timeout" property: how long a lock operation
+     * (see @ref lock) will wait if the resource is locked
+     * by another requester.
+     * The current value can be inspected using method @ref getResourceTimeout.
+     * @param value (Input): the new value: <BR>
+     *        0: no wait <BR>
+     *        >0: maximum number of milliseconds to wait <BR>
+     *        <0: unlimited wait
+     */
+    void setResourceTimeout(int value) {
+        flom_handle_set_resource_timeout(&handle, value); }
+
+    /**
+     * Gets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+     * used to contact a local FLoM daemon (server).
+     * The current value can be altered using method @ref setSocketName.
+     * @return the current value
+     */
+    const char *getSocketName() {
+        return flom_handle_get_socket_name(&handle); }
+
+    /**
+     * Sets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+     * used to contact a local FLoM daemon (server).
+     * The current value can be inspected using method @ref getSocketName.
+     * @param value (Input): the new value
+     * @return a reason code (see file @ref flom_errors.h)
+     */
+    int setSocketName(const char *value) {
+        return flom_handle_set_socket_name(&handle, value); }
+
+    /**
+     * Gets the trace filename: the name (absolute or relative path) used
+     * by libflom (FLoM client library) to record trace messages.
+     * The current value can be altered using method @ref setTraceFilename.
+     * @return the current value
+     */
+    const char *getTraceFilename() {
+        return flom_handle_get_trace_filename(&handle); }
+
+    /**
+     * Sets the trace filename: the name (absolute or relative path) used
+     * by libflom (FLoM client library) to record trace messages.
+     * The current value can be inspected using function @ref getTraceFilename.
+     * @param value (Input): the new value
+     */
+    void setTraceFilename(const char *value) {
+        flom_handle_set_trace_filename(&handle, value); }
+    
+    /**
+     * Gets the unicast address: the IP address (or a network name that the
+     * system can resolve) of the host that must be contacted
+     * to reach FLoM daemon (server) using TCP/IP; see also
+     * @ref getUnicastPort.
+     * The current value can be altered using method @ref setUnicastAddress.
+     * @return the current value
+     */
+    const char *getUnicastAddress() {
+        return flom_handle_get_unicast_address(&handle); }
+
+    /**
+     * Sets the unicast address: the IP address (or a network name that the
+     * system can resolve) of the host that must be contacted
+     * to reach FLoM daemon (server) using TCP/IP; see also
+     * @ref setUnicastPort.
+     * The current value can be inspected using method @ref getUnicastAddress.
+     * @param value (Input): the new value
+     */
+    void setUnicastAddress(const char *value) {
+        flom_handle_set_unicast_address(&handle, value); }
+
+    /**
+     * Gets the TCP/IP unicast port that must be used to contact the FLoM
+     * daemon (server) using TCP/IP; see also @ref getUnicastAddress.
+     * The current value can be altered using function @ref setUnicastPort.
+     * @return the current value
+     */
+    int getUnicastPort() {
+        return flom_handle_get_unicast_port(&handle); }
+
+    /**
+     * Sets the TCP/IP unicast port that must be used to contact the FLoM
+     * daemon (server) using TCP/IP; see also @ref setUnicastAddress.
+     * The current value can be inspected using method @ref getUnicastPort.
+     * @param value (Input): the new value
+     */
+    void setUnicastPort(int value) {
+        flom_handle_set_unicast_port(&handle, value); }
 };
 
 

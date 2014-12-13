@@ -21,5 +21,8 @@
 
 
 int main(int argc, char *argv[]) {
+    FlomHandle handle;
+    handle.lock(NULL,0);
+    handle.unlock();
     return 0;
 }

@@ -15,5 +15,7 @@ index.html:	doxygen.conf \
 		$(top_srcdir)/src/flom.h \
 		$(top_srcdir)/src/flom_errors.h \
 		$(top_srcdir)/src/flom_handle.h \
-		$(top_srcdir)/src/flom_handle.h
+		$(top_srcdir)/src/flom_types.h \
+		$(top_srcdir)/src/flom.hh \
+		$(top_srcdir)/src/FlomHandle.hh
 	$(DOXYGEN) doxygen.conf
