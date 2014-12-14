@@ -290,7 +290,9 @@ flom_LDFLAGS = -Wl,-rpath -Wl,$(libdir)
 EXTRA_DIST = flom_errors.h.in
 BUILT_SOURCES = flom_errors.h
 CLEANFILES = flom_errors.h
-dist_include_HEADERS = flom.h flom_handle.h flom_types.h
+dist_include_HEADERS = flom.h flom_handle.h flom_types.h \
+	flom.hh FlomHandle.hh
+
 nodist_include_HEADERS = flom_errors.h
 noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_daemon_mngmnt.h \

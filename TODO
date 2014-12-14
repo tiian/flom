@@ -1,8 +1,6 @@
 Road map:
 
-C++ header (interface): header only implementation!
-how to workaround return value inside constructor and destructor. Using exceptions??
-char * --> string ??
+C++ header (interface): header only implementation! Implement test cases...
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 

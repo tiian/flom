@@ -16,12 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <iostream>
+
 #include "flom.hh"
 
-
+using namespace flom;
 
 int main(int argc, char *argv[]) {
     FlomHandle handle;
+    string resName = "foo";
+    handle.setResourceName(resName);
+    cout << "Resource name: " << handle.getResourceName() << endl;
     handle.lock(NULL,0);
     handle.unlock();
     return 0;

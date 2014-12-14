@@ -17,7 +17,8 @@ flom_errors.h: flom_errors.h.in
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
 	$< >$@
 
-dist_include_HEADERS = flom.h flom_handle.h flom_types.h
+dist_include_HEADERS = flom.h flom_handle.h flom_types.h \
+	flom.hh FlomHandle.hh
 nodist_include_HEADERS = flom_errors.h
 noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_daemon_mngmnt.h \

@@ -2,19 +2,26 @@
  * Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
- * This file is part of FLoM.
+ * This file is part of FLoM and libflom (FLoM API client library)
  *
  * FLoM is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License version 2.1 as
+ * it under the terms of the GNU General Public License version 2.0 as
  * published by the Free Software Foundation.
+ *
+ * This file is part of libflom too and you can redistribute it and/or modify
+ * it under the terms of one of the following licences:
+ * - GNU General Public License version 2.0
+ * - GNU Lesser General Public License version 2.1
+ * as published by the Free Software Foundation.
  *
  * FLoM is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License and
+ * GNU Lesser General Public License along with FLoM.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef FLOM_DAEMON_H
 # define FLOM_DAEMON_H
