@@ -41,10 +41,8 @@
 
 using namespace std;
 
-
-
 namespace flom {
-
+    
     /**
      * FLoM exception class, it extends standard exception class and adds the
      * return code property that maps on C API
@@ -546,9 +544,7 @@ namespace flom {
          */
         void setUnicastPort(int value) {
             flom_handle_set_unicast_port(&handle, value); }
-    };
-
-
+    }; /* class FlomHandle */
 
 } /* namespace flom */
 

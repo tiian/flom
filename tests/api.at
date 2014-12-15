@@ -1,15 +1,19 @@
 AT_BANNER([API checks])
 
-AT_SETUP([Happy path (static and dynamic)])
+AT_SETUP([C Happy path (static and dynamic)])
 AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
 AT_CHECK([case0000], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Missing calls (static and dynamic)])
+AT_SETUP([C++ Happy path (static and dynamic)])
+AT_CHECK([case1000], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([C Missing calls (static and dynamic)])
 AT_CHECK([case0001], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Getter and setter methods])
+AT_SETUP([C Getter and setter methods])
 AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
 AT_CHECK([case0002], [0], [ignore], [ignore])
