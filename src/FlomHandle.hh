@@ -123,7 +123,23 @@ namespace flom {
          */
         int lock(char *element, size_t element_size) {
             return flom_handle_lock(&handle, element, element_size); }
-
+        /**
+         * Locks the (logical) resource linked to this handle; the resource
+         * MUST be unlocked using method @ref unlock when the lock condition
+         * is no more necessary
+         * @param element (Output): contains the name of the locked element if
+         *        the resource is of type "resource set". Note: due to the
+         *        underlying C function the max lenght of the string is fixed
+         *        but it can be changed to the value you prefer.
+         * @return a reason code (see file @ref flom_errors.h)
+         */
+        int lock(string &element) {
+            char buffer[100];
+            int ret_cod = flom_handle_lock(&handle, buffer, sizeof(buffer));
+            element.assign(buffer);
+            return ret_cod;
+        }
+        
         /**
          * Unlocks the (logical) resource linked to this handle; the resource
          * MUST be previously locked using method @ref lock

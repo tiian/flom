@@ -33,26 +33,30 @@ void static_handle_happy_path(void) {
     
     /* initialize a new handle */
     if (FLOM_RC_OK != (ret_cod = flom_handle_init(&my_handle))) {
-        fprintf(stderr, "flom_handle_init() returned %d, '%s'\n",
+        fprintf(stderr, "static_handle_happy_path/flom_handle_init() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }    
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle, locked_element,
                                            sizeof(locked_element)))) {
-        fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
+        fprintf(stderr, "static_handle_happy_path/flom_handle_lock() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     } 
     /* lock release */
     if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(&my_handle))) {
-        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
+        fprintf(stderr, "static_handle_happy_path/flom_handle_unlock() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
     /* handle clean-up (memory release) */
     if (FLOM_RC_OK != (ret_cod = flom_handle_clean(&my_handle))) {
-        fprintf(stderr, "flom_handle_clean() returned %d, '%s'\n",
+        fprintf(stderr, "static_handle_happy_path/flom_handle_clean() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
@@ -72,21 +76,24 @@ void static_handle_missing_init(void) {
     if (FLOM_RC_API_INVALID_SEQUENCE != (
             ret_cod = flom_handle_lock(&my_handle, locked_element,
                                 sizeof(locked_element)))) {
-        fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
+        fprintf(stderr, "static_handle_missing_init/flom_handle_lock() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }     
     /* lock release */
     if (FLOM_RC_API_INVALID_SEQUENCE != (
             ret_cod = flom_handle_unlock(&my_handle))) {
-        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
+        fprintf(stderr, "static_handle_missing_init/flom_handle_unlock() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
     /* handle clean-up (memory release) */
     if (FLOM_RC_API_INVALID_SEQUENCE != (
             ret_cod = flom_handle_clean(&my_handle))) {
-        fprintf(stderr, "flom_handle_clean() returned %d, '%s'\n",
+        fprintf(stderr, "static_handle_missing_init/flom_handle_clean() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
@@ -103,20 +110,23 @@ void static_handle_missing_lock(void) {
 
     /* initialize a new handle */
     if (FLOM_RC_OK != (ret_cod = flom_handle_init(&my_handle))) {
-        fprintf(stderr, "flom_handle_init() returned %d, '%s'\n",
+        fprintf(stderr, "static_handle_missing_lock/flom_handle_init() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
     /* lock release */
     if (FLOM_RC_API_INVALID_SEQUENCE != (
             ret_cod = flom_handle_unlock(&my_handle))) {
-        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
+        fprintf(stderr, "static_handle_missing_lock/flom_handle_unlock() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
     /* handle clean-up (memory release) */
     if (FLOM_RC_OK != (ret_cod = flom_handle_clean(&my_handle))) {
-        fprintf(stderr, "flom_handle_clean() returned %d, '%s'\n",
+        fprintf(stderr, "static_handle_missing_lock/flom_handle_clean() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
@@ -134,33 +144,23 @@ void static_handle_missing_unlock(void) {
 
     /* initialize a new handle */
     if (FLOM_RC_OK != (ret_cod = flom_handle_init(&my_handle))) {
-        fprintf(stderr, "flom_handle_init() returned %d, '%s'\n",
+        fprintf(stderr, "static_handle_missing_unlock/flom_handle_init() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle, locked_element,
                                            sizeof(locked_element)))) {
-        fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
+        fprintf(stderr, "static_handle_missing_unlock/flom_handle_lock() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     } 
     /* handle clean-up (memory release) */
-    if (FLOM_RC_API_INVALID_SEQUENCE != (
-            ret_cod = flom_handle_clean(&my_handle))) {
-        fprintf(stderr, "flom_handle_clean() returned %d, '%s'\n",
-                ret_cod, flom_strerror(ret_cod));
-        exit(1);
-    }
-    /* lock release */
-    if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(&my_handle))) {
-        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
-                ret_cod, flom_strerror(ret_cod));
-        exit(1);
-    }
-    /* handle clean-up (memory release) */
     if (FLOM_RC_OK != (ret_cod = flom_handle_clean(&my_handle))) {
-        fprintf(stderr, "flom_handle_clean() returned %d, '%s'\n",
+        fprintf(stderr, "static_handle_missing_unlock/flom_handle_clean() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
@@ -178,19 +178,22 @@ void dynamic_handle_happy_path(void) {
 
     /* create a new handle */
     if (NULL == (my_handle = flom_handle_new())) {
-        fprintf(stderr, "flom_handle_init() returned %p\n", my_handle);
+        fprintf(stderr, "dynamic_handle_happy_path/flom_handle_init() "
+                "returned %p\n", my_handle);
         exit(1);
     }    
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle, locked_element,
                                                   sizeof(locked_element)))) {
-        fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
+        fprintf(stderr, "dynamic_handle_happy_path/flom_handle_lock() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     } 
     /* lock release */
     if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(my_handle))) {
-        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
+        fprintf(stderr, "dynamic_handle_happy_path/flom_handle_unlock() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
@@ -212,14 +215,16 @@ void dynamic_handle_missing_new(void) {
     if (FLOM_RC_NULL_OBJECT != (
             ret_cod = flom_handle_lock(my_handle, locked_element,
                                        sizeof(locked_element)))) {
-        fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
+        fprintf(stderr, "dynamic_handle_missing_new/flom_handle_lock() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     } 
     /* lock release */
     if (FLOM_RC_NULL_OBJECT != (
             ret_cod = flom_handle_unlock(my_handle))) {
-        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
+        fprintf(stderr, "dynamic_handle_missing_new/flom_handle_unlock() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
@@ -238,13 +243,15 @@ void dynamic_handle_missing_lock(void) {
 
     /* create a new handle */
     if (NULL == (my_handle = flom_handle_new())) {
-        fprintf(stderr, "flom_handle_init() returned %p\n", my_handle);
+        fprintf(stderr, "dynamic_handle_missing_lock/flom_handle_init() "
+                "returned %p\n", my_handle);
         exit(1);
     }    
     /* lock release */
     if (FLOM_RC_API_INVALID_SEQUENCE != (
             ret_cod = flom_handle_unlock(my_handle))) {
-        fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
+        fprintf(stderr, "dynamic_handle_missing_lock/flom_handle_unlock() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
@@ -261,13 +268,15 @@ void dynamic_handle_missing_unlock(void) {
 
     /* create a new handle */
     if (NULL == (my_handle = flom_handle_new())) {
-        fprintf(stderr, "flom_handle_init() returned %p\n", my_handle);
+        fprintf(stderr, "dynamic_handle_missing_unlock/flom_handle_init() "
+                "returned %p\n", my_handle);
         exit(1);
     }    
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle, locked_element,
                                                   sizeof(locked_element)))) {
-        fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
+        fprintf(stderr, "dynamic_handle_missing_unlock/flom_handle_lock() "
+                "returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     } 

@@ -113,6 +113,8 @@ extern "C" {
      * if this method is not called a memory leak will be generated.
      * For every object initialized with @ref flom_handle_init
      * there must be a call to this method.
+     * If the handle is locked, it will be unlocked before proceeding with
+     * clean-up to avoid memory leaks.
      * @param handle (Input/Output): a statically allocated object to clean
      * @return a reason code (see file @ref flom_errors.h)
      */

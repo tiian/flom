@@ -22,25 +22,26 @@
 
 using namespace flom;
 
+
+
 /*
  * Happy path usage with a static handle
  */
-void static_handle_happy_path(void) {
-    int ret_cod;
-    FlomHandle my_handle;
-    char locked_element[100];
+void staticHandleHappyPath(void) {
+    int retCod;
+    FlomHandle myHandle;
+    string lockedElement;
     
     /* lock acquisition */
-    if (FLOM_RC_OK != (ret_cod = my_handle.lock(locked_element,
-                                                sizeof(locked_element)))) {
-        cerr << "FlomHandle.lock() returned " << ret_cod
-             << ", '" << flom_strerror(ret_cod) << "'" << endl;
+    if (FLOM_RC_OK != (retCod = myHandle.lock(lockedElement))) {
+        cerr << "FlomHandle.lock() returned " << retCod
+             << ", '" << flom_strerror(retCod) << "'" << endl;
         exit(1);
     } 
     /* lock release */
-    if (FLOM_RC_OK != (ret_cod = my_handle.unlock())) {
-        cerr << "FlomHandle.unlock() returned " << ret_cod
-             << ", '" << flom_strerror(ret_cod) << "'" << endl;
+    if (FLOM_RC_OK != (retCod = myHandle.unlock())) {
+        cerr << "FlomHandle.unlock() returned " << retCod
+             << ", '" << flom_strerror(retCod) << "'" << endl;
         exit(1);
     }
 }
@@ -50,39 +51,38 @@ void static_handle_happy_path(void) {
 /*
  * Happy path usage with a dynamic handle
  */
-void dynamic_handle_happy_path(void) {
-    int ret_cod;
-    FlomHandle *my_handle = NULL;
-    char locked_element[100];
+void dynamicHandleHappyPath(void) {
+    int retCod;
+    FlomHandle *myHandle = NULL;
+    string lockedElement;
 
     /* create a new handle */
-    if (NULL == (my_handle = new FlomHandle())) {
-        cerr << "FlomHandle() returned " << my_handle << endl;
+    if (NULL == (myHandle = new FlomHandle())) {
+        cerr << "FlomHandle() returned " << myHandle << endl;
         exit(1);
     }    
     /* lock acquisition */
-    if (FLOM_RC_OK != (ret_cod = my_handle->lock(locked_element,
-                                                 sizeof(locked_element)))) {
-        cerr << "FlomHandle.lock() returned " << ret_cod
-             << ", '" << flom_strerror(ret_cod) << "'" << endl;
+    if (FLOM_RC_OK != (retCod = myHandle->lock(lockedElement))) {
+        cerr << "FlomHandle.lock() returned " << retCod
+             << ", '" << flom_strerror(retCod) << "'" << endl;
     } 
     /* lock release */
-    if (FLOM_RC_OK != (ret_cod = my_handle->unlock())) {
-        cerr << "FlomHandle.unlock() returned " << ret_cod
-             << ", '" << flom_strerror(ret_cod) << "'" << endl;
+    if (FLOM_RC_OK != (retCod = myHandle->unlock())) {
+        cerr << "FlomHandle.unlock() returned " << retCod
+             << ", '" << flom_strerror(retCod) << "'" << endl;
         exit(1);
     }
     /* delete the handle */
-    delete my_handle;
+    delete myHandle;
 }
 
 
 
 int main(int argc, char *argv[]) {
     /* static handle tests */
-    static_handle_happy_path();
+    staticHandleHappyPath();
     /* dynamic handle test */
-    dynamic_handle_happy_path();
+    dynamicHandleHappyPath();
     /* exit */
     return 0;
 }

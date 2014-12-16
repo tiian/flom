@@ -49,7 +49,7 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-@COND_CPPAPI_TRUE@am__EXEEXT_1 = case1000$(EXEEXT)
+@COND_CPPAPI_TRUE@am__EXEEXT_1 = case1000$(EXEEXT) case1001$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_case0000_OBJECTS = case0000.$(OBJEXT)
 case0000_OBJECTS = $(am_case0000_OBJECTS)
@@ -67,6 +67,10 @@ am_case1000_OBJECTS = case1000.$(OBJEXT)
 case1000_OBJECTS = $(am_case1000_OBJECTS)
 case1000_LDADD = $(LDADD)
 case1000_DEPENDENCIES = ../../src/libflom.la
+am_case1001_OBJECTS = case1001.$(OBJEXT)
+case1001_OBJECTS = $(am_case1001_OBJECTS)
+case1001_LDADD = $(LDADD)
+case1001_DEPENDENCIES = ../../src/libflom.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -90,9 +94,9 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) $(case0002_SOURCES) \
-	$(case1000_SOURCES)
+	$(case1000_SOURCES) $(case1001_SOURCES)
 DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
-	$(case0002_SOURCES) $(case1000_SOURCES)
+	$(case0002_SOURCES) $(case1000_SOURCES) $(case1001_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -272,9 +276,10 @@ case0001_SOURCES = case0001.c
 case0002_SOURCES = case0002.c
 # C++ language case tests
 case1000_SOURCES = case1000.cc
+case1001_SOURCES = case1001.cc
 # C++ case tests executables are built conditionally (only if --disable-cppapi 
 # was not specified at configure time)
-@COND_CPPAPI_TRUE@MAYBE_CPPAPI = case1000
+@COND_CPPAPI_TRUE@MAYBE_CPPAPI = case1000 case1001
 LDADD = ../../src/libflom.la @GLIB2_LIBS@
 all: all-am
 
@@ -331,6 +336,9 @@ case0002$(EXEEXT): $(case0002_OBJECTS) $(case0002_DEPENDENCIES)
 case1000$(EXEEXT): $(case1000_OBJECTS) $(case1000_DEPENDENCIES) 
 	@rm -f case1000$(EXEEXT)
 	$(CXXLINK) $(case1000_OBJECTS) $(case1000_LDADD) $(LIBS)
+case1001$(EXEEXT): $(case1001_OBJECTS) $(case1001_DEPENDENCIES) 
+	@rm -f case1001$(EXEEXT)
+	$(CXXLINK) $(case1001_OBJECTS) $(case1001_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -342,6 +350,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0001.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0002.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case1000.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case1001.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -172,7 +172,8 @@ flom_handle_t *flom_handle_new(void)
 
 int flom_handle_clean(flom_handle_t *handle)
 {
-    enum Exception { API_INVALID_SEQUENCE
+    enum Exception { FLOM_HANDLE_UNLOCK_ERROR
+                     , API_INVALID_SEQUENCE
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -182,6 +183,11 @@ int flom_handle_clean(flom_handle_t *handle)
     
     FLOM_TRACE(("flom_handle_clean\n"));
     TRY {
+        /* is the handle locked? we must unlock it before going on... */
+        if (FLOM_HANDLE_STATE_LOCKED == handle->state) {
+            if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(handle)))
+                THROW(FLOM_HANDLE_UNLOCK_ERROR);
+        }
         /* check handle state */
         if (FLOM_HANDLE_STATE_INIT != handle->state &&
             FLOM_HANDLE_STATE_DISCONNECTED != handle->state) {
@@ -202,6 +208,8 @@ int flom_handle_clean(flom_handle_t *handle)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case FLOM_HANDLE_UNLOCK_ERROR:
+                break;
             case API_INVALID_SEQUENCE:
                 ret_cod = FLOM_RC_API_INVALID_SEQUENCE;
                 break;
