@@ -64,7 +64,7 @@ void static_handle_happy_path(void) {
     /* check socket name */
     if (strcmp(nd_socket_name, flom_handle_get_socket_name(&my_handle))) {
         fprintf(stderr,
-                "Unexpected result form flom_handle_set/get_socket_name\n");
+                "Unexpected result from flom_handle_set/get_socket_name\n");
         exit(1);
     }
 
@@ -80,7 +80,7 @@ void static_handle_happy_path(void) {
     if (strcmp(nd_trace_filename,
                flom_handle_get_trace_filename(&my_handle))) {
         fprintf(stderr,
-                "Unexpected result form flom_handle_set/get_trace_filename\n");
+                "Unexpected result from flom_handle_set/get_trace_filename\n");
         exit(1);
     }
     
@@ -101,7 +101,7 @@ void static_handle_happy_path(void) {
     if (strcmp(nd_resource_name,
                flom_handle_get_resource_name(&my_handle))) {
         fprintf(stderr,
-                "Unexpected result form flom_handle_set/get_resource_name\n");
+                "Unexpected result from flom_handle_set/get_resource_name\n");
         exit(1);
     }
     
@@ -203,7 +203,7 @@ void static_handle_happy_path(void) {
     if (strcmp(nd_unicast_address,
                flom_handle_get_unicast_address(&my_handle))) {
         fprintf(stderr,
-                "Unexpected result form flom_handle_set/get_unicast_address\n");
+                "Unexpected result from flom_handle_set/get_unicast_address\n");
         exit(1);
     }
     
@@ -219,7 +219,7 @@ void static_handle_happy_path(void) {
     if (strcmp(nd_multicast_address,
                flom_handle_get_multicast_address(&my_handle))) {
         fprintf(stderr,
-                "Unexpected result form flom_handle_set/get_multicast_address\n");
+                "Unexpected result from flom_handle_set/get_multicast_address\n");
         exit(1);
     }
     
@@ -357,7 +357,7 @@ void dynamic_handle_happy_path(void) {
     /* check socket name */
     if (strcmp(nd_socket_name, flom_handle_get_socket_name(my_handle))) {
         fprintf(stderr,
-                "Unexpected result form flom_handle_set/get_socket_name\n");
+                "Unexpected result from flom_handle_set/get_socket_name\n");
         exit(1);
     }
 
@@ -373,7 +373,7 @@ void dynamic_handle_happy_path(void) {
     if (strcmp(nd_trace_filename,
                flom_handle_get_trace_filename(my_handle))) {
         fprintf(stderr,
-                "Unexpected result form flom_handle_set/get_trace_filename\n");
+                "Unexpected result from flom_handle_set/get_trace_filename\n");
         exit(1);
     }
     
@@ -394,7 +394,7 @@ void dynamic_handle_happy_path(void) {
     if (strcmp(nd_resource_name,
                flom_handle_get_resource_name(my_handle))) {
         fprintf(stderr,
-                "Unexpected result form flom_handle_set/get_resource_name\n");
+                "Unexpected result from flom_handle_set/get_resource_name\n");
         exit(1);
     }
     
@@ -496,7 +496,7 @@ void dynamic_handle_happy_path(void) {
     if (strcmp(nd_unicast_address,
                flom_handle_get_unicast_address(my_handle))) {
         fprintf(stderr,
-                "Unexpected result form flom_handle_set/get_unicast_address\n");
+                "Unexpected result from flom_handle_set/get_unicast_address\n");
         exit(1);
     }
     
@@ -512,7 +512,7 @@ void dynamic_handle_happy_path(void) {
     if (strcmp(nd_multicast_address,
                flom_handle_get_multicast_address(my_handle))) {
         fprintf(stderr,
-                "Unexpected result form flom_handle_set/get_multicast_address\n");
+                "Unexpected result from flom_handle_set/get_multicast_address\n");
         exit(1);
     }
     

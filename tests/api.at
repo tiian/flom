@@ -22,3 +22,7 @@ AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
 AT_CHECK([case0002], [0], [ignore], [ignore])
 AT_CLEANUP
+
+AT_SETUP([C++ Getter and setter methods])
+AT_CHECK([case1002], [0], [ignore], [ignore])
+AT_CLEANUP

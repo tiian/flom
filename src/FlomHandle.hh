@@ -200,7 +200,7 @@ namespace flom {
          * @return the current value
          */
         int getDiscoveryTtl() {
-            flom_handle_get_discovery_ttl(&handle); }
+            return flom_handle_get_discovery_ttl(&handle); }
 
         /**
          * Sets the UDP/IP multicast TTL parameter used during auto-discovery
@@ -244,10 +244,22 @@ namespace flom {
          *         @ref getMulticastPort.
          * The current value can be altered using function
          *         @ref setMulticastAddress.
-         * @return the current value
+         * @return the current value as a null terminated C string
          */
-        const char *getMulticastAddress() {
+        const char *getMulticastAddressAsCStr() {
             return flom_handle_get_multicast_address(&handle); }
+        /**
+         * Gets the multicast address: the IP address (or a network name that
+         * the system can resolve) of the IP multicast group that must be
+         * contacted to reach FLoM daemon (server) using UDP/IP; see also
+         *         @ref getMulticastPort.
+         * The current value can be altered using function
+         *         @ref setMulticastAddress.
+         * @return the current value as a standard C++ string
+         */
+        string getMulticastAddress() {
+            return NULL != flom_handle_get_multicast_address(&handle) ?
+                flom_handle_get_multicast_address(&handle) : ""; }
 
         /**
          * Sets the multicast address: the IP address (or a network name that
@@ -350,7 +362,8 @@ namespace flom {
          * @return the current value as a C++ standard string
          */
         string getResourceName() {
-            return string(flom_handle_get_resource_name(&handle)); }
+            return NULL != flom_handle_get_resource_name(&handle) ?
+                flom_handle_get_resource_name(&handle) : ""; }
 
         /**
          * Sets the resource name: the name of the resource that can be locked
@@ -442,7 +455,8 @@ namespace flom {
          * @return the current value as a C++ standard string
          */
         string getSocketName() {
-            return string(flom_handle_get_socket_name(&handle)); }
+            return NULL != flom_handle_get_socket_name(&handle) ?
+                flom_handle_get_socket_name(&handle) : ""; }
 
         /**
          * Sets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
@@ -478,7 +492,8 @@ namespace flom {
          * @return the current value as a C++ standard string
          */
         string getTraceFilename() {
-            return string(flom_handle_get_trace_filename(&handle)); }
+            return NULL != flom_handle_get_trace_filename(&handle) ?
+                flom_handle_get_trace_filename(&handle) : ""; }
 
         /**
          * Sets the trace filename: the name (absolute or relative path) used
@@ -518,7 +533,8 @@ namespace flom {
          * @return the current value as a C++ standard string
          */
         string getUnicastAddress() {
-            return string(flom_handle_get_unicast_address(&handle)); }
+            return NULL != flom_handle_get_unicast_address(&handle) ?
+                flom_handle_get_unicast_address(&handle) : ""; }
 
         /**
          * Sets the unicast address: the IP address (or a network name that the

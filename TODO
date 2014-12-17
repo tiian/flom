@@ -1,6 +1,5 @@
 Road map:
 
-C++ header (interface): header only implementation! Implement test cases...
 C++ test cases must be optional (depending on configure parameter)
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
