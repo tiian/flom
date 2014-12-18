@@ -1,2 +1,5 @@
 PATH=@abs_top_builddir@/src/:@abs_top_builddir@/tests/scripts/:@abs_top_builddir@/tests/src/:$PATH
 export PATH
+
+CPPAPI=@CPPAPI@
+export CPPAPI

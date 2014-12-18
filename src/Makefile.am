@@ -8,6 +8,11 @@ bin_PROGRAMS = flom
 EXTRA_DIST = flom_errors.h.in
 BUILT_SOURCES = flom_errors.h
 CLEANFILES = flom_errors.h
+if COND_CPPAPI
+  INST_CPPAPI=flom.hh FlomHandle.hh
+else
+  NOINST_CPPAPI=flom.hh FlomHandle.hh
+endif
 
 flom_errors.h: flom_errors.h.in
 	sed \
@@ -18,7 +23,7 @@ flom_errors.h: flom_errors.h.in
 	$< >$@
 
 dist_include_HEADERS = flom.h flom_handle.h flom_types.h \
-	flom.hh FlomHandle.hh
+	$(INST_CPPAPI)
 nodist_include_HEADERS = flom_errors.h
 noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_daemon_mngmnt.h \
@@ -26,7 +31,7 @@ noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
 	flom_locker.h flom_msg.h flom_resource_hier.h \
 	flom_resource_numeric.h flom_resource_set.h \
 	flom_resource_simple.h flom_rsrc.h \
-	flom_syslog.h flom_trace.h
+	flom_syslog.h flom_trace.h $(NOINST_CPPAPI)
 
 libflom_la_SOURCES = flom_client.c flom_config.c flom_conns.c \
 	flom_daemon.c flom_daemon_mngmnt.c flom_errors.c flom_locker.c \

@@ -64,6 +64,9 @@ NOTE: tests needs the system is NOT overloaded because they stick on timing
       and timing breaks if the system is overloaded.
 NOTE: FLoM must be installed with "sudo make install" before tests can 
       proceed (this is a library path issue...)
+NOTE: if you are not interested in C++ API library support, specify
+      "--disable-cppapi" at configure time; example:
+      ./configure --disable-cppapi
 If you need some help (usage tricks, hints, etc...) please post a message in
 the forum: http://sourceforge.net/p/flom/discussion/
 If you think you have discovered a bug, please open a ticket here:

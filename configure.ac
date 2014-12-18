@@ -231,6 +231,9 @@ AC_SUBST(GLIB2_LIBS)
 AC_SUBST(GTHREAD2_LIBS)
 AC_SUBST(HAVE_DOT)
 
+# substitution of optional (--disable) features 
+AC_SUBST(CPPAPI)
+
 # substitution of LibTool values for library version
 AC_SUBST(LT_CURRENT)
 AC_SUBST(LT_AGE)
