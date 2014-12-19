@@ -5,22 +5,41 @@ GLIB2_LIBS=@GLIB2_LIBS@
 # -Wl,-rpath -Wl,... avoids to specify LD_LIBRARY_PATH or equivalent
 # variable to execute the produced executable
 LDFLAGS=-L@libdir@ -Wl,-rpath -Wl,@libdir@
+CC=@CC@
+CXX=@CXX@
 
-all:	basic_static basic_dynamic advanced_static advanced_dynamic
+all:	basic_static basic_dynamic advanced_static advanced_dynamic \
+	@CPPTARGET@
 
 basic_static:	basic_static.c
-	gcc basic_static.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+	$(CC) basic_static.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
 		-o basic_static
 
 basic_dynamic:	basic_dynamic.c
-	gcc basic_dynamic.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+	$(CC) basic_dynamic.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
 		-o basic_dynamic
 
 advanced_static:	advanced_static.c
-	gcc advanced_static.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+	$(CC) advanced_static.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
 		-o advanced_static
 
 advanced_dynamic:	advanced_dynamic.c
-	gcc advanced_dynamic.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+	$(CC) advanced_dynamic.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
 		-o advanced_dynamic
+
+BasicStatic:	BasicStatic.cc
+	$(CXX) BasicStatic.cc -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+		-o BasicStatic
+
+BasicDynamic:	BasicDynamic.cc
+	$(CXX) BasicDynamic.cc -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+		-o BasicDynamic
+
+AdvancedStatic:	AdvancedStatic.cc
+	$(CXX) AdvancedStatic.cc -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+		-o AdvancedStatic
+
+AdvancedDynamic:	AdvancedDynamic.cc
+	$(CXX) AdvancedDynamic.cc -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+		-o AdvancedDynamic
 

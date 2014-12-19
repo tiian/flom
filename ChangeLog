@@ -1,9 +1,9 @@
 LOG:
 
-         - 0.9.1 
+         - 0.9.1 C++ client library API: libflom (flom.hh)
 	Fixed test case "Use case 3 (2/2)" (there was a synchronization bug)
 
-20141204 - 0.9.0 Client library API: libflom
+20141204 - 0.9.0 C client library API: libflom (flom.h)
 	Fixed a bug related to negative resource timeouts, for example 
 	"-o -100" or "--resource-timeout=-100"
 	Fixed this bug: 
