@@ -7,7 +7,7 @@ dist_noinst_DATA = Makefile.am example_makefile.in
 dist_examples_DATA = README basic_static.c basic_dynamic.c \
 	advanced_static.c advanced_dynamic.c $(CPPSOURCE)
 nodist_examples_DATA = example_makefile
-example_makefile: example_makefile.in
+example_makefile: example_makefile.in ../../config.status
 	sed \
 	-e 's|@CC[@]|$(CC)|g' \
 	-e 's|@CXX[@]|$(CXX)|g' \

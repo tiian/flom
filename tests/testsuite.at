@@ -2,10 +2,10 @@ AT_INIT
 AT_COPYRIGHT([Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforge.net>])
 AT_COLOR_TESTS
 
-m4_include([api.at])
 m4_include([cmdopt.at])
 m4_include([incompopt.at])
 m4_include([shutdown.at])
+m4_include([api.at])
 m4_include([usecase.at])
 m4_include([usecase-dist.at])
 m4_include([usecase-num.at])

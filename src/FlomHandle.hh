@@ -112,10 +112,12 @@ namespace flom {
         /**
          * Locks the (logical) resource linked to this handle; the resource
          * MUST be unlocked using method @ref unlock when the lock condition
-         * is no more necessary
+         * is no more necessary.  Use this instance of the method if you are
+         * interested to the name of the locked element and you prefer a C
+         * null terminated string.
          * @param element (Output): contains the name of the locked element if
          *        the resource is of type "resource set"; set it to NULL if you
-         *        are not interested to retrieve an element name
+         *        are not interested to retrieve an element name.
          * @param element_size (Input): maximum number of characters (null
          *        terminator included) that can be used by the function to store
          *        the name of the locked element
@@ -126,7 +128,9 @@ namespace flom {
         /**
          * Locks the (logical) resource linked to this handle; the resource
          * MUST be unlocked using method @ref unlock when the lock condition
-         * is no more necessary
+         * is no more necessary. Use this instance of the method if you are
+         * interested to the name of the locked element and you prefer a C++
+         * standard string.
          * @param element (Output): contains the name of the locked element if
          *        the resource is of type "resource set". Note: due to the
          *        underlying C function the max lenght of the string is fixed
@@ -138,6 +142,16 @@ namespace flom {
             int ret_cod = flom_handle_lock(&handle, buffer, sizeof(buffer));
             element.assign(buffer);
             return ret_cod;
+        }
+        /**
+         * Locks the (logical) resource linked to this handle; the resource
+         * MUST be unlocked using method @ref unlock when the lock condition
+         * is no more necessary. Use this instance of the method if you are not
+         * interested to the name of the locked element.
+         * @return a reason code (see file @ref flom_errors.h)
+         */
+        int lock() {
+            return flom_handle_lock(&handle, NULL, 0);
         }
         
         /**

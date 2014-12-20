@@ -30,10 +30,9 @@ using namespace flom;
 void staticHandleHappyPath(void) {
     int retCod;
     FlomHandle myHandle;
-    string lockedElement;
     
     /* lock acquisition */
-    if (FLOM_RC_OK != (retCod = myHandle.lock(lockedElement))) {
+    if (FLOM_RC_OK != (retCod = myHandle.lock())) {
         cerr << "FlomHandle.lock() returned " << retCod
              << ", '" << flom_strerror(retCod) << "'" << endl;
         exit(1);
@@ -54,7 +53,6 @@ void staticHandleHappyPath(void) {
 void dynamicHandleHappyPath(void) {
     int retCod;
     FlomHandle *myHandle = NULL;
-    string lockedElement;
 
     /* create a new handle */
     if (NULL == (myHandle = new FlomHandle())) {
@@ -62,7 +60,7 @@ void dynamicHandleHappyPath(void) {
         exit(1);
     }    
     /* lock acquisition */
-    if (FLOM_RC_OK != (retCod = myHandle->lock(lockedElement))) {
+    if (FLOM_RC_OK != (retCod = myHandle->lock())) {
         cerr << "FlomHandle.lock() returned " << retCod
              << ", '" << flom_strerror(retCod) << "'" << endl;
     } 

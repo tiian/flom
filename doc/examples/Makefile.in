@@ -487,7 +487,7 @@ uninstall-am: uninstall-dist_examplesDATA \
 	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
 	uninstall-dist_examplesDATA uninstall-nodist_examplesDATA
 
-example_makefile: example_makefile.in
+example_makefile: example_makefile.in ../../config.status
 	sed \
 	-e 's|@CC[@]|$(CC)|g' \
 	-e 's|@CXX[@]|$(CXX)|g' \

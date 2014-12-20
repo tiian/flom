@@ -30,7 +30,7 @@ using namespace flom;
  */
 const string ndSocketName("/tmp/flom_socket_name");
 const string ndTraceFilename("/tmp/flom.trc");
-const string ndResourceName("myResource");
+const string ndResourceName("red.blue.green");
 const string ndUnicastAddress("127.0.0.1");
 const string ndMulticastAddress("224.0.0.1");
 
@@ -299,7 +299,10 @@ void staticHandleHappyPath(void) {
         cerr << "FlomHandle.lock() returned " << retCod << " '" <<
             flom_strerror(retCod) << "'" << endl;
         exit(1);
-    } 
+    } else {
+        cout << "staticHandleHappyPath locked element is " << lockedElement
+             << endl;
+    }   
     /* lock release */
     if (FLOM_RC_OK != (retCod = myHandle.unlock())) {
         cerr << "FlomHandle.unlock() returned " << retCod << " '" <<
@@ -378,13 +381,13 @@ void dynamicHandleHappyPath(void) {
     }
     
     /* get current value for resource create property */
-    cout << "FlomHandle->getResourceCreate() = " << myHandle->getResourceCreate()
-         << endl;
+    cout << "FlomHandle->getResourceCreate() = " <<
+        myHandle->getResourceCreate() << endl;
     /* set a new value for resource create property */
     myHandle->setResourceCreate(FALSE);
     /* get new value for resource create property */
-    cout << "FlomHandle->getResourceCreate() = " << myHandle->getResourceCreate()
-         << endl;
+    cout << "FlomHandle->getResourceCreate() = " <<
+        myHandle->getResourceCreate() << endl;
     /* check resource create 1/2 */
     if (myHandle->getResourceCreate()) {
         cerr << "Unexpected result from FlomHandle->set/getResourceCreate" <<
@@ -394,8 +397,8 @@ void dynamicHandleHappyPath(void) {
     /* set a new value for resource create property */
     myHandle->setResourceCreate(TRUE);
     /* get new value for resource create property */
-    cout << "FlomHandle->getResourceCreate() = " << myHandle->getResourceCreate()
-         << endl;
+    cout << "FlomHandle->getResourceCreate() = " <<
+        myHandle->getResourceCreate() << endl;
     /* check resource create 2/2 */
     if (!myHandle->getResourceCreate()) {
         cerr << "Unexpected result from FlomHandle->set/getResourceCreate" <<
@@ -580,6 +583,9 @@ void dynamicHandleHappyPath(void) {
         cerr << "FlomHandle->lock() returned " << retCod << " '" <<
             flom_strerror(retCod) << "'" << endl;
         exit(1);
+    } else {
+        cout << "dynamicHandleHappyPath locked element is " << lockedElement
+             << endl;
     } 
     /* lock release */
     if (FLOM_RC_OK != (retCod = myHandle->unlock())) {

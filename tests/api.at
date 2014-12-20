@@ -10,9 +10,75 @@ AT_CHECK([case0001], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([C Getter and setter methods])
+AT_DATA([expout],
+[[flom_handle_get_socket_name() = '/tmp/flom-tiian'
+flom_handle_get_socket_name() = '/tmp/flom_socket_name'
+flom_handle_get_trace_filename() = '(null)'
+flom_handle_get_trace_filename() = '/tmp/flom.trc'
+flom_handle_get_resource_name() = '_RESOURCE'
+flom_handle_get_resource_name() = 'red.green.blue'
+flom_handle_get_resource_create() = 1
+flom_handle_get_resource_create() = 0
+flom_handle_get_resource_create() = 1
+flom_handle_get_resource_timeout() = -1
+flom_handle_get_resource_timeout() = -1
+flom_handle_get_resource_quantity() = 1
+flom_handle_get_resource_quantity() = 3
+flom_handle_get_lock_mode() = 5
+flom_handle_get_lock_mode() = 4
+flom_handle_get_resource_idle_lifespan() = 0
+flom_handle_get_resource_idle_lifespan() = 10000
+flom_handle_get_unicast_address() = '(null)'
+flom_handle_get_unicast_address() = '127.0.0.1'
+flom_handle_get_multicast_address() = '(null)'
+flom_handle_get_multicast_address() = '224.0.0.1'
+flom_handle_get_unicast_port() = 28015
+flom_handle_get_unicast_port() = 7777
+flom_handle_get_multicast_port() = 28015
+flom_handle_get_multicast_port() = 8888
+flom_handle_get_discovery_attempts() = 2
+flom_handle_get_discovery_attempts() = 5
+flom_handle_get_discovery_timeout() = 500
+flom_handle_get_discovery_timeout() = 750
+flom_handle_get_discovery_ttl() = 1
+flom_handle_get_discovery_ttl() = 2
+staticHandleHappyPath locked element is red
+flom_handle_get_socket_name() = '/tmp/flom-tiian'
+flom_handle_get_socket_name() = '/tmp/flom_socket_name'
+flom_handle_get_trace_filename() = '(null)'
+flom_handle_get_trace_filename() = '/tmp/flom.trc'
+flom_handle_get_resource_name() = '_RESOURCE'
+flom_handle_get_resource_name() = 'red.green.blue'
+flom_handle_get_resource_create() = 1
+flom_handle_get_resource_create() = 0
+flom_handle_get_resource_create() = 1
+flom_handle_get_resource_timeout() = -1
+flom_handle_get_resource_timeout() = -1
+flom_handle_get_resource_quantity() = 1
+flom_handle_get_resource_quantity() = 3
+flom_handle_get_lock_mode() = 5
+flom_handle_get_lock_mode() = 4
+flom_handle_get_resource_idle_lifespan() = 0
+flom_handle_get_resource_idle_lifespan() = 10000
+flom_handle_get_unicast_address() = '(null)'
+flom_handle_get_unicast_address() = '127.0.0.1'
+flom_handle_get_multicast_address() = '(null)'
+flom_handle_get_multicast_address() = '224.0.0.1'
+flom_handle_get_unicast_port() = 28015
+flom_handle_get_unicast_port() = 7777
+flom_handle_get_multicast_port() = 28015
+flom_handle_get_multicast_port() = 8888
+flom_handle_get_discovery_attempts() = 2
+flom_handle_get_discovery_attempts() = 5
+flom_handle_get_discovery_timeout() = 500
+flom_handle_get_discovery_timeout() = 750
+flom_handle_get_discovery_ttl() = 1
+flom_handle_get_discovery_ttl() = 2
+dynamicHandleHappyPath locked element is green
+]])
 AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
-AT_CHECK([case0002], [0], [ignore], [ignore])
+AT_CHECK([case0002], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([C++ Happy path (static and dynamic)])
@@ -27,8 +93,74 @@ AT_CHECK([case1001], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([C++ Getter and setter methods])
+AT_DATA([expout],
+[[FlomHandle.getSocketName() = '/tmp/flom-tiian'
+FlomHandle.getSocketName() = '/tmp/flom_socket_name'
+FlomHandle.getTraceFilename() = ''
+FlomHandle.getTraceFilename() = '/tmp/flom.trc'
+FlomHandle.getResourceName() = '_RESOURCE'
+FlomHandle.getResourceName() = 'red.blue.green'
+FlomHandle.getResourceCreate() = 1
+FlomHandle.getResourceCreate() = 0
+FlomHandle.getResourceCreate() = 1
+FlomHandle.getResourceTimeout() = -1
+FlomHandle.getResourceTimeout() = -1
+FlomHandle.getResourceQuantity() = 1
+FlomHandle.getResourceQuantity() = 3
+FlomHandle.getLockMode() = 5
+FlomHandle.getLockMode() = 4
+FlomHandle.getResourceIdleLifespan() = 0
+FlomHandle.getResourceIdleLifespan() = 10000
+FlomHandle.getUnicastAddress() = ''
+FlomHandle.getUnicastAddress() = '127.0.0.1'
+FlomHandle.getMulticastAddress() = ''
+FlomHandle.getMulticastAddress() = '224.0.0.1'
+FlomHandle.getUnicastPort() = 28015
+FlomHandle.getUnicastPort() = 7777
+FlomHandle.getMulticastPort() = 28015
+FlomHandle.getMulticastPort() = 8888
+FlomHandle.getDiscoveryAttempts() = 2
+FlomHandle.getDiscoveryAttempts() = 5
+FlomHandle.getDiscoveryTimeout() = 500
+FlomHandle.getDiscoveryTimeout() = 750
+FlomHandle.getDiscoveryTtl() = 1
+FlomHandle.getDiscoveryTtl() = 2
+staticHandleHappyPath locked element is red
+FlomHandle->getSocketName() = '/tmp/flom-tiian'
+FlomHandle->getSocketName() = '/tmp/flom_socket_name'
+FlomHandle->getTraceFilename() = ''
+FlomHandle->getTraceFilename() = '/tmp/flom.trc'
+FlomHandle->getResourceName() = '_RESOURCE'
+FlomHandle->getResourceName() = 'red.blue.green'
+FlomHandle->getResourceCreate() = 1
+FlomHandle->getResourceCreate() = 0
+FlomHandle->getResourceCreate() = 1
+FlomHandle->getResourceTimeout() = -1
+FlomHandle->getResourceTimeout() = -1
+FlomHandle->getResourceQuantity() = 1
+FlomHandle->getResourceQuantity() = 3
+FlomHandle->getLockMode() = 5
+FlomHandle->getLockMode() = 4
+FlomHandle->getResourceIdleLifespan() = 0
+FlomHandle->getResourceIdleLifespan() = 10000
+FlomHandle->getUnicastAddress() = ''
+FlomHandle->getUnicastAddress() = '127.0.0.1'
+FlomHandle->getMulticastAddress() = ''
+FlomHandle->getMulticastAddress() = '224.0.0.1'
+FlomHandle->getUnicastPort() = 28015
+FlomHandle->getUnicastPort() = 7777
+FlomHandle->getMulticastPort() = 28015
+FlomHandle->getMulticastPort() = 8888
+FlomHandle->getDiscoveryAttempts() = 2
+FlomHandle->getDiscoveryAttempts() = 5
+FlomHandle->getDiscoveryTimeout() = 500
+FlomHandle->getDiscoveryTimeout() = 750
+FlomHandle->getDiscoveryTtl() = 1
+FlomHandle->getDiscoveryTtl() = 2
+dynamicHandleHappyPath locked element is blue
+]])
 AT_CHECK([if test "$CPPAPI" = "no"; then exit 77; fi])
 AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
-AT_CHECK([case1002], [0], [ignore], [ignore])
+AT_CHECK([case1002], [0], [expout], [ignore])
 AT_CLEANUP

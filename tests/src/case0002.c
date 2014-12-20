@@ -29,7 +29,7 @@
  */
 const char *nd_socket_name = "/tmp/flom_socket_name";
 const char *nd_trace_filename = "/tmp/flom.trc";
-const char *nd_resource_name = "myResource";
+const char *nd_resource_name = "red.green.blue";
 const char *nd_unicast_address = "127.0.0.1";
 const char *nd_multicast_address = "224.0.0.1";
 
@@ -187,7 +187,8 @@ void static_handle_happy_path(void) {
     /* check resource idle lifespan */
     if (10000 != flom_handle_get_resource_idle_lifespan(&my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_resource_idle_lifespan\n");
+                "Unexpected result from flom_handle_set/"
+                "get_resource_idle_lifespan\n");
         exit(1);
     }
     
@@ -203,7 +204,8 @@ void static_handle_happy_path(void) {
     if (strcmp(nd_unicast_address,
                flom_handle_get_unicast_address(&my_handle))) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_unicast_address\n");
+                "Unexpected result from flom_handle_set/"
+                "get_unicast_address\n");
         exit(1);
     }
     
@@ -219,7 +221,8 @@ void static_handle_happy_path(void) {
     if (strcmp(nd_multicast_address,
                flom_handle_get_multicast_address(&my_handle))) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_multicast_address\n");
+                "Unexpected result from flom_handle_set/"
+                "get_multicast_address\n");
         exit(1);
     }
     
@@ -271,7 +274,8 @@ void static_handle_happy_path(void) {
     /* check discovery attempts */
     if (5 != flom_handle_get_discovery_attempts(&my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_discovery_attempts\n");
+                "Unexpected result from flom_handle_set/"
+                "get_discovery_attempts\n");
         exit(1);
     }
     
@@ -286,7 +290,8 @@ void static_handle_happy_path(void) {
     /* check discovery timeout */
     if (750 != flom_handle_get_discovery_timeout(&my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_discovery_timeout\n");
+                "Unexpected result from flom_handle_set/"
+                "get_discovery_timeout\n");
         exit(1);
     }
     
@@ -311,7 +316,9 @@ void static_handle_happy_path(void) {
         fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
-    } 
+    } else {
+        printf("staticHandleHappyPath locked element is %s\n", locked_element);
+    }
     /* lock release */
     if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(&my_handle))) {
         fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
@@ -409,7 +416,8 @@ void dynamic_handle_happy_path(void) {
     /* check resource create 1/2 */
     if (flom_handle_get_resource_create(my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_resource_create\n");
+                "Unexpected result from flom_handle_set/"
+                "get_resource_create\n");
         exit(1);
     }    
     /* set a new value for resource create property */
@@ -420,7 +428,8 @@ void dynamic_handle_happy_path(void) {
     /* check resource create 2/2 */
     if (!flom_handle_get_resource_create(my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_resource_create\n");
+                "Unexpected result from flom_handle_set/"
+                "get_resource_create\n");
         exit(1);
     }
         
@@ -435,7 +444,8 @@ void dynamic_handle_happy_path(void) {
     /* check resource timeout */
     if (-1 != flom_handle_get_resource_timeout(my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_resource_timeout\n");
+                "Unexpected result from flom_handle_set/"
+                "get_resource_timeout\n");
         exit(1);
     }
     
@@ -450,7 +460,8 @@ void dynamic_handle_happy_path(void) {
     /* check resource quantity */
     if (3 != flom_handle_get_resource_quantity(my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_resource_quantity\n");
+                "Unexpected result from flom_handle_set/"
+                "get_resource_quantity\n");
         exit(1);
     }
     
@@ -483,7 +494,8 @@ void dynamic_handle_happy_path(void) {
     /* check resource idle lifespan */
     if (10000 != flom_handle_get_resource_idle_lifespan(my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_resource_idle_lifespan\n");
+                "Unexpected result from flom_handle_set/"
+                "get_resource_idle_lifespan\n");
         exit(1);
     }
     
@@ -496,7 +508,8 @@ void dynamic_handle_happy_path(void) {
     if (strcmp(nd_unicast_address,
                flom_handle_get_unicast_address(my_handle))) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_unicast_address\n");
+                "Unexpected result from flom_handle_set/"
+                "get_unicast_address\n");
         exit(1);
     }
     
@@ -512,7 +525,8 @@ void dynamic_handle_happy_path(void) {
     if (strcmp(nd_multicast_address,
                flom_handle_get_multicast_address(my_handle))) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_multicast_address\n");
+                "Unexpected result from flom_handle_set/"
+                "get_multicast_address\n");
         exit(1);
     }
     
@@ -549,7 +563,8 @@ void dynamic_handle_happy_path(void) {
     /* check multicast port */
     if (8888 != flom_handle_get_multicast_port(my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_multicast_port\n");
+                "Unexpected result from flom_handle_set/"
+                "get_multicast_port\n");
         exit(1);
     }
     
@@ -564,7 +579,8 @@ void dynamic_handle_happy_path(void) {
     /* check discovery attempts */
     if (5 != flom_handle_get_discovery_attempts(my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_discovery_attempts\n");
+                "Unexpected result from flom_handle_set/"
+                "get_discovery_attempts\n");
         exit(1);
     }
     
@@ -579,7 +595,8 @@ void dynamic_handle_happy_path(void) {
     /* check discovery timeout */
     if (750 != flom_handle_get_discovery_timeout(my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_discovery_timeout\n");
+                "Unexpected result from flom_handle_set/"
+                "get_discovery_timeout\n");
         exit(1);
     }
     
@@ -604,6 +621,9 @@ void dynamic_handle_happy_path(void) {
         fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
+    } else {
+        printf("dynamicHandleHappyPath locked element is %s\n",
+               locked_element);
     } 
     /* lock release */
     if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(my_handle))) {

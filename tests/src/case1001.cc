@@ -30,14 +30,13 @@ using namespace flom;
 void staticHandleHappyPath(void) {
     int retCod;
     FlomHandle myHandle;
-    string lockedElement;
     
     /* lock acquisition */
-    if (FLOM_RC_OK != (retCod = myHandle.lock(lockedElement))) {
-        cerr << "staticHandleHappyPath/FlomHandle.lock() returned " <<
+    if (FLOM_RC_OK != (retCod = myHandle.lock())) {
+        cerr << "/FlomHandle.lock() returned " <<
             retCod << " '" << flom_strerror(retCod) << "'" << endl;
         exit(1);
-    } 
+    }
     /* lock release */
     if (FLOM_RC_OK != (retCod = myHandle.unlock())) {
         cerr << "staticHandleHappyPath/FlomHandle.unlock() returned " <<
@@ -67,7 +66,7 @@ void staticHandleMissingLock(void) {
 
 
 /*
- * Stress test with a static handle, missing flom_handle_lock method
+ * Stress test with a static handle, missing unlock method
  */
 void staticHandleMissingUnlock(void) {
     int retCod;
@@ -91,7 +90,6 @@ void staticHandleMissingUnlock(void) {
 void dynamicHandleHappyPath(void) {
     int retCod;
     FlomHandle *myHandle = NULL;
-    string lockedElement;
 
     /* create a new handle */
     if (NULL == (myHandle = new FlomHandle())) {
@@ -100,11 +98,11 @@ void dynamicHandleHappyPath(void) {
         exit(1);
     }    
     /* lock acquisition */
-    if (FLOM_RC_OK != (retCod = myHandle->lock(lockedElement))) {
+    if (FLOM_RC_OK != (retCod = myHandle->lock())) {
         cerr << "dynamicHandleHappyPath/FlomHandle.lock() returned " <<
             retCod << " '" << flom_strerror(retCod) << "'" << endl;
         exit(1);
-    } 
+    }
     /* lock release */
     if (FLOM_RC_OK != (retCod = myHandle->unlock())) {
         cerr << "dynamicHandleHappyPath/FlomHandle.unlock() returned " <<
