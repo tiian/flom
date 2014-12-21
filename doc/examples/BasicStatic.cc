@@ -51,10 +51,9 @@ int main(int argc, char *argv[]) {
     int retCod;
     /* step 1: handle declaration */
     FlomHandle myHandle;
-    string lockedElement;
     
     /* step 2: lock acquisition */
-    if (FLOM_RC_OK != (retCod = myHandle.lock(lockedElement))) {
+    if (FLOM_RC_OK != (retCod = myHandle.lock())) {
         cerr << "FlomHandle.lock() returned " << retCod << " '" <<
             flom_strerror(retCod) << "'" << endl;
         exit(1);
