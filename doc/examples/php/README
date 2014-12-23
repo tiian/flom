@@ -1,0 +1,7 @@
+This directory contains PHP examples: this is work in progress and all this
+stuff must be integrated inside autoconf/automake
+
+this is the command line to run the example:
+./build.sh
+php -c php.ini basic.php
+

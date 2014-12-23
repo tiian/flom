@@ -55,7 +55,6 @@ int main(int argc, char *argv[]) {
     int ret_cod;
     /* step 1: handle declaration */
     flom_handle_t *my_handle = NULL;
-    char locked_element[100];
 
     /* step 2: new handle creation */
     if (NULL == (my_handle = flom_handle_new())) {
@@ -63,8 +62,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }    
     /* step 3: lock acquisition */
-    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle, locked_element,
-                                                  sizeof(locked_element)))) {
+    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle, NULL, 0))) {
         fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
