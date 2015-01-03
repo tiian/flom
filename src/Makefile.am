@@ -1,3 +1,7 @@
+if COND_PHP
+  MAYBE_PHP = php
+endif
+SUBDIRS = . $(MAYBE_PHP)
 AM_CPPFLAGS = -D_SYSCONFDIR='"@sysconfdir@"'
 AM_CFLAGS = -Wall
 lib_LTLIBRARIES = libflom.la

@@ -115,6 +115,7 @@ AC_CONFIG_FILES([
   etc/Makefile
   man/Makefile
   src/Makefile
+  src/php/Makefile
   tests/atlocal
   tests/Makefile
   tests/src/Makefile
@@ -164,6 +165,24 @@ CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
 # Checking the availability of some utility programs
 AC_CHECK_PROGS(DOXYGEN, [doxygen], [true])
 AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
+
+# Checking the availability of SWIG (Simplified Wrapper and Interface Generator)
+AC_CHECK_PROG(HAVE_SWIG, [swig], [yes], [no])
+# Checking the availability of PHP tools
+AC_CHECK_PROG(HAVE_PHP, [php], [yes], [no])
+AC_CHECK_PROG(HAVE_PHP_CONFIG, [php-config], [yes], [no])
+# Build PHP wrapper?
+AC_ARG_ENABLE([php],
+	AS_HELP_STRING([--disable-php],
+		[do not prepare PHP binding API]),
+	[PHP="no"], [PHP="yes"])
+# PHP stuff is conditional
+AM_CONDITIONAL([COND_PHP], [test "$HAVE_SWIG" = "yes" -a \
+	"$HAVE_PHP" = "yes" -a "$HAVE_PHP_CONFIG" = "yes" -a \
+	"$PHP" = "yes"])
+AC_DEFINE_UNQUOTED([PHP_INCLUDES], [$(php-config --includes)], [Includes directives for PHP wrapper generation])
+
+AC_DEFINE_UNQUOTED([_ES_GENERIC_ERROR], [$_ES_GENERIC_ERROR], [Exit status for generic error])
 
 AC_CHECK_HEADERS(assert.h)
 AC_CHECK_HEADERS(errno.h)
@@ -233,6 +252,7 @@ AC_SUBST(HAVE_DOT)
 
 # substitution of optional (--disable) features 
 AC_SUBST(CPPAPI)
+AC_SUBST(PHP_INCLUDES)
 
 # substitution of LibTool values for library version
 AC_SUBST(LT_CURRENT)
