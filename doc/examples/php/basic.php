@@ -18,7 +18,7 @@
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-include("flom.php");
+include("/home/tiian/src/flom/src/php/flom.php");
 
 $handle = new flom_handle_t();
 /*

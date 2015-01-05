@@ -139,9 +139,6 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* Includes directives for PHP wrapper generation */
-#undef PHP_INCLUDES
-
 /* The size of `int', as computed by sizeof. */
 #undef SIZEOF_INT
 

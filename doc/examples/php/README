@@ -4,4 +4,6 @@ stuff must be integrated inside autoconf/automake
 this is the command line to run the example:
 ./build.sh
 php -c php.ini basic.php
+alternative way:
+php -d extension=flom.so basic.php
 

@@ -167,7 +167,7 @@ AC_CHECK_PROGS(DOXYGEN, [doxygen], [true])
 AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
 
 # Checking the availability of SWIG (Simplified Wrapper and Interface Generator)
-AC_CHECK_PROG(HAVE_SWIG, [swig], [yes], [no])
+AC_CHECK_PROGS(SWIG, [swig])
 # Checking the availability of PHP tools
 AC_CHECK_PROG(HAVE_PHP, [php], [yes], [no])
 AC_CHECK_PROG(HAVE_PHP_CONFIG, [php-config], [yes], [no])
@@ -177,10 +177,10 @@ AC_ARG_ENABLE([php],
 		[do not prepare PHP binding API]),
 	[PHP="no"], [PHP="yes"])
 # PHP stuff is conditional
-AM_CONDITIONAL([COND_PHP], [test "$HAVE_SWIG" = "yes" -a \
-	"$HAVE_PHP" = "yes" -a "$HAVE_PHP_CONFIG" = "yes" -a \
-	"$PHP" = "yes"])
-AC_DEFINE_UNQUOTED([PHP_INCLUDES], [$(php-config --includes)], [Includes directives for PHP wrapper generation])
+AM_CONDITIONAL([COND_PHP], [test "$HAVE_PHP" = "yes" -a \
+	"$HAVE_PHP_CONFIG" = "yes" -a "$PHP" = "yes"])
+PHP_INCLUDES=$(php-config --includes)
+PHP_INSTALL_PATH=$(php-config --extension-dir)
 
 AC_DEFINE_UNQUOTED([_ES_GENERIC_ERROR], [$_ES_GENERIC_ERROR], [Exit status for generic error])
 
@@ -253,6 +253,7 @@ AC_SUBST(HAVE_DOT)
 # substitution of optional (--disable) features 
 AC_SUBST(CPPAPI)
 AC_SUBST(PHP_INCLUDES)
+AC_SUBST(PHP_INSTALL_PATH)
 
 # substitution of LibTool values for library version
 AC_SUBST(LT_CURRENT)
