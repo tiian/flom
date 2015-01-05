@@ -265,15 +265,14 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-
-# Transform this in a real Makefile.am with libtool thing!
-lib_LTLIBRARIES = flom-php-module.la
-flom_php_module_la_SOURCES = flom_wrap.c
-AM_CPPFLAGS = @PHP_INCLUDES@
+AM_CFLAGS = 
+AM_CPPFLAGS = @PHP_INCLUDES@ -I ..
 AM_LDFLAGS = -module
 # Unsure if it's better to use flom_php_module_la_LIBADD or 
 # flom_php_module_la_LDADD
 flom_php_module_la_LIBADD = @GLIB2_LIBS@ ../libflom.la
+lib_LTLIBRARIES = flom-php-module.la
+flom_php_module_la_SOURCES = flom_wrap.c
 all: all-am
 
 .SUFFIXES:
@@ -562,8 +561,9 @@ ps: ps-am
 ps-am:
 
 uninstall-am: uninstall-libLTLIBRARIES
-
-.MAKE: install-am install-exec-am install-strip
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
+.MAKE: install-am install-exec-am install-strip uninstall-am
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
 	clean-libLTLIBRARIES clean-libtool ctags distclean \
@@ -577,17 +577,21 @@ uninstall-am: uninstall-libLTLIBRARIES
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-libLTLIBRARIES
+	tags uninstall uninstall-am uninstall-hook \
+	uninstall-libLTLIBRARIES
 
 
 flom_wrap.c: flom.i
 	$(SWIG) -php -I.. flom.i
+# @@@ php_DATA = flom.php
 
 install-exec-hook:
-	ln -sf $(DESTDIR)$(libdir)/flom-php-module.so @PHP_INSTALL_PATH@/flom.so
+	ln -sf $(DESTDIR)$(libdir)/flom-php-module.so \
+	@PHP_INSTALL_PATH@/flom.so || echo "WARNING: module flom.so not installed in PHP default path @PHP_INSTALL_PATH@"
+	echo "datadir="$(datadir)
 
-#uninstall-hook:
-#	rm -f @PHP_INSTALL_PATH@/flom.so
+uninstall-hook:
+	rm -f @PHP_INSTALL_PATH@/flom.so
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

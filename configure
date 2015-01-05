@@ -10872,6 +10872,8 @@ LT_CURRENT=0
 LT_AGE=0
 LT_REVISION=0
 
+# @@@ AC_DEFINE([phpdir], ['${datarootdir}/${PACKAGE_TARNAME}'])
+
 # hardwired configuration
 _RELEASE_DATE="2014-12-20"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
@@ -14459,11 +14461,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14462: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14464: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14466: \$? = $ac_status" >&5
+   echo "$as_me:14468: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14558,11 +14560,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14561: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14563: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14565: \$? = $ac_status" >&5
+   echo "$as_me:14567: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14610,11 +14612,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14613: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14615: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14617: \$? = $ac_status" >&5
+   echo "$as_me:14619: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized

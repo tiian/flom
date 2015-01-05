@@ -1,9 +1,19 @@
 This directory contains PHP examples: this is work in progress and all this
 stuff must be integrated inside autoconf/automake
 
-this is the command line to run the example:
-./build.sh
-php -c php.ini basic.php
-alternative way:
+After a complete installation procedure:
+./configure
+make
+sudo make install
+check the PHP modules have been built and installe:
+ls -la /usr/local/lib/flom-php*
+
+This is the command line to run the example:
+
 php -d extension=flom.so basic.php
+
+if for any reason "flom.so" link was not created inside your PHP standard
+extension directory, you can point it directly from the FLoM installation path:
+
+php -d extension=/usr/local/lib/flom-php-module.so basic.php
 

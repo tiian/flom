@@ -1,6 +1,6 @@
 Road map:
 
-Fix PHP makefile
+Fix PHP makefile: how to install flom.php in /usr/local/share/flom/php/flom.php
 Add PHP test cases
 Fix PHP examples
 Fix copyright dates

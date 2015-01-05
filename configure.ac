@@ -15,6 +15,8 @@ LT_CURRENT=0
 LT_AGE=0
 LT_REVISION=0
 
+# @@@ AC_DEFINE([phpdir], ['${datarootdir}/${PACKAGE_TARNAME}'])
+
 # hardwired configuration
 _RELEASE_DATE="2014-12-20"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
