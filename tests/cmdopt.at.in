@@ -50,6 +50,22 @@ AT_DATA([flom.conf],
 AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_COMMANDTRACEFILE@], [0], [expout], [ignore])
 AT_CLEANUP
 
+AT_SETUP([Command trace file: --append-trace-file])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_TRACE@]/@_CONFIG_KEY_APPENDTRACEFILE@=1
+]])
+AT_CHECK([flom -V --append-trace-file=yes -- ls | grep @_CONFIG_KEY_APPENDTRACEFILE@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+@_CONFIG_KEY_APPENDTRACEFILE@=yes
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+[@_CONFIG_GROUP_NETWORK@]
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_APPENDTRACEFILE@], [0], [expout], [ignore])
+AT_CLEANUP
+
 AT_SETUP([Verbose mode: -V, --verbose])
 AT_DATA([expout],
 [[[@_CONFIG_GROUP_TRACE@]/@_CONFIG_KEY_VERBOSE@=1

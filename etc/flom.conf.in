@@ -20,6 +20,10 @@
 # Destination of trace messages produced by command (foreground) process
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_COMMANDTRACEFILE@=/tmp/flom-command.trc
+# Append trace files; valid values are "yes" (append) and "no" (truncate,
+# default)
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_APPENDTRACEFILE@=no
 # Flom execution will produce verbose output; valid values are "yes" and "no"
 # (case insensitive)
 # (Uncomment below row if necessary)

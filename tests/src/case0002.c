@@ -68,9 +68,8 @@ void static_handle_happy_path(void) {
         exit(1);
     }
 
-    /* get current trace filename */
-    printf("flom_handle_get_trace_filename() = '%s'\n",
-           flom_handle_get_trace_filename(&my_handle));
+    /* we don't get current trace filename because it can be altered by a
+       global config file */
     /* set a new trace filename */
     flom_handle_set_trace_filename(&my_handle, nd_trace_filename);
     /* get new trace filename */
@@ -142,7 +141,8 @@ void static_handle_happy_path(void) {
     /* check resource timeout */
     if (-1 != flom_handle_get_resource_timeout(&my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_resource_timeout\n");
+                "Unexpected result from flom_handle_set/"
+                "get_resource_timeout\n");
         exit(1);
     }
     
@@ -157,7 +157,8 @@ void static_handle_happy_path(void) {
     /* check resource quantity */
     if (3 != flom_handle_get_resource_quantity(&my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_resource_quantity\n");
+                "Unexpected result from flom_handle_set/"
+                "get_resource_quantity\n");
         exit(1);
     }
     
@@ -368,9 +369,8 @@ void dynamic_handle_happy_path(void) {
         exit(1);
     }
 
-    /* get current trace filename */
-    printf("flom_handle_get_trace_filename() = '%s'\n",
-           flom_handle_get_trace_filename(my_handle));
+    /* we don't get current trace filename because it can be altered by a
+       global config file */
     /* set a new trace filename */
     flom_handle_set_trace_filename(my_handle, nd_trace_filename);
     /* get new trace filename */

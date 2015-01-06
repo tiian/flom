@@ -173,6 +173,9 @@
 #undef _CONFIG_GROUP_TRACE
 
 /* Label of "command trace file" key inside config files */
+#undef _CONFIG_KEY_APPENDTRACEFILE
+
+/* Label of "command trace file" key inside config files */
 #undef _CONFIG_KEY_COMMANDTRACEFILE
 
 /* Label of "Create" key inside config files */

@@ -62,9 +62,8 @@ void staticHandleHappyPath(void) {
         exit(1);
     }
 
-    /* get current trace filename */
-    cout << "FlomHandle.getTraceFilename() = '" << myHandle.getTraceFilename()
-         << "'" << endl;
+    /* we don't get current trace filename because it can be altered by a
+       global config file */
     /* set a new trace filename */
     myHandle.setTraceFilename(ndTraceFilename);
     /* get new trace filename */
@@ -346,9 +345,8 @@ void dynamicHandleHappyPath(void) {
         exit(1);
     }
 
-    /* get current trace filename */
-    cout << "FlomHandle->getTraceFilename() = '" << myHandle->getTraceFilename()
-         << "'" << endl;
+    /* we don't get current trace filename because it can be altered by a
+       global config file */
     /* set a new trace filename */
     myHandle->setTraceFilename(ndTraceFilename);
     /* get new trace filename */

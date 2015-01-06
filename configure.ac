@@ -34,6 +34,7 @@ _DEFAULT_TCP_KEEPALIVE_PROBES=6
 _CONFIG_GROUP_TRACE="Trace"
 _CONFIG_KEY_DAEMONTRACEFILE="DaemonTraceFile"
 _CONFIG_KEY_COMMANDTRACEFILE="CommandTraceFile"
+_CONFIG_KEY_APPENDTRACEFILE="AppendTraceFile"
 _CONFIG_KEY_VERBOSE="Verbose"
 _CONFIG_GROUP_RESOURCE="Resource"
 _CONFIG_KEY_CREATE="Create"
@@ -78,6 +79,7 @@ AC_DEFINE_UNQUOTED([_DEFAULT_TCP_KEEPALIVE_PROBES], [$_DEFAULT_TCP_KEEPALIVE_PRO
 AC_DEFINE_UNQUOTED([_CONFIG_GROUP_TRACE], ["$_CONFIG_GROUP_TRACE"], [Label of "trace" group inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_DAEMONTRACEFILE], ["$_CONFIG_KEY_DAEMONTRACEFILE"], [Label of "daemon trace file" key inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_COMMANDTRACEFILE], ["$_CONFIG_KEY_COMMANDTRACEFILE"], [Label of "command trace file" key inside config files])
+AC_DEFINE_UNQUOTED([_CONFIG_KEY_APPENDTRACEFILE], ["$_CONFIG_KEY_APPENDTRACEFILE"], [Label of "command trace file" key inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_VERBOSE], ["$_CONFIG_KEY_VERBOSE"], [Label of "Verbose" key inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_GROUP_RESOURCE], ["$_CONFIG_GROUP_RESOURCE"], [Label of "resource" group inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_CREATE], ["$_CONFIG_KEY_CREATE"], [Label of "Create" key inside config files])
@@ -179,7 +181,8 @@ AC_ARG_ENABLE([php],
 		[do not prepare PHP binding API]),
 	[PHP="no"], [PHP="yes"])
 # PHP stuff is conditional
-AM_CONDITIONAL([COND_PHP], [test "$HAVE_PHP" = "yes" -a \
+# @@@ Intentionally disabled 2015-01-06 due to a different feature development!
+AM_CONDITIONAL([COND_PHP], [test "$HAVE_PHP" = "yes@@@" -a \
 	"$HAVE_PHP_CONFIG" = "yes" -a "$PHP" = "yes"])
 PHP_INCLUDES=$(php-config --includes)
 PHP_INSTALL_PATH=$(php-config --extension-dir)
@@ -269,6 +272,7 @@ AC_SUBST(_USER_CONFIG_FILENAME)
 AC_SUBST(_CONFIG_GROUP_TRACE)
 AC_SUBST(_CONFIG_KEY_DAEMONTRACEFILE)
 AC_SUBST(_CONFIG_KEY_COMMANDTRACEFILE)
+AC_SUBST(_CONFIG_KEY_APPENDTRACEFILE)
 AC_SUBST(_CONFIG_KEY_VERBOSE)
 AC_SUBST(_CONFIG_GROUP_RESOURCE)
 AC_SUBST(_CONFIG_KEY_CREATE)

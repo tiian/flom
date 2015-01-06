@@ -67,6 +67,7 @@ static gint quiesce_exit = 0;
 static gint immediate_exit = 0;
 static gchar *command_trace_file = NULL;
 static gchar *daemon_trace_file = NULL;
+static gchar *append_trace_file = NULL;
 static gchar **command_argv = NULL;
 /* command line options */
 static GOptionEntry entries[] =
@@ -95,6 +96,7 @@ static GOptionEntry entries[] =
     { "tcp-keepalive-probes", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_probes, "Local override for SO_KEEPALIVE feature", NULL },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
     { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
+    { "append-trace-file", 0, 0, G_OPTION_ARG_STRING, &append_trace_file, "Specify if the trace file(s) must be appended or truncated for every execution (accepted values 'yes', 'no')", NULL },
     { "quiesce-exit", 'x', 0, G_OPTION_ARG_NONE, &quiesce_exit, "Start daemon termination completing current requests", NULL },
     { "immediate-exit", 'X', 0, G_OPTION_ARG_NONE, &immediate_exit, "Start daemon termination immediately and interrupting current requests", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
@@ -248,9 +250,20 @@ int main (int argc, char *argv[])
     if (_DEFAULT_TCP_KEEPALIVE_PROBES != tcp_keepalive_probes) {
         flom_config_set_tcp_keepalive_probes(NULL, tcp_keepalive_probes);
     }
+    if (NULL != append_trace_file) {
+        flom_bool_value_t fbv;
+        if (FLOM_BOOL_INVALID == (
+                fbv = flom_bool_value_retrieve(append_trace_file))) {
+            g_print("append-trace-file: '%s' is an invalid value\n",
+                    append_trace_file);
+            exit(FLOM_ES_GENERIC_ERROR);
+        }
+        flom_config_set_append_trace_file(NULL, fbv);
+    }    
     if (NULL != flom_config_get_command_trace_file(NULL))
         /* change trace destination if necessary */
-        FLOM_TRACE_REOPEN(flom_config_get_command_trace_file(NULL));
+        FLOM_TRACE_REOPEN(flom_config_get_command_trace_file(NULL),
+                          flom_config_get_append_trace_file(NULL));
 
     /* print configuration */
     if (flom_config_get_verbose(NULL))

@@ -13,7 +13,6 @@ AT_SETUP([C Getter and setter methods])
 AT_DATA([expout],
 [[flom_handle_get_socket_name() = '/tmp/flom-tiian'
 flom_handle_get_socket_name() = '/tmp/flom_socket_name'
-flom_handle_get_trace_filename() = '(null)'
 flom_handle_get_trace_filename() = '/tmp/flom.trc'
 flom_handle_get_resource_name() = '_RESOURCE'
 flom_handle_get_resource_name() = 'red.green.blue'
@@ -45,7 +44,6 @@ flom_handle_get_discovery_ttl() = 2
 staticHandleHappyPath locked element is red
 flom_handle_get_socket_name() = '/tmp/flom-tiian'
 flom_handle_get_socket_name() = '/tmp/flom_socket_name'
-flom_handle_get_trace_filename() = '(null)'
 flom_handle_get_trace_filename() = '/tmp/flom.trc'
 flom_handle_get_resource_name() = '_RESOURCE'
 flom_handle_get_resource_name() = 'red.green.blue'
@@ -96,7 +94,6 @@ AT_SETUP([C++ Getter and setter methods])
 AT_DATA([expout],
 [[FlomHandle.getSocketName() = '/tmp/flom-tiian'
 FlomHandle.getSocketName() = '/tmp/flom_socket_name'
-FlomHandle.getTraceFilename() = ''
 FlomHandle.getTraceFilename() = '/tmp/flom.trc'
 FlomHandle.getResourceName() = '_RESOURCE'
 FlomHandle.getResourceName() = 'red.blue.green'
@@ -128,7 +125,6 @@ FlomHandle.getDiscoveryTtl() = 2
 staticHandleHappyPath locked element is red
 FlomHandle->getSocketName() = '/tmp/flom-tiian'
 FlomHandle->getSocketName() = '/tmp/flom_socket_name'
-FlomHandle->getTraceFilename() = ''
 FlomHandle->getTraceFilename() = '/tmp/flom.trc'
 FlomHandle->getResourceName() = '_RESOURCE'
 FlomHandle->getResourceName() = 'red.blue.green'

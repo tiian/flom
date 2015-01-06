@@ -179,7 +179,8 @@ int flom_daemon(flom_config_t *config, int family)
                 if (i != pipefd[0] && i != pipefd[1])
                     close(i);
 
-            FLOM_TRACE_REOPEN(flom_config_get_daemon_trace_file(config));
+            FLOM_TRACE_REOPEN(flom_config_get_daemon_trace_file(config),
+                              flom_config_get_append_trace_file(config));
             FLOM_TRACE(("flom_daemon: now daemonized!\n"));
 
             /* activate service */

@@ -773,7 +773,8 @@ int flom_init_check(void)
                 break;
             if (NULL != flom_config_get_command_trace_file(NULL))
                 /* change trace destination if necessary */
-                FLOM_TRACE_REOPEN(flom_config_get_command_trace_file(NULL));
+                FLOM_TRACE_REOPEN(flom_config_get_command_trace_file(NULL),
+                                  flom_config_get_append_trace_file(NULL));
             /* check configuration */
             if (FLOM_RC_OK != (ret_cod = flom_config_check(NULL)))
                 break;

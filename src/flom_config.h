@@ -146,6 +146,10 @@ extern const gchar *FLOM_CONFIG_KEY_DAEMONTRACEFILE;
  */
 extern const gchar *FLOM_CONFIG_KEY_COMMANDTRACEFILE;
 /**
+ * Label associated to AppendTraceFile key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_APPENDTRACEFILE;
+/**
  * Label associated to Verbose key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_VERBOSE;
@@ -277,6 +281,10 @@ typedef struct flom_config_s {
      * Name of the file must be used to write trace messages from the command
      */
     gchar             *command_trace_file;
+    /**
+     * Append trace file, boolean value: TRUE=append, FALSE=truncate
+     */
+    gint               append_trace_file;
     /**
      * Verbose execution: more messages will be printed on console
      */
@@ -520,6 +528,34 @@ extern "C" {
         flom_config_t *config) {
         return NULL == config ?
             global_config.command_trace_file : config->command_trace_file;
+    }
+
+
+    
+    /**
+     * Set "append_trace_file" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
+     * @param value IN new (boolean) value
+     */
+    static inline void flom_config_set_append_trace_file(
+        flom_config_t *config, gint value) {
+        if (NULL == config)
+            global_config.append_trace_file = value;
+        else
+            config->append_trace_file = value;
+    }
+
+
+
+    /**
+     * Get "append_trace_file" config parameter
+     * @param config IN/OUT configuration object, NULL for global config
+     * @return a boolean value
+     */
+    static inline gint flom_config_get_append_trace_file(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.append_trace_file : config->append_trace_file;
     }
 
 

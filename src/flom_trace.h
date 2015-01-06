@@ -172,7 +172,7 @@ extern unsigned long flom_trace_mask;
  * only if _TRACE macro is defined
  */
 #ifdef _TRACE
-# define FLOM_TRACE_REOPEN(a) flom_trace_reopen(a)
+# define FLOM_TRACE_REOPEN(a,b) flom_trace_reopen(a,b)
 #else
 # define FLOM_TRACE_REOPEN
 #endif
@@ -257,8 +257,10 @@ extern "C" {
      * Open a new stream for trace
      * @param file_name IN name of the file must be used for trace or NULL
      *                     for stderr
+     * @param append IN value boolean, if TRUE the trace file will be appended,
+     *               otherwise the trace file will be truncated
      */     
-    void flom_trace_reopen(const char *file_name);
+    void flom_trace_reopen(const char *file_name, int append);
 
     
     

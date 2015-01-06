@@ -96,11 +96,11 @@ void flom_trace_init(void)
 
 
 
-void flom_trace_reopen(const char *file_name)
+void flom_trace_reopen(const char *file_name, int append)
 {
     FILE *tmp_trace_file;
     if (NULL != file_name) {
-        tmp_trace_file = fopen(file_name, "w");
+        tmp_trace_file = fopen(file_name, append ? "a" : "w");
         if (NULL != tmp_trace_file) {
             /* only if different than stderr, the file must be closed */
             if (stderr != trace_file)
