@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforge.net>
+# Copyright (c) 2013-2015, Christian Ferrari <tiian@users.sourceforge.net>
 # All rights reserved.
 #
 # This file is part of FLOM.

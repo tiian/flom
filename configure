@@ -15569,7 +15569,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files Makefile doc/Makefile doc/examples/Makefile doc/html/Makefile etc/Makefile man/Makefile src/Makefile src/php/Makefile tests/atlocal tests/Makefile tests/src/Makefile"
+ac_config_files="$ac_config_files Makefile doc/Makefile doc/examples/Makefile doc/examples/php/Makefile doc/html/Makefile etc/Makefile man/Makefile src/Makefile src/php/Makefile tests/atlocal tests/Makefile tests/src/Makefile"
 
 ac_config_commands="$ac_config_commands tests/atconfig"
 
@@ -16176,8 +16176,7 @@ else
 fi
 
 # PHP stuff is conditional
-# @@@ Intentionally disabled 2015-01-06 due to a different feature development!
- if test "$HAVE_PHP" = "yes@@@" -a \
+ if test "$HAVE_PHP" = "yes" -a \
 	"$HAVE_PHP_CONFIG" = "yes" -a "$PHP" = "yes"; then
   COND_PHP_TRUE=
   COND_PHP_FALSE='#'
@@ -17810,6 +17809,7 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "doc/examples/Makefile") CONFIG_FILES="$CONFIG_FILES doc/examples/Makefile" ;;
+    "doc/examples/php/Makefile") CONFIG_FILES="$CONFIG_FILES doc/examples/php/Makefile" ;;
     "doc/html/Makefile") CONFIG_FILES="$CONFIG_FILES doc/html/Makefile" ;;
     "etc/Makefile") CONFIG_FILES="$CONFIG_FILES etc/Makefile" ;;
     "man/Makefile") CONFIG_FILES="$CONFIG_FILES man/Makefile" ;;

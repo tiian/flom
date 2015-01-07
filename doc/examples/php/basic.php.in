@@ -1,6 +1,6 @@
 <?php 
 /*
- * Copyright (c) 2013-2014, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2013-2015, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of FLoM.
@@ -18,13 +18,11 @@
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-include("/home/tiian/src/flom/src/php/flom.php");
+include("@datadir@/@PACKAGE@/php/flom.php");
 
 $handle = new flom_handle_t();
-/*
-$element = "XXXXXXXXXXXXXXXXXXXXXXXXXXXX";
-*/
 $ret_cod = FLOM_RC_OK;
+
 if (FLOM_RC_OK != ($ret_cod = flom_handle_init($handle))) {
 	fwrite(STDERR, "flom_handle_init() returned " . $ret_cod . " '" . 
 		flom_strerror($ret_cod) . "'\n");
@@ -47,10 +45,4 @@ if (FLOM_RC_OK != ($ret_cod = flom_handle_clean($handle))) {
 }
 $handle = NULL;
 
-/*
-flom_handle_set_resource_name($handle, "red.green.blue");
-flom_handle_lock($handle, $element, strlen($element));
-echo "Element is " . $element . "\n";
-flom_handle_unlock($handle);
-*/
 ?>

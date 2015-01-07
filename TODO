@@ -1,9 +1,7 @@
 Road map:
 
-Fix PHP makefile: how to install flom.php in /usr/local/share/flom/php/flom.php
+Fix PHP examples: advanced.php must be implemented, basic.php must be cleaned-up
 Add PHP test cases
-Fix PHP examples
-Fix copyright dates
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 

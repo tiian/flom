@@ -15,6 +15,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -35,7 +36,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = src/php
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -68,7 +70,7 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(libdir)"
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(phpdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 flom_php_module_la_DEPENDENCIES = ../libflom.la
 am_flom_php_module_la_OBJECTS = flom_wrap.lo
@@ -88,6 +90,7 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(flom_php_module_la_SOURCES)
 DIST_SOURCES = $(flom_php_module_la_SOURCES)
+DATA = $(dist_noinst_DATA) $(php_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -269,11 +272,15 @@ top_srcdir = @top_srcdir@
 AM_CFLAGS = 
 AM_CPPFLAGS = @PHP_INCLUDES@ -I ..
 AM_LDFLAGS = -module
+dist_noinst_DATA = flom.i
 # Unsure if it's better to use flom_php_module_la_LIBADD or 
 # flom_php_module_la_LDADD
 flom_php_module_la_LIBADD = @GLIB2_LIBS@ ../libflom.la
-lib_LTLIBRARIES = flom-php-module.la
 flom_php_module_la_SOURCES = flom_wrap.c
+lib_LTLIBRARIES = flom-php-module.la
+phpdir = $(datadir)/$(PACKAGE)/php
+php_DATA = flom.php
+EXTRA_DIST = flom.php php_flom.h
 all: all-am
 
 .SUFFIXES:
@@ -376,6 +383,26 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-phpDATA: $(php_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(phpdir)" || $(MKDIR_P) "$(DESTDIR)$(phpdir)"
+	@list='$(php_DATA)'; test -n "$(phpdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(phpdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(phpdir)" || exit $$?; \
+	done
+
+uninstall-phpDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(php_DATA)'; test -n "$(phpdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(phpdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(phpdir)" && rm -f $$files
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -461,9 +488,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LTLIBRARIES) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(phpdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -514,7 +541,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-phpDATA
 
 install-dvi: install-dvi-am
 
@@ -561,7 +588,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES
+uninstall-am: uninstall-libLTLIBRARIES uninstall-phpDATA
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 .MAKE: install-am install-exec-am install-strip uninstall-am
@@ -574,22 +601,20 @@ uninstall-am: uninstall-libLTLIBRARIES
 	install-dvi-am install-exec install-exec-am install-exec-hook \
 	install-html install-html-am install-info install-info-am \
 	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install-phpDATA install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-hook \
-	uninstall-libLTLIBRARIES
+	uninstall-libLTLIBRARIES uninstall-phpDATA
 
 
 flom_wrap.c: flom.i
 	$(SWIG) -php -I.. flom.i
-# @@@ php_DATA = flom.php
 
 install-exec-hook:
 	ln -sf $(DESTDIR)$(libdir)/flom-php-module.so \
 	@PHP_INSTALL_PATH@/flom.so || echo "WARNING: module flom.so not installed in PHP default path @PHP_INSTALL_PATH@"
-	echo "datadir="$(datadir)
 
 uninstall-hook:
 	rm -f @PHP_INSTALL_PATH@/flom.so

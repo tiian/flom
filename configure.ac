@@ -115,6 +115,7 @@ AC_CONFIG_FILES([
   Makefile
   doc/Makefile
   doc/examples/Makefile
+  doc/examples/php/Makefile
   doc/html/Makefile
   etc/Makefile
   man/Makefile
@@ -181,8 +182,7 @@ AC_ARG_ENABLE([php],
 		[do not prepare PHP binding API]),
 	[PHP="no"], [PHP="yes"])
 # PHP stuff is conditional
-# @@@ Intentionally disabled 2015-01-06 due to a different feature development!
-AM_CONDITIONAL([COND_PHP], [test "$HAVE_PHP" = "yes@@@" -a \
+AM_CONDITIONAL([COND_PHP], [test "$HAVE_PHP" = "yes" -a \
 	"$HAVE_PHP_CONFIG" = "yes" -a "$PHP" = "yes"])
 PHP_INCLUDES=$(php-config --includes)
 PHP_INSTALL_PATH=$(php-config --extension-dir)
