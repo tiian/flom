@@ -6,10 +6,16 @@ nodist_examples_DATA = basic.php advanced.php
 basic.php: basic.php.in ../../../config.status
 	sed \
 	-e 's|@datadir[@]|$(datadir)|g' \
+	-e 's|@libdir[@]|$(libdir)|g' \
 	-e 's|@PACKAGE[@]|$(PACKAGE)|g' \
 	$< >$@
 advanced.php: advanced.php.in ../../../config.status
 	sed \
 	-e 's|@datadir[@]|$(datadir)|g' \
+	-e 's|@libdir[@]|$(libdir)|g' \
 	-e 's|@PACKAGE[@]|$(PACKAGE)|g' \
+	$< >$@
+README: README.in ../../../config.status
+	sed \
+	-e 's|@libdir[@]|$(libdir)|g' \
 	$< >$@

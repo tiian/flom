@@ -1,7 +1,7 @@
 LOG:
 
          - 0.9.2 Added trace append option (--append-trace-file)
-	ATTENTION: all console messages produced by main.c (flom command) and
+	WARNING: all console messages produced by main.c (flom command) and
 	related to warning conditions were moved from stdout to stderr. If your
 	automation scripts implement console message parsing, you will have to
 	fix them before the usage with this new version. As a rule of thumb,

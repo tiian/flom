@@ -1,6 +1,5 @@
 Road map:
 
-Fix PHP examples: advanced.php must be implemented, basic.php must be cleaned-up
 Add PHP test cases
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait

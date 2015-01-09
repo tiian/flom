@@ -489,12 +489,18 @@ uninstall-am: uninstall-dist_examplesDATA \
 basic.php: basic.php.in ../../../config.status
 	sed \
 	-e 's|@datadir[@]|$(datadir)|g' \
+	-e 's|@libdir[@]|$(libdir)|g' \
 	-e 's|@PACKAGE[@]|$(PACKAGE)|g' \
 	$< >$@
 advanced.php: advanced.php.in ../../../config.status
 	sed \
 	-e 's|@datadir[@]|$(datadir)|g' \
+	-e 's|@libdir[@]|$(libdir)|g' \
 	-e 's|@PACKAGE[@]|$(PACKAGE)|g' \
+	$< >$@
+README: README.in ../../../config.status
+	sed \
+	-e 's|@libdir[@]|$(libdir)|g' \
 	$< >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

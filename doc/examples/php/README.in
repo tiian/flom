@@ -1,0 +1,13 @@
+This directory contains PHP examples.
+
+After a complete installation procedure:
+./configure
+make
+sudo make install
+check the PHP modules have been built and installed:
+ls -la @libdir@/flom-php-module.*
+
+Read the comments inside
+	basic.php
+	advanced.php
+to understand how these PHP programs can be executed

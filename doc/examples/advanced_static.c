@@ -26,7 +26,7 @@
 /*
  * This example program shows the usage of libflom API library with
  * a statically allocated handle; it uses a resource set instead of the
- * default resource and displays the name of the element obtained.
+ * default resource and displays the name of the obtained element.
  * These are the steps:
  * 1. declare an object of type flom_handle_t inside process stack
  * 2. initialize the allocated handle using function flom_handle_init()
