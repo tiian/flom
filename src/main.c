@@ -117,7 +117,7 @@ int main (int argc, char *argv[])
     option_context = g_option_context_new("[-- command to execute]");
     g_option_context_add_main_entries(option_context, entries, NULL);
     if (!g_option_context_parse(option_context, &argc, &argv, &error)) {
-        g_print("option parsing failed: %s\n", error->message);
+        g_printerr("option parsing failed: %s\n", error->message);
         exit(FLOM_ES_GENERIC_ERROR);
     }
     g_option_context_free(option_context);
@@ -139,7 +139,7 @@ int main (int argc, char *argv[])
     
     /* initialize regular expression table */
     if (FLOM_RC_OK != (ret_cod = global_res_name_preg_init())) {
-        g_print("global_res_name_preg_init: ret_cod=%d\n", ret_cod);
+        g_printerr("global_res_name_preg_init: ret_cod=%d\n", ret_cod);
         exit(FLOM_ES_GENERIC_ERROR);
     }
 
@@ -148,7 +148,7 @@ int main (int argc, char *argv[])
     /* initialize configuration with standard system, standard user and
        user customized config files */
     if (FLOM_RC_OK != (ret_cod = flom_config_init(NULL, config_file))) {
-        g_print("flom_config_init: ret_cod=%d\n", ret_cod);
+        g_printerr("flom_config_init: ret_cod=%d\n", ret_cod);
         exit(FLOM_ES_GENERIC_ERROR);
     }
     /* overrides configuration with command line passed arguments */
@@ -161,12 +161,12 @@ int main (int argc, char *argv[])
     if (NULL != resource_name)
         if (FLOM_RC_OK != (ret_cod = flom_config_set_resource_name(
                                NULL, resource_name))) {
-            g_print("flom_config_set_resource_name: ret_cod=%d\n", ret_cod);
+            g_printerr("flom_config_set_resource_name: ret_cod=%d\n", ret_cod);
             exit(FLOM_ES_GENERIC_ERROR);
         }
     if (0 > resource_quantity)
-        g_warning("Resource quantity ignored because negative values (%d) "
-                  "are meaningless\n", resource_quantity);
+        g_printerr("Resource quantity ignored because negative values (%d) "
+                   "are meaningless\n", resource_quantity);
     else if (0 < resource_quantity)
         flom_config_set_resource_quantity(NULL, resource_quantity);
 
@@ -174,8 +174,8 @@ int main (int argc, char *argv[])
         flom_bool_value_t fbv;
         if (FLOM_BOOL_INVALID == (
                 fbv = flom_bool_value_retrieve(resource_wait))) {
-            g_print("resource-wait: '%s' is an invalid value\n",
-                    resource_wait);
+            g_printerr("resource-wait: '%s' is an invalid value\n",
+                       resource_wait);
             exit(FLOM_ES_GENERIC_ERROR);
         }
         flom_config_set_resource_wait(NULL, fbv);
@@ -183,8 +183,8 @@ int main (int argc, char *argv[])
     if (FLOM_NETWORK_WAIT_TIMEOUT != resource_timeout) {
         /* timeout is useless if no wait was specified */
         if (FLOM_BOOL_NO == flom_config_get_resource_wait(NULL))
-            g_warning("Timeout ignored because 'no wait' behavior was "
-                      "specified\n");
+            g_printerr("Timeout ignored because 'no wait' behavior was "
+                       "specified\n");
         else
             flom_config_set_resource_timeout(NULL, resource_timeout);
     }
@@ -192,7 +192,7 @@ int main (int argc, char *argv[])
         flom_lock_mode_t flm;
         if (FLOM_LOCK_MODE_INVALID == (
                 flm = flom_lock_mode_retrieve(lock_mode))) {
-            g_print("lock-mode: '%s' is an invalid value\n", lock_mode);
+            g_printerr("lock-mode: '%s' is an invalid value\n", lock_mode);
             exit(FLOM_ES_GENERIC_ERROR);
         }
         flom_config_set_lock_mode(NULL, flm);
@@ -211,9 +211,9 @@ int main (int argc, char *argv[])
     if (NULL != socket_name) {
         if (FLOM_RC_OK != (ret_cod = flom_config_set_socket_name(
                                NULL, socket_name))) {
-            g_print("socket-name: '%s' is an invalid value\n", socket_name);
-            g_print("flom_client_connect: ret_cod=%d (%s)\n",
-                    ret_cod, flom_strerror(ret_cod));
+            g_printerr("socket-name: '%s' is an invalid value\n", socket_name);
+            g_printerr("flom_client_connect: ret_cod=%d (%s)\n",
+                       ret_cod, flom_strerror(ret_cod));
             exit(FLOM_ES_GENERIC_ERROR);
         }
     }
@@ -254,8 +254,8 @@ int main (int argc, char *argv[])
         flom_bool_value_t fbv;
         if (FLOM_BOOL_INVALID == (
                 fbv = flom_bool_value_retrieve(append_trace_file))) {
-            g_print("append-trace-file: '%s' is an invalid value\n",
-                    append_trace_file);
+            g_printerr("append-trace-file: '%s' is an invalid value\n",
+                       append_trace_file);
             exit(FLOM_ES_GENERIC_ERROR);
         }
         flom_config_set_append_trace_file(NULL, fbv);
@@ -271,7 +271,7 @@ int main (int argc, char *argv[])
 
     /* check configuration */
     if (FLOM_RC_OK != (ret_cod = flom_config_check(NULL))) {
-        g_warning("Configuration is not valid, cannot go on!\n");
+        g_printerr("Configuration is not valid, cannot go on!\n");
         exit(FLOM_ES_GENERIC_ERROR);        
     }
 
@@ -285,14 +285,14 @@ int main (int argc, char *argv[])
     
     /* check the command is not null */
     if (NULL == command_argv) {
-        g_warning("No command to execute!\n");
+        g_printerr("No command to execute!\n");
         exit(FLOM_ES_UNABLE_TO_EXECUTE_COMMAND);        
     }
 
     /* open connection to a valid flom lock manager... */
     if (FLOM_RC_OK != (ret_cod = flom_client_connect(NULL, &cd, TRUE))) {
-        g_print("flom_client_connect: ret_cod=%d (%s)\n",
-                ret_cod, flom_strerror(ret_cod));
+        g_printerr("flom_client_connect: ret_cod=%d (%s)\n",
+                   ret_cod, flom_strerror(ret_cod));
         exit(FLOM_ES_GENERIC_ERROR);
     }
 
@@ -306,48 +306,49 @@ int main (int argc, char *argv[])
                 g_print("Locked element is '%s'\n", locked_element);
             break;
         case FLOM_RC_LOCK_BUSY: /* busy */
-            g_print("Resource already locked, the lock cannot be obtained\n");
+            g_printerr("Resource already locked, the lock cannot be "
+                       "obtained\n");
             /* gracefully disconnect from daemon */
             if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
-                g_print("flom_client_unlock: ret_cod=%d (%s)\n",
-                        ret_cod, flom_strerror(ret_cod));
+                g_printerr("flom_client_unlock: ret_cod=%d (%s)\n",
+                          ret_cod, flom_strerror(ret_cod));
             }
             exit(FLOM_ES_RESOURCE_BUSY);
             break;
         case FLOM_RC_LOCK_CANT_WAIT: /* can't wait, leaving... */
-            g_print("The resource could be available in the future, but the "
-                    "requester can't wait\n");
+            g_printerr("The resource could be available in the future, "
+                       "but the requester can't wait\n");
             /* gracefully disconnect from daemon */
             if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
-                g_print("flom_client_unlock: ret_cod=%d (%s)\n",
-                        ret_cod, flom_strerror(ret_cod));
+                g_printerr("flom_client_unlock: ret_cod=%d (%s)\n",
+                           ret_cod, flom_strerror(ret_cod));
             }
             exit(FLOM_ES_REQUESTER_CANT_WAIT);
             break;
         case FLOM_RC_LOCK_IMPOSSIBLE: /* impossible */
-            g_print("Resource will never satisfy the request, the lock "
-                    "cannot be obtained\n");
+            g_printerr("Resource will never satisfy the request, the lock "
+                       "cannot be obtained\n");
             /* gracefully disconnect from daemon */
             if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
-                g_print("flom_client_unlock: ret_cod=%d (%s)\n",
-                        ret_cod, flom_strerror(ret_cod));
+                g_printerr("flom_client_unlock: ret_cod=%d (%s)\n",
+                          ret_cod, flom_strerror(ret_cod));
             }
             exit(FLOM_ES_GENERIC_ERROR);
             break;
         case FLOM_RC_NETWORK_TIMEOUT: /* timeout expired, busy resource */
-            g_print("The lock was not obtained because timeout "
-                    "(%d milliseconds) expired\n",
-                    flom_config_get_resource_timeout(NULL));
+            g_printerr("The lock was not obtained because timeout "
+                       "(%d milliseconds) expired\n",
+                       flom_config_get_resource_timeout(NULL));
             /* gracefully disconnect from daemon */
             if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
-                g_print("flom_client_unlock: ret_cod=%d (%s)\n",
-                        ret_cod, flom_strerror(ret_cod));
+                g_printerr("flom_client_unlock: ret_cod=%d (%s)\n",
+                           ret_cod, flom_strerror(ret_cod));
             }
             exit(FLOM_ES_RESOURCE_BUSY);
             break;            
         default:
-            g_print("flom_client_lock: ret_cod=%d (%s)\n",
-                    ret_cod, flom_strerror(ret_cod));
+            g_printerr("flom_client_lock: ret_cod=%d (%s)\n",
+                       ret_cod, flom_strerror(ret_cod));
             exit(FLOM_ES_GENERIC_ERROR);
     } /* switch (ret_cod) */
 
@@ -355,7 +356,7 @@ int main (int argc, char *argv[])
     if (FLOM_RC_OK != (ret_cod = flom_exec(command_argv, locked_element,
                                            &child_status))) {
         guint i, num;
-        g_print("Unable to execute command: '");
+        g_printerr("Unable to execute command: '");
         num = g_strv_length(command_argv);
         for (i=0; i<num; ++i)
             g_print("%s", command_argv[i]);
@@ -365,15 +366,15 @@ int main (int argc, char *argv[])
     
     /* sending unlock command */
     if (FLOM_RC_OK != (ret_cod = flom_client_unlock(NULL, &cd))) {
-        g_print("flom_client_unlock: ret_cod=%d (%s)\n",
-                ret_cod, flom_strerror(ret_cod));
+        g_printerr("flom_client_unlock: ret_cod=%d (%s)\n",
+                   ret_cod, flom_strerror(ret_cod));
         exit(FLOM_ES_GENERIC_ERROR);
     }
 
     /* gracefully disconnect from daemon */
     if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
-        g_print("flom_client_unlock: ret_cod=%d (%s)\n",
-                ret_cod, flom_strerror(ret_cod));
+        g_printerr("flom_client_unlock: ret_cod=%d (%s)\n",
+                   ret_cod, flom_strerror(ret_cod));
     }
 
     g_strfreev (command_argv);

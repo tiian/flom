@@ -1,6 +1,12 @@
 LOG:
 
          - 0.9.2 Added trace append option (--append-trace-file)
+	ATTENTION: all console messages produced by main.c (flom command) and
+	related to warning conditions were moved from stdout to stderr. If your
+	automation scripts implement console message parsing, you will have to
+	fix them before the usage with this new version. As a rule of thumb,
+	it is suggested to use exit code check ($?) instead of console message
+	parsing.
 
 20141220 - 0.9.1 C++ client library API: libflom (flom.hh)
 	Fixed test case "Use case 3 (2/2)" (there was a synchronization bug)

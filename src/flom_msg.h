@@ -480,8 +480,8 @@ struct flom_msg_body_mngmnt_8_s {
 
 
 /**
- * This structure maps the messages flowing between FLOM client and
- * FLOM server (daemon). The struct is not used for the transmission over the
+ * This structure maps the messages flowing between FLoM client and
+ * FLoM server (daemon). The struct is not used for the transmission over the
  * network, but only inside the client and the server.
  * This is a "fake" object; it's defined and used in the hope of simplicity
  */

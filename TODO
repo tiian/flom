@@ -5,6 +5,10 @@ Add PHP test cases
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 
+implement a loop for connect/bind if bind returns an error: this shuold help
+to reduce the race condition between a closing daemon and a starting client.
+See this thread: https://github.com/tiian/flom/issues/3
+
 IPv6
 
 SSL 
