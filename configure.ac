@@ -182,10 +182,15 @@ AC_ARG_ENABLE([php],
 		[do not prepare PHP binding API]),
 	[PHP="no"], [PHP="yes"])
 # PHP stuff is conditional
-AM_CONDITIONAL([COND_PHP], [test "$HAVE_PHP" = "yes" -a \
-	"$HAVE_PHP_CONFIG" = "yes" -a "$PHP" = "yes"])
-PHP_INCLUDES=$(php-config --includes)
-PHP_INSTALL_PATH=$(php-config --extension-dir)
+if test "$HAVE_PHP" = "yes" -a "$HAVE_PHP_CONFIG" = "yes" -a "$PHP" = "yes"
+then
+	PHPAPI="yes"
+	PHP_INCLUDES=$(php-config --includes)
+	PHP_INSTALL_PATH=$(php-config --extension-dir)
+else
+	PHPAPI="no"
+fi
+AM_CONDITIONAL([COND_PHPAPI], [test "$PHPAPI" = "yes"])
 
 AC_DEFINE_UNQUOTED([_ES_GENERIC_ERROR], [$_ES_GENERIC_ERROR], [Exit status for generic error])
 
@@ -255,8 +260,12 @@ AC_SUBST(GLIB2_LIBS)
 AC_SUBST(GTHREAD2_LIBS)
 AC_SUBST(HAVE_DOT)
 
+# substitution of the current logged user
+AC_SUBST(USER)
+
 # substitution of optional (--disable) features 
 AC_SUBST(CPPAPI)
+AC_SUBST(PHPAPI)
 AC_SUBST(PHP_INCLUDES)
 AC_SUBST(PHP_INSTALL_PATH)
 

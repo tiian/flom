@@ -1,7 +1,7 @@
-if COND_PHP
-  MAYBE_PHP = php
+if COND_PHPAPI
+  MAYBE_PHPAPI = php
 endif
-SUBDIRS = . $(MAYBE_PHP)
+SUBDIRS = . $(MAYBE_PHPAPI)
 AM_CPPFLAGS = -D_SYSCONFDIR='"@sysconfdir@"'
 AM_CFLAGS = -Wall
 lib_LTLIBRARIES = libflom.la

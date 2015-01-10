@@ -13,6 +13,27 @@ case1002_SOURCES = case1002.cc
 if COND_CPPAPI
   MAYBE_CPPAPI=case1000 case1001 case1002
 endif
+noinst_PROGRAMS = case0000 case0001 case0002 $(MAYBE_CPPAPI)
+if COND_PHPAPI
+  MAYBE_PHPAPI=case2000.php case2001.php case2002.php
+endif
+dist_noinst_DATA = case2000.php.in case2001.php.in case2002.php.in
+noinst_DATA = $(MAYBE_PHPAPI)
+
 LDADD = ../../src/libflom.la @GLIB2_LIBS@
 
-noinst_PROGRAMS = case0000 case0001 case0002 $(MAYBE_CPPAPI)
+case2000.php:	case2000.php.in ../../config.status
+	sed \
+	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+	$< >$@
+
+case2001.php:	case2001.php.in ../../config.status
+	sed \
+	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+	$< >$@
+
+case2002.php:	case2002.php.in ../../config.status
+	sed \
+	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+	$< >$@
+

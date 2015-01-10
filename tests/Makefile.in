@@ -158,6 +158,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PHPAPI = @PHPAPI@
 PHP_INCLUDES = @PHP_INCLUDES@
 PHP_INSTALL_PATH = @PHP_INSTALL_PATH@
 PKG_CONFIG = @PKG_CONFIG@
@@ -167,6 +168,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 SWIG = @SWIG@
+USER = @USER@
 VERSION = @VERSION@
 _CONFIG_GROUP_DAEMON = @_CONFIG_GROUP_DAEMON@
 _CONFIG_GROUP_NETWORK = @_CONFIG_GROUP_NETWORK@
@@ -272,7 +274,7 @@ TESTSUITEFLAGS = "-e"
 EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	package.m4 \
 	testsuite.at \
-	api.at \
+	api.at.in \
 	cmdopt.at.in \
 	shutdown.at \
 	incompopt.at.in \
@@ -288,7 +290,9 @@ TESTSUITE = $(srcdir)/testsuite
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 DISTCLEANFILES = atconfig
-CLEANFILES = cmdopt.at incompopt.at usecase.at usecase-dist.at usecase-lt.at
+CLEANFILES = api.at cmdopt.at incompopt.at usecase.at usecase-dist.at \
+	usecase-lt.at
+
 all: all-recursive
 
 .SUFFIXES:
@@ -655,6 +659,12 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	  echo 'm4_define([AT_PACKAGE_URL],       [$(PACKAGE_URL)])'; \
 	} > $@-t
 	mv $@-t $@
+
+api.at: api.at.in
+	sed \
+	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+	-e 's|@USER[@]|$(USER)|g' \
+	$< >$@
 
 cmdopt.at: cmdopt.at.in
 	sed \

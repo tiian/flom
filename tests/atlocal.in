@@ -3,3 +3,7 @@ export PATH
 
 CPPAPI=@CPPAPI@
 export CPPAPI
+PHPPATH=@abs_top_builddir@/tests/src
+export PHPPATH
+PHPAPI=@PHPAPI@
+export PHPAPI

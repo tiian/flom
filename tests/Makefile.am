@@ -21,7 +21,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	package.m4 \
 	testsuite.at \
-	api.at \
+	api.at.in \
 	cmdopt.at.in \
 	shutdown.at \
 	incompopt.at.in \
@@ -32,6 +32,12 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	usecase-num.at \
 	usecase-set.at \
 	scripts/*.sh
+
+api.at: api.at.in
+	sed \
+	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+	-e 's|@USER[@]|$(USER)|g' \
+	$< >$@
 
 cmdopt.at: cmdopt.at.in
 	sed \
@@ -117,4 +123,5 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	mv $@.tmp $@
 
 DISTCLEANFILES = atconfig
-CLEANFILES = cmdopt.at incompopt.at usecase.at usecase-dist.at usecase-lt.at
+CLEANFILES = api.at cmdopt.at incompopt.at usecase.at usecase-dist.at \
+	usecase-lt.at

@@ -1,7 +1,7 @@
-if COND_PHP
-  MAYBE_PHP = php
+if COND_PHPAPI
+  MAYBE_PHPAPI = php
 endif
-SUBDIRS = . $(MAYBE_PHP)
+SUBDIRS = . $(MAYBE_PHPAPI)
 examplesdir = $(docdir)/examples
 if COND_CPPAPI
   CPPSOURCE=BasicStatic.cc BasicDynamic.cc AdvancedStatic.cc AdvancedDynamic.cc

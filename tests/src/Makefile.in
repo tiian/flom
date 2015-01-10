@@ -15,6 +15,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -37,7 +38,8 @@ host_triplet = @host@
 noinst_PROGRAMS = case0000$(EXEEXT) case0001$(EXEEXT) \
 	case0002$(EXEEXT) $(am__EXEEXT_1)
 subdir = tests/src
-DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = README $(dist_noinst_DATA) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -103,6 +105,7 @@ SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) $(case0002_SOURCES) \
 DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
 	$(case0002_SOURCES) $(case1000_SOURCES) $(case1001_SOURCES) \
 	$(case1002_SOURCES)
+DATA = $(dist_noinst_DATA) $(noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -174,6 +177,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PHPAPI = @PHPAPI@
 PHP_INCLUDES = @PHP_INCLUDES@
 PHP_INSTALL_PATH = @PHP_INSTALL_PATH@
 PKG_CONFIG = @PKG_CONFIG@
@@ -183,6 +187,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 SWIG = @SWIG@
+USER = @USER@
 VERSION = @VERSION@
 _CONFIG_GROUP_DAEMON = @_CONFIG_GROUP_DAEMON@
 _CONFIG_GROUP_NETWORK = @_CONFIG_GROUP_NETWORK@
@@ -294,6 +299,9 @@ case1002_SOURCES = case1002.cc
 # C++ case tests executables are built conditionally (only if --disable-cppapi 
 # was not specified at configure time)
 @COND_CPPAPI_TRUE@MAYBE_CPPAPI = case1000 case1001 case1002
+@COND_PHPAPI_TRUE@MAYBE_PHPAPI = case2000.php case2001.php case2002.php
+dist_noinst_DATA = case2000.php.in case2001.php.in case2002.php.in
+noinst_DATA = $(MAYBE_PHPAPI)
 LDADD = ../../src/libflom.la @GLIB2_LIBS@
 all: all-am
 
@@ -502,7 +510,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(PROGRAMS) $(DATA)
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -615,6 +623,21 @@ uninstall-am:
 	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
 	pdf pdf-am ps ps-am tags uninstall uninstall-am
 
+
+case2000.php:	case2000.php.in ../../config.status
+	sed \
+	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+	$< >$@
+
+case2001.php:	case2001.php.in ../../config.status
+	sed \
+	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+	$< >$@
+
+case2002.php:	case2002.php.in ../../config.status
+	sed \
+	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+	$< >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
