@@ -973,7 +973,7 @@ static void SWIG_Php_SetModule(swig_module_info *pointer) {
 #define SWIGTYPE_int swig_types[0]
 #define SWIGTYPE_p_flom_handle_s swig_types[1]
 #define SWIGTYPE_p_flom_handle_state_e swig_types[2]
-#define SWIGTYPE_p_flom_lock_mode_t swig_types[3]
+#define SWIGTYPE_p_flom_lock_mode_e swig_types[3]
 #define SWIGTYPE_p_p_void swig_types[4]
 #define SWIGTYPE_p_void swig_types[5]
 static swig_type_info *swig_types[7];
@@ -1054,6 +1054,7 @@ extern "C" {
 
 
 #include "flom_errors.h"
+#include "flom_types.h"
 #include "flom_handle.h"
 
 
@@ -1062,7 +1063,7 @@ extern "C" {
 static swig_type_info _swigt__int = {"_int", "int", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_flom_handle_s = {"_p_flom_handle_s", "struct flom_handle_s *|flom_handle_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_flom_handle_state_e = {"_p_flom_handle_state_e", "enum flom_handle_state_e *|flom_handle_state_t *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_flom_lock_mode_t = {"_p_flom_lock_mode_t", "flom_lock_mode_t *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_flom_lock_mode_e = {"_p_flom_lock_mode_e", "enum flom_lock_mode_e *|flom_lock_mode_t *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_void = {"_p_p_void", "void **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_void = {"_p_void", "void *", 0, 0, (void*)0, 0};
 
@@ -1070,7 +1071,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__int,
   &_swigt__p_flom_handle_s,
   &_swigt__p_flom_handle_state_e,
-  &_swigt__p_flom_lock_mode_t,
+  &_swigt__p_flom_lock_mode_e,
   &_swigt__p_p_void,
   &_swigt__p_void,
 };
@@ -1078,7 +1079,7 @@ static swig_type_info *swig_type_initial[] = {
 static swig_cast_info _swigc__int[] = {  {&_swigt__int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_flom_handle_s[] = {  {&_swigt__p_flom_handle_s, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_flom_handle_state_e[] = {  {&_swigt__p_flom_handle_state_e, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_flom_lock_mode_t[] = {  {&_swigt__p_flom_lock_mode_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_flom_lock_mode_e[] = {  {&_swigt__p_flom_lock_mode_e, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_void[] = {  {&_swigt__p_p_void, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_void[] = {  {&_swigt__p_void, 0, 0, 0},{0, 0, 0, 0}};
 
@@ -1086,7 +1087,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__int,
   _swigc__p_flom_handle_s,
   _swigc__p_flom_handle_state_e,
-  _swigc__p_flom_lock_mode_t,
+  _swigc__p_flom_lock_mode_e,
   _swigc__p_p_void,
   _swigc__p_void,
 };
@@ -1097,8 +1098,8 @@ static swig_cast_info *swig_cast_initial[] = {
 /* end header section */
 /* vdecl subsection */
 static int le_swig__int=0; /* handle for _int */
+static int le_swig__p_flom_lock_mode_e=0; /* handle for _p_flom_lock_mode_e */
 static int le_swig__p_flom_handle_s=0; /* handle for flom_handle_t */
-static int le_swig__p_flom_lock_mode_t=0; /* handle for _p_flom_lock_mode_t */
 static int le_swig__p_flom_handle_state_e=0; /* handle for _p_flom_handle_state_e */
 static int le_swig__p_p_void=0; /* handle for _p_p_void */
 static int le_swig__p_void=0; /* handle for _p_void */
@@ -1678,11 +1679,9 @@ ZEND_NAMED_FUNCTION(_wrap_flom_handle_get_lock_mode) {
       SWIG_PHP_Error(E_ERROR, "Type error in argument 1 of flom_handle_get_lock_mode. Expected SWIGTYPE_p_flom_handle_s");
     }
   }
-  result = flom_handle_get_lock_mode((struct flom_handle_s const *)arg1);
+  result = (flom_lock_mode_t)flom_handle_get_lock_mode((struct flom_handle_s const *)arg1);
   {
-    flom_lock_mode_t * resultobj = (flom_lock_mode_t *) emalloc(sizeof(flom_lock_mode_t));
-    memcpy(resultobj, &result, sizeof(flom_lock_mode_t));
-    SWIG_SetPointerZval(return_value, (void *)resultobj, SWIGTYPE_p_flom_lock_mode_t, 1);
+    ZVAL_LONG(return_value,result);
   }
   return;
 fail:
@@ -1693,7 +1692,6 @@ fail:
 ZEND_NAMED_FUNCTION(_wrap_flom_handle_set_lock_mode) {
   flom_handle_t *arg1 = (flom_handle_t *) 0 ;
   flom_lock_mode_t arg2 ;
-  flom_lock_mode_t *tmp2 ;
   zval **args[2];
   
   SWIG_ResetError();
@@ -1706,12 +1704,12 @@ ZEND_NAMED_FUNCTION(_wrap_flom_handle_set_lock_mode) {
       SWIG_PHP_Error(E_ERROR, "Type error in argument 1 of flom_handle_set_lock_mode. Expected SWIGTYPE_p_flom_handle_s");
     }
   }
-  {
-    if(SWIG_ConvertPtr(*args[1], (void **) &tmp2, SWIGTYPE_p_flom_lock_mode_t, 0) < 0 || tmp2 == NULL) {
-      SWIG_PHP_Error(E_ERROR, "Type error in argument 2 of flom_handle_set_lock_mode. Expected SWIGTYPE_p_flom_lock_mode_t");
-    }
-    arg2 = *tmp2;
-  }
+  
+  /*@SWIG:/usr/share/swig1.3/php/utils.i,7,CONVERT_INT_IN@*/
+  convert_to_long_ex(args[1]);
+  arg2 = (flom_lock_mode_t) Z_LVAL_PP(args[1]);
+  /*@SWIG@*/;
+  
   flom_handle_set_lock_mode(arg1,arg2);
   
   return;
@@ -2364,12 +2362,12 @@ static ZEND_RSRC_DTOR_FUNC(_wrap_destroy_int) {
   /* No destructor for simple type _int */
   efree(rsrc->ptr);
 }
+static ZEND_RSRC_DTOR_FUNC(_wrap_destroy_p_flom_lock_mode_e) {
+  /* No destructor for simple type _p_flom_lock_mode_e */
+  efree(rsrc->ptr);
+}
 static ZEND_RSRC_DTOR_FUNC(_wrap_destroy_p_flom_handle_s) {
   __wrap_delete_flom_handle_t(rsrc, SWIGTYPE_p_flom_handle_s->name TSRMLS_CC);
-}
-static ZEND_RSRC_DTOR_FUNC(_wrap_destroy_p_flom_lock_mode_t) {
-  /* No destructor for simple type _p_flom_lock_mode_t */
-  efree(rsrc->ptr);
 }
 static ZEND_RSRC_DTOR_FUNC(_wrap_destroy_p_flom_handle_state_e) {
   /* No destructor for simple type _p_flom_handle_state_e */
@@ -2718,10 +2716,10 @@ ZEND_INIT_MODULE_GLOBALS(flom, flom_init_globals, flom_destroy_globals);
 /* Register resource destructors for pointer types */
 le_swig__int=zend_register_list_destructors_ex(_wrap_destroy_int,NULL,(char *)(SWIGTYPE_int->name),module_number);
 SWIG_TypeClientData(SWIGTYPE_int,&le_swig__int);
+le_swig__p_flom_lock_mode_e=zend_register_list_destructors_ex(_wrap_destroy_p_flom_lock_mode_e,NULL,(char *)(SWIGTYPE_p_flom_lock_mode_e->name),module_number);
+SWIG_TypeClientData(SWIGTYPE_p_flom_lock_mode_e,&le_swig__p_flom_lock_mode_e);
 le_swig__p_flom_handle_s=zend_register_list_destructors_ex(_wrap_destroy_p_flom_handle_s,NULL,(char *)(SWIGTYPE_p_flom_handle_s->name),module_number);
 SWIG_TypeClientData(SWIGTYPE_p_flom_handle_s,&le_swig__p_flom_handle_s);
-le_swig__p_flom_lock_mode_t=zend_register_list_destructors_ex(_wrap_destroy_p_flom_lock_mode_t,NULL,(char *)(SWIGTYPE_p_flom_lock_mode_t->name),module_number);
-SWIG_TypeClientData(SWIGTYPE_p_flom_lock_mode_t,&le_swig__p_flom_lock_mode_t);
 le_swig__p_flom_handle_state_e=zend_register_list_destructors_ex(_wrap_destroy_p_flom_handle_state_e,NULL,(char *)(SWIGTYPE_p_flom_handle_state_e->name),module_number);
 SWIG_TypeClientData(SWIGTYPE_p_flom_handle_state_e,&le_swig__p_flom_handle_state_e);
 le_swig__p_p_void=zend_register_list_destructors_ex(_wrap_destroy_p_p_void,NULL,(char *)(SWIGTYPE_p_p_void->name),module_number);
@@ -2811,6 +2809,16 @@ SWIG_LONG_CONSTANT(FLOM_RC_G_STRSPLIT_ERROR, -211);
 SWIG_LONG_CONSTANT(FLOM_RC_G_THREAD_CREATE_ERROR, -212);
 SWIG_LONG_CONSTANT(FLOM_RC_G_TRY_MALLOC_ERROR, -213);
 SWIG_LONG_CONSTANT(FLOM_RC_G_TRY_REALLOC_ERROR, -214);
+SWIG_LONG_CONSTANT(TRUE, 1);
+SWIG_LONG_CONSTANT(FALSE, 0);
+SWIG_LONG_CONSTANT(FLOM_LOCK_MODE_NL, FLOM_LOCK_MODE_NL);
+SWIG_LONG_CONSTANT(FLOM_LOCK_MODE_CR, FLOM_LOCK_MODE_CR);
+SWIG_LONG_CONSTANT(FLOM_LOCK_MODE_CW, FLOM_LOCK_MODE_CW);
+SWIG_LONG_CONSTANT(FLOM_LOCK_MODE_PR, FLOM_LOCK_MODE_PR);
+SWIG_LONG_CONSTANT(FLOM_LOCK_MODE_PW, FLOM_LOCK_MODE_PW);
+SWIG_LONG_CONSTANT(FLOM_LOCK_MODE_EX, FLOM_LOCK_MODE_EX);
+SWIG_LONG_CONSTANT(FLOM_LOCK_MODE_N, FLOM_LOCK_MODE_N);
+SWIG_LONG_CONSTANT(FLOM_LOCK_MODE_INVALID, FLOM_LOCK_MODE_INVALID);
 SWIG_LONG_CONSTANT(FLOM_HANDLE_STATE_INIT, FLOM_HANDLE_STATE_INIT);
 SWIG_LONG_CONSTANT(FLOM_HANDLE_STATE_CONNECTED, FLOM_HANDLE_STATE_CONNECTED);
 SWIG_LONG_CONSTANT(FLOM_HANDLE_STATE_LOCKED, FLOM_HANDLE_STATE_LOCKED);

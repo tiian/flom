@@ -234,7 +234,8 @@ void static_handle_happy_path(void) {
         fprintf(stderr, "flom_handle_set_socket_name() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
-    }    
+    }
+    
     /* get current value for unicast port */
     printf("flom_handle_get_unicast_port() = %d\n",
            flom_handle_get_unicast_port(&my_handle));

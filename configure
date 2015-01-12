@@ -934,7 +934,7 @@ enable_dependency_tracking
 with_gnu_ld
 enable_libtool_lock
 enable_trace
-enable_cppapi
+enable_cpp
 enable_php
 '
       ac_precious_vars='build_alias
@@ -1594,7 +1594,7 @@ Optional Packages:
                           both]
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --disable-trace         disable trace feature (not suggested)
-  --disable-cppapi        do not prepare C++ API
+  --disable-cpp           do not prepare C++ API
   --disable-php           do not prepare PHP binding API
 
 Some influential environment variables:
@@ -15590,9 +15590,9 @@ else
   _TRACE="yes"; CPPFLAGS="$CPPFLAGS -D_TRACE"
 fi
 
-# Check whether --enable-cppapi was given.
-if test "${enable_cppapi+set}" = set; then :
-  enableval=$enable_cppapi; CPPAPI="no"
+# Check whether --enable-cpp was given.
+if test "${enable_cpp+set}" = set; then :
+  enableval=$enable_cpp; CPPAPI="no"
 else
   CPPAPI="yes"
 fi

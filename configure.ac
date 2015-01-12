@@ -136,8 +136,8 @@ AC_ARG_ENABLE([trace],
         AS_HELP_STRING([--disable-trace],
                 [disable trace feature (not suggested)]),
         [_TRACE="no"], [_TRACE="yes"; CPPFLAGS="$CPPFLAGS -D_TRACE"] )
-AC_ARG_ENABLE([cppapi],
-	AS_HELP_STRING([--disable-cppapi],
+AC_ARG_ENABLE([cpp],
+	AS_HELP_STRING([--disable-cpp],
 		[do not prepare C++ API]),
 	[CPPAPI="no"], [CPPAPI="yes"])
 #AM_PROG_CC_C_O

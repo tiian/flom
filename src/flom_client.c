@@ -797,6 +797,12 @@ int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
         size_t to_send;
         ssize_t to_read;
 
+        /* @@@ debug, remove me 
+        FLOM_TRACE(("flom_client_lock: timeout=%d, element='%*.*s', "
+                    "element_size=%u\n", timeout, element_size, element_size,
+                    element, element_size));
+        */
+        
         /* initialize message */
         flom_msg_init(&msg);
         /* prepare a request (lock) message */
@@ -876,7 +882,8 @@ int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
         switch (msg.body.lock_16.answer.rc) {
             case FLOM_RC_OK:
                 /* copy element if available */
-                if (NULL != msg.body.lock_16.answer.element) {
+                if (NULL != msg.body.lock_16.answer.element &&
+                    0 < element_size) {
                     strncpy(element, msg.body.lock_16.answer.element,
                             element_size);
                     element[element_size-1] = '\0';
@@ -892,14 +899,16 @@ int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
                     case FLOM_RC_OK:
                         /* copy element if available */
                         if (3*FLOM_MSG_STEP_INCR == cd->last_step) {
-                            if (NULL != msg.body.lock_24.answer.element) {
+                            if (NULL != msg.body.lock_24.answer.element &&
+                                0 < element_size) {
                                 strncpy(element,
                                         msg.body.lock_24.answer.element,
                                         element_size);
                                 element[element_size-1] = '\0';
                             }
                         } else if (4*FLOM_MSG_STEP_INCR == cd->last_step) {
-                            if (NULL != msg.body.lock_24.answer.element) {
+                            if (NULL != msg.body.lock_24.answer.element &&
+                                0 < element_size) {
                                 strncpy(element,
                                         msg.body.lock_24.answer.element,
                                         element_size);
