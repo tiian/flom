@@ -85,6 +85,10 @@ typedef struct flom_handle_s {
      * Configuration data
      */
     void                 *config;
+    /**
+     * (last) Locked element (useful for resource sets)
+     */
+    char                 *locked_element;
 } flom_handle_t;
 
 
@@ -168,6 +172,24 @@ extern "C" {
 
 
 
+    /**
+     * Return the name of the locked element if the resource is of type set.<P>
+     * Note 1: this function can be used only after @ref flom_handle_lock
+     *         and before @ref flom_handle_unlock<P>
+     * Note 2: this function can be used only when locking a resource of
+     *         type "resource set"<P>
+     * Note 3: the return string must copied as soon as possible to a different
+     *         place because it's a dynamic string removed by
+     *         @ref flom_handle_unlock<P>
+     * @param handle (Input): a valid object handle
+     * @return the name of the locked element
+     */
+    const char *flom_handle_get_locked_element(const flom_handle_t *handle) {
+        return handle->locked_element;
+    }
+
+
+    
     /**
      * Gets the maximum number of attempts that will be tryed during
      * auto-discovery phase using UDP/IP multicast (see

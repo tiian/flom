@@ -202,6 +202,9 @@ int flom_handle_clean(flom_handle_t *handle)
         /* release memory of connection data structure */
         g_free(handle->conn_data);
         handle->conn_data = NULL;
+        /* release memory of locked element */
+        g_free(handle->locked_element);
+        handle->locked_element = NULL;
         /* clean handle state */
         handle->state = FLOM_HANDLE_STATE_CLEANED;
         

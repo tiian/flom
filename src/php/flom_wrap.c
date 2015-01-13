@@ -1307,6 +1307,78 @@ fail:
 }
 
 
+ZEND_NAMED_FUNCTION(_wrap_flom_handle_t_locked_element_set) {
+  flom_handle_t *arg1 = (flom_handle_t *) 0 ;
+  char *arg2 = (char *) 0 ;
+  zval **args[2];
+  
+  SWIG_ResetError();
+  if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_array_ex(2, args) != SUCCESS) {
+    WRONG_PARAM_COUNT;
+  }
+  
+  {
+    if(SWIG_ConvertPtr(*args[0], (void **) &arg1, SWIGTYPE_p_flom_handle_s, 0) < 0) {
+      SWIG_PHP_Error(E_ERROR, "Type error in argument 1 of flom_handle_t_locked_element_set. Expected SWIGTYPE_p_flom_handle_s");
+    }
+  }
+  if(!arg1) SWIG_PHP_Error(E_ERROR, "this pointer is NULL");
+  
+  /*@SWIG:/usr/share/swig1.3/php/utils.i,26,CONVERT_STRING_IN@*/
+  if ((*args[1])->type==IS_NULL) {
+    arg2 = (char *) 0;
+  } else {
+    convert_to_string_ex(args[1]);
+    arg2 = (char *) Z_STRVAL_PP(args[1]);
+  }
+  /*@SWIG@*/;
+  
+  {
+    if (arg1->locked_element) free((char *)arg1->locked_element);
+    if (arg2) {
+      arg1->locked_element = (char *) malloc(strlen((const char *)arg2)+1);
+      strcpy((char *)arg1->locked_element, (const char *)arg2);
+    } else {
+      arg1->locked_element = 0;
+    }
+  }
+  
+  return;
+fail:
+  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
+}
+
+
+ZEND_NAMED_FUNCTION(_wrap_flom_handle_t_locked_element_get) {
+  flom_handle_t *arg1 = (flom_handle_t *) 0 ;
+  zval **args[1];
+  char *result = 0 ;
+  
+  SWIG_ResetError();
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_array_ex(1, args) != SUCCESS) {
+    WRONG_PARAM_COUNT;
+  }
+  
+  {
+    if(SWIG_ConvertPtr(*args[0], (void **) &arg1, SWIGTYPE_p_flom_handle_s, 0) < 0) {
+      SWIG_PHP_Error(E_ERROR, "Type error in argument 1 of flom_handle_t_locked_element_get. Expected SWIGTYPE_p_flom_handle_s");
+    }
+  }
+  if(!arg1) SWIG_PHP_Error(E_ERROR, "this pointer is NULL");
+  result = (char *) ((arg1)->locked_element);
+  {
+    if(!result) {
+      ZVAL_NULL(return_value);
+    } else {
+      ZVAL_STRING(return_value, (char *)result, 1);
+    }
+  }
+  return;
+fail:
+  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
+}
+
+
 ZEND_NAMED_FUNCTION(_wrap_new_flom_handle_t) {
   flom_handle_t *result = 0 ;
   
@@ -1495,6 +1567,35 @@ ZEND_NAMED_FUNCTION(_wrap_flom_handle_unlock) {
   result = (int)flom_handle_unlock(arg1);
   {
     ZVAL_LONG(return_value,result);
+  }
+  return;
+fail:
+  zend_error_noreturn(SWIG_ErrorCode(),"%s",SWIG_ErrorMsg());
+}
+
+
+ZEND_NAMED_FUNCTION(_wrap_flom_handle_get_locked_element) {
+  flom_handle_t *arg1 = (flom_handle_t *) 0 ;
+  zval **args[1];
+  char *result = 0 ;
+  
+  SWIG_ResetError();
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_array_ex(1, args) != SUCCESS) {
+    WRONG_PARAM_COUNT;
+  }
+  
+  {
+    if(SWIG_ConvertPtr(*args[0], (void **) &arg1, SWIGTYPE_p_flom_handle_s, 0) < 0) {
+      SWIG_PHP_Error(E_ERROR, "Type error in argument 1 of flom_handle_get_locked_element. Expected SWIGTYPE_p_flom_handle_s");
+    }
+  }
+  result = (char *)flom_handle_get_locked_element((struct flom_handle_s const *)arg1);
+  {
+    if(!result) {
+      ZVAL_NULL(return_value);
+    } else {
+      ZVAL_STRING(return_value, (char *)result, 1);
+    }
   }
   return;
 fail:
@@ -2395,6 +2496,8 @@ static zend_function_entry flom_functions[] = {
  SWIG_ZEND_NAMED_FE(flom_handle_t_conn_data_get,_wrap_flom_handle_t_conn_data_get,NULL)
  SWIG_ZEND_NAMED_FE(flom_handle_t_config_set,_wrap_flom_handle_t_config_set,NULL)
  SWIG_ZEND_NAMED_FE(flom_handle_t_config_get,_wrap_flom_handle_t_config_get,NULL)
+ SWIG_ZEND_NAMED_FE(flom_handle_t_locked_element_set,_wrap_flom_handle_t_locked_element_set,NULL)
+ SWIG_ZEND_NAMED_FE(flom_handle_t_locked_element_get,_wrap_flom_handle_t_locked_element_get,NULL)
  SWIG_ZEND_NAMED_FE(new_flom_handle_t,_wrap_new_flom_handle_t,NULL)
  SWIG_ZEND_NAMED_FE(flom_handle_init,_wrap_flom_handle_init,NULL)
  SWIG_ZEND_NAMED_FE(flom_handle_clean,_wrap_flom_handle_clean,NULL)
@@ -2402,6 +2505,7 @@ static zend_function_entry flom_functions[] = {
  SWIG_ZEND_NAMED_FE(flom_handle_delete,_wrap_flom_handle_delete,NULL)
  SWIG_ZEND_NAMED_FE(flom_handle_lock,_wrap_flom_handle_lock,NULL)
  SWIG_ZEND_NAMED_FE(flom_handle_unlock,_wrap_flom_handle_unlock,NULL)
+ SWIG_ZEND_NAMED_FE(flom_handle_get_locked_element,_wrap_flom_handle_get_locked_element,NULL)
  SWIG_ZEND_NAMED_FE(flom_handle_get_discovery_attempts,_wrap_flom_handle_get_discovery_attempts,NULL)
  SWIG_ZEND_NAMED_FE(flom_handle_set_discovery_attempts,_wrap_flom_handle_set_discovery_attempts,NULL)
  SWIG_ZEND_NAMED_FE(flom_handle_get_discovery_timeout,_wrap_flom_handle_get_discovery_timeout,NULL)

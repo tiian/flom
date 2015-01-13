@@ -32,6 +32,6 @@
 #ifndef FLOM_H
 # define FLOM_H
 # include "flom_errors.h"
-# include "flom_handle.h"
 # include "flom_types.h"
+# include "flom_handle.h"
 #endif /* FLOM_H */
