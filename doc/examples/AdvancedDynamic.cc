@@ -57,7 +57,6 @@ int main(int argc, char *argv[]) {
     int retCod;
     /* step 1: handle declaration */
     FlomHandle *myHandle = NULL;
-    string lockedElement;
 
     /* step 2: new handle creation */
     if (NULL == (myHandle = new FlomHandle())) {
@@ -81,13 +80,13 @@ int main(int argc, char *argv[]) {
     }
     
     /* step 4: lock acquisition */
-    if (FLOM_RC_OK != (retCod = myHandle->lock(lockedElement))) {
+    if (FLOM_RC_OK != (retCod = myHandle->lock())) {
         cerr << "FlomHandle->lock() returned " << retCod << " '" <<
             flom_strerror(retCod) << "'" << endl;
         exit(1);
     } else {
-        cout << "FlomHandle->lock(): locked element is '" << lockedElement <<
-            "'" << endl;
+        cout << "FlomHandle->getLockedElement(): '" <<
+            myHandle->getLockedElement() << "'" << endl;
     }
     
     /* step 5: execute the code that needs lock protection */

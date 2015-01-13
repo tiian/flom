@@ -145,16 +145,14 @@ extern "C" {
      * @param cd IN connection data
      * @param timeout IN maximum wait time for lock acquisition
      * @param element OUT the obtained element if the locked resource is of
-     *        type resource set, a null string "\0" if the locked resource
+     *        type resource set, NULL if the locked resource
      *        does not returns an element. The return name is null terminated.
-     * @param element_size IN size of the buffer that will be used by the
-     *        function to store the element name; the trailing null
-     *        character decrease to element_size-1 the max lenght of the
-     *        returned element
+     *        Note: the string allocated with g_malloc and MUST be freed by the
+     *        caller using g_free!
      * @return a reason code
      */
     int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
-                         int timeout, char *element, size_t element_size);
+                         int timeout, char **element);
 
 
 

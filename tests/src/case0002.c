@@ -41,7 +41,6 @@ const char *nd_multicast_address = "224.0.0.1";
 void static_handle_happy_path(void) {
     int ret_cod;
     flom_handle_t my_handle;
-    char locked_element[100];
 
     /* initialize a new handle */
     if (FLOM_RC_OK != (ret_cod = flom_handle_init(&my_handle))) {
@@ -314,13 +313,13 @@ void static_handle_happy_path(void) {
     }
     
     /* lock acquisition */
-    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle, locked_element,
-                                           sizeof(locked_element)))) {
+    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle))) {
         fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
-    } else {
-        printf("staticHandleHappyPath locked element is %s\n", locked_element);
+    } else if (NULL != flom_handle_get_locked_element(&my_handle)) {
+        printf("staticHandleHappyPath locked element is %s\n",
+               flom_handle_get_locked_element(&my_handle));
     }
     /* lock release */
     if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(&my_handle))) {
@@ -344,7 +343,6 @@ void static_handle_happy_path(void) {
 void dynamic_handle_happy_path(void) {
     int ret_cod;
     flom_handle_t *my_handle = NULL;
-    char locked_element[100];
 
     /* create a new handle */
     if (NULL == (my_handle = flom_handle_new())) {
@@ -618,14 +616,13 @@ void dynamic_handle_happy_path(void) {
     }
     
     /* lock acquisition */
-    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle, locked_element,
-                                                  sizeof(locked_element)))) {
+    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle))) {
         fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
-    } else {
+    } else if (NULL != flom_handle_get_locked_element(my_handle)) {
         printf("dynamicHandleHappyPath locked element is %s\n",
-               locked_element);
+               flom_handle_get_locked_element(my_handle));
     } 
     /* lock release */
     if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(my_handle))) {

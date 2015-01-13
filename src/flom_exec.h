@@ -59,7 +59,7 @@ extern "C" {
      * @param child_status OUT child exit status
      * @return a reason code
      */
-    int flom_exec(gchar **const command_argv, char *const element,
+    int flom_exec(gchar **const command_argv, const char *element,
                   int *child_status);
 
     

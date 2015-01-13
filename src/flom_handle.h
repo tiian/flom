@@ -149,16 +149,9 @@ extern "C" {
      * be unlocked using function @ref flom_handle_unlock when the lock
      * condition is no more necessary
      * @param handle (Input/Output): a valid object handle
-     * @param element (Output): contains the name of the locked element if
-     *        the resource is of type "resource set"; set it to NULL if you
-     *        are not interested to retrieve an element name
-     * @param element_size (Input): maximum number of characters (null
-     *        terminator included) that can be used by the function to store
-     *        the name of the locked element
      * @return a reason code (see file @ref flom_errors.h)
      */
-    int flom_handle_lock(flom_handle_t *handle,
-                         char *element, size_t element_size);
+    int flom_handle_lock(flom_handle_t *handle);
 
 
 

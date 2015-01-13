@@ -71,10 +71,9 @@ void staticHandleMissingLock(void) {
 void staticHandleMissingUnlock(void) {
     int retCod;
     FlomHandle myHandle;
-    string lockedElement;
 
     /* lock acquisition */
-    if (FLOM_RC_OK != (retCod = myHandle.lock(lockedElement))) {
+    if (FLOM_RC_OK != (retCod = myHandle.lock())) {
         cerr << "staticHandleMissingUnlock/FlomHandle.lock() returned " <<
             retCod << " '" << flom_strerror(retCod) << "'" << endl;
         exit(1);
@@ -144,7 +143,6 @@ void dynamicHandleMissingLock(void) {
 void dynamicHandleMissingUnlock(void) {
     int retCod;
     FlomHandle *myHandle = NULL;
-    string lockedElement;
 
     /* create a new handle */
     if (NULL == (myHandle = new FlomHandle())) {
@@ -153,7 +151,7 @@ void dynamicHandleMissingUnlock(void) {
         exit(1);
     }    
     /* lock acquisition */
-    if (FLOM_RC_OK != (retCod = myHandle->lock(lockedElement))) {
+    if (FLOM_RC_OK != (retCod = myHandle->lock())) {
         cerr << "dynamicHandleMissingLock/FlomHandle.lock() returned " <<
             retCod << "'" << flom_strerror(retCod) << "'" << endl;
         exit(1);

@@ -41,7 +41,6 @@ const string ndMulticastAddress("224.0.0.1");
 void staticHandleHappyPath(void) {
     int retCod;
     FlomHandle myHandle;
-    string lockedElement;
 
     /* get current AF_UNIX/PF_LOCAL socket_name */
     cout << "FlomHandle.getSocketName() = '" << myHandle.getSocketName() <<
@@ -294,13 +293,13 @@ void staticHandleHappyPath(void) {
     }
     
     /* lock acquisition */
-    if (FLOM_RC_OK != (retCod = myHandle.lock(lockedElement))) {
+    if (FLOM_RC_OK != (retCod = myHandle.lock())) {
         cerr << "FlomHandle.lock() returned " << retCod << " '" <<
             flom_strerror(retCod) << "'" << endl;
         exit(1);
     } else {
-        cout << "staticHandleHappyPath locked element is " << lockedElement
-             << endl;
+        cout << "staticHandleHappyPath locked element is " <<
+            myHandle.getLockedElement() << endl;
     }   
     /* lock release */
     if (FLOM_RC_OK != (retCod = myHandle.unlock())) {
@@ -318,7 +317,6 @@ void staticHandleHappyPath(void) {
 void dynamicHandleHappyPath(void) {
     int retCod;
     FlomHandle *myHandle = NULL;
-    string lockedElement;
 
     /* create a new handle */
     if (NULL == (myHandle = new FlomHandle())) {
@@ -577,13 +575,13 @@ void dynamicHandleHappyPath(void) {
     }
     
     /* lock acquisition */
-    if (FLOM_RC_OK != (retCod = myHandle->lock(lockedElement))) {
+    if (FLOM_RC_OK != (retCod = myHandle->lock())) {
         cerr << "FlomHandle->lock() returned " << retCod << " '" <<
             flom_strerror(retCod) << "'" << endl;
         exit(1);
     } else {
-        cout << "dynamicHandleHappyPath locked element is " << lockedElement
-             << endl;
+        cout << "dynamicHandleHappyPath locked element is " <<
+            myHandle->getLockedElement() << endl;
     } 
     /* lock release */
     if (FLOM_RC_OK != (retCod = myHandle->unlock())) {

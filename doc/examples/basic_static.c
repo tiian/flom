@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }    
     /* step 3: lock acquisition */
-    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle, NULL, 0))) {
+    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle))) {
         fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);

@@ -766,7 +766,7 @@ int flom_client_discover_udp_connect(struct flom_conn_data_s *cd,
 
 
 int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
-                     int timeout, char *element, size_t element_size)
+                     int timeout, char **element)
 {
     enum Exception { G_STRDUP_ERROR
                      , MSG_SERIALIZE_ERROR
@@ -873,8 +873,6 @@ int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
         
         flom_msg_trace(&msg);
 
-        /* reset element name */
-        memset(element, 0, element_size);
         /* check lock answer */
         if (FLOM_MSG_VERB_LOCK != msg.header.pvs.verb ||
             2*FLOM_MSG_STEP_INCR != msg.header.pvs.step)
@@ -882,11 +880,11 @@ int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
         switch (msg.body.lock_16.answer.rc) {
             case FLOM_RC_OK:
                 /* copy element if available */
-                if (NULL != msg.body.lock_16.answer.element &&
-                    0 < element_size) {
-                    strncpy(element, msg.body.lock_16.answer.element,
-                            element_size);
-                    element[element_size-1] = '\0';
+                if (NULL != msg.body.lock_16.answer.element) {
+                    *element = g_realloc(
+                        *element, strlen(msg.body.lock_16.answer.element));
+                    if (NULL != *element)
+                        strcpy(*element, msg.body.lock_16.answer.element);
                 }
                 break;
             case FLOM_RC_LOCK_ENQUEUED:
@@ -899,20 +897,22 @@ int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
                     case FLOM_RC_OK:
                         /* copy element if available */
                         if (3*FLOM_MSG_STEP_INCR == cd->last_step) {
-                            if (NULL != msg.body.lock_24.answer.element &&
-                                0 < element_size) {
-                                strncpy(element,
-                                        msg.body.lock_24.answer.element,
-                                        element_size);
-                                element[element_size-1] = '\0';
+                            if (NULL != msg.body.lock_24.answer.element) {
+                                *element = g_realloc(
+                                    *element,
+                                    strlen(msg.body.lock_16.answer.element));
+                                if (NULL != *element)
+                                    strcpy(*element,
+                                           msg.body.lock_16.answer.element);
                             }
                         } else if (4*FLOM_MSG_STEP_INCR == cd->last_step) {
-                            if (NULL != msg.body.lock_24.answer.element &&
-                                0 < element_size) {
-                                strncpy(element,
-                                        msg.body.lock_24.answer.element,
-                                        element_size);
-                                element[element_size-1] = '\0';
+                            if (NULL != msg.body.lock_24.answer.element) {
+                                *element = g_realloc(
+                                    *element,
+                                    strlen(msg.body.lock_16.answer.element));
+                                if (NULL != *element)
+                                    strcpy(*element,
+                                           msg.body.lock_16.answer.element);
                             }
                         } else
                             THROW(INTERNAL_ERROR);

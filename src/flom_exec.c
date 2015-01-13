@@ -42,7 +42,7 @@
 #define FLOM_TRACE_MODULE   FLOM_TRACE_MOD_EXEC
 
 
-int flom_exec(gchar **const command_argv, char *const element,
+int flom_exec(gchar **const command_argv, const char *element,
               int *child_status)
 {
     enum Exception { COMMAND_ARGV_IS_NULL
@@ -54,6 +54,7 @@ int flom_exec(gchar **const command_argv, char *const element,
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     pid_t pid = -1;
+    gchar *local_element = NULL;
     
     FLOM_TRACE(("flom_exec\n"));
     TRY {
@@ -73,22 +74,24 @@ int flom_exec(gchar **const command_argv, char *const element,
             guint i, num, el;
             num = g_strv_length(command_argv);
             /* check additional option (resource set locked element) **/
-            if ('\0' == element[0])
+            if (NULL  == element)
                 el = 0;
-            else
+            else {
                 el = 1;
+                local_element = g_strdup((const gchar *)element);
+            }
             for (i=0; i<num; ++i)
                 FLOM_TRACE(("flom_exec-child: command_argv[%u]='%s'\n",
                             i, command_argv[i]));
             if (el)
-                FLOM_TRACE(("flom_exec-child: element='%s'\n", element));
+                FLOM_TRACE(("flom_exec-child: element='%s'\n", local_element));
             if (NULL == (argv = (char **)malloc((++num+el)* sizeof(char *))))
                 THROW(MALLOC_ERROR);
             for (i=0; i<num-1; ++i) {
                 argv[i] = command_argv[i];
             }
             if (el)
-                argv[num-1] = element;
+                argv[num-1] = local_element;
             argv[num-1+el] = (char *)NULL;
             FLOM_TRACE(("flom_exec-child: path='%s'\n", path));
             for (i=0; i<num-1+el; ++i)
@@ -144,6 +147,8 @@ int flom_exec(gchar **const command_argv, char *const element,
                 "ret_cod=%d/errno=%d\n",
                 (0 == pid ? "child" : "father"), 
                 excp, ret_cod, errno));
+    /* free dynamic memory */
+    g_free(local_element);
     if (0 == pid && FLOM_RC_OK != ret_cod)
         exit(FLOM_ES_UNABLE_TO_EXECUTE_COMMAND);
     return ret_cod;

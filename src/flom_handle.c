@@ -263,7 +263,7 @@ void flom_handle_delete(flom_handle_t *handle)
 }
 
 
-int flom_handle_lock(flom_handle_t *handle, char *element, size_t element_size)
+int flom_handle_lock(flom_handle_t *handle)
 {
     enum Exception { NULL_OBJECT
                      , API_INVALID_SEQUENCE
@@ -313,7 +313,7 @@ int flom_handle_lock(flom_handle_t *handle, char *element, size_t element_size)
                                handle->config, cd,
                                flom_config_get_resource_timeout(
                                    handle->config),
-                               element, element_size)))
+                               &(handle->locked_element))))
             THROW(CLIENT_LOCK_ERROR);
         /* state update */
         handle->state = FLOM_HANDLE_STATE_LOCKED;
@@ -394,6 +394,9 @@ int flom_handle_unlock(flom_handle_t *handle)
         /* gracefully disconnect from daemon */
         if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(cd)))
             THROW(CLIENT_DISCONNECT_ERROR);
+        /* free locked element name is allocated */
+        g_free(handle->locked_element);
+        handle->locked_element = NULL;
         /* state update */
         handle->state = FLOM_HANDLE_STATE_DISCONNECTED;
         

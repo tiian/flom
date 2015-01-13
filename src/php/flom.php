@@ -243,8 +243,8 @@ abstract class flom {
 		flom_handle_delete($handle);
 	}
 
-	static function flom_handle_lock($handle,$element,$element_size) {
-		return flom_handle_lock($handle,$element,$element_size);
+	static function flom_handle_lock($handle) {
+		return flom_handle_lock($handle);
 	}
 
 	static function flom_handle_unlock($handle) {

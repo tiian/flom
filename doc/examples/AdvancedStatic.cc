@@ -55,7 +55,6 @@ int main(int argc, char *argv[]) {
     int retCod;
     /* step 1: handle declaration */
     FlomHandle myHandle;
-    string lockedElement;
     
     /* step 2a: set a different AF_UNIX/PF_LOCAL socket to connect to FLoM
        daemon */
@@ -73,13 +72,13 @@ int main(int argc, char *argv[]) {
     }
     
     /* step 3: lock acquisition */
-    if (FLOM_RC_OK != (retCod = myHandle.lock(lockedElement))) {
+    if (FLOM_RC_OK != (retCod = myHandle.lock())) {
         cerr << "FlomHandle.lock() returned " << retCod << " '" <<
             flom_strerror(retCod) << "'" << endl;
         exit(1);
     } else {
-        cout << "FlomHandle.lock(): locked element is '" << lockedElement <<
-            "'" << endl;
+        cout << "FlomHandle.getLockedElement(): '" <<
+            myHandle.getLockedElement() << "'" << endl;
     }
 
     /* step 4: execute the code that needs lock protection */

@@ -115,44 +115,10 @@ namespace flom {
          * is no more necessary.  Use this instance of the method if you are
          * interested to the name of the locked element and you prefer a C
          * null terminated string.
-         * @param element (Output): contains the name of the locked element if
-         *        the resource is of type "resource set"; set it to NULL if you
-         *        are not interested to retrieve an element name.
-         * @param element_size (Input): maximum number of characters (null
-         *        terminator included) that can be used by the function to store
-         *        the name of the locked element
-         * @return a reason code (see file @ref flom_errors.h)
-         */
-        int lock(char *element, size_t element_size) {
-            return flom_handle_lock(&handle, element, element_size); }
-        /**
-         * Locks the (logical) resource linked to this handle; the resource
-         * MUST be unlocked using method @ref unlock when the lock condition
-         * is no more necessary. Use this instance of the method if you are
-         * interested to the name of the locked element and you prefer a C++
-         * standard string.
-         * @param element (Output): contains the name of the locked element if
-         *        the resource is of type "resource set". Note: due to the
-         *        underlying C function the max lenght of the string is fixed
-         *        but it can be changed to the value you prefer.
-         * @return a reason code (see file @ref flom_errors.h)
-         */
-        int lock(string &element) {
-            char buffer[100];
-            int ret_cod = flom_handle_lock(&handle, buffer, sizeof(buffer));
-            element.assign(buffer);
-            return ret_cod;
-        }
-        /**
-         * Locks the (logical) resource linked to this handle; the resource
-         * MUST be unlocked using method @ref unlock when the lock condition
-         * is no more necessary. Use this instance of the method if you are not
-         * interested to the name of the locked element.
          * @return a reason code (see file @ref flom_errors.h)
          */
         int lock() {
-            return flom_handle_lock(&handle, NULL, 0);
-        }
+            return flom_handle_lock(&handle); }
         
         /**
          * Unlocks the (logical) resource linked to this handle; the resource
@@ -162,6 +128,37 @@ namespace flom {
         int unlock() {
             return flom_handle_unlock(&handle); }
 
+        /**
+         * Gets the name of the locked element if the resource is of
+         * type set.<P>
+         * Note 1: this method can be used only after @ref lock and before
+         *         @ref unlock<P>
+         * Note 2: this function can be used only when locking a resource of
+         *         type "resource set"<P>
+         * Note 3: the return string must copied as soon as possible to a
+         *         different place because it's a dynamic string removed by
+         *         @ref unlock<P>
+         * @return the name of the locked element
+         */
+        const char *getLockedElementAsCStr() {
+            return flom_handle_get_locked_element(&handle); }
+        
+        /**
+         * Gets the name of the locked element if the resource is of
+         * type set.<P>
+         * Note 1: this method can be used only after @ref lock and before
+         *         @ref unlock<P>
+         * Note 2: this function can be used only when locking a resource of
+         *         type "resource set"<P>
+         * Note 3: the return string must copied as soon as possible to a
+         *         different place because it's a dynamic string removed by
+         *         @ref unlock<P>
+         * @return the name of the locked element
+         */
+        string getLockedElement() {
+            return NULL != flom_handle_get_locked_element(&handle) ?
+                flom_handle_get_locked_element(&handle) : ""; }
+        
         /**
          * Gets the maximum number of attempts that will be tryed during
          * auto-discovery phase using UDP/IP multicast (see

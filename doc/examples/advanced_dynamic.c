@@ -59,7 +59,6 @@ int main(int argc, char *argv[]) {
     int ret_cod;
     /* step 1: handle declaration */
     flom_handle_t *my_handle = NULL;
-    char locked_element[100];
 
     /* step 2: new handle creation */
     if (NULL == (my_handle = flom_handle_new())) {
@@ -84,13 +83,13 @@ int main(int argc, char *argv[]) {
     }
     
     /* step 4: lock acquisition */
-    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle, locked_element,
-                                                  sizeof(locked_element)))) {
+    if (FLOM_RC_OK != (ret_cod = flom_handle_lock(my_handle))) {
         fprintf(stderr, "flom_handle_lock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
-    } else {
-        printf("flom_handle_lock(): locked element is '%s'\n", locked_element);
+    } else if (NULL != flom_handle_get_locked_element(my_handle)) {
+        printf("flom_handle_get_locked_element(): '%s'\n",
+               flom_handle_get_locked_element(my_handle));
     } 
     
     /* step 5: execute the code that needs lock protection */
