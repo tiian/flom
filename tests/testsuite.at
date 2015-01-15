@@ -9,7 +9,7 @@ m4_include([shutdown.at])
 m4_include([usecase.at])
 m4_include([usecase-dist.at])
 m4_include([usecase-num.at])
-m4_include([usecase-set.at])
 m4_include([usecase-hier.at])
+m4_include([usecase-set.at])
 m4_include([usecase-lt.at])
 

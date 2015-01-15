@@ -1,10 +1,6 @@
 Road map:
 
-Use case 12 breaks with segmentation fault after flom_handle_lock changes...
-
-Check all examples: C, C++, PHP after flom_handle_lock reshaping 
-
-Add PHP test cases
+There seems to be some memory leak with PHP... take a look to it!!!
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 

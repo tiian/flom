@@ -66,7 +66,7 @@ if (FLOM_RC_OK != ($ret_cod = flom_handle_init($handle))) {
 }
 
 /* step 3: lock acquisition */
-if (FLOM_RC_OK != ($ret_cod = flom_handle_lock($handle, NULL, 0))) {
+if (FLOM_RC_OK != ($ret_cod = flom_handle_lock($handle))) {
 	fwrite(STDERR, "flom_handle_lock() returned " . $ret_cod . " '" . 
 		flom_strerror($ret_cod) . "'\n");
 	exit(1);

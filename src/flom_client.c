@@ -881,10 +881,14 @@ int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
             case FLOM_RC_OK:
                 /* copy element if available */
                 if (NULL != msg.body.lock_16.answer.element) {
-                    *element = g_realloc(
-                        *element, strlen(msg.body.lock_16.answer.element));
-                    if (NULL != *element)
-                        strcpy(*element, msg.body.lock_16.answer.element);
+                    FLOM_TRACE(("flom_client_lock: element=%p, *element=%p\n",
+                                element, *element));
+                    g_free(*element);
+                    FLOM_TRACE(("flom_client_lock: element=%p, *element=%p\n",
+                                element, *element));
+                    *element = g_strdup(msg.body.lock_16.answer.element);
+                    FLOM_TRACE(("flom_client_lock: element=%p, *element=%p\n",
+                                element, *element));
                 }
                 break;
             case FLOM_RC_LOCK_ENQUEUED:
@@ -898,21 +902,15 @@ int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
                         /* copy element if available */
                         if (3*FLOM_MSG_STEP_INCR == cd->last_step) {
                             if (NULL != msg.body.lock_24.answer.element) {
-                                *element = g_realloc(
-                                    *element,
-                                    strlen(msg.body.lock_16.answer.element));
-                                if (NULL != *element)
-                                    strcpy(*element,
-                                           msg.body.lock_16.answer.element);
+                                g_free(*element);
+                                *element = g_strdup(
+                                    msg.body.lock_24.answer.element);
                             }
                         } else if (4*FLOM_MSG_STEP_INCR == cd->last_step) {
                             if (NULL != msg.body.lock_24.answer.element) {
-                                *element = g_realloc(
-                                    *element,
-                                    strlen(msg.body.lock_16.answer.element));
-                                if (NULL != *element)
-                                    strcpy(*element,
-                                           msg.body.lock_16.answer.element);
+                                g_free(*element);
+                                *element = g_strdup(
+                                    msg.body.lock_24.answer.element);
                             }
                         } else
                             THROW(INTERNAL_ERROR);
