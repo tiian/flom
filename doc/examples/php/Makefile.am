@@ -1,5 +1,5 @@
 examplesdir = $(docdir)/examples/php
-dist_noinst_DATA = basic.php.in advanced.php.in
+dist_noinst_DATA = basic.php.in advanced.php.in README.in
 dist_examples_DATA = README
 nodist_examples_DATA = basic.php advanced.php
 

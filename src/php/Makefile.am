@@ -6,7 +6,7 @@ dist_noinst_DATA = flom.i
 # flom_php_module_la_LDADD
 flom_php_module_la_LIBADD = @GLIB2_LIBS@ ../libflom.la
 
-flom_wrap.c: flom.i ../flom_errors.h ../flom_types.h ../flom_handle.h
+flom_wrap.c: flom.i
 	$(SWIG) -php -I.. flom.i
 
 flom_php_module_la_SOURCES = flom_wrap.c

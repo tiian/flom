@@ -114,11 +114,14 @@ function happy_path() {
 		exit(1);
 	 }
 	 /* lock acquisition */
-	 if (FLOM_RC_OK != ($ret_cod = flom_handle_lock($handle, NULL, 0))) {
+	 if (FLOM_RC_OK != ($ret_cod = flom_handle_lock($handle))) {
 	    	fwrite(STDERR, "happy_path/flom_handle_lock() returned " . 
 		$ret_cod . " '" . flom_strerror($ret_cod) . "'\n");
 	 	exit(1);
 	 }
+	 /* retrieve locked element */
+	 fwrite(STDERR, "happy_path/flom_handle_get_locked_element() is " .
+	 		flom_handle_get_locked_element($handle) . "\n");
 	 /* lock release */
 	 if (FLOM_RC_OK != ($ret_cod = flom_handle_unlock($handle))) {
 	    	fwrite(STDERR, "happy_path/flom_handle_unlock() returned " . 

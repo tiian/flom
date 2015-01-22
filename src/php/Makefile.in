@@ -611,7 +611,7 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-phpDATA
 	uninstall-libLTLIBRARIES uninstall-phpDATA
 
 
-flom_wrap.c: flom.i ../flom_errors.h ../flom_types.h ../flom_handle.h
+flom_wrap.c: flom.i
 	$(SWIG) -php -I.. flom.i
 
 install-exec-hook:
