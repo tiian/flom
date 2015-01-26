@@ -302,7 +302,7 @@ SUBDIRS = . $(MAYBE_PHPAPI)
 examplesdir = $(docdir)/examples
 @COND_CPPAPI_TRUE@CPPSOURCE = BasicStatic.cc BasicDynamic.cc AdvancedStatic.cc AdvancedDynamic.cc
 @COND_CPPAPI_TRUE@CPPTARGET = BasicStatic BasicDynamic AdvancedStatic AdvancedDynamic
-dist_noinst_DATA = Makefile.am example_makefile.in
+dist_noinst_DATA = Makefile.am example_makefile.in README.in
 dist_examples_DATA = README basic_static.c basic_dynamic.c \
 	advanced_static.c advanced_dynamic.c $(CPPSOURCE)
 
@@ -705,6 +705,10 @@ example_makefile: example_makefile.in ../../config.status
 	-e 's|@CXX[@]|$(CXX)|g' \
 	-e 's|@CPPTARGET[@]|$(CPPTARGET)|g' \
 	-e 's|@GLIB2_LIBS[@]|$(GLIB2_LIBS)|g' \
+	-e 's|@libdir[@]|$(libdir)|g' \
+	$< >$@
+README:	README.in ../../config.status
+	sed \
 	-e 's|@libdir[@]|$(libdir)|g' \
 	$< >$@
 

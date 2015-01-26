@@ -172,7 +172,7 @@ AC_CHECK_PROGS(DOXYGEN, [doxygen], [true])
 AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
 
 # Checking the availability of SWIG (Simplified Wrapper and Interface Generator)
-AC_CHECK_PROGS(SWIG, [swig])
+AC_CHECK_PROGS(SWIG, [swig], [noswig])
 # Checking the availability of PHP tools
 AC_CHECK_PROG(HAVE_PHP, [php], [yes], [no])
 AC_CHECK_PROG(HAVE_PHP_CONFIG, [php-config], [yes], [no])
@@ -182,7 +182,8 @@ AC_ARG_ENABLE([php],
 		[do not prepare PHP binding API]),
 	[PHP="no"], [PHP="yes"])
 # PHP stuff is conditional
-if test "$HAVE_PHP" = "yes" -a "$HAVE_PHP_CONFIG" = "yes" -a "$PHP" = "yes"
+if test "$HAVE_PHP" = "yes" -a "$HAVE_PHP_CONFIG" = "yes" -a "$PHP" = "yes" \
+	-a "$SWIG" != "noswig"
 then
 	PHPAPI="yes"
 	PHP_INCLUDES=$(php-config --includes)

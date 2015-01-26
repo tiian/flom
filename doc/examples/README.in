@@ -24,10 +24,10 @@ To trace FLoM API calls you have to set FLOM_TRACE_MASK environment variable
 	export FLOM_TRACE_MASK=0x8000
 before program execution.
 
-The directory /usr/local/lib may be already in your standard library path; in
+The directory @libdir@ may be already in your standard library path; in
 the case it's not, you can use LD_LIBRARY_PATH environment variable before
 executing the compiled programs:
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@libdir@
 	./basic_static
 	./basic_dynamic
 	./advanced_static

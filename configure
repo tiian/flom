@@ -16091,6 +16091,7 @@ fi
 
   test -n "$SWIG" && break
 done
+test -n "$SWIG" || SWIG="noswig"
 
 # Checking the availability of PHP tools
 # Extract the first word of "php", so it can be a program name with args.
@@ -16178,7 +16179,8 @@ else
 fi
 
 # PHP stuff is conditional
-if test "$HAVE_PHP" = "yes" -a "$HAVE_PHP_CONFIG" = "yes" -a "$PHP" = "yes"
+if test "$HAVE_PHP" = "yes" -a "$HAVE_PHP_CONFIG" = "yes" -a "$PHP" = "yes" \
+	-a "$SWIG" != "noswig"
 then
 	PHPAPI="yes"
 	PHP_INCLUDES=$(php-config --includes)

@@ -1,3 +1,10 @@
+Release: 0.9.2
+Date:    2015-01-24
+Ubuntu 10.04 / x86_64 / virtual (KVM)
+Ubuntu 10.04 / x86 / virtual (KVM)
+Ubuntu 14.04 / x86_64 / virtual (KVM)
+CentOS 6.6 / x86_64 / virtual (KVM)
+
 Release: 0.9.1
 Date:    2014-12-20
 Ubuntu 10.04 / x86 / physical

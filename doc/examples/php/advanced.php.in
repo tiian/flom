@@ -46,14 +46,17 @@ include("@datadir@/@PACKAGE@/php/flom.php");
  *     directory, point it directly to FLoM installation path:
  *     php -d extension=@libdir@/flom-php-module.so basic.php
  *
+ * Note: many times you have to set LD_LIBRARY_PATH to load libflom library:
+ *     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@libdir@
+ *
  * Note: this program needs an already started FLoM daemon, for instance:
- * flom -s /tmp/my_socket_name -d -1 -- true
- * php -d extension=flom.so advanced.php
+ *     flom -s /tmp/my_socket_name -d -1 -- true
+ *     php -d extension=flom.so advanced.php
  *
  * The program itself is not verbose, but you might activate tracing if you
  * were interested to understand what's happen:
- * FLOM_TRACE_MASK=0x8000
- * php -d extension=flom.so advanced.php
+ *     FLOM_TRACE_MASK=0x8000
+ *     php -d extension=flom.so advanced.php
  */
 
 

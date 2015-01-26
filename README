@@ -43,12 +43,18 @@ Note: libflom is the library distributed along with FLoM; it's free software:
 
 Download the tarball from SourceForge: https://sourceforge.net/projects/flom/
 and install FLoM using standard GNU build chain: 
-tar xvzf flom-X.Y.Z.tar.gz
-cd flom-X.Y.Z
-./configure
-make
-sudo make install
-refer to INSTALL file for more details.
+    tar xvzf flom-X.Y.Z.tar.gz
+    cd flom-X.Y.Z
+    ./configure
+    make
+    sudo make install
+if you are using a Red Hat derivative you will probably use
+    su
+    make install
+    exit
+instead of "sudo make install".
+
+Take a look to file INSTALL for more details.
 
 Use 
 man flom 
@@ -65,8 +71,11 @@ NOTE: tests needs the system is NOT overloaded because they stick on timing
 NOTE: FLoM must be installed with "sudo make install" before tests can 
       proceed (this is a library path issue...)
 NOTE: if you are not interested in C++ API library support, specify
-      "--disable-cppapi" at configure time; example:
-      ./configure --disable-cppapi
+      "--disable-cpp" at configure time; example:
+      ./configure --disable-cpp
+NOTE: if you are not interested in PHP API library support, specify
+      "--disable-php" at configure time; example:
+      ./configure --disable-php
 If you need some help (usage tricks, hints, etc...) please post a message in
 the forum: http://sourceforge.net/p/flom/discussion/
 If you think you have discovered a bug, please open a ticket here:
