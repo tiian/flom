@@ -9,7 +9,7 @@ flom_php_module_la_LIBADD = @GLIB2_LIBS@ ../libflom.la
 flom_wrap.c: flom.i ../flom_errors.h.in ../flom_types.h ../flom_handle.h
 	$(SWIG) -php -I.. flom.i
 
-flom_php_module_la_SOURCES = flom_wrap.c
+nodist_flom_php_module_la_SOURCES = flom_wrap.c
 
 lib_LTLIBRARIES = flom-php-module.la
 phpdir = $(datadir)/$(PACKAGE)/php

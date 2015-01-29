@@ -1,7 +1,6 @@
 Road map:
 
-document PHP on Wiki and explain CentOS 6.6 needs to rebuild the SWIG
-interface
+document PHP on Wiki
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 

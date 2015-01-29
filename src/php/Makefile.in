@@ -73,8 +73,8 @@ am__base_list = \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(phpdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 flom_php_module_la_DEPENDENCIES = ../libflom.la
-am_flom_php_module_la_OBJECTS = flom_wrap.lo
-flom_php_module_la_OBJECTS = $(am_flom_php_module_la_OBJECTS)
+nodist_flom_php_module_la_OBJECTS = flom_wrap.lo
+flom_php_module_la_OBJECTS = $(nodist_flom_php_module_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -88,8 +88,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(flom_php_module_la_SOURCES)
-DIST_SOURCES = $(flom_php_module_la_SOURCES)
+SOURCES = $(nodist_flom_php_module_la_SOURCES)
+DIST_SOURCES =
 DATA = $(dist_noinst_DATA) $(php_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -278,7 +278,7 @@ dist_noinst_DATA = flom.i
 # Unsure if it's better to use flom_php_module_la_LIBADD or 
 # flom_php_module_la_LDADD
 flom_php_module_la_LIBADD = @GLIB2_LIBS@ ../libflom.la
-flom_php_module_la_SOURCES = flom_wrap.c
+nodist_flom_php_module_la_SOURCES = flom_wrap.c
 lib_LTLIBRARIES = flom-php-module.la
 phpdir = $(datadir)/$(PACKAGE)/php
 php_DATA = flom.php

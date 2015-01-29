@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [0.9.2-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [0.9.2], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -18,7 +18,7 @@ LT_REVISION=0
 # @@@ AC_DEFINE([phpdir], ['${datarootdir}/${PACKAGE_TARNAME}'])
 
 # hardwired configuration
-_RELEASE_DATE="2014-12-20"
+_RELEASE_DATE="2015-01-29"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"
