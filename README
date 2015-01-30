@@ -22,8 +22,9 @@ This is a brief list of the available features:
 - an autodiscovery feature is available to reduce deployment complexity in a
   distributed environment (every node at any time may become a "server" for
   the others node)
-- easy API (Application Programming Interface) to synchronize your own C
-  programs with shell executed flom commands
+- easy API (Application Programming Interface) to synchronize your own
+  programs with shell executed flom commands. These languages have a ready
+  to use binding: C, C++, PHP.
 
 FLoM central documentation site is hosted by SourceForge Wiki: https://sourceforge.net/p/flom/wiki/Home/
 
