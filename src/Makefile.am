@@ -1,7 +1,10 @@
 if COND_PHPAPI
   MAYBE_PHPAPI = php
 endif
-SUBDIRS = . $(MAYBE_PHPAPI)
+if COND_PYTHONAPI
+  MAYBE_PYTHONAPI = python
+endif
+SUBDIRS = . $(MAYBE_PHPAPI) $(MAYBE_PYTHONAPI)
 AM_CPPFLAGS = -D_SYSCONFDIR='"@sysconfdir@"'
 AM_CFLAGS = -Wall
 lib_LTLIBRARIES = libflom.la

@@ -121,6 +121,7 @@ AC_CONFIG_FILES([
   man/Makefile
   src/Makefile
   src/php/Makefile
+  src/python/Makefile
   tests/atlocal
   tests/Makefile
   tests/src/Makefile
@@ -192,6 +193,24 @@ else
 	PHPAPI="no"
 fi
 AM_CONDITIONAL([COND_PHPAPI], [test "$PHPAPI" = "yes"])
+
+# Checking the availability of Python tools
+AC_CHECK_PROG(HAVE_PYTHON, [python], [yes], [no])
+AC_CHECK_PROG(HAVE_PYTHON_CONFIG, [python-config], [yes], [no])
+# Build Python wrapper?
+AC_ARG_ENABLE([python],
+	AS_HELP_STRING([--disable-python],
+		[do not prepare Python binding API]),
+	[PYTHON="no"], [PYTHON="yes"])
+# Python stuff is conditional
+if test "$HAVE_PYTHON" = "yes" -a "$HAVE_PYTHON_CONFIG" = "yes" -a "$PYTHON" = "yes" -a "$SWIG" != "noswig"
+then
+	PYTHONAPI="yes"
+	PYTHON_INCLUDES=$(python-config --includes)
+else
+	PYTHONAPI="no"
+fi
+AM_CONDITIONAL([COND_PYTHONAPI], [test "$PYTHONAPI" = "yes"])
 
 AC_DEFINE_UNQUOTED([_ES_GENERIC_ERROR], [$_ES_GENERIC_ERROR], [Exit status for generic error])
 
@@ -269,6 +288,8 @@ AC_SUBST(CPPAPI)
 AC_SUBST(PHPAPI)
 AC_SUBST(PHP_INCLUDES)
 AC_SUBST(PHP_INSTALL_PATH)
+AC_SUBST(PYTHONAPI)
+AC_SUBST(PYTHON_INCLUDES)
 
 # substitution of LibTool values for library version
 AC_SUBST(LT_CURRENT)
