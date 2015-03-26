@@ -1,6 +1,6 @@
 Road map:
 
-fix Python build procedure (Makefile.am and setup.py)
+remove constants from src/python/setup.py : they should be parameters!
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 

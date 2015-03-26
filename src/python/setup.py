@@ -7,8 +7,10 @@ setup.py file for SWIG generated module
 from distutils.core import setup, Extension
 
 flom_module = Extension('_flom',
+	include_dirs=['..'],
 	sources=['flom_wrap.c'],
-	library_dirs=['/usr/local/lib'],
+	library_dirs=['../.libs'],
+	runtime_library_dirs=['/usr/local/lib'],
 	libraries=['flom','glib-2.0','gthread-2.0']
 	)
 
