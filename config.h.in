@@ -276,7 +276,7 @@
 /* Exit status for generic error */
 #undef _ES_GENERIC_ERROR
 
-/* Exit status for can't wait condition */
+/* Exit status for cannot wait condition */
 #undef _ES_REQUESTER_CANT_WAIT
 
 /* Exit status for busy resource condition */

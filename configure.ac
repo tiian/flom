@@ -18,6 +18,7 @@ LT_REVISION=0
 # @@@ AC_DEFINE([phpdir], ['${datarootdir}/${PACKAGE_TARNAME}'])
 
 # hardwired configuration
+_FLOM_PREFIX="flom"
 _RELEASE_DATE="2015-01-29"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
@@ -103,7 +104,7 @@ AC_DEFINE_UNQUOTED([_CONFIG_KEY_DISCOVERY_TTL], ["$_CONFIG_KEY_DISCOVERY_TTL"], 
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_TCP_KEEPALIVE_TIME], ["$_CONFIG_KEY_TCP_KEEPALIVE_TIME"], [Label of "TcpKeepaliveTime" key inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_TCP_KEEPALIVE_INTVL], ["$_CONFIG_KEY_TCP_KEEPALIVE_INTVL"], [Label of "TcpKeepaliveIntvl" key inside config files])
 AC_DEFINE_UNQUOTED([_CONFIG_KEY_TCP_KEEPALIVE_PROBES], ["$_CONFIG_KEY_TCP_KEEPALIVE_PROBES"], [Label of "TcpKeepaliveProbes" key inside config files])
-AC_DEFINE_UNQUOTED([_ES_REQUESTER_CANT_WAIT], [$_ES_REQUESTER_CANT_WAIT], [Exit status for can't wait condition])
+AC_DEFINE_UNQUOTED([_ES_REQUESTER_CANT_WAIT], [$_ES_REQUESTER_CANT_WAIT], [Exit status for cannot wait condition])
 AC_DEFINE_UNQUOTED([_ES_UNABLE_TO_EXECUTE_COMMAND], [$_ES_UNABLE_TO_EXECUTE_COMMAND], [Exit status for command execution error])
 AC_DEFINE_UNQUOTED([_ES_RESOURCE_BUSY], [$_ES_RESOURCE_BUSY], [Exit status for busy resource condition])
 AC_DEFINE_UNQUOTED([_ES_GENERIC_ERROR], [$_ES_GENERIC_ERROR], [Exit status for generic error])
@@ -157,13 +158,17 @@ fi
 # here: https://developer.gnome.org/glib/2.32/glib-compiling.html
 # Until glib 2.30, gthread must be specified as documented here:
 # https://developer.gnome.org/glib/2.30/glib-compiling.html
+GLIB2_PYTHON=""
+GTHREAD2_PYTHON=""
 pkg-config --atleast-version=2.32 glib-2.0
 if test $? -eq 0
 then
 	PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.32])
+	GLIB2_PYTHON="glib-2.0"
 else
-#	PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.22 gthread-2.0 >= 2.22])
 	PKG_CHECK_MODULES([GLIB2], [gthread-2.0 >= 2.22])
+	GLIB2_PYTHON="glib-2.0"
+	GTHREAD2_PYTHON="gthread-2.0"
 fi
 CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
 #GLIB2_LIBS automatically set by PKG_CHECK_MODULES macro
@@ -290,6 +295,8 @@ AC_SUBST(PHP_INCLUDES)
 AC_SUBST(PHP_INSTALL_PATH)
 AC_SUBST(PYTHONAPI)
 AC_SUBST(PYTHON_INCLUDES)
+AC_SUBST(GLIB2_PYTHON)
+AC_SUBST(GTHREAD2_PYTHON)
 
 # substitution of LibTool values for library version
 AC_SUBST(LT_CURRENT)
@@ -297,6 +304,7 @@ AC_SUBST(LT_AGE)
 AC_SUBST(LT_REVISION)
 
 # substitution inside *.in for hardwired configuration
+AC_SUBST(_FLOM_PREFIX)
 AC_SUBST(_RELEASE_DATE)
 AC_SUBST(_SYSTEM_CONFIG_FILENAME)
 AC_SUBST(_USER_CONFIG_FILENAME)

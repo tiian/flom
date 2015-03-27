@@ -83,8 +83,10 @@ EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GLIB2_CFLAGS = @GLIB2_CFLAGS@
 GLIB2_LIBS = @GLIB2_LIBS@
+GLIB2_PYTHON = @GLIB2_PYTHON@
 GREP = @GREP@
 GTHREAD2_LIBS = @GTHREAD2_LIBS@
+GTHREAD2_PYTHON = @GTHREAD2_PYTHON@
 HAVE_DOT = @HAVE_DOT@
 HAVE_PHP = @HAVE_PHP@
 HAVE_PHP_CONFIG = @HAVE_PHP_CONFIG@
@@ -176,6 +178,7 @@ _ES_GENERIC_ERROR = @_ES_GENERIC_ERROR@
 _ES_REQUESTER_CANT_WAIT = @_ES_REQUESTER_CANT_WAIT@
 _ES_RESOURCE_BUSY = @_ES_RESOURCE_BUSY@
 _ES_UNABLE_TO_EXECUTE_COMMAND = @_ES_UNABLE_TO_EXECUTE_COMMAND@
+_FLOM_PREFIX = @_FLOM_PREFIX@
 _RELEASE_DATE = @_RELEASE_DATE@
 _RESOURCE_SET_SEPARATOR = @_RESOURCE_SET_SEPARATOR@
 _SYSTEM_CONFIG_FILENAME = @_SYSTEM_CONFIG_FILENAME@
@@ -424,12 +427,24 @@ uninstall-am: uninstall-local
 flom_wrap.c: flom.i ../flom_errors.h.in ../flom_types.h ../flom_handle.h
 	$(SWIG) -python -I.. flom.i
 
+setup.py:	setup.py.i ../../config.status
+	sed \
+	-e 's|@libdir[@]|$(libdir)|g' \
+	-e 's|@_FLOM_PREFIX[@]|$(_FLOM_PREFIX)|g' \
+	-e 's|@GLIB2_PYTHON[@]|$(GLIB2_PYTHON)|g' \
+	-e 's|@GTHREAD2_PYTHON[@]|$(GTHREAD2_PYTHON)|g' \
+	-e 's|@PACKAGE_BUGREPORT[@]|$(PACKAGE_BUGREPORT)|g' \
+	-e 's|@PACKAGE_NAME[@]|$(PACKAGE_NAME)|g' \
+	-e 's|@PACKAGE_STRING[@]|$(PACKAGE_STRING)|g' \
+	-e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
+	$< >$@
+
 # Build Python module extension
 all-local:	flom_wrap.c setup.py
 	python setup.py build_ext --inplace
 
 clean-local:
-	rm -f flom_wrap.c _flom.so flom.py
+	rm -f flom_wrap.c _flom.so flom.py setup.py
 
 # Install Python module extension
 install-exec-local:
