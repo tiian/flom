@@ -1,9 +1,17 @@
 PATH=@abs_top_builddir@/src/:@abs_top_builddir@/tests/scripts/:@abs_top_builddir@/tests/src/:$PATH
 export PATH
 
+LT_LIBRARY_PATH=@abs_top_builddir@/src/.libs:$LT_LIBRARY_PATH
+export LD_LIBRARY_PATH
+
 CPPAPI=@CPPAPI@
 export CPPAPI
 PHPPATH=@abs_top_builddir@/tests/src
 export PHPPATH
 PHPAPI=@PHPAPI@
 export PHPAPI
+PYTHONPATH=@abs_top_builddir@/tests/src
+export PYTHONPATH
+PYTHONAPI=@PYTHONAPI@
+export PYTHONAPI
+

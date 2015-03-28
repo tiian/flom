@@ -1,6 +1,6 @@
 Road map:
 
-remove constants from src/python/setup.py : they should be parameters!
+Python case tests: resolve libflom run-time link issue
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 

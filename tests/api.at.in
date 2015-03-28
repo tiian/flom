@@ -213,3 +213,10 @@ AT_CHECK([if test "$PHPAPI" = "no"; then exit 77; fi])
 # the end of the string...
 AT_CHECK([php -d extension=@abs_top_builddir@/src/php/.libs/flom-php-module.so $PHPPATH/case2002.php], [0], [ignore], [ignore])
 AT_CLEANUP
+
+AT_SETUP([Python Happy path])
+AT_CHECK([if test "$PYTHONAPI" = "no"; then exit 77; fi])
+AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
+AT_CHECK([python $PYTHONPATH/case3000.py], [0], [ignore], [ignore])
+AT_CLEANUP
+
