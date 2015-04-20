@@ -220,3 +220,50 @@ AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
 AT_CHECK([python $PYTHONPATH/case3000.py], [0], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([Python Missing calls])
+AT_CHECK([if test "$PYTHONAPI" = "no"; then exit 77; fi])
+AT_CHECK([python $PYTHONPATH/case3001.py], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Python Getter and setter methods])
+AT_DATA([expout],
+[[flom_handle_get_socket_name() = '/tmp/flom-@USER@'
+flom_handle_get_socket_name() = '/tmp/flom_socket_name'
+flom_handle_get_trace_filename() = '/tmp/flom.trc'
+flom_handle_get_resource_name() = '_RESOURCE'
+flom_handle_get_resource_name() = 'red.green.blue'
+flom_handle_get_resource_create() = 1
+flom_handle_get_resource_create() = 0
+flom_handle_get_resource_create() = 1
+flom_handle_get_resource_timeout() = -1
+flom_handle_get_resource_timeout() = -1
+flom_handle_get_resource_quantity() = 1
+flom_handle_get_resource_quantity() = 3
+flom_handle_get_lock_mode() = 5
+flom_handle_get_lock_mode() = 4
+flom_handle_get_resource_idle_lifespan() = 0
+flom_handle_get_resource_idle_lifespan() = 10000
+flom_handle_get_unicast_address() = ''
+flom_handle_get_unicast_address() = '127.0.0.1'
+flom_handle_get_multicast_address() = ''
+flom_handle_get_multicast_address() = '224.0.0.1'
+flom_handle_get_unicast_port() = 28015
+flom_handle_get_unicast_port() = 7777
+flom_handle_get_multicast_port() = 28015
+flom_handle_get_multicast_port() = 8888
+flom_handle_get_discovery_attempts() = 2
+flom_handle_get_discovery_attempts() = 5
+flom_handle_get_discovery_timeout() = 500
+flom_handle_get_discovery_timeout() = 750
+flom_handle_get_discovery_ttl() = 1
+flom_handle_get_discovery_ttl() = 2
+happy_path locked element is 'red'
+]])
+AT_CHECK([pkill flom], [0], [ignore], [ignore])
+AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
+AT_CHECK([if test "$PYTHONAPI" = "no"; then exit 77; fi])
+# @@@ put again expout after fixing the problem with the binay zeroes at 
+# the end of the string...
+AT_CHECK([python $PYTHONPATH/case3002.py], [0], [ignore], [ignore])
+AT_CLEANUP
+

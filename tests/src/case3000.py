@@ -23,21 +23,21 @@ from flom import *
 
 # step 1: handle allocation
 handle = flom_handle_t()
-ret_cod = FLOM_RC_OK;
+ret_cod = FLOM_RC_OK
 
 # step 2: handle initialization
 ret_cod = flom_handle_init(handle)
 if FLOM_RC_OK != ret_cod:
 	sys.stderr.write("flom_handle_init() returned " + str(ret_cod) +
 	" '"  + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1);
+	sys.exit(1)
 
 # step 3: lock acquisition
 ret_cod = flom_handle_lock(handle)
 if FLOM_RC_OK != ret_cod:
 	sys.stderr.write("flom_handle_lock() returned " + str(ret_cod) +
 	" '" + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1);
+	sys.exit(1)
 
 # step 4: execute the code that needs lock protection
 
@@ -46,14 +46,14 @@ ret_cod = flom_handle_unlock(handle)
 if FLOM_RC_OK != ret_cod:
 	sys.stderr.write("flom_handle_unlock() returned " + str(ret_cod) +
 	" '" + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1);
+	sys.exit(1)
 
 # step 6: handle clean-up (memory release)
 ret_cod = flom_handle_clean(handle)
 if FLOM_RC_OK != ret_cod:
 	sys.stderr.write("flom_handle_clean() returned " + str(ret_cod) +
 	" '" + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1);
+	sys.exit(1)
 
 # step 7: handle deallocation
 del handle
