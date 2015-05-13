@@ -126,7 +126,8 @@ void static_handle_happy_path(void) {
     /* check resource create 2/2 */
     if (!flom_handle_get_resource_create(&my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_resource_create\n");
+                "Unexpected result from flom_handle_set/"
+		"get_resource_create\n");
         exit(1);
     }
     

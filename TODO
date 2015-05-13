@@ -1,7 +1,6 @@
 Road map:
 
-Python  & PHP case tests: fix api.at.in where @@@ is in place (this test was
-skipped but it can now be performed)
+api.at.in: go on with PHP and Python checks (after get_resource_timeout)
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 

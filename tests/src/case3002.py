@@ -95,13 +95,13 @@ def happy_path() :
     sys.stdout.write("flom_handle_get_resource_name() = '" +
                      flom_handle_get_resource_name(handle) + "'\n")
     # get current value for resource create property
-    sys.stdout.write("flom_handle_get_resource_create() = '" +
-                     str(flom_handle_get_resource_create(handle)) + "'\n")
+    sys.stdout.write("flom_handle_get_resource_create() = " +
+                     str(flom_handle_get_resource_create(handle)) + "\n")
     # set a new value for resource create property
     flom_handle_set_resource_create(handle, FALSE)
     # get new value for resource create property
-    sys.stdout.write("flom_handle_get_resource_create() = '" +
-                     str(flom_handle_get_resource_create(handle)) + "'\n")
+    sys.stdout.write("flom_handle_get_resource_create() = " +
+                     str(flom_handle_get_resource_create(handle)) + "\n")
     # check resource create 1/2
     if flom_handle_get_resource_create(handle):
         sys.stderr.write("Unexpected result from flom_handle_set/" +
@@ -111,13 +111,28 @@ def happy_path() :
     # set a new value for resource create property
     flom_handle_set_resource_create(handle, TRUE)
     # get new value for resource create property
-    sys.stdout.write("flom_handle_get_resource_create() = '" +
-                     str(flom_handle_get_resource_create(handle)) + "'\n")
+    sys.stdout.write("flom_handle_get_resource_create() = " +
+                     str(flom_handle_get_resource_create(handle)) + "\n")
     # check resource create 2/2
     if not flom_handle_get_resource_create(handle):
         sys.stderr.write("Unexpected result from flom_handle_set/" +
                          "get_resource_create\n")
         sys.exit(1)
+
+    # get current value for resource timeout property
+    sys.stdout.write("flom_handle_get_resource_timeout() = " +
+                     str(flom_handle_get_resource_timeout(handle)) + "\n");
+    # set a new value for resource timeout property
+    flom_handle_set_resource_timeout(handle, -1);
+    # get new value for resource timeout property
+    sys.stdout.write("flom_handle_get_resource_timeout() = " +
+                     str(flom_handle_get_resource_timeout(handle)) + "\n");
+    # check resource timeout
+    ret_cod = flom_handle_get_resource_timeout(handle)
+    if -1 != ret_cod:
+        sys.stderr.write("Unexpected result from flom_handle_set/" +
+                         "get_resource_timeout\n");
+        sys.exit(1);
 
     # lock acquisition
     ret_cod = flom_handle_lock(handle)
@@ -128,8 +143,8 @@ def happy_path() :
         sys.exit(1);
 
     # retrieve locked element
-    sys.stderr.write("happy_path/flom_handle_get_locked_element() is " +
-                     flom_handle_get_locked_element(handle) + "\n")
+    sys.stdout.write("happy_path locked element is '" +
+                     flom_handle_get_locked_element(handle) + "'\n")
     # lock release
     ret_cod = flom_handle_unlock(handle)
     if FLOM_RC_OK != ret_cod:

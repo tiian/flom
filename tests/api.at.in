@@ -184,34 +184,12 @@ flom_handle_get_resource_create() = 0
 flom_handle_get_resource_create() = 1
 flom_handle_get_resource_timeout() = -1
 flom_handle_get_resource_timeout() = -1
-flom_handle_get_resource_quantity() = 1
-flom_handle_get_resource_quantity() = 3
-flom_handle_get_lock_mode() = 5
-flom_handle_get_lock_mode() = 4
-flom_handle_get_resource_idle_lifespan() = 0
-flom_handle_get_resource_idle_lifespan() = 10000
-flom_handle_get_unicast_address() = ''
-flom_handle_get_unicast_address() = '127.0.0.1'
-flom_handle_get_multicast_address() = ''
-flom_handle_get_multicast_address() = '224.0.0.1'
-flom_handle_get_unicast_port() = 28015
-flom_handle_get_unicast_port() = 7777
-flom_handle_get_multicast_port() = 28015
-flom_handle_get_multicast_port() = 8888
-flom_handle_get_discovery_attempts() = 2
-flom_handle_get_discovery_attempts() = 5
-flom_handle_get_discovery_timeout() = 500
-flom_handle_get_discovery_timeout() = 750
-flom_handle_get_discovery_ttl() = 1
-flom_handle_get_discovery_ttl() = 2
 happy_path locked element is 'red'
 ]])
 AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
 AT_CHECK([if test "$PHPAPI" = "no"; then exit 77; fi])
-# @@@ put again expout after fixing the problem with the binay zeroes at 
-# the end of the string...
-AT_CHECK([php -d extension=@abs_top_builddir@/src/php/.libs/flom-php-module.so $PHPPATH/case2002.php], [0], [ignore], [ignore])
+AT_CHECK([php -d extension=@abs_top_builddir@/src/php/.libs/flom-php-module.so $PHPPATH/case2002.php], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Python Happy path])
@@ -237,33 +215,11 @@ flom_handle_get_resource_create() = 0
 flom_handle_get_resource_create() = 1
 flom_handle_get_resource_timeout() = -1
 flom_handle_get_resource_timeout() = -1
-flom_handle_get_resource_quantity() = 1
-flom_handle_get_resource_quantity() = 3
-flom_handle_get_lock_mode() = 5
-flom_handle_get_lock_mode() = 4
-flom_handle_get_resource_idle_lifespan() = 0
-flom_handle_get_resource_idle_lifespan() = 10000
-flom_handle_get_unicast_address() = ''
-flom_handle_get_unicast_address() = '127.0.0.1'
-flom_handle_get_multicast_address() = ''
-flom_handle_get_multicast_address() = '224.0.0.1'
-flom_handle_get_unicast_port() = 28015
-flom_handle_get_unicast_port() = 7777
-flom_handle_get_multicast_port() = 28015
-flom_handle_get_multicast_port() = 8888
-flom_handle_get_discovery_attempts() = 2
-flom_handle_get_discovery_attempts() = 5
-flom_handle_get_discovery_timeout() = 500
-flom_handle_get_discovery_timeout() = 750
-flom_handle_get_discovery_ttl() = 1
-flom_handle_get_discovery_ttl() = 2
 happy_path locked element is 'red'
 ]])
 AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
 AT_CHECK([if test "$PYTHONAPI" = "no"; then exit 77; fi])
-# @@@ put again expout after fixing the problem with the binay zeroes at 
-# the end of the string...
-AT_CHECK([python $PYTHONPATH/case3002.py], [0], [ignore], [ignore])
+AT_CHECK([python $PYTHONPATH/case3002.py], [0], [expout], [ignore])
 AT_CLEANUP
 
