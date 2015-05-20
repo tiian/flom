@@ -24,7 +24,7 @@ This is a brief list of the available features:
   the others node)
 - easy API (Application Programming Interface) to synchronize your own
   programs with shell executed flom commands. These languages have a ready
-  to use binding: C, C++, PHP.
+  to use binding: C, C++, PHP, Python.
 
 FLoM central documentation site is hosted by SourceForge Wiki: https://sourceforge.net/p/flom/wiki/Home/
 

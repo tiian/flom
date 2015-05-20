@@ -35,29 +35,29 @@ function happy_path() {
 	 $nd_unicast_address = "127.0.0.1";
 	 $nd_multicast_address = "224.0.0.1";
 	 /* handle allocation */
-	 $handle = new flom_handle_t();
+	 $my_handle = new flom_handle_t();
 	 $ret_cod = FLOM_RC_OK;
 	 /* handle initialization */
-	 if (FLOM_RC_OK != ($ret_cod = flom_handle_init($handle))) {
+	 if (FLOM_RC_OK != ($ret_cod = flom_handle_init($my_handle))) {
 	 	fwrite(STDERR, "flom_handle_init() returned " . 
 		$ret_cod . " '" . flom_strerror($ret_cod) . "'\n");
 		exit(1);
 	 }
 	 /* get current AF_UNIX/PF_LOCAL socket_name */
 	 fwrite(STDOUT, "flom_handle_get_socket_name() = '" .
-           flom_handle_get_socket_name($handle) . "'\n");
+           flom_handle_get_socket_name($my_handle) . "'\n");
 	 /* set a new AF_UNIX/PF_LOCAL socket_name */
 	 if (FLOM_RC_OK != ($ret_cod = flom_handle_set_socket_name(
-	    		$handle, $nd_socket_name))) {
+	    		$my_handle, $nd_socket_name))) {
 		fwrite(STDERR, "flom_handle_set_socket_name() returned " .
 		$ret_cod . ", '" . flom_strerror($ret_cod) . "'\n");
 		exit(1);
 	 }
 	 /* get new AF_UNIX/PF_LOCAL socket_name */
 	 fwrite(STDOUT, "flom_handle_get_socket_name() = '" .
-           flom_handle_get_socket_name($handle) . "'\n");
+           flom_handle_get_socket_name($my_handle) . "'\n");
 	 /* check socket name */
-	 if ($nd_socket_name != flom_handle_get_socket_name($handle)) {
+	 if ($nd_socket_name != flom_handle_get_socket_name($my_handle)) {
 	        fwrite(STDERR, "Unexpected result from flom_handle_set/" .
 		"get_socket_name\n");
 		exit(1);
@@ -65,77 +65,256 @@ function happy_path() {
 	 /* we don't get current trace filename because it can be altered by a
 	    global config file */
 	 /* set a new trace filename */
-	 flom_handle_set_trace_filename($handle, $nd_trace_filename);
+	 flom_handle_set_trace_filename($my_handle, $nd_trace_filename);
 	 /* get new trace filename */
 	 fwrite(STDOUT, "flom_handle_get_trace_filename() = '" .
-           flom_handle_get_trace_filename($handle) . "'\n");
+           flom_handle_get_trace_filename($my_handle) . "'\n");
 	 /* check trace filename */
-	 if ($nd_trace_filename != flom_handle_get_trace_filename($handle)) {
+	 if ($nd_trace_filename != flom_handle_get_trace_filename($my_handle)) {
 	        fwrite(STDERR, "Unexpected result from flom_handle_set/" .
 		"get_trace_filename\n");
 		exit(1);
 	 }
 	 /* get current resource name */
 	 fwrite(STDOUT, "flom_handle_get_resource_name() = '" .
-           flom_handle_get_resource_name($handle) . "'\n");
+           flom_handle_get_resource_name($my_handle) . "'\n");
 	 /* set a new resource name */
 	 if (FLOM_RC_OK != ($ret_cod = flom_handle_set_resource_name(
-	    		$handle, $nd_resource_name))) {
+	    		$my_handle, $nd_resource_name))) {
 		fwrite(STDERR, "flom_handle_set_resource_name() returned " .
 		$ret_cod . ", '" . flom_strerror($ret_cod) . "'\n");
 		exit(1);
 	 }
 	 /* get new resource name */
 	 fwrite(STDOUT, "flom_handle_get_resource_name() = '" .
-           flom_handle_get_resource_name($handle) . "'\n");
+           flom_handle_get_resource_name($my_handle) . "'\n");
 	 /* get current value for resource create property */
 	 fwrite(STDOUT, "flom_handle_get_resource_create() = " .
-           flom_handle_get_resource_create($handle) . "\n");
+           flom_handle_get_resource_create($my_handle) . "\n");
 	 /* set a new value for resource create property */
-	 flom_handle_set_resource_create($handle, FALSE);
+	 flom_handle_set_resource_create($my_handle, FALSE);
 	 /* get new value for resource create property */
 	 fwrite(STDOUT, "flom_handle_get_resource_create() = " .
-           flom_handle_get_resource_create($handle) . "\n");
+           flom_handle_get_resource_create($my_handle) . "\n");
          /* check resource create 1/2 */
-	 if (flom_handle_get_resource_create($handle)) {
+	 if (flom_handle_get_resource_create($my_handle)) {
 	        fwrite(STDERR, "Unexpected result from flom_handle_set/" .
 		"get_resource_create\n");
 		exit(1);
 	 }
 	 /* set a new value for resource create property */
-	 flom_handle_set_resource_create($handle, TRUE);
+	 flom_handle_set_resource_create($my_handle, TRUE);
 	 /* get new value for resource create property */
 	 fwrite(STDOUT, "flom_handle_get_resource_create() = " .
-           flom_handle_get_resource_create($handle) . "\n");
+           flom_handle_get_resource_create($my_handle) . "\n");
          /* check resource create 2/2 */
-	 if (!flom_handle_get_resource_create($handle)) {
+	 if (!flom_handle_get_resource_create($my_handle)) {
 	        fwrite(STDERR, "Unexpected result from flom_handle_set/" .
 		"get_resource_create\n");
 		exit(1);
 	 }
+	 
+	 /* get current value for resource timeout property */
+    	 fwrite(STDOUT, "flom_handle_get_resource_timeout() = " .
+	   flom_handle_get_resource_timeout($my_handle) . "\n");
+         /* set a new value for resource timeout property */
+         flom_handle_set_resource_timeout($my_handle, -1);
+         /* get new value for resource timeout property */
+    	 fwrite(STDOUT, "flom_handle_get_resource_timeout() = " .
+	   flom_handle_get_resource_timeout($my_handle) . "\n");
+	 /* check resource timeout */
+         if (-1 != flom_handle_get_resource_timeout($my_handle)) {
+            fwrite(STDERR, "Unexpected result from flom_handle_set/" .
+            		   "get_resource_timeout\n");
+            exit(1);	   
+	 }
+    
+         /* get current value for resource quantity property */
+         fwrite(STDOUT, "flom_handle_get_resource_quantity() = ". 
+             flom_handle_get_resource_quantity($my_handle) . "\n");
+         /* set a new value for resource quantity property */
+         flom_handle_set_resource_quantity($my_handle, 3);
+         /* get new value for resource quantity property */
+	 fwrite(STDOUT, "flom_handle_get_resource_quantity() = " . 
+             flom_handle_get_resource_quantity($my_handle) . "\n");
+         /* check resource quantity */
+         if (3 != flom_handle_get_resource_quantity($my_handle)) {
+             fwrite(STDERR,
+                "Unexpected result from flom_handle_set/" .
+                "get_resource_quantity\n");
+             exit(1);
+         }
+
+	 /* get current value for resource lock mode property */
+	 fwrite(STDOUT, "flom_handle_get_lock_mode() = " .
+           		flom_handle_get_lock_mode($my_handle) . "\n");
+	 /* set a new value for resource lock mode property */
+	 flom_handle_set_lock_mode($my_handle, FLOM_LOCK_MODE_PW);
+	 /* get new value for resource lock mode property */
+	 fwrite(STDOUT, "flom_handle_get_lock_mode() = " .
+	 		flom_handle_get_lock_mode($my_handle) . "\n");
+	 /* check resource lock mode */
+	 if (FLOM_LOCK_MODE_PW != flom_handle_get_lock_mode($my_handle)) {
+	    fwrite(STDERR,
+                "Unexpected result from flom_handle_set/get_lock_mode\n");
+	    exit(1);
+    	 }
+    
+         /* get current value for resource idle lifespan */
+	 fwrite(STDOUT, "flom_handle_get_resource_idle_lifespan() = " .
+           		flom_handle_get_resource_idle_lifespan($my_handle) .
+			"\n");
+	 /* set a new value for resource idle lifespan */
+	 flom_handle_set_resource_idle_lifespan($my_handle, 10000);
+    	 /* get new value for resource idle lifespan */
+    	 fwrite(STDOUT, "flom_handle_get_resource_idle_lifespan() = " .
+           		flom_handle_get_resource_idle_lifespan($my_handle) .
+			"\n");
+    	 /* check resource idle lifespan */
+    	 if (10000 != flom_handle_get_resource_idle_lifespan($my_handle)) {
+	        fwrite(STDERR, "Unexpected result from flom_handle_set/" .
+			       "get_resource_idle_lifespan\n");
+        	exit(1);
+    	 }
+    
+	/* get current unicast address */
+	fwrite(STDOUT, "flom_handle_get_unicast_address() = '" . 
+           flom_handle_get_unicast_address($my_handle) . "'\n");
+	/* set a new unicast_address */
+	flom_handle_set_unicast_address($my_handle, $nd_unicast_address);
+	/* get new unicast address */
+	fwrite(STDOUT, "flom_handle_get_unicast_address() = '" . 
+           flom_handle_get_unicast_address($my_handle) . "'\n");
+	/* check unicast address */
+    	if ($nd_unicast_address !=
+            flom_handle_get_unicast_address($my_handle)) {
+	    fwrite(STDERR, "Unexpected result from flom_handle_set/" .
+                	   "get_unicast_address\n");
+	    exit(1);
+        }
+    
+        /* get current multicast address */
+    	fwrite(STDOUT, "flom_handle_get_multicast_address() = '" .
+           flom_handle_get_multicast_address($my_handle) . "'\n");
+	/* set a new multicast_address */
+    	flom_handle_set_multicast_address($my_handle, $nd_multicast_address);
+	/* get new multicast address */
+    	fwrite(STDOUT, "flom_handle_get_multicast_address() = '" .
+           flom_handle_get_multicast_address($my_handle) . "'\n");
+	/* check multicast address */
+	if ($nd_multicast_address !=
+            flom_handle_get_multicast_address($my_handle)) {
+	    fwrite(STDERR, "Unexpected result from flom_handle_set/" .
+	                    "get_multicast_address\n");
+            exit(1);
+        }
+    
+	/* set AF_UNIX/PF_LOCAL socket_name again */
+	if (FLOM_RC_OK != ($ret_cod = flom_handle_set_socket_name(
+                           $my_handle, $nd_socket_name))) {
+ 	    fwrite(STDERR, "flom_handle_set_socket_name() returned " .
+	    		   $ret_cod . ", '" . flom_strerror($ret_cod) . "'\n");
+	    exit(1);
+	}
+    
+        /* get current value for unicast port */
+	fwrite(STDOUT, "flom_handle_get_unicast_port() = " .
+           flom_handle_get_unicast_port($my_handle) . "\n");
+	/* set a new value for unicast_port */
+	flom_handle_set_unicast_port($my_handle, 7777);
+	/* get new value for unicast port */
+	fwrite(STDOUT, "flom_handle_get_unicast_port() = " .
+           flom_handle_get_unicast_port($my_handle) . "\n");
+	/* check unicast port */
+	if (7777 != flom_handle_get_unicast_port($my_handle)) {
+           fwrite(STDERR,
+                "Unexpected result from flom_handle_set/get_unicast_port\n");
+           exit(1);
+	}
+    
+        /* get current value for multicast port */
+	fwrite(STDOUT, "flom_handle_get_multicast_port() = " .
+           flom_handle_get_multicast_port($my_handle) . "\n");
+	/* set a new value for multicast_port */
+	flom_handle_set_multicast_port($my_handle, 8888);
+	/* get new value for multicast port */
+	fwrite(STDOUT, "flom_handle_get_multicast_port() = " .
+           flom_handle_get_multicast_port($my_handle) . "\n");
+	/* check multicast port */
+	if (8888 != flom_handle_get_multicast_port($my_handle)) {
+           fwrite(STDERR,
+                "Unexpected result from flom_handle_set/get_multicast_port\n");
+	   exit(1);
+	}
+    
+        /* get current value for discovery attempts property */
+    	fwrite(STDOUT, "flom_handle_get_discovery_attempts() = " .
+           flom_handle_get_discovery_attempts($my_handle) . "\n");
+	/* set a new value for discovery attempts property */
+	flom_handle_set_discovery_attempts($my_handle, 5);
+	/* get new value for discovery attempts */
+    	fwrite(STDOUT, "flom_handle_get_discovery_attempts() = " .
+           flom_handle_get_discovery_attempts($my_handle) . "\n");
+	/* check discovery attempts */
+	if (5 != flom_handle_get_discovery_attempts($my_handle)) {
+	   fwrite(STDERR, "Unexpected result from flom_handle_set/" .
+	                   "get_discovery_attempts\n");
+           exit(1);
+	}
+    
+        /* get current value for discovery timeout property */
+	fwrite(STDOUT, "flom_handle_get_discovery_timeout() = " .
+           flom_handle_get_discovery_timeout($my_handle) . "\n");
+	/* set a new value for discovery timeout property */
+	flom_handle_set_discovery_timeout($my_handle, 750);
+	/* get new value for discovery timeout */
+	fwrite(STDOUT, "flom_handle_get_discovery_timeout() = " .
+           flom_handle_get_discovery_timeout($my_handle) . "\n");
+	/* check discovery timeout */
+	if (750 != flom_handle_get_discovery_timeout($my_handle)) {
+	   fwrite(STDERR, "Unexpected result from flom_handle_set/" .
+                	  "get_discovery_timeout\n");
+	   exit(1);
+        }
+    
+	/* get current value for discovery ttl property */
+	fwrite(STDOUT, "flom_handle_get_discovery_ttl() = " .
+           flom_handle_get_discovery_ttl($my_handle) . "\n");
+	/* set a new value for discovery ttl property */
+	flom_handle_set_discovery_ttl($my_handle, 2);
+	/* get new value for discovery ttl */
+	fwrite(STDOUT, "flom_handle_get_discovery_ttl() = " .
+           flom_handle_get_discovery_ttl($my_handle) . "\n");
+	/* check discovery ttl */
+	if (2 != flom_handle_get_discovery_ttl($my_handle)) {
+	   fwrite(STDERR,
+                "Unexpected result from flom_handle_set/get_discovery_ttl\n");
+           exit(1);
+        }
+    
 	 /* lock acquisition */
-	 if (FLOM_RC_OK != ($ret_cod = flom_handle_lock($handle))) {
+	 if (FLOM_RC_OK != ($ret_cod = flom_handle_lock($my_handle))) {
 	    	fwrite(STDERR, "happy_path/flom_handle_lock() returned " . 
 		$ret_cod . " '" . flom_strerror($ret_cod) . "'\n");
 	 	exit(1);
 	 }
 	 /* retrieve locked element */
-	 fwrite(STDERR, "happy_path/flom_handle_get_locked_element() is " .
-	 		flom_handle_get_locked_element($handle) . "\n");
+	 fwrite(STDOUT, "happy_path locked element is " .
+	 		flom_handle_get_locked_element($my_handle) . "\n");
 	 /* lock release */
-	 if (FLOM_RC_OK != ($ret_cod = flom_handle_unlock($handle))) {
+	 if (FLOM_RC_OK != ($ret_cod = flom_handle_unlock($my_handle))) {
 	    	fwrite(STDERR, "happy_path/flom_handle_unlock() returned " . 
 		$ret_cod . " '" . flom_strerror($ret_cod) . "'\n");
 		exit(1);
 	 }
 	 /* handle clean-up (memory release) */
-	 if (FLOM_RC_OK != ($ret_cod = flom_handle_clean($handle))) {
+	 if (FLOM_RC_OK != ($ret_cod = flom_handle_clean($my_handle))) {
 	   	fwrite(STDERR, "happy_path/flom_handle_clean() returned " . 
 		$ret_cod . " '" . flom_strerror($ret_cod) . "'\n");
 		exit(1);
 	 }
 	 /* handle deallocation */
-	 $handle = NULL;
+	 $my_handle = NULL;
 }
 
 

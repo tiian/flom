@@ -1,6 +1,6 @@
 Road map:
 
-api.at.in: go on with PHP and Python checks (after get_resource_timeout)
+prepare Python programming examples
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 
