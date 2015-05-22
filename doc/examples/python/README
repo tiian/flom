@@ -1,0 +1,14 @@
+This directory contains Python examples.
+
+After a complete installation procedure:
+./configure
+make
+sudo make install
+check the Python modules have been built and installed:
+ls -la /usr/local/lib/python*/dist-packages/*
+
+Read the comments inside
+	basic.py
+	advanced.py
+to understand how these Python programs can be executed.
+

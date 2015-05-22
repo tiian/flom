@@ -1,6 +1,6 @@
 Road map:
 
-prepare Python programming examples
+check build is OK for release
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 

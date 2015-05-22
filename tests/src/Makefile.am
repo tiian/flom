@@ -17,8 +17,12 @@ noinst_PROGRAMS = case0000 case0001 case0002 $(MAYBE_CPPAPI)
 if COND_PHPAPI
   MAYBE_PHPAPI=case2000.php case2001.php case2002.php
 endif
-dist_noinst_DATA = case2000.php.in case2001.php.in case2002.php.in
-noinst_DATA = $(MAYBE_PHPAPI)
+if COND_PYTHONAPI
+  MAYBE_PYTHONAPI=case3000.py case3001.py case3002.py
+endif
+dist_noinst_DATA = case2000.php.in case2001.php.in case2002.php.in \
+	$(MAYBE_PYTHONAPI)
+noinst_DATA = $(MAYBE_PHPAPI) 
 
 LDADD = ../../src/libflom.la @GLIB2_LIBS@
 

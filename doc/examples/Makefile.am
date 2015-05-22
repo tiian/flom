@@ -1,7 +1,10 @@
 if COND_PHPAPI
   MAYBE_PHPAPI = php
 endif
-SUBDIRS = . $(MAYBE_PHPAPI)
+if COND_PYTHONAPI
+  MAYBE_PYTHONAPI = python
+endif
+SUBDIRS = . $(MAYBE_PHPAPI) $(MAYBE_PYTHONAPI)
 examplesdir = $(docdir)/examples
 if COND_CPPAPI
   CPPSOURCE=BasicStatic.cc BasicDynamic.cc AdvancedStatic.cc AdvancedDynamic.cc

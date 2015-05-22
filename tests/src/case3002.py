@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
-#/
+#
 
 
 
@@ -89,7 +89,7 @@ def happy_path() :
         sys.stderr.write("flom_handle_set_resource_name() returned " +
                          str(ret_cod) + ", '" + flom_strerror(ret_cod) +
                          "'\n")
-        sys.exit(1);
+        sys.exit(1)
 
     # get new resource name
     sys.stdout.write("flom_handle_get_resource_name() = '" +
@@ -106,7 +106,7 @@ def happy_path() :
     if flom_handle_get_resource_create(my_handle):
         sys.stderr.write("Unexpected result from flom_handle_set/" +
                          "get_resource_create\n")
-        sys.exit(1);
+        sys.exit(1)
 
     # set a new value for resource create property
     flom_handle_set_resource_create(my_handle, TRUE)
@@ -121,176 +121,176 @@ def happy_path() :
 
     # get current value for resource timeout property
     sys.stdout.write("flom_handle_get_resource_timeout() = " +
-                     str(flom_handle_get_resource_timeout(my_handle)) + "\n");
+                     str(flom_handle_get_resource_timeout(my_handle)) + "\n")
     # set a new value for resource timeout property
-    flom_handle_set_resource_timeout(my_handle, -1);
+    flom_handle_set_resource_timeout(my_handle, -1)
     # get new value for resource timeout property
     sys.stdout.write("flom_handle_get_resource_timeout() = " +
-                     str(flom_handle_get_resource_timeout(my_handle)) + "\n");
+                     str(flom_handle_get_resource_timeout(my_handle)) + "\n")
     # check resource timeout
     ret_cod = flom_handle_get_resource_timeout(my_handle)
     if -1 != ret_cod:
         sys.stderr.write("Unexpected result from flom_handle_set/" +
-                         "get_resource_timeout\n");
-        sys.exit(1);
+                         "get_resource_timeout\n")
+        sys.exit(1)
 
     # get current value for resource quantity property
     sys.stdout.write("flom_handle_get_resource_quantity() = " + 
-                     str(flom_handle_get_resource_quantity(my_handle)) + "\n");
+                     str(flom_handle_get_resource_quantity(my_handle)) + "\n")
     # set a new value for resource quantity property
-    flom_handle_set_resource_quantity(my_handle, 3);
+    flom_handle_set_resource_quantity(my_handle, 3)
     # get new value for resource quantity property
     sys.stdout.write("flom_handle_get_resource_quantity() = " + 
-                     str(flom_handle_get_resource_quantity(my_handle)) + "\n");
+                     str(flom_handle_get_resource_quantity(my_handle)) + "\n")
     # check resource quantity
     ret_cod = flom_handle_get_resource_quantity(my_handle)
     if 3 != ret_cod:
         sys.stderr.write("Unexpected result from flom_handle_set/" +
-                         "get_resource_quantity\n");
-        sys.exit(1);
+                         "get_resource_quantity\n")
+        sys.exit(1)
 
     # get current value for resource lock mode property
     sys.stdout.write("flom_handle_get_lock_mode() = " +
-                     str(flom_handle_get_lock_mode(my_handle)) + "\n");
+                     str(flom_handle_get_lock_mode(my_handle)) + "\n")
     # set a new value for resource lock mode property
-    flom_handle_set_lock_mode(my_handle, FLOM_LOCK_MODE_PW);
+    flom_handle_set_lock_mode(my_handle, FLOM_LOCK_MODE_PW)
     # get new value for resource lock mode property
     sys.stdout.write("flom_handle_get_lock_mode() = " +
-                     str(flom_handle_get_lock_mode(my_handle)) + "\n");
+                     str(flom_handle_get_lock_mode(my_handle)) + "\n")
     # check resource lock mode
     ret_cod = flom_handle_get_lock_mode(my_handle)
     if FLOM_LOCK_MODE_PW != ret_cod:
         sys.stderr.write("Unexpected result from flom_handle_set" + 
-                         "/get_lock_mode\n");
-        sys.exit(1);
+                         "/get_lock_mode\n")
+        sys.exit(1)
     
     # get current value for resource idle lifespan
     sys.stdout.write("flom_handle_get_resource_idle_lifespan() = " +
                      str(flom_handle_get_resource_idle_lifespan(my_handle)) +
-                     "\n");
+                     "\n")
     # set a new value for resource idle lifespan
-    flom_handle_set_resource_idle_lifespan(my_handle, 10000);
+    flom_handle_set_resource_idle_lifespan(my_handle, 10000)
     # get new value for resource idle lifespan
     sys.stdout.write("flom_handle_get_resource_idle_lifespan() = " +
                      str(flom_handle_get_resource_idle_lifespan(my_handle)) +
-                     "\n");
+                     "\n")
     # check resource idle lifespan
     ret_cod = flom_handle_get_resource_idle_lifespan(my_handle)
     if 10000 != ret_cod:
         sys.stderr.write("Unexpected result from flom_handle_set/" +
-                         "get_resource_idle_lifespan\n");
-        sys.exit(1);
+                         "get_resource_idle_lifespan\n")
+        sys.exit(1)
     
     # get current unicast address
     sys.stdout.write("flom_handle_get_unicast_address() = '" + 
-           str(flom_handle_get_unicast_address(my_handle)) + "'\n");
+           str(flom_handle_get_unicast_address(my_handle)) + "'\n")
     # set a new unicast_address
-    flom_handle_set_unicast_address(my_handle, nd_unicast_address);
+    flom_handle_set_unicast_address(my_handle, nd_unicast_address)
     # get new unicast address
     sys.stdout.write("flom_handle_get_unicast_address() = '" +
-           str(flom_handle_get_unicast_address(my_handle)) + "'\n");
+           str(flom_handle_get_unicast_address(my_handle)) + "'\n")
     # check unicast address
     if nd_unicast_address != flom_handle_get_unicast_address(my_handle):
         sys.stderr.write("Unexpected result from flom_handle_set/" +
-                	   "get_unicast_address\n");
-        sys.exit(1);
+                	   "get_unicast_address\n")
+        sys.exit(1)
     
     # get current multicast address */
     sys.stdout.write("flom_handle_get_multicast_address() = '" +
-           str(flom_handle_get_multicast_address(my_handle)) + "'\n");
+           str(flom_handle_get_multicast_address(my_handle)) + "'\n")
     # set a new multicast_address
-    flom_handle_set_multicast_address(my_handle, nd_multicast_address);
+    flom_handle_set_multicast_address(my_handle, nd_multicast_address)
     # get new multicast address
     sys.stdout.write("flom_handle_get_multicast_address() = '" +
-           str(flom_handle_get_multicast_address(my_handle)) + "'\n");
+           str(flom_handle_get_multicast_address(my_handle)) + "'\n")
     # check multicast address
     if nd_multicast_address != flom_handle_get_multicast_address(my_handle):
         sys.stderr.write("Unexpected result from flom_handle_set/" +
-                         "get_multicast_address\n");
-        sys.exit(1);
+                         "get_multicast_address\n")
+        sys.exit(1)
     
     # set AF_UNIX/PF_LOCAL socket_name again
-    ret_cod = flom_handle_set_socket_name(my_handle, nd_socket_name);
+    ret_cod = flom_handle_set_socket_name(my_handle, nd_socket_name)
     if FLOM_RC_OK != ret_cod:
         sys.stderr.write("flom_handle_set_socket_name() returned " +
 	    		 str(ret_cod) + ", '" + flom_strerror(ret_cod) + 
-                         "'\n");
-        sys.exit(1);
+                         "'\n")
+        sys.exit(1)
     
     # get current value for unicast port
     sys.stdout.write("flom_handle_get_unicast_port() = " +
-           str(flom_handle_get_unicast_port(my_handle)) + "\n");
+           str(flom_handle_get_unicast_port(my_handle)) + "\n")
     # set a new value for unicast_port
-    flom_handle_set_unicast_port(my_handle, 7777);
+    flom_handle_set_unicast_port(my_handle, 7777)
     # get new value for unicast port
     sys.stdout.write("flom_handle_get_unicast_port() = " +
-           str(flom_handle_get_unicast_port(my_handle)) + "\n");
+           str(flom_handle_get_unicast_port(my_handle)) + "\n")
     # check unicast port
-    ret_cod = flom_handle_get_unicast_port(my_handle);
+    ret_cod = flom_handle_get_unicast_port(my_handle)
     if 7777 != ret_cod:
         sys.stderr.write("Unexpected result from flom_handle_set/" +
-                         "get_unicast_port\n");
-        sys.exit(1);
+                         "get_unicast_port\n")
+        sys.exit(1)
     
     # get current value for multicast port
     sys.stdout.write("flom_handle_get_multicast_port() = " +
-           str(flom_handle_get_multicast_port(my_handle)) + "\n");
+           str(flom_handle_get_multicast_port(my_handle)) + "\n")
     # set a new value for multicast_port
-    flom_handle_set_multicast_port(my_handle, 8888);
+    flom_handle_set_multicast_port(my_handle, 8888)
     # get new value for multicast port
     sys.stdout.write("flom_handle_get_multicast_port() = " +
-           str(flom_handle_get_multicast_port(my_handle)) + "\n");
+           str(flom_handle_get_multicast_port(my_handle)) + "\n")
     # check multicast port
-    ret_cod = flom_handle_get_multicast_port(my_handle);
+    ret_cod = flom_handle_get_multicast_port(my_handle)
     if 8888 != ret_cod:
         sys.stderr.write("Unexpected result from flom_handle_set/" +
-                         "get_multicast_port\n");
-        sys.exit(1);
+                         "get_multicast_port\n")
+        sys.exit(1)
     
     # get current value for discovery attempts property
     sys.stdout.write("flom_handle_get_discovery_attempts() = " +
-           str(flom_handle_get_discovery_attempts(my_handle)) + "\n");
+           str(flom_handle_get_discovery_attempts(my_handle)) + "\n")
     # set a new value for discovery attempts property
-    flom_handle_set_discovery_attempts(my_handle, 5);
+    flom_handle_set_discovery_attempts(my_handle, 5)
     # get new value for discovery attempts
     sys.stdout.write("flom_handle_get_discovery_attempts() = " +
-           str(flom_handle_get_discovery_attempts(my_handle)) + "\n");
+           str(flom_handle_get_discovery_attempts(my_handle)) + "\n")
     # check discovery attempts
-    ret_cod = flom_handle_get_discovery_attempts(my_handle);
+    ret_cod = flom_handle_get_discovery_attempts(my_handle)
     if 5 != ret_cod:
         sys.stderr.write("Unexpected result from flom_handle_set/" +
-                         "get_discovery_attempts\n");
-        sys.exit(1);
+                         "get_discovery_attempts\n")
+        sys.exit(1)
     
     # get current value for discovery timeout property
     sys.stdout.write("flom_handle_get_discovery_timeout() = " +
-                     str(flom_handle_get_discovery_timeout(my_handle)) + "\n");
+                     str(flom_handle_get_discovery_timeout(my_handle)) + "\n")
     # set a new value for discovery timeout property
-    flom_handle_set_discovery_timeout(my_handle, 750);
+    flom_handle_set_discovery_timeout(my_handle, 750)
     # get new value for discovery timeout
     sys.stdout.write("flom_handle_get_discovery_timeout() = " +
-                     str(flom_handle_get_discovery_timeout(my_handle)) + "\n");
+                     str(flom_handle_get_discovery_timeout(my_handle)) + "\n")
     # check discovery timeout
-    ret_cod = flom_handle_get_discovery_timeout(my_handle);
+    ret_cod = flom_handle_get_discovery_timeout(my_handle)
     if 750 != ret_cod:
         sys.stderr.write("Unexpected result from flom_handle_set/" +
-                         "get_discovery_timeout\n");
-        sys.exit(1);
+                         "get_discovery_timeout\n")
+        sys.exit(1)
     
     # get current value for discovery ttl property
     sys.stdout.write("flom_handle_get_discovery_ttl() = " +
-                     str(flom_handle_get_discovery_ttl(my_handle)) + "\n");
+                     str(flom_handle_get_discovery_ttl(my_handle)) + "\n")
     # set a new value for discovery ttl property
-    flom_handle_set_discovery_ttl(my_handle, 2);
+    flom_handle_set_discovery_ttl(my_handle, 2)
     # get new value for discovery ttl
     sys.stdout.write("flom_handle_get_discovery_ttl() = " +
-                     str(flom_handle_get_discovery_ttl(my_handle)) + "\n");
+                     str(flom_handle_get_discovery_ttl(my_handle)) + "\n")
     # check discovery ttl
-    ret_cod = flom_handle_get_discovery_ttl(my_handle);
+    ret_cod = flom_handle_get_discovery_ttl(my_handle)
     if 2 != ret_cod:
         sys.stderr.write("Unexpected result from flom_handle_set/" +
-                         "get_discovery_ttl\n");
-        sys.exit(1);
+                         "get_discovery_ttl\n")
+        sys.exit(1)
     
     # lock acquisition
     ret_cod = flom_handle_lock(my_handle)
@@ -298,7 +298,7 @@ def happy_path() :
         sys.stderr.write("happy_path/flom_handle_lock() returned " + 
                          str(ret_cod) + " '" + flom_strerror(ret_cod) +
                          "'\n")
-        sys.exit(1);
+        sys.exit(1)
 
     # retrieve locked element
     sys.stdout.write("happy_path locked element is '" +
@@ -309,14 +309,14 @@ def happy_path() :
         sys.stderr.write("happy_path/flom_handle_unlock() returned " +
                          str(ret_cod) + " '" + flom_strerror(ret_cod) +
                          "'\n")
-        sys.exit(1);
+        sys.exit(1)
 
     # handle clean-up (memory release)
     ret_cod = flom_handle_clean(my_handle)
     if FLOM_RC_OK != ret_cod:
         sys.stderr.write("happy_path/flom_handle_clean() returned " + 
                          str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
-        sys.exit(1);
+        sys.exit(1)
 
     # handle deallocation
     del my_handle

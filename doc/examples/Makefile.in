@@ -93,7 +93,7 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = . php
+DIST_SUBDIRS = . php python
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -305,7 +305,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @COND_PHPAPI_TRUE@MAYBE_PHPAPI = php
-SUBDIRS = . $(MAYBE_PHPAPI)
+@COND_PYTHONAPI_TRUE@MAYBE_PYTHONAPI = python
+SUBDIRS = . $(MAYBE_PHPAPI) $(MAYBE_PYTHONAPI)
 examplesdir = $(docdir)/examples
 @COND_CPPAPI_TRUE@CPPSOURCE = BasicStatic.cc BasicDynamic.cc AdvancedStatic.cc AdvancedDynamic.cc
 @COND_CPPAPI_TRUE@CPPTARGET = BasicStatic BasicDynamic AdvancedStatic AdvancedDynamic
