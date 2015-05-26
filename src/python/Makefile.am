@@ -1,4 +1,4 @@
-dist_noinst_DATA = flom.i
+dist_noinst_DATA = flom.i setup.py.i
 
 # Produce FLoM wrapper using SWIG
 flom_wrap.c: flom.i ../flom_errors.h.in ../flom_types.h ../flom_handle.h

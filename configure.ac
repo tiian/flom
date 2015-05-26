@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [0.9.3-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [0.9.3], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -15,11 +15,9 @@ LT_CURRENT=0
 LT_AGE=0
 LT_REVISION=0
 
-# @@@ AC_DEFINE([phpdir], ['${datarootdir}/${PACKAGE_TARNAME}'])
-
 # hardwired configuration
 _FLOM_PREFIX="flom"
-_RELEASE_DATE="2015-01-29"
+_RELEASE_DATE="2015-05-26"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"
@@ -166,6 +164,7 @@ if test $? -eq 0
 then
 	PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.32])
 	GLIB2_PYTHON="glib-2.0"
+	GTHREAD2_PYTHON="glib-2.0"
 else
 	PKG_CHECK_MODULES([GLIB2], [gthread-2.0 >= 2.22])
 	GLIB2_PYTHON="glib-2.0"

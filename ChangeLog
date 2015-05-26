@@ -1,5 +1,7 @@
 LOG:
 
+20150526 - 0.9.3 Python client library API
+
 20150129 - 0.9.2 PHP client library API: flom-php-module (flom.php)
 	Added trace append option (--append-trace-file)
 	WARNING: flom_handle_lock() changed signature, use

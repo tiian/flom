@@ -85,5 +85,16 @@ If you avoided to send me an e-mail I would be happy: forum posts and tickets
 can be seen by many people and I should not answer the same questions many
 times.
 
+Dependencies report:
+O.S.		Feature		Packages
+Ubuntu		Basic		make gcc libglib2.0-dev pkg-config automake
+Ubuntu		C++ API		g++
+Ubuntu		PHP API		swig php5-cli php5-dev
+Ubuntu		Python API	swig python-dev
+CentOS		Basic		gcc glib2-devel
+CentOS		C++ API		gcc-c++
+CentOS		PHP API		swig php-cli php-devel
+CentOS		Python API	swig python-devel
+
 Enjoy FLoM!
 Ch.F.
