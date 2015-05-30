@@ -1,5 +1,7 @@
 LOG:
 
+         - 0.9.4 Developing Java client library API
+
 20150526 - 0.9.3 Python client library API
 
 20150129 - 0.9.2 PHP client library API: flom-php-module (flom.php)
