@@ -39,10 +39,10 @@ DIST_COMMON = README $(am__dist_examples_DATA_DIST) \
 	$(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/ax_jni_include_dir.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -156,6 +156,8 @@ GREP = @GREP@
 GTHREAD2_LIBS = @GTHREAD2_LIBS@
 GTHREAD2_PYTHON = @GTHREAD2_PYTHON@
 HAVE_DOT = @HAVE_DOT@
+HAVE_JAVA = @HAVE_JAVA@
+HAVE_JAVAC = @HAVE_JAVAC@
 HAVE_PHP = @HAVE_PHP@
 HAVE_PHP_CONFIG = @HAVE_PHP_CONFIG@
 HAVE_PYTHON = @HAVE_PYTHON@
@@ -206,6 +208,7 @@ STRIP = @STRIP@
 SWIG = @SWIG@
 USER = @USER@
 VERSION = @VERSION@
+_ACJNI_JAVAC = @_ACJNI_JAVAC@
 _CONFIG_GROUP_DAEMON = @_CONFIG_GROUP_DAEMON@
 _CONFIG_GROUP_NETWORK = @_CONFIG_GROUP_NETWORK@
 _CONFIG_GROUP_RESOURCE = @_CONFIG_GROUP_RESOURCE@

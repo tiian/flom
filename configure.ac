@@ -120,6 +120,7 @@ AC_CONFIG_FILES([
   etc/Makefile
   man/Makefile
   src/Makefile
+  src/java/Makefile
   src/php/Makefile
   src/python/Makefile
   tests/atlocal
@@ -179,6 +180,22 @@ AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
 
 # Checking the availability of SWIG (Simplified Wrapper and Interface Generator)
 AC_CHECK_PROGS(SWIG, [swig], [noswig])
+
+# Checking the availability of JRE
+AC_CHECK_PROG(HAVE_JAVA, [java], [yes], [no])
+# Checking the availability of JDK
+AC_CHECK_PROG(HAVE_JAVAC, [javac], [yes], [no])
+
+AX_JNI_INCLUDE_DIR
+
+for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
+do
+	CPPFLAGS="$CPPFLAGS -I$JNI_INCLUDE_DIR"
+done
+AC_CHECK_HEADERS(jni.h jni_md.h)
+
+AM_CONDITIONAL([COND_JAVAAPI], [test "$HAVE_JAVAC" = "yes"])
+
 # Checking the availability of PHP tools
 AC_CHECK_PROG(HAVE_PHP, [php], [yes], [no])
 AC_CHECK_PROG(HAVE_PHP_CONFIG, [php-config], [yes], [no])
