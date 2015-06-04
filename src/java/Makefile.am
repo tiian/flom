@@ -1,18 +1,22 @@
 #AM_CFLAGS =
-#AM_CPPFLAGS = @PHP_INCLUDES@ -I ..
+AM_CPPFLAGS = @PHP_INCLUDES@ -I ..
+JAVA_PKGDIR = org/tiian/flom
 AM_LDFLAGS = -module -Wl,--no-as-needed -Wl,-lglib-2.0 -Wl,--as-needed
-dist_noinst_DATA = flom.i
 libflom_java_la_LIBADD = @GLIB2_LIBS@ ../libflom.la
 
-flom_wrap.c: flom.i ../flom_errors.h.in ../flom_types.h ../flom_handle.h
-	$(SWIG) -java -I.. flom.i
+nodist_libflom_java_la_SOURCES = FlomHandle.c FlomHandle.h
 
-nodist_libflom_java_la_SOURCES = flom_wrap.c
+$(JAVA_PKGDIR)/FlomHandle.class:	$(JAVA_PKGDIR)/FlomHandle.java
+	javac $(JAVA_PKGDIR)/FlomHandle.java
+
+FlomHandle.h:	$(JAVA_PKGDIR)/FlomHandle.class
+	javah -o FlomHandle.h org.tiian.flom.FlomHandle
+
 
 lib_LTLIBRARIES = libflom-java.la
-javadir = $(datadir)/$(PACKAGE)/java
-java_DATA = flom.java
-EXTRA_DIST = flom.java
+#javadir = $(datadir)/$(PACKAGE)/java
+#java_DATA = flom.java
+#EXTRA_DIST = flom.java
 
 #install-exec-hook:
 #	ln -sf $(DESTDIR)$(libdir)/flom-php-module.so \

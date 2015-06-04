@@ -15,7 +15,6 @@
 
 @SET_MAKE@
 
-
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -36,8 +35,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = src/java
-DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_jni_include_dir.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
@@ -70,10 +68,10 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(javadir)"
+am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libflom_java_la_DEPENDENCIES = ../libflom.la
-nodist_libflom_java_la_OBJECTS = flom_wrap.lo
+nodist_libflom_java_la_OBJECTS = FlomHandle.lo
 libflom_java_la_OBJECTS = $(nodist_libflom_java_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -90,7 +88,6 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(nodist_libflom_java_la_SOURCES)
 DIST_SOURCES =
-DATA = $(dist_noinst_DATA) $(java_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -283,15 +280,12 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 #AM_CFLAGS =
-#AM_CPPFLAGS = @PHP_INCLUDES@ -I ..
+AM_CPPFLAGS = @PHP_INCLUDES@ -I ..
+JAVA_PKGDIR = org/tiian/flom
 AM_LDFLAGS = -module -Wl,--no-as-needed -Wl,-lglib-2.0 -Wl,--as-needed
-dist_noinst_DATA = flom.i
 libflom_java_la_LIBADD = @GLIB2_LIBS@ ../libflom.la
-nodist_libflom_java_la_SOURCES = flom_wrap.c
+nodist_libflom_java_la_SOURCES = FlomHandle.c FlomHandle.h
 lib_LTLIBRARIES = libflom-java.la
-javadir = $(datadir)/$(PACKAGE)/java
-java_DATA = flom.java
-EXTRA_DIST = flom.java
 all: all-am
 
 .SUFFIXES:
@@ -366,7 +360,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_wrap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FlomHandle.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -394,26 +388,6 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-javaDATA: $(java_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(javadir)" || $(MKDIR_P) "$(DESTDIR)$(javadir)"
-	@list='$(java_DATA)'; test -n "$(javadir)" || list=; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(javadir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(javadir)" || exit $$?; \
-	done
-
-uninstall-javaDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(java_DATA)'; test -n "$(javadir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(javadir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(javadir)" && rm -f $$files
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -499,9 +473,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(DATA)
+all-am: Makefile $(LTLIBRARIES)
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(javadir)"; do \
+	for dir in "$(DESTDIR)$(libdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -552,7 +526,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-javaDATA
+install-data-am:
 
 install-dvi: install-dvi-am
 
@@ -598,7 +572,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-javaDATA uninstall-libLTLIBRARIES
+uninstall-am: uninstall-libLTLIBRARIES
 
 .MAKE: install-am install-strip
 
@@ -608,18 +582,23 @@ uninstall-am: uninstall-javaDATA uninstall-libLTLIBRARIES
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-javaDATA \
+	install-html-am install-info install-info-am \
 	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
 	install-ps install-ps-am install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-javaDATA \
-	uninstall-libLTLIBRARIES
+	tags uninstall uninstall-am uninstall-libLTLIBRARIES
 
 
-flom_wrap.c: flom.i ../flom_errors.h.in ../flom_types.h ../flom_handle.h
-	$(SWIG) -java -I.. flom.i
+$(JAVA_PKGDIR)/FlomHandle.class:	$(JAVA_PKGDIR)/FlomHandle.java
+	javac $(JAVA_PKGDIR)/FlomHandle.java
+
+FlomHandle.h:	$(JAVA_PKGDIR)/FlomHandle.class
+	javah -o FlomHandle.h org.tiian.flom.FlomHandle
+#javadir = $(datadir)/$(PACKAGE)/java
+#java_DATA = flom.java
+#EXTRA_DIST = flom.java
 
 #install-exec-hook:
 #	ln -sf $(DESTDIR)$(libdir)/flom-php-module.so \
