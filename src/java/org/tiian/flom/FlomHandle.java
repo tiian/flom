@@ -9,15 +9,42 @@ public class FlomHandle {
 
     private ByteBuffer bb;
 
-    private native ByteBuffer createHandle();
+    /**
+     * Create a new native @ref flom_handle_t object and return a pointer
+     * to JVM environment
+     */
+    private native ByteBuffer newFlomHandle();
 
-    // @@@ remove me!!!
-    private native void sayHello();
+    private native void deleteFlomHandle(ByteBuffer bb);
 
+    public FlomHandle() {
+        bb = newFlomHandle();
+    }
+
+    /**
+     * Explicitly release the native object allocated by JNI wrapper
+     */
+    public void release() {
+        deleteFlomHandle(bb);
+        bb = null;
+    }
+
+    /**
+     * Release native object if finalization is executed and the program
+     * forgot to call @ref release method
+     */
+    protected void finalize() {
+        if (null != bb)
+            deleteFlomHandle(bb);
+    }
+    
     // @@@ remove me!!!
     public static void main(String[] args) {
         FlomHandle fh = new FlomHandle();
-        fh.sayHello();
-        ByteBuffer prova = fh.createHandle();
+        fh.release();
+        /*
+        System.runFinalization();
+        Runtime.getRuntime().runFinalization();
+        */
     }
 }

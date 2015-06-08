@@ -45,7 +45,7 @@
 
 
 /* Allocate a new FlomHandle (native struct) */
-JNIEXPORT jobject JNICALL Java_org_tiian_flom_FlomHandle_createHandle(
+JNIEXPORT jobject JNICALL Java_org_tiian_flom_FlomHandle_newFlomHandle(
     JNIEnv *env, jobject this_obj)
 {
     enum Exception { MALLOC_ERROR
@@ -56,7 +56,7 @@ JNIEXPORT jobject JNICALL Java_org_tiian_flom_FlomHandle_createHandle(
     if (FLOM_RC_OK != flom_init_check())
         return NULL;
     
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_createHandle\n"));
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_newFlomHandle\n"));
     TRY {
         flom_handle_t *h = flom_handle_new();
         jobject bb = (*env)->NewDirectByteBuffer(env, (void *)h,
@@ -78,16 +78,35 @@ JNIEXPORT jobject JNICALL Java_org_tiian_flom_FlomHandle_createHandle(
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_createHandle/excp=%d/"
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_newFlomHandle/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return bb;
 }
 
 
 
-// Implementation of native method sayHello() of HelloJNI class
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_sayHello(
-    JNIEnv *env, jobject thisObj) {
-    printf("Hello World!\n");
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
+  (JNIEnv *env, jobject this_obj, jobject byte_buffer)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    if (FLOM_RC_OK != flom_init_check())
+        return;
+    
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_deleteFlomHandle\n"));
+    TRY {
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_deleteFlomHandle/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return;
 }
