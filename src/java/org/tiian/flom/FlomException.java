@@ -26,52 +26,19 @@
 
 package org.tiian.flom;
 
-import java.nio.ByteBuffer;
-
-public class FlomHandle {
+public class FlomException {
     static {
         System.loadLibrary("flom_java");
     }
 
-    private ByteBuffer NativeHandler;
-
-    /**
-     * Create a new native @ref flom_handle_t object and return a pointer
-     * to JVM environment
-     */
-    private native ByteBuffer newFlomHandle();
-
-    private native void deleteFlomHandle(ByteBuffer NativeHandler);
-
-    public FlomHandle() {
-        NativeHandler = newFlomHandle();
-    }
-
-    /**
-     * Explicitly free the native object allocated by JNI wrapper
-     */
-    public void free() {
-        deleteFlomHandle(NativeHandler);
-        NativeHandler = null;
-    }
-
-    /**
-     * Release native object if finalization is executed and the program
-     * forgot to call @ref release method
-     */
-    protected void finalize() {
-        if (null != NativeHandler)
-            deleteFlomHandle(NativeHandler);
-    }
+    private int ReturnCode;
     
-    // @@@ remove me!!!
-    public static void main(String[] args) {
-        FlomHandle fh = new FlomHandle();
-        fh.free();
-        FlomException excp = new FlomException(23);
-        /*
-        System.runFinalization();
-        Runtime.getRuntime().runFinalization();
-        */
+    public FlomException(int returnCode) {
+        ReturnCode = returnCode;
     }
+
+    public int getReturnCode() { return ReturnCode; }
+
+    public native String getReturnCodeText();
+    private int foob;
 }

@@ -1,0 +1,3 @@
+Some work in progress notes...
+
+java -Djava.library.path=/usr/local/lib -classpath flom.jar org.tiian.flom.FlomHandle

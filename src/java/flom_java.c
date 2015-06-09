@@ -32,7 +32,7 @@
 #include "flom_defines.h"
 #include "flom_trace.h"
 #include "flom.h"
-#include "FlomHandle.h"
+#include "flom_java.h"
  
 
 
