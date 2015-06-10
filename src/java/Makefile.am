@@ -4,9 +4,8 @@ JAVA_PKGDIR = org/tiian/flom
 AM_LDFLAGS = -module -Wl,--no-as-needed -Wl,-lglib-2.0 -Wl,--as-needed
 libflom_java_la_LIBADD = @GLIB2_LIBS@ ../libflom.la
 
-#libflom_java_la_SOURCES = flom_java.h flom_java.c
-libflom_java_la_SOURCES = flom_java.c
-noinst_HEADERS = flom_java.h
+libflom_java_la_SOURCES = flom_java.h flom_java.c
+dist_noinst_HEADERS = flom_java.h
 javadir = $(datadir)/$(PACKAGE)/java
 dist_java_DATA = flom.jar
 lib_LTLIBRARIES = libflom_java.la
@@ -18,7 +17,7 @@ $(JAVA_PKGDIR)/FlomException.class:	$(JAVA_PKGDIR)/FlomException.java
 	javac $<
 
 flom_java.h:	flom.jar
-	javah -o $@ -classpath $< org.tiian.flom.FlomHandle org.tiian.flom.FlomException
+	rm $@ ; javah -o $@ -classpath $< org.tiian.flom.FlomHandle org.tiian.flom.FlomException
 
 flom.jar:	$(JAVA_PKGDIR)/FlomHandle.class $(JAVA_PKGDIR)/FlomException.class
 	jar cf $@ $(JAVA_PKGDIR)/FlomHandle.class $(JAVA_PKGDIR)/FlomException.class

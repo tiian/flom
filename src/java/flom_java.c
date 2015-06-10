@@ -51,7 +51,7 @@ JNIEXPORT jobject JNICALL Java_org_tiian_flom_FlomHandle_newFlomHandle(
     enum Exception { MALLOC_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    jobject bb = NULL;
+    jobject byte_buffer = NULL;
 
     if (FLOM_RC_OK != flom_init_check())
         return NULL;
@@ -59,12 +59,12 @@ JNIEXPORT jobject JNICALL Java_org_tiian_flom_FlomHandle_newFlomHandle(
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_newFlomHandle\n"));
     TRY {
         flom_handle_t *h = flom_handle_new();
-        jobject bb = (*env)->NewDirectByteBuffer(env, (void *)h,
-                                                 NULL != h ? 
-                                                 sizeof(flom_handle_t) :
-                                                 0);
         if (NULL == h)
             THROW(MALLOC_ERROR);
+        byte_buffer = (*env)->NewDirectByteBuffer(env, (void *)h,
+                                                  NULL != h ? 
+                                                  sizeof(flom_handle_t) :
+                                                  0);
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -80,7 +80,7 @@ JNIEXPORT jobject JNICALL Java_org_tiian_flom_FlomHandle_newFlomHandle(
     } /* TRY-CATCH */
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_newFlomHandle/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return bb;
+    return byte_buffer;
 }
 
 
@@ -88,7 +88,8 @@ JNIEXPORT jobject JNICALL Java_org_tiian_flom_FlomHandle_newFlomHandle(
 JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
   (JNIEnv *env, jobject this_obj, jobject byte_buffer)
 {
-    enum Exception { NONE } excp;
+    enum Exception { NULL_OBJECT
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     if (FLOM_RC_OK != flom_init_check())
@@ -96,9 +97,16 @@ JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
     
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_deleteFlomHandle\n"));
     TRY {
+        flom_handle_t *fh = (flom_handle_t *)byte_buffer;
+        if (NULL == fh)
+            THROW(NULL_OBJECT);
+        flom_handle_delete(fh);
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -109,4 +117,34 @@ JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_deleteFlomHandle/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return;
+}
+
+
+
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomException_getReturnCodeText
+(JNIEnv *env, jobject this_obj)
+{
+    jstring return_string = NULL;
+    jclass this_class;
+    jfieldID field_id;
+    jint return_code;
+    
+    /* get a reference to this object's class */
+    if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
+        FLOM_TRACE(("Java_org_tiian_flom_FlomException_getReturnCodeText: "
+                    "this_class == NULL\n"));
+        return return_string;
+    }
+    /* get the field identificator */
+    if (NULL == (field_id = (*env)->GetFieldID(env, this_class,
+                                               "ReturnCode", "I"))) {
+        FLOM_TRACE(("Java_org_tiian_flom_FlomException_getReturnCodeText: "
+                    "field_id == NULL\n"));
+        return return_string;
+    }
+    /* get ReturnCode value */
+    return_code = (*env)->GetIntField(env, this_obj, field_id);
+    /* get return string using native method */
+    return_string = (*env)->NewStringUTF(env, flom_strerror(return_code));
+    return return_string;
 }

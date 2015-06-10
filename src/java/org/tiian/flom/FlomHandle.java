@@ -50,9 +50,15 @@ public class FlomHandle {
     /**
      * Explicitly free the native object allocated by JNI wrapper
      */
-    public void free() {
-        deleteFlomHandle(NativeHandler);
-        NativeHandler = null;
+    public void free() throws FlomException {
+        if (null != NativeHandler) {
+            deleteFlomHandle(NativeHandler);
+            NativeHandler = null;
+        } else {
+            /* @@@ use FLOM constant here! SWIG...!!! */
+            FlomException e = new FlomException(-4);
+            throw e;
+        }
     }
 
     /**
@@ -60,15 +66,27 @@ public class FlomHandle {
      * forgot to call @ref release method
      */
     protected void finalize() {
-        if (null != NativeHandler)
-            deleteFlomHandle(NativeHandler);
+        try {
+            if (null != NativeHandler)
+                free();
+        } catch(Exception e) {
+        }
     }
     
     // @@@ remove me!!!
     public static void main(String[] args) {
         FlomHandle fh = new FlomHandle();
-        fh.free();
-        FlomException excp = new FlomException(23);
+        try {
+            fh.free();
+        } catch(FlomException e) {
+            System.out.println("FlomException: ReturnCode=" +
+                               e.getReturnCode() + 
+                               " (" + e.getReturnCodeText() + ")");
+
+        }
+        FlomException excp = new FlomException(-9);
+        System.out.println("ReturnCode=" + excp.getReturnCode() + 
+                           " (" + excp.getReturnCodeText() + ")");
         /*
         System.runFinalization();
         Runtime.getRuntime().runFinalization();

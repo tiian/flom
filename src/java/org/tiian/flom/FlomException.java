@@ -26,7 +26,7 @@
 
 package org.tiian.flom;
 
-public class FlomException {
+public class FlomException extends Exception {
     static {
         System.loadLibrary("flom_java");
     }
