@@ -1,6 +1,7 @@
 Road map:
 
-fix deleteFlomHandle JNI method;
+accessing private field instead of passing it, directly from C
+returning from C with return code on every method
 use ret_cod to come back from JNI and construct the relative FlomException if not FLOM_RC_OK
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait

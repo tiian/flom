@@ -88,22 +88,33 @@ JNIEXPORT jobject JNICALL Java_org_tiian_flom_FlomHandle_newFlomHandle(
 JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
   (JNIEnv *env, jobject this_obj, jobject byte_buffer)
 {
-    enum Exception { NULL_OBJECT
+    enum Exception { GET_OBJECT_CLASS_ERROR
+                     , NULL_OBJECT
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     if (FLOM_RC_OK != flom_init_check())
         return;
+
+    /* get a reference to this object's class */
+    if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
+        FLOM_TRACE(("Java_org_tiian_flom_FlomException_getReturnCodeText: "
+                    "this_class == NULL\n"));
+        THROW(GET_OBJECT_CLASS_ERROR);
+    }    
     
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_deleteFlomHandle\n"));
     TRY {
-        flom_handle_t *fh = (flom_handle_t *)byte_buffer;
+        flom_handle_t *fh = (flom_handle_t *)(*env)->GetDirectBufferAddress(env, byte_buffer);
         if (NULL == fh)
             THROW(NULL_OBJECT);
         flom_handle_delete(fh);
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case GET_OBJECT_CLASS_ERROR:
+                ret_cod = FLOM_RC_GET_OBJECT_CLASS_ERROR;
+                break;
             case NULL_OBJECT:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;

@@ -209,6 +209,9 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_G_TRY_REALLOC_ERROR:
             return "ERROR: 'g_try_realloc' function returned "
                 "an error condition";
+            /* JNI related errors */
+        case FLOM_RC_GET_OBJECT_CLASS_ERROR:
+            return "ERROR: 'GetObjectClass' function returned NULL pointer";
         default:
             return "ERROR: unknown error";
     } /* switch (ret_cod) */
