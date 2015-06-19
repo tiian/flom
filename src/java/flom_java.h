@@ -18,10 +18,10 @@ JNIEXPORT jobject JNICALL Java_org_tiian_flom_FlomHandle_newFlomHandle
 /*
  * Class:     org_tiian_flom_FlomHandle
  * Method:    deleteFlomHandle
- * Signature: (Ljava/nio/ByteBuffer;)V
+ * Signature: ()I
  */
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
-  (JNIEnv *, jobject, jobject);
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
+  (JNIEnv *, jobject);
 
 #ifdef __cplusplus
 }

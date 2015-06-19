@@ -85,10 +85,11 @@ JNIEXPORT jobject JNICALL Java_org_tiian_flom_FlomHandle_newFlomHandle(
 
 
 
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
-  (JNIEnv *env, jobject this_obj, jobject byte_buffer)
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
+  (JNIEnv *env, jobject this_obj)
 {
     enum Exception { GET_OBJECT_CLASS_ERROR
+                     , GET_FIELD_ID_ERROR
                      , NULL_OBJECT
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -96,17 +97,32 @@ JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
     if (FLOM_RC_OK != flom_init_check())
         return;
 
-    /* get a reference to this object's class */
-    if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
-        FLOM_TRACE(("Java_org_tiian_flom_FlomException_getReturnCodeText: "
-                    "this_class == NULL\n"));
-        THROW(GET_OBJECT_CLASS_ERROR);
-    }    
-    
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_deleteFlomHandle\n"));
     TRY {
-        flom_handle_t *fh = (flom_handle_t *)(*env)->GetDirectBufferAddress(env, byte_buffer);
-        if (NULL == fh)
+        jclass this_class;
+        jfieldID field_id;
+        jobject byte_buffer;
+        flom_handle_t *fh;
+        
+        /* get a reference to this object's class */
+        if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
+            FLOM_TRACE(("Java_org_tiian_flom_FlomException_deleteFlomHandle: "
+                        "this_class == NULL\n"));
+            THROW(GET_OBJECT_CLASS_ERROR);
+        }
+        /* get the field identificator */
+        if (NULL == (field_id = (*env)->GetFieldID(
+                         env, this_class, "NativeHandler",
+                         "Ljava/nio/ByteBuffer;"))) {
+            FLOM_TRACE(("Java_org_tiian_flom_FlomException_deleteFlomHandle: "
+                        "field_id == NULL\n"));
+            THROW(GET_FIELD_ID_ERROR);
+        }
+        /* get ByteBuffer reference */
+        byte_buffer = (*env)->GetObjectField(env, this_obj, field_id);
+        /* cast to flom_handle_t */
+        if (NULL == (fh = (flom_handle_t *)(*env)->GetDirectBufferAddress(
+                         env, byte_buffer)))
             THROW(NULL_OBJECT);
         flom_handle_delete(fh);
         THROW(NONE);
@@ -114,6 +130,9 @@ JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
         switch (excp) {
             case GET_OBJECT_CLASS_ERROR:
                 ret_cod = FLOM_RC_GET_OBJECT_CLASS_ERROR;
+                break;
+            case GET_FIELD_ID_ERROR:
+                ret_cod = FLOM_RC_GET_FIELD_ID_ERROR;
                 break;
             case NULL_OBJECT:
                 ret_cod = FLOM_RC_NULL_OBJECT;
@@ -127,7 +146,7 @@ JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
     } /* TRY-CATCH */
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_deleteFlomHandle/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return;
+    return (jint)ret_cod;
 }
 
 

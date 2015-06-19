@@ -47,7 +47,7 @@ public class FlomHandle {
      */
     private native ByteBuffer newFlomHandle();
 
-    private native void deleteFlomHandle(ByteBuffer NativeHandler);
+    private native int deleteFlomHandle();
 
     public FlomHandle() {
         NativeHandler = newFlomHandle();
@@ -57,13 +57,13 @@ public class FlomHandle {
      * Explicitly free the native object allocated by JNI wrapper
      */
     public void free() throws FlomException {
-        if (null != NativeHandler) {
-            deleteFlomHandle(NativeHandler);
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_NULL_OBJECT);
+        else {
+            int ReturnCode = deleteFlomHandle();
+            if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+                throw new FlomException(ReturnCode);
             NativeHandler = null;
-        } else {
-            /* @@@ use FLOM constant here! SWIG...!!! */
-            FlomException e = new FlomException(-4);
-            throw e;
         }
     }
 
@@ -73,8 +73,7 @@ public class FlomHandle {
      */
     protected void finalize() {
         try {
-            if (null != NativeHandler)
-                free();
+            free();
         } catch(Exception e) {
         }
     }
@@ -90,9 +89,6 @@ public class FlomHandle {
                                " (" + e.getReturnCodeText() + ")");
 
         }
-        FlomException excp = new FlomException(-9);
-        System.out.println("ReturnCode=" + excp.getReturnCode() + 
-                           " (" + excp.getReturnCodeText() + ")");
         /*
         System.runFinalization();
         Runtime.getRuntime().runFinalization();
