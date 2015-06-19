@@ -79,6 +79,7 @@ class FlomErrorCodes {
 	public final static int FLOM_RC_G_THREAD_CREATE_ERROR = -212;
 	public final static int FLOM_RC_G_TRY_MALLOC_ERROR = -213;
 	public final static int FLOM_RC_G_TRY_REALLOC_ERROR = -214;
-	public final static int FLOM_RC_GET_OBJECT_CLASS_ERROR = -300;
-	public final static int FLOM_RC_GET_FIELD_ID_ERROR = -301;
+	public final static int FLOM_RC_GET_FIELD_ID_ERROR = -300;
+	public final static int FLOM_RC_GET_OBJECT_CLASS_ERROR = -301;
+	public final static int FLOM_RC_NEW_DIRECT_BYTE_BUFFER_ERROR = -302;
 }

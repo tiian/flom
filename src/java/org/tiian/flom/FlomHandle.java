@@ -42,24 +42,33 @@ public class FlomHandle {
     private ByteBuffer NativeHandler;
 
     /**
-     * Create a new native @ref flom_handle_t object and return a pointer
-     * to JVM environment
+     * Create a new native @ref flom_handle_t object and set @ref NativeHandler
      */
-    private native ByteBuffer newFlomHandle();
-
+    private native int newFlomHandle();
+    /**
+     * Delete the native @ref flom_handle_t object
+     */
     private native int deleteFlomHandle();
+    /**
+     * Call the lock method of native @ref flom_handle_t object
+     */
+    private native int lockFlomHandle();
+    
 
-    public FlomHandle() {
-        NativeHandler = newFlomHandle();
+
+    /**
+     * Create a new object calling the native interface
+     */
+    public FlomHandle() throws FlomException {
+        int ReturnCode = newFlomHandle();
+        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+            throw new FlomException(ReturnCode);
     }
-
     /**
      * Explicitly free the native object allocated by JNI wrapper
      */
     public void free() throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_NULL_OBJECT);
-        else {
+        if (null != NativeHandler) {
             int ReturnCode = deleteFlomHandle();
             if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
                 throw new FlomException(ReturnCode);
@@ -67,6 +76,27 @@ public class FlomHandle {
         }
     }
 
+
+    
+    /**
+     * Locks the (logical) resource linked to this handle; the resource
+     * MUST be unlocked using method @ref unlock when the lock condition
+     * is no more necessary.  Use this instance of the method if you are
+     * interested to the name of the locked element and you prefer a C
+     * null terminated string.
+     */
+    public void lock() throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else {
+            int ReturnCode = lockFlomHandle();
+            if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+                throw new FlomException(ReturnCode);
+        }
+    }
+
+
+    
     /**
      * Release native object if finalization is executed and the program
      * forgot to call @ref release method
@@ -74,20 +104,24 @@ public class FlomHandle {
     protected void finalize() {
         try {
             free();
-        } catch(Exception e) {
+        } catch(FlomException e) {
+            System.err.println("FlomHandle.finalize() thrown a " +
+                               "FlomException: ReturnCode=" +
+                               e.getReturnCode() + 
+                               " (" + e.getReturnCodeText() + ")");
         }
     }
     
     // @@@ remove me!!!
     public static void main(String[] args) {
-        FlomHandle fh = new FlomHandle();
         try {
+            FlomHandle fh = new FlomHandle();
+            fh.lock();
             fh.free();
         } catch(FlomException e) {
             System.out.println("FlomException: ReturnCode=" +
                                e.getReturnCode() + 
                                " (" + e.getReturnCodeText() + ")");
-
         }
         /*
         System.runFinalization();

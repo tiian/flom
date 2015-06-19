@@ -210,11 +210,14 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'g_try_realloc' function returned "
                 "an error condition";
             /* JNI related errors */
+        case FLOM_RC_GET_FIELD_ID_ERROR:
+            return "ERROR: 'JNI GetFieldID' function returned NULL pointer";
         case FLOM_RC_GET_OBJECT_CLASS_ERROR:
             return "ERROR: 'JNI GetObjectClass' function returned NULL "
                 "pointer";
-        case FLOM_RC_GET_FIELD_ID_ERROR:
-            return "ERROR: 'JNI GetFieldID' function returned NULL pointer";
+        case FLOM_RC_NEW_DIRECT_BYTE_BUFFER_ERROR:
+            return "ERROR: 'JNI NewDirectByteBuffer' function returned NULL "
+                "pointer";
         default:
             return "ERROR: unknown error";
     } /* switch (ret_cod) */

@@ -10,9 +10,9 @@ extern "C" {
 /*
  * Class:     org_tiian_flom_FlomHandle
  * Method:    newFlomHandle
- * Signature: ()Ljava/nio/ByteBuffer;
+ * Signature: ()I
  */
-JNIEXPORT jobject JNICALL Java_org_tiian_flom_FlomHandle_newFlomHandle
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_newFlomHandle
   (JNIEnv *, jobject);
 
 /*
@@ -21,6 +21,14 @@ JNIEXPORT jobject JNICALL Java_org_tiian_flom_FlomHandle_newFlomHandle
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    lockFlomHandle
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_lockFlomHandle
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus
