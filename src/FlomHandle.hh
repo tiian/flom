@@ -112,21 +112,17 @@ namespace flom {
         /**
          * Locks the (logical) resource linked to this handle; the resource
          * MUST be unlocked using method @ref unlock when the lock condition
-         * is no more necessary.  Use this instance of the method if you are
-         * interested to the name of the locked element and you prefer a C
-         * null terminated string.
+         * is no more necessary.
          * @return a reason code (see file @ref flom_errors.h)
          */
-        int lock() {
-            return flom_handle_lock(&handle); }
+        int lock() { return flom_handle_lock(&handle); }
         
         /**
          * Unlocks the (logical) resource linked to this handle; the resource
          * MUST be previously locked using method @ref lock
          * @return a reason code (see file @ref flom_errors.h)
          */
-        int unlock() {
-            return flom_handle_unlock(&handle); }
+        int unlock() { return flom_handle_unlock(&handle); }
 
         /**
          * Gets the name of the locked element if the resource is of

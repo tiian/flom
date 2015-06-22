@@ -44,23 +44,31 @@ public class FlomHandle {
     /**
      * Create a new native @ref flom_handle_t object and set @ref NativeHandler
      */
-    private native int newFlomHandle();
+    private native int newFH();
     /**
      * Delete the native @ref flom_handle_t object
      */
-    private native int deleteFlomHandle();
+    private native int deleteFH();
     /**
      * Call the lock method of native @ref flom_handle_t object
      */
-    private native int lockFlomHandle();
-    
+    private native int lockFH();
+    /**
+     * Call the unlock method of native @ref flom_handle_t object
+     */
+    private native int unlockFH();
+    /**
+     * Call the getLockedElement of native @ref flom_handle_t object
+     */
+    private native String getLockedElementFH();
+
 
 
     /**
      * Create a new object calling the native interface
      */
     public FlomHandle() throws FlomException {
-        int ReturnCode = newFlomHandle();
+        int ReturnCode = newFH();
         if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
             throw new FlomException(ReturnCode);
     }
@@ -69,7 +77,7 @@ public class FlomHandle {
      */
     public void free() throws FlomException {
         if (null != NativeHandler) {
-            int ReturnCode = deleteFlomHandle();
+            int ReturnCode = deleteFH();
             if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
                 throw new FlomException(ReturnCode);
             NativeHandler = null;
@@ -79,7 +87,7 @@ public class FlomHandle {
 
     
     /**
-     * Locks the (logical) resource linked to this handle; the resource
+     * Lock the (logical) resource linked to this handle; the resource
      * MUST be unlocked using method @ref unlock when the lock condition
      * is no more necessary.  Use this instance of the method if you are
      * interested to the name of the locked element and you prefer a C
@@ -89,7 +97,23 @@ public class FlomHandle {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else {
-            int ReturnCode = lockFlomHandle();
+            int ReturnCode = lockFH();
+            if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+                throw new FlomException(ReturnCode);
+        }
+    }
+
+
+    
+    /**
+     * Unlock the (logical) resource linked to this handle; the resource
+     * MUST be previously locked using method @ref lock
+     */
+    public void unlock() throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else {
+            int ReturnCode = unlockFH();
             if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
                 throw new FlomException(ReturnCode);
         }
@@ -117,6 +141,7 @@ public class FlomHandle {
         try {
             FlomHandle fh = new FlomHandle();
             fh.lock();
+            fh.unlock();
             fh.free();
         } catch(FlomException e) {
             System.out.println("FlomException: ReturnCode=" +

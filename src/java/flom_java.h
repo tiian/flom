@@ -9,26 +9,42 @@ extern "C" {
 #endif
 /*
  * Class:     org_tiian_flom_FlomHandle
- * Method:    newFlomHandle
+ * Method:    newFH
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_newFlomHandle
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_newFH
   (JNIEnv *, jobject);
 
 /*
  * Class:     org_tiian_flom_FlomHandle
- * Method:    deleteFlomHandle
+ * Method:    deleteFH
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_deleteFlomHandle
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_deleteFH
   (JNIEnv *, jobject);
 
 /*
  * Class:     org_tiian_flom_FlomHandle
- * Method:    lockFlomHandle
+ * Method:    lockFH
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_lockFlomHandle
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_lockFH
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    unlockFH
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_unlockFH
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getLockedElementFH
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getLockedElementFH
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus
