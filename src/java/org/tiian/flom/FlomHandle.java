@@ -104,6 +104,18 @@ public class FlomHandle {
     }
 
 
+
+    public String getLockedElement() throws FlomException {
+        String ReturnString = null;
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else {
+            if (null == (ReturnString = getLockedElementFH()))
+                ReturnString = new String("");
+        }
+        return ReturnString;
+    }
+    
     
     /**
      * Unlock the (logical) resource linked to this handle; the resource
@@ -141,6 +153,8 @@ public class FlomHandle {
         try {
             FlomHandle fh = new FlomHandle();
             fh.lock();
+            System.out.println("FlomHandle: locked element = '" +
+                               fh.getLockedElement() + "'");
             fh.unlock();
             fh.free();
         } catch(FlomException e) {

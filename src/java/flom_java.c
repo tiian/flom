@@ -300,15 +300,28 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_unlockFH
 JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getLockedElementFH
 (JNIEnv *env, jobject this_obj)
 {
-    enum Exception { NONE } excp;
+    enum Exception { GET_NATIVE_HANDLE_ERROR
+                     , NONE } excp;
+    /* ret_cod is only for tracing because Java strings are immutable and
+       the function can not return using a varying parameter */
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    jstring ret_string = NULL;
     
-    FLOM_TRACE(("\n"));
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getLockedElementFH\n"));
     TRY {
+        flom_handle_t *handle;
         
+        if (FLOM_RC_OK != (
+                ret_cod = Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                    env, this_obj, &handle)))
+            THROW(GET_NATIVE_HANDLE_ERROR);
+        ret_string = (*env)->NewStringUTF(
+            env, flom_handle_get_locked_element(handle));
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case GET_NATIVE_HANDLE_ERROR:
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -316,9 +329,9 @@ JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getLockedElementFH
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    FLOM_TRACE(("/excp=%d/"
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getLockedElementFH/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
+    return ret_string;
 }
 
 
