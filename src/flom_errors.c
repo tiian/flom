@@ -35,6 +35,8 @@ const char *flom_strerror(int ret_cod)
 {
     switch (ret_cod) {
         /* WARNINGS */
+        case FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE:
+            return "WARNING: the name of the locked element is not available";
         case FLOM_RC_NETWORK_TIMEOUT:
             return "WARNING: network operation timeout";
         case FLOM_RC_CONNECTION_CLOSED:
@@ -70,7 +72,7 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_NETWORK_EVENT_ERROR:
             return "ERROR: an unespected network event raised";
         case FLOM_RC_NULL_OBJECT:
-            return "ERROR: an argument is null";
+            return "ERROR: the object is null";
         case FLOM_RC_INVALID_OPTION:
             return "ERROR: a specified option is not valid";
         case FLOM_RC_OBJ_CORRUPTED:

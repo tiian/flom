@@ -47,6 +47,54 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_unlockFH
 JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getLockedElementFH
   (JNIEnv *, jobject);
 
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getDiscoveryAttemptsFH
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryAttemptsFH
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setDiscoveryAttemptsFH
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryAttemptsFH
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getDiscoveryTimeoutFH
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryTimeoutFH
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setDiscoveryTimeoutFH
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTimeoutFH
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getDiscoveryTtlFH
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryTtlFH
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setDiscoveryTtlFH
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTtlFH
+  (JNIEnv *, jobject, jint);
+
 #ifdef __cplusplus
 }
 #endif

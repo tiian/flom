@@ -5,6 +5,7 @@ class FlomErrorCodes {
 	public final static int FLOM_ES_RESOURCE_BUSY = 98;
 	public final static int FLOM_ES_GENERIC_ERROR = 99;
 	public final static int FLOM_ES_OK = 0;
+	public final static int FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE = +10;
 	public final static int FLOM_RC_NETWORK_TIMEOUT = +9;
 	public final static int FLOM_RC_CONNECTION_CLOSED = +8;
 	public final static int FLOM_RC_CONNECTION_REFUSED = +7;

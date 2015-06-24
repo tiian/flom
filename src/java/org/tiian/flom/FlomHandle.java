@@ -39,7 +39,16 @@ public class FlomHandle {
         System.loadLibrary("flom_java");
     }
 
+    /**
+     * This is the opaque wrapper of a flom_handle_t object used by the
+     * native library
+     */
     private ByteBuffer NativeHandler;
+    /**
+     * Native methods save the return code in this private field that can
+     * be inspected from the Java code
+     */
+    private int ReturnCode;
 
     /**
      * Create a new native @ref flom_handle_t object and set @ref NativeHandler
@@ -50,20 +59,50 @@ public class FlomHandle {
      */
     private native int deleteFH();
     /**
-     * Call the lock method of native @ref flom_handle_t object
+     * Call 'lock' method of the native @ref flom_handle_t object
      */
     private native int lockFH();
     /**
-     * Call the unlock method of native @ref flom_handle_t object
+     * Call 'unlock' method of the native @ref flom_handle_t object
      */
     private native int unlockFH();
     /**
-     * Call the getLockedElement of native @ref flom_handle_t object
+     * Call 'get_locked_element' method of the native @ref flom_handle_t object
      */
     private native String getLockedElementFH();
+    /**
+     * Call 'get_discovery_attempts' method of the native
+     * @ref flom_handle_t object
+     */
+    private native int getDiscoveryAttemptsFH();
+    /**
+     * Call 'set_discovery_attempts' method of the native
+     * @ref flom_handle_t object
+     */
+    private native void setDiscoveryAttemptsFH(int value);
+    /**
+     * Call 'get_discovery_timeout' method of the native
+     * @ref flom_handle_t object
+     */
+    private native int getDiscoveryTimeoutFH();
+    /**
+     * Call 'set_discovery_timeout' method of the native
+     * @ref flom_handle_t object
+     */
+    private native void setDiscoveryTimeoutFH(int value);
+    /**
+     * Call 'get_discovery_ttl' method of the native
+     * @ref flom_handle_t object
+     */
+    private native int getDiscoveryTtlFH();
+    /**
+     * Call 'set_discovery_ttl' method of the native
+     * @ref flom_handle_t object
+     */
+    private native void setDiscoveryTtlFH(int value);
 
 
-
+    
     /**
      * Create a new object calling the native interface
      */
@@ -105,18 +144,6 @@ public class FlomHandle {
 
 
 
-    public String getLockedElement() throws FlomException {
-        String ReturnString = null;
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else {
-            if (null == (ReturnString = getLockedElementFH()))
-                ReturnString = new String("");
-        }
-        return ReturnString;
-    }
-    
-    
     /**
      * Unlock the (logical) resource linked to this handle; the resource
      * MUST be previously locked using method @ref lock
@@ -132,6 +159,133 @@ public class FlomHandle {
     }
 
 
+    
+    /**
+     * Get the name of the locked element if the resource is of type set;
+     * this method throws an exception if the name of the locked element is
+     * not available
+     */
+    public String getLockedElement() throws FlomException {
+        String ReturnString = null;
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else {
+            ReturnCode = FlomErrorCodes.FLOM_RC_OK;
+            if (null == (ReturnString = getLockedElementFH()))
+                throw new FlomException(
+                    FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE);
+        }
+        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+            throw new FlomException(ReturnCode);
+        return ReturnString;
+    }
+
+    /**
+     * Get the maximum number of attempts that will be tryed during
+     * auto-discovery phase using UDP/IP multicast (see
+     * @ref getMulticastAddress, @ref getMulticastPort).
+     * The current value can be altered using method
+     * @ref setDiscoveryAttempts
+     * @return the current value
+     */
+    public int getDiscoveryAttempts() throws FlomException {
+        ReturnCode = FlomErrorCodes.FLOM_RC_OK;
+        int DiscoveryAttempts = getDiscoveryAttemptsFH();
+        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+            throw new FlomException(ReturnCode);
+        return DiscoveryAttempts;
+    }
+
+
+    
+    /**
+     * Sets the maximum number of attempts that will be tryed during
+     * auto-discovery phase using UDP/IP multicast (see
+     *         @ref setMulticastAddress, @ref setMulticastPort).
+     * The current value can be inspected using method
+     *         @ref getDiscoveryAttempts
+     * @param value (Input): the new value
+     */
+    public void setDiscoveryAttempts(int value) throws FlomException {
+        ReturnCode = FlomErrorCodes.FLOM_RC_OK;
+        setDiscoveryAttemptsFH(value);
+        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+            throw new FlomException(ReturnCode);
+        return;
+    }
+
+    
+    
+    /**
+     * Gets the number of milliseconds between two consecutive attempts that
+     * will be tryed during auto-discovery phase using UDP/IP multicast (see
+     * @ref getMulticastAddress, @ref getMulticastPort).
+     * The current value can be altered using method
+     * @ref setDiscoveryTimeout
+     * @return the current value
+     */
+    public int getDiscoveryTimeout() throws FlomException {
+        ReturnCode = FlomErrorCodes.FLOM_RC_OK;
+        int DiscoveryTimeout = getDiscoveryTimeoutFH();
+        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+            throw new FlomException(ReturnCode);
+        return DiscoveryTimeout;
+    }
+
+
+    
+    /**
+     * Sets the number of milliseconds between two consecutive attempts that
+     * will be tryed during auto-discovery phase using UDP/IP multicast (see
+     * @ref setMulticastAddress, @ref setMulticastPort).
+     * The current value can be inspected using method
+     * @ref getDiscoveryTtl.
+     * @param value (Input): the new value
+     */
+    public void setDiscoveryTimeout(int value) throws FlomException {
+        ReturnCode = FlomErrorCodes.FLOM_RC_OK;
+        setDiscoveryTimeoutFH(value);
+        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+            throw new FlomException(ReturnCode);
+        return;
+    }
+
+    
+    
+    /**
+     * Gets the UDP/IP multicast TTL parameter used during auto-discovery
+     * phase; for a definition of the parameter, see
+     * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html
+     * . The current value can be altered using method @ref setDiscoveryTtl
+     * @return the current value
+     */
+    public int getDiscoveryTtl() throws FlomException {
+        ReturnCode = FlomErrorCodes.FLOM_RC_OK;
+        int DiscoveryTtl = getDiscoveryTtlFH();
+        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+            throw new FlomException(ReturnCode);
+        return DiscoveryTtl;
+    }
+
+
+    
+    /**
+     * Sets the UDP/IP multicast TTL parameter used during auto-discovery
+     * phase; for a definition of the parameter, see
+     * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html
+     * . The current value can be inspected using method
+     * @ref getDiscoveryTtl.
+     * @param value (Input): the new value
+     */
+    public void setDiscoveryTtl(int value) throws FlomException {
+        ReturnCode = FlomErrorCodes.FLOM_RC_OK;
+        setDiscoveryTtlFH(value);
+        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+            throw new FlomException(ReturnCode);
+        return;
+    }
+
+    
     
     /**
      * Release native object if finalization is executed and the program
@@ -153,8 +307,27 @@ public class FlomHandle {
         try {
             FlomHandle fh = new FlomHandle();
             fh.lock();
-            System.out.println("FlomHandle: locked element = '" +
-                               fh.getLockedElement() + "'");
+            try {
+                System.out.println("FlomHandle.getLockedElement() = '" +
+                                   fh.getLockedElement() + "'");
+            } catch(FlomException e) {
+                if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
+                    e.getReturnCode())
+                    System.out.println("FlomHandle: " +
+                                       e.getReturnCodeText());
+                else throw(e);
+                    
+            }
+            fh.setDiscoveryAttempts(33);
+            System.out.println("FlomHandle.getDiscoveryAttempts() = " +
+                               fh.getDiscoveryAttempts());
+            fh.setDiscoveryTimeout(231);
+            System.out.println("FlomHandle.getDiscoveryTimeout() = " +
+                               fh.getDiscoveryTimeout());
+            fh.setDiscoveryTtl(5);
+            System.out.println("FlomHandle.getDiscoveryTtl() = " +
+                               fh.getDiscoveryTtl());
+
             fh.unlock();
             fh.free();
         } catch(FlomException e) {
