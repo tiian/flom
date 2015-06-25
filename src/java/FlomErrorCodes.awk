@@ -3,4 +3,7 @@ BEGIN {
 	print "class FlomErrorCodes {" 
 }
 /#define.*FLOM_/	{ print "\tpublic final static int " $2 " = " $3 ";" }
-END   { print "}" }
+END   { 
+	print "\tpublic native static String getText(int code);"
+	print "}"
+}

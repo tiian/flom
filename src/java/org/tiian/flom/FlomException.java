@@ -34,11 +34,9 @@ public class FlomException extends Exception {
     private int ReturnCode;
     
     public FlomException(int returnCode) {
+        super(FlomErrorCodes.getText(returnCode));
         ReturnCode = returnCode;
     }
 
     public int getReturnCode() { return ReturnCode; }
-
-    public native String getReturnCodeText();
-    private int foob;
 }

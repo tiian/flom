@@ -83,4 +83,5 @@ class FlomErrorCodes {
 	public final static int FLOM_RC_GET_FIELD_ID_ERROR = -300;
 	public final static int FLOM_RC_GET_OBJECT_CLASS_ERROR = -301;
 	public final static int FLOM_RC_NEW_DIRECT_BYTE_BUFFER_ERROR = -302;
+	public native static String getText(int code);
 }

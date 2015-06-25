@@ -636,7 +636,7 @@ $(JAVA_PKGDIR)/FlomException.class:	$(JAVA_PKGDIR)/FlomException.java
 	javac $<
 
 flom_java.h:	flom.jar
-	rm -f $@ ; javah -o $@ -classpath $< org.tiian.flom.FlomHandle org.tiian.flom.FlomException
+	rm -f $@ ; javah -o $@ -classpath $< org.tiian.flom.FlomHandle org.tiian.flom.FlomErrorCodes
 
 flom.jar:	$(JAVA_PKGDIR)/FlomErrorCodes.class $(JAVA_PKGDIR)/FlomHandle.class $(JAVA_PKGDIR)/FlomException.class
 	jar cf $@ $^

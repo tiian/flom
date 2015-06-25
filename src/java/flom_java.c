@@ -120,110 +120,53 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_newFH(
 
 
 /* This is an helper internal function, it's not seen by JNI */
-int Java_org_tiian_flom_FlomHandle_getNativeHandle(
-    JNIEnv *env, jobject this_obj, flom_handle_t **handle)
+flom_handle_t *Java_org_tiian_flom_FlomHandle_getNativeHandle(
+    JNIEnv *env, jobject this_obj)
 {
-    enum Exception { GET_OBJECT_CLASS_ERROR
-                     , GET_FIELD_ID_ERROR
-                     , NULL_OBJECT
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    jclass this_class;
+    jfieldID field_id;
+    jobject byte_buffer;
+    flom_handle_t *fh;
     
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getNativeHandle\n"));
-    TRY {
-        jclass this_class;
-        jfieldID field_id;
-        jobject byte_buffer;
-        flom_handle_t *fh;
-        
-        /* get a reference to this object's class */
-        if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
-            FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getNativeHandle: "
-                        "this_class == NULL\n"));
-            THROW(GET_OBJECT_CLASS_ERROR);
-        }
-        /* get the field identificator */
-        if (NULL == (field_id = (*env)->GetFieldID(
-                         env, this_class, "NativeHandler",
-                         "Ljava/nio/ByteBuffer;"))) {
-            FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getNativeHandle: "
-                        "field_id == NULL\n"));
-            THROW(GET_FIELD_ID_ERROR);
-        }
-        /* get ByteBuffer reference */
-        byte_buffer = (*env)->GetObjectField(env, this_obj, field_id);
-        /* cast to flom_handle_t */
-        if (NULL == (fh = (flom_handle_t *)(*env)->GetDirectBufferAddress(
-                         env, byte_buffer)))
-            THROW(NULL_OBJECT);
-        *handle = fh;
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getNativeHandle/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
 
+    /* get a reference to this object's class */
+    if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
+        FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getNativeHandle: "
+                    "this_class == NULL\n"));
+        jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
+        (*env)->ThrowNew(
+            env, Exception,
+            "JNI/Java_org_tiian_flom_FlomHandle_getNativeHandle/"
+            "GetObjectClass returned NULL");
+    }
 
-
-Java_org_tiian_flom_FlomHandle_setReturnCode(
-    JNIEnv *env, jobject this_obj, jint return_code)
-{
-    enum Exception { GET_OBJECT_CLASS_ERROR
-                     , GET_FIELD_ID_ERROR
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setReturnCode: %d\n",
-                return_code));
-    TRY {
-        jclass this_class;
-        jfieldID field_id;
-        
-        /* get a reference to this object's class */
-        if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
-            FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setReturnCode: "
-                        "this_class == NULL\n"));
-            THROW(GET_OBJECT_CLASS_ERROR);
-        }
-        /* get the field identificator */
-        if (NULL == (field_id = (*env)->GetFieldID(
-                         env, this_class, "ReturnCode", "I"))) {
-            FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setReturnCode: "
-                        "field_id == NULL\n"));
-            THROW(GET_FIELD_ID_ERROR);
-        }
-        /* set ReturnCode value */
-        (*env)->SetIntField(env, this_obj, field_id, return_code);
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case GET_OBJECT_CLASS_ERROR:
-                ret_cod = FLOM_RC_GET_OBJECT_CLASS_ERROR;
-                break;
-            case GET_FIELD_ID_ERROR:
-                ret_cod = FLOM_RC_GET_FIELD_ID_ERROR;
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setReturnCode/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return;
+    /* get the field identificator */
+    if (NULL == (field_id = (*env)->GetFieldID(
+                     env, this_class, "NativeHandler",
+                     "Ljava/nio/ByteBuffer;"))) {
+        FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getNativeHandle: "
+                    "field_id == NULL\n"));
+        jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
+        (*env)->ThrowNew(
+            env, Exception,
+            "JNI/Java_org_tiian_flom_FlomHandle_getNativeHandle/"
+            "GetFieldID returned NULL");
+    }
+    /* get ByteBuffer reference */
+    byte_buffer = (*env)->GetObjectField(env, this_obj, field_id);
+    /* cast to flom_handle_t */
+    if (NULL == (fh = (flom_handle_t *)(*env)->GetDirectBufferAddress(
+                     env, byte_buffer))) {
+        FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getNativeHandle: "
+                    "fh == NULL\n"));
+        jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
+        (*env)->ThrowNew(
+            env, Exception,
+            "JNI/Java_org_tiian_flom_FlomHandle_getNativeHandle/"
+            "GetDirectBufferAddress returned NULL");
+    }
+    return fh;
 }
 
 
@@ -231,8 +174,7 @@ Java_org_tiian_flom_FlomHandle_setReturnCode(
 JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_deleteFH
   (JNIEnv *env, jobject this_obj)
 {
-    enum Exception { GET_NATIVE_HANDLE_ERROR
-                     , NONE } excp;
+    enum Exception { NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     if (FLOM_RC_OK != (ret_cod = flom_init_check()))
@@ -242,16 +184,11 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_deleteFH
     TRY {
         flom_handle_t *handle;
         
-        if (FLOM_RC_OK != (
-                ret_cod = Java_org_tiian_flom_FlomHandle_getNativeHandle(
-                    env, this_obj, &handle)))
-            THROW(GET_NATIVE_HANDLE_ERROR);
-        flom_handle_delete(handle);
+        flom_handle_delete(Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                               env, this_obj));
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case GET_NATIVE_HANDLE_ERROR:
-                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -269,8 +206,7 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_deleteFH
 JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_lockFH
 (JNIEnv *env, jobject this_obj)
 {
-    enum Exception { GET_NATIVE_HANDLE_ERROR
-                     , LOCK_ERROR
+    enum Exception { LOCK_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -281,17 +217,14 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_lockFH
     TRY {
         flom_handle_t *handle;
         
-        if (FLOM_RC_OK != (
-                ret_cod = Java_org_tiian_flom_FlomHandle_getNativeHandle(
-                    env, this_obj, &handle)))
-            THROW(GET_NATIVE_HANDLE_ERROR);
-        if (FLOM_RC_OK != (ret_cod = flom_handle_lock(handle)))
+        if (FLOM_RC_OK != (ret_cod = flom_handle_lock(
+                               Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                                   env, this_obj))))
             THROW(LOCK_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case GET_NATIVE_HANDLE_ERROR:
             case LOCK_ERROR:
                 break;
             case NONE:
@@ -311,8 +244,7 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_lockFH
 JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_unlockFH
 (JNIEnv *env, jobject this_obj)
 {
-    enum Exception { GET_NATIVE_HANDLE_ERROR
-                     , UNLOCK_ERROR
+    enum Exception { UNLOCK_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -323,17 +255,14 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_unlockFH
     TRY {
         flom_handle_t *handle;
         
-        if (FLOM_RC_OK != (
-                ret_cod = Java_org_tiian_flom_FlomHandle_getNativeHandle(
-                    env, this_obj, &handle)))
-            THROW(GET_NATIVE_HANDLE_ERROR);
-        if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(handle)))
+        if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(
+                               Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                                   env, this_obj))))
             THROW(UNLOCK_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case GET_NATIVE_HANDLE_ERROR:
             case UNLOCK_ERROR:
                 break;
             case NONE:
@@ -353,147 +282,44 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_unlockFH
 JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getLockedElementFH
 (JNIEnv *env, jobject this_obj)
 {
-    enum Exception { GET_NATIVE_HANDLE_ERROR
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    jstring ret_string = NULL;
-    
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getLockedElementFH\n"));
-    TRY {
-        flom_handle_t *handle;
-        
-        if (FLOM_RC_OK != (
-                ret_cod = Java_org_tiian_flom_FlomHandle_getNativeHandle(
-                    env, this_obj, &handle)))
-            THROW(GET_NATIVE_HANDLE_ERROR);
-        ret_string = (*env)->NewStringUTF(
-            env, flom_handle_get_locked_element(handle));
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case GET_NATIVE_HANDLE_ERROR:
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        Java_org_tiian_flom_FlomHandle_setReturnCode(env, this_obj, ret_cod);
-    } /* TRY-CATCH */
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getLockedElementFH/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_string;
+    return (*env)->NewStringUTF(
+        env,
+        flom_handle_get_locked_element(
+            Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                env, this_obj)));
 }
 
 
 
-JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryAttemptsFH
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryAttemptsJNI
 (JNIEnv *env, jobject this_obj)
 {
-    enum Exception { GET_NATIVE_HANDLE_ERROR
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    jint discovery_attempts = 0;
-    
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getDiscoveryAttemptsFH\n"));
-    TRY {
-        flom_handle_t *handle;
-        
-        if (FLOM_RC_OK != (
-                ret_cod = Java_org_tiian_flom_FlomHandle_getNativeHandle(
-                    env, this_obj, &handle)))
-            THROW(GET_NATIVE_HANDLE_ERROR);
-        discovery_attempts = flom_handle_get_discovery_attempts(handle);
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case GET_NATIVE_HANDLE_ERROR:
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        Java_org_tiian_flom_FlomHandle_setReturnCode(env, this_obj, ret_cod);
-    } /* TRY-CATCH */
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getDiscoveryAttemptsFH/"
-                "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return discovery_attempts;
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getDiscoveryAttempts\n"));
+    return (jint)flom_handle_get_discovery_attempts(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj));
 }
 
 
 
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryAttemptsFH
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryAttemptsJNI
 (JNIEnv *env, jobject this_obj, jint value)
 {
-    enum Exception { GET_NATIVE_HANDLE_ERROR
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setDiscoveryAttemptsFH\n"));
-    TRY {
-        flom_handle_t *handle;
-        
-        if (FLOM_RC_OK != (
-                ret_cod = Java_org_tiian_flom_FlomHandle_getNativeHandle(
-                    env, this_obj, &handle)))
-            THROW(GET_NATIVE_HANDLE_ERROR);
-        flom_handle_set_discovery_attempts(handle, value);
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case GET_NATIVE_HANDLE_ERROR:
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        Java_org_tiian_flom_FlomHandle_setReturnCode(env, this_obj, ret_cod);
-    } /* TRY-CATCH */
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setDiscoveryAttemptsFH/"
-                "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    flom_handle_set_discovery_attempts(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj),
+        value);
     return;
 }
 
     
 
-JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryTimeoutFH
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryTimeout
 (JNIEnv *env, jobject this_obj)
 {
-    enum Exception { GET_NATIVE_HANDLE_ERROR
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    jint discovery_timeout = 0;
-    
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getDiscoveryTimeoutFH\n"));
-    TRY {
-        flom_handle_t *handle;
-        
-        if (FLOM_RC_OK != (
-                ret_cod = Java_org_tiian_flom_FlomHandle_getNativeHandle(
-                    env, this_obj, &handle)))
-            THROW(GET_NATIVE_HANDLE_ERROR);
-        discovery_timeout = flom_handle_get_discovery_timeout(handle);
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case GET_NATIVE_HANDLE_ERROR:
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        Java_org_tiian_flom_FlomHandle_setReturnCode(env, this_obj, ret_cod);
-    } /* TRY-CATCH */
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getDiscoveryTimeoutFH/"
-                "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return discovery_timeout;
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getDiscoveryTimeout\n"));
+    return (jint)flom_handle_get_discovery_timeout(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj));
 }
 
 
@@ -501,72 +327,22 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryTimeoutFH
 JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTimeoutFH
 (JNIEnv *env, jobject this_obj, jint value)
 {
-    enum Exception { GET_NATIVE_HANDLE_ERROR
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setDiscoveryTimeoutFH\n"));
-    TRY {
-        flom_handle_t *handle;
-        
-        if (FLOM_RC_OK != (
-                ret_cod = Java_org_tiian_flom_FlomHandle_getNativeHandle(
-                    env, this_obj, &handle)))
-            THROW(GET_NATIVE_HANDLE_ERROR);
-        flom_handle_set_discovery_timeout(handle, value);
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case GET_NATIVE_HANDLE_ERROR:
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        Java_org_tiian_flom_FlomHandle_setReturnCode(env, this_obj, ret_cod);
-    } /* TRY-CATCH */
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setDiscoveryTimeoutFH/"
-                "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    flom_handle_set_discovery_timeout(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj), value);
     return;
 }
 
     
 
-JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryTtlFH
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryTtl
 (JNIEnv *env, jobject this_obj)
 {
-    enum Exception { GET_NATIVE_HANDLE_ERROR
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    jint discovery_ttl = 0;
-    
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getDiscoveryTtlFH\n"));
-    TRY {
-        flom_handle_t *handle;
-        
-        if (FLOM_RC_OK != (
-                ret_cod = Java_org_tiian_flom_FlomHandle_getNativeHandle(
-                    env, this_obj, &handle)))
-            THROW(GET_NATIVE_HANDLE_ERROR);
-        discovery_ttl = flom_handle_get_discovery_ttl(handle);
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case GET_NATIVE_HANDLE_ERROR:
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-        Java_org_tiian_flom_FlomHandle_setReturnCode(env, this_obj, ret_cod);
-    } /* TRY-CATCH */
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getDiscoveryTtlFH/"
-                "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return discovery_ttl;
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getDiscoveryTtl\n"));
+    return (jint)flom_handle_get_discovery_ttl(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj));
 }
 
 
@@ -574,31 +350,23 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryTtlFH
 JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTtlFH
 (JNIEnv *env, jobject this_obj, jint value)
 {
-    enum Exception { GET_NATIVE_HANDLE_ERROR
-                     , NONE } excp;
+    enum Exception { NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setDiscoveryTtlFH\n"));
     TRY {
-        flom_handle_t *handle;
-        
-        if (FLOM_RC_OK != (
-                ret_cod = Java_org_tiian_flom_FlomHandle_getNativeHandle(
-                    env, this_obj, &handle)))
-            THROW(GET_NATIVE_HANDLE_ERROR);
-        flom_handle_set_discovery_ttl(handle, value);
+        flom_handle_set_discovery_ttl(
+            Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                env, this_obj), value);
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case GET_NATIVE_HANDLE_ERROR:
-                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
             default:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        Java_org_tiian_flom_FlomHandle_setReturnCode(env, this_obj, ret_cod);
     } /* TRY-CATCH */
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setDiscoveryTtlFH/"
                 "excp=%d/ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -607,30 +375,8 @@ JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTtlFH
 
     
 
-JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomException_getReturnCodeText
-(JNIEnv *env, jobject this_obj)
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomErrorCodes_getText
+(JNIEnv *env, jclass this_obj, jint code)
 {
-    jstring return_string = NULL;
-    jclass this_class;
-    jfieldID field_id;
-    jint return_code;
-    
-    /* get a reference to this object's class */
-    if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
-        FLOM_TRACE(("Java_org_tiian_flom_FlomException_getReturnCodeText: "
-                    "this_class == NULL\n"));
-        return return_string;
-    }
-    /* get the field identificator */
-    if (NULL == (field_id = (*env)->GetFieldID(env, this_class,
-                                               "ReturnCode", "I"))) {
-        FLOM_TRACE(("Java_org_tiian_flom_FlomException_getReturnCodeText: "
-                    "field_id == NULL\n"));
-        return return_string;
-    }
-    /* get ReturnCode value */
-    return_code = (*env)->GetIntField(env, this_obj, field_id);
-    /* get return string using native method */
-    return_string = (*env)->NewStringUTF(env, flom_strerror(return_code));
-    return return_string;
+    return (*env)->NewStringUTF(env, flom_strerror(code));
 }

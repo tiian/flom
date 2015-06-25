@@ -44,11 +44,6 @@ public class FlomHandle {
      * native library
      */
     private ByteBuffer NativeHandler;
-    /**
-     * Native methods save the return code in this private field that can
-     * be inspected from the Java code
-     */
-    private int ReturnCode;
 
     /**
      * Create a new native @ref flom_handle_t object and set @ref NativeHandler
@@ -71,30 +66,10 @@ public class FlomHandle {
      */
     private native String getLockedElementFH();
     /**
-     * Call 'get_discovery_attempts' method of the native
-     * @ref flom_handle_t object
-     */
-    private native int getDiscoveryAttemptsFH();
-    /**
-     * Call 'set_discovery_attempts' method of the native
-     * @ref flom_handle_t object
-     */
-    private native void setDiscoveryAttemptsFH(int value);
-    /**
-     * Call 'get_discovery_timeout' method of the native
-     * @ref flom_handle_t object
-     */
-    private native int getDiscoveryTimeoutFH();
-    /**
      * Call 'set_discovery_timeout' method of the native
      * @ref flom_handle_t object
      */
     private native void setDiscoveryTimeoutFH(int value);
-    /**
-     * Call 'get_discovery_ttl' method of the native
-     * @ref flom_handle_t object
-     */
-    private native int getDiscoveryTtlFH();
     /**
      * Call 'set_discovery_ttl' method of the native
      * @ref flom_handle_t object
@@ -170,16 +145,17 @@ public class FlomHandle {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else {
-            ReturnCode = FlomErrorCodes.FLOM_RC_OK;
             if (null == (ReturnString = getLockedElementFH()))
                 throw new FlomException(
                     FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE);
         }
-        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
-            throw new FlomException(ReturnCode);
         return ReturnString;
     }
 
+    /**
+     * Native method for @ref getDiscoveryAttempts
+     */
+    private native int getDiscoveryAttemptsJNI();
     /**
      * Get the maximum number of attempts that will be tryed during
      * auto-discovery phase using UDP/IP multicast (see
@@ -189,15 +165,18 @@ public class FlomHandle {
      * @return the current value
      */
     public int getDiscoveryAttempts() throws FlomException {
-        ReturnCode = FlomErrorCodes.FLOM_RC_OK;
-        int DiscoveryAttempts = getDiscoveryAttemptsFH();
-        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
-            throw new FlomException(ReturnCode);
-        return DiscoveryAttempts;
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            return getDiscoveryAttemptsJNI();
     }
 
 
-    
+
+    /**
+     * Native method for @ref setDiscoveryAttempts
+     */
+    private native void setDiscoveryAttemptsJNI(int value);
     /**
      * Sets the maximum number of attempts that will be tryed during
      * auto-discovery phase using UDP/IP multicast (see
@@ -207,11 +186,10 @@ public class FlomHandle {
      * @param value (Input): the new value
      */
     public void setDiscoveryAttempts(int value) throws FlomException {
-        ReturnCode = FlomErrorCodes.FLOM_RC_OK;
-        setDiscoveryAttemptsFH(value);
-        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
-            throw new FlomException(ReturnCode);
-        return;
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            setDiscoveryAttemptsJNI(value);
     }
 
     
@@ -224,13 +202,7 @@ public class FlomHandle {
      * @ref setDiscoveryTimeout
      * @return the current value
      */
-    public int getDiscoveryTimeout() throws FlomException {
-        ReturnCode = FlomErrorCodes.FLOM_RC_OK;
-        int DiscoveryTimeout = getDiscoveryTimeoutFH();
-        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
-            throw new FlomException(ReturnCode);
-        return DiscoveryTimeout;
-    }
+    public native int getDiscoveryTimeout();
 
 
     
@@ -242,12 +214,8 @@ public class FlomHandle {
      * @ref getDiscoveryTtl.
      * @param value (Input): the new value
      */
-    public void setDiscoveryTimeout(int value) throws FlomException {
-        ReturnCode = FlomErrorCodes.FLOM_RC_OK;
+    public void setDiscoveryTimeout(int value) {
         setDiscoveryTimeoutFH(value);
-        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
-            throw new FlomException(ReturnCode);
-        return;
     }
 
     
@@ -259,14 +227,7 @@ public class FlomHandle {
      * . The current value can be altered using method @ref setDiscoveryTtl
      * @return the current value
      */
-    public int getDiscoveryTtl() throws FlomException {
-        ReturnCode = FlomErrorCodes.FLOM_RC_OK;
-        int DiscoveryTtl = getDiscoveryTtlFH();
-        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
-            throw new FlomException(ReturnCode);
-        return DiscoveryTtl;
-    }
-
+    public native int getDiscoveryTtl();
 
     
     /**
@@ -277,12 +238,8 @@ public class FlomHandle {
      * @ref getDiscoveryTtl.
      * @param value (Input): the new value
      */
-    public void setDiscoveryTtl(int value) throws FlomException {
-        ReturnCode = FlomErrorCodes.FLOM_RC_OK;
+    public void setDiscoveryTtl(int value) {
         setDiscoveryTtlFH(value);
-        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
-            throw new FlomException(ReturnCode);
-        return;
     }
 
     
@@ -298,7 +255,7 @@ public class FlomHandle {
             System.err.println("FlomHandle.finalize() thrown a " +
                                "FlomException: ReturnCode=" +
                                e.getReturnCode() + 
-                               " (" + e.getReturnCodeText() + ")");
+                               " (" + e.getMessage() + ")");
         }
     }
     
@@ -306,6 +263,8 @@ public class FlomHandle {
     public static void main(String[] args) {
         try {
             FlomHandle fh = new FlomHandle();
+            System.out.println("FlomHandle.getDiscoveryAttempts() = " +
+                               fh.getDiscoveryAttempts());
             fh.lock();
             try {
                 System.out.println("FlomHandle.getLockedElement() = '" +
@@ -313,10 +272,8 @@ public class FlomHandle {
             } catch(FlomException e) {
                 if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
                     e.getReturnCode())
-                    System.out.println("FlomHandle: " +
-                                       e.getReturnCodeText());
+                    System.out.println("FlomHandle: " + e.getMessage());
                 else throw(e);
-                    
             }
             fh.setDiscoveryAttempts(33);
             System.out.println("FlomHandle.getDiscoveryAttempts() = " +
@@ -333,7 +290,7 @@ public class FlomHandle {
         } catch(FlomException e) {
             System.out.println("FlomException: ReturnCode=" +
                                e.getReturnCode() + 
-                               " (" + e.getReturnCodeText() + ")");
+                               " (" + e.getMessage() + ")");
         }
         /*
         System.runFinalization();
