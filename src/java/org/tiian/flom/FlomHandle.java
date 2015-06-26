@@ -287,7 +287,20 @@ public class FlomHandle {
             setDiscoveryTtlJNI(value);
     }
 
+
     
+    /**
+     * Gets lock mode property: how a simple or hierarchical resource will
+     * be locked when method @ref lock is called; FLoM
+     * supports the same lock mode semantic proposed by DLM, see
+     * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
+     * for a detailed explanation
+     * . The current value can be altered using method @ref setLockMode
+     * @return the current value
+     */
+    FlomLockMode getLockMode() {
+         return FlomLockMode.CONCURRENT_READ; }
+
     
     
     // @@@ remove me!!!
