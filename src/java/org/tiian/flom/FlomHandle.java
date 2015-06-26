@@ -39,67 +39,69 @@ public class FlomHandle {
         System.loadLibrary("flom_java");
     }
 
+
+    
     /**
      * This is the opaque wrapper of a flom_handle_t object used by the
      * native library
      */
     private ByteBuffer NativeHandler;
 
-    /**
-     * Create a new native @ref flom_handle_t object and set @ref NativeHandler
-     */
-    private native int newFH();
-    /**
-     * Delete the native @ref flom_handle_t object
-     */
-    private native int deleteFH();
-    /**
-     * Call 'lock' method of the native @ref flom_handle_t object
-     */
-    private native int lockFH();
-    /**
-     * Call 'unlock' method of the native @ref flom_handle_t object
-     */
-    private native int unlockFH();
-    /**
-     * Call 'get_locked_element' method of the native @ref flom_handle_t object
-     */
-    private native String getLockedElementFH();
-    /**
-     * Call 'set_discovery_timeout' method of the native
-     * @ref flom_handle_t object
-     */
-    private native void setDiscoveryTimeoutFH(int value);
-    /**
-     * Call 'set_discovery_ttl' method of the native
-     * @ref flom_handle_t object
-     */
-    private native void setDiscoveryTtlFH(int value);
-
 
     
+    /**
+     * Create a new native @ref flom_handle_t object and set @ref NativeHandler
+     * Called by class constructor
+     */
+    private native int newJNI();
     /**
      * Create a new object calling the native interface
      */
     public FlomHandle() throws FlomException {
-        int ReturnCode = newFH();
+        int ReturnCode = newJNI();
         if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
             throw new FlomException(ReturnCode);
     }
+
+
+    
+    /**
+     * Delete the native @ref flom_handle_t object
+     * Called by @ref free method
+     */
+    private native int deleteJNI();
     /**
      * Explicitly free the native object allocated by JNI wrapper
      */
     public void free() throws FlomException {
         if (null != NativeHandler) {
-            int ReturnCode = deleteFH();
+            int ReturnCode = deleteJNI();
             if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
                 throw new FlomException(ReturnCode);
             NativeHandler = null;
         }
     }
+    /**
+     * Release native object if finalization is executed and the program
+     * forgot to call @ref release method
+     */
+    protected void finalize() {
+        try {
+            free();
+        } catch(FlomException e) {
+            System.err.println("FlomHandle.finalize() thrown a " +
+                               "FlomException: ReturnCode=" +
+                               e.getReturnCode() + 
+                               " (" + e.getMessage() + ")");
+        }
+    }
 
 
     
+    /**
+     * Native method for @ref lock
+     */
+    private native int lockJNI();
     /**
      * Lock the (logical) resource linked to this handle; the resource
      * MUST be unlocked using method @ref unlock when the lock condition
@@ -111,7 +113,7 @@ public class FlomHandle {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else {
-            int ReturnCode = lockFH();
+            int ReturnCode = lockJNI();
             if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
                 throw new FlomException(ReturnCode);
         }
@@ -120,6 +122,10 @@ public class FlomHandle {
 
 
     /**
+     * Native method for @ref unlock
+     */
+    private native int unlockJNI();
+    /**
      * Unlock the (logical) resource linked to this handle; the resource
      * MUST be previously locked using method @ref lock
      */
@@ -127,7 +133,7 @@ public class FlomHandle {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else {
-            int ReturnCode = unlockFH();
+            int ReturnCode = unlockJNI();
             if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
                 throw new FlomException(ReturnCode);
         }
@@ -135,6 +141,10 @@ public class FlomHandle {
 
 
     
+    /**
+     * Native method for @ref getLockedElement
+     */
+    private native String getLockedElementJNI();
     /**
      * Get the name of the locked element if the resource is of type set;
      * this method throws an exception if the name of the locked element is
@@ -145,13 +155,15 @@ public class FlomHandle {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else {
-            if (null == (ReturnString = getLockedElementFH()))
+            if (null == (ReturnString = getLockedElementJNI()))
                 throw new FlomException(
                     FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE);
         }
         return ReturnString;
     }
 
+
+    
     /**
      * Native method for @ref getDiscoveryAttempts
      */
@@ -195,6 +207,10 @@ public class FlomHandle {
     
     
     /**
+     * Native method for @ref getDiscoveryTimeout
+     */
+    private native int getDiscoveryTimeoutJNI();
+    /**
      * Gets the number of milliseconds between two consecutive attempts that
      * will be tryed during auto-discovery phase using UDP/IP multicast (see
      * @ref getMulticastAddress, @ref getMulticastPort).
@@ -202,10 +218,19 @@ public class FlomHandle {
      * @ref setDiscoveryTimeout
      * @return the current value
      */
-    public native int getDiscoveryTimeout();
+    public int getDiscoveryTimeout() throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            return getDiscoveryTimeoutJNI();
+    }
 
 
     
+    /**
+     * Native method for @ref setDiscoveryTimeout
+     */
+    private native void setDiscoveryTimeoutJNI(int value);
     /**
      * Sets the number of milliseconds between two consecutive attempts that
      * will be tryed during auto-discovery phase using UDP/IP multicast (see
@@ -214,12 +239,19 @@ public class FlomHandle {
      * @ref getDiscoveryTtl.
      * @param value (Input): the new value
      */
-    public void setDiscoveryTimeout(int value) {
-        setDiscoveryTimeoutFH(value);
+    public void setDiscoveryTimeout(int value) throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            setDiscoveryTimeoutJNI(value);
     }
 
     
     
+    /**
+     * Native method for @ref getDiscoveryTtl
+     */
+    private native int getDiscoveryTtlJNI();
     /**
      * Gets the UDP/IP multicast TTL parameter used during auto-discovery
      * phase; for a definition of the parameter, see
@@ -227,9 +259,19 @@ public class FlomHandle {
      * . The current value can be altered using method @ref setDiscoveryTtl
      * @return the current value
      */
-    public native int getDiscoveryTtl();
+    public int getDiscoveryTtl() throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            return getDiscoveryTtlJNI();
+    }
+    
 
     
+    /**
+     * Native method for @ref setDiscoveryTtl
+     */
+    private native void setDiscoveryTtlJNI(int value);
     /**
      * Sets the UDP/IP multicast TTL parameter used during auto-discovery
      * phase; for a definition of the parameter, see
@@ -238,26 +280,15 @@ public class FlomHandle {
      * @ref getDiscoveryTtl.
      * @param value (Input): the new value
      */
-    public void setDiscoveryTtl(int value) {
-        setDiscoveryTtlFH(value);
+    public void setDiscoveryTtl(int value) throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            setDiscoveryTtlJNI(value);
     }
 
     
     
-    /**
-     * Release native object if finalization is executed and the program
-     * forgot to call @ref release method
-     */
-    protected void finalize() {
-        try {
-            free();
-        } catch(FlomException e) {
-            System.err.println("FlomHandle.finalize() thrown a " +
-                               "FlomException: ReturnCode=" +
-                               e.getReturnCode() + 
-                               " (" + e.getMessage() + ")");
-        }
-    }
     
     // @@@ remove me!!!
     public static void main(String[] args) {
