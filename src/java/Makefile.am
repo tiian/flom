@@ -14,7 +14,10 @@ lib_LTLIBRARIES = libflom_java.la
 $(JAVA_PKGDIR)/FlomErrorCodes.java:	FlomErrorCodes.awk ../flom_errors.h
 	awk -f $^ > $@
 
-$(JAVA_PKGDIR)/FlomLockMode.class:	$(JAVA_PKGDIR)/FlomLockMode.java
+$(JAVA_PKGDIR)/FlomLockModes.java:	FlomLockModes.awk ../flom_types.h
+	awk -f $^ > $@
+
+$(JAVA_PKGDIR)/FlomLockModes.class:	$(JAVA_PKGDIR)/FlomLockModes.java
 	javac $<
 
 $(JAVA_PKGDIR)/FlomErrorCodes.class:	$(JAVA_PKGDIR)/FlomErrorCodes.java
@@ -29,7 +32,7 @@ $(JAVA_PKGDIR)/FlomException.class:	$(JAVA_PKGDIR)/FlomException.java
 flom_java.h:	flom.jar
 	rm -f $@ ; javah -o $@ -classpath $< org.tiian.flom.FlomHandle org.tiian.flom.FlomErrorCodes
 
-flom.jar:	$(JAVA_PKGDIR)/FlomErrorCodes.class $(JAVA_PKGDIR)/FlomLockMode.class $(JAVA_PKGDIR)/FlomHandle.class $(JAVA_PKGDIR)/FlomException.class
+flom.jar:	$(JAVA_PKGDIR)/FlomErrorCodes.class $(JAVA_PKGDIR)/FlomLockModes.class $(JAVA_PKGDIR)/FlomHandle.class $(JAVA_PKGDIR)/FlomException.class
 	jar cf $@ $^
 
 #javadir = $(datadir)/$(PACKAGE)/java

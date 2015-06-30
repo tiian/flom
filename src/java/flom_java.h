@@ -95,6 +95,22 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryTtlJNI
 JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTtlJNI
   (JNIEnv *, jobject, jint);
 
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getLockModeJNI
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getLockModeJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setLockModeJNI
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setLockModeJNI
+  (JNIEnv *, jobject, jint);
+
 #ifdef __cplusplus
 }
 #endif

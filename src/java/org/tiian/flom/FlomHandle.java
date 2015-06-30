@@ -288,21 +288,53 @@ public class FlomHandle {
     }
 
 
-    
+
+    /**
+     * Native method for @ref getLockMode
+     */
+    private native int getLockModeJNI();
     /**
      * Gets lock mode property: how a simple or hierarchical resource will
      * be locked when method @ref lock is called; FLoM
      * supports the same lock mode semantic proposed by DLM, see
      * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
      * for a detailed explanation
-     * . The current value can be altered using method @ref setLockMode
+     * . The current value can be altered using method @ref setLockMode.
+     * The available lock modes are described by class @ref FlomLockModes
      * @return the current value
      */
-    FlomLockMode getLockMode() {
-         return FlomLockMode.CONCURRENT_READ; }
+    int getLockMode() throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            return getLockModeJNI();
+    }
 
     
     
+    /**
+     * Native method for @ref setLockMode
+     */
+    private native void setLockModeJNI(int value);
+    /**
+     * Sets lock mode property: how a simple or hierarchical resource will
+     * be locked when method @ref lock is called; FLoM
+     * supports the same lock mode semantic proposed by DLM, see
+     * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
+     * for a detailed explanation
+     * . The current value can be inspected using method @ref getLockMode
+     * @param value (Input): the new value
+     * The available lock modes are described by class @ref FlomLockModes
+     */
+    public void setLockMode(int value) throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            setLockModeJNI(value);
+    }
+
+
+
     // @@@ remove me!!!
     public static void main(String[] args) {
         try {
@@ -328,6 +360,9 @@ public class FlomHandle {
             fh.setDiscoveryTtl(5);
             System.out.println("FlomHandle.getDiscoveryTtl() = " +
                                fh.getDiscoveryTtl());
+            fh.setLockMode(FlomLockModes.FLOM_LOCK_MODE_PR);
+            System.out.println("FlomHandle.getLockMode() = " +
+                               fh.getLockMode());
 
             fh.unlock();
             fh.free();
