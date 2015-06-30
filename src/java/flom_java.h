@@ -111,6 +111,46 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getLockModeJNI
 JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setLockModeJNI
   (JNIEnv *, jobject, jint);
 
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getMulticastAddressJNI
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getMulticastAddressJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setMulticastAddressJNI
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setMulticastAddressJNI
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getMulticastPortJNI
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getMulticastPortJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setMulticastPortJNI
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setMulticastPortJNI
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getResourceCreateJNI
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_tiian_flom_FlomHandle_getResourceCreateJNI
+  (JNIEnv *, jobject);
+
 #ifdef __cplusplus
 }
 #endif

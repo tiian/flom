@@ -1,7 +1,6 @@
 Road map:
 
-implement getLockedElement passing it as a parameter (propagate ret_cod to
-the caller...)
+implement getResourceCreate...
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 

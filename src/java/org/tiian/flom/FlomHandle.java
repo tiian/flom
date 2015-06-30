@@ -288,7 +288,6 @@ public class FlomHandle {
     }
 
 
-
     /**
      * Native method for @ref getLockMode
      */
@@ -303,15 +302,15 @@ public class FlomHandle {
      * The available lock modes are described by class @ref FlomLockModes
      * @return the current value
      */
-    int getLockMode() throws FlomException {
+    public int getLockMode() throws FlomException {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else
             return getLockModeJNI();
     }
 
-    
-    
+
+        
     /**
      * Native method for @ref setLockMode
      */
@@ -334,7 +333,113 @@ public class FlomHandle {
     }
 
 
+    
+    /**
+     * Native method for @ref getMulticastAddress
+     */
+    private native String getMulticastAddressJNI();
+    /**
+     * Gets the multicast address: the IP address (or a network name that
+     * the system can resolve) of the IP multicast group that must be
+     * contacted to reach FLoM daemon (server) using UDP/IP; see also
+     *         @ref getMulticastPort.
+     * The current value can be altered using function
+     *         @ref setMulticastAddress.
+     * @return the current value as a standard C++ string
+     */
+    public String getMulticastAddress() throws FlomException {
+        String ReturnString = null;
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else {
+            if (null == (ReturnString = getMulticastAddressJNI()))
+                ReturnString = new String("");
+        }
+        return ReturnString;
+    }
 
+
+    
+    /**
+     * Native method for @ref setMulticastAddress
+     */
+    private native void setMulticastAddressJNI(String value);
+    /**
+     * Sets the multicast address: the IP address (or a network name that
+     * the system can resolve) of the IP multicast group that must be
+     * contacted to reach FLoM daemon (server) using UDP/IP; see also
+     * @ref setMulticastPort.
+     * The current value can be inspected using method
+     * @ref getMulticastAddress.
+     * @param value (Input): the new value (C++ standard string)
+     */
+    public void setMulticastAddress(String value) throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            setMulticastAddressJNI(value);
+    }
+
+    
+    
+    /**
+     * Native method for @ref getMulticastPort
+     */
+    private native int getMulticastPortJNI();
+    /**
+     * Gets the UDP/IP multicast port that must be used to contact the FLoM
+     * daemon (server) using UDP/IP; see also @ref getMulticastAddress.
+     * The current value can be altered using method @ref setMulticastPort.
+     * @return the current value
+     */
+    public int getMulticastPort() throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            return getMulticastPortJNI();
+    }
+
+
+    
+    /**
+     * Native method for @ref setMulticastPort
+     */
+    private native void setMulticastPortJNI(int value);
+    /**
+     * Sets the UDP/IP multicast port that must be used to contact the FLoM
+     * daemon (server) using UDP/IP; see also @ref setMulticastAddress.
+     * The current value can be inspected using method
+     * @ref getMulticastPort.
+     * @param value (Input): the new value
+     */
+    public void setMulticastPort(int value) throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            setMulticastPortJNI(value);
+    }
+
+
+    
+    /**
+     * Native method for @ref getResourceCreate
+     */
+    private native boolean getResourceCreateJNI();
+    /**
+     * Gets the UDP/IP multicast port that must be used to contact the FLoM
+     * daemon (server) using UDP/IP; see also @ref getMulticastAddress.
+     * The current value can be altered using method @ref setResourceCreate.
+     * @return the current value
+     */
+    public boolean getResourceCreate() throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            return getResourceCreateJNI();
+    }
+
+
+    
     // @@@ remove me!!!
     public static void main(String[] args) {
         try {
@@ -364,6 +469,21 @@ public class FlomHandle {
             System.out.println("FlomHandle.getLockMode() = " +
                                fh.getLockMode());
 
+            fh.setMulticastAddress("224.0.0.3");
+            try {
+                System.out.println("FlomHandle.getMulticastAddress() = '" +
+                                   fh.getMulticastAddress() + "'");
+            } catch(FlomException e) {
+                if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
+                    e.getReturnCode())
+                    System.out.println("FlomHandle: " + e.getMessage());
+                else throw(e);
+            }
+
+            fh.setMulticastPort(12345);
+            System.out.println("FlomHandle.getMulticastPort() = " +
+                               fh.getMulticastPort());
+            
             fh.unlock();
             fh.free();
         } catch(FlomException e) {

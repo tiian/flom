@@ -312,6 +312,66 @@ JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setLockModeJNI
 
     
 
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getMulticastAddressJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getMulticastAddressJNI\n"));
+    return (*env)->NewStringUTF(
+        env,
+        flom_handle_get_multicast_address(
+            Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                env, this_obj)));
+}
+
+
+
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setMulticastAddressJNI
+(JNIEnv *env, jobject this_obj, jstring value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setMulticastAddressJNI\n"));
+    const char *cstr = (*env)->GetStringUTFChars(env, value, NULL);
+    flom_handle_set_multicast_address(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj),
+        cstr);
+    return;
+}
+
+
+    
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getMulticastPortJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getMulticastPortJNI\n"));
+    return (jint)flom_handle_get_multicast_port(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj));
+}
+
+
+
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setMulticastPortJNI
+(JNIEnv *env, jobject this_obj, jint value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setMulticastPortJNI\n"));
+    flom_handle_set_multicast_port(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj), value);
+    return;
+}
+
+
+
+JNIEXPORT jboolean JNICALL Java_org_tiian_flom_FlomHandle_getResourceCreateJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getResourceCreateJNI\n"));
+    return (jint)flom_handle_get_resource_create(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj));
+}
+
+
+
 JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomErrorCodes_getText
 (JNIEnv *env, jclass this_obj, jint code)
 {
