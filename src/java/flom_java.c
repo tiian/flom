@@ -372,6 +372,67 @@ JNIEXPORT jboolean JNICALL Java_org_tiian_flom_FlomHandle_getResourceCreateJNI
 
 
 
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setResourceCreateJNI
+  (JNIEnv *env, jobject this_obj, jboolean value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setResourceCreateJNI\n"));
+    flom_handle_set_resource_create(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj), value);
+    return;
+}
+
+
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getResourceIdleLifespanJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getResourceIdleLifespanJNI\n"));
+    return (jint)flom_handle_get_resource_idle_lifespan(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj));
+}
+
+
+
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setResourceIdleLifespanJNI
+(JNIEnv *env, jobject this_obj, jint value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setResourceIdleLifespanJNI\n"));
+    flom_handle_set_resource_idle_lifespan(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj), value);
+    return;
+}
+
+
+
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getResourceNameJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getResourceNameJNI\n"));
+    return (*env)->NewStringUTF(
+        env,
+        flom_handle_get_resource_name(
+            Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                env, this_obj)));
+}
+
+
+
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setResourceNameJNI
+(JNIEnv *env, jobject this_obj, jstring value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setResourceNameJNI\n"));
+    const char *cstr = (*env)->GetStringUTFChars(env, value, NULL);
+    flom_handle_set_resource_name(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj),
+        cstr);
+    return;
+}
+
+
+
 JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomErrorCodes_getText
 (JNIEnv *env, jclass this_obj, jint code)
 {

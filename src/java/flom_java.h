@@ -151,6 +151,46 @@ JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setMulticastPortJNI
 JNIEXPORT jboolean JNICALL Java_org_tiian_flom_FlomHandle_getResourceCreateJNI
   (JNIEnv *, jobject);
 
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setResourceCreateJNI
+ * Signature: (Z)V
+ */
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setResourceCreateJNI
+  (JNIEnv *, jobject, jboolean);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getResourceIdleLifespanJNI
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getResourceIdleLifespanJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setResourceIdleLifespanJNI
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setResourceIdleLifespanJNI
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getResourceNameJNI
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getResourceNameJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setResourceNameJNI
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setResourceNameJNI
+  (JNIEnv *, jobject, jstring);
+
 #ifdef __cplusplus
 }
 #endif

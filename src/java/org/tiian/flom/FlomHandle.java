@@ -440,6 +440,115 @@ public class FlomHandle {
 
 
     
+    /**
+     * Native method for @ref setResourceCreate
+     */
+    private native void setResourceCreateJNI(boolean value);
+    /**
+     * Sets "resource create" boolean property: it specifies if method
+     * @ref lock can create a new resource when the specified
+     * one is not defined.
+     * The current value can be inspected using method
+     * @ref getResourceCreate.
+     * @param value (Input): the new value
+     */
+    public void setResourceCreate(boolean value) throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            setResourceCreateJNI(value);
+    }
+
+
+    
+    /**
+     * Native method for @ref getResourceIdleLifespan
+     */
+    private native int getResourceIdleLifespanJNI();
+    /**
+     * Gets "resource idle lifespan" property: it specifies how many
+     * milliseconds a resource will be kept after the last locker released
+     * it; the expiration is necessary to avoid useless resource allocation.
+     * The current value can be altered using method
+     *     @ref setResourceIdleLifespan.
+     * @return the current value
+     */
+    public int getResourceIdleLifespan() throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            return getResourceIdleLifespanJNI();
+    }
+
+
+    
+    /**
+     * Native method for @ref setResourceIdleLifespan
+     */
+    private native void setResourceIdleLifespanJNI(int value);
+    /**
+     * Sets "resource idle lifespan" property: it specifies how many
+     * milliseconds a resource will be kept after the last locker released
+     * it; the expiration is necessary to avoid useless resource allocation.
+     * The current value can be inspected using method
+     *     @ref getResourceIdleLifespan.
+     * @param value (Input): the new value
+     */
+    public void setResourceIdleLifespan(int value) throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            setResourceIdleLifespanJNI(value);
+    }
+
+
+    
+    /**
+     * Native method for @ref getResourceName
+     */
+    private native String getResourceNameJNI();
+    /**
+     * Gets the resource name: the name of the resource that can be locked
+     * and unlocked using @ref lock and @ref unlock methods.
+     * The current value can be altered using method @ref setResourceName.
+     * @return the current value as a C++ standard string
+     */
+    public String getResourceName() throws FlomException {
+        String ReturnString = null;
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else {
+            if (null == (ReturnString = getResourceNameJNI()))
+                ReturnString = new String("");
+        }
+        return ReturnString;
+    }
+
+
+    
+    /**
+     * Native method for @ref setResourceName
+     */
+    private native void setResourceNameJNI(String value);
+    /**
+     * Sets the resource name: the name of the resource that can be locked
+     * and unlocked using @ref lock and @ref unlock methods.
+     * The current value can be inspected using method @ref getResourceName.
+     * NOTE: the resource type is determined by its name; take a look to
+     * flom command man page (-r, --resource-name option) for an
+     * explanation of the resource name grammar.
+     * @param value (Input): the new value (C++ standard string)
+     * @return a reason code (see file @ref flom_errors.h)
+     */
+    public void setResourceName(String value) throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            setResourceNameJNI(value);
+    }
+
+    
+    
     // @@@ remove me!!!
     public static void main(String[] args) {
         try {
@@ -483,7 +592,29 @@ public class FlomHandle {
             fh.setMulticastPort(12345);
             System.out.println("FlomHandle.getMulticastPort() = " +
                                fh.getMulticastPort());
+
+            fh.setResourceCreate(false);
+            System.out.println("FlomHandle.getResourceCreate() = " +
+                               fh.getResourceCreate());
+            fh.setResourceCreate(true);
+            System.out.println("FlomHandle.getResourceCreate() = " +
+                               fh.getResourceCreate());
             
+            fh.setResourceIdleLifespan(6);
+            System.out.println("FlomHandle.getResourceIdleLifespan() = " +
+                               fh.getResourceIdleLifespan());
+
+            fh.setResourceName("a strange name");
+            try {
+                System.out.println("FlomHandle.getResourceName() = '" +
+                                   fh.getResourceName() + "'");
+            } catch(FlomException e) {
+                if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
+                    e.getReturnCode())
+                    System.out.println("FlomHandle: " + e.getMessage());
+                else throw(e);
+            }
+
             fh.unlock();
             fh.free();
         } catch(FlomException e) {
