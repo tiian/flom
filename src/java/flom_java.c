@@ -171,6 +171,45 @@ flom_handle_t *Java_org_tiian_flom_FlomHandle_getNativeHandle(
 
 
 
+/* This is an helper internal function, it's not seen by JNI */
+void Java_org_tiian_flom_FlomHandle_setNativeReturnCode(
+    JNIEnv *env, jobject this_obj, jint ret_cod)
+{
+    jclass this_class;
+    jfieldID field_id;
+    int *i;
+    
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setNativeReturnCode: "
+                "ret_cod=%d\n", ret_cod));
+
+    /* get a reference to this object's class */
+    if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
+        FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setNativeReturnCode: "
+                    "this_class == NULL\n"));
+        jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
+        (*env)->ThrowNew(
+            env, Exception,
+            "JNI/Java_org_tiian_flom_FlomHandle_setNativeReturnCode/"
+            "GetObjectClass returned NULL");
+    }
+
+    /* get the field identificator */
+    if (NULL == (field_id = (*env)->GetFieldID(
+                     env, this_class, "NativeReturnCode", "I"))) {
+        FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setNativeReturnCode: "
+                    "field_id == NULL\n"));
+        jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
+        (*env)->ThrowNew(
+            env, Exception,
+            "JNI/Java_org_tiian_flom_FlomHandle_setNativeReturnCode/"
+            "GetFieldID returned NULL");
+    }
+    /* set the int value */
+    (*env)->SetIntField(env, this_obj, field_id, ret_cod);
+}
+
+
+
 JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_deleteJNI
   (JNIEnv *env, jobject this_obj)
 {
@@ -425,9 +464,27 @@ JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setResourceNameJNI
 {
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setResourceNameJNI\n"));
     const char *cstr = (*env)->GetStringUTFChars(env, value, NULL);
-    flom_handle_set_resource_name(
+    int ret_cod = flom_handle_set_resource_name(
         Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj),
         cstr);
+    if (FLOM_RC_OK != ret_cod) {
+        jclass Exception;
+        const char const_msg_excp[] =
+            "JNI/Java_org_tiian_flom_FlomHandle_setResourceNameJNI/"
+            "flom_handle_set_resource_name returned an error condition: "
+            "ret_cod=%d";
+        char msg_excp[sizeof(const_msg_excp)+100];
+        /* the name is not valid and an exception must be thrown... */
+        FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setResourceNameJNI/"
+                    "flom_handle_set_resource_name: ret_cod=%d ('%s')\n",
+                    ret_cod, flom_strerror(ret_cod)));
+        Exception = (*env)->FindClass(env, "java/lang/Exception");
+        snprintf(msg_excp, sizeof(msg_excp), const_msg_excp, ret_cod);
+        (*env)->ThrowNew(env, Exception, msg_excp);
+        /* propate native return code to Java object */
+        Java_org_tiian_flom_FlomHandle_setNativeReturnCode(
+            env, this_obj, (jint)ret_cod);
+    }
     return;
 }
 

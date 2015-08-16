@@ -48,6 +48,15 @@ public class FlomHandle {
     private ByteBuffer NativeHandler;
 
 
+
+    /**
+     * This field is used to pass the native return code from native to Java
+     * when an exception must be propagated: native generates only standard
+     * Exception objects, while Java generates custom FlomException objects
+     */
+    private int NativeReturnCode;
+    
+
     
     /**
      * Create a new native @ref flom_handle_t object and set @ref NativeHandler
@@ -543,8 +552,12 @@ public class FlomHandle {
     public void setResourceName(String value) throws FlomException {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
+        else try {
             setResourceNameJNI(value);
+            } catch (Exception e) {
+                // propagate the exception retrieving the native return code
+                throw new FlomException(NativeReturnCode);
+            }
     }
 
     
@@ -562,7 +575,8 @@ public class FlomHandle {
             } catch(FlomException e) {
                 if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
                     e.getReturnCode())
-                    System.out.println("FlomHandle: " + e.getMessage());
+                    System.out.println("FlomHandle.getLockedElement() " +
+                                       "EXCP/" + e.getMessage());
                 else throw(e);
             }
             fh.setDiscoveryAttempts(33);
@@ -604,14 +618,33 @@ public class FlomHandle {
             System.out.println("FlomHandle.getResourceIdleLifespan() = " +
                                fh.getResourceIdleLifespan());
 
-            fh.setResourceName("a strange name");
+            // use a wrong resource name
+            try {
+                fh.setResourceName("an invalid name...");
+            } catch(FlomException e) {
+                if (FlomErrorCodes.FLOM_RC_INVALID_RESOURCE_NAME ==
+                    e.getReturnCode())
+                    System.out.println("FlomHandle.setResourceName() EXCP/"
+                                       + e.getMessage());
+                else throw(e);
+            }
+            try {
+                fh.setResourceName("avalidname");
+            } catch(FlomException e) {
+                if (FlomErrorCodes.FLOM_RC_INVALID_RESOURCE_NAME ==
+                    e.getReturnCode())
+                    System.out.println("FlomHandle.setResourceName() EXCP/"
+                                       + e.getMessage());
+                else throw(e);
+            }
             try {
                 System.out.println("FlomHandle.getResourceName() = '" +
                                    fh.getResourceName() + "'");
             } catch(FlomException e) {
                 if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
                     e.getReturnCode())
-                    System.out.println("FlomHandle: " + e.getMessage());
+                    System.out.println("FlomHandle.getResourceName() EXCP/"
+                                       + e.getMessage());
                 else throw(e);
             }
 

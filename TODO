@@ -1,7 +1,7 @@
 Road map:
 
 debug setResourceName: there's a bug when the name contains blanks, the
-return code is wrong
+following correct invocation exploits another error...
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 

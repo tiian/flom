@@ -1209,23 +1209,28 @@ int flom_config_set_resource_name(flom_config_t *config,
                                   const gchar *resource_name)
 {
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    int command_line = FALSE;
     
     FLOM_TRACE(("flom_config_set_resource_name(%s)\n", resource_name));
     /* default config object */
-    if (NULL == config)
+    if (NULL == config) {
         config = &global_config;
+        command_line = TRUE;
+    }
     /* check resource name is not the default (reserved) */
     if (!strncmp(resource_name, DEFAULT_RESOURCE_NAME,
                  sizeof(DEFAULT_RESOURCE_NAME))) {
-        g_print("ERROR: '%s' is a reserved resource name and can not be set "
-                "by user\n", resource_name);
-        ret_cod = FLOM_RC_INVALID_OPTION;
+        if (command_line)
+            g_print("ERROR: '%s' is a reserved resource name and can not be "
+                    "set by user\n", resource_name);
+        ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
     } else if (FLOM_RSRC_TYPE_NULL == flom_rsrc_get_type(resource_name)) {
         FLOM_TRACE(("flom_config_set_resource_name: invalid resource "
                     "name '%s'\n", resource_name));
-        g_print("ERROR: '%s' is not a valid name for a resource\n",
-                resource_name);
-        ret_cod = FLOM_RC_INVALID_OPTION;
+        if (command_line)
+            g_print("ERROR: '%s' is not a valid name for a resource\n",
+                    resource_name);
+        ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
     } else {
         if (NULL != config->resource_name)
             g_free(config->resource_name);
