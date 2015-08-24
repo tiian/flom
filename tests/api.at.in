@@ -79,6 +79,14 @@ AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
 AT_CHECK([case0002], [0], [expout], [ignore])
 AT_CLEANUP
 
+AT_SETUP([C wrong resource unlock])
+AT_CHECK([pkill flom], [0], [ignore], [ignore])
+AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
+AT_CHECK([case0003 1], [0], [ignore], [ignore])
+AT_CHECK([flom -r resource1 -- true], [0], [ignore], [ignore])
+AT_CHECK([flom -r resource2 -- true], [0], [ignore], [ignore])
+AT_CLEANUP
+
 AT_SETUP([C++ Happy path (static and dynamic)])
 AT_CHECK([if test "$CPPAPI" = "no"; then exit 77; fi])
 AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])

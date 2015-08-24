@@ -1,5 +1,8 @@
 Road map:
 
+is it possible to fix client side too the change resource name of a locked
+resource (no change is possible at all...!!!)???
+
 debug setResourceName: there's a bug when the name contains blanks, the
 following correct invocation exploits another error...
 

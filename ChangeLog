@@ -1,6 +1,8 @@
 LOG:
 
          - 0.9.4 Developing Java client library API
+	Fixed a bug that could be exploited trying to unlock a resource
+	with a name different from the locked one (server side fix)
 
 20150526 - 0.9.3 Python client library API
 

@@ -36,7 +36,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = case0000$(EXEEXT) case0001$(EXEEXT) \
-	case0002$(EXEEXT) $(am__EXEEXT_1)
+	case0002$(EXEEXT) case0003$(EXEEXT) $(am__EXEEXT_1)
 subdir = tests/src
 DIST_COMMON = README $(am__dist_noinst_DATA_DIST) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -66,6 +66,10 @@ am_case0002_OBJECTS = case0002.$(OBJEXT)
 case0002_OBJECTS = $(am_case0002_OBJECTS)
 case0002_LDADD = $(LDADD)
 case0002_DEPENDENCIES = ../../src/libflom.la
+am_case0003_OBJECTS = case0003.$(OBJEXT)
+case0003_OBJECTS = $(am_case0003_OBJECTS)
+case0003_LDADD = $(LDADD)
+case0003_DEPENDENCIES = ../../src/libflom.la
 am_case1000_OBJECTS = case1000.$(OBJEXT)
 case1000_OBJECTS = $(am_case1000_OBJECTS)
 case1000_LDADD = $(LDADD)
@@ -101,10 +105,11 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) $(case0002_SOURCES) \
-	$(case1000_SOURCES) $(case1001_SOURCES) $(case1002_SOURCES)
-DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
-	$(case0002_SOURCES) $(case1000_SOURCES) $(case1001_SOURCES) \
+	$(case0003_SOURCES) $(case1000_SOURCES) $(case1001_SOURCES) \
 	$(case1002_SOURCES)
+DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
+	$(case0002_SOURCES) $(case0003_SOURCES) $(case1000_SOURCES) \
+	$(case1001_SOURCES) $(case1002_SOURCES)
 am__dist_noinst_DATA_DIST = case2000.php.in case2001.php.in \
 	case2002.php.in case3000.py case3001.py case3002.py
 DATA = $(dist_noinst_DATA) $(noinst_DATA)
@@ -305,6 +310,7 @@ AM_CFLAGS = -Wall
 case0000_SOURCES = case0000.c
 case0001_SOURCES = case0001.c
 case0002_SOURCES = case0002.c
+case0003_SOURCES = case0003.c
 # C++ language case tests
 case1000_SOURCES = case1000.cc
 case1001_SOURCES = case1001.cc
@@ -371,6 +377,9 @@ case0001$(EXEEXT): $(case0001_OBJECTS) $(case0001_DEPENDENCIES)
 case0002$(EXEEXT): $(case0002_OBJECTS) $(case0002_DEPENDENCIES) 
 	@rm -f case0002$(EXEEXT)
 	$(LINK) $(case0002_OBJECTS) $(case0002_LDADD) $(LIBS)
+case0003$(EXEEXT): $(case0003_OBJECTS) $(case0003_DEPENDENCIES) 
+	@rm -f case0003$(EXEEXT)
+	$(LINK) $(case0003_OBJECTS) $(case0003_LDADD) $(LIBS)
 case1000$(EXEEXT): $(case1000_OBJECTS) $(case1000_DEPENDENCIES) 
 	@rm -f case1000$(EXEEXT)
 	$(CXXLINK) $(case1000_OBJECTS) $(case1000_LDADD) $(LIBS)
@@ -390,6 +399,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0000.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0001.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0002.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0003.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case1000.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case1001.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case1002.Po@am__quote@

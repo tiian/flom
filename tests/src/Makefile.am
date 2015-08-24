@@ -4,6 +4,7 @@ AM_CFLAGS = -Wall
 case0000_SOURCES = case0000.c
 case0001_SOURCES = case0001.c
 case0002_SOURCES = case0002.c
+case0003_SOURCES = case0003.c
 # C++ language case tests
 case1000_SOURCES = case1000.cc
 case1001_SOURCES = case1001.cc
@@ -13,7 +14,7 @@ case1002_SOURCES = case1002.cc
 if COND_CPPAPI
   MAYBE_CPPAPI=case1000 case1001 case1002
 endif
-noinst_PROGRAMS = case0000 case0001 case0002 $(MAYBE_CPPAPI)
+noinst_PROGRAMS = case0000 case0001 case0002 case0003 $(MAYBE_CPPAPI)
 if COND_PHPAPI
   MAYBE_PHPAPI=case2000.php case2001.php case2002.php
 endif
