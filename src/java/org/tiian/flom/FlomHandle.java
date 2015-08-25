@@ -54,7 +54,9 @@ public class FlomHandle {
      * when an exception must be propagated: native generates only standard
      * Exception objects, while Java generates custom FlomException objects
      */
+    /* @@@ probably useless, remove me!!!
     private int NativeReturnCode;
+    */
     
 
     
@@ -538,7 +540,7 @@ public class FlomHandle {
     /**
      * Native method for @ref setResourceName
      */
-    private native void setResourceNameJNI(String value);
+    private native int setResourceNameJNI(String value);
     /**
      * Sets the resource name: the name of the resource that can be locked
      * and unlocked using @ref lock and @ref unlock methods.
@@ -552,12 +554,11 @@ public class FlomHandle {
     public void setResourceName(String value) throws FlomException {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else try {
-            setResourceNameJNI(value);
-            } catch (Exception e) {
-                // propagate the exception retrieving the native return code
-                throw new FlomException(NativeReturnCode);
-            }
+        else {
+            int ReturnCode = setResourceNameJNI(value);
+            if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+                throw new FlomException(ReturnCode);
+        }
     }
 
     

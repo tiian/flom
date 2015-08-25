@@ -1,10 +1,6 @@
 Road map:
 
-is it possible to fix client side too the change resource name of a locked
-resource (no change is possible at all...!!!)???
-
-debug setResourceName: there's a bug when the name contains blanks, the
-following correct invocation exploits another error...
+Java: going on with getResourceQuantity() and other methods...
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 

@@ -86,8 +86,9 @@ void unlock_different_resource(void) {
     /* get new resource name */
     printf("flom_handle_get_resource_name() = '%s'\n",
            flom_handle_get_resource_name(&my_handle));
-    /* check resource name */
-    if (strcmp(nd_resource_name2,
+    /* check resource name: it should not be changed because the resource
+     is already locked */
+    if (strcmp(nd_resource_name1,
                flom_handle_get_resource_name(&my_handle))) {
         fprintf(stderr,
                 "Unexpected result from flom_handle_set/get_resource_name\n");

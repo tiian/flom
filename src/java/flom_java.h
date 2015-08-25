@@ -186,9 +186,9 @@ JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getResourceNameJNI
 /*
  * Class:     org_tiian_flom_FlomHandle
  * Method:    setResourceNameJNI
- * Signature: (Ljava/lang/String;)V
+ * Signature: (Ljava/lang/String;)I
  */
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setResourceNameJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setResourceNameJNI
   (JNIEnv *, jobject, jstring);
 
 #ifdef __cplusplus

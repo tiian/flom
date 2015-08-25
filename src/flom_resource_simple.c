@@ -39,6 +39,7 @@
 #include "flom_rsrc.h"
 #include "flom_resource_simple.h"
 #include "flom_trace.h"
+#include "flom_syslog.h"
 
 
 
@@ -218,12 +219,15 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                 /* check lock is managed by this locker (this check will
                    trigger some issue if a client obtained more locks...) */
                 if (g_strcmp0(flom_resource_get_name(resource),
-                              msg->body.lock_8.resource.name)) {
+                              msg->body.unlock_8.resource.name)) {
                     FLOM_TRACE(("flom_resource_simple_inmsg: client wants to "
                                 "unlock resource '%s' while it's locking "
                                 "resource '%s'\n",
-                                msg->body.lock_8.resource.name,
+                                msg->body.unlock_8.resource.name,
                                 flom_resource_get_name(resource)));
+                    syslog(LOG_WARNING, FLOM_SYSLOG_FLM009W,
+                           msg->body.unlock_8.resource.name,
+                           flom_resource_get_name(resource));
                     THROW(INVALID_OPTION);
                 }
                 /* clean lock */

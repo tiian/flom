@@ -449,7 +449,16 @@ void flom_handle_set_discovery_attempts(flom_handle_t *handle, int value)
     FLOM_TRACE(("flom_handle_set_discovery_attempts: "
                 "old value=%d, new value=%d\n",
                 flom_config_get_discovery_attempts(handle->config), value));
-    flom_config_set_discovery_attempts(handle->config, (gint)value);
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            flom_config_set_discovery_attempts(handle->config, (gint)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_discovery_attempts: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
 }
 
 
@@ -468,7 +477,16 @@ void flom_handle_set_discovery_timeout(flom_handle_t *handle, int value)
     FLOM_TRACE(("flom_handle_set_discovery_timeout: "
                 "old value=%d, new value=%d\n",
                 flom_config_get_discovery_timeout(handle->config), value));
-    flom_config_set_discovery_timeout(handle->config, (gint)value);
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            flom_config_set_discovery_timeout(handle->config, (gint)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_discovery_timeout: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
 }
 
 
@@ -487,7 +505,16 @@ void flom_handle_set_discovery_ttl(flom_handle_t *handle, int value)
     FLOM_TRACE(("flom_handle_set_discovery_ttl: "
                 "old value=%d, new value=%d\n",
                 flom_config_get_discovery_ttl(handle->config), value));
-    flom_config_set_discovery_ttl(handle->config, (gint)value);
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            flom_config_set_discovery_ttl(handle->config, (gint)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_discovery_ttl: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
 }
 
 
@@ -506,7 +533,17 @@ void flom_handle_set_lock_mode(flom_handle_t *handle, flom_lock_mode_t value)
     FLOM_TRACE(("flom_handle_set_lock_mode: "
                 "old value=%d, new value=%d\n",
                 flom_config_get_lock_mode(handle->config), value));
-    flom_config_set_lock_mode(handle->config, value);
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_CONNECTED:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            flom_config_set_lock_mode(handle->config, value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_lock_mode: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
 }
 
 
@@ -527,12 +564,22 @@ void flom_handle_set_multicast_address(flom_handle_t *handle,
                 "old value='%s', new value='%s'\n",
                 STRORNULL(flom_config_get_multicast_address(handle->config)),
                 STRORNULL(value)));
-    flom_config_set_multicast_address(handle->config, (const gchar *)value);
-    /* reset socket name and unicast address */
-    if (NULL != value) {
-        flom_handle_set_socket_name(handle, NULL);
-        flom_handle_set_unicast_address(handle, NULL);
-    } /* if (NULL != value) */
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            flom_config_set_multicast_address(handle->config,
+                                              (const gchar *)value);
+            /* reset socket name and unicast address */
+            if (NULL != value) {
+                flom_handle_set_socket_name(handle, NULL);
+                flom_handle_set_unicast_address(handle, NULL);
+            } /* if (NULL != value) */
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_multicast_address: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
 }
 
 
@@ -551,7 +598,16 @@ void flom_handle_set_multicast_port(flom_handle_t *handle, int value)
     FLOM_TRACE(("flom_handle_set_multicast_port: "
                 "old value=%d, new value=%d\n",
                 flom_config_get_multicast_port(handle->config), value));
-    flom_config_set_multicast_port(handle->config, (gint)value);
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            flom_config_set_multicast_port(handle->config, (gint)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_multicast_port: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
 }
 
 
@@ -570,7 +626,16 @@ void flom_handle_set_resource_create(flom_handle_t *handle, int value)
     FLOM_TRACE(("flom_handle_set_resource_create: "
                 "old value=%d, new value=%d\n",
                 flom_config_get_resource_create(handle->config), value));
-    return flom_config_set_resource_create(handle->config, value);
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            flom_config_set_resource_create(handle->config, value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_resource_create: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
 }
 
 
@@ -590,7 +655,18 @@ void flom_handle_set_resource_idle_lifespan(flom_handle_t *handle, int value)
                 "old value=%d, new value=%d\n",
                 flom_config_get_resource_idle_lifespan(handle->config),
                 value));
-    flom_config_set_resource_idle_lifespan(handle->config, (gint)value);
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+        case FLOM_HANDLE_STATE_CONNECTED:
+            flom_config_set_resource_idle_lifespan(handle->config,
+                                                   (gint)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_resource_idle_lifespan: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
 }
 
 
@@ -610,7 +686,18 @@ int flom_handle_set_resource_name(flom_handle_t *handle, const char *value)
                 "old value='%s', new value='%s'\n",
                 STRORNULL(flom_config_get_resource_name(handle->config)),
                 STRORNULL(value)));
-    return flom_config_set_resource_name(handle->config, (const gchar *)value);
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+        case FLOM_HANDLE_STATE_CONNECTED:
+            flom_config_set_resource_name(handle->config,
+                                          (const gchar *)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_resource_name: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
 }
 
 
@@ -629,7 +716,17 @@ void flom_handle_set_resource_quantity(flom_handle_t *handle, int value)
     FLOM_TRACE(("flom_handle_set_resource_quantity: "
                 "old value=%d, new value=%d\n",
                 flom_config_get_resource_quantity(handle->config), value));
-    flom_config_set_resource_quantity(handle->config, (int)value);
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+        case FLOM_HANDLE_STATE_CONNECTED:
+            flom_config_set_resource_quantity(handle->config, (int)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_resource_quantity: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
 }
 
 
@@ -648,7 +745,17 @@ void flom_handle_set_resource_timeout(flom_handle_t *handle, int value)
     FLOM_TRACE(("flom_handle_set_resource_timeout: "
                 "old value=%d, new value=%d\n",
                 flom_config_get_resource_timeout(handle->config), value));
-    return flom_config_set_resource_timeout(handle->config, (int)value);
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+        case FLOM_HANDLE_STATE_CONNECTED:
+            flom_config_set_resource_timeout(handle->config, (int)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_resource_timeout: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
 }
 
 
@@ -668,12 +775,23 @@ int flom_handle_set_socket_name(flom_handle_t *handle, const char *value)
                 "old value='%s', new value='%s'\n",
                 STRORNULL(flom_config_get_socket_name(handle->config)),
                 STRORNULL(value)));
-    /* reset unicast and multicast addresses */
-    if (NULL != value) {
-        flom_handle_set_unicast_address(handle, NULL);
-        flom_handle_set_multicast_address(handle, NULL);
-    } /* if (NULL != value) */
-    return flom_config_set_socket_name(handle->config, (const gchar *)value);
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            /* reset unicast and multicast addresses */
+            if (NULL != value) {
+                flom_handle_set_unicast_address(handle, NULL);
+                flom_handle_set_multicast_address(handle, NULL);
+            } /* if (NULL != value) */
+            return flom_config_set_socket_name(handle->config,
+                                               (const gchar *)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_socket_name: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
+    return FLOM_RC_API_INVALID_SEQUENCE;
 }
 
 
@@ -714,12 +832,22 @@ void flom_handle_set_unicast_address(flom_handle_t *handle, const char *value)
                 "old value='%s', new value='%s'\n",
                 STRORNULL(flom_config_get_unicast_address(handle->config)),
                 STRORNULL(value)));
-    flom_config_set_unicast_address(handle->config, (const gchar *)value);
-    /* reset socket name and multicast address*/
-    if (NULL != value) {
-        flom_handle_set_socket_name(handle, NULL);
-        flom_handle_set_multicast_address(handle, NULL);
-    } /* if (NULL != value) */
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            flom_config_set_unicast_address(handle->config,
+                                            (const gchar *)value);
+            /* reset socket name and multicast address*/
+            if (NULL != value) {
+                flom_handle_set_socket_name(handle, NULL);
+                flom_handle_set_multicast_address(handle, NULL);
+            } /* if (NULL != value) */
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_unicast_address: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
 }
 
 
@@ -738,7 +866,16 @@ void flom_handle_set_unicast_port(flom_handle_t *handle, int value)
     FLOM_TRACE(("flom_handle_set_unicast_port: "
                 "old value=%d, new value=%d\n",
                 flom_config_get_unicast_port(handle->config), value));
-    flom_config_set_unicast_port(handle->config, (gint)value);
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            flom_config_set_unicast_port(handle->config, (gint)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_unicast_port: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+    } /* switch (handle->state) */
 }
 
 

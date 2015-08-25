@@ -42,6 +42,7 @@
 #include "flom_rsrc.h"
 #include "flom_resource_hier.h"
 #include "flom_trace.h"
+#include "flom_syslog.h"
 
 
 
@@ -451,6 +452,9 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
                                 "is managing resource '%s'\n",
                                 STRORNULL(msg->body.unlock_8.resource.name),
                                 STRORNULL(resource->data.hier.root->name)));
+                    syslog(LOG_WARNING, FLOM_SYSLOG_FLM009W,
+                           STRORNULL(msg->body.unlock_8.resource.name),
+                           STRORNULL(resource->data.hier.root->name));
                     THROW(INVALID_RESOURCE_NAME);
                 }
                 /* set the asked unlock name at resource level */

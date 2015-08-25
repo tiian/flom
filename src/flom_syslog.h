@@ -25,6 +25,12 @@
 
 
 
+#ifdef HAVE_SYSLOG_H
+# include <syslog.h>
+#endif
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -59,6 +65,8 @@ extern "C" {
     "immediate shutdown request"
 #define FLOM_SYSLOG_FLM008N "FLM008N FLoM daemon is starting quiesce " \
     "shutdown"
+#define FLOM_SYSLOG_FLM009W "FLM009W a client wants to unlock resource '%s' " \
+    "but it has locked resource '%s'"
     
     
 
