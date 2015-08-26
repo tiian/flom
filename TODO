@@ -1,5 +1,6 @@
 Road map:
 
+Java: return code for set methods as implemented in C interface
 Java: going on with getResourceQuantity() and other methods...
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait

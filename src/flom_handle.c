@@ -444,7 +444,7 @@ int flom_handle_get_discovery_attempts(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_discovery_attempts(flom_handle_t *handle, int value)
+int flom_handle_set_discovery_attempts(flom_handle_t *handle, int value)
 {
     FLOM_TRACE(("flom_handle_set_discovery_attempts: "
                 "old value=%d, new value=%d\n",
@@ -458,7 +458,9 @@ void flom_handle_set_discovery_attempts(flom_handle_t *handle, int value)
             FLOM_TRACE(("flom_handle_set_discovery_attempts: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
+    return FLOM_RC_OK;
 }
 
 
@@ -472,7 +474,7 @@ int flom_handle_get_discovery_timeout(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_discovery_timeout(flom_handle_t *handle, int value)
+int flom_handle_set_discovery_timeout(flom_handle_t *handle, int value)
 {
     FLOM_TRACE(("flom_handle_set_discovery_timeout: "
                 "old value=%d, new value=%d\n",
@@ -486,7 +488,9 @@ void flom_handle_set_discovery_timeout(flom_handle_t *handle, int value)
             FLOM_TRACE(("flom_handle_set_discovery_timeout: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
+    return FLOM_RC_OK;
 }
 
 
@@ -500,7 +504,7 @@ int flom_handle_get_discovery_ttl(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_discovery_ttl(flom_handle_t *handle, int value)
+int flom_handle_set_discovery_ttl(flom_handle_t *handle, int value)
 {
     FLOM_TRACE(("flom_handle_set_discovery_ttl: "
                 "old value=%d, new value=%d\n",
@@ -514,7 +518,9 @@ void flom_handle_set_discovery_ttl(flom_handle_t *handle, int value)
             FLOM_TRACE(("flom_handle_set_discovery_ttl: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
+    return FLOM_RC_OK;
 }
 
 
@@ -528,7 +534,7 @@ flom_lock_mode_t flom_handle_get_lock_mode(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_lock_mode(flom_handle_t *handle, flom_lock_mode_t value)
+int flom_handle_set_lock_mode(flom_handle_t *handle, flom_lock_mode_t value)
 {
     FLOM_TRACE(("flom_handle_set_lock_mode: "
                 "old value=%d, new value=%d\n",
@@ -542,8 +548,10 @@ void flom_handle_set_lock_mode(flom_handle_t *handle, flom_lock_mode_t value)
         default:
             FLOM_TRACE(("flom_handle_set_lock_mode: state %d " \
                         "is not compatible with set operation\n",
-                        handle->state));
+                        handle->state)); 
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
+    return FLOM_RC_OK;
 }
 
 
@@ -557,8 +565,8 @@ const char *flom_handle_get_multicast_address(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_multicast_address(flom_handle_t *handle,
-                                       const char *value)
+int flom_handle_set_multicast_address(flom_handle_t *handle,
+                                      const char *value)
 {
     FLOM_TRACE(("flom_handle_set_multicast_address: "
                 "old value='%s', new value='%s'\n",
@@ -579,7 +587,9 @@ void flom_handle_set_multicast_address(flom_handle_t *handle,
             FLOM_TRACE(("flom_handle_set_multicast_address: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
+    return FLOM_RC_OK;
 }
 
 
@@ -593,7 +603,7 @@ int flom_handle_get_multicast_port(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_multicast_port(flom_handle_t *handle, int value)
+int flom_handle_set_multicast_port(flom_handle_t *handle, int value)
 {
     FLOM_TRACE(("flom_handle_set_multicast_port: "
                 "old value=%d, new value=%d\n",
@@ -607,7 +617,9 @@ void flom_handle_set_multicast_port(flom_handle_t *handle, int value)
             FLOM_TRACE(("flom_handle_set_multicast_port: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
+    return FLOM_RC_OK;
 }
 
 
@@ -621,7 +633,7 @@ int flom_handle_get_resource_create(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_resource_create(flom_handle_t *handle, int value)
+int flom_handle_set_resource_create(flom_handle_t *handle, int value)
 {
     FLOM_TRACE(("flom_handle_set_resource_create: "
                 "old value=%d, new value=%d\n",
@@ -635,7 +647,9 @@ void flom_handle_set_resource_create(flom_handle_t *handle, int value)
             FLOM_TRACE(("flom_handle_set_resource_create: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
+    return FLOM_RC_OK;
 }
 
 
@@ -649,7 +663,7 @@ int flom_handle_get_resource_idle_lifespan(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_resource_idle_lifespan(flom_handle_t *handle, int value)
+int flom_handle_set_resource_idle_lifespan(flom_handle_t *handle, int value)
 {
     FLOM_TRACE(("flom_handle_set_resource_idle_lifespan: "
                 "old value=%d, new value=%d\n",
@@ -666,7 +680,9 @@ void flom_handle_set_resource_idle_lifespan(flom_handle_t *handle, int value)
             FLOM_TRACE(("flom_handle_set_resource_idle_lifespan: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
+    return FLOM_RC_OK;
 }
 
 
@@ -697,7 +713,9 @@ int flom_handle_set_resource_name(flom_handle_t *handle, const char *value)
             FLOM_TRACE(("flom_handle_set_resource_name: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
+    return FLOM_RC_OK;
 }
 
 
@@ -711,7 +729,7 @@ int flom_handle_get_resource_quantity(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_resource_quantity(flom_handle_t *handle, int value)
+int flom_handle_set_resource_quantity(flom_handle_t *handle, int value)
 {
     FLOM_TRACE(("flom_handle_set_resource_quantity: "
                 "old value=%d, new value=%d\n",
@@ -726,7 +744,9 @@ void flom_handle_set_resource_quantity(flom_handle_t *handle, int value)
             FLOM_TRACE(("flom_handle_set_resource_quantity: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
+    return FLOM_RC_OK;
 }
 
 
@@ -740,7 +760,7 @@ int flom_handle_get_resource_timeout(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_resource_timeout(flom_handle_t *handle, int value)
+int flom_handle_set_resource_timeout(flom_handle_t *handle, int value)
 {
     FLOM_TRACE(("flom_handle_set_resource_timeout: "
                 "old value=%d, new value=%d\n",
@@ -755,7 +775,9 @@ void flom_handle_set_resource_timeout(flom_handle_t *handle, int value)
             FLOM_TRACE(("flom_handle_set_resource_timeout: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
+    return FLOM_RC_OK;
 }
 
 
@@ -791,7 +813,7 @@ int flom_handle_set_socket_name(flom_handle_t *handle, const char *value)
                         "is not compatible with set operation\n",
                         handle->state));
     } /* switch (handle->state) */
-    return FLOM_RC_API_INVALID_SEQUENCE;
+    return FLOM_RC_API_IMMUTABLE_HANDLE;
 }
 
 
@@ -806,13 +828,14 @@ const char *flom_handle_get_trace_filename(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_trace_filename(flom_handle_t *handle, const char *value)
+int flom_handle_set_trace_filename(flom_handle_t *handle, const char *value)
 {
     FLOM_TRACE(("flom_handle_set_trace_filename: "
                 "old value='%s', new value='%s'\n",
                 STRORNULL(flom_config_get_command_trace_file(handle->config)),
                 STRORNULL(value)));
     flom_config_set_command_trace_file(handle->config, (const gchar *)value);
+    return FLOM_RC_OK;
 }
 
 
@@ -826,7 +849,7 @@ const char *flom_handle_get_unicast_address(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_unicast_address(flom_handle_t *handle, const char *value)
+int flom_handle_set_unicast_address(flom_handle_t *handle, const char *value)
 {
     FLOM_TRACE(("flom_handle_set_unicast_address: "
                 "old value='%s', new value='%s'\n",
@@ -847,7 +870,9 @@ void flom_handle_set_unicast_address(flom_handle_t *handle, const char *value)
             FLOM_TRACE(("flom_handle_set_unicast_address: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
+    return FLOM_RC_OK;
 }
 
 
@@ -861,7 +886,7 @@ int flom_handle_get_unicast_port(const flom_handle_t *handle)
 
 
 
-void flom_handle_set_unicast_port(flom_handle_t *handle, int value)
+int flom_handle_set_unicast_port(flom_handle_t *handle, int value)
 {
     FLOM_TRACE(("flom_handle_set_unicast_port: "
                 "old value=%d, new value=%d\n",
@@ -875,7 +900,9 @@ void flom_handle_set_unicast_port(flom_handle_t *handle, int value)
             FLOM_TRACE(("flom_handle_set_unicast_port: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
+    return FLOM_RC_OK;
 }
 
 

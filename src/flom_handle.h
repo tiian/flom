@@ -206,8 +206,9 @@ extern "C" {
      *         @ref flom_handle_get_discovery_attempts
      * @param handle (Input/Output): a valid object handle
      * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
-    void flom_handle_set_discovery_attempts(flom_handle_t *handle, int value);
+    int flom_handle_set_discovery_attempts(flom_handle_t *handle, int value);
 
 
 
@@ -234,8 +235,9 @@ extern "C" {
      *         @ref flom_handle_get_discovery_timeout.
      * @param handle (Input): a valid object handle
      * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
-    void flom_handle_set_discovery_timeout(flom_handle_t *handle, int value);
+    int flom_handle_set_discovery_timeout(flom_handle_t *handle, int value);
 
 
 
@@ -260,8 +262,9 @@ extern "C" {
      *         @ref flom_handle_get_discovery_ttl.
      * @param handle (Input/Output): a valid object handle
      * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
-    void flom_handle_set_discovery_ttl(flom_handle_t *handle, int value);
+    int flom_handle_set_discovery_ttl(flom_handle_t *handle, int value);
 
 
 
@@ -290,9 +293,10 @@ extern "C" {
      *         @ref flom_handle_get_lock_mode
      * @param handle (Input/Output): a valid object handle
      * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
-    void flom_handle_set_lock_mode(flom_handle_t *handle,
-                                   flom_lock_mode_t value);
+    int flom_handle_set_lock_mode(flom_handle_t *handle,
+                                  flom_lock_mode_t value);
 
 
 
@@ -319,9 +323,10 @@ extern "C" {
      *         @ref flom_handle_get_multicast_address.
      * @param handle (Input/Output): a valid object handle
      * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
-    void flom_handle_set_multicast_address(flom_handle_t *handle,
-                                           const char *value);
+    int flom_handle_set_multicast_address(flom_handle_t *handle,
+                                          const char *value);
 
 
     
@@ -346,8 +351,9 @@ extern "C" {
      *         @ref flom_handle_get_multicast_port.
      * @param handle (Input): a valid object handle
      * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
-    void flom_handle_set_multicast_port(flom_handle_t *handle, int value);
+    int flom_handle_set_multicast_port(flom_handle_t *handle, int value);
 
 
 
@@ -372,8 +378,9 @@ extern "C" {
      *         @ref flom_handle_get_resource_create.
      * @param handle (Input/Output): a valid object handle
      * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
-    void flom_handle_set_resource_create(flom_handle_t *handle, int value);
+    int flom_handle_set_resource_create(flom_handle_t *handle, int value);
 
 
 
@@ -398,9 +405,10 @@ extern "C" {
      *     @ref flom_handle_get_resource_idle_lifespan.
      * @param handle (Input/Output): a valid object handle
      * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
-    void flom_handle_set_resource_idle_lifespan(flom_handle_t *handle,
-                                                int value);
+    int flom_handle_set_resource_idle_lifespan(flom_handle_t *handle,
+                                               int value);
 
 
 
@@ -428,7 +436,7 @@ extern "C" {
      * explanation of the resource name grammar.
      * @param handle (Input/Output): a valid object handle
      * @param value (Input): the new value
-     * @return a reason code (see file @ref flom_errors.h)
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
     int flom_handle_set_resource_name(flom_handle_t *handle,
                                       const char *value);
@@ -458,8 +466,9 @@ extern "C" {
      * NOTE: this property applies to "numeric resources" only.
      * @param handle (Input/Output): a valid object handle
      * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
-    void flom_handle_set_resource_quantity(flom_handle_t *handle, int value);
+    int flom_handle_set_resource_quantity(flom_handle_t *handle, int value);
 
 
     
@@ -490,8 +499,9 @@ extern "C" {
      *        0: no wait <BR>
      *        >0: maximum number of milliseconds to wait <BR>
      *        <0: unlimited wait
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
-    void flom_handle_set_resource_timeout(flom_handle_t *handle, int value);
+    int flom_handle_set_resource_timeout(flom_handle_t *handle, int value);
 
 
 
@@ -540,9 +550,10 @@ extern "C" {
      *     @ref flom_handle_get_trace_filename.
      * @param handle (Input/Output): a valid object handle
      * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK
      */
-    void flom_handle_set_trace_filename(flom_handle_t *handle,
-                                        const char *value);
+    int flom_handle_set_trace_filename(flom_handle_t *handle,
+                                       const char *value);
 
 
 
@@ -569,9 +580,10 @@ extern "C" {
      *         @ref flom_handle_get_unicast_address.
      * @param handle (Input/Output): a valid object handle
      * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
-    void flom_handle_set_unicast_address(flom_handle_t *handle,
-                                         const char *value);
+    int flom_handle_set_unicast_address(flom_handle_t *handle,
+                                        const char *value);
 
 
     
@@ -596,8 +608,9 @@ extern "C" {
      *         @ref flom_handle_get_unicast_port.
      * @param handle (Input): a valid object handle
      * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
-    void flom_handle_set_unicast_port(flom_handle_t *handle, int value);
+    int flom_handle_set_unicast_port(flom_handle_t *handle, int value);
 
 
 

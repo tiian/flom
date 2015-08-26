@@ -4,7 +4,8 @@ LOG:
 	Fixed a bug that could be exploited trying to unlock a resource
 	with a name different from the locked one (server side fix).
 	API setter methods are ignored if the handle state does not allow the
-	change of the property.
+	change of the property; they return FLOM_RC_API_IMMUTABLE_HANDLE
+	warning code if the program needs to check the set operation result.
 
 20150526 - 0.9.3 Python client library API
 

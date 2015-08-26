@@ -37,6 +37,10 @@ abstract class flom {
 
 	const FLOM_ES_OK = FLOM_ES_OK;
 
+	const FLOM_RC_API_IMMUTABLE_HANDLE = FLOM_RC_API_IMMUTABLE_HANDLE;
+
+	const FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE = FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE;
+
 	const FLOM_RC_NETWORK_TIMEOUT = FLOM_RC_NETWORK_TIMEOUT;
 
 	const FLOM_RC_CONNECTION_CLOSED = FLOM_RC_CONNECTION_CLOSED;
@@ -185,6 +189,12 @@ abstract class flom {
 
 	const FLOM_RC_G_TRY_REALLOC_ERROR = FLOM_RC_G_TRY_REALLOC_ERROR;
 
+	const FLOM_RC_GET_FIELD_ID_ERROR = FLOM_RC_GET_FIELD_ID_ERROR;
+
+	const FLOM_RC_GET_OBJECT_CLASS_ERROR = FLOM_RC_GET_OBJECT_CLASS_ERROR;
+
+	const FLOM_RC_NEW_DIRECT_BYTE_BUFFER_ERROR = FLOM_RC_NEW_DIRECT_BYTE_BUFFER_ERROR;
+
 	static function flom_strerror($ret_cod) {
 		return flom_strerror($ret_cod);
 	}
@@ -260,7 +270,7 @@ abstract class flom {
 	}
 
 	static function flom_handle_set_discovery_attempts($handle,$value) {
-		flom_handle_set_discovery_attempts($handle,$value);
+		return flom_handle_set_discovery_attempts($handle,$value);
 	}
 
 	static function flom_handle_get_discovery_timeout($handle) {
@@ -268,7 +278,7 @@ abstract class flom {
 	}
 
 	static function flom_handle_set_discovery_timeout($handle,$value) {
-		flom_handle_set_discovery_timeout($handle,$value);
+		return flom_handle_set_discovery_timeout($handle,$value);
 	}
 
 	static function flom_handle_get_discovery_ttl($handle) {
@@ -276,7 +286,7 @@ abstract class flom {
 	}
 
 	static function flom_handle_set_discovery_ttl($handle,$value) {
-		flom_handle_set_discovery_ttl($handle,$value);
+		return flom_handle_set_discovery_ttl($handle,$value);
 	}
 
 	static function flom_handle_get_lock_mode($handle) {
@@ -284,7 +294,7 @@ abstract class flom {
 	}
 
 	static function flom_handle_set_lock_mode($handle,$value) {
-		flom_handle_set_lock_mode($handle,$value);
+		return flom_handle_set_lock_mode($handle,$value);
 	}
 
 	static function flom_handle_get_multicast_address($handle) {
@@ -292,7 +302,7 @@ abstract class flom {
 	}
 
 	static function flom_handle_set_multicast_address($handle,$value) {
-		flom_handle_set_multicast_address($handle,$value);
+		return flom_handle_set_multicast_address($handle,$value);
 	}
 
 	static function flom_handle_get_multicast_port($handle) {
@@ -300,7 +310,7 @@ abstract class flom {
 	}
 
 	static function flom_handle_set_multicast_port($handle,$value) {
-		flom_handle_set_multicast_port($handle,$value);
+		return flom_handle_set_multicast_port($handle,$value);
 	}
 
 	static function flom_handle_get_resource_create($handle) {
@@ -308,7 +318,7 @@ abstract class flom {
 	}
 
 	static function flom_handle_set_resource_create($handle,$value) {
-		flom_handle_set_resource_create($handle,$value);
+		return flom_handle_set_resource_create($handle,$value);
 	}
 
 	static function flom_handle_get_resource_idle_lifespan($handle) {
@@ -316,7 +326,7 @@ abstract class flom {
 	}
 
 	static function flom_handle_set_resource_idle_lifespan($handle,$value) {
-		flom_handle_set_resource_idle_lifespan($handle,$value);
+		return flom_handle_set_resource_idle_lifespan($handle,$value);
 	}
 
 	static function flom_handle_get_resource_name($handle) {
@@ -332,7 +342,7 @@ abstract class flom {
 	}
 
 	static function flom_handle_set_resource_quantity($handle,$value) {
-		flom_handle_set_resource_quantity($handle,$value);
+		return flom_handle_set_resource_quantity($handle,$value);
 	}
 
 	static function flom_handle_get_resource_timeout($handle) {
@@ -340,7 +350,7 @@ abstract class flom {
 	}
 
 	static function flom_handle_set_resource_timeout($handle,$value) {
-		flom_handle_set_resource_timeout($handle,$value);
+		return flom_handle_set_resource_timeout($handle,$value);
 	}
 
 	static function flom_handle_get_socket_name($handle) {
@@ -356,7 +366,7 @@ abstract class flom {
 	}
 
 	static function flom_handle_set_trace_filename($handle,$value) {
-		flom_handle_set_trace_filename($handle,$value);
+		return flom_handle_set_trace_filename($handle,$value);
 	}
 
 	static function flom_handle_get_unicast_address($handle) {
@@ -364,7 +374,7 @@ abstract class flom {
 	}
 
 	static function flom_handle_set_unicast_address($handle,$value) {
-		flom_handle_set_unicast_address($handle,$value);
+		return flom_handle_set_unicast_address($handle,$value);
 	}
 
 	static function flom_handle_get_unicast_port($handle) {
@@ -372,7 +382,7 @@ abstract class flom {
 	}
 
 	static function flom_handle_set_unicast_port($handle,$value) {
-		flom_handle_set_unicast_port($handle,$value);
+		return flom_handle_set_unicast_port($handle,$value);
 	}
 }
 

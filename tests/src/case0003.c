@@ -77,8 +77,9 @@ void unlock_different_resource(void) {
     }
     
     /* set a different resource name */
-    if (FLOM_RC_OK != (ret_cod = flom_handle_set_resource_name(
-                           &my_handle, nd_resource_name2))) {
+    if (FLOM_RC_API_IMMUTABLE_HANDLE != (
+            ret_cod = flom_handle_set_resource_name(
+                &my_handle, nd_resource_name2))) {
         fprintf(stderr, "flom_handle_set_resource_name() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);

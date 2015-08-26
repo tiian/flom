@@ -35,6 +35,8 @@ const char *flom_strerror(int ret_cod)
 {
     switch (ret_cod) {
         /* WARNINGS */
+        case FLOM_RC_API_IMMUTABLE_HANDLE:
+            return "WARNING: the handle can not be changed at this time";
         case FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE:
             return "WARNING: the name of the locked element is not available";
         case FLOM_RC_NETWORK_TIMEOUT:
