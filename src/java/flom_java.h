@@ -58,9 +58,9 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryAttemptsJNI
 /*
  * Class:     org_tiian_flom_FlomHandle
  * Method:    setDiscoveryAttemptsJNI
- * Signature: (I)V
+ * Signature: (I)I
  */
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryAttemptsJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryAttemptsJNI
   (JNIEnv *, jobject, jint);
 
 /*
@@ -74,9 +74,9 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryTimeoutJNI
 /*
  * Class:     org_tiian_flom_FlomHandle
  * Method:    setDiscoveryTimeoutJNI
- * Signature: (I)V
+ * Signature: (I)I
  */
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTimeoutJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTimeoutJNI
   (JNIEnv *, jobject, jint);
 
 /*
@@ -90,9 +90,9 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryTtlJNI
 /*
  * Class:     org_tiian_flom_FlomHandle
  * Method:    setDiscoveryTtlJNI
- * Signature: (I)V
+ * Signature: (I)I
  */
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTtlJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTtlJNI
   (JNIEnv *, jobject, jint);
 
 /*
@@ -106,9 +106,9 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getLockModeJNI
 /*
  * Class:     org_tiian_flom_FlomHandle
  * Method:    setLockModeJNI
- * Signature: (I)V
+ * Signature: (I)I
  */
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setLockModeJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setLockModeJNI
   (JNIEnv *, jobject, jint);
 
 /*
@@ -122,9 +122,9 @@ JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getMulticastAddressJNI
 /*
  * Class:     org_tiian_flom_FlomHandle
  * Method:    setMulticastAddressJNI
- * Signature: (Ljava/lang/String;)V
+ * Signature: (Ljava/lang/String;)I
  */
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setMulticastAddressJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setMulticastAddressJNI
   (JNIEnv *, jobject, jstring);
 
 /*
@@ -138,9 +138,9 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getMulticastPortJNI
 /*
  * Class:     org_tiian_flom_FlomHandle
  * Method:    setMulticastPortJNI
- * Signature: (I)V
+ * Signature: (I)I
  */
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setMulticastPortJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setMulticastPortJNI
   (JNIEnv *, jobject, jint);
 
 /*
@@ -154,9 +154,9 @@ JNIEXPORT jboolean JNICALL Java_org_tiian_flom_FlomHandle_getResourceCreateJNI
 /*
  * Class:     org_tiian_flom_FlomHandle
  * Method:    setResourceCreateJNI
- * Signature: (Z)V
+ * Signature: (Z)I
  */
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setResourceCreateJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setResourceCreateJNI
   (JNIEnv *, jobject, jboolean);
 
 /*
@@ -170,9 +170,9 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getResourceIdleLifespanJNI
 /*
  * Class:     org_tiian_flom_FlomHandle
  * Method:    setResourceIdleLifespanJNI
- * Signature: (I)V
+ * Signature: (I)I
  */
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setResourceIdleLifespanJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setResourceIdleLifespanJNI
   (JNIEnv *, jobject, jint);
 
 /*
@@ -212,6 +212,8 @@ extern "C" {
 #define org_tiian_flom_FlomErrorCodes_FLOM_ES_GENERIC_ERROR 99L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_ES_OK
 #define org_tiian_flom_FlomErrorCodes_FLOM_ES_OK 0L
+#undef org_tiian_flom_FlomErrorCodes_FLOM_RC_API_IMMUTABLE_HANDLE
+#define org_tiian_flom_FlomErrorCodes_FLOM_RC_API_IMMUTABLE_HANDLE 11L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE 10L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_NETWORK_TIMEOUT

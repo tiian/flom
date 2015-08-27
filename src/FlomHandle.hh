@@ -173,13 +173,15 @@ namespace flom {
          * The current value can be inspected using method
          *         @ref getDiscoveryAttempts
          * @param value (Input): the new value
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setDiscoveryAttempts(int value) {
-            flom_handle_set_discovery_attempts(&handle, value); }
+        int setDiscoveryAttempts(int value) {
+            return flom_handle_set_discovery_attempts(&handle, value); }
 
         /**
-         * Gets the number of milliseconds between two consecutive attempts that
-         * will be tryed during auto-discovery phase using UDP/IP multicast (see
+         * Gets the number of milliseconds between two consecutive attempts
+         * that will be tryed during auto-discovery phase using UDP/IP
+         * multicast (see
          * @ref getMulticastAddress, @ref getMulticastPort).
          * The current value can be altered using method
          * @ref setDiscoveryTimeout
@@ -189,15 +191,17 @@ namespace flom {
             return flom_handle_get_discovery_timeout(&handle); }
 
         /**
-         * Sets the number of milliseconds between two consecutive attempts that
-         * will be tryed during auto-discovery phase using UDP/IP multicast (see
+         * Sets the number of milliseconds between two consecutive attempts
+         * that will be tryed during auto-discovery phase using UDP/IP
+         * multicast (see
          * @ref setMulticastAddress, @ref setMulticastPort).
          * The current value can be inspected using method
          * @ref getDiscoveryTimeout.
          * @param value (Input): the new value
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setDiscoveryTimeout(int value) {
-            flom_handle_set_discovery_timeout(&handle, value); }
+        int setDiscoveryTimeout(int value) {
+            return flom_handle_set_discovery_timeout(&handle, value); }
 
         /**
          * Gets the UDP/IP multicast TTL parameter used during auto-discovery
@@ -216,9 +220,10 @@ namespace flom {
          * . The current value can be inspected using method
          * @ref getDiscoveryTtl.
          * @param value (Input): the new value
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setDiscoveryTtl(int value) {
-            flom_handle_set_discovery_ttl(&handle, value); }
+        int setDiscoveryTtl(int value) {
+            return flom_handle_set_discovery_ttl(&handle, value); }
 
         /**
          * Gets lock mode property: how a simple or hierarchical resource will
@@ -240,9 +245,10 @@ namespace flom {
          * for a detailed explanation
          * . The current value can be inspected using method @ref getLockMode
          * @param value (Input): the new value
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setLockMode(flom_lock_mode_t value) {
-            flom_handle_set_lock_mode(&handle, value); }
+        int setLockMode(flom_lock_mode_t value) {
+            return flom_handle_set_lock_mode(&handle, value); }
 
         /**
          * Gets the multicast address: the IP address (or a network name that
@@ -276,9 +282,10 @@ namespace flom {
          * The current value can be inspected using method
          * @ref getMulticastAddress.
          * @param value (Input): the new value (C null terminated string)
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setMulticastAddress(const char *value) {
-            flom_handle_set_multicast_address(&handle, value); }
+        int setMulticastAddress(const char *value) {
+            return flom_handle_set_multicast_address(&handle, value); }
         /**
          * Sets the multicast address: the IP address (or a network name that
          * the system can resolve) of the IP multicast group that must be
@@ -306,9 +313,10 @@ namespace flom {
          * The current value can be inspected using method
          * @ref getMulticastPort.
          * @param value (Input): the new value
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setMulticastPort(int value) {
-            flom_handle_set_multicast_port(&handle, value); }
+        int setMulticastPort(int value) {
+            return flom_handle_set_multicast_port(&handle, value); }
 
         /**
          * Gets "resource create" boolean property: it specifies if method
@@ -328,14 +336,16 @@ namespace flom {
          * The current value can be inspected using method
          * @ref getResourceCreate.
          * @param value (Input): the new value
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setResourceCreate(int value) {
-            flom_handle_set_resource_create(&handle, value); }
+        int setResourceCreate(int value) {
+            return flom_handle_set_resource_create(&handle, value); }
 
         /**
          * Gets "resource idle lifespan" property: it specifies how many
          * milliseconds a resource will be kept after the last locker released
-         * it; the expiration is necessary to avoid useless resource allocation.
+         * it; the expiration is necessary to avoid useless resource
+         * allocation.
          * The current value can be altered using method
          *     @ref setResourceIdleLifespan.
          * @return the current value
@@ -346,13 +356,15 @@ namespace flom {
         /**
          * Sets "resource idle lifespan" property: it specifies how many
          * milliseconds a resource will be kept after the last locker released
-         * it; the expiration is necessary to avoid useless resource allocation.
+         * it; the expiration is necessary to avoid useless resource
+         * allocation.
          * The current value can be inspected using method
          *     @ref getResourceIdleLifespan.
          * @param value (Input): the new value
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setResourceIdleLifespan(int value) {
-            flom_handle_set_resource_idle_lifespan(&handle, value); }
+        int setResourceIdleLifespan(int value) {
+            return flom_handle_set_resource_idle_lifespan(&handle, value); }
 
         /**
          * Gets the resource name: the name of the resource that can be locked
@@ -375,24 +387,27 @@ namespace flom {
         /**
          * Sets the resource name: the name of the resource that can be locked
          * and unlocked using @ref lock and @ref unlock methods.
-         * The current value can be inspected using method @ref getResourceName.
+         * The current value can be inspected using method
+         * @ref getResourceName.
          * NOTE: the resource type is determined by its name; take a look to
          * flom command man page (-r, --resource-name option) for an
          * explanation of the resource name grammar.
          * @param value (Input): the new value (C null terminated string)
-         * @return a reason code (see file @ref flom_errors.h)
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
         int setResourceName(const char *value) {
             return flom_handle_set_resource_name(&handle, value); }
         /**
          * Sets the resource name: the name of the resource that can be locked
          * and unlocked using @ref lock and @ref unlock methods.
-         * The current value can be inspected using method @ref getResourceName.
+         * The current value can be inspected using method
+         * @ref getResourceName.
          * NOTE: the resource type is determined by its name; take a look to
          * flom command man page (-r, --resource-name option) for an
          * explanation of the resource name grammar.
          * @param value (Input): the new value (C++ standard string)
          * @return a reason code (see file @ref flom_errors.h)
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
         int setResourceName(const string &value) {
             return flom_handle_set_resource_name(&handle, value.c_str()); }
@@ -415,9 +430,10 @@ namespace flom {
          * @ref getResourceQuantity.
          * NOTE: this property applies to "numeric resources" only.
          * @param value (Input): the new value
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setResourceQuantity(int value) {
-            flom_handle_set_resource_quantity(&handle, value); }
+        int setResourceQuantity(int value) {
+            return flom_handle_set_resource_quantity(&handle, value); }
 
         /**
          * Gets "resource timeout" property: how long a lock operation
@@ -443,9 +459,10 @@ namespace flom {
          *        0: no wait <BR>
          *        >0: maximum number of milliseconds to wait <BR>
          *        <0: unlimited wait
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setResourceTimeout(int value) {
-            flom_handle_set_resource_timeout(&handle, value); }
+        int setResourceTimeout(int value) {
+            return flom_handle_set_resource_timeout(&handle, value); }
 
         /**
          * Gets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
@@ -508,25 +525,28 @@ namespace flom {
          * The current value can be inspected using function
          * @ref getTraceFilename.
          * @param value (Input): the new value (C null terminated string)
+         * @return @ref FLOM_RC_OK
          */
-        void setTraceFilename(const char *value) {
-            flom_handle_set_trace_filename(&handle, value); }
+        int setTraceFilename(const char *value) {
+            return flom_handle_set_trace_filename(&handle, value); }
         /**
          * Sets the trace filename: the name (absolute or relative path) used
          * by libflom (FLoM client library) to record trace messages.
          * The current value can be inspected using function
          * @ref getTraceFilename.
          * @param value (Input): the new value (C++ standard string)
+         * @return @ref FLOM_RC_OK
          */
-        void setTraceFilename(const string &value) {
-            flom_handle_set_trace_filename(&handle, value.c_str()); }
+        int setTraceFilename(const string &value) {
+            return flom_handle_set_trace_filename(&handle, value.c_str()); }
 
         /**
          * Gets the unicast address: the IP address (or a network name that the
          * system can resolve) of the host that must be contacted
          * to reach FLoM daemon (server) using TCP/IP; see also
          * @ref getUnicastPort.
-         * The current value can be altered using method @ref setUnicastAddress.
+         * The current value can be altered using method
+         * @ref setUnicastAddress.
          * @return the current value as a C null terminated string
          */
         const char *getUnicastAddressAsCStr() {
@@ -536,7 +556,8 @@ namespace flom {
          * system can resolve) of the host that must be contacted
          * to reach FLoM daemon (server) using TCP/IP; see also
          * @ref getUnicastPort.
-         * The current value can be altered using method @ref setUnicastAddress.
+         * The current value can be altered using method
+         * @ref setUnicastAddress.
          * @return the current value as a C++ standard string
          */
         string getUnicastAddress() {
@@ -551,9 +572,10 @@ namespace flom {
          * The current value can be inspected using method
          * @ref getUnicastAddress.
          * @param value (Input): the new value (C null terminted string)
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setUnicastAddress(const char *value) {
-            flom_handle_set_unicast_address(&handle, value); }
+        int setUnicastAddress(const char *value) {
+            return flom_handle_set_unicast_address(&handle, value); }
         /**
          * Sets the unicast address: the IP address (or a network name that the
          * system can resolve) of the host that must be contacted
@@ -580,9 +602,10 @@ namespace flom {
          * daemon (server) using TCP/IP; see also @ref setUnicastAddress.
          * The current value can be inspected using method @ref getUnicastPort.
          * @param value (Input): the new value
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setUnicastPort(int value) {
-            flom_handle_set_unicast_port(&handle, value); }
+        int setUnicastPort(int value) {
+            return flom_handle_set_unicast_port(&handle, value); }
     }; /* class FlomHandle */
 
 } /* namespace flom */

@@ -199,7 +199,7 @@ public class FlomHandle {
     /**
      * Native method for @ref setDiscoveryAttempts
      */
-    private native void setDiscoveryAttemptsJNI(int value);
+    private native int setDiscoveryAttemptsJNI(int value);
     /**
      * Sets the maximum number of attempts that will be tryed during
      * auto-discovery phase using UDP/IP multicast (see
@@ -207,12 +207,14 @@ public class FlomHandle {
      * The current value can be inspected using method
      *         @ref getDiscoveryAttempts
      * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
      */
-    public void setDiscoveryAttempts(int value) throws FlomException {
+    public int setDiscoveryAttempts(int value) throws FlomException {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else
-            setDiscoveryAttemptsJNI(value);
+            return setDiscoveryAttemptsJNI(value);
     }
 
     
@@ -241,7 +243,7 @@ public class FlomHandle {
     /**
      * Native method for @ref setDiscoveryTimeout
      */
-    private native void setDiscoveryTimeoutJNI(int value);
+    private native int setDiscoveryTimeoutJNI(int value);
     /**
      * Sets the number of milliseconds between two consecutive attempts that
      * will be tryed during auto-discovery phase using UDP/IP multicast (see
@@ -249,12 +251,14 @@ public class FlomHandle {
      * The current value can be inspected using method
      * @ref getDiscoveryTtl.
      * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
      */
-    public void setDiscoveryTimeout(int value) throws FlomException {
+    public int setDiscoveryTimeout(int value) throws FlomException {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else
-            setDiscoveryTimeoutJNI(value);
+            return setDiscoveryTimeoutJNI(value);
     }
 
     
@@ -282,7 +286,7 @@ public class FlomHandle {
     /**
      * Native method for @ref setDiscoveryTtl
      */
-    private native void setDiscoveryTtlJNI(int value);
+    private native int setDiscoveryTtlJNI(int value);
     /**
      * Sets the UDP/IP multicast TTL parameter used during auto-discovery
      * phase; for a definition of the parameter, see
@@ -290,12 +294,14 @@ public class FlomHandle {
      * . The current value can be inspected using method
      * @ref getDiscoveryTtl.
      * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
      */
-    public void setDiscoveryTtl(int value) throws FlomException {
+    public int setDiscoveryTtl(int value) throws FlomException {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else
-            setDiscoveryTtlJNI(value);
+            return setDiscoveryTtlJNI(value);
     }
 
 
@@ -325,7 +331,7 @@ public class FlomHandle {
     /**
      * Native method for @ref setLockMode
      */
-    private native void setLockModeJNI(int value);
+    private native int setLockModeJNI(int value);
     /**
      * Sets lock mode property: how a simple or hierarchical resource will
      * be locked when method @ref lock is called; FLoM
@@ -335,12 +341,14 @@ public class FlomHandle {
      * . The current value can be inspected using method @ref getLockMode
      * @param value (Input): the new value
      * The available lock modes are described by class @ref FlomLockModes
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
      */
-    public void setLockMode(int value) throws FlomException {
+    public int setLockMode(int value) throws FlomException {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else
-            setLockModeJNI(value);
+            return setLockModeJNI(value);
     }
 
 
@@ -374,7 +382,7 @@ public class FlomHandle {
     /**
      * Native method for @ref setMulticastAddress
      */
-    private native void setMulticastAddressJNI(String value);
+    private native int setMulticastAddressJNI(String value);
     /**
      * Sets the multicast address: the IP address (or a network name that
      * the system can resolve) of the IP multicast group that must be
@@ -383,12 +391,14 @@ public class FlomHandle {
      * The current value can be inspected using method
      * @ref getMulticastAddress.
      * @param value (Input): the new value (C++ standard string)
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
      */
-    public void setMulticastAddress(String value) throws FlomException {
+    public int setMulticastAddress(String value) throws FlomException {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else
-            setMulticastAddressJNI(value);
+            return setMulticastAddressJNI(value);
     }
 
     
@@ -415,19 +425,21 @@ public class FlomHandle {
     /**
      * Native method for @ref setMulticastPort
      */
-    private native void setMulticastPortJNI(int value);
+    private native int setMulticastPortJNI(int value);
     /**
      * Sets the UDP/IP multicast port that must be used to contact the FLoM
      * daemon (server) using UDP/IP; see also @ref setMulticastAddress.
      * The current value can be inspected using method
      * @ref getMulticastPort.
      * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
      */
-    public void setMulticastPort(int value) throws FlomException {
+    public int setMulticastPort(int value) throws FlomException {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else
-            setMulticastPortJNI(value);
+            return setMulticastPortJNI(value);
     }
 
 
@@ -454,7 +466,7 @@ public class FlomHandle {
     /**
      * Native method for @ref setResourceCreate
      */
-    private native void setResourceCreateJNI(boolean value);
+    private native int setResourceCreateJNI(boolean value);
     /**
      * Sets "resource create" boolean property: it specifies if method
      * @ref lock can create a new resource when the specified
@@ -462,12 +474,14 @@ public class FlomHandle {
      * The current value can be inspected using method
      * @ref getResourceCreate.
      * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
      */
-    public void setResourceCreate(boolean value) throws FlomException {
+    public int setResourceCreate(boolean value) throws FlomException {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else
-            setResourceCreateJNI(value);
+            return setResourceCreateJNI(value);
     }
 
 
@@ -496,7 +510,7 @@ public class FlomHandle {
     /**
      * Native method for @ref setResourceIdleLifespan
      */
-    private native void setResourceIdleLifespanJNI(int value);
+    private native int setResourceIdleLifespanJNI(int value);
     /**
      * Sets "resource idle lifespan" property: it specifies how many
      * milliseconds a resource will be kept after the last locker released
@@ -504,12 +518,14 @@ public class FlomHandle {
      * The current value can be inspected using method
      *     @ref getResourceIdleLifespan.
      * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
      */
-    public void setResourceIdleLifespan(int value) throws FlomException {
+    public int setResourceIdleLifespan(int value) throws FlomException {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else
-            setResourceIdleLifespanJNI(value);
+            return setResourceIdleLifespanJNI(value);
     }
 
 
@@ -549,16 +565,20 @@ public class FlomHandle {
      * flom command man page (-r, --resource-name option) for an
      * explanation of the resource name grammar.
      * @param value (Input): the new value (C++ standard string)
-     * @return a reason code (see file @ref flom_errors.h)
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
      */
-    public void setResourceName(String value) throws FlomException {
+    public int setResourceName(String value) throws FlomException {
+        int ReturnCode = FlomErrorCodes.FLOM_RC_OK;
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
         else {
-            int ReturnCode = setResourceNameJNI(value);
-            if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+            ReturnCode = setResourceNameJNI(value);
+            if (FlomErrorCodes.FLOM_RC_OK != ReturnCode &&
+                FlomErrorCodes.FLOM_RC_API_IMMUTABLE_HANDLE != ReturnCode)
                 throw new FlomException(ReturnCode);
         }
+        return ReturnCode;
     }
 
     
@@ -619,6 +639,7 @@ public class FlomHandle {
             System.out.println("FlomHandle.getResourceIdleLifespan() = " +
                                fh.getResourceIdleLifespan());
 
+            
             // use a wrong resource name
             try {
                 fh.setResourceName("an invalid name...");
@@ -648,7 +669,6 @@ public class FlomHandle {
                                        + e.getMessage());
                 else throw(e);
             }
-
             fh.unlock();
             fh.free();
         } catch(FlomException e) {

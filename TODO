@@ -1,5 +1,13 @@
 Road map:
 
+Release 1.0.0:
+- change project status from beta to stable
+- Java examples
+- Java case tests
+- Javadoc
+- updated C/C++ docs
+- updated site
+
 Java: return code for set methods as implemented in C interface
 Java: going on with getResourceQuantity() and other methods...
 

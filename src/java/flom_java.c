@@ -273,14 +273,13 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryAttemptsJNI
 
 
 
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryAttemptsJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryAttemptsJNI
 (JNIEnv *env, jobject this_obj, jint value)
 {
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setDiscoveryAttemptsJNI\n"));
-    flom_handle_set_discovery_attempts(
+    return (jint)flom_handle_set_discovery_attempts(
         Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj),
         value);
-    return;
 }
 
     
@@ -295,14 +294,13 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryTimeoutJNI
 
 
 
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTimeoutJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTimeoutJNI
 (JNIEnv *env, jobject this_obj, jint value)
 {
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setDiscoveryTimeoutJNI\n"));
-    flom_handle_set_discovery_timeout(
+    return (jint)flom_handle_set_discovery_timeout(
         Java_org_tiian_flom_FlomHandle_getNativeHandle(
             env, this_obj), value);
-    return;
 }
 
     
@@ -318,14 +316,13 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getDiscoveryTtlJNI
 
 
 
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTtlJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setDiscoveryTtlJNI
 (JNIEnv *env, jobject this_obj, jint value)
 {
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setDiscoveryTtlJNI\n"));
-    flom_handle_set_discovery_ttl(
+    return (jint)flom_handle_set_discovery_ttl(
         Java_org_tiian_flom_FlomHandle_getNativeHandle(
             env, this_obj), value);
-    return;
 }
 
     
@@ -341,14 +338,13 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getLockModeJNI
 
 
 
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setLockModeJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setLockModeJNI
 (JNIEnv *env, jobject this_obj, jint value)
 {
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setLockModeJNI\n"));
-    flom_handle_set_lock_mode(
+    return (jint)flom_handle_set_lock_mode(
         Java_org_tiian_flom_FlomHandle_getNativeHandle(
             env, this_obj), value);
-    return;
 }
 
     
@@ -366,15 +362,14 @@ JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getMulticastAddressJNI
 
 
 
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setMulticastAddressJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setMulticastAddressJNI
 (JNIEnv *env, jobject this_obj, jstring value)
 {
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setMulticastAddressJNI\n"));
     const char *cstr = (*env)->GetStringUTFChars(env, value, NULL);
-    flom_handle_set_multicast_address(
+    return (jint)flom_handle_set_multicast_address(
         Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj),
         cstr);
-    return;
 }
 
 
@@ -390,14 +385,13 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getMulticastPortJNI
 
 
 
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setMulticastPortJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setMulticastPortJNI
 (JNIEnv *env, jobject this_obj, jint value)
 {
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setMulticastPortJNI\n"));
-    flom_handle_set_multicast_port(
+    return (jint)flom_handle_set_multicast_port(
         Java_org_tiian_flom_FlomHandle_getNativeHandle(
             env, this_obj), value);
-    return;
 }
 
 
@@ -413,14 +407,13 @@ JNIEXPORT jboolean JNICALL Java_org_tiian_flom_FlomHandle_getResourceCreateJNI
 
 
 
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setResourceCreateJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setResourceCreateJNI
   (JNIEnv *env, jobject this_obj, jboolean value)
 {
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setResourceCreateJNI\n"));
-    flom_handle_set_resource_create(
+    return (jint)flom_handle_set_resource_create(
         Java_org_tiian_flom_FlomHandle_getNativeHandle(
             env, this_obj), value);
-    return;
 }
 
 
@@ -436,14 +429,13 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getResourceIdleLifespanJNI
 
 
 
-JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_setResourceIdleLifespanJNI
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setResourceIdleLifespanJNI
 (JNIEnv *env, jobject this_obj, jint value)
 {
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setResourceIdleLifespanJNI\n"));
-    flom_handle_set_resource_idle_lifespan(
+    return (jint)flom_handle_set_resource_idle_lifespan(
         Java_org_tiian_flom_FlomHandle_getNativeHandle(
             env, this_obj), value);
-    return;
 }
 
 
