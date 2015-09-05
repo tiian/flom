@@ -465,6 +465,100 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setResourceNameJNI
 
 
 
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getResourceQuantityJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getResourceQuantityJNI\n"));
+    return (jint)flom_handle_get_resource_quantity(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj));
+}
+
+
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setResourceQuantityJNI
+(JNIEnv *env, jobject this_obj, jint value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setResourceQuantityJNI\n"));
+    return (jint)flom_handle_set_resource_quantity(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj), value);
+}
+
+
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getResourceTimeoutJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getResourceTimeoutJNI\n"));
+    return (jint)flom_handle_get_resource_timeout(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj));
+}
+
+
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setResourceTimeoutJNI
+(JNIEnv *env, jobject this_obj, jint value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setResourceTimeoutJNI\n"));
+    return (jint)flom_handle_set_resource_timeout(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj), value);
+}
+
+
+
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getSocketNameJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getSocketNameJNI\n"));
+    return (*env)->NewStringUTF(
+        env,
+        flom_handle_get_socket_name(
+            Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                env, this_obj)));
+}
+
+
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setSocketNameJNI
+(JNIEnv *env, jobject this_obj, jstring value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setSocketNameJNI\n"));
+    const char *cstr = (*env)->GetStringUTFChars(env, value, NULL);
+    return (jint)flom_handle_set_socket_name(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj),
+        cstr);
+}
+
+
+    
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getTraceFilenameJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getTraceFilenameJNI\n"));
+    return (*env)->NewStringUTF(
+        env,
+        flom_handle_get_trace_filename(
+            Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                env, this_obj)));
+}
+
+
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setTraceFilenameJNI
+(JNIEnv *env, jobject this_obj, jstring value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setTraceFilenameJNI\n"));
+    const char *cstr = (*env)->GetStringUTFChars(env, value, NULL);
+    return (jint)flom_handle_set_trace_filename(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj),
+        cstr);
+}
+
+
+    
 JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomErrorCodes_getText
 (JNIEnv *env, jclass this_obj, jint code)
 {

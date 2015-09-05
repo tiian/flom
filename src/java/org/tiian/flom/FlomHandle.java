@@ -364,7 +364,7 @@ public class FlomHandle {
      *         @ref getMulticastPort.
      * The current value can be altered using function
      *         @ref setMulticastAddress.
-     * @return the current value as a standard C++ string
+     * @return the current value
      */
     public String getMulticastAddress() throws FlomException {
         String ReturnString = null;
@@ -390,13 +390,15 @@ public class FlomHandle {
      * @ref setMulticastPort.
      * The current value can be inspected using method
      * @ref getMulticastAddress.
-     * @param value (Input): the new value (C++ standard string)
+     * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
      */
     public int setMulticastAddress(String value) throws FlomException {
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else if (null == value)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_NULL_OBJECT);
         else
             return setMulticastAddressJNI(value);
     }
@@ -538,7 +540,7 @@ public class FlomHandle {
      * Gets the resource name: the name of the resource that can be locked
      * and unlocked using @ref lock and @ref unlock methods.
      * The current value can be altered using method @ref setResourceName.
-     * @return the current value as a C++ standard string
+     * @return the current value
      */
     public String getResourceName() throws FlomException {
         String ReturnString = null;
@@ -564,7 +566,7 @@ public class FlomHandle {
      * NOTE: the resource type is determined by its name; take a look to
      * flom command man page (-r, --resource-name option) for an
      * explanation of the resource name grammar.
-     * @param value (Input): the new value (C++ standard string)
+     * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
      */
@@ -572,6 +574,8 @@ public class FlomHandle {
         int ReturnCode = FlomErrorCodes.FLOM_RC_OK;
         if (null == NativeHandler)
             throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else if (null == value)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_NULL_OBJECT);
         else {
             ReturnCode = setResourceNameJNI(value);
             if (FlomErrorCodes.FLOM_RC_OK != ReturnCode &&
@@ -583,23 +587,199 @@ public class FlomHandle {
 
     
     
+    /**
+     * Native method for @ref getResourceQuantity
+     */
+    private native int getResourceQuantityJNI();
+    /**
+     * Gets "resource quantity" property: the number of units that will be
+     * locked and unlocked using @ref lock and @ref unlock methods.
+     * The current value can be altered using method
+     * @ref setResourceQuantity.
+     * NOTE: this property applies to "numeric resources" only.
+     * @return the current value
+     */
+    public int getResourceQuantity() throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            return getResourceQuantityJNI();
+    }
+
+
+    
+    /**
+     * Native method for @ref setResourceQuantity
+     */
+    private native int setResourceQuantityJNI(int value);
+    /**
+     * Sets "resource quantity" property: the number of units that will be
+     * locked and unlocked using @ref lock and @ref unlock methods.
+     * The current value can be inspected using method
+     * @ref getResourceQuantity.
+     * NOTE: this property applies to "numeric resources" only.
+     * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
+     */
+    public int setResourceQuantity(int value) throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            return setResourceQuantityJNI(value);
+    }
+
+
+    
+    /**
+     * Native method for @ref getResourceTimeout
+     */
+    private native int getResourceTimeoutJNI();
+    /**
+     * Gets "resource timeout" property: how long a lock operation
+     * (see @ref lock) will wait if the resource is locked
+     * by another requester.
+     * The current value can be altered using method
+     * @ref setResourceTimeout.
+     * @return the current value: <BR>
+     *        0: no wait <BR>
+     *        >0: maximum number of milliseconds to wait <BR>
+     *        <0: unlimited wait
+     */
+    public int getResourceTimeout() throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            return getResourceTimeoutJNI();
+    }
+
+
+    
+    /**
+     * Native method for @ref setResourceTimeout
+     */
+    private native int setResourceTimeoutJNI(int value);
+    /**
+     * Sets "resource timeout" property: how long a lock operation
+     * (see @ref lock) will wait if the resource is locked
+     * by another requester.
+     * The current value can be inspected using method
+     * @ref getResourceTimeout.
+     * @param value (Input): the new value: <BR>
+     *        0: no wait <BR>
+     *        >0: maximum number of milliseconds to wait <BR>
+     *        <0: unlimited wait
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
+     */
+    public int setResourceTimeout(int value) throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else
+            return setResourceTimeoutJNI(value);
+    }
+
+
+    
+    /**
+     * Native method for @ref getSocketName
+     */
+    private native String getSocketNameJNI();
+    /**
+     * Gets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+     * used to contact a local FLoM daemon (server).
+     * The current value can be altered using method @ref setSocketName.
+     * @return the current value as a standard
+     */
+    public String getSocketName() throws FlomException {
+        String ReturnString = null;
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else {
+            if (null == (ReturnString = getSocketNameJNI()))
+                ReturnString = new String("");
+        }
+        return ReturnString;
+    }
+
+
+    
+    /**
+     * Native method for @ref setSocketName
+     */
+    private native int setSocketNameJNI(String value);
+    /**
+     * Sets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+     * used to contact a local FLoM daemon (server).
+     * The current value can be inspected using method @ref getSocketName
+     * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
+     */
+    public int setSocketName(String value) throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else if (null == value)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_NULL_OBJECT);
+        else
+            return setSocketNameJNI(value);
+    }
+
+    
+    
+    /**
+     * Native method for @ref getTraceFilename
+     */
+    private native String getTraceFilenameJNI();
+    /**
+     * Gets the trace filename: the name (absolute or relative path) used
+     * by libflom (FLoM client library) to record trace messages.
+     * The current value can be altered using method @ref setTraceFilename.
+     * @return the current value
+     */
+    public String getTraceFilename() throws FlomException {
+        String ReturnString = null;
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else {
+            if (null == (ReturnString = getTraceFilenameJNI()))
+                ReturnString = new String("");
+        }
+        return ReturnString;
+    }
+
+
+    
+    /**
+     * Native method for @ref setTraceFilename
+     */
+    private native int setTraceFilenameJNI(String value);
+    /**
+     * Sets the trace filename: the name (absolute or relative path) used
+     * by libflom (FLoM client library) to record trace messages.
+     * The current value can be inspected using function
+     * @ref getTraceFilename.
+     * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
+     */
+    public int setTraceFilename(String value) throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+        else if (null == value)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_NULL_OBJECT);
+        else
+            return setTraceFilenameJNI(value);
+    }
+
+    
+    
     // @@@ remove me!!!
     public static void main(String[] args) {
         try {
             FlomHandle fh = new FlomHandle();
             System.out.println("FlomHandle.getDiscoveryAttempts() = " +
                                fh.getDiscoveryAttempts());
-            fh.lock();
-            try {
-                System.out.println("FlomHandle.getLockedElement() = '" +
-                                   fh.getLockedElement() + "'");
-            } catch(FlomException e) {
-                if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
-                    e.getReturnCode())
-                    System.out.println("FlomHandle.getLockedElement() " +
-                                       "EXCP/" + e.getMessage());
-                else throw(e);
-            }
             fh.setDiscoveryAttempts(33);
             System.out.println("FlomHandle.getDiscoveryAttempts() = " +
                                fh.getDiscoveryAttempts());
@@ -612,7 +792,7 @@ public class FlomHandle {
             fh.setLockMode(FlomLockModes.FLOM_LOCK_MODE_PR);
             System.out.println("FlomHandle.getLockMode() = " +
                                fh.getLockMode());
-
+            /*
             fh.setMulticastAddress("224.0.0.3");
             try {
                 System.out.println("FlomHandle.getMulticastAddress() = '" +
@@ -623,11 +803,11 @@ public class FlomHandle {
                     System.out.println("FlomHandle: " + e.getMessage());
                 else throw(e);
             }
-
+            */
             fh.setMulticastPort(12345);
             System.out.println("FlomHandle.getMulticastPort() = " +
                                fh.getMulticastPort());
-
+           
             fh.setResourceCreate(false);
             System.out.println("FlomHandle.getResourceCreate() = " +
                                fh.getResourceCreate());
@@ -638,6 +818,14 @@ public class FlomHandle {
             fh.setResourceIdleLifespan(6);
             System.out.println("FlomHandle.getResourceIdleLifespan() = " +
                                fh.getResourceIdleLifespan());
+
+            fh.setResourceQuantity(6);
+            System.out.println("FlomHandle.getResourceQuantity() = " +
+                               fh.getResourceQuantity());
+
+            fh.setResourceTimeout(69);
+            System.out.println("FlomHandle.getResourceTimeout() = " +
+                               fh.getResourceTimeout());
 
             
             // use a wrong resource name
@@ -667,6 +855,47 @@ public class FlomHandle {
                     e.getReturnCode())
                     System.out.println("FlomHandle.getResourceName() EXCP/"
                                        + e.getMessage());
+                else throw(e);
+            }
+
+            
+            System.out.println("FlomHandle.getSocketName() = '" +
+                               fh.getSocketName() + "'");
+            /*
+            fh.setSocketName("/tmp/foobar");
+            try {
+                System.out.println("FlomHandle.getSocketName() = '" +
+                                   fh.getSocketName() + "'");
+            } catch(FlomException e) {
+                if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
+                    e.getReturnCode())
+                    System.out.println("FlomHandle: " + e.getMessage());
+                else throw(e);
+            }
+            fh.setSocketName(null);
+            */
+
+            fh.setTraceFilename("/tmp/mytrace");
+            try {
+                System.out.println("FlomHandle.getTraceFilename() = '" +
+                                   fh.getTraceFilename() + "'");
+            } catch(FlomException e) {
+                if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
+                    e.getReturnCode())
+                    System.out.println("FlomHandle: " + e.getMessage());
+                else throw(e);
+            }
+            fh.setTraceFilename(null);
+            
+            fh.lock();
+            try {
+                System.out.println("FlomHandle.getLockedElement() = '" +
+                                   fh.getLockedElement() + "'");
+            } catch(FlomException e) {
+                if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
+                    e.getReturnCode())
+                    System.out.println("FlomHandle.getLockedElement() " +
+                                       "EXCP/" + e.getMessage());
                 else throw(e);
             }
             fh.unlock();

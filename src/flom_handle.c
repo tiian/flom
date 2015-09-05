@@ -835,6 +835,8 @@ int flom_handle_set_trace_filename(flom_handle_t *handle, const char *value)
                 STRORNULL(flom_config_get_command_trace_file(handle->config)),
                 STRORNULL(value)));
     flom_config_set_command_trace_file(handle->config, (const gchar *)value);
+    FLOM_TRACE_REOPEN(flom_config_get_command_trace_file(handle->config),
+                      FALSE);
     return FLOM_RC_OK;
 }
 

@@ -191,6 +191,70 @@ JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getResourceNameJNI
 JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setResourceNameJNI
   (JNIEnv *, jobject, jstring);
 
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getResourceQuantityJNI
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getResourceQuantityJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setResourceQuantityJNI
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setResourceQuantityJNI
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getResourceTimeoutJNI
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getResourceTimeoutJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setResourceTimeoutJNI
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setResourceTimeoutJNI
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getSocketNameJNI
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getSocketNameJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setSocketNameJNI
+ * Signature: (Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setSocketNameJNI
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getTraceFilenameJNI
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getTraceFilenameJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setTraceFilenameJNI
+ * Signature: (Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setTraceFilenameJNI
+  (JNIEnv *, jobject, jstring);
+
 #ifdef __cplusplus
 }
 #endif
