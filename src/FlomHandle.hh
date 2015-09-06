@@ -129,7 +129,7 @@ namespace flom {
          * type set.<P>
          * Note 1: this method can be used only after @ref lock and before
          *         @ref unlock<P>
-         * Note 2: this function can be used only when locking a resource of
+         * Note 2: this method can be used only when locking a resource of
          *         type "resource set"<P>
          * Note 3: the return string must copied as soon as possible to a
          *         different place because it's a dynamic string removed by
@@ -144,7 +144,7 @@ namespace flom {
          * type set.<P>
          * Note 1: this method can be used only after @ref lock and before
          *         @ref unlock<P>
-         * Note 2: this function can be used only when locking a resource of
+         * Note 2: this method can be used only when locking a resource of
          *         type "resource set"<P>
          * Note 3: the return string must copied as soon as possible to a
          *         different place because it's a dynamic string removed by
@@ -255,7 +255,7 @@ namespace flom {
          * the system can resolve) of the IP multicast group that must be
          * contacted to reach FLoM daemon (server) using UDP/IP; see also
          *         @ref getMulticastPort.
-         * The current value can be altered using function
+         * The current value can be altered using method
          *         @ref setMulticastAddress.
          * @return the current value as a null terminated C string
          */
@@ -266,7 +266,7 @@ namespace flom {
          * the system can resolve) of the IP multicast group that must be
          * contacted to reach FLoM daemon (server) using UDP/IP; see also
          *         @ref getMulticastPort.
-         * The current value can be altered using function
+         * The current value can be altered using method
          *         @ref setMulticastAddress.
          * @return the current value as a standard C++ string
          */
@@ -522,7 +522,7 @@ namespace flom {
         /**
          * Sets the trace filename: the name (absolute or relative path) used
          * by libflom (FLoM client library) to record trace messages.
-         * The current value can be inspected using function
+         * The current value can be inspected using method
          * @ref getTraceFilename.
          * @param value (Input): the new value (C null terminated string)
          * @return @ref FLOM_RC_OK
@@ -532,7 +532,7 @@ namespace flom {
         /**
          * Sets the trace filename: the name (absolute or relative path) used
          * by libflom (FLoM client library) to record trace messages.
-         * The current value can be inspected using function
+         * The current value can be inspected using method
          * @ref getTraceFilename.
          * @param value (Input): the new value (C++ standard string)
          * @return @ref FLOM_RC_OK
@@ -591,7 +591,7 @@ namespace flom {
         /**
          * Gets the TCP/IP unicast port that must be used to contact the FLoM
          * daemon (server) using TCP/IP; see also @ref getUnicastAddress.
-         * The current value can be altered using function @ref setUnicastPort.
+         * The current value can be altered using method @ref setUnicastPort.
          * @return the current value
          */
         int getUnicastPort() {

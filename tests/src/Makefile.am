@@ -9,21 +9,30 @@ case0003_SOURCES = case0003.c
 case1000_SOURCES = case1000.cc
 case1001_SOURCES = case1001.cc
 case1002_SOURCES = case1002.cc
+# Java language case tests
+JAVA_SOURCE_FILES = case4000.java
+# PHP language case tests
+PHP_SOURCE_FILES = case2000.php.in case2001.php.in case2002.php.in
+# Python language case tests
+PYTHON_SOURCE_FILES = case3000.py case3001.py case3002.py
 # C++ case tests executables are built conditionally (only if --disable-cppapi 
 # was not specified at configure time)
 if COND_CPPAPI
   MAYBE_CPPAPI=case1000 case1001 case1002
 endif
-noinst_PROGRAMS = case0000 case0001 case0002 case0003 $(MAYBE_CPPAPI)
+if COND_JAVAAPI
+  MAYBE_JAVAAPI=case4000.class
+endif
 if COND_PHPAPI
   MAYBE_PHPAPI=case2000.php case2001.php case2002.php
 endif
 if COND_PYTHONAPI
-  MAYBE_PYTHONAPI=case3000.py case3001.py case3002.py
+  MAYBE_PYTHONAPI=$(PYTHON_SOURCE_FILES)
 endif
-dist_noinst_DATA = case2000.php.in case2001.php.in case2002.php.in \
-	$(MAYBE_PYTHONAPI)
-noinst_DATA = $(MAYBE_PHPAPI) 
+noinst_PROGRAMS = case0000 case0001 case0002 case0003 $(MAYBE_CPPAPI)
+dist_noinst_DATA = $(JAVA_SOURCE_FILES) $(PHP_SOURCE_FILES) \
+	$(PYTHON_SOURCE_FILES)
+noinst_DATA = $(MAYBE_PHPAPI) $(MAYBE_JAVAAPI)
 
 LDADD = ../../src/libflom.la @GLIB2_LIBS@
 
@@ -42,3 +51,5 @@ case2002.php:	case2002.php.in ../../config.status
 	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
 	$< >$@
 
+case4000.class:	case4000.java
+	javac -cp $(abs_top_builddir)/src/java/flom.jar $<

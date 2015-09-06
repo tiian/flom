@@ -92,15 +92,13 @@ public class FlomHandle {
      * Delete the native @ref flom_handle_t object
      * Called by @ref free method
      */
-    private native int deleteJNI();
+    private native void deleteJNI();
     /**
      * Explicitly free the native object allocated by JNI wrapper
      */
-    public void free() throws FlomException {
+    public void free() {
         if (null != NativeHandler) {
-            int ReturnCode = deleteJNI();
-            if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
-                throw new FlomException(ReturnCode);
+            deleteJNI();
             NativeHandler = null;
         }
     }
@@ -109,14 +107,7 @@ public class FlomHandle {
      * forgot to call @ref release method
      */
     protected void finalize() {
-        try {
-            free();
-        } catch(FlomException e) {
-            System.err.println("FlomHandle.finalize() thrown a " +
-                               "FlomException: ReturnCode=" +
-                               e.getReturnCode() + 
-                               " (" + e.getMessage() + ")");
-        }
+        free();
     }
 
 
@@ -352,7 +343,7 @@ public class FlomHandle {
      * the system can resolve) of the IP multicast group that must be
      * contacted to reach FLoM daemon (server) using UDP/IP; see also
      *         @ref getMulticastPort.
-     * The current value can be altered using function
+     * The current value can be altered using method
      *         @ref setMulticastAddress.
      * @return the current value
      */
@@ -702,7 +693,7 @@ public class FlomHandle {
     /**
      * Sets the trace filename: the name (absolute or relative path) used
      * by libflom (FLoM client library) to record trace messages.
-     * The current value can be inspected using function
+     * The current value can be inspected using method
      * @ref getTraceFilename.
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
@@ -714,6 +705,87 @@ public class FlomHandle {
     }
 
     
+    
+    /**
+     * Native method for @ref getUnicastAddress
+     */
+    private native String getUnicastAddressJNI();
+    /**
+     * Gets the unicast address: the IP address (or a network name that the
+     * system can resolve) of the host that must be contacted
+     * to reach FLoM daemon (server) using TCP/IP; see also
+     *         @ref getUnicastPort.
+     * The current value can be altered using method
+     *         @ref setUnicastAddress.
+     * @return the current value
+     */
+    public String getUnicastAddress() throws FlomException {
+        String ReturnString = null;
+        nullCheck();
+        if (null == (ReturnString = getUnicastAddressJNI()))
+            ReturnString = new String("");
+        return ReturnString;
+    }
+
+
+    
+    /**
+     * Native method for @ref setUnicastAddress
+     */
+    private native int setUnicastAddressJNI(String value);
+    /**
+     * Sets the unicast address: the IP address (or a network name that the
+     * system can resolve) of the host that must be contacted
+     * to reach FLoM daemon (server) using TCP/IP; see also
+     * @ref setUnicastPort.
+     * The current value can be inspected using method
+     * @ref getUnicastAddress.
+     * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
+     */
+    public int setUnicastAddress(String value) throws FlomException {
+        nullCheck(value);
+        return setUnicastAddressJNI(value);
+    }
+
+    
+    
+    /**
+     * Native method for @ref getUnicastPort
+     */
+    private native int getUnicastPortJNI();
+    /**
+     * Gets the TCP/IP unicast port that must be used to contact the FLoM
+     * daemon (server) using TCP/IP; see also @ref getUnicastAddress.
+     * The current value can be altered using method @ref setUnicastPort.
+     * @return the current value
+     */
+    public int getUnicastPort() throws FlomException {
+        nullCheck();
+        return getUnicastPortJNI();
+    }
+
+
+    
+    /**
+     * Native method for @ref setUnicastPort
+     */
+    private native int setUnicastPortJNI(int value);
+    /**
+     * Sets the TCP/IP unicast port that must be used to contact the FLoM
+     * daemon (server) using TCP/IP; see also @ref setUnicastAddress.
+     * The current value can be inspected using method @ref getUnicastPort.
+     * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
+     */
+    public int setUnicastPort(int value) throws FlomException {
+        nullCheck();
+        return setUnicastPortJNI(value);
+    }
+
+
     
     // @@@ remove me!!!
     public static void main(String[] args) {

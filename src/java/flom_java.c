@@ -171,7 +171,7 @@ flom_handle_t *Java_org_tiian_flom_FlomHandle_getNativeHandle(
 
 
 
-JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_deleteJNI
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_deleteJNI
   (JNIEnv *env, jobject this_obj)
 {
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_deleteJNI\n"));

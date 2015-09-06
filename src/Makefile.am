@@ -1,6 +1,6 @@
-#if COND_JAVAAPI
-#  MAYBE_JAVAAPI = java
-#endif
+if COND_JAVAAPI
+  MAYBE_JAVAAPI = java
+endif
 if COND_PHPAPI
   MAYBE_PHPAPI = php
 endif

@@ -18,9 +18,9 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_newJNI
 /*
  * Class:     org_tiian_flom_FlomHandle
  * Method:    deleteJNI
- * Signature: ()I
+ * Signature: ()V
  */
-JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_deleteJNI
+JNIEXPORT void JNICALL Java_org_tiian_flom_FlomHandle_deleteJNI
   (JNIEnv *, jobject);
 
 /*
@@ -254,6 +254,38 @@ JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getTraceFilenameJNI
  */
 JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setTraceFilenameJNI
   (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getUnicastAddressJNI
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getUnicastAddressJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setUnicastAddressJNI
+ * Signature: (Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setUnicastAddressJNI
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getUnicastPortJNI
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getUnicastPortJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setUnicastPortJNI
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setUnicastPortJNI
+  (JNIEnv *, jobject, jint);
 
 #ifdef __cplusplus
 }

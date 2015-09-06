@@ -77,6 +77,16 @@
 
 /* WARNINGS */
 /**
+ * The handle can not be changed at this time (probably, some API was called
+ * using an invalid sequence)
+ */
+#define FLOM_RC_API_IMMUTABLE_HANDLE                +11
+/**
+ * The name of the element is not available (probably, the resource is not of
+ * type "set")
+ */
+#define FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE          +10
+/**
  * A network operation timed out
  */
 #define FLOM_RC_NETWORK_TIMEOUT                       +9
@@ -389,6 +399,21 @@
  * "g_try_realloc" function error
  */
 #define FLOM_RC_G_TRY_REALLOC_ERROR                 -214
+
+/* JNI related errors */
+
+/**
+ * JNI "GetFieldID" function error
+ */
+#define FLOM_RC_GET_FIELD_ID_ERROR                  -300
+/**
+ * JNI "GetObjectClass" function error
+ */
+#define FLOM_RC_GET_OBJECT_CLASS_ERROR              -301
+/**
+ * JNI "NewDirectByteBuffer" function error
+ */
+#define FLOM_RC_NEW_DIRECT_BYTE_BUFFER_ERROR       -302
 
 
 

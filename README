@@ -91,7 +91,7 @@ Ubuntu		Basic		make gcc libglib2.0-dev pkg-config automake
 Ubuntu		C++ API		g++
 Ubuntu		PHP API		swig php5-cli php5-dev
 Ubuntu		Python API	swig python-dev
-Ubuntu		Java API	openjdk-6-jdk
+Ubuntu	10.04	Java API	openjdk-6-jdk
 CentOS		Basic		gcc glib2-devel
 CentOS		C++ API		gcc-c++
 CentOS		PHP API		swig php-cli php-devel
