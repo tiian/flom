@@ -171,47 +171,6 @@ flom_handle_t *Java_org_tiian_flom_FlomHandle_getNativeHandle(
 
 
 
-/* @@@ probably useless, remove me 
- This is an helper internal function, it's not seen by JNI 
-void Java_org_tiian_flom_FlomHandle_setNativeReturnCode(
-    JNIEnv *env, jobject this_obj, jint ret_cod)
-{
-    jclass this_class;
-    jfieldID field_id;
-    int *i;
-    
-    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setNativeReturnCode: "
-                "ret_cod=%d\n", ret_cod));
-
-    // get a reference to this object's class
-    if (NULL == (this_class = (*env)->GetObjectClass(env, this_obj))) {
-        FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setNativeReturnCode: "
-                    "this_class == NULL\n"));
-        jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-        (*env)->ThrowNew(
-            env, Exception,
-            "JNI/Java_org_tiian_flom_FlomHandle_setNativeReturnCode/"
-            "GetObjectClass returned NULL");
-    }
-
-    // get the field identificator
-    if (NULL == (field_id = (*env)->GetFieldID(
-                     env, this_class, "NativeReturnCode", "I"))) {
-        FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setNativeReturnCode: "
-                    "field_id == NULL\n"));
-        jclass Exception = (*env)->FindClass(env, "java/lang/Exception");
-        (*env)->ThrowNew(
-            env, Exception,
-            "JNI/Java_org_tiian_flom_FlomHandle_setNativeReturnCode/"
-            "GetFieldID returned NULL");
-    }
-    // set the int value
-    (*env)->SetIntField(env, this_obj, field_id, ret_cod);
-}
-*/
-
-
-
 JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_deleteJNI
   (JNIEnv *env, jobject this_obj)
 {

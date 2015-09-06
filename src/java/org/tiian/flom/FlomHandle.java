@@ -50,14 +50,26 @@ public class FlomHandle {
 
 
     /**
-     * This field is used to pass the native return code from native to Java
-     * when an exception must be propagated: native generates only standard
-     * Exception objects, while Java generates custom FlomException objects
+     * Checks the current object is not corrupted
      */
-    /* @@@ probably useless, remove me!!!
-    private int NativeReturnCode;
-    */
-    
+    private void nullCheck() throws FlomException {
+        if (null == NativeHandler)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
+    }
+
+
+
+    /*
+     * Checks the current object is not corrupted and the passed argument is
+     * not null
+     * @param value (Input) the string that must be checked
+     */
+    private void nullCheck(String value) throws FlomException {
+        nullCheck();
+        if (null == value)
+            throw new FlomException(FlomErrorCodes.FLOM_RC_NULL_OBJECT);
+    }
+
 
     
     /**
@@ -121,13 +133,11 @@ public class FlomHandle {
      * null terminated string.
      */
     public void lock() throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else {
-            int ReturnCode = lockJNI();
-            if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
-                throw new FlomException(ReturnCode);
-        }
+        nullCheck();
+        
+        int ReturnCode = lockJNI();
+        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+            throw new FlomException(ReturnCode);
     }
 
 
@@ -141,13 +151,11 @@ public class FlomHandle {
      * MUST be previously locked using method @ref lock
      */
     public void unlock() throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else {
-            int ReturnCode = unlockJNI();
-            if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
-                throw new FlomException(ReturnCode);
-        }
+        nullCheck();
+        
+        int ReturnCode = unlockJNI();
+        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+            throw new FlomException(ReturnCode);
     }
 
 
@@ -163,13 +171,11 @@ public class FlomHandle {
      */
     public String getLockedElement() throws FlomException {
         String ReturnString = null;
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else {
-            if (null == (ReturnString = getLockedElementJNI()))
-                throw new FlomException(
-                    FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE);
-        }
+        nullCheck();
+        
+        if (null == (ReturnString = getLockedElementJNI()))
+            throw new FlomException(
+                FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE);
         return ReturnString;
     }
 
@@ -188,10 +194,8 @@ public class FlomHandle {
      * @return the current value
      */
     public int getDiscoveryAttempts() throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return getDiscoveryAttemptsJNI();
+        nullCheck();
+        return getDiscoveryAttemptsJNI();
     }
 
 
@@ -211,10 +215,8 @@ public class FlomHandle {
      *         was changed by the setter method
      */
     public int setDiscoveryAttempts(int value) throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return setDiscoveryAttemptsJNI(value);
+        nullCheck();
+        return setDiscoveryAttemptsJNI(value);
     }
 
     
@@ -232,10 +234,8 @@ public class FlomHandle {
      * @return the current value
      */
     public int getDiscoveryTimeout() throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return getDiscoveryTimeoutJNI();
+        nullCheck();
+        return getDiscoveryTimeoutJNI();
     }
 
 
@@ -255,10 +255,8 @@ public class FlomHandle {
      *         was changed by the setter method
      */
     public int setDiscoveryTimeout(int value) throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return setDiscoveryTimeoutJNI(value);
+        nullCheck();
+        return setDiscoveryTimeoutJNI(value);
     }
 
     
@@ -275,10 +273,8 @@ public class FlomHandle {
      * @return the current value
      */
     public int getDiscoveryTtl() throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return getDiscoveryTtlJNI();
+        nullCheck();
+        return getDiscoveryTtlJNI();
     }
     
 
@@ -298,10 +294,8 @@ public class FlomHandle {
      *         was changed by the setter method
      */
     public int setDiscoveryTtl(int value) throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return setDiscoveryTtlJNI(value);
+        nullCheck();
+        return setDiscoveryTtlJNI(value);
     }
 
 
@@ -320,10 +314,8 @@ public class FlomHandle {
      * @return the current value
      */
     public int getLockMode() throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return getLockModeJNI();
+        nullCheck();
+        return getLockModeJNI();
     }
 
 
@@ -345,10 +337,8 @@ public class FlomHandle {
      *         was changed by the setter method
      */
     public int setLockMode(int value) throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return setLockModeJNI(value);
+        nullCheck();
+        return setLockModeJNI(value);
     }
 
 
@@ -368,12 +358,9 @@ public class FlomHandle {
      */
     public String getMulticastAddress() throws FlomException {
         String ReturnString = null;
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else {
-            if (null == (ReturnString = getMulticastAddressJNI()))
-                ReturnString = new String("");
-        }
+        nullCheck();
+        if (null == (ReturnString = getMulticastAddressJNI()))
+            ReturnString = new String("");
         return ReturnString;
     }
 
@@ -395,12 +382,8 @@ public class FlomHandle {
      *         was changed by the setter method
      */
     public int setMulticastAddress(String value) throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else if (null == value)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_NULL_OBJECT);
-        else
-            return setMulticastAddressJNI(value);
+        nullCheck(value);
+        return setMulticastAddressJNI(value);
     }
 
     
@@ -416,10 +399,8 @@ public class FlomHandle {
      * @return the current value
      */
     public int getMulticastPort() throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return getMulticastPortJNI();
+        nullCheck();
+        return getMulticastPortJNI();
     }
 
 
@@ -438,10 +419,8 @@ public class FlomHandle {
      *         was changed by the setter method
      */
     public int setMulticastPort(int value) throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return setMulticastPortJNI(value);
+        nullCheck();
+        return setMulticastPortJNI(value);
     }
 
 
@@ -457,10 +436,8 @@ public class FlomHandle {
      * @return the current value
      */
     public boolean getResourceCreate() throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return getResourceCreateJNI();
+        nullCheck();
+        return getResourceCreateJNI();
     }
 
 
@@ -480,10 +457,8 @@ public class FlomHandle {
      *         was changed by the setter method
      */
     public int setResourceCreate(boolean value) throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return setResourceCreateJNI(value);
+        nullCheck();
+        return setResourceCreateJNI(value);
     }
 
 
@@ -501,10 +476,8 @@ public class FlomHandle {
      * @return the current value
      */
     public int getResourceIdleLifespan() throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return getResourceIdleLifespanJNI();
+        nullCheck();
+        return getResourceIdleLifespanJNI();
     }
 
 
@@ -524,10 +497,8 @@ public class FlomHandle {
      *         was changed by the setter method
      */
     public int setResourceIdleLifespan(int value) throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return setResourceIdleLifespanJNI(value);
+        nullCheck();
+        return setResourceIdleLifespanJNI(value);
     }
 
 
@@ -544,12 +515,9 @@ public class FlomHandle {
      */
     public String getResourceName() throws FlomException {
         String ReturnString = null;
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else {
-            if (null == (ReturnString = getResourceNameJNI()))
-                ReturnString = new String("");
-        }
+        nullCheck();
+        if (null == (ReturnString = getResourceNameJNI()))
+            ReturnString = new String("");
         return ReturnString;
     }
 
@@ -572,16 +540,11 @@ public class FlomHandle {
      */
     public int setResourceName(String value) throws FlomException {
         int ReturnCode = FlomErrorCodes.FLOM_RC_OK;
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else if (null == value)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_NULL_OBJECT);
-        else {
-            ReturnCode = setResourceNameJNI(value);
-            if (FlomErrorCodes.FLOM_RC_OK != ReturnCode &&
-                FlomErrorCodes.FLOM_RC_API_IMMUTABLE_HANDLE != ReturnCode)
-                throw new FlomException(ReturnCode);
-        }
+        nullCheck(value);
+        ReturnCode = setResourceNameJNI(value);
+        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode &&
+            FlomErrorCodes.FLOM_RC_API_IMMUTABLE_HANDLE != ReturnCode)
+            throw new FlomException(ReturnCode);
         return ReturnCode;
     }
 
@@ -600,10 +563,8 @@ public class FlomHandle {
      * @return the current value
      */
     public int getResourceQuantity() throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return getResourceQuantityJNI();
+        nullCheck();
+        return getResourceQuantityJNI();
     }
 
 
@@ -623,10 +584,8 @@ public class FlomHandle {
      *         was changed by the setter method
      */
     public int setResourceQuantity(int value) throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return setResourceQuantityJNI(value);
+        nullCheck();
+        return setResourceQuantityJNI(value);
     }
 
 
@@ -647,10 +606,8 @@ public class FlomHandle {
      *        <0: unlimited wait
      */
     public int getResourceTimeout() throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return getResourceTimeoutJNI();
+        nullCheck();
+        return getResourceTimeoutJNI();
     }
 
 
@@ -673,10 +630,8 @@ public class FlomHandle {
      *         was changed by the setter method
      */
     public int setResourceTimeout(int value) throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else
-            return setResourceTimeoutJNI(value);
+        nullCheck();
+        return setResourceTimeoutJNI(value);
     }
 
 
@@ -693,12 +648,9 @@ public class FlomHandle {
      */
     public String getSocketName() throws FlomException {
         String ReturnString = null;
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else {
-            if (null == (ReturnString = getSocketNameJNI()))
-                ReturnString = new String("");
-        }
+        nullCheck();
+        if (null == (ReturnString = getSocketNameJNI()))
+            ReturnString = new String("");
         return ReturnString;
     }
 
@@ -717,12 +669,8 @@ public class FlomHandle {
      *         was changed by the setter method
      */
     public int setSocketName(String value) throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else if (null == value)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_NULL_OBJECT);
-        else
-            return setSocketNameJNI(value);
+        nullCheck(value);
+        return setSocketNameJNI(value);
     }
 
     
@@ -739,12 +687,9 @@ public class FlomHandle {
      */
     public String getTraceFilename() throws FlomException {
         String ReturnString = null;
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else {
-            if (null == (ReturnString = getTraceFilenameJNI()))
-                ReturnString = new String("");
-        }
+        nullCheck();
+        if (null == (ReturnString = getTraceFilenameJNI()))
+            ReturnString = new String("");
         return ReturnString;
     }
 
@@ -764,12 +709,8 @@ public class FlomHandle {
      *         was changed by the setter method
      */
     public int setTraceFilename(String value) throws FlomException {
-        if (null == NativeHandler)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_OBJ_CORRUPTED);
-        else if (null == value)
-            throw new FlomException(FlomErrorCodes.FLOM_RC_NULL_OBJECT);
-        else
-            return setTraceFilenameJNI(value);
+        nullCheck(value);
+        return setTraceFilenameJNI(value);
     }
 
     
