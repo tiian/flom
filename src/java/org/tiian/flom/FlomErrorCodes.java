@@ -1,5 +1,5 @@
 package  org.tiian.flom;
-class FlomErrorCodes {
+public class FlomErrorCodes {
 	public final static int FLOM_ES_REQUESTER_CANT_WAIT = 96;
 	public final static int FLOM_ES_UNABLE_TO_EXECUTE_COMMAND = 97;
 	public final static int FLOM_ES_RESOURCE_BUSY = 98;
