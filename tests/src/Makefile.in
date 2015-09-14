@@ -162,6 +162,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+JAVAAPI = @JAVAAPI@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -314,7 +315,7 @@ case1000_SOURCES = case1000.cc
 case1001_SOURCES = case1001.cc
 case1002_SOURCES = case1002.cc
 # Java language case tests
-JAVA_SOURCE_FILES = case4000.java case4001.java
+JAVA_SOURCE_FILES = case4000.java case4001.java case4002.java
 # PHP language case tests
 PHP_SOURCE_FILES = case2000.php.in case2001.php.in case2002.php.in
 # Python language case tests
@@ -322,7 +323,7 @@ PYTHON_SOURCE_FILES = case3000.py case3001.py case3002.py
 # C++ case tests executables are built conditionally (only if --disable-cppapi 
 # was not specified at configure time)
 @COND_CPPAPI_TRUE@MAYBE_CPPAPI = case1000 case1001 case1002
-@COND_JAVAAPI_TRUE@MAYBE_JAVAAPI = case4000.class case4001.class
+@COND_JAVAAPI_TRUE@MAYBE_JAVAAPI = case4000.class case4001.class case4002.class
 @COND_PHPAPI_TRUE@MAYBE_PHPAPI = case2000.php case2001.php case2002.php
 @COND_PYTHONAPI_TRUE@MAYBE_PYTHONAPI = $(PYTHON_SOURCE_FILES)
 dist_noinst_DATA = $(JAVA_SOURCE_FILES) $(PHP_SOURCE_FILES) \
@@ -674,6 +675,9 @@ case4000.class:	case4000.java
 	javac -cp $(abs_top_builddir)/src/java/flom.jar $<
 
 case4001.class:	case4001.java
+	javac -cp $(abs_top_builddir)/src/java/flom.jar $<
+
+case4002.class:	case4002.java
 	javac -cp $(abs_top_builddir)/src/java/flom.jar $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

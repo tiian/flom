@@ -6,6 +6,8 @@ export LD_LIBRARY_PATH
 
 CPPAPI=@CPPAPI@
 export CPPAPI
+JAVAAPI=@JAVAAPI@
+export JAVAAPI
 PHPPATH=@abs_top_builddir@/tests/src
 export PHPPATH
 PHPAPI=@PHPAPI@

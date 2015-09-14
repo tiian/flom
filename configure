@@ -801,6 +801,7 @@ PYTHONAPI
 PHP_INSTALL_PATH
 PHP_INCLUDES
 PHPAPI
+JAVAAPI
 CPPAPI
 USER
 GTHREAD2_LIBS
@@ -814,10 +815,10 @@ HAVE_PHP_CONFIG
 HAVE_PHP
 COND_JAVAAPI_FALSE
 COND_JAVAAPI_TRUE
-_ACJNI_JAVAC
 HAVE_JAR
 HAVE_JAVAC
 HAVE_JAVA
+_ACJNI_JAVAC
 SWIG
 HAVE_DOT
 DOXYGEN
@@ -4931,13 +4932,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4934: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4935: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4937: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4938: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4940: output\"" >&5)
+  (eval echo "\"\$as_me:4941: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6143,7 +6144,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6146 "configure"' > conftest.$ac_ext
+  echo '#line 6147 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7673,11 +7674,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7676: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7677: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7680: \$? = $ac_status" >&5
+   echo "$as_me:7681: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8012,11 +8013,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8015: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8016: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8019: \$? = $ac_status" >&5
+   echo "$as_me:8020: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8117,11 +8118,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8120: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8121: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8124: \$? = $ac_status" >&5
+   echo "$as_me:8125: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8172,11 +8173,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8175: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8176: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8179: \$? = $ac_status" >&5
+   echo "$as_me:8180: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10556,7 +10557,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10559 "configure"
+#line 10560 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10652,7 +10653,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10655 "configure"
+#line 10656 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14486,11 +14487,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14489: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14490: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14493: \$? = $ac_status" >&5
+   echo "$as_me:14494: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14585,11 +14586,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14588: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14589: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14592: \$? = $ac_status" >&5
+   echo "$as_me:14593: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14637,11 +14638,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14640: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14641: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14644: \$? = $ac_status" >&5
+   echo "$as_me:14645: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16115,123 +16116,6 @@ done
 test -n "$SWIG" || SWIG="noswig"
 
 
-# Checking the availability of JRE
-# Extract the first word of "java", so it can be a program name with args.
-set dummy java; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_HAVE_JAVA+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$HAVE_JAVA"; then
-  ac_cv_prog_HAVE_JAVA="$HAVE_JAVA" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_HAVE_JAVA="yes"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_HAVE_JAVA" && ac_cv_prog_HAVE_JAVA="no"
-fi
-fi
-HAVE_JAVA=$ac_cv_prog_HAVE_JAVA
-if test -n "$HAVE_JAVA"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HAVE_JAVA" >&5
-$as_echo "$HAVE_JAVA" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-# Checking the availability of JDK
-# Extract the first word of "javac", so it can be a program name with args.
-set dummy javac; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_HAVE_JAVAC+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$HAVE_JAVAC"; then
-  ac_cv_prog_HAVE_JAVAC="$HAVE_JAVAC" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_HAVE_JAVAC="yes"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_HAVE_JAVAC" && ac_cv_prog_HAVE_JAVAC="no"
-fi
-fi
-HAVE_JAVAC=$ac_cv_prog_HAVE_JAVAC
-if test -n "$HAVE_JAVAC"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HAVE_JAVAC" >&5
-$as_echo "$HAVE_JAVAC" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-# Extract the first word of "jar", so it can be a program name with args.
-set dummy jar; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_HAVE_JAR+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$HAVE_JAR"; then
-  ac_cv_prog_HAVE_JAR="$HAVE_JAR" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_HAVE_JAR="yes"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_HAVE_JAR" && ac_cv_prog_HAVE_JAR="no"
-fi
-fi
-HAVE_JAR=$ac_cv_prog_HAVE_JAR
-if test -n "$HAVE_JAR"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HAVE_JAR" >&5
-$as_echo "$HAVE_JAR" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-
 
 
 JNI_INCLUDE_DIRS=""
@@ -16413,7 +16297,130 @@ fi
 done
 
 
- if test "$HAVE_JAVAC" = "yes"; then
+# Checking the availability of JRE
+# Extract the first word of "java", so it can be a program name with args.
+set dummy java; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_prog_HAVE_JAVA+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$HAVE_JAVA"; then
+  ac_cv_prog_HAVE_JAVA="$HAVE_JAVA" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_HAVE_JAVA="yes"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_HAVE_JAVA" && ac_cv_prog_HAVE_JAVA="no"
+fi
+fi
+HAVE_JAVA=$ac_cv_prog_HAVE_JAVA
+if test -n "$HAVE_JAVA"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HAVE_JAVA" >&5
+$as_echo "$HAVE_JAVA" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+# Checking the availability of JDK
+# Extract the first word of "javac", so it can be a program name with args.
+set dummy javac; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_prog_HAVE_JAVAC+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$HAVE_JAVAC"; then
+  ac_cv_prog_HAVE_JAVAC="$HAVE_JAVAC" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_HAVE_JAVAC="yes"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_HAVE_JAVAC" && ac_cv_prog_HAVE_JAVAC="no"
+fi
+fi
+HAVE_JAVAC=$ac_cv_prog_HAVE_JAVAC
+if test -n "$HAVE_JAVAC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HAVE_JAVAC" >&5
+$as_echo "$HAVE_JAVAC" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+# Extract the first word of "jar", so it can be a program name with args.
+set dummy jar; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_prog_HAVE_JAR+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$HAVE_JAR"; then
+  ac_cv_prog_HAVE_JAR="$HAVE_JAR" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_HAVE_JAR="yes"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_HAVE_JAR" && ac_cv_prog_HAVE_JAR="no"
+fi
+fi
+HAVE_JAR=$ac_cv_prog_HAVE_JAR
+if test -n "$HAVE_JAR"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HAVE_JAR" >&5
+$as_echo "$HAVE_JAR" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+if test "$HAVE_JAVA" = "yes" -a "$HAVE_JAVAC" = "yes" -a "$HAVE_JAR" = "yes"
+then
+	# @@@ replace "no" with "yes" to activate Java build and test
+	JAVAAPI="no"
+else
+	JAVAAPI="no"
+fi
+ if test "$JAVAAPI" = "yes"; then
   COND_JAVAAPI_TRUE=
   COND_JAVAAPI_FALSE='#'
 else
@@ -17109,6 +17116,7 @@ done
 
 
 # substitution of optional (--disable) features
+
 
 
 

@@ -1,6 +1,6 @@
 BEGIN { 
 	print "package  org.tiian.flom;"
-	print "class FlomErrorCodes {" 
+	print "public class FlomErrorCodes {" 
 }
 /#define.*FLOM_/	{ print "\tpublic final static int " $2 " = " $3 ";" }
 END   { 

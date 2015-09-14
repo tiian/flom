@@ -181,12 +181,6 @@ AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
 # Checking the availability of SWIG (Simplified Wrapper and Interface Generator)
 AC_CHECK_PROGS(SWIG, [swig], [noswig])
 
-# Checking the availability of JRE
-AC_CHECK_PROG(HAVE_JAVA, [java], [yes], [no])
-# Checking the availability of JDK
-AC_CHECK_PROG(HAVE_JAVAC, [javac], [yes], [no])
-AC_CHECK_PROG(HAVE_JAR, [jar], [yes], [no])
-
 AX_JNI_INCLUDE_DIR
 
 for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
@@ -195,7 +189,19 @@ do
 done
 AC_CHECK_HEADERS(jni.h jni_md.h)
 
-AM_CONDITIONAL([COND_JAVAAPI], [test "$HAVE_JAVAC" = "yes"])
+# Checking the availability of JRE
+AC_CHECK_PROG(HAVE_JAVA, [java], [yes], [no])
+# Checking the availability of JDK
+AC_CHECK_PROG(HAVE_JAVAC, [javac], [yes], [no])
+AC_CHECK_PROG(HAVE_JAR, [jar], [yes], [no])
+if test "$HAVE_JAVA" = "yes" -a "$HAVE_JAVAC" = "yes" -a "$HAVE_JAR" = "yes"
+then
+	# @@@ replace "no" with "yes" to activate Java build and test
+	JAVAAPI="no"
+else
+	JAVAAPI="no"
+fi
+AM_CONDITIONAL([COND_JAVAAPI], [test "$JAVAAPI" = "yes"])
 
 # Checking the availability of PHP tools
 AC_CHECK_PROG(HAVE_PHP, [php], [yes], [no])
@@ -308,6 +314,7 @@ AC_SUBST(USER)
 
 # substitution of optional (--disable) features 
 AC_SUBST(CPPAPI)
+AC_SUBST(JAVAAPI)
 AC_SUBST(PHPAPI)
 AC_SUBST(PHP_INCLUDES)
 AC_SUBST(PHP_INSTALL_PATH)
