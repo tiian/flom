@@ -210,13 +210,6 @@ void staticHandleHappyPath(void) {
         exit(1);
     }
     
-    /* set AF_UNIX/PF_LOCAL socket_name again */
-    if (FLOM_RC_OK != (retCod = myHandle.setSocketName(ndSocketName))) {
-        cerr << "FlomHandle.setSocketName() returned " << retCod << " '" <<
-            flom_strerror(retCod) << "'" << endl;
-        exit(1);
-    }
-    
     /* get current value for unicast port */
     cout << "FlomHandle.getUnicastPort() = " <<
         myHandle.getUnicastPort() << endl;
@@ -289,6 +282,13 @@ void staticHandleHappyPath(void) {
     if (2 != myHandle.getDiscoveryTtl()) {
         cerr << "Unexpected result from FlomHandle.set/getDiscoveryTtl"
              << endl;
+        exit(1);
+    }
+    
+    /* set AF_UNIX/PF_LOCAL socket_name again */
+    if (FLOM_RC_OK != (retCod = myHandle.setSocketName(ndSocketName))) {
+        cerr << "FlomHandle.setSocketName() returned " << retCod << " '" <<
+            flom_strerror(retCod) << "'" << endl;
         exit(1);
     }
     

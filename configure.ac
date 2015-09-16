@@ -197,7 +197,7 @@ AC_CHECK_PROG(HAVE_JAR, [jar], [yes], [no])
 if test "$HAVE_JAVA" = "yes" -a "$HAVE_JAVAC" = "yes" -a "$HAVE_JAR" = "yes"
 then
 	# @@@ replace "no" with "yes" to activate Java build and test
-	JAVAAPI="no"
+	JAVAAPI="yes"
 else
 	JAVAAPI="no"
 fi

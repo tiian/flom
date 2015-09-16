@@ -516,8 +516,51 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setTraceFilenameJNI
         cstr);
 }
 
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getUnicastAddressJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getUnicastAddressJNI\n"));
+    return (*env)->NewStringUTF(
+        env,
+        flom_handle_get_unicast_address(
+            Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                env, this_obj)));
+}
 
-    
+
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setUnicastAddressJNI
+(JNIEnv *env, jobject this_obj, jstring value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setUnicastAddressJNI\n"));
+    const char *cstr = (*env)->GetStringUTFChars(env, value, NULL);
+    return (jint)flom_handle_set_unicast_address(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj),
+        cstr);
+}
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getUnicastPortJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getUnicastPortJNI\n"));
+    return (jint)flom_handle_get_unicast_port(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj));
+}
+
+
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setUnicastPortJNI
+(JNIEnv *env, jobject this_obj, jint value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setUnicastPortJNI\n"));
+    return (jint)flom_handle_set_unicast_port(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj), value);
+}
+
+
+
 JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomErrorCodes_getText
 (JNIEnv *env, jclass this_obj, jint code)
 {

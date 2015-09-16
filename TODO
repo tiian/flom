@@ -1,15 +1,12 @@
 Road map:
 
-Java: going on with Java case tests: case4002 copying from case1002
-
 Release 1.0.0:
 - change project status from beta to stable
 - Java examples
-- Java case tests
 - Javadoc
 - update TestLog file
-- updated C/C++ docs
-- updated site
+- update C/C++ docs
+- update site
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 
