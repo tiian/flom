@@ -463,8 +463,9 @@ ps: ps-am
 ps-am:
 
 uninstall-am: uninstall-dist_htmlDATA
-
-.MAKE: install-am install-strip
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
+.MAKE: install-am install-strip uninstall-am
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	distclean distclean-generic distclean-libtool distdir dvi \
@@ -476,7 +477,7 @@ uninstall-am: uninstall-dist_htmlDATA
 	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	uninstall uninstall-am uninstall-dist_htmlDATA
+	uninstall uninstall-am uninstall-dist_htmlDATA uninstall-hook
 
 
 doxygen.conf:	doxygen.conf.in
@@ -493,6 +494,9 @@ index.html:	doxygen.conf \
 		$(top_srcdir)/src/flom.hh \
 		$(top_srcdir)/src/FlomHandle.hh
 	$(DOXYGEN) doxygen.conf
+
+uninstall-hook:
+	if test -d ${docdir}/html; then rmdir ${docdir}/html; fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

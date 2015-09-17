@@ -22,4 +22,4 @@ install-exec-hook:
 
 uninstall-hook:
 	rm -f @PHP_INSTALL_PATH@/flom.so
-
+	if test -d ${pkgdatadir}/php; then rmdir ${pkgdatadir}/php; fi

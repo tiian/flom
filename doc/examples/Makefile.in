@@ -93,7 +93,7 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = . php python
+DIST_SUBDIRS = java php python .
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -309,9 +309,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+@COND_JAVAAPI_TRUE@MAYBE_JAVAAPI = java
 @COND_PHPAPI_TRUE@MAYBE_PHPAPI = php
 @COND_PYTHONAPI_TRUE@MAYBE_PYTHONAPI = python
-SUBDIRS = . $(MAYBE_PHPAPI) $(MAYBE_PYTHONAPI)
+SUBDIRS = $(MAYBE_JAVAAPI) $(MAYBE_PHPAPI) $(MAYBE_PYTHONAPI) .
 examplesdir = $(docdir)/examples
 @COND_CPPAPI_TRUE@CPPSOURCE = BasicStatic.cc BasicDynamic.cc AdvancedStatic.cc AdvancedDynamic.cc
 @COND_CPPAPI_TRUE@CPPTARGET = BasicStatic BasicDynamic AdvancedStatic AdvancedDynamic
@@ -692,9 +693,10 @@ ps-am:
 
 uninstall-am: uninstall-dist_examplesDATA \
 	uninstall-nodist_examplesDATA
-
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) ctags-recursive \
-	install-am install-strip tags-recursive
+	install-am install-strip tags-recursive uninstall-am
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am check check-am clean clean-generic clean-libtool \
@@ -710,7 +712,7 @@ uninstall-am: uninstall-dist_examplesDATA \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
 	uninstall uninstall-am uninstall-dist_examplesDATA \
-	uninstall-nodist_examplesDATA
+	uninstall-hook uninstall-nodist_examplesDATA
 
 example_makefile: example_makefile.in ../../config.status
 	sed \
@@ -724,6 +726,9 @@ README:	README.in ../../config.status
 	sed \
 	-e 's|@libdir[@]|$(libdir)|g' \
 	$< >$@
+
+uninstall-hook:
+	if test -d ${docdir}/examples; then rmdir ${docdir}/examples; fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

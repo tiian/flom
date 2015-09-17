@@ -45,7 +45,7 @@ using namespace flom;
  *
  * The program itself is not verbose, but you might activate tracing if you
  * were interested to understand what's happen:
- * FLOM_TRACE_MASK=0x8000
+ * export FLOM_TRACE_MASK=0x8000
  * ./AvancedStatic
  */
 
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 
     /* step 4: execute the code that needs lock protection */
     
-    /* step 6: lock release */
+    /* step 5: lock release */
     if (FLOM_RC_OK != (retCod = myHandle.unlock())) {
         cerr << "FlomHandle.unlock() returned " << retCod << " '" <<
             flom_strerror(retCod) << "'" << endl;

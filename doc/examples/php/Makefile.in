@@ -483,8 +483,9 @@ ps-am:
 
 uninstall-am: uninstall-dist_examplesDATA \
 	uninstall-nodist_examplesDATA
-
-.MAKE: install-am install-strip
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
+.MAKE: install-am install-strip uninstall-am
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	distclean distclean-generic distclean-libtool distdir dvi \
@@ -497,7 +498,8 @@ uninstall-am: uninstall-dist_examplesDATA \
 	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-dist_examplesDATA uninstall-nodist_examplesDATA
+	uninstall-dist_examplesDATA uninstall-hook \
+	uninstall-nodist_examplesDATA
 
 
 basic.php: basic.php.in ../../../config.status
@@ -516,6 +518,9 @@ README: README.in ../../../config.status
 	sed \
 	-e 's|@libdir[@]|$(libdir)|g' \
 	$< >$@
+
+uninstall-hook:
+	if test -d ${docdir}/examples/php; then rmdir ${docdir}/examples/php; fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

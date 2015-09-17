@@ -1,4 +1,4 @@
-This directory contains PHP examples.
+This directory contains the PHP examples.
 
 After a complete installation procedure:
 ./configure
@@ -14,4 +14,4 @@ to understand how these PHP programs can be executed.
 
 It may be you have to add @libdir@ directory to your LD_LIBRARY_PATH
 environment variable, for example:
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@libdir@
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@libdir@

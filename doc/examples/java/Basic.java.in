@@ -1,0 +1,84 @@
+/*
+ * Copyright (c) 2013-2015, Christian Ferrari <tiian@users.sourceforge.net>
+ * All rights reserved.
+ *
+ * This file is part of FLoM.
+ *
+ * FLoM is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
+ *
+ * FLoM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+
+/*
+ * This example program shows the basic usage of the FLoM Java package.
+ * These are the steps:
+ * 0. import org.tiian.flom package
+ * 1. create an object of type FlomHandle
+ * 2. acquire a lock using method lock()
+ * 3. execute the code protected by the acquired lock
+ * 4. release the lock using method unlock()
+ * 5. release the object: this step is suggested because FlomHandle objects
+ *    use native C functions and this method allows the JVM to immediately
+ *    release the memory allocated by the C functions
+ *
+ * Compilation command:
+ *     javac -cp @datadir@/@PACKAGE@/java/flom.jar Basic.java
+ *
+ * Note: this program needs an already started FLoM daemon, for instance:
+ *     flom -d -1 -- true
+ *     java -Djava.library.path=@libdir@ -cp @datadir@/@PACKAGE@/java/flom.jar:. Basic
+ *
+ * You might activate tracing if you were interested to understand what's
+ * happen:
+ *     export FLOM_TRACE_MASK=0x8000
+ *     java -Djava.library.path=@libdir@ -cp @datadir@/@PACKAGE@/java/flom.jar:. Basic
+ */
+
+
+
+/* step 0: import FLoM package */
+import org.tiian.flom.*;
+
+
+
+public class Basic {
+    public static void main(String[] args) {
+        try {
+            /* step 1: handle creation */
+            System.out.println("Creating an object of type FlomHandle...");
+            FlomHandle myHandle = new FlomHandle();
+
+            /* step 2: lock acquisition */
+            System.out.println("Locking the resource...");
+            myHandle.lock();
+
+            /* step 3: execute the code that needs lock protection */
+            /*
+              ...
+            */
+
+            /* step 4: lock release */
+            System.out.println("Unlocking the resource...");
+            myHandle.unlock();
+
+            /* step 5: object release (this step is not mandatory but
+               suggested */
+            System.out.println("Releasing the object...");
+            myHandle.free();
+        } catch (FlomException e) {
+            System.err.println("FlomException: FLoM ReturnCode= " +
+                               e.getReturnCode() + " ('" +
+                               e.getMessage() + "')");
+        }
+    }
+}

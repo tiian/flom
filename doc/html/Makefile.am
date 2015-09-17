@@ -19,3 +19,7 @@ index.html:	doxygen.conf \
 		$(top_srcdir)/src/flom.hh \
 		$(top_srcdir)/src/FlomHandle.hh
 	$(DOXYGEN) doxygen.conf
+
+uninstall-hook:
+	if test -d ${docdir}/html; then rmdir ${docdir}/html; fi
+

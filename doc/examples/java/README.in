@@ -1,0 +1,23 @@
+This directory contains the Java examples.
+
+After a complete installation procedure:
+./configure
+make
+sudo make install
+check the Java JNI library that has been built and installed:
+ls -la @libdir@/libflom_java.*
+
+Read the comments inside
+	Basic.java
+	Advanced.java
+to understand how these Java programs can be executed.
+
+FLoM Java package uses JNI to access libflom C API functions: libflom_java
+must be loadable by your JVM.
+You can add @libdir@ directory to your LD_LIBRARY_PATH
+environment variable, for example:
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@libdir@
+or alternatively you can use
+	java -Djava.library.path=@libdir@ ...
+to tell the JVM where C libraries can be found (other than in standard
+system library path)

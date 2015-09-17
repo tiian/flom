@@ -823,9 +823,11 @@ ps: ps-recursive
 ps-am:
 
 uninstall-am: uninstall-dist_docDATA
-
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) all \
-	ctags-recursive install-am install-strip tags-recursive
+	ctags-recursive install-am install-strip tags-recursive \
+	uninstall-am
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am am--refresh check check-am clean clean-generic \
@@ -842,7 +844,7 @@ uninstall-am: uninstall-dist_docDATA
 	installcheck-am installdirs installdirs-am maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am uninstall-dist_docDATA
+	uninstall uninstall-am uninstall-dist_docDATA uninstall-hook
 
 
 doxygen.conf: doxygen.conf.in
@@ -850,6 +852,10 @@ doxygen.conf: doxygen.conf.in
 	-e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
 	-e 's|@HAVE_DOT[@]|$(HAVE_DOT)|g' \
 	$< >$@
+
+uninstall-hook:
+	if test -d ${docdir}; then rmdir ${docdir}; fi
+	if test -d ${pkgdatadir}; then rmdir ${pkgdatadir}; fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

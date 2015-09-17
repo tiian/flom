@@ -1,10 +1,13 @@
+if COND_JAVAAPI
+  MAYBE_JAVAAPI = java
+endif
 if COND_PHPAPI
   MAYBE_PHPAPI = php
 endif
 if COND_PYTHONAPI
   MAYBE_PYTHONAPI = python
 endif
-SUBDIRS = . $(MAYBE_PHPAPI) $(MAYBE_PYTHONAPI)
+SUBDIRS = $(MAYBE_JAVAAPI) $(MAYBE_PHPAPI) $(MAYBE_PYTHONAPI) .
 examplesdir = $(docdir)/examples
 if COND_CPPAPI
   CPPSOURCE=BasicStatic.cc BasicDynamic.cc AdvancedStatic.cc AdvancedDynamic.cc
@@ -27,3 +30,5 @@ README:	README.in ../../config.status
 	-e 's|@libdir[@]|$(libdir)|g' \
 	$< >$@
 
+uninstall-hook:
+	if test -d ${docdir}/examples; then rmdir ${docdir}/examples; fi

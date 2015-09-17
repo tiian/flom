@@ -632,6 +632,7 @@ install-exec-hook:
 
 uninstall-hook:
 	rm -f @PHP_INSTALL_PATH@/flom.so
+	if test -d ${pkgdatadir}/php; then rmdir ${pkgdatadir}/php; fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

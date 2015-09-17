@@ -11,3 +11,6 @@ doxygen.conf: doxygen.conf.in
 	-e 's|@HAVE_DOT[@]|$(HAVE_DOT)|g' \
 	$< >$@
 
+uninstall-hook:
+	if test -d ${docdir}; then rmdir ${docdir}; fi
+	if test -d ${pkgdatadir}; then rmdir ${pkgdatadir}; fi

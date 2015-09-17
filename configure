@@ -951,6 +951,7 @@ with_gnu_ld
 enable_libtool_lock
 enable_trace
 enable_cpp
+enable_java
 enable_php
 enable_python
 '
@@ -1612,6 +1613,7 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --disable-trace         disable trace feature (not suggested)
   --disable-cpp           do not prepare C++ API
+  --disable-java          do not prepare Java binding API
   --disable-php           do not prepare PHP binding API
   --disable-python        do not prepare Python binding API
 
@@ -4932,13 +4934,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4935: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4937: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4938: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4940: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4941: output\"" >&5)
+  (eval echo "\"\$as_me:4943: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6144,7 +6146,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6147 "configure"' > conftest.$ac_ext
+  echo '#line 6149 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7674,11 +7676,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7677: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7679: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7681: \$? = $ac_status" >&5
+   echo "$as_me:7683: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8013,11 +8015,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8016: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8018: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8020: \$? = $ac_status" >&5
+   echo "$as_me:8022: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8118,11 +8120,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8121: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8123: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8125: \$? = $ac_status" >&5
+   echo "$as_me:8127: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8173,11 +8175,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8176: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8178: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8180: \$? = $ac_status" >&5
+   echo "$as_me:8182: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10557,7 +10559,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10560 "configure"
+#line 10562 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10653,7 +10655,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10656 "configure"
+#line 10658 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14487,11 +14489,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14490: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14492: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14494: \$? = $ac_status" >&5
+   echo "$as_me:14496: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14586,11 +14588,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14589: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14591: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14593: \$? = $ac_status" >&5
+   echo "$as_me:14595: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14638,11 +14640,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14641: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14643: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14645: \$? = $ac_status" >&5
+   echo "$as_me:14647: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15588,7 +15590,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files Makefile doc/Makefile doc/examples/Makefile doc/examples/php/Makefile doc/examples/python/Makefile doc/html/Makefile etc/Makefile man/Makefile src/Makefile src/java/Makefile src/php/Makefile src/python/Makefile tests/atlocal tests/Makefile tests/src/Makefile"
+ac_config_files="$ac_config_files Makefile doc/Makefile doc/examples/Makefile doc/examples/java/Makefile doc/examples/php/Makefile doc/examples/python/Makefile doc/html/Makefile etc/Makefile man/Makefile src/Makefile src/java/Makefile src/php/Makefile src/python/Makefile tests/atlocal tests/Makefile tests/src/Makefile"
 
 ac_config_commands="$ac_config_commands tests/atconfig"
 
@@ -16413,9 +16415,17 @@ $as_echo "no" >&6; }
 fi
 
 
-if test "$HAVE_JAVA" = "yes" -a "$HAVE_JAVAC" = "yes" -a "$HAVE_JAR" = "yes"
+# Build Java wrapper?
+# Check whether --enable-java was given.
+if test "${enable_java+set}" = set; then :
+  enableval=$enable_java; JAVA="no"
+else
+  JAVA="yes"
+fi
+
+# Java stuff is conditional
+if test "$JAVA" = "yes" -a "$HAVE_JAVA" = "yes" -a "$HAVE_JAVAC" = "yes" -a "$HAVE_JAR" = "yes"
 then
-	# @@@ replace "no" with "yes" to activate Java build and test
 	JAVAAPI="yes"
 else
 	JAVAAPI="no"
@@ -18274,6 +18284,7 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "doc/examples/Makefile") CONFIG_FILES="$CONFIG_FILES doc/examples/Makefile" ;;
+    "doc/examples/java/Makefile") CONFIG_FILES="$CONFIG_FILES doc/examples/java/Makefile" ;;
     "doc/examples/php/Makefile") CONFIG_FILES="$CONFIG_FILES doc/examples/php/Makefile" ;;
     "doc/examples/python/Makefile") CONFIG_FILES="$CONFIG_FILES doc/examples/python/Makefile" ;;
     "doc/html/Makefile") CONFIG_FILES="$CONFIG_FILES doc/html/Makefile" ;;

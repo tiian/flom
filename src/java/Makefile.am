@@ -6,15 +6,18 @@ libflom_java_la_LIBADD = @GLIB2_LIBS@ ../libflom.la
 
 libflom_java_la_SOURCES = flom_java.h flom_java.c
 dist_noinst_HEADERS = flom_java.h
-dist_noinst_DATA = FlomErrorCodes.awk
+dist_noinst_DATA = FlomErrorCodes.awk FlomLockModes.awk \
+	$(JAVA_PKGDIR)/FlomException.java $(JAVA_PKGDIR)/FlomHandle.java
 javadir = $(datadir)/$(PACKAGE)/java
 dist_java_DATA = flom.jar
 lib_LTLIBRARIES = libflom_java.la
 
 $(JAVA_PKGDIR)/FlomErrorCodes.java:	FlomErrorCodes.awk ../flom_errors.h
+	mkdir -p $(JAVA_PKGDIR)
 	awk -f $^ > $@
 
 $(JAVA_PKGDIR)/FlomLockModes.java:	FlomLockModes.awk ../flom_types.h
+	mkdir -p $(JAVA_PKGDIR)
 	awk -f $^ > $@
 
 $(JAVA_PKGDIR)/FlomLockModes.class:	$(JAVA_PKGDIR)/FlomLockModes.java
@@ -35,14 +38,6 @@ flom_java.h:	flom.jar $(JAVA_PKGDIR)/FlomHandle.java
 flom.jar:	$(JAVA_PKGDIR)/FlomErrorCodes.class $(JAVA_PKGDIR)/FlomLockModes.class $(JAVA_PKGDIR)/FlomHandle.class $(JAVA_PKGDIR)/FlomException.class
 	jar cf $@ $^
 
-#javadir = $(datadir)/$(PACKAGE)/java
-#java_DATA = flom.java
-#EXTRA_DIST = flom.java
-
-#install-exec-hook:
-#	ln -sf $(DESTDIR)$(libdir)/flom-php-module.so \
-#	@PHP_INSTALL_PATH@/flom.so || echo "WARNING: module flom.so not installed in PHP default path @PHP_INSTALL_PATH@"
-
-#uninstall-hook:
-#	rm -f @PHP_INSTALL_PATH@/flom.so
+uninstall-hook:
+	if test -d ${pkgdatadir}/java; then rmdir ${pkgdatadir}/java; fi
 

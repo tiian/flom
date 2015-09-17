@@ -19,3 +19,6 @@ README: README.in ../../../config.status
 	sed \
 	-e 's|@libdir[@]|$(libdir)|g' \
 	$< >$@
+
+uninstall-hook:
+	if test -d ${docdir}/examples/php; then rmdir ${docdir}/examples/php; fi

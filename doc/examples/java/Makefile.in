@@ -34,9 +34,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = doc/examples/python
-DIST_COMMON = README $(dist_examples_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+subdir = doc/examples/java
+DIST_COMMON = README $(dist_examples_DATA) $(dist_noinst_DATA) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_jni_include_dir.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
@@ -71,8 +71,10 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(examplesdir)"
-DATA = $(dist_examples_DATA)
+am__installdirs = "$(DESTDIR)$(examplesdir)" \
+	"$(DESTDIR)$(examplesdir)"
+DATA = $(dist_examples_DATA) $(dist_noinst_DATA) \
+	$(nodist_examples_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -263,8 +265,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-examplesdir = $(docdir)/examples/python
-dist_examples_DATA = basic.py advanced.py README
+examplesdir = $(docdir)/examples/java
+dist_noinst_DATA = Basic.java.in Advanced.java.in README.in
+dist_examples_DATA = README
+nodist_examples_DATA = Basic.java Advanced.java
 all: all-am
 
 .SUFFIXES:
@@ -277,9 +281,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu doc/examples/python/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu doc/examples/java/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu doc/examples/python/Makefile
+	  $(AUTOMAKE) --gnu doc/examples/java/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -320,6 +324,26 @@ install-dist_examplesDATA: $(dist_examples_DATA)
 uninstall-dist_examplesDATA:
 	@$(NORMAL_UNINSTALL)
 	@list='$(dist_examples_DATA)'; test -n "$(examplesdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(examplesdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(examplesdir)" && rm -f $$files
+install-nodist_examplesDATA: $(nodist_examples_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(examplesdir)" || $(MKDIR_P) "$(DESTDIR)$(examplesdir)"
+	@list='$(nodist_examples_DATA)'; test -n "$(examplesdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(examplesdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(examplesdir)" || exit $$?; \
+	done
+
+uninstall-nodist_examplesDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_examples_DATA)'; test -n "$(examplesdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(examplesdir)' && rm -f" $$files ")"; \
@@ -365,7 +389,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(examplesdir)"; do \
+	for dir in "$(DESTDIR)$(examplesdir)" "$(DESTDIR)$(examplesdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -413,7 +437,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_examplesDATA
+install-data-am: install-dist_examplesDATA install-nodist_examplesDATA
 
 install-dvi: install-dvi-am
 
@@ -457,7 +481,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_examplesDATA
+uninstall-am: uninstall-dist_examplesDATA \
+	uninstall-nodist_examplesDATA
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 .MAKE: install-am install-strip uninstall-am
@@ -468,16 +493,36 @@ uninstall-am: uninstall-dist_examplesDATA
 	install-data install-data-am install-dist_examplesDATA \
 	install-dvi install-dvi-am install-exec install-exec-am \
 	install-html install-html-am install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am uninstall uninstall-am uninstall-dist_examplesDATA \
-	uninstall-hook
+	install-man install-nodist_examplesDATA install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
+	uninstall-dist_examplesDATA uninstall-hook \
+	uninstall-nodist_examplesDATA
 
+
+Basic.java:	Basic.java.in
+	sed \
+	-e 's|@datadir[@]|$(datadir)|g' \
+	-e 's|@libdir[@]|$(libdir)|g' \
+	-e 's|@PACKAGE[@]|$(PACKAGE)|g' \
+	$< >$@
+
+Advanced.java:	Advanced.java.in
+	sed \
+	-e 's|@datadir[@]|$(datadir)|g' \
+	-e 's|@libdir[@]|$(libdir)|g' \
+	-e 's|@PACKAGE[@]|$(PACKAGE)|g' \
+	$< >$@
+
+README:		README.in
+	sed \
+	-e 's|@libdir[@]|$(libdir)|g' \
+	$< >$@
 
 uninstall-hook:
-	if test -d ${docdir}/examples/python; then rmdir ${docdir}/examples/python; fi
+	if test -d ${docdir}/examples/java; then rmdir ${docdir}/examples/java; fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
