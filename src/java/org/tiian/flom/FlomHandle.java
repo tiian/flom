@@ -73,7 +73,7 @@ public class FlomHandle {
 
     
     /**
-     * Create a new native @ref flom_handle_t object and set @ref NativeHandler
+     * Create a new native flom_handle_t object and set NativeHandler
      * Called by class constructor
      */
     private native int newJNI();
@@ -89,8 +89,8 @@ public class FlomHandle {
 
     
     /**
-     * Delete the native @ref flom_handle_t object
-     * Called by @ref free method
+     * Delete the native flom_handle_t object
+     * Called by free method
      */
     private native void deleteJNI();
     /**
@@ -104,7 +104,7 @@ public class FlomHandle {
     }
     /**
      * Release native object if finalization is executed and the program
-     * forgot to call @ref release method
+     * forgot to call release method
      */
     protected void finalize() {
         free();
@@ -113,15 +113,13 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref lock
+     * Native method for lock
      */
     private native int lockJNI();
     /**
      * Lock the (logical) resource linked to this handle; the resource
-     * MUST be unlocked using method @ref unlock when the lock condition
-     * is no more necessary.  Use this instance of the method if you are
-     * interested to the name of the locked element and you prefer a C
-     * null terminated string.
+     * MUST be unlocked using method unlock when the lock condition
+     * is no more necessary.
      */
     public void lock() throws FlomException {
         nullCheck();
@@ -134,12 +132,12 @@ public class FlomHandle {
 
 
     /**
-     * Native method for @ref unlock
+     * Native method for unlock
      */
     private native int unlockJNI();
     /**
      * Unlock the (logical) resource linked to this handle; the resource
-     * MUST be previously locked using method @ref lock
+     * MUST be previously locked using method lock
      */
     public void unlock() throws FlomException {
         nullCheck();
@@ -152,7 +150,7 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref getLockedElement
+     * Native method for getLockedElement
      */
     private native String getLockedElementJNI();
     /**
@@ -173,15 +171,15 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref getDiscoveryAttempts
+     * Native method for getDiscoveryAttempts
      */
     private native int getDiscoveryAttemptsJNI();
     /**
      * Get the maximum number of attempts that will be tryed during
      * auto-discovery phase using UDP/IP multicast (see
-     * @ref getMulticastAddress, @ref getMulticastPort).
+     * getMulticastAddress, getMulticastPort).
      * The current value can be altered using method
-     * @ref setDiscoveryAttempts
+     * setDiscoveryAttempts
      * @return the current value
      */
     public int getDiscoveryAttempts() throws FlomException {
@@ -192,15 +190,15 @@ public class FlomHandle {
 
 
     /**
-     * Native method for @ref setDiscoveryAttempts
+     * Native method for setDiscoveryAttempts
      */
     private native int setDiscoveryAttemptsJNI(int value);
     /**
      * Sets the maximum number of attempts that will be tryed during
      * auto-discovery phase using UDP/IP multicast (see
-     *         @ref setMulticastAddress, @ref setMulticastPort).
+     *         setMulticastAddress, setMulticastPort).
      * The current value can be inspected using method
-     *         @ref getDiscoveryAttempts
+     *         getDiscoveryAttempts
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
@@ -213,15 +211,15 @@ public class FlomHandle {
     
     
     /**
-     * Native method for @ref getDiscoveryTimeout
+     * Native method for getDiscoveryTimeout
      */
     private native int getDiscoveryTimeoutJNI();
     /**
      * Gets the number of milliseconds between two consecutive attempts that
      * will be tryed during auto-discovery phase using UDP/IP multicast (see
-     * @ref getMulticastAddress, @ref getMulticastPort).
+     * getMulticastAddress, getMulticastPort).
      * The current value can be altered using method
-     * @ref setDiscoveryTimeout
+     * setDiscoveryTimeout
      * @return the current value
      */
     public int getDiscoveryTimeout() throws FlomException {
@@ -232,15 +230,15 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref setDiscoveryTimeout
+     * Native method for setDiscoveryTimeout
      */
     private native int setDiscoveryTimeoutJNI(int value);
     /**
      * Sets the number of milliseconds between two consecutive attempts that
      * will be tryed during auto-discovery phase using UDP/IP multicast (see
-     * @ref setMulticastAddress, @ref setMulticastPort).
+     * setMulticastAddress, setMulticastPort).
      * The current value can be inspected using method
-     * @ref getDiscoveryTtl.
+     * getDiscoveryTtl.
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
@@ -253,14 +251,14 @@ public class FlomHandle {
     
     
     /**
-     * Native method for @ref getDiscoveryTtl
+     * Native method for getDiscoveryTtl
      */
     private native int getDiscoveryTtlJNI();
     /**
      * Gets the UDP/IP multicast TTL parameter used during auto-discovery
      * phase; for a definition of the parameter, see
      * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html
-     * . The current value can be altered using method @ref setDiscoveryTtl
+     * . The current value can be altered using method setDiscoveryTtl
      * @return the current value
      */
     public int getDiscoveryTtl() throws FlomException {
@@ -271,7 +269,7 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref setDiscoveryTtl
+     * Native method for setDiscoveryTtl
      */
     private native int setDiscoveryTtlJNI(int value);
     /**
@@ -279,7 +277,7 @@ public class FlomHandle {
      * phase; for a definition of the parameter, see
      * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html
      * . The current value can be inspected using method
-     * @ref getDiscoveryTtl.
+     * getDiscoveryTtl.
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
@@ -291,17 +289,17 @@ public class FlomHandle {
 
 
     /**
-     * Native method for @ref getLockMode
+     * Native method for getLockMode
      */
     private native int getLockModeJNI();
     /**
      * Gets lock mode property: how a simple or hierarchical resource will
-     * be locked when method @ref lock is called; FLoM
+     * be locked when method lock is called; FLoM
      * supports the same lock mode semantic proposed by DLM, see
      * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
      * for a detailed explanation
-     * . The current value can be altered using method @ref setLockMode.
-     * The available lock modes are described by class @ref FlomLockModes
+     * . The current value can be altered using method setLockMode.
+     * The available lock modes are described by class FlomLockModes
      * @return the current value
      */
     public int getLockMode() throws FlomException {
@@ -312,18 +310,18 @@ public class FlomHandle {
 
         
     /**
-     * Native method for @ref setLockMode
+     * Native method for setLockMode
      */
     private native int setLockModeJNI(int value);
     /**
      * Sets lock mode property: how a simple or hierarchical resource will
-     * be locked when method @ref lock is called; FLoM
+     * be locked when method lock is called; FLoM
      * supports the same lock mode semantic proposed by DLM, see
      * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
      * for a detailed explanation
-     * . The current value can be inspected using method @ref getLockMode
+     * . The current value can be inspected using method getLockMode
      * @param value (Input): the new value
-     * The available lock modes are described by class @ref FlomLockModes
+     * The available lock modes are described by class FlomLockModes
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
      */
@@ -335,16 +333,16 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref getMulticastAddress
+     * Native method for getMulticastAddress
      */
     private native String getMulticastAddressJNI();
     /**
      * Gets the multicast address: the IP address (or a network name that
      * the system can resolve) of the IP multicast group that must be
      * contacted to reach FLoM daemon (server) using UDP/IP; see also
-     *         @ref getMulticastPort.
+     *         getMulticastPort.
      * The current value can be altered using method
-     *         @ref setMulticastAddress.
+     *         setMulticastAddress.
      * @return the current value
      */
     public String getMulticastAddress() throws FlomException {
@@ -358,16 +356,16 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref setMulticastAddress
+     * Native method for setMulticastAddress
      */
     private native int setMulticastAddressJNI(String value);
     /**
      * Sets the multicast address: the IP address (or a network name that
      * the system can resolve) of the IP multicast group that must be
      * contacted to reach FLoM daemon (server) using UDP/IP; see also
-     * @ref setMulticastPort.
+     * setMulticastPort.
      * The current value can be inspected using method
-     * @ref getMulticastAddress.
+     * getMulticastAddress.
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
@@ -380,13 +378,13 @@ public class FlomHandle {
     
     
     /**
-     * Native method for @ref getMulticastPort
+     * Native method for getMulticastPort
      */
     private native int getMulticastPortJNI();
     /**
      * Gets the UDP/IP multicast port that must be used to contact the FLoM
-     * daemon (server) using UDP/IP; see also @ref getMulticastAddress.
-     * The current value can be altered using method @ref setMulticastPort.
+     * daemon (server) using UDP/IP; see also getMulticastAddress.
+     * The current value can be altered using method setMulticastPort.
      * @return the current value
      */
     public int getMulticastPort() throws FlomException {
@@ -397,14 +395,14 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref setMulticastPort
+     * Native method for setMulticastPort
      */
     private native int setMulticastPortJNI(int value);
     /**
      * Sets the UDP/IP multicast port that must be used to contact the FLoM
-     * daemon (server) using UDP/IP; see also @ref setMulticastAddress.
+     * daemon (server) using UDP/IP; see also setMulticastAddress.
      * The current value can be inspected using method
-     * @ref getMulticastPort.
+     * getMulticastPort.
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
@@ -417,13 +415,13 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref getResourceCreate
+     * Native method for getResourceCreate
      */
     private native boolean getResourceCreateJNI();
     /**
      * Gets the UDP/IP multicast port that must be used to contact the FLoM
-     * daemon (server) using UDP/IP; see also @ref getMulticastAddress.
-     * The current value can be altered using method @ref setResourceCreate.
+     * daemon (server) using UDP/IP; see also getMulticastAddress.
+     * The current value can be altered using method setResourceCreate.
      * @return the current value
      */
     public boolean getResourceCreate() throws FlomException {
@@ -434,15 +432,15 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref setResourceCreate
+     * Native method for setResourceCreate
      */
     private native int setResourceCreateJNI(boolean value);
     /**
      * Sets "resource create" boolean property: it specifies if method
-     * @ref lock can create a new resource when the specified
+     * lock can create a new resource when the specified
      * one is not defined.
      * The current value can be inspected using method
-     * @ref getResourceCreate.
+     * getResourceCreate.
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
@@ -455,7 +453,7 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref getResourceIdleLifespan
+     * Native method for getResourceIdleLifespan
      */
     private native int getResourceIdleLifespanJNI();
     /**
@@ -463,7 +461,7 @@ public class FlomHandle {
      * milliseconds a resource will be kept after the last locker released
      * it; the expiration is necessary to avoid useless resource allocation.
      * The current value can be altered using method
-     *     @ref setResourceIdleLifespan.
+     *     setResourceIdleLifespan.
      * @return the current value
      */
     public int getResourceIdleLifespan() throws FlomException {
@@ -474,7 +472,7 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref setResourceIdleLifespan
+     * Native method for setResourceIdleLifespan
      */
     private native int setResourceIdleLifespanJNI(int value);
     /**
@@ -482,7 +480,7 @@ public class FlomHandle {
      * milliseconds a resource will be kept after the last locker released
      * it; the expiration is necessary to avoid useless resource allocation.
      * The current value can be inspected using method
-     *     @ref getResourceIdleLifespan.
+     *     getResourceIdleLifespan.
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
@@ -495,13 +493,13 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref getResourceName
+     * Native method for getResourceName
      */
     private native String getResourceNameJNI();
     /**
      * Gets the resource name: the name of the resource that can be locked
-     * and unlocked using @ref lock and @ref unlock methods.
-     * The current value can be altered using method @ref setResourceName.
+     * and unlocked using lock and unlock methods.
+     * The current value can be altered using method setResourceName.
      * @return the current value
      */
     public String getResourceName() throws FlomException {
@@ -515,13 +513,13 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref setResourceName
+     * Native method for setResourceName
      */
     private native int setResourceNameJNI(String value);
     /**
      * Sets the resource name: the name of the resource that can be locked
-     * and unlocked using @ref lock and @ref unlock methods.
-     * The current value can be inspected using method @ref getResourceName.
+     * and unlocked using lock and unlock methods.
+     * The current value can be inspected using method getResourceName.
      * NOTE: the resource type is determined by its name; take a look to
      * flom command man page (-r, --resource-name option) for an
      * explanation of the resource name grammar.
@@ -542,14 +540,14 @@ public class FlomHandle {
     
     
     /**
-     * Native method for @ref getResourceQuantity
+     * Native method for getResourceQuantity
      */
     private native int getResourceQuantityJNI();
     /**
      * Gets "resource quantity" property: the number of units that will be
-     * locked and unlocked using @ref lock and @ref unlock methods.
+     * locked and unlocked using lock and unlock methods.
      * The current value can be altered using method
-     * @ref setResourceQuantity.
+     * setResourceQuantity.
      * NOTE: this property applies to "numeric resources" only.
      * @return the current value
      */
@@ -561,14 +559,14 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref setResourceQuantity
+     * Native method for setResourceQuantity
      */
     private native int setResourceQuantityJNI(int value);
     /**
      * Sets "resource quantity" property: the number of units that will be
-     * locked and unlocked using @ref lock and @ref unlock methods.
+     * locked and unlocked using lock and unlock methods.
      * The current value can be inspected using method
-     * @ref getResourceQuantity.
+     * getResourceQuantity.
      * NOTE: this property applies to "numeric resources" only.
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
@@ -582,15 +580,15 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref getResourceTimeout
+     * Native method for getResourceTimeout
      */
     private native int getResourceTimeoutJNI();
     /**
      * Gets "resource timeout" property: how long a lock operation
-     * (see @ref lock) will wait if the resource is locked
+     * (see lock) will wait if the resource is locked
      * by another requester.
      * The current value can be altered using method
-     * @ref setResourceTimeout.
+     * setResourceTimeout.
      * @return the current value: <BR>
      *        0: no wait <BR>
      *        >0: maximum number of milliseconds to wait <BR>
@@ -604,15 +602,15 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref setResourceTimeout
+     * Native method for setResourceTimeout
      */
     private native int setResourceTimeoutJNI(int value);
     /**
      * Sets "resource timeout" property: how long a lock operation
-     * (see @ref lock) will wait if the resource is locked
+     * (see lock) will wait if the resource is locked
      * by another requester.
      * The current value can be inspected using method
-     * @ref getResourceTimeout.
+     * getResourceTimeout.
      * @param value (Input): the new value: <BR>
      *        0: no wait <BR>
      *        >0: maximum number of milliseconds to wait <BR>
@@ -628,13 +626,13 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref getSocketName
+     * Native method for getSocketName
      */
     private native String getSocketNameJNI();
     /**
      * Gets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
      * used to contact a local FLoM daemon (server).
-     * The current value can be altered using method @ref setSocketName.
+     * The current value can be altered using method setSocketName.
      * @return the current value as a standard
      */
     public String getSocketName() throws FlomException {
@@ -648,13 +646,13 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref setSocketName
+     * Native method for setSocketName
      */
     private native int setSocketNameJNI(String value);
     /**
      * Sets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
      * used to contact a local FLoM daemon (server).
-     * The current value can be inspected using method @ref getSocketName
+     * The current value can be inspected using method getSocketName
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
@@ -667,13 +665,13 @@ public class FlomHandle {
     
     
     /**
-     * Native method for @ref getTraceFilename
+     * Native method for getTraceFilename
      */
     private native String getTraceFilenameJNI();
     /**
      * Gets the trace filename: the name (absolute or relative path) used
      * by libflom (FLoM client library) to record trace messages.
-     * The current value can be altered using method @ref setTraceFilename.
+     * The current value can be altered using method setTraceFilename.
      * @return the current value
      */
     public String getTraceFilename() throws FlomException {
@@ -687,14 +685,14 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref setTraceFilename
+     * Native method for setTraceFilename
      */
     private native int setTraceFilenameJNI(String value);
     /**
      * Sets the trace filename: the name (absolute or relative path) used
      * by libflom (FLoM client library) to record trace messages.
      * The current value can be inspected using method
-     * @ref getTraceFilename.
+     * getTraceFilename.
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
@@ -707,16 +705,16 @@ public class FlomHandle {
     
     
     /**
-     * Native method for @ref getUnicastAddress
+     * Native method for getUnicastAddress
      */
     private native String getUnicastAddressJNI();
     /**
      * Gets the unicast address: the IP address (or a network name that the
      * system can resolve) of the host that must be contacted
      * to reach FLoM daemon (server) using TCP/IP; see also
-     *         @ref getUnicastPort.
+     *         getUnicastPort.
      * The current value can be altered using method
-     *         @ref setUnicastAddress.
+     *         setUnicastAddress.
      * @return the current value
      */
     public String getUnicastAddress() throws FlomException {
@@ -730,16 +728,16 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref setUnicastAddress
+     * Native method for setUnicastAddress
      */
     private native int setUnicastAddressJNI(String value);
     /**
      * Sets the unicast address: the IP address (or a network name that the
      * system can resolve) of the host that must be contacted
      * to reach FLoM daemon (server) using TCP/IP; see also
-     * @ref setUnicastPort.
+     * setUnicastPort.
      * The current value can be inspected using method
-     * @ref getUnicastAddress.
+     * getUnicastAddress.
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
@@ -752,13 +750,13 @@ public class FlomHandle {
     
     
     /**
-     * Native method for @ref getUnicastPort
+     * Native method for getUnicastPort
      */
     private native int getUnicastPortJNI();
     /**
      * Gets the TCP/IP unicast port that must be used to contact the FLoM
-     * daemon (server) using TCP/IP; see also @ref getUnicastAddress.
-     * The current value can be altered using method @ref setUnicastPort.
+     * daemon (server) using TCP/IP; see also getUnicastAddress.
+     * The current value can be altered using method setUnicastPort.
      * @return the current value
      */
     public int getUnicastPort() throws FlomException {
@@ -769,13 +767,13 @@ public class FlomHandle {
 
     
     /**
-     * Native method for @ref setUnicastPort
+     * Native method for setUnicastPort
      */
     private native int setUnicastPortJNI(int value);
     /**
      * Sets the TCP/IP unicast port that must be used to contact the FLoM
-     * daemon (server) using TCP/IP; see also @ref setUnicastAddress.
-     * The current value can be inspected using method @ref getUnicastPort.
+     * daemon (server) using TCP/IP; see also setUnicastAddress.
+     * The current value can be inspected using method getUnicastPort.
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method

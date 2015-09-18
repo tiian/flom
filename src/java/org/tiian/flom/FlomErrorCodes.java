@@ -1,4 +1,9 @@
 package  org.tiian.flom;
+/**
+ * This class contains the constants necessary to map the
+ * codes returned by the C native functions wrapped by the JNI
+ * methods.
+ */
 public class FlomErrorCodes {
 	public final static int FLOM_ES_REQUESTER_CANT_WAIT = 96;
 	public final static int FLOM_ES_UNABLE_TO_EXECUTE_COMMAND = 97;
@@ -84,5 +89,10 @@ public class FlomErrorCodes {
 	public final static int FLOM_RC_GET_FIELD_ID_ERROR = -300;
 	public final static int FLOM_RC_GET_OBJECT_CLASS_ERROR = -301;
 	public final static int FLOM_RC_NEW_DIRECT_BYTE_BUFFER_ERROR = -302;
+	/**
+	 * Retrieve the text associated to a FLoM code
+	 * @param code is the code returned by the C native functions
+	 * @return a string with a human readable description
+	 */
 	public native static String getText(int code);
 }

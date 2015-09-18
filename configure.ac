@@ -118,6 +118,11 @@ AC_CONFIG_FILES([
   doc/examples/php/Makefile
   doc/examples/python/Makefile
   doc/html/Makefile
+  doc/html/C/Makefile
+  doc/html/C++/Makefile
+  doc/html/java/Makefile
+  doc/html/java/resources/Makefile
+  doc/html/java/org/tiian/flom/Makefile
   etc/Makefile
   man/Makefile
   src/Makefile
@@ -195,13 +200,14 @@ AC_CHECK_PROG(HAVE_JAVA, [java], [yes], [no])
 # Checking the availability of JDK
 AC_CHECK_PROG(HAVE_JAVAC, [javac], [yes], [no])
 AC_CHECK_PROG(HAVE_JAR, [jar], [yes], [no])
+AC_CHECK_PROG(HAVE_JAVADOC, [javadoc], [yes], [no])
 # Build Java wrapper?
 AC_ARG_ENABLE([java],
 	AS_HELP_STRING([--disable-java],
 		[do not prepare Java binding API]),
 	[JAVA="no"], [JAVA="yes"])
 # Java stuff is conditional
-if test "$JAVA" = "yes" -a "$HAVE_JAVA" = "yes" -a "$HAVE_JAVAC" = "yes" -a "$HAVE_JAR" = "yes"
+if test "$JAVA" = "yes" -a "$HAVE_JAVA" = "yes" -a "$HAVE_JAVAC" = "yes" -a "$HAVE_JAR" = "yes" -a "$HAVE_JAVADOC" = "yes"
 then
 	JAVAAPI="yes"
 else

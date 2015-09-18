@@ -1,7 +1,10 @@
 package  org.tiian.flom;
 /**
- * See C header file src/flom_types.h to discover the meaning
- * of every lock mode
+ * This class contains the constants necessary to map the
+ * lock modes used by the C native functions wrapped by the JNI
+ * methods.
+ * See C header file src/flom_types.h for a verbose description
+ * of every lock mode.
  */
 public class FlomLockModes {
 	public final static int     FLOM_LOCK_MODE_NL = 0;

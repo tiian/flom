@@ -80,7 +80,7 @@ namespace flom {
 
 
     /**
-     * This class provides C++ abstraction to C @ref flom_handle_t type
+     * This class provides C++ abstraction to C flom_handle_t type
      */
     class FlomHandle {
         private:

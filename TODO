@@ -2,10 +2,9 @@ Road map:
 
 Release 1.0.0:
 - change project status from beta to stable
-- Javadoc
 - update TestLog file
-- update C/C++ docs
 - update site
+- upload html API docs
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 
