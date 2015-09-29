@@ -52,6 +52,7 @@ public class FlomException extends Exception {
     /**
      * Get the return code of the native C function that returned an error
      * condition to the JNI wrapper method
+     * @return the return code associated to the exception
      */
     public int getReturnCode() { return ReturnCode; }
 }

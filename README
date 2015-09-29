@@ -77,6 +77,24 @@ NOTE: if you are not interested in C++ API library support, specify
 NOTE: if you are not interested in PHP API library support, specify
       "--disable-php" at configure time; example:
       ./configure --disable-php
+NOTE: if you are not interested in Java API library support, specify
+      "--disable-java" at configure time; example:
+      ./configure --disable-java
+
+Issues related to multicast and internal Linux firewalling:
+the easiest way is to completely disable the internal firewall with
+commands
+	systemctl stop firewalld 
+	systemctl disable firewalld 
+or alternatively
+	service ipchains stop
+	service iptables stop
+	chkconfig ipchains off
+	chkconfig iptables off
+If you cannot disable the firewall and you want to use FLoM autodiscovery
+feature (IP multicast based), you will have to configure the internal
+firewall allowing FLoM multicast packets.
+
 If you need some help (usage tricks, hints, etc...) please post a message in
 the forum: http://sourceforge.net/p/flom/discussion/
 If you think you have discovered a bug, please open a ticket here:
@@ -92,10 +110,14 @@ Ubuntu		C++ API		g++
 Ubuntu		PHP API		swig php5-cli php5-dev
 Ubuntu		Python API	swig python-dev
 Ubuntu	10.04	Java API	openjdk-6-jdk
-CentOS		Basic		gcc glib2-devel
+Ubuntu	12.04	Java API	default-jdk (openjdk 6)
+Ubuntu	14.04	Java API	default-jdk (openjdk 7)
+CentOS		Basic		gcc glib2-devel autoconf
 CentOS		C++ API		gcc-c++
 CentOS		PHP API		swig php-cli php-devel
 CentOS		Python API	swig python-devel
+CentOS	6.6	Java API	java-1.6.0-openjdk* or java-1.7.0-openjdk*
+CentOS	7.1	Java API	
 
 Enjoy FLoM!
 Ch.F.

@@ -79,6 +79,8 @@ public class FlomHandle {
     private native int newJNI();
     /**
      * Create a new object calling the native interface
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public FlomHandle() throws FlomException {
         int ReturnCode = newJNI();
@@ -120,6 +122,8 @@ public class FlomHandle {
      * Lock the (logical) resource linked to this handle; the resource
      * MUST be unlocked using method unlock when the lock condition
      * is no more necessary.
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public void lock() throws FlomException {
         nullCheck();
@@ -138,6 +142,8 @@ public class FlomHandle {
     /**
      * Unlock the (logical) resource linked to this handle; the resource
      * MUST be previously locked using method lock
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public void unlock() throws FlomException {
         nullCheck();
@@ -157,6 +163,9 @@ public class FlomHandle {
      * Get the name of the locked element if the resource is of type set;
      * this method throws an exception if the name of the locked element is
      * not available
+     * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public String getLockedElement() throws FlomException {
         String ReturnString = null;
@@ -181,6 +190,8 @@ public class FlomHandle {
      * The current value can be altered using method
      * setDiscoveryAttempts
      * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int getDiscoveryAttempts() throws FlomException {
         nullCheck();
@@ -202,6 +213,8 @@ public class FlomHandle {
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setDiscoveryAttempts(int value) throws FlomException {
         nullCheck();
@@ -221,6 +234,8 @@ public class FlomHandle {
      * The current value can be altered using method
      * setDiscoveryTimeout
      * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int getDiscoveryTimeout() throws FlomException {
         nullCheck();
@@ -242,6 +257,8 @@ public class FlomHandle {
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setDiscoveryTimeout(int value) throws FlomException {
         nullCheck();
@@ -260,6 +277,8 @@ public class FlomHandle {
      * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html
      * . The current value can be altered using method setDiscoveryTtl
      * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int getDiscoveryTtl() throws FlomException {
         nullCheck();
@@ -281,6 +300,8 @@ public class FlomHandle {
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setDiscoveryTtl(int value) throws FlomException {
         nullCheck();
@@ -301,6 +322,8 @@ public class FlomHandle {
      * . The current value can be altered using method setLockMode.
      * The available lock modes are described by class FlomLockModes
      * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int getLockMode() throws FlomException {
         nullCheck();
@@ -324,6 +347,8 @@ public class FlomHandle {
      * The available lock modes are described by class FlomLockModes
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setLockMode(int value) throws FlomException {
         nullCheck();
@@ -344,6 +369,8 @@ public class FlomHandle {
      * The current value can be altered using method
      *         setMulticastAddress.
      * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public String getMulticastAddress() throws FlomException {
         String ReturnString = null;
@@ -369,6 +396,8 @@ public class FlomHandle {
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setMulticastAddress(String value) throws FlomException {
         nullCheck(value);
@@ -386,6 +415,8 @@ public class FlomHandle {
      * daemon (server) using UDP/IP; see also getMulticastAddress.
      * The current value can be altered using method setMulticastPort.
      * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int getMulticastPort() throws FlomException {
         nullCheck();
@@ -406,6 +437,8 @@ public class FlomHandle {
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setMulticastPort(int value) throws FlomException {
         nullCheck();
@@ -423,6 +456,8 @@ public class FlomHandle {
      * daemon (server) using UDP/IP; see also getMulticastAddress.
      * The current value can be altered using method setResourceCreate.
      * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public boolean getResourceCreate() throws FlomException {
         nullCheck();
@@ -444,6 +479,8 @@ public class FlomHandle {
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setResourceCreate(boolean value) throws FlomException {
         nullCheck();
@@ -463,6 +500,8 @@ public class FlomHandle {
      * The current value can be altered using method
      *     setResourceIdleLifespan.
      * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int getResourceIdleLifespan() throws FlomException {
         nullCheck();
@@ -484,6 +523,8 @@ public class FlomHandle {
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setResourceIdleLifespan(int value) throws FlomException {
         nullCheck();
@@ -501,6 +542,8 @@ public class FlomHandle {
      * and unlocked using lock and unlock methods.
      * The current value can be altered using method setResourceName.
      * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public String getResourceName() throws FlomException {
         String ReturnString = null;
@@ -526,6 +569,8 @@ public class FlomHandle {
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setResourceName(String value) throws FlomException {
         int ReturnCode = FlomErrorCodes.FLOM_RC_OK;
@@ -550,6 +595,8 @@ public class FlomHandle {
      * setResourceQuantity.
      * NOTE: this property applies to "numeric resources" only.
      * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int getResourceQuantity() throws FlomException {
         nullCheck();
@@ -571,6 +618,8 @@ public class FlomHandle {
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setResourceQuantity(int value) throws FlomException {
         nullCheck();
@@ -591,8 +640,10 @@ public class FlomHandle {
      * setResourceTimeout.
      * @return the current value: <BR>
      *        0: no wait <BR>
-     *        >0: maximum number of milliseconds to wait <BR>
-     *        <0: unlimited wait
+     *        &gt; 0: maximum number of milliseconds to wait <BR>
+     *        &lt; 0: unlimited wait
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int getResourceTimeout() throws FlomException {
         nullCheck();
@@ -613,10 +664,12 @@ public class FlomHandle {
      * getResourceTimeout.
      * @param value (Input): the new value: <BR>
      *        0: no wait <BR>
-     *        >0: maximum number of milliseconds to wait <BR>
-     *        <0: unlimited wait
+     *        &gt; 0: maximum number of milliseconds to wait <BR>
+     *        &lt; 0: unlimited wait
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setResourceTimeout(int value) throws FlomException {
         nullCheck();
@@ -634,6 +687,8 @@ public class FlomHandle {
      * used to contact a local FLoM daemon (server).
      * The current value can be altered using method setSocketName.
      * @return the current value as a standard
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public String getSocketName() throws FlomException {
         String ReturnString = null;
@@ -656,6 +711,8 @@ public class FlomHandle {
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setSocketName(String value) throws FlomException {
         nullCheck(value);
@@ -673,6 +730,8 @@ public class FlomHandle {
      * by libflom (FLoM client library) to record trace messages.
      * The current value can be altered using method setTraceFilename.
      * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public String getTraceFilename() throws FlomException {
         String ReturnString = null;
@@ -696,6 +755,8 @@ public class FlomHandle {
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setTraceFilename(String value) throws FlomException {
         nullCheck(value);
@@ -716,6 +777,8 @@ public class FlomHandle {
      * The current value can be altered using method
      *         setUnicastAddress.
      * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public String getUnicastAddress() throws FlomException {
         String ReturnString = null;
@@ -741,6 +804,8 @@ public class FlomHandle {
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setUnicastAddress(String value) throws FlomException {
         nullCheck(value);
@@ -758,6 +823,8 @@ public class FlomHandle {
      * daemon (server) using TCP/IP; see also getUnicastAddress.
      * The current value can be altered using method setUnicastPort.
      * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int getUnicastPort() throws FlomException {
         nullCheck();
@@ -777,148 +844,11 @@ public class FlomHandle {
      * @param value (Input): the new value
      * @return a reason code that can be checked to be sure the property
      *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
      */
     public int setUnicastPort(int value) throws FlomException {
         nullCheck();
         return setUnicastPortJNI(value);
-    }
-
-
-    
-    // @@@ remove me!!!
-    public static void main(String[] args) {
-        try {
-            FlomHandle fh = new FlomHandle();
-            System.out.println("FlomHandle.getDiscoveryAttempts() = " +
-                               fh.getDiscoveryAttempts());
-            fh.setDiscoveryAttempts(33);
-            System.out.println("FlomHandle.getDiscoveryAttempts() = " +
-                               fh.getDiscoveryAttempts());
-            fh.setDiscoveryTimeout(231);
-            System.out.println("FlomHandle.getDiscoveryTimeout() = " +
-                               fh.getDiscoveryTimeout());
-            fh.setDiscoveryTtl(5);
-            System.out.println("FlomHandle.getDiscoveryTtl() = " +
-                               fh.getDiscoveryTtl());
-            fh.setLockMode(FlomLockModes.FLOM_LOCK_MODE_PR);
-            System.out.println("FlomHandle.getLockMode() = " +
-                               fh.getLockMode());
-            /*
-            fh.setMulticastAddress("224.0.0.3");
-            try {
-                System.out.println("FlomHandle.getMulticastAddress() = '" +
-                                   fh.getMulticastAddress() + "'");
-            } catch(FlomException e) {
-                if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
-                    e.getReturnCode())
-                    System.out.println("FlomHandle: " + e.getMessage());
-                else throw(e);
-            }
-            */
-            fh.setMulticastPort(12345);
-            System.out.println("FlomHandle.getMulticastPort() = " +
-                               fh.getMulticastPort());
-           
-            fh.setResourceCreate(false);
-            System.out.println("FlomHandle.getResourceCreate() = " +
-                               fh.getResourceCreate());
-            fh.setResourceCreate(true);
-            System.out.println("FlomHandle.getResourceCreate() = " +
-                               fh.getResourceCreate());
-            
-            fh.setResourceIdleLifespan(6);
-            System.out.println("FlomHandle.getResourceIdleLifespan() = " +
-                               fh.getResourceIdleLifespan());
-
-            fh.setResourceQuantity(6);
-            System.out.println("FlomHandle.getResourceQuantity() = " +
-                               fh.getResourceQuantity());
-
-            fh.setResourceTimeout(69);
-            System.out.println("FlomHandle.getResourceTimeout() = " +
-                               fh.getResourceTimeout());
-
-            
-            // use a wrong resource name
-            try {
-                fh.setResourceName("an invalid name...");
-            } catch(FlomException e) {
-                if (FlomErrorCodes.FLOM_RC_INVALID_RESOURCE_NAME ==
-                    e.getReturnCode())
-                    System.out.println("FlomHandle.setResourceName() EXCP/"
-                                       + e.getMessage());
-                else throw(e);
-            }
-            try {
-                fh.setResourceName("avalidname");
-            } catch(FlomException e) {
-                if (FlomErrorCodes.FLOM_RC_INVALID_RESOURCE_NAME ==
-                    e.getReturnCode())
-                    System.out.println("FlomHandle.setResourceName() EXCP/"
-                                       + e.getMessage());
-                else throw(e);
-            }
-            try {
-                System.out.println("FlomHandle.getResourceName() = '" +
-                                   fh.getResourceName() + "'");
-            } catch(FlomException e) {
-                if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
-                    e.getReturnCode())
-                    System.out.println("FlomHandle.getResourceName() EXCP/"
-                                       + e.getMessage());
-                else throw(e);
-            }
-
-            
-            System.out.println("FlomHandle.getSocketName() = '" +
-                               fh.getSocketName() + "'");
-            /*
-            fh.setSocketName("/tmp/foobar");
-            try {
-                System.out.println("FlomHandle.getSocketName() = '" +
-                                   fh.getSocketName() + "'");
-            } catch(FlomException e) {
-                if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
-                    e.getReturnCode())
-                    System.out.println("FlomHandle: " + e.getMessage());
-                else throw(e);
-            }
-            fh.setSocketName(null);
-            */
-
-            fh.setTraceFilename("/tmp/mytrace");
-            try {
-                System.out.println("FlomHandle.getTraceFilename() = '" +
-                                   fh.getTraceFilename() + "'");
-            } catch(FlomException e) {
-                if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
-                    e.getReturnCode())
-                    System.out.println("FlomHandle: " + e.getMessage());
-                else throw(e);
-            }
-            fh.setTraceFilename(null);
-            
-            fh.lock();
-            try {
-                System.out.println("FlomHandle.getLockedElement() = '" +
-                                   fh.getLockedElement() + "'");
-            } catch(FlomException e) {
-                if (FlomErrorCodes.FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE ==
-                    e.getReturnCode())
-                    System.out.println("FlomHandle.getLockedElement() " +
-                                       "EXCP/" + e.getMessage());
-                else throw(e);
-            }
-            fh.unlock();
-            fh.free();
-        } catch(FlomException e) {
-            System.out.println("FlomException: ReturnCode=" +
-                               e.getReturnCode() + 
-                               " (" + e.getMessage() + ")");
-        }
-        /*
-        System.runFinalization();
-        Runtime.getRuntime().runFinalization();
-        */
     }
 }

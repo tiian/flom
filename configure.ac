@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.0.0-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [1.0.0-rc], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -187,14 +187,6 @@ AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
 # Checking the availability of SWIG (Simplified Wrapper and Interface Generator)
 AC_CHECK_PROGS(SWIG, [swig], [noswig])
 
-AX_JNI_INCLUDE_DIR
-
-for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
-do
-	CPPFLAGS="$CPPFLAGS -I$JNI_INCLUDE_DIR"
-done
-AC_CHECK_HEADERS(jni.h jni_md.h)
-
 # Checking the availability of JRE
 AC_CHECK_PROG(HAVE_JAVA, [java], [yes], [no])
 # Checking the availability of JDK
@@ -209,6 +201,14 @@ AC_ARG_ENABLE([java],
 # Java stuff is conditional
 if test "$JAVA" = "yes" -a "$HAVE_JAVA" = "yes" -a "$HAVE_JAVAC" = "yes" -a "$HAVE_JAR" = "yes" -a "$HAVE_JAVADOC" = "yes"
 then
+	# JNI include directory resolution
+	AX_JNI_INCLUDE_DIR
+	for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
+	do
+		CPPFLAGS="$CPPFLAGS -I$JNI_INCLUDE_DIR"
+	done
+	AC_CHECK_HEADERS(jni.h jni_md.h)
+	# OK, all Java stuff is OK!
 	JAVAAPI="yes"
 else
 	JAVAAPI="no"
