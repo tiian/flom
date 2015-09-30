@@ -117,7 +117,7 @@ CentOS		C++ API		gcc-c++
 CentOS		PHP API		swig php-cli php-devel
 CentOS		Python API	swig python-devel
 CentOS	6.6	Java API	java-1.6.0-openjdk* or java-1.7.0-openjdk*
-CentOS	7.1	Java API	
+CentOS	7.1	Java API	java-1.8.0-openjdk*
 
 Enjoy FLoM!
 Ch.F.
