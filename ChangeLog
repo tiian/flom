@@ -1,5 +1,8 @@
 LOG:
 
+         - 1.1.0
+	IPv6 support
+
 20150930 - 1.0.0 Java client library API
 	Fixed a bug that could be exploited trying to unlock a resource
 	with a name different from the locked one (server side fix).

@@ -285,18 +285,21 @@ int flom_client_connect_tcp(flom_config_t *config,
                     "and port %d\n", flom_config_get_unicast_address(config),
                     flom_config_get_unicast_port(config)));
         memset(&hints, 0, sizeof(hints));
+
         hints.ai_flags = AI_CANONNAME;
         /* remove this filter to support IPV6, but most of the following
            calls must be fixed! */
-        hints.ai_family = AF_INET; 
+        hints.ai_family = AF_UNSPEC; 
         hints.ai_socktype = SOCK_STREAM;
+        /*
         hints.ai_protocol = IPPROTO_TCP;
+        */
         snprintf(port_string, sizeof(port_string), "%u",
                  flom_config_get_unicast_port(config));
 
-                 if (0 != (errcode = getaddrinfo(
-                               flom_config_get_unicast_address(config),
-                                        port_string, &hints, &result))) {
+        if (0 != (errcode = getaddrinfo(
+                      flom_config_get_unicast_address(config),
+                      port_string, &hints, &result))) {
             FLOM_TRACE(("flom_client_connect_tcp/getaddrinfo(): "
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
             THROW(GETADDRINFO_ERROR);

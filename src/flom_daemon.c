@@ -279,13 +279,14 @@ int flom_listen(flom_config_t *config, flom_conns_t *conns)
 
     FLOM_TRACE(("flom_listen\n"));
     TRY {
-        switch (flom_conns_get_domain(conns)) {
+        int domain = flom_conns_get_domain(conns);
+        switch (domain) {
             case AF_LOCAL:
                 if (FLOM_RC_OK != (ret_cod = flom_listen_local(
                                        config, conns)))
                     THROW(LISTEN_LOCAL_ERROR);
                 break;
-            case AF_INET:
+            case AF_UNSPEC:  /* IPv4 or IPv6 */
                 /* create TCP/IP unicast listener */
                 if (FLOM_RC_OK != (ret_cod = flom_listen_tcp(config, conns)))
                     THROW(LISTEN_TCP_ERROR);
@@ -294,6 +295,7 @@ int flom_listen(flom_config_t *config, flom_conns_t *conns)
                     THROW(LISTEN_UDP_ERROR);
                 break;
             default:
+                FLOM_TRACE(("flom_listen: domain=%d\n", domain));
                 THROW(INVALID_DOMAIN);
         }
         THROW(NONE);

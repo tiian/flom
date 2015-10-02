@@ -74,12 +74,15 @@ NOTE: FLoM must be installed with "sudo make install" before tests can
 NOTE: if you are not interested in C++ API library support, specify
       "--disable-cpp" at configure time; example:
       ./configure --disable-cpp
-NOTE: if you are not interested in PHP API library support, specify
-      "--disable-php" at configure time; example:
-      ./configure --disable-php
 NOTE: if you are not interested in Java API library support, specify
       "--disable-java" at configure time; example:
       ./configure --disable-java
+NOTE: if you are not interested in PHP API library support, specify
+      "--disable-php" at configure time; example:
+      ./configure --disable-php
+NOTE: if you are not interested in Python API library support, specify
+      "--disable-python" at configure time; example:
+      ./configure --disable-python
 
 Issues related to multicast and internal Linux firewalling:
 the easiest way is to completely disable the internal firewall with

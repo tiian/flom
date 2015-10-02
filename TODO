@@ -1,10 +1,6 @@
 Road map:
 
-Release 1.0.0:
-- change project status from beta to stable
-- update TestLog file
-- update site
-- upload html API docs
+find out all AF_INET occurrences and fix the code for IPv6
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 
