@@ -426,15 +426,18 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
         hints.ai_flags = AI_PASSIVE;
         hints.ai_family = flom_conns_get_domain(conns);
         hints.ai_socktype = SOCK_STREAM;
+        /*
         hints.ai_protocol = IPPROTO_TCP;
+        */
         snprintf(port, sizeof(port), "%u",
                  flom_config_get_unicast_port(config));
         FLOM_TRACE(("flom_listen_tcp_configured: binding address '%s' "
                     "and port %s\n", flom_config_get_unicast_address(config),
                     port));
 
-        if (0 != (errcode = getaddrinfo(flom_config_get_unicast_address(config),
-                                        port, &hints, &result))) {
+        if (0 != (errcode = getaddrinfo(
+                      flom_config_get_unicast_address(config),
+                      port, &hints, &result))) {
             FLOM_TRACE(("flom_listen_tcp_configured/getaddrinfo(): "
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
             THROW(GETADDRINFO_ERROR);
@@ -463,7 +466,7 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
-                } else  if (-1 == bind(fd, gai->ai_addr, gai->ai_addrlen)) {
+                } else if (-1 == bind(fd, gai->ai_addr, gai->ai_addrlen)) {
                     FLOM_TRACE(("flom_listen_tcp_configured/bind() : "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
