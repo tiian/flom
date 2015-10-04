@@ -458,12 +458,17 @@ int flom_client_discover_udp(flom_config_t *config,
                     "and port %d\n", flom_config_get_multicast_address(config),
                     flom_config_get_multicast_port(config)));
         memset(&hints, 0, sizeof(hints));
-        hints.ai_flags = AI_CANONNAME;
+        hints.ai_flags = AI_PASSIVE;
         /* remove this filter to support IPV6, but most of the following
            calls must be fixed! */
-        hints.ai_family = AF_INET; 
+        /*
+        hints.ai_family = AF_INET;
+        */
+        hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_DGRAM;
+        /*
         hints.ai_protocol = IPPROTO_UDP;
+        */
         snprintf(port, sizeof(port), "%u",
                  flom_config_get_multicast_port(config));
 
@@ -800,12 +805,6 @@ int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
         size_t to_send;
         ssize_t to_read;
 
-        /* @@@ debug, remove me 
-        FLOM_TRACE(("flom_client_lock: timeout=%d, element='%*.*s', "
-                    "element_size=%u\n", timeout, element_size, element_size,
-                    element, element_size));
-        */
-        
         /* initialize message */
         flom_msg_init(&msg);
         /* prepare a request (lock) message */

@@ -1,5 +1,7 @@
 Road map:
 
+update manpage for -A option: specify the ranges are IPv4, put IPv6 information
+
 find out all AF_INET occurrences and fix the code for IPv6
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait

@@ -108,6 +108,7 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
             case AF_UNIX:
                 tmp->saun = *((struct sockaddr_un *)sa);
                 break;
+            case AF_INET:
             case AF_UNSPEC:
                 tmp->sain = *((struct sockaddr_in *)sa);
                 break;

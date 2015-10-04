@@ -286,6 +286,7 @@ int flom_listen(flom_config_t *config, flom_conns_t *conns)
                                        config, conns)))
                     THROW(LISTEN_LOCAL_ERROR);
                 break;
+            case AF_INET:
             case AF_UNSPEC:  /* IPv4 or IPv6 */
                 /* create TCP/IP unicast listener */
                 if (FLOM_RC_OK != (ret_cod = flom_listen_tcp(config, conns)))

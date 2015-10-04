@@ -1,6 +1,6 @@
 AT_BANNER([Distributed environement use case checks])
 
-AT_SETUP([IPv4 lo address])
+AT_SETUP([Unicast IPv4 lo address])
 # skip if the address is not available
 AT_CHECK([iface_ip_address.sh lo 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
@@ -8,7 +8,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh lo 4)"], [0],
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([IPv4-Mapped IPv6 lo address])
+AT_SETUP([Unicast IPv4-Mapped IPv6 lo address])
 # skip if the address is not available
 AT_CHECK([iface_ip_address.sh lo 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
@@ -16,7 +16,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a ::FFFF:$(iface_ip_address.sh lo 4)"
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([IPv6 lo address])
+AT_SETUP([Unicast IPv6 lo address])
 # skip if the address is not available
 AT_CHECK([iface_ip_address.sh lo 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
@@ -24,7 +24,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh lo 6)"], [0],
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([IPv4 eth0 address])
+AT_SETUP([Unicast IPv4 eth0 address])
 # skip if the address is not available
 AT_CHECK([iface_ip_address.sh eth0 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
@@ -32,7 +32,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth0 4)"], [0
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([IPv4-Mapped IPv6 eth0 address])
+AT_SETUP([Unicast IPv4-Mapped IPv6 eth0 address])
 # skip if the address is not available
 AT_CHECK([iface_ip_address.sh eth0 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
@@ -40,7 +40,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a ::FFFF:$(iface_ip_address.sh eth0 4
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([IPv6 eth0 address])
+AT_SETUP([Unicast IPv6 eth0 address])
 # skip if the address is not available
 AT_CHECK([iface_ip_address.sh eth0 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
@@ -48,7 +48,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth0 6)%eth0"
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([IPv4 eth1 address])
+AT_SETUP([Unicast IPv4 eth1 address])
 # skip if the address is not available
 AT_CHECK([iface_ip_address.sh eth1 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
@@ -56,7 +56,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth1 4)"], [0
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([IPv4-Mapped IPv6 eth1 address])
+AT_SETUP([Unicast IPv4-Mapped IPv6 eth1 address])
 # skip if the address is not available
 AT_CHECK([iface_ip_address.sh eth1 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
@@ -64,11 +64,29 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a ::FFFF:$(iface_ip_address.sh eth1 4
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([IPv6 eth1 address])
+AT_SETUP([Unicast IPv6 eth1 address])
 # skip if the address is not available
 AT_CHECK([iface_ip_address.sh eth1 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth1 6)%eth1"], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Multicast IPv4 address])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+# start a new daemon
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -A 224.0.0.1"], [0], [ignore], [ignore])
+# connect to previously started daemon after multicast discovery
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A 224.0.0.1"], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Multicast IPv6 address])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+# start a new daemon
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -A ff02::1"], [0], [ignore], [ignore])
+# connect to previously started daemon after multicast discovery
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A ff02::1"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
