@@ -427,6 +427,7 @@ int flom_client_discover_udp(flom_config_t *config,
                      , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , CLIENT_CONNECT_TCP_ERROR
+                     , INVALID_AI_FAMILY
                      , CLIENT_DISCOVER_UDP_CONNECT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -449,7 +450,7 @@ int flom_client_discover_udp(flom_config_t *config,
         ssize_t sent;
         struct timeval timeout;
         ssize_t received;
-        struct sockaddr_in from;
+        struct sockaddr from;
         socklen_t addrlen = sizeof(from);
         
         flom_msg_init(&msg);
@@ -492,6 +493,7 @@ int flom_client_discover_udp(flom_config_t *config,
 
                 /* prepare a local address on an ephemeral port to listen for
                    a reply from daemon */
+                /* fix for IPv6 @@@ */
                 memset(&local_address, 0, sizeof(local_address));
                 local_address.sin_family = hints.ai_family;
                 local_address.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -560,12 +562,14 @@ int flom_client_discover_udp(flom_config_t *config,
         msg.header.pvs.step = FLOM_MSG_STEP_INCR;
         /* serialize the request message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
-                               &msg, out_buffer, sizeof(out_buffer), &to_send)))
+                               &msg, out_buffer, sizeof(out_buffer),
+                               &to_send)))
             THROW(MSG_SERIALIZE_ERROR);
 
         /* set time-out for receive operation */
         timeout.tv_sec = flom_config_get_discovery_timeout(config)/1000;
-        timeout.tv_usec = (flom_config_get_discovery_timeout(config)%1000)*1000;
+        timeout.tv_usec = (flom_config_get_discovery_timeout(
+                               config)%1000)*1000;
         if (-1 == setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
                              sizeof(timeout)))
             THROW(SETSOCKOPT_ERROR);
@@ -593,7 +597,7 @@ int flom_client_discover_udp(flom_config_t *config,
             memset(&from, 0, sizeof(from));
             if (-1 == (received = recvfrom(
                            fd, in_buffer, sizeof(in_buffer), 0,
-                           (struct sockaddr *)&from, &addrlen))) {
+                           &from, &addrlen))) {
                 if (EAGAIN == errno || EWOULDBLOCK == errno) {
                     FLOM_TRACE(("flom_client_discover_udp: no answer from "
                                 "UDP/IP multicast discovery\n"));
@@ -655,12 +659,33 @@ int flom_client_discover_udp(flom_config_t *config,
                                    config, cd, start_daemon)))
                 THROW(CLIENT_CONNECT_TCP_ERROR);
         } else {
+            struct sockaddr_in from4;
+            struct sockaddr_in6 from6;
+            struct sockaddr *sa;
             /* connect to discovered server using IP source address and
                port retrieved from message */
-            from.sin_port = htons(msg.body.discover_16.network.port);
-            from.sin_family = hints.ai_family;
+            switch (gai->ai_family) {
+                case AF_INET:
+                    memcpy(&from4, &from, addrlen = sizeof(from4));
+                    from4.sin_port =
+                        htons(msg.body.discover_16.network.port);
+                    from4.sin_family = gai->ai_family;
+                    sa = (struct sockaddr *)&from4;
+                    break;
+                case AF_INET6:
+                    memcpy(&from6, &from, addrlen = sizeof(from6));
+                    from6.sin6_port = htons(
+                        msg.body.discover_16.network.port);
+                    from6.sin6_family = gai->ai_family;
+                    sa = (struct sockaddr *)&from6;
+                    break;
+                default:
+                    FLOM_TRACE(("flom_client_discover_udp: "
+                                "gai->ai_family=%d\n", gai->ai_family));
+                    THROW(INVALID_AI_FAMILY);
+            } /* switch (gai->ai_family) */
             if (FLOM_RC_OK != (ret_cod = flom_client_discover_udp_connect(
-                                   cd, &from)))
+                                   cd, sa, addrlen)))
                 THROW(CLIENT_DISCOVER_UDP_CONNECT_ERROR);
         }
         THROW(NONE);
@@ -691,6 +716,10 @@ int flom_client_discover_udp(flom_config_t *config,
                 break;
             case MSG_DESERIALIZE_ERROR:
             case CLIENT_CONNECT_TCP_ERROR:
+                break;
+            case INVALID_AI_FAMILY:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+                break;
             case CLIENT_DISCOVER_UDP_CONNECT_ERROR:
                 break;
             case NONE:
@@ -714,7 +743,8 @@ int flom_client_discover_udp(flom_config_t *config,
 
 
 int flom_client_discover_udp_connect(struct flom_conn_data_s *cd,
-                                     const struct sockaddr_in *soin)
+                                     const struct sockaddr *sa,
+                                     socklen_t addrlen)
 {
     enum Exception { SOCKET_ERROR
                      , CONNECT_ERROR
@@ -726,13 +756,12 @@ int flom_client_discover_udp_connect(struct flom_conn_data_s *cd,
     FLOM_TRACE(("flom_client_discover_udp_connect\n"));
     TRY {
         int sock_opt = 1;
-        
-        if (-1 == (fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)))
+
+        if (-1 == (fd = socket(sa->sa_family, SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
         FLOM_TRACE_HEX_DATA("flom_client_discover_udp_connect: soin ",
-                            (void *)soin, sizeof(struct sockaddr_in));
-        if (-1 == connect(fd, (struct sockaddr *)soin,
-                          sizeof(struct sockaddr_in)))
+                            (void *)sa, addrlen);
+        if (-1 == connect(fd, sa, addrlen))
             THROW(CONNECT_ERROR);
         if (0 != setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
                             (void *)(&sock_opt), sizeof(sock_opt)))
@@ -740,8 +769,8 @@ int flom_client_discover_udp_connect(struct flom_conn_data_s *cd,
         /* set connection definition object attributes */
         cd->fd = fd;
         cd->type = SOCK_STREAM;
-        memcpy(&cd->sain, soin, sizeof(struct sockaddr_in));
-        cd->addr_len = sizeof(struct sockaddr_in);
+        memcpy(&cd->sa, sa, addrlen);
+        cd->addr_len = addrlen;
         /* avoid socket close operated by clean-up step */
         fd = NULL_FD;
         
