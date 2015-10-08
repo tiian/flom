@@ -110,11 +110,13 @@ extern "C" {
      * @param config IN configuration object, NULL for global config
      * @param cd IN/OUT connection data
      * @param start_daemon IN try to start a new daemon if connection fails
+     * @param family OUT AF_INET or AF_INET6
      * @return a reason code
      */
     int flom_client_discover_udp(flom_config_t *config,
                                  struct flom_conn_data_s *cd,
-                                 int start_daemon);
+                                 int start_daemon,
+                                 sa_family_t *family);
 
 
 

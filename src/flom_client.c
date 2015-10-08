@@ -94,7 +94,9 @@ int flom_client_connect(flom_config_t *config,
                                    config, cd, start_daemon)))
                 THROW(CLIENT_CONNECT_TCP_ERROR);
         } else if (NULL != flom_config_get_multicast_address(config)) {
-            ret_cod = flom_client_discover_udp(config, cd, start_daemon);
+            sa_family_t family;
+            ret_cod = flom_client_discover_udp(
+                config, cd, start_daemon, &family);
             switch (ret_cod) {
                 case FLOM_RC_OK:
                     break;
@@ -105,12 +107,13 @@ int flom_client_connect(flom_config_t *config,
                                         "failed, activating a new daemon\n"));
                             /* try to start a daemon on this node */
                             if (FLOM_RC_OK != (ret_cod = flom_daemon(
-                                                   config, AF_INET)))
+                                                   config, family)))
                                 THROW(DAEMON_ERROR);
                             /* try to discover again */
                             if (FLOM_RC_OK != (
                                     ret_cod = flom_client_discover_udp(
-                                        config, cd, start_daemon)))
+                                        config, cd, start_daemon,
+                                        &family)))
                                 THROW(CLIENT_DISCOVER_UDP_ERROR1);
                         } else {
                             FLOM_TRACE(("flom_client_connect: connection "
@@ -415,9 +418,11 @@ const struct addrinfo *flom_client_connect_tcp_try(
 
 
 int flom_client_discover_udp(flom_config_t *config,
-                             struct flom_conn_data_s *cd, int start_daemon)
+                             struct flom_conn_data_s *cd, int start_daemon,
+                             sa_family_t *family)
 {
     enum Exception { GETADDRINFO_ERROR
+                     , INVALID_AI_FAMILY1
                      , CONNECT_ERROR
                      , MSG_SERIALIZE_ERROR
                      , SETSOCKOPT_ERROR
@@ -427,7 +432,7 @@ int flom_client_discover_udp(flom_config_t *config,
                      , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
                      , MSG_DESERIALIZE_ERROR
                      , CLIENT_CONNECT_TCP_ERROR
-                     , INVALID_AI_FAMILY
+                     , INVALID_AI_FAMILY2
                      , CLIENT_DISCOVER_UDP_CONNECT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -460,16 +465,8 @@ int flom_client_discover_udp(flom_config_t *config,
                     flom_config_get_multicast_port(config)));
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_PASSIVE;
-        /* remove this filter to support IPV6, but most of the following
-           calls must be fixed! */
-        /*
-        hints.ai_family = AF_INET;
-        */
         hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_DGRAM;
-        /*
-        hints.ai_protocol = IPPROTO_UDP;
-        */
         snprintf(port, sizeof(port), "%u",
                  flom_config_get_multicast_port(config));
 
@@ -488,20 +485,40 @@ int flom_client_discover_udp(flom_config_t *config,
             /* traverse the list and try to connect... */
             gai = result;
             while (NULL != gai && !found) {
-                struct sockaddr_in local_address;
-                socklen_t local_address_len;
+                struct sockaddr_in local_addr4;
+                struct sockaddr_in6 local_addr6;
+                struct sockaddr *local_addr;
+                socklen_t local_addr_len;
 
                 /* prepare a local address on an ephemeral port to listen for
                    a reply from daemon */
-                /* fix for IPv6 @@@ */
-                memset(&local_address, 0, sizeof(local_address));
-                local_address.sin_family = hints.ai_family;
-                local_address.sin_addr.s_addr = htonl(INADDR_ANY);
-                local_address.sin_port = 0;
-                local_address_len = sizeof(local_address);
-                
-                FLOM_TRACE_HEX_DATA("flom_client_discover_udp: ai_addr ",
+                switch (gai->ai_family) {
+                    case AF_INET:
+                        memset(&local_addr4, 0, sizeof(local_addr4));
+                        local_addr4.sin_family = gai->ai_family;
+                        local_addr4.sin_addr.s_addr = htonl(INADDR_ANY);
+                        local_addr4.sin_port = 0;
+                        local_addr_len = sizeof(local_addr4);
+                        local_addr = (struct sockaddr *)&local_addr4;
+                        break;
+                    case AF_INET6:
+                        memset(&local_addr6, 0, sizeof(local_addr6));
+                        local_addr6.sin6_family = gai->ai_family;
+                        local_addr6.sin6_addr = in6addr_any;
+                        local_addr6.sin6_port = 0;
+                        local_addr_len = sizeof(local_addr6);
+                        local_addr = (struct sockaddr *)&local_addr6;
+                        break;
+                    default:
+                        FLOM_TRACE(("flom_client_discover_udp: "
+                                    "gai->ai_family=%d\n", gai->ai_family));
+                        THROW(INVALID_AI_FAMILY1);
+                } /* switch (gai->ai_family) */
+                FLOM_TRACE_HEX_DATA("flom_client_discover_udp: gai->ai_addr ",
                                     (void *)gai->ai_addr, gai->ai_addrlen);
+                FLOM_TRACE_HEX_DATA("flom_client_discover_udp_connect: "
+                                    "local_addr ",
+                                    (void *)local_addr, local_addr_len);
                 if (-1 == (fd = socket(gai->ai_family, gai->ai_socktype,
                                        gai->ai_protocol))) {
                     FLOM_TRACE(("flom_client_discover_udp/socket(): "
@@ -519,8 +536,8 @@ int flom_client_discover_udp(flom_config_t *config,
                     close(fd);
                     fd = NULL_FD;
                 } else if (-1 == setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF,
-                                            (void *)&local_address,
-                                            local_address_len)) {
+                                            (void *)local_addr,
+                                            local_addr_len)) {
                     FLOM_TRACE(("flom_client_discover_udp/setsockopt("
                                 "IP_MULTICAST_IF) : "
                                 "errno=%d '%s', skipping...\n", errno,
@@ -538,8 +555,7 @@ int flom_client_discover_udp(flom_config_t *config,
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
-                } else if (-1 == bind(fd, (struct sockaddr *)&local_address,
-                                      local_address_len)) {
+                } else if (-1 == bind(fd, local_addr, local_addr_len)) {
                     FLOM_TRACE(("flom_client_discover_udp/bind() : "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
@@ -548,6 +564,7 @@ int flom_client_discover_udp(flom_config_t *config,
                     fd = NULL_FD;
                 } else {
                     found = TRUE;
+                    *family = gai->ai_family;
                 }  /* if (-1 == (*fd = socket( */
             } /* while (NULL != gai && !connected) */            
         }
@@ -682,7 +699,7 @@ int flom_client_discover_udp(flom_config_t *config,
                 default:
                     FLOM_TRACE(("flom_client_discover_udp: "
                                 "gai->ai_family=%d\n", gai->ai_family));
-                    THROW(INVALID_AI_FAMILY);
+                    THROW(INVALID_AI_FAMILY2);
             } /* switch (gai->ai_family) */
             if (FLOM_RC_OK != (ret_cod = flom_client_discover_udp_connect(
                                    cd, sa, addrlen)))
@@ -693,6 +710,9 @@ int flom_client_discover_udp(flom_config_t *config,
         switch (excp) {
             case GETADDRINFO_ERROR:
                 ret_cod = FLOM_RC_GETADDRINFO_ERROR;
+                break;
+            case INVALID_AI_FAMILY1:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
                 break;
             case CONNECT_ERROR:
                 ret_cod = FLOM_RC_CONNECT_ERROR;
@@ -717,7 +737,7 @@ int flom_client_discover_udp(flom_config_t *config,
             case MSG_DESERIALIZE_ERROR:
             case CLIENT_CONNECT_TCP_ERROR:
                 break;
-            case INVALID_AI_FAMILY:
+            case INVALID_AI_FAMILY2:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
                 break;
             case CLIENT_DISCOVER_UDP_CONNECT_ERROR:

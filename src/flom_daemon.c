@@ -287,7 +287,8 @@ int flom_listen(flom_config_t *config, flom_conns_t *conns)
                     THROW(LISTEN_LOCAL_ERROR);
                 break;
             case AF_INET:
-            case AF_UNSPEC:  /* IPv4 or IPv6 */
+            case AF_INET6:
+            case AF_UNSPEC:
                 /* create TCP/IP unicast listener */
                 if (FLOM_RC_OK != (ret_cod = flom_listen_tcp(config, conns)))
                     THROW(LISTEN_TCP_ERROR);
@@ -540,13 +541,13 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
         int sock_opt = 1;
         gint unicast_port;
 
-        if (-1 == (fd = socket(flom_conns_get_domain(conns), SOCK_STREAM,
-                               IPPROTO_TCP)))
+        if (-1 == (fd = socket(flom_conns_get_domain(conns), SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
         if (-1 == setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
                              (void *)&sock_opt, sizeof(sock_opt)))
             THROW(SETSOCKOPT_ERROR);
         /* binding local address, ephemeral port */
+        /* @@@ implement IPv6 ... */
         memset(&soin, 0, sizeof(soin));
         soin.sin_addr.s_addr = htonl(INADDR_ANY);
         soin.sin_port = 0;
