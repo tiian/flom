@@ -106,6 +106,9 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: XML message deserialization";
         case FLOM_RC_API_INVALID_SEQUENCE:
             return "ERROR: API function called using an invalid sequence";
+        case FLOM_RC_INVALID_AI_FAMILY_ERROR:
+            return "ERROR: address family is not a valid IP address family "
+                "(AF_INET, AF_INET6)";
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";
         case FLOM_RC_BIND_ERROR:
@@ -130,6 +133,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'getsockname' function returned an error condition";
         case FLOM_RC_GETSOCKOPT_ERROR:
             return "ERROR: 'getsockopt' function returned an error condition";
+        case FLOM_RC_INET_NTOP_ERROR:
+            return "ERROR: 'inet_ntop' function returned an error condition";
         case FLOM_RC_LISTEN_ERROR:
             return "ERROR: 'listen' function returned an error condition";
         case FLOM_RC_MALLOC_ERROR:

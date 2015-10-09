@@ -255,7 +255,7 @@ AM_CONDITIONAL([COND_PYTHONAPI], [test "$PYTHONAPI" = "yes"])
 
 AC_DEFINE_UNQUOTED([_ES_GENERIC_ERROR], [$_ES_GENERIC_ERROR], [Exit status for generic error])
 
-AC_CHECK_HEADERS(assert.h)
+AC_CHECK_HEADERS(arpa/inet.h assert.h)
 AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_HEADERS(glib.h)

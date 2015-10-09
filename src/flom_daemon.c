@@ -28,6 +28,9 @@
 
 
 #include <stdio.h>
+#ifdef HAVE_ARPA_INET_H
+# include <arpa/inet.h>
+#endif
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
@@ -79,9 +82,23 @@
 
 
 
+/* global read only variables (constants initialized by flom_daemon) */
+/**
+ * String equivalent to IPv4 INADDR_ANY constant
+ */
+static char FLOM_INADDR_ANY_STRING[INET_ADDRSTRLEN];
+/**
+ * String equivalent to IPv6 in6addr_any constant
+ */
+static char FLOM_INADDR6_ANY_STRING[INET6_ADDRSTRLEN];
+
+
+
 int flom_daemon(flom_config_t *config, int family)
 {
-    enum Exception { PIPE_ERROR
+    enum Exception { INET_NTOP_ERROR1
+                     , INET_NTOP_ERROR2
+                     , PIPE_ERROR
                      , FORK_ERROR
                      , WAIT_ERROR
                      , CHILD_PID_ERROR
@@ -105,7 +122,21 @@ int flom_daemon(flom_config_t *config, int family)
     FLOM_TRACE(("flom_daemon\n"));
     TRY {
         pid_t pid;
+        struct sockaddr_in sa_in;
+        struct sockaddr_in6 sa_in6;
 
+        /* initializing INxADDR ANY strings */
+        sa_in.sin_addr.s_addr = htonl(INADDR_ANY);
+        sa_in6.sin6_addr = in6addr_any;
+        if (FLOM_INADDR_ANY_STRING != inet_ntop(
+                AF_INET, &(sa_in.sin_addr), FLOM_INADDR_ANY_STRING,
+                sizeof(FLOM_INADDR_ANY_STRING)))
+            THROW(INET_NTOP_ERROR1);
+        if (FLOM_INADDR6_ANY_STRING != inet_ntop(
+                AF_INET6, &(sa_in6.sin6_addr), FLOM_INADDR6_ANY_STRING,
+                sizeof(FLOM_INADDR6_ANY_STRING)))
+            THROW(INET_NTOP_ERROR2);
+        
         /* creating a communication pipe to understand when the daemon is
            ready to run */
         if (-1 == pipe(pipefd))
@@ -208,6 +239,10 @@ int flom_daemon(flom_config_t *config, int family)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INET_NTOP_ERROR1:
+            case INET_NTOP_ERROR2:
+                ret_cod = FLOM_RC_INET_NTOP_ERROR;
+                break;
             case PIPE_ERROR:
                 ret_cod = FLOM_RC_PIPE_ERROR;
                 break;
@@ -526,9 +561,11 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
 {
     enum Exception { SOCKET_ERROR
                      , SETSOCKOPT_ERROR
+                     , INVALID_AI_FAMILY1
                      , BIND_ERROR
                      , LISTEN_ERROR
                      , GETSOCKNAME_ERROR
+                     , INVALID_AI_FAMILY2
                      , CONNS_ADD_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -536,38 +573,70 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
     
     FLOM_TRACE(("flom_listen_tcp_automatic\n"));
     TRY {
-        struct sockaddr_in soin, addr;
-        socklen_t addrlen;
+        struct sockaddr_in soin4;
+        struct sockaddr_in6 soin6;
+        struct sockaddr *sa, addr;
+        socklen_t sa_len, addrlen;
+        in_port_t sa_port;
         int sock_opt = 1;
         gint unicast_port;
-
-        if (-1 == (fd = socket(flom_conns_get_domain(conns), SOCK_STREAM, 0)))
+        sa_family_t family = flom_conns_get_domain(conns);
+        if (-1 == (fd = socket(family, SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
         if (-1 == setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
                              (void *)&sock_opt, sizeof(sock_opt)))
             THROW(SETSOCKOPT_ERROR);
         /* binding local address, ephemeral port */
-        /* @@@ implement IPv6 ... */
-        memset(&soin, 0, sizeof(soin));
-        soin.sin_addr.s_addr = htonl(INADDR_ANY);
-        soin.sin_port = 0;
-        if (-1 == bind(fd, (struct sockaddr *)&soin, sizeof(soin)))
+        switch (family) {
+            case AF_INET:
+                sa_len = sizeof(soin4);
+                memset(&soin4, 0, sa_len);
+                soin4.sin_addr.s_addr = htonl(INADDR_ANY);
+                soin4.sin_port = 0;
+                sa = (struct sockaddr *)&soin4;
+                break;
+            case AF_INET6:
+                sa_len = sizeof(soin6);
+                memset(&soin6, 0, sa_len);
+                soin6.sin6_addr = in6addr_any;
+                soin6.sin6_port = 0;
+                sa = (struct sockaddr *)&soin6;
+                break;
+            default:
+                FLOM_TRACE(("flom_listen_tcp_automatic: family=%d\n",
+                            family));
+                THROW(INVALID_AI_FAMILY1);
+        } /* switch (family) */
+        if (-1 == bind(fd, sa, sa_len))
             THROW(BIND_ERROR);
         if (-1 ==listen(fd, 100))
             THROW(LISTEN_ERROR);
         /* retrieve address and port */
         addrlen = sizeof(addr);
         memset(&addr, 0, addrlen);
-        if (-1 == getsockname(fd, (struct sockaddr *)&addr, &addrlen))
+        if (-1 == getsockname(fd, &addr, &addrlen))
             THROW(GETSOCKNAME_ERROR);
         FLOM_TRACE_HEX_DATA("flom_listen_tcp_automatic: addr ",
                             (void *)&addr, addrlen);
+        if (AF_INET != addr.sa_family && AF_INET6 != addr.sa_family)
+            THROW(INVALID_AI_FAMILY2);
         /* inject address value to configuration */
         FLOM_TRACE(("flom_listen_tcp_automatic: set unicast address to value "
-                    "'%s'\n", FLOM_INADDR_ANY_STRING));
-        flom_config_set_unicast_address(config, FLOM_INADDR_ANY_STRING);
+                    "'%s'\n", AF_INET == addr.sa_family ?
+                    FLOM_INADDR_ANY_STRING : FLOM_INADDR6_ANY_STRING));
+        flom_config_set_unicast_address(
+            config, AF_INET == addr.sa_family ?
+            FLOM_INADDR_ANY_STRING : FLOM_INADDR6_ANY_STRING);
+        /* reuse soin4 and soin6 structs */
+        if (AF_INET == addr.sa_family) {
+            memcpy(&soin4, &addr, sizeof(soin4));
+            sa_port = soin4.sin_port;
+        } else {
+            memcpy(&soin6, &addr, sizeof(soin6));
+            sa_port = soin6.sin6_port;
+        } /* if (AF_INET == addr.sa_family) */
         /* inject port value to configuration */
-        unicast_port = ntohs(addr.sin_port);
+        unicast_port = ntohs(sa_port);
         FLOM_TRACE(("flom_listen_tcp_automatic: set unicast port to value "
                     "%d\n", unicast_port));
         flom_config_set_unicast_port(config, unicast_port);
@@ -587,6 +656,9 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
             case SETSOCKOPT_ERROR:
                 ret_cod = FLOM_RC_SETSOCKOPT_ERROR;
                 break;
+            case INVALID_AI_FAMILY1:
+                ret_cod = FLOM_RC_INVALID_AI_FAMILY_ERROR;
+                break;
             case BIND_ERROR:
                 ret_cod = FLOM_RC_BIND_ERROR;
                 break;
@@ -595,6 +667,9 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
                 break;
             case GETSOCKNAME_ERROR:
                 ret_cod = FLOM_RC_GETSOCKNAME_ERROR;
+                break;
+            case INVALID_AI_FAMILY2:
+                ret_cod = FLOM_RC_INVALID_AI_FAMILY_ERROR;
                 break;
             case CONNS_ADD_ERROR:
                 break;

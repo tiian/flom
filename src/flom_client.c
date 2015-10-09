@@ -712,7 +712,7 @@ int flom_client_discover_udp(flom_config_t *config,
                 ret_cod = FLOM_RC_GETADDRINFO_ERROR;
                 break;
             case INVALID_AI_FAMILY1:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
+                ret_cod = FLOM_RC_INVALID_AI_FAMILY_ERROR;
                 break;
             case CONNECT_ERROR:
                 ret_cod = FLOM_RC_CONNECT_ERROR;
@@ -738,7 +738,7 @@ int flom_client_discover_udp(flom_config_t *config,
             case CLIENT_CONNECT_TCP_ERROR:
                 break;
             case INVALID_AI_FAMILY2:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
+                ret_cod = FLOM_RC_INVALID_AI_FAMILY_ERROR;
                 break;
             case CLIENT_DISCOVER_UDP_CONNECT_ERROR:
                 break;
