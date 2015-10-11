@@ -34,6 +34,9 @@
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+# include <netinet/in.h>
+#endif
 #ifdef HAVE_NETINET_TCP_H
 # include <netinet/tcp.h>
 #endif
@@ -693,7 +696,9 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
 int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
 {
     enum Exception { NO_MULTICAST
+                     , INVALID_AI_FAMILY_ERROR1
                      , GETADDRINFO_ERROR
+                     , INVALID_AI_FAMILY_ERROR2
                      , CONNECT_ERROR
                      , CONNS_ADD_ERROR
                      , NONE } excp;
@@ -705,7 +710,11 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
     FLOM_TRACE(("flom_listen_udp\n"));
     TRY {
         struct addrinfo hints;
-        struct sockaddr_in local_address;
+        struct sockaddr *local_addr;
+        struct sockaddr_in local_addr_in;
+        struct sockaddr_in6 local_addr_in6;
+        socklen_t local_addr_len;
+        sa_family_t family = flom_conns_get_domain(conns);
         char port[100];
         int errcode;
         int found = FALSE;
@@ -722,18 +731,35 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
                     "using address '%s' and port %d\n",
                     flom_config_get_multicast_address(config),
                     flom_config_get_multicast_port(config)));
+        /* prepare hints for getaddressinfo() */
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_CANONNAME;
-        /* prepare a local address structure for incoming datagrams */
-        memset(&local_address, 0, sizeof(local_address));
-        local_address.sin_family = AF_INET;
-        local_address.sin_addr.s_addr = htonl(INADDR_ANY);
-        local_address.sin_port = htons(flom_config_get_multicast_port(config));
-        /* remove this filter to support IPV6, but most of the following
-           calls must be fixed! */
-        hints.ai_family = AF_INET; 
+        hints.ai_family = AF_UNSPEC; 
         hints.ai_socktype = SOCK_DGRAM;
-        hints.ai_protocol = IPPROTO_UDP;
+        /* prepare a local address structure for incoming datagrams */
+        switch (family) {
+            case AF_INET:
+                local_addr_len = sizeof(local_addr_in);
+                memset(&local_addr_in, 0, local_addr_len);
+                local_addr_in.sin_family = AF_INET;
+                local_addr_in.sin_addr.s_addr = htonl(INADDR_ANY);
+                local_addr_in.sin_port = htons(
+                    flom_config_get_multicast_port(config));
+                local_addr = (struct sockaddr *)&local_addr_in;
+                break;
+            case AF_INET6:
+                local_addr_len = sizeof(local_addr_in6);
+                memset(&local_addr_in6, 0, local_addr_len);
+                local_addr_in6.sin6_family = AF_INET6;
+                local_addr_in6.sin6_addr = in6addr_any;
+                local_addr_in6.sin6_port = htons(
+                    flom_config_get_multicast_port(config));
+                local_addr = (struct sockaddr *)&local_addr_in6;
+                break;
+            default:
+                FLOM_TRACE(("flom_listen_udp: family=%d\n", family));
+                THROW(INVALID_AI_FAMILY_ERROR1);
+        } /* switch (family) */
         snprintf(port, sizeof(port), "%u",
                  flom_config_get_multicast_port(config));
 
@@ -769,8 +795,7 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
-                } else if (-1 == bind(fd, (struct sockaddr *)&local_address,
-                                      sizeof(local_address))) {
+                } else if (-1 == bind(fd, local_addr, local_addr_len)) {
                     FLOM_TRACE(("flom_listen_udp/bind() : "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
@@ -779,13 +804,38 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
                     fd = NULL_FD;
                 } else { /* switching to multicast mode */
                     struct ip_mreq mreq;
-                    
-                    memcpy(&mreq.imr_multiaddr,
-                           &((struct sockaddr_in *)gai->ai_addr)->sin_addr,
-                           sizeof(struct in_addr));
-                    mreq.imr_interface.s_addr = htonl(INADDR_ANY);
-                    if (-1 == setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-                                            &mreq, sizeof(mreq))) {
+                    struct ipv6_mreq mreq6;
+                    int setsockopt_return;
+
+                    switch (family) {
+                        case AF_INET:
+                            memcpy(&mreq.imr_multiaddr,
+                                   &((struct sockaddr_in *)gai->ai_addr)
+                                   ->sin_addr,
+                                   sizeof(struct in_addr));
+                            /* all the interfaces... */
+                            mreq.imr_interface.s_addr = htonl(INADDR_ANY);
+                            setsockopt_return = setsockopt(
+                                fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+                                &mreq, sizeof(mreq));
+                            break;
+                        case AF_INET6:
+                            memcpy(&mreq6.ipv6mr_multiaddr,
+                                   &((struct sockaddr_in6 *)gai->ai_addr)
+                                   ->sin6_addr,
+                                   sizeof(struct in6_addr));
+                            /* all the interfaces... */
+                            mreq6.ipv6mr_interface = 0;
+                            setsockopt_return = setsockopt(
+                                fd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP,
+                                &mreq6, sizeof(mreq6));
+                            break;
+                        default:
+                            FLOM_TRACE(("flom_listen_udp: family=%d\n",
+                                        family));
+                            THROW(INVALID_AI_FAMILY_ERROR2);
+                    } /* switch (family) */
+                    if (-1 == setsockopt_return) {
                         FLOM_TRACE(("flom_listen_udp/setsockopt("
                                     "IP_ADD_MEMBERSHIP) : "
                                     "errno=%d '%s', skipping...\n", errno,
@@ -819,8 +869,14 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
             case NO_MULTICAST:
                 ret_cod = FLOM_RC_OK;
                 break;
+            case INVALID_AI_FAMILY_ERROR1:
+                ret_cod = FLOM_RC_INVALID_AI_FAMILY_ERROR;
+                break;
             case GETADDRINFO_ERROR:
                 ret_cod = FLOM_RC_GETADDRINFO_ERROR;
+                break;
+            case INVALID_AI_FAMILY_ERROR2:
+                ret_cod = FLOM_RC_INVALID_AI_FAMILY_ERROR;
                 break;
             case CONNECT_ERROR:
                 ret_cod = FLOM_RC_CONNECT_ERROR;
@@ -1796,7 +1852,9 @@ int flom_accept_discover_reply(flom_config_t *config, int fd,
             (in_port_t)flom_config_get_unicast_port(config);
         if (NULL != flom_config_get_unicast_address(config) &&
             0 != g_strcmp0(FLOM_INADDR_ANY_STRING,
-                          flom_config_get_unicast_address(config)))
+                          flom_config_get_unicast_address(config)) &&
+            0 != g_strcmp0(FLOM_INADDR6_ANY_STRING,
+                           flom_config_get_unicast_address(config)))
             msg.body.discover_16.network.address = g_strdup(
                 flom_config_get_unicast_address(config));
         /* serialize the request message */
