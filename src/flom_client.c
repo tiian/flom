@@ -479,6 +479,8 @@ int flom_client_discover_udp(flom_config_t *config,
         } else {
             int sock_opt = 1;
             u_char sock_opt2 = flom_config_get_discovery_ttl(config);
+            u_int ipv6_iface = 0;
+            int ipv6_hops = flom_config_get_discovery_ttl(config);
             
             FLOM_TRACE_ADDRINFO("flom_client_discover_udp/getaddrinfo(): ",
                                 result);
@@ -489,6 +491,7 @@ int flom_client_discover_udp(flom_config_t *config,
                 struct sockaddr_in6 local_addr6;
                 struct sockaddr *local_addr;
                 socklen_t local_addr_len;
+                int rc;
 
                 /* prepare a local address on an ephemeral port to listen for
                    a reply from daemon */
@@ -535,37 +538,49 @@ int flom_client_discover_udp(flom_config_t *config,
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
-                } else if (-1 == setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF,
-                                            (void *)local_addr,
-                                            local_addr_len)) {
+                    continue;
+                }
+                rc = AF_INET == gai->ai_family ?
+                    setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF,
+                               (void *)local_addr, local_addr_len) :
+                    setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF,
+                               (void *)&ipv6_iface, sizeof(ipv6_iface));
+                if (-1 == rc) {
                     FLOM_TRACE(("flom_client_discover_udp/setsockopt("
-                                "IP_MULTICAST_IF) : "
+                                "IP_MULTICAST_IF/IPV6_MULTICAST_IF) : "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
-                } else if (-1 == setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL,
-                                            (void *)&sock_opt2,
-                                            sizeof(sock_opt2))) {
+                    continue;
+                }
+                rc = AF_INET == gai->ai_family ?
+                    setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL,
+                               (void *)&sock_opt2, sizeof(sock_opt2)) :
+                    setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+                               (void *)&ipv6_hops, sizeof(ipv6_hops));
+                if (-1 == rc) {
                     FLOM_TRACE(("flom_client_discover_udp/setsockopt("
-                                "IP_MULTICAST_TTL) : "
+                                "IP_MULTICAST_TTL/IPV6_MULTICAST_HOPS) : "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
-                } else if (-1 == bind(fd, local_addr, local_addr_len)) {
+                    continue;
+                }
+                if (-1 == bind(fd, local_addr, local_addr_len)) {
                     FLOM_TRACE(("flom_client_discover_udp/bind() : "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
                     gai = gai->ai_next;
                     close(fd);
                     fd = NULL_FD;
-                } else {
-                    found = TRUE;
-                    *family = gai->ai_family;
-                }  /* if (-1 == (*fd = socket( */
+                    continue;
+                }
+                found = TRUE;
+                *family = gai->ai_family;
             } /* while (NULL != gai && !connected) */            
         }
         if (!found) {

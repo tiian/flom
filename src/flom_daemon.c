@@ -1176,8 +1176,9 @@ int flom_accept_loop_pollin(flom_config_t *config,
             ssize_t read_bytes;
             struct flom_msg_s *msg;
             GMarkupParseContext *gmpc;
-            struct sockaddr_in src_addr;
+            struct sockaddr src_addr;
             socklen_t addrlen = sizeof(src_addr);
+            memset(&src_addr, 0, addrlen);
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
                                    c->fd, c->type, buffer, sizeof(buffer),
@@ -1857,6 +1858,7 @@ int flom_accept_discover_reply(flom_config_t *config, int fd,
                            flom_config_get_unicast_address(config)))
             msg.body.discover_16.network.address = g_strdup(
                 flom_config_get_unicast_address(config));
+        
         /* serialize the request message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
                                &msg, buffer, sizeof(buffer), &to_send)))
