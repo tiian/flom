@@ -49,4 +49,4 @@ libflom_la_SOURCES = flom_client.c flom_config.c flom_conns.c \
 	flom_resource_hier.c flom_resource_numeric.c flom_resource_set.c \
 	flom_resource_simple.c flom_rsrc.c flom_trace.c
 
-flom_SOURCES = main.c flom_exec.c
+flom_SOURCES = main.c flom_exec.c flom_debug_features.c

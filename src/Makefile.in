@@ -88,7 +88,8 @@ libflom_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libflom_la_LDFLAGS) $(LDFLAGS) -o $@
 PROGRAMS = $(bin_PROGRAMS)
-am_flom_OBJECTS = main.$(OBJEXT) flom_exec.$(OBJEXT)
+am_flom_OBJECTS = main.$(OBJEXT) flom_exec.$(OBJEXT) \
+	flom_debug_features.$(OBJEXT)
 flom_OBJECTS = $(am_flom_OBJECTS)
 flom_DEPENDENCIES = libflom.la
 flom_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -279,6 +280,8 @@ _CONFIG_KEY_UNICAST_ADDRESS = @_CONFIG_KEY_UNICAST_ADDRESS@
 _CONFIG_KEY_UNICAST_PORT = @_CONFIG_KEY_UNICAST_PORT@
 _CONFIG_KEY_VERBOSE = @_CONFIG_KEY_VERBOSE@
 _CONFIG_KEY_WAIT = @_CONFIG_KEY_WAIT@
+_DEBUG_FEATURE_IPV6_MULTICAST_CLIENT = @_DEBUG_FEATURE_IPV6_MULTICAST_CLIENT@
+_DEBUG_FEATURE_IPV6_MULTICAST_SERVER = @_DEBUG_FEATURE_IPV6_MULTICAST_SERVER@
 _DEFAULT_DAEMON_LIFESPAN = @_DEFAULT_DAEMON_LIFESPAN@
 _DEFAULT_DAEMON_PORT = @_DEFAULT_DAEMON_PORT@
 _DEFAULT_DISCOVERY_ATTEMPTS = @_DEFAULT_DISCOVERY_ATTEMPTS@
@@ -383,7 +386,7 @@ libflom_la_SOURCES = flom_client.c flom_config.c flom_conns.c \
 	flom_resource_hier.c flom_resource_numeric.c flom_resource_set.c \
 	flom_resource_simple.c flom_rsrc.c flom_trace.c
 
-flom_SOURCES = main.c flom_exec.c
+flom_SOURCES = main.c flom_exec.c flom_debug_features.c
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -510,6 +513,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_conns.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon_mngmnt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_debug_features.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_errors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_exec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_handle.Plo@am__quote@

@@ -467,6 +467,7 @@ int flom_client_discover_udp(flom_config_t *config,
         hints.ai_flags = AI_PASSIVE;
         hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_DGRAM;
+        hints.ai_protocol = IPPROTO_UDP;
         snprintf(port, sizeof(port), "%u",
                  flom_config_get_multicast_port(config));
 
@@ -519,8 +520,7 @@ int flom_client_discover_udp(flom_config_t *config,
                 } /* switch (gai->ai_family) */
                 FLOM_TRACE_HEX_DATA("flom_client_discover_udp: gai->ai_addr ",
                                     (void *)gai->ai_addr, gai->ai_addrlen);
-                FLOM_TRACE_HEX_DATA("flom_client_discover_udp_connect: "
-                                    "local_addr ",
+                FLOM_TRACE_HEX_DATA("flom_client_discover_udp: local_addr ",
                                     (void *)local_addr, local_addr_len);
                 if (-1 == (fd = socket(gai->ai_family, gai->ai_socktype,
                                        gai->ai_protocol))) {

@@ -34,6 +34,7 @@
 #include "flom_config.h"
 #include "flom_client.h"
 #include "flom_conns.h"
+#include "flom_debug_features.h"
 #include "flom_errors.h"
 #include "flom_exec.h"
 #include "flom_rsrc.h"
@@ -68,6 +69,7 @@ static gint immediate_exit = 0;
 static gchar *command_trace_file = NULL;
 static gchar *daemon_trace_file = NULL;
 static gchar *append_trace_file = NULL;
+static gchar *debug_feature = NULL;
 static gchar **command_argv = NULL;
 /* command line options */
 static GOptionEntry entries[] =
@@ -99,6 +101,7 @@ static GOptionEntry entries[] =
     { "append-trace-file", 0, 0, G_OPTION_ARG_STRING, &append_trace_file, "Specify if the trace file(s) must be appended or truncated for every execution (accepted values 'yes', 'no')", NULL },
     { "quiesce-exit", 'x', 0, G_OPTION_ARG_NONE, &quiesce_exit, "Start daemon termination completing current requests", NULL },
     { "immediate-exit", 'X', 0, G_OPTION_ARG_NONE, &immediate_exit, "Start daemon termination immediately and interrupting current requests", NULL },
+    { "debug-feature", 0, 0, G_OPTION_ARG_STRING, &debug_feature, "Debug execution, specify the debug feature to execute", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
     { NULL }
 };
@@ -275,6 +278,10 @@ int main (int argc, char *argv[])
         exit(FLOM_ES_GENERIC_ERROR);        
     }
 
+    /* check if the command is asking the execution of a debug feature */
+    if (NULL != debug_feature)
+        exit(FLOM_RC_OK == flom_debug_feature(debug_feature) ? 0 : 1);
+    
     /* check if the command is asking daemon termination */
     if (quiesce_exit || immediate_exit) {
         g_print("Starting FLoM daemon %s shutdown...\n",

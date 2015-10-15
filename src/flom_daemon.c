@@ -807,7 +807,7 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
                     struct ipv6_mreq mreq6;
                     int setsockopt_return;
 
-                    switch (family) {
+                    switch (gai->ai_family) {
                         case AF_INET:
                             memcpy(&mreq.imr_multiaddr,
                                    &((struct sockaddr_in *)gai->ai_addr)
@@ -831,13 +831,13 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
                                 &mreq6, sizeof(mreq6));
                             break;
                         default:
-                            FLOM_TRACE(("flom_listen_udp: family=%d\n",
-                                        family));
+                            FLOM_TRACE(("flom_listen_udp: gai->ai_family=%d\n",
+                                        gai->ai_family));
                             THROW(INVALID_AI_FAMILY_ERROR2);
-                    } /* switch (family) */
+                    } /* switch (gai->ai_family) */
                     if (-1 == setsockopt_return) {
                         FLOM_TRACE(("flom_listen_udp/setsockopt("
-                                    "IP_ADD_MEMBERSHIP) : "
+                                    "IP_ADD_MEMBERSHIP/IPV6_ADD_MEMBERSHIP) : "
                                     "errno=%d '%s', skipping...\n", errno,
                                     strerror(errno)));
                         gai = gai->ai_next;
@@ -1864,7 +1864,8 @@ int flom_accept_discover_reply(flom_config_t *config, int fd,
                                &msg, buffer, sizeof(buffer), &to_send)))
             THROW(MSG_SERIALIZE_ERROR);
         FLOM_TRACE(("flom_accept_discover_reply: fd=%d, src_addr=%p, "
-                    "addrlen=%d\n", fd, src_addr, addrlen));
+                    "addrlen=%d, (%d/%d)\n", fd, src_addr, addrlen,
+                    sizeof(struct sockaddr_in), sizeof(struct sockaddr_in6)));
         FLOM_TRACE_HEX_DATA("flom_accept_discover_reply: src_addr ",
                             (void *)src_addr, addrlen);        
         FLOM_TRACE_TEXT_DATA("flom_accept_discover_reply: buffer ",

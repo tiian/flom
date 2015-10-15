@@ -137,6 +137,11 @@
  */
 #define FLOM_TRACE_MOD_API                0x00008000
 
+/**
+ * trace module for debug features
+ */
+#define FLOM_TRACE_MOD_DEBUG_FEATURES     0x00010000
+
 
 
 /**

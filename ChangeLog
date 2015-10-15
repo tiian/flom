@@ -1,6 +1,7 @@
 LOG:
 
          - 1.1.0
+	New option --debug-feature to debug some special feature
 	IPv6 support
 
 20150930 - 1.0.0 Java client library API
