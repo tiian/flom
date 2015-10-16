@@ -251,10 +251,10 @@
 #undef _CONFIG_KEY_WAIT
 
 /* Label of "IPv6 Multicast Client" debug feature */
-#undef _DEBUG_FEATURE_IPV6_MULTICAST_CLIENT
+#undef _DEBUG_FEATURES_IPV6_MULTICAST_CLIENT
 
 /* Label of "IPv6 Multicast Server" debug feature */
-#undef _DEBUG_FEATURE_IPV6_MULTICAST_SERVER
+#undef _DEBUG_FEATURES_IPV6_MULTICAST_SERVER
 
 /* Default value for option daemon lifespan (milliseconds) */
 #undef _DEFAULT_DAEMON_LIFESPAN

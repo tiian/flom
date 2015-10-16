@@ -44,11 +44,11 @@ extern "C" {
     /**
      * Label associated to IPv6 Multicast Server debug feature
      */
-    extern const char *FLOM_DEBUG_FEATURE_IPV6_MULTICAST_SERVER;
+    extern const char *FLOM_DEBUG_FEATURES_IPV6_MULTICAST_SERVER;
     /**
      * Label associated to IPv6 Multicast Client debug feature
      */
-    extern const char *FLOM_DEBUG_FEATURE_IPV6_MULTICAST_CLIENT;
+    extern const char *FLOM_DEBUG_FEATURES_IPV6_MULTICAST_CLIENT;
 
 
 
@@ -57,7 +57,7 @@ extern "C" {
      * @param name IN of the feature
      * @return a reason code
      */
-    int flom_debug_feature(const char *name);
+    int flom_debug_features(const char *name);
 
     
 
@@ -65,7 +65,7 @@ extern "C" {
      * Execute an IPv6 Multicast Server to test network connectivity
      * @return a reason code
      */
-    int flom_debug_feature_ipv6_multicast_server(void);
+    int flom_debug_features_ipv6_multicast_server(void);
 
 
 
@@ -73,7 +73,7 @@ extern "C" {
      * Execute an IPv6 Multicast Client to test network connectivity
      * @return a reason code
      */
-    int flom_debug_feature_ipv6_multicast_client(void);
+    int flom_debug_features_ipv6_multicast_client(void);
     
 
 #ifdef __cplusplus

@@ -20,6 +20,13 @@
 
 
 
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif
+
+
+
+#include "flom_config.h"
 #include "flom_errors.h"
 #include "flom_debug_features.h"
 #include "flom_trace.h"
@@ -34,28 +41,28 @@
 
 
 
-const char *FLOM_DEBUG_FEATURE_IPV6_MULTICAST_SERVER = _DEBUG_FEATURE_IPV6_MULTICAST_SERVER;
-const char *FLOM_DEBUG_FEATURE_IPV6_MULTICAST_CLIENT = _DEBUG_FEATURE_IPV6_MULTICAST_CLIENT;
+const char *FLOM_DEBUG_FEATURES_IPV6_MULTICAST_SERVER = _DEBUG_FEATURES_IPV6_MULTICAST_SERVER;
+const char *FLOM_DEBUG_FEATURES_IPV6_MULTICAST_CLIENT = _DEBUG_FEATURES_IPV6_MULTICAST_CLIENT;
 
 
 
-int flom_debug_feature(const char *name)
+int flom_debug_features(const char *name)
 {
     enum Exception { INVALID_OPTION
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
-    FLOM_TRACE(("flom_debug_feature\n"));
+    FLOM_TRACE(("flom_debug_features\n"));
     TRY {
-        FLOM_TRACE(("flom_debug_feature: name='%s'\n", name));
+        FLOM_TRACE(("flom_debug_features: name='%s'\n", name));
 
-        if (0 == strcasecmp(name, FLOM_DEBUG_FEATURE_IPV6_MULTICAST_SERVER))
-            ret_cod = flom_debug_feature_ipv6_multicast_server();
+        if (0 == strcasecmp(name, FLOM_DEBUG_FEATURES_IPV6_MULTICAST_SERVER))
+            ret_cod = flom_debug_features_ipv6_multicast_server();
         else if (0 == strcasecmp(name,
-                                 FLOM_DEBUG_FEATURE_IPV6_MULTICAST_CLIENT))
-            ret_cod = flom_debug_feature_ipv6_multicast_client();
+                                 FLOM_DEBUG_FEATURES_IPV6_MULTICAST_CLIENT))
+            ret_cod = flom_debug_features_ipv6_multicast_client();
         else {
-            FLOM_TRACE(("flom_debug_feature: debug feature '%s' "
+            FLOM_TRACE(("flom_debug_features: debug feature '%s' "
                         "is not available\n", name));
             THROW(INVALID_OPTION);
         }
@@ -72,19 +79,62 @@ int flom_debug_feature(const char *name)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    FLOM_TRACE(("flom_debug_feature/excp=%d/"
+    FLOM_TRACE(("flom_debug_features/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
 
 
 
-int flom_debug_feature_ipv6_multicast_server(void)
+int flom_debug_features_ipv6_multicast_server(void)
 {
     enum Exception { NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
-    FLOM_TRACE(("flom_debug_feature_ipv6_multicast_server\n"));
+    FLOM_TRACE(("flom_debug_features_ipv6_multicast_server\n"));
+    TRY {
+        char port[10];
+        struct addrinfo hints;
+
+        /* prepare port for getaddrinfo(...) */
+        snprintf(port, sizeof(port), "%u",
+                 flom_config_get_multicast_port(NULL));
+        FLOM_TRACE(("flom_debug_features_ipv6_multicast_server: "
+                    "multicast address='%s', multicast port=%s\n",
+                    STRORNULL(flom_config_get_multicast_address(NULL)),
+                    port));
+
+        /* prepare hints for getaddrinfo(...) */
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_flags = AI_CANONNAME;
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_socktype = SOCK_DGRAM;
+
+        /* @@@ going on with code from flom_listen_udp... */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_debug_features_ipv6_multicast_server/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_debug_features_ipv6_multicast_client(void)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_debug_features_ipv6_multicast_client\n"));
     TRY {
         
         THROW(NONE);
@@ -97,32 +147,7 @@ int flom_debug_feature_ipv6_multicast_server(void)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    FLOM_TRACE(("flom_debug_feature_ipv6_multicast_server/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-int flom_debug_feature_ipv6_multicast_client(void)
-{
-    enum Exception { NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
-    FLOM_TRACE(("flom_debug_feature_ipv6_multicast_client\n"));
-    TRY {
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("flom_debug_feature_ipv6_multicast_client/excp=%d/"
+    FLOM_TRACE(("flom_debug_features_ipv6_multicast_client/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

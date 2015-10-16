@@ -280,7 +280,7 @@ int main (int argc, char *argv[])
 
     /* check if the command is asking the execution of a debug feature */
     if (NULL != debug_feature)
-        exit(FLOM_RC_OK == flom_debug_feature(debug_feature) ? 0 : 1);
+        exit(FLOM_RC_OK == flom_debug_features(debug_feature) ? 0 : 1);
     
     /* check if the command is asking daemon termination */
     if (quiesce_exit || immediate_exit) {
