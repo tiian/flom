@@ -733,7 +733,9 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
                     flom_config_get_multicast_port(config)));
         /* prepare hints for getaddressinfo() */
         memset(&hints, 0, sizeof(hints));
+        /*
         hints.ai_flags = AI_CANONNAME;
+        */
         hints.ai_family = AF_UNSPEC; 
         hints.ai_socktype = SOCK_DGRAM;
         /* prepare a local address structure for incoming datagrams */

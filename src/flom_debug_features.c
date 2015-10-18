@@ -88,13 +88,23 @@ int flom_debug_features(const char *name)
 
 int flom_debug_features_ipv6_multicast_server(void)
 {
-    enum Exception { NONE } excp;
+    enum Exception { GETADDRINFO_ERROR
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
+
+    struct addrinfo *res = NULL;
+    int fd = FLOM_NULL_FD;
+
     FLOM_TRACE(("flom_debug_features_ipv6_multicast_server\n"));
     TRY {
         char port[10];
         struct addrinfo hints;
+        int errcode;
+        const struct addrinfo *gai;
+        const int sock_opt = 1;
+        struct sockaddr_in6 bind_addr;
+        socklen_t bind_addr_len;
+        struct ipv6_mreq mreq6;
 
         /* prepare port for getaddrinfo(...) */
         snprintf(port, sizeof(port), "%u",
@@ -106,15 +116,140 @@ int flom_debug_features_ipv6_multicast_server(void)
 
         /* prepare hints for getaddrinfo(...) */
         memset(&hints, 0, sizeof(hints));
-        hints.ai_flags = AI_CANONNAME;
-        hints.ai_family = AF_UNSPEC;
+        hints.ai_flags = AI_PASSIVE;
+        hints.ai_family = AF_INET6;
         hints.ai_socktype = SOCK_DGRAM;
+        if (0 != (errcode = getaddrinfo(
+                      flom_config_get_multicast_address(NULL), port,
+                      &hints, &res))) {
+            FLOM_TRACE(("flom_debug_features_ipv6_multicast_server/"
+                        "getaddrinfo(): errcode=%d '%s'\n",
+                        errcode, gai_strerror(errcode)));
+            THROW(GETADDRINFO_ERROR);
+        } /* if (0 != (errcode = getaddrinfo( */
 
+        /* traverse the list returned by getaddrinfo */
+        gai = res;
+        FLOM_TRACE(("flom_debug_features_ipv6_multicast_server/"
+                    "getaddrinfo() list pointer %p\n", gai));
+        while (NULL != gai) {
+            /* debugging address */
+            FLOM_TRACE_SOCKADDR("flom_debug_features_ipv6_multicast_server: "
+                                "address returned by getaddrinfo():",
+                                gai->ai_addr, gai->ai_addrlen);
+            FLOM_TRACE_ADDRINFO("flom_debug_features_ipv6_multicast_server/"
+                                "getaddrinfo(): ", gai);
+            /* creating socket */
+            FLOM_TRACE(("flom_debug_features_ipv6_multicast_server:"
+                        " creating a new socket...\n"));
+            if (-1 == (fd = socket(gai->ai_family, gai->ai_socktype,
+                                   gai->ai_protocol))) {
+                FLOM_TRACE(("flom_debug_features_ipv6_multicast_server/"
+                            "socket(): errno=%d '%s', skipping...\n", errno,
+                            strerror(errno)));
+                gai = gai->ai_next;
+                continue; /* trying next address if available */
+            } else {
+                /* debugging the retrieved socket */
+                struct sockaddr socket_addr;
+                socklen_t socket_addrlen;
+                if (-1 == getsockname(fd, &socket_addr, &socket_addrlen)) {
+                    FLOM_TRACE(("flom_debug_features_ipv6_multicast_server/"
+                                "getsockname(): errno=%d '%s', skipping...\n",
+                                errno, strerror(errno)));
+                    gai = gai->ai_next;
+                    continue; /* trying next address if available */
+                } else {
+                    FLOM_TRACE_SOCKADDR("flom_debug_features_ipv6_multicast_"
+                                        "server: address returned by "
+                                        "getsockname():",
+                                        &socket_addr, socket_addrlen);
+                } /* if (-1 == getsockname(fd */
+            }
+            /* setting socket property */
+            FLOM_TRACE(("flom_debug_features_ipv6_multicast_server:"
+                        " setting SO_REUSEADDR socket property...\n"));
+            if (-1 == setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
+                                 (void *)&sock_opt, sizeof(sock_opt))) {
+                FLOM_TRACE(("flom_debug_features_ipv6_multicast_server/"
+                            "setsockopt(SO_REUSEADDR): "
+                            "errno=%d '%s', skipping...\n", errno,
+                            strerror(errno)));
+                gai = gai->ai_next;
+                close(fd);
+                fd = FLOM_NULL_FD;
+                continue; /* trying next address if available */
+            }
+            /* binding local port */
+            bind_addr_len = sizeof(bind_addr);
+            memset(&bind_addr, 0, bind_addr_len);
+            bind_addr.sin6_family = AF_INET6;
+            bind_addr.sin6_addr = in6addr_any;
+            bind_addr.sin6_port = htons(flom_config_get_multicast_port(NULL));
+            FLOM_TRACE_SOCKADDR("flom_debug_features_ipv6_multicast_server:"
+                                " binding to address ", &bind_addr,
+                                bind_addr_len);
+            if (-1 == bind(fd, (struct sockaddr *)&bind_addr, bind_addr_len)) {
+                FLOM_TRACE(("flom_debug_features_ipv6_multicast_server/"
+                            "bind: errno=%d '%s', skipping...\n", errno,
+                            strerror(errno)));
+                gai = gai->ai_next;
+                close(fd);
+                fd = FLOM_NULL_FD;
+                continue; /* trying next address if available */
+            } else {
+                /* debugging the bound socket */
+                struct sockaddr socket_addr;
+                socklen_t socket_addrlen;
+                if (-1 == getsockname(fd, &socket_addr, &socket_addrlen)) {
+                    FLOM_TRACE(("flom_debug_features_ipv6_multicast_server/"
+                                "getsockname(): errno=%d '%s', skipping...\n",
+                                errno, strerror(errno)));
+                    gai = gai->ai_next;
+                    continue; /* trying next address if available */
+                } else {
+                    FLOM_TRACE_SOCKADDR("flom_debug_features_ipv6_multicast_"
+                                        "server: address returned by "
+                                        "bind():",
+                                        &socket_addr, socket_addrlen);
+                } /* if (-1 == getsockname(fd */
+            }
+            /* activating multicast */
+            FLOM_TRACE(("flom_debug_features_ipv6_multicast_server:"
+                        " activating multicast...\n"));
+            memcpy(&mreq6.ipv6mr_multiaddr,
+                   &((struct sockaddr_in6 *)gai->ai_addr)->sin6_addr,
+                   sizeof(struct in6_addr));
+            /* all the interfaces... */
+            mreq6.ipv6mr_interface = 0;
+            if (-1 == setsockopt(fd, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP,
+                                 &mreq6, sizeof(mreq6))) {
+                FLOM_TRACE(("flom_debug_features_ipv6_multicast_server/"
+                            "setsockopt(IPV6_ADD_MEMBERSHIP): "
+                            "errno=%d '%s', skipping...\n", errno,
+                            strerror(errno)));
+                gai = gai->ai_next;
+                close(fd);
+                fd = FLOM_NULL_FD;
+                continue; /* trying next address if available */
+            }
+            /* that's OK, break the loop */
+            break;
+            gai = gai->ai_next;
+        } /* while (NULL != gai) */
+        if (NULL != gai) {
+            FLOM_TRACE(("flom_debug_features_ipv6_multicast_server: "
+                        "multicast server created!\n"));
+            sleep(60);
+        }
         /* @@@ going on with code from flom_listen_udp... */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case GETADDRINFO_ERROR:
+                ret_cod = FLOM_RC_GETADDRINFO_ERROR;
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -122,6 +257,11 @@ int flom_debug_features_ipv6_multicast_server(void)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release getaddrinfo data */
+    if (NULL != res)
+        freeaddrinfo(res);
+    if (FLOM_NULL_FD != fd)
+        close(fd);
     FLOM_TRACE(("flom_debug_features_ipv6_multicast_server/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

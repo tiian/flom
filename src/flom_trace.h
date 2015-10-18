@@ -244,6 +244,21 @@ extern unsigned long flom_trace_mask;
 
 
 
+/**
+ * FLOM_TRACE_SOCKADDR macro is used to compile trace messages only if _TRACE
+ * macro is defined;
+ * trace message is printed only for modules (FLOM_TRACE_MODULE) covered by
+ * trace mask (FLOM_TRACE_MASK) specified as environment variable
+ */
+#ifdef _TRACE
+# define FLOM_TRACE_SOCKADDR(p,a,l)                                     \
+    (FLOM_TRACE_MODULE & flom_trace_mask ? flom_trace_sockaddr(p,a,l) : 0)
+#else
+# define FLOM_TRACE_SOCKADDR(p,a,l)
+#endif /* _TRACE */
+    
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -311,6 +326,19 @@ extern "C" {
      */
     void flom_trace_addrinfo(const char *prefix, const struct addrinfo *ai);
 
+
+
+    /**
+     * Dump the content of a sockaddr struct
+     * @param prefix IN trace prefix to print before dump (it is a fixed
+     *               prefix, not a format with values)
+     * @param addr IN the address to be dumped
+     * @param addrlen IN specifies the size, in bytes, of the address
+     *                   structure pointed to by addr
+     */
+    void flom_trace_sockaddr(const char *prefix, const struct sockaddr *addr,
+                             socklen_t addrlen);
+    
 
     
 #ifdef __cplusplus

@@ -140,6 +140,22 @@
 
 
 
+/**
+ * Format must be used in *printf family function to print a "socklen_t"
+ * value
+ */
+#if SIZEOF_SOCKLEN_T == SIZEOF_INT
+# define SOCKLEN_T_FORMAT "%u"
+#elif SIZEOF_SOCKLEN_T == SIZEOF_LONG_INT
+# define SOCKLEN_T_FORMAT "%lu"
+#elif SIZEOF_SOCKLEN_T == SIZEOF_LONG_LONG_INT
+# define SOCKLEN_T_FORMAT "%llu"
+#else
+# error Unable to determine sizeof(socklen_t)
+#endif
+
+
+
 #ifdef HAVE_TIME_H
 # if SIZEOF_CLOCK_T == SIZEOF_INT
 #  define CLOCK_T_FORMAT "%d"

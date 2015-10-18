@@ -233,8 +233,7 @@ void flom_trace_addrinfo(const char *prefix, const struct addrinfo *p)
     
     /* trace is closed, skipping it! */
     if (NULL == trace_file)
-        return;
-    
+        return;    
     /* lock the mutex */
     g_static_mutex_lock(&flom_trace_mutex);
     gettimeofday(&tv, NULL);
@@ -260,4 +259,85 @@ void flom_trace_addrinfo(const char *prefix, const struct addrinfo *p)
     fprintf(trace_file, "\n");
     /* remove the lock from mutex */
     g_static_mutex_unlock(&flom_trace_mutex);
+}
+
+
+
+void flom_trace_sockaddr(const char *prefix, const struct sockaddr *addr,
+                         socklen_t addrlen)
+{
+    int trace_hex = FALSE;
+    struct tm broken_time;
+    struct timeval tv;
+    
+    /* trace is closed, skipping it! */
+    if (NULL == trace_file)
+        return;    
+    /* lock the mutex */
+    g_static_mutex_lock(&flom_trace_mutex);
+    gettimeofday(&tv, NULL);
+    localtime_r(&tv.tv_sec, &broken_time);
+    /* default header */
+    fprintf(trace_file,
+            "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d ["
+            PID_T_FORMAT "/%p] %s",
+            broken_time.tm_year + 1900, broken_time.tm_mon + 1,
+            broken_time.tm_mday, broken_time.tm_hour,
+            broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
+            getpid(), g_thread_self(), prefix);
+    if (NULL == addr) {
+        fprintf(trace_file, " addr is NULL\n");
+    } else {
+        struct sockaddr_in sin;
+        struct sockaddr_in6 sin6;
+        char sin_addr[INET6_ADDRSTRLEN];
+        switch (addr->sa_family) {
+            case AF_INET:
+                if (sizeof(sin) != addrlen) {
+                    fprintf(trace_file, "IPv4, invalid length structure "
+                            "(" SOCKLEN_T_FORMAT "/" SIZE_T_FORMAT ")",
+                            addrlen, sizeof(sin));
+                    trace_hex = TRUE;
+                } else {
+                    fprintf(trace_file, " IPv4 address:");
+                    memcpy(&sin, addr, addrlen);
+                    fprintf(trace_file, ", sin_port=" IN_PORT_T_FORMAT,
+                            htons(sin.sin_port));
+                    inet_ntop(AF_INET, &sin.sin_addr, sin_addr,
+                              sizeof(sin_addr));
+                    fprintf(trace_file, ", sin_addr='%s'", sin_addr);
+                }
+                break;
+            case AF_INET6:
+                if (sizeof(sin6) != addrlen) {
+                    fprintf(trace_file, "IPv6, invalid length structure "
+                            "(" SOCKLEN_T_FORMAT "/" SIZE_T_FORMAT ")",
+                            addrlen, sizeof(sin6));
+                    trace_hex = TRUE;
+                } else {
+                    fprintf(trace_file, " IPv6 address");
+                    memcpy(&sin6, addr, addrlen);
+                    fprintf(trace_file, ", sin6_port=" IN_PORT_T_FORMAT,
+                            htons(sin6.sin6_port));
+                    fprintf(trace_file, ", sin6_flowinfo=0x%x",
+                            sin6.sin6_flowinfo);
+                    inet_ntop(AF_INET6, &sin6.sin6_addr, sin_addr,
+                              sizeof(sin_addr));
+                    fprintf(trace_file, ", sin6_addr='%s'", sin_addr);
+                }
+                break;
+            default:
+                fprintf(trace_file, " unknown family, sa_family=%d, "
+                        "addrlen=%d", addr->sa_family, addrlen);
+                trace_hex = TRUE;
+                break;
+        } /* switch (addr->sa_family) */
+    } /* if (NULL == addr) */
+    /* close trace record */
+    fprintf(trace_file, "\n");
+    /* remove the lock from mutex */
+    g_static_mutex_unlock(&flom_trace_mutex);
+    /* hex dump if necessary */
+    if (trace_hex)
+        flom_trace_hex_data(prefix, addr, addrlen);
 }
