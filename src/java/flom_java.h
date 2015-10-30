@@ -368,6 +368,8 @@ extern "C" {
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_API_INVALID_SEQUENCE -17L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_INVALID_AI_FAMILY_ERROR
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_INVALID_AI_FAMILY_ERROR -18L
+#undef org_tiian_flom_FlomErrorCodes_FLOM_RC_INVALID_IP_ADDRESS
+#define org_tiian_flom_FlomErrorCodes_FLOM_RC_INVALID_IP_ADDRESS -19L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_ACCEPT_ERROR
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_ACCEPT_ERROR -100L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_BIND_ERROR

@@ -467,7 +467,9 @@ int flom_client_discover_udp(flom_config_t *config,
         hints.ai_flags = AI_PASSIVE;
         hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_DGRAM;
+        /*
         hints.ai_protocol = IPPROTO_UDP;
+        */
         snprintf(port, sizeof(port), "%u",
                  flom_config_get_multicast_port(config));
 
