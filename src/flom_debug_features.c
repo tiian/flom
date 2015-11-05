@@ -115,6 +115,7 @@ int flom_debug_features_ipv6_multicast_server(void)
         const char welcome_msg[] = "WELCOME";
         size_t welcome_msg_len = strlen(welcome_msg);
         ssize_t sent_bytes;
+        struct sockaddr_in6 src_addr6;
         
         /* prepare port for getaddrinfo(...) */
         snprintf(port, sizeof(port), "%u",
@@ -268,13 +269,23 @@ int flom_debug_features_ipv6_multicast_server(void)
         FLOM_TRACE_HEX_DATA("flom_debug_features_ipv6_multicast_server: "
                             "arrived datagram ", (byte_t *)buf, read_bytes);
         FLOM_TRACE_SOCKADDR("flom_debug_features_ipv6_multicast_server: "
-                            "address returned by recvfrom(): ",
+                            "address returned by recvfrom() ",
                             &src_addr, src_addr_len);
 
+        memcpy(&src_addr6, &src_addr, src_addr_len);
+        /* @@@ remove constant 2 and use getifaddrs function */
+        src_addr6.sin6_scope_id = 2;
+        FLOM_TRACE_SOCKADDR("flom_debug_features_ipv6_multicast_server: "
+                            "address after sin6_scope_id set: ",
+                            (struct sockaddr *)&src_addr6, src_addr_len);
         /* send reply message */
+        sleep(1);
+        FLOM_TRACE(("flom_debug_features_ipv6_multicast_server: "
+                    "sending '%s' to the client...\n", welcome_msg));
         if (welcome_msg_len != (sent_bytes = sendto(
                                     fd, welcome_msg, welcome_msg_len, 0,
-                                    &src_addr, src_addr_len))) {
+                                    (struct sockaddr *)&src_addr6,
+                                    src_addr_len))) {
             FLOM_TRACE(("flom_debug_features_ipv6_multicast_server/"
                         "sendto(): sent %d instead of %d bytes; "
                         "errno=%d '%s'\n",
@@ -343,6 +354,7 @@ int flom_debug_features_ipv6_multicast_client(void)
         char buf[2048];
         struct sockaddr src_addr;
         socklen_t src_addr_len;
+        struct sockaddr_in6 dst_addr;
         
         /* prepare port for getaddrinfo(...) */
         snprintf(port, sizeof(port), "%u",
@@ -389,6 +401,8 @@ int flom_debug_features_ipv6_multicast_client(void)
             local_addr.sin6_family = gai->ai_family;
             local_addr.sin6_addr = in6addr_any;
             local_addr.sin6_port = 0;
+            /* @@@ */
+            local_addr.sin6_scope_id = 2;
             FLOM_TRACE_SOCKADDR("flom_debug_features_ipv6_multicast_client: "
                                 "local address to listen for a reply from "
                                 "server:", (struct sockaddr *)&local_addr,
@@ -451,6 +465,7 @@ int flom_debug_features_ipv6_multicast_client(void)
                                 "local address after bind:",
                                 (struct sockaddr *)&local_addr,
                                 local_addr_len);
+            
             /* that's OK, break the loop */
             break;
         } /* while (NULL != gai) */
@@ -463,9 +478,16 @@ int flom_debug_features_ipv6_multicast_client(void)
         /* send hello message to the server */
         FLOM_TRACE(("flom_debug_features_ipv6_multicast_client: "
                     "sending '%s' to the server...\n", hello_msg));
+        memcpy(&dst_addr, gai->ai_addr, gai->ai_addrlen);
+        /* @@@ */
+        dst_addr.sin6_scope_id = 2;
+        FLOM_TRACE_SOCKADDR("flom_debug_features_ipv6_multicast_client: "
+                            "destination address:",
+                            (struct sockaddr *)&dst_addr, gai->ai_addrlen);
         if (hello_msg_len != (sent_bytes = sendto(
                                   fd, hello_msg, hello_msg_len, 0,
-                                  gai->ai_addr, gai->ai_addrlen))) {
+                                  (struct sockaddr *)&dst_addr,
+                                  gai->ai_addrlen))) {
             FLOM_TRACE(("flom_debug_features_ipv6_multicast_client/"
                         "sendto(): sent %d instead of %d bytes; "
                         "errno=%d '%s'\n",

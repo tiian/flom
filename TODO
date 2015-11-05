@@ -1,5 +1,9 @@
 Road map:
 
+try to use different sockets for multicast and unicast traffic!
+isolate the necessary scope_id fields: remove unnecessary ones
+
+
 fix bug in flom_accept_discover_reply for multicast with IPv6: it seems related to the source address; make some deep understanding about UDP IPv6 on Richard Stevens...
 try to remove AF_UNSPEC from switch/case and see what happens...
 

@@ -27,6 +27,9 @@
 
 
 
+#ifdef HAVE_ARPA_INET_H
+# include <arpa/inet.h>
+#endif
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>
 #endif
@@ -291,10 +294,11 @@ void flom_trace_sockaddr(const char *prefix, const struct sockaddr *addr,
         struct sockaddr_in sin;
         struct sockaddr_in6 sin6;
         char sin_addr[INET6_ADDRSTRLEN];
+        fprintf(trace_file, "addrlen=" SOCKLEN_T_FORMAT ";", addrlen);
         switch (addr->sa_family) {
             case AF_INET:
                 if (sizeof(sin) != addrlen) {
-                    fprintf(trace_file, "IPv4, invalid length structure "
+                    fprintf(trace_file, " IPv4, invalid length structure "
                             "(" SOCKLEN_T_FORMAT "/" SIZE_T_FORMAT ")",
                             addrlen, sizeof(sin));
                     trace_hex = TRUE;
@@ -324,6 +328,8 @@ void flom_trace_sockaddr(const char *prefix, const struct sockaddr *addr,
                     inet_ntop(AF_INET6, &sin6.sin6_addr, sin_addr,
                               sizeof(sin_addr));
                     fprintf(trace_file, ", sin6_addr='%s'", sin_addr);
+                    fprintf(trace_file, ", sin6_scope_id=%u",
+                            sin6.sin6_scope_id);
                 }
                 break;
             default:
@@ -339,5 +345,5 @@ void flom_trace_sockaddr(const char *prefix, const struct sockaddr *addr,
     g_static_mutex_unlock(&flom_trace_mutex);
     /* hex dump if necessary */
     if (trace_hex)
-        flom_trace_hex_data(prefix, addr, addrlen);
+        flom_trace_hex_data(prefix, (byte_t *)addr, addrlen);
 }
