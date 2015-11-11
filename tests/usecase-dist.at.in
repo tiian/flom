@@ -84,18 +84,9 @@ AT_CLEANUP
 AT_SETUP([Multicast IPv6 address])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # start a new daemon
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -A ff02::1"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -A ff01::1"], [0], [ignore], [ignore])
 # connect to previously started daemon after multicast discovery
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A ff02::1"], [0], [ignore], [ignore])
-AT_CHECK([pgrep flom], [0], [ignore], [ignore])
-AT_CLEANUP
-
-AT_SETUP([Multicast IPv4-Mapped IPv6 address])
-AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-# start a new daemon
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -A ::ffff:224.0.0.1"], [0], [ignore], [ignore])
-# connect to previously started daemon after multicast discovery
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A ::ffff:224.0.0.1"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A ff01::1"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
@@ -117,9 +108,31 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000" ; sleep 6], [0], [ignore], [ignore]
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Network daemon with unlimited lifespan])
+AT_SETUP([Net daemon with unlimit lifespan (IPv4, eth0)])
+AT_CHECK([iface_ip_address.sh eth0 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(portable_ip_address.sh)"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth0 4)"], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Net daemon with unlimit lifespan (IPv4, eth1)])
+AT_CHECK([iface_ip_address.sh eth1 4], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth1 4)"], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Net daemon with unlimit lifespan (IPv6, eth0)])
+AT_CHECK([iface_ip_address.sh eth0 6], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth0 6)"], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Net daemon with unlimit lifespan (IPv6, eth1)])
+AT_CHECK([iface_ip_address.sh eth1 6], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth1 6)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 

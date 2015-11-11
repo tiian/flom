@@ -578,7 +578,8 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
     TRY {
         struct sockaddr_in soin4;
         struct sockaddr_in6 soin6;
-        struct sockaddr *sa, addr;
+        struct sockaddr *sa;
+        struct sockaddr_storage addr;
         socklen_t sa_len, addrlen;
         in_port_t sa_port;
         int sock_opt = 1;
@@ -617,21 +618,23 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
         /* retrieve address and port */
         addrlen = sizeof(addr);
         memset(&addr, 0, addrlen);
-        if (-1 == getsockname(fd, &addr, &addrlen))
+        if (-1 == getsockname(fd, (struct sockaddr *)&addr, &addrlen))
             THROW(GETSOCKNAME_ERROR);
         FLOM_TRACE_HEX_DATA("flom_listen_tcp_automatic: addr ",
                             (void *)&addr, addrlen);
-        if (AF_INET != addr.sa_family && AF_INET6 != addr.sa_family)
+        if (AF_INET != addr.ss_family &&
+            AF_INET6 != addr.ss_family)
             THROW(INVALID_AI_FAMILY2);
         /* inject address value to configuration */
         FLOM_TRACE(("flom_listen_tcp_automatic: set unicast address to value "
-                    "'%s'\n", AF_INET == addr.sa_family ?
+                    "'%s'\n",
+                    AF_INET == addr.ss_family ?
                     FLOM_INADDR_ANY_STRING : FLOM_INADDR6_ANY_STRING));
         flom_config_set_unicast_address(
-            config, AF_INET == addr.sa_family ?
+            config, AF_INET == addr.ss_family ?
             FLOM_INADDR_ANY_STRING : FLOM_INADDR6_ANY_STRING);
         /* reuse soin4 and soin6 structs */
-        if (AF_INET == addr.sa_family) {
+        if (AF_INET == addr.ss_family) {
             memcpy(&soin4, &addr, sizeof(soin4));
             sa_port = soin4.sin_port;
         } else {
@@ -1152,9 +1155,10 @@ int flom_accept_loop_pollin(flom_config_t *config,
         if (0 == id) {
             /* it's a new connection */
             int conn_fd;
-            struct sockaddr cliaddr;
+            struct sockaddr_storage cliaddr;
             socklen_t clilen = sizeof(cliaddr);
-            if (-1 == (conn_fd = accept(c->fd, &cliaddr, &clilen)))
+            if (-1 == (conn_fd = accept(c->fd, (struct sockaddr *)&cliaddr,
+                                        &clilen)))
                 THROW(ACCEPT_ERROR);
             FLOM_TRACE(("flom_accept_loop_pollin: new client connected "
                         "with fd=%d\n", conn_fd));
@@ -1171,14 +1175,14 @@ int flom_accept_loop_pollin(flom_config_t *config,
             }
             if (FLOM_RC_OK != (ret_cod = flom_conns_add(
                                    conns, conn_fd, SOCK_STREAM, clilen,
-                                   &cliaddr, TRUE)))
+                                   (struct sockaddr *)&cliaddr, TRUE)))
                 THROW(CONNS_ADD_ERROR);
         } else {
             char buffer[FLOM_MSG_BUFFER_SIZE];
             ssize_t read_bytes;
             struct flom_msg_s *msg;
             GMarkupParseContext *gmpc;
-            struct sockaddr src_addr;
+            struct sockaddr_storage src_addr;
             socklen_t addrlen = sizeof(src_addr);
             memset(&src_addr, 0, addrlen);
             /* it's data from an existing connection */

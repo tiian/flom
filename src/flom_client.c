@@ -388,11 +388,11 @@ const struct addrinfo *flom_client_connect_tcp_try(
     const struct addrinfo *gai, int *fd)
 {
     const struct addrinfo *found = NULL; 
-    *fd = NULL_FD;
+    *fd = FLOM_NULL_FD;
     /* traverse the list and try to connect... */
     while (NULL != gai && NULL == found) {
-        if (-1 == (*fd = socket(gai->ai_family, gai->ai_socktype,
-                                gai->ai_protocol))) {
+        if (FLOM_NULL_FD == (*fd = socket(gai->ai_family, gai->ai_socktype,
+                                          gai->ai_protocol))) {
             FLOM_TRACE(("flom_client_connect_tcp_try/socket(): "
                         "errno=%d '%s', skipping...\n", errno,
                         strerror(errno)));
@@ -401,13 +401,16 @@ const struct addrinfo *flom_client_connect_tcp_try(
             FLOM_TRACE_HEX_DATA("flom_client_connect_tcp_try/connect(): "
                                 "gai->ai_addr ",
                                 (void *)gai->ai_addr, gai->ai_addrlen);
+            FLOM_TRACE_SOCKADDR("flom_client_connect_tcp_try/connect(): "
+                                "gai->ai_addr ",
+                                (void *)gai->ai_addr, gai->ai_addrlen);
             if (-1 == connect(*fd, gai->ai_addr, gai->ai_addrlen)) {
                 FLOM_TRACE(("flom_client_connect_tcp_try/connect(): "
                             "errno=%d '%s', skipping...\n", errno,
                             strerror(errno)));
                 gai = gai->ai_next;
                 close(*fd);
-                *fd = NULL_FD;
+                *fd = FLOM_NULL_FD;
             } else
                 found = gai;
         } /* if (-1 == (*fd = socket( */
@@ -455,7 +458,7 @@ int flom_client_discover_udp(flom_config_t *config,
         ssize_t sent;
         struct timeval timeout;
         ssize_t received;
-        struct sockaddr from;
+        struct sockaddr_storage from;
         socklen_t addrlen = sizeof(from);
         
         flom_msg_init(&msg);
@@ -631,7 +634,7 @@ int flom_client_discover_udp(flom_config_t *config,
             memset(&from, 0, sizeof(from));
             if (-1 == (received = recvfrom(
                            fd, in_buffer, sizeof(in_buffer), 0,
-                           &from, &addrlen))) {
+                           (struct sockaddr *)&from, &addrlen))) {
                 if (EAGAIN == errno || EWOULDBLOCK == errno) {
                     FLOM_TRACE(("flom_client_discover_udp: no answer from "
                                 "UDP/IP multicast discovery\n"));
