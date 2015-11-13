@@ -275,7 +275,7 @@ int flom_client_connect_tcp(flom_config_t *config,
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     struct addrinfo *result = NULL;
-    int fd = NULL_FD;
+    int fd = FLOM_NULL_FD;
     
     FLOM_TRACE(("flom_client_connect_tcp\n"));
     TRY {
@@ -290,13 +290,9 @@ int flom_client_connect_tcp(flom_config_t *config,
         memset(&hints, 0, sizeof(hints));
 
         hints.ai_flags = AI_CANONNAME;
-        /* remove this filter to support IPV6, but most of the following
-           calls must be fixed! */
         hints.ai_family = AF_UNSPEC; 
         hints.ai_socktype = SOCK_STREAM;
-        /*
         hints.ai_protocol = IPPROTO_TCP;
-        */
         snprintf(port_string, sizeof(port_string), "%u",
                  flom_config_get_unicast_port(config));
 
@@ -317,7 +313,7 @@ int flom_client_connect_tcp(flom_config_t *config,
                                     "failed, activating a new daemon\n"));
                         /* daemon is not active, starting it... */
                         if (FLOM_RC_OK != (ret_cod = flom_daemon(
-                                               config, hints.ai_family)))
+                                               config, result->ai_family)))
                             THROW(DAEMON_ERROR);
                         /* trying to connect again... */
                         p = flom_client_connect_tcp_try(result, &fd);
@@ -344,7 +340,7 @@ int flom_client_connect_tcp(flom_config_t *config,
         cd->addr_len = p->ai_addrlen;
 
         /* avoid socket close operated by clean-up step */
-        fd = NULL_FD;
+        fd = FLOM_NULL_FD;
         
         THROW(NONE);
     } CATCH {
@@ -375,7 +371,7 @@ int flom_client_connect_tcp(flom_config_t *config,
     } /* TRY-CATCH */
     if (NULL != result)
         freeaddrinfo(result);
-    if (NULL_FD != fd)
+    if (FLOM_NULL_FD != fd)
         close(fd);
     FLOM_TRACE(("flom_client_connect_tcp/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -441,7 +437,7 @@ int flom_client_discover_udp(flom_config_t *config,
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     struct addrinfo *result = NULL;
-    int fd = NULL_FD;
+    int fd = FLOM_NULL_FD;
     struct flom_msg_s msg;
     
     FLOM_TRACE(("flom_client_discover_udp\n"));
@@ -470,9 +466,7 @@ int flom_client_discover_udp(flom_config_t *config,
         hints.ai_flags = AI_PASSIVE;
         hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_DGRAM;
-        /*
         hints.ai_protocol = IPPROTO_UDP;
-        */
         snprintf(port, sizeof(port), "%u",
                  flom_config_get_multicast_port(config));
 
@@ -542,7 +536,7 @@ int flom_client_discover_udp(flom_config_t *config,
                                 strerror(errno)));
                     gai = gai->ai_next;
                     close(fd);
-                    fd = NULL_FD;
+                    fd = FLOM_NULL_FD;
                     continue;
                 }
                 rc = AF_INET == gai->ai_family ?
@@ -557,7 +551,7 @@ int flom_client_discover_udp(flom_config_t *config,
                                 strerror(errno)));
                     gai = gai->ai_next;
                     close(fd);
-                    fd = NULL_FD;
+                    fd = FLOM_NULL_FD;
                     continue;
                 }
                 rc = AF_INET == gai->ai_family ?
@@ -572,7 +566,7 @@ int flom_client_discover_udp(flom_config_t *config,
                                 strerror(errno)));
                     gai = gai->ai_next;
                     close(fd);
-                    fd = NULL_FD;
+                    fd = FLOM_NULL_FD;
                     continue;
                 }
                 if (-1 == bind(fd, local_addr, local_addr_len)) {
@@ -581,7 +575,7 @@ int flom_client_discover_udp(flom_config_t *config,
                                 strerror(errno)));
                     gai = gai->ai_next;
                     close(fd);
-                    fd = NULL_FD;
+                    fd = FLOM_NULL_FD;
                     continue;
                 }
                 found = TRUE;
@@ -661,7 +655,7 @@ int flom_client_discover_udp(flom_config_t *config,
                             (void *)&from, addrlen);
         /* this UDP/IP socket is no more useful */
         close(fd);
-        fd = NULL_FD;
+        fd = FLOM_NULL_FD;
         
         flom_msg_free(&msg);
         flom_msg_init(&msg);
@@ -771,7 +765,7 @@ int flom_client_discover_udp(flom_config_t *config,
     } /* TRY-CATCH */
     if (NULL != result)
         freeaddrinfo(result);
-    if (NULL_FD != fd)
+    if (FLOM_NULL_FD != fd)
         close(fd);
     flom_msg_free(&msg);
     FLOM_TRACE(("flom_client_discover_udp/excp=%d/"
@@ -791,7 +785,7 @@ int flom_client_discover_udp_connect(struct flom_conn_data_s *cd,
                      , SETSOCKOPT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    int fd = NULL_FD;
+    int fd = FLOM_NULL_FD;
     
     FLOM_TRACE(("flom_client_discover_udp_connect\n"));
     TRY {
@@ -812,7 +806,7 @@ int flom_client_discover_udp_connect(struct flom_conn_data_s *cd,
         memcpy(&cd->sa, sa, addrlen);
         cd->addr_len = addrlen;
         /* avoid socket close operated by clean-up step */
-        fd = NULL_FD;
+        fd = FLOM_NULL_FD;
         
         THROW(NONE);
     } CATCH {
@@ -833,7 +827,7 @@ int flom_client_discover_udp_connect(struct flom_conn_data_s *cd,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    if (NULL_FD != fd)
+    if (FLOM_NULL_FD != fd)
         close(fd);
     FLOM_TRACE(("flom_client_discover_udp_connect/excp=%d/"
                 "ret_cod=%d/errno=%d ('%s')\n", excp, ret_cod, errno,
@@ -1265,7 +1259,7 @@ int flom_client_disconnect(struct flom_conn_data_s *cd)
         if (-1 == shutdown(cd->fd, SHUT_RD))
             FLOM_TRACE(("flom_client_disconnect/shutdown(%d,SHUT_RD)=%d "
                         "('%s')\n", cd->fd, errno, strerror(errno)));
-        cd->fd = NULL_FD;
+        cd->fd = FLOM_NULL_FD;
         
         THROW(NONE);
     } CATCH {

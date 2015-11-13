@@ -77,10 +77,6 @@
  * Expansion allocation step
  */
 #define FLOM_CONNS_PERCENT_ALLOCATION  20
-/**
- * Null file descriptor
- */
-#define NULL_FD   -1
 
 
 
@@ -295,7 +291,7 @@ extern "C" {
             return ((struct flom_conn_data_s *)
                     g_ptr_array_index(conns->array, id))->fd;
         else
-            return NULL_FD;
+            return FLOM_NULL_FD;
     }
 
 

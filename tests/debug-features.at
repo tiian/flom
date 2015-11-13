@@ -1,0 +1,14 @@
+AT_BANNER([Debug features])
+
+AT_SETUP([IPv6 multicast])
+AT_DATA([expout],
+[[Arrived datagram is 'HELLO'
+Sent datagram is 'WELCOME'
+Sent datagram is 'HELLO'
+Arrived datagram is 'WELCOME'
+]])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=ipv6.multicast.server -A ff01::1 &], [0], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=ipv6.multicast.client -A ff01::1], [0], [expout], [ignore])
+AT_CLEANUP
+

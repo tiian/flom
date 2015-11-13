@@ -59,9 +59,9 @@ void flom_locker_destroy(struct flom_locker_s *locker)
 {
     if (NULL != locker) {
         flom_resource_free(&locker->resource);
-        if (NULL_FD != locker->write_pipe)
+        if (FLOM_NULL_FD != locker->write_pipe)
             close(locker->write_pipe);
-        if (NULL_FD != locker->read_pipe)
+        if (FLOM_NULL_FD != locker->read_pipe)
             close(locker->read_pipe);
         g_free(locker);
     }
@@ -286,7 +286,7 @@ gpointer flom_locker_loop(gpointer data)
                         if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                                &conns, i)))
                             THROW(CONNS_CLOSE_ERROR4);
-                        locker->read_pipe = NULL_FD;
+                        locker->read_pipe = FLOM_NULL_FD;
                     }
                     /* conns is no more consistent, break the loop and poll
                        again */

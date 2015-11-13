@@ -293,6 +293,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	cmdopt.at.in \
 	shutdown.at \
 	incompopt.at.in \
+	debug-features.at \
 	usecase.at.in \
 	usecase-dist.at.in \
 	usecase-hier.at \
@@ -750,6 +751,7 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/cmdopt.at \
 	$(srcdir)/shutdown.at \
 	$(srcdir)/incompopt.at \
+	$(srcdir)/debug-features.at \
 	$(srcdir)/usecase.at \
 	$(srcdir)/usecase-dist.at \
 	$(srcdir)/usecase-lt.at \

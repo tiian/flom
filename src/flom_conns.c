@@ -110,7 +110,6 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
                 break;
             case AF_INET:
             case AF_INET6:
-            case AF_UNSPEC:
                 tmp->sain = *((struct sockaddr_in *)sa);
                 break;
             default:
@@ -226,7 +225,7 @@ int flom_conns_set_events(flom_conns_t *conns, short events)
         for (i=0; i<conns->array->len; ++i) {
             struct flom_conn_data_s *c =
                 (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
-            if (NULL_FD != c->fd)
+            if (FLOM_NULL_FD != c->fd)
                 conns->poll_array[i].events = events;
             else {
                 FLOM_TRACE(("flom_conns_set_events: i=%u, "
@@ -275,14 +274,14 @@ int flom_conns_close_fd(flom_conns_t *conns, guint id)
             THROW(NULL_OBJECT);
         if (FLOM_CONN_STATE_REMOVE != c->state) {
             c->state = FLOM_CONN_STATE_REMOVE;
-            if (NULL_FD == c->fd) {
+            if (FLOM_NULL_FD == c->fd) {
                 FLOM_TRACE(("flom_conns_close: connection id=%u already "
                             "closed, skipping...\n", id));
             } else {
                 FLOM_TRACE(("flom_conns_close: closing fd=%d\n", c->fd));
                 if (0 != close(c->fd))
                     THROW(CLOSE_ERROR);
-                c->fd = NULL_FD;
+                c->fd = FLOM_NULL_FD;
             }
         } else {
             FLOM_TRACE(("flom_conns_close: connection id=%u already "
@@ -485,7 +484,7 @@ int flom_conn_set_keepalive(flom_config_t *config, int fd)
         int optval;
         socklen_t optlen = sizeof(optval);
         
-        if (NULL_FD == fd)
+        if (FLOM_NULL_FD == fd)
             THROW(NULL_OBJECT);
 
         FLOM_TRACE(("flom_conn_set_keepalive: setting SO_KEEPALIVE "

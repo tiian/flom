@@ -163,7 +163,7 @@ extern "C" {
      */
     static inline void flom_locker_init(struct flom_locker_s *locker) {
         locker->thread = NULL;
-        locker->write_pipe = locker->read_pipe = NULL_FD;
+        locker->write_pipe = locker->read_pipe = FLOM_NULL_FD;
         locker->write_sequence = locker->read_sequence =
             locker->idle_periods = 0;
         memset(&locker->resource, 0, sizeof(flom_resource_t));

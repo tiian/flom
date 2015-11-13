@@ -62,13 +62,13 @@ lock mode as defined by VMS DLM (Distributed Lock Manager). \fIMODE\fP can be: "
 absolute \fIFILENAME\fP that must be used to create the UNIX socket used for local communication between \fBflom\fP command line and \fBflom daemon\fP; typical values are something like \fI/tmp/something\fP. This option is useful to share locks between different users (the default socket is per user and every user creates a different one)
 .TP
 .B -a, --unicast-address=\fIIPaddress
-TCP/IP address that must be used to reach a running daemon; if the daemon must be started locally, \fIIPaddress\fP must be a valid IP address for this host
+TCP/IP address that must be used to reach a running daemon; if the daemon must be started locally, \fIIPaddress\fP must be a valid IP address for this host. Both IPv4 and IPv6 addresses can be used
 .TP
 .B -p, --unicast-port=\fIIPport
 TCP/IP port that must be used to reach a running daemon; if the daemon must be started locally, \fIIPport\fP must be a port not used by another process on this host. If \fIIPaddress\fP (see \fB-a\fP, \fB--unicast-address\fP) is specified and \fIIPport\fP is not specified, the default value is @_DEFAULT_DAEMON_PORT@
 .TP
 .B -A, --multicast-address=\fIIPaddress
-UDP/IP multicast address that must be used to discover the location of a running daemon; if the daemon must be started locally, \fIIPaddress\fP must be a valid multicast IP address for this host. Multicast address ranges are: 224.0.0.1 - 224.0.0.255 (link-local), 239.255.0.0 - 239.255.255.255 (site-local), 239.192.0.0 - 239.195.255.255 (organization-local) and 224.0.1.0 - 238.255.255.255 (global); a typical choice is an address in \fIlink-local\fP or in \fIsite-local\fP range
+UDP/IP multicast address that must be used to discover the location of a running daemon; if the daemon must be started locally, \fIIPaddress\fP must be a valid multicast IP address for this host. Multicast IPv4 address ranges are: 224.0.0.1 - 224.0.0.255 (link-local), 239.255.0.0 - 239.255.255.255 (site-local), 239.192.0.0 - 239.195.255.255 (organization-local) and 224.0.1.0 - 238.255.255.255 (global). Multicast IPv6 addresses are documented at this URL: \fIhttp://www.iana.org/assignments/ipv6-multicast-addresses/\fP. A typical choice is an address in \fIlink-local\fP or in \fIsite-local\fP range
 .TP
 .B -P, --multicast-port=\fIIPport
 UDP/IP multicast port that must be used to discover the location of a running daemon; if the daemon must be started locally, \fIIPport\fP must be a port not used by another process on this host. If \fIIPaddress\fP (see \fB-A\fP, \fB--multicast-address\fP) is specified and \fIIPport\fP is not specified, the default value is @_DEFAULT_DAEMON_PORT@
@@ -102,6 +102,12 @@ file destination of the trace messages produced by the daemon (background) proce
 .TP
 .B --append-trace-file=\fIyes|no
 \fBdefault\fP (\fIno\fP): the command will truncate the trace file(s), otherwise (\fIyes\fP) it will append the trace file(s). The number and the name of the trace files depends on \fB-T, --command-trace-file\fP and \fB-t, --daemon-trace-file\fP options
+.TP
+.B --debug-feature=\fPipv6.multicast.server
+activate an IPv6 multicast server (requester) for debugging purposes
+.TP
+.B --debug-feature=\fPipv6.multicast.client
+activate an IPv6 multicast client (replier) for debugging purposes
 .P
 .SH EXIT STATUS
 if anything runs as expected, \fBflom\fP exit status is the same of the controlled (serialized) command. Sometimes an error occurs and \fBflom\fP reports it using dedicated exit statuses you can check with \fI$?\fP environment variable:

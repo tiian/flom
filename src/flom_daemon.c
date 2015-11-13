@@ -326,7 +326,6 @@ int flom_listen(flom_config_t *config, flom_conns_t *conns)
                 break;
             case AF_INET:
             case AF_INET6:
-            case AF_UNSPEC:
                 /* create TCP/IP unicast listener */
                 if (FLOM_RC_OK != (ret_cod = flom_listen_tcp(config, conns)))
                     THROW(LISTEN_TCP_ERROR);
@@ -454,7 +453,7 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     struct addrinfo *result = NULL;
-    int fd = NULL_FD;
+    int fd = FLOM_NULL_FD;
     
     FLOM_TRACE(("flom_listen_tcp_configured\n"));
     TRY {
@@ -466,9 +465,7 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
         hints.ai_flags = AI_PASSIVE;
         hints.ai_family = flom_conns_get_domain(conns);
         hints.ai_socktype = SOCK_STREAM;
-        /*
         hints.ai_protocol = IPPROTO_TCP;
-        */
         snprintf(port, sizeof(port), "%u",
                  flom_config_get_unicast_port(config));
         FLOM_TRACE(("flom_listen_tcp_configured: binding address '%s' "
@@ -505,14 +502,14 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
                                 strerror(errno)));
                     gai = gai->ai_next;
                     close(fd);
-                    fd = NULL_FD;
+                    fd = FLOM_NULL_FD;
                 } else if (-1 == bind(fd, gai->ai_addr, gai->ai_addrlen)) {
                     FLOM_TRACE(("flom_listen_tcp_configured/bind() : "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
                     gai = gai->ai_next;
                     close(fd);
-                    fd = NULL_FD;
+                    fd = FLOM_NULL_FD;
                 } else {
                     bound = TRUE;
                     FLOM_TRACE(("flom_listen_tcp_configured: bound!\n"));
@@ -527,7 +524,7 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
                                conns, fd, SOCK_STREAM, gai->ai_addrlen,
                                gai->ai_addr, TRUE)))
             THROW(CONNS_ADD_ERROR);
-        fd = NULL_FD; /* avoid socket close by clean-up section */
+        fd = FLOM_NULL_FD; /* avoid socket close by clean-up section */
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -551,7 +548,7 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
     } /* TRY-CATCH */
     if (NULL != result)
         freeaddrinfo(result);
-    if (NULL_FD != fd)
+    if (FLOM_NULL_FD != fd)
         close(fd);
     FLOM_TRACE(("flom_listen_tcp_configured/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -572,7 +569,7 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
                      , CONNS_ADD_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    int fd = NULL_FD;
+    int fd = FLOM_NULL_FD;
     
     FLOM_TRACE(("flom_listen_tcp_automatic\n"));
     TRY {
@@ -651,7 +648,7 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
                                conns, fd, SOCK_STREAM, addrlen,
                                (struct sockaddr *)&addr, TRUE)))
             THROW(CONNS_ADD_ERROR);
-        fd = NULL_FD; /* avoid socket close by clean-up section */
+        fd = FLOM_NULL_FD; /* avoid socket close by clean-up section */
         
         THROW(NONE);
     } CATCH {
@@ -686,7 +683,7 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    if (NULL_FD != fd)
+    if (FLOM_NULL_FD != fd)
         close(fd);
     FLOM_TRACE(("flom_listen_tcp_automatic/excp=%d/"
                 "ret_cod=%d/errno=%d ('%s')\n", excp, ret_cod, errno,
@@ -708,7 +705,7 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     struct addrinfo *result = NULL;
-    int fd = NULL_FD;
+    int fd = FLOM_NULL_FD;
     
     FLOM_TRACE(("flom_listen_udp\n"));
     TRY {
@@ -736,9 +733,7 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
                     flom_config_get_multicast_port(config)));
         /* prepare hints for getaddressinfo() */
         memset(&hints, 0, sizeof(hints));
-        /*
         hints.ai_flags = AI_CANONNAME;
-        */
         hints.ai_family = AF_UNSPEC; 
         hints.ai_socktype = SOCK_DGRAM;
         /* prepare a local address structure for incoming datagrams */
@@ -799,14 +794,14 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
                                 strerror(errno)));
                     gai = gai->ai_next;
                     close(fd);
-                    fd = NULL_FD;
+                    fd = FLOM_NULL_FD;
                 } else if (-1 == bind(fd, local_addr, local_addr_len)) {
                     FLOM_TRACE(("flom_listen_udp/bind() : "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
                     gai = gai->ai_next;
                     close(fd);
-                    fd = NULL_FD;
+                    fd = FLOM_NULL_FD;
                 } else { /* switching to multicast mode */
                     struct ip_mreq mreq;
                     struct ipv6_mreq mreq6;
@@ -847,7 +842,7 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
                                     strerror(errno)));
                         gai = gai->ai_next;
                         close(fd);
-                        fd = NULL_FD;
+                        fd = FLOM_NULL_FD;
                     } else {
                         found = TRUE;
                     }  /* else */
@@ -863,7 +858,7 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
                                conns, fd, SOCK_DGRAM, gai->ai_addrlen,
                                gai->ai_addr, TRUE)))
             THROW(CONNS_ADD_ERROR);
-        fd = NULL_FD; /* avoid socket close by clean-up section */        
+        fd = FLOM_NULL_FD; /* avoid socket close by clean-up section */        
         syslog(LOG_NOTICE, FLOM_SYSLOG_FLM002I,
                flom_config_get_multicast_address(config),
                flom_config_get_multicast_port(config));
@@ -897,7 +892,7 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
     } /* TRY-CATCH */
     if (NULL != result)
         freeaddrinfo(result);
-    if (NULL_FD != fd)
+    if (FLOM_NULL_FD != fd)
         close(fd);
     FLOM_TRACE(("flom_listen_udp/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -1389,8 +1384,8 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
         for (i=0; i<n; ++i) {
             if (NULL == (locker = flom_locker_array_get(lockers, i)))
                 THROW(NULL_OBJECT2);
-            if (NULL_FD == locker->write_pipe ||
-                NULL_FD == locker->read_pipe) {
+            if (FLOM_NULL_FD == locker->write_pipe ||
+                FLOM_NULL_FD == locker->read_pipe) {
                 FLOM_TRACE(("flom_accept_loop_transfer: locker # %u is "
                             "terminating (write_pipe=%d, read_pipe=%d), "
                             "skipping...\n", i, locker->write_pipe,
@@ -1711,7 +1706,7 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers, int *again)
                 THROW(NULL_LOCKER);
             if (fl->write_sequence == fl->read_sequence &&
                 fl->idle_periods > FLOM_LOCKER_MAX_IDLE_PERIODS) {
-                if (fl->write_pipe != NULL_FD) {
+                if (fl->write_pipe != FLOM_NULL_FD) {
                     FLOM_TRACE(("flom_accept_loop_chklockers: starting "
                                 "termination for locker %u (thread=%p, "
                                 "write_pipe=%d, read_pipe=%d, "
@@ -1724,9 +1719,9 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers, int *again)
                                 fl->read_sequence, fl->idle_periods));
                     if (-1 == close(fl->write_pipe))
                         THROW(CLOSE_ERROR);
-                    fl->write_pipe = NULL_FD;
-                } else if (fl->write_pipe == NULL_FD &&
-                           fl->read_pipe == NULL_FD) {
+                    fl->write_pipe = FLOM_NULL_FD;
+                } else if (fl->write_pipe == FLOM_NULL_FD &&
+                           fl->read_pipe == FLOM_NULL_FD) {
                     gpointer thread_ret_cod;
                     FLOM_TRACE(("flom_accept_loop_chklockers: completing "
                                 "termination for locker %u (thread=%p, "

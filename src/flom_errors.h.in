@@ -211,6 +211,10 @@
  * Address family is not a valid IP address family (AF_INET, AF_INET6)
  */
 #define FLOM_RC_INVALID_AI_FAMILY_ERROR              -18
+/**
+ * A specified IP address is not valid for the current function
+ */
+#define FLOM_RC_INVALID_IP_ADDRESS                   -19
 
 
 
