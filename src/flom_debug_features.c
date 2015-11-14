@@ -162,9 +162,10 @@ int flom_debug_features_ipv6_multicast_server(void)
                 continue; /* trying next address if available */
             } else {
                 /* debugging the retrieved socket */
-                struct sockaddr socket_addr;
-                socklen_t socket_addrlen;
-                if (-1 == getsockname(fdi, &socket_addr, &socket_addrlen)) {
+                struct sockaddr_storage socket_addr;
+                socklen_t socket_addrlen = sizeof(socket_addr);
+                if (-1 == getsockname(fdi, (struct sockaddr *)&socket_addr,
+                                      &socket_addrlen)) {
                     FLOM_TRACE(("flom_debug_features_ipv6_multicast_server/"
                                 "getsockname(): errno=%d '%s', skipping...\n",
                                 errno, strerror(errno)));
@@ -174,7 +175,8 @@ int flom_debug_features_ipv6_multicast_server(void)
                     FLOM_TRACE_SOCKADDR("flom_debug_features_ipv6_multicast_"
                                         "server: address returned by "
                                         "getsockname(): ",
-                                        &socket_addr, socket_addrlen);
+                                        (struct sockaddr *)&socket_addr,
+                                        socket_addrlen);
                 } /* if (-1 == getsockname(fdi */
             }
             /* setting socket property */
@@ -212,9 +214,10 @@ int flom_debug_features_ipv6_multicast_server(void)
                 continue; /* trying next address if available */
             } else {
                 /* debugging the bound socket */
-                struct sockaddr socket_addr;
-                socklen_t socket_addrlen;
-                if (-1 == getsockname(fdi, &socket_addr, &socket_addrlen)) {
+                struct sockaddr_storage socket_addr;
+                socklen_t socket_addrlen = sizeof(socket_addr);
+                if (-1 == getsockname(fdi, (struct sockaddr *)&socket_addr,
+                                      &socket_addrlen)) {
                     FLOM_TRACE(("flom_debug_features_ipv6_multicast_server/"
                                 "getsockname(): errno=%d '%s', skipping...\n",
                                 errno, strerror(errno)));
@@ -224,7 +227,8 @@ int flom_debug_features_ipv6_multicast_server(void)
                     FLOM_TRACE_SOCKADDR("flom_debug_features_ipv6_multicast_"
                                         "server: address returned by "
                                         "bind() ",
-                                        &socket_addr, socket_addrlen);
+                                        (struct sockaddr *)&socket_addr,
+                                        socket_addrlen);
                 } /* if (-1 == getsockname(fdi */
             }
             /* activating multicast */

@@ -35,8 +35,8 @@ flom_errors.h: flom_errors.h.in
 dist_include_HEADERS = flom.h flom_handle.h flom_types.h \
 	$(INST_CPPAPI)
 nodist_include_HEADERS = flom_errors.h
-noinst_HEADERS = flom_client.h flom_config.h flom_conns.h flom_daemon.h \
-	flom_daemon_mngmnt.h \
+noinst_HEADERS = flom_client.h flom_config.h flom_conns.h \
+	flom_debug_features.h flom_daemon.h flom_daemon_mngmnt.h \
 	flom_defines.h flom_exec.h \
 	flom_locker.h flom_msg.h flom_resource_hier.h \
 	flom_resource_numeric.h flom_resource_set.h \

@@ -592,6 +592,7 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
             case AF_INET:
                 sa_len = sizeof(soin4);
                 memset(&soin4, 0, sa_len);
+                soin4.sin_family = family;
                 soin4.sin_addr.s_addr = htonl(INADDR_ANY);
                 soin4.sin_port = 0;
                 sa = (struct sockaddr *)&soin4;
@@ -599,6 +600,7 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
             case AF_INET6:
                 sa_len = sizeof(soin6);
                 memset(&soin6, 0, sa_len);
+                soin6.sin6_family = family;
                 soin6.sin6_addr = in6addr_any;
                 soin6.sin6_port = 0;
                 sa = (struct sockaddr *)&soin6;
@@ -608,6 +610,8 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
                             family));
                 THROW(INVALID_AI_FAMILY1);
         } /* switch (family) */
+        FLOM_TRACE_SOCKADDR("flom_listen_tcp_automatic: bindind address ",
+                            sa, sa_len);
         if (-1 == bind(fd, sa, sa_len))
             THROW(BIND_ERROR);
         if (-1 ==listen(fd, 100))
