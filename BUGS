@@ -1,0 +1,15 @@
+This is a list of well known bugs.
+
+As of release 1.1.0, flom ships IPv6 support; IPv6 UDP Multicast does not
+work on some Linux systems.
+This is a list of Linux systems that passed the test:
+- Ubuntu 10.04, 32 bit, virtual (KVM)
+- Ubuntu 10.64, 64 bit, virtual (KVM)
+- Ubuntu 12.04, 64 bit, virtual (KVM)
+- Ubuntu 14.04, 64 bit, virtual (KVM)
+- CentOS 7.1, 64 bit, virtual (KVM)
+This is the list of the Linux systems that did not pass the test:
+- CentOS 6.6, 32 bit, virutal (KVM)
+- CentOS 6.6, 64 bit, virtual (KVM)
+Please refer to the bug tracker for additional information:
+https://sourceforge.net/p/flom/tickets/2/

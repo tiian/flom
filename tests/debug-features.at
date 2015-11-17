@@ -1,6 +1,8 @@
 AT_BANNER([Debug features])
 
 AT_SETUP([IPv6 multicast])
+# skipping for some Linux distributions
+AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_DATA([expout],
 [[Arrived datagram is 'HELLO'
 Sent datagram is 'WELCOME'

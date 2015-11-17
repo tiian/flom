@@ -82,6 +82,8 @@ AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Multicast IPv6 address])
+# skipping for some Linux distributions
+AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # start a new daemon
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -A ff01::1"], [0], [ignore], [ignore])
@@ -204,6 +206,8 @@ AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Net dynamic daemon with unlimited life (IPv6)])
+# skip for some Linux distributions
+AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A ff01::1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
@@ -231,6 +235,8 @@ AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Net dynamic daemon with limited life (IPv6)])
+# skipping for some Linux distributions
+AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A ff01::1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
@@ -250,6 +256,8 @@ AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Network dynamic daemon not started (IPv6)])
+# skipping for some Linux distributions
+AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A ff01::1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
@@ -289,6 +297,8 @@ AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Net daemon with autodisc and unl. life (IPv6, eth0)])
+# skipping for some Linux distributions
+AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([iface_ip_address.sh eth0 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
@@ -305,6 +315,8 @@ AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Net daemon with autodisc and unl. life (IPv6, eth1)])
+# skipping for some Linux distributions
+AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([iface_ip_address.sh eth1 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
@@ -339,6 +351,8 @@ AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Net daemon with autodisc and lim. life (IPv6, eth0)])
+# skipping for some Linux distributions
+AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([iface_ip_address.sh eth0 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
@@ -348,6 +362,8 @@ AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Net daemon with autodisc and lim. life (IPv6, eth1)])
+# skipping for some Linux distributions
+AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([iface_ip_address.sh eth1 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
@@ -373,6 +389,8 @@ AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Net daemon with autodisc not started (IPv6, eth0)])
+# skipping for some Linux distributions
+AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([iface_ip_address.sh eth0 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
@@ -381,6 +399,8 @@ AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Net daemon with autodisc not started (IPv6, eth1)])
+# skipping for some Linux distributions
+AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([iface_ip_address.sh eth1 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon

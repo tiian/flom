@@ -1,8 +1,9 @@
 LOG:
 
-         - 1.1.0
+20151117 - 1.1.0 IoGaCo, first release: IPv6 support
 	New option --debug-feature to debug some special feature
-	IPv6 support
+	IPv6 support; please pay attention to this unresolved bug:
+	https://sourceforge.net/p/flom/tickets/2/
 
 20150930 - 1.0.0 Java client library API
 	Fixed a bug that could be exploited trying to unlock a resource
