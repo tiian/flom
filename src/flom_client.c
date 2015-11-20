@@ -33,6 +33,9 @@
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
+#ifdef HAVE_IFADDRS_H
+# include <ifaddrs.h>
+#endif
 #ifdef HAVE_NETDB_H
 # include <netdb.h>
 #endif
@@ -265,7 +268,8 @@ int flom_client_connect_local(flom_config_t *config,
 int flom_client_connect_tcp(flom_config_t *config,
                             struct flom_conn_data_s *cd, int start_daemon)
 {
-    enum Exception { GETADDRINFO_ERROR
+    enum Exception { GETIFADDRS_ERROR
+                     , GETADDRINFO_ERROR
                      , DAEMON_ERROR
                      , DAEMON_NOT_STARTED1
                      , CONNECT_ERROR1
@@ -275,6 +279,11 @@ int flom_client_connect_tcp(flom_config_t *config,
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     struct addrinfo *result = NULL;
+#ifdef HAVE_GETIFADDRS
+    /* getifaddrs is not POSIX and we can not be sure it's available */
+    struct ifaddrs *ifaddr = NULL, *ifa;
+#endif /* HAVE_GETIFADDRS */
+    
     int fd = FLOM_NULL_FD;
     
     FLOM_TRACE(("flom_client_connect_tcp\n"));
@@ -296,6 +305,18 @@ int flom_client_connect_tcp(flom_config_t *config,
         snprintf(port_string, sizeof(port_string), "%u",
                  flom_config_get_unicast_port(config));
 
+#ifdef HAVE_GETIFADDRS
+        /* getifaddrs is not POSIX and we can not be sure it's available */
+        if (-1 == getifaddrs(&ifaddr)) {
+            FLOM_TRACE(("flom_client_connect_tcp/getifaddrs(): "
+                        "errno=%d '%s'\n", errno, strerror(errno)));
+            THROW(GETIFADDRS_ERROR);
+        } else {
+            FLOM_TRACE_IFADDRS("flom_client_connect_tcp/getifaddrs(): ",
+                               ifaddr);
+        }
+#endif /* HAVE_GETIFADDRS */
+        
         if (0 != (errcode = getaddrinfo(
                       flom_config_get_unicast_address(config),
                       port_string, &hints, &result))) {
@@ -345,6 +366,9 @@ int flom_client_connect_tcp(flom_config_t *config,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case GETIFADDRS_ERROR:
+                ret_cod = FLOM_RC_GETIFADDRS_ERROR;
+                break;
             case GETADDRINFO_ERROR:
                 ret_cod = FLOM_RC_GETADDRINFO_ERROR;
                 break;
@@ -371,6 +395,11 @@ int flom_client_connect_tcp(flom_config_t *config,
     } /* TRY-CATCH */
     if (NULL != result)
         freeaddrinfo(result);
+#ifdef HAVE_FREEIFADDRS
+    /* freeifaddrs is not POSIX and we can not be sure it's available */
+    if (NULL != ifaddr)
+        freeifaddrs(ifaddr);
+#endif /* HAVE_FREEIFADDRS */
     if (FLOM_NULL_FD != fd)
         close(fd);
     FLOM_TRACE(("flom_client_connect_tcp/excp=%d/"

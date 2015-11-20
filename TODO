@@ -1,5 +1,8 @@
 Road map:
 
+implement "interface" command line option like in ping6 to support IPv6
+network aliases
+
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 
 implement a loop for connect/bind if bind returns an error: this shuold help

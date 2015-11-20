@@ -30,6 +30,9 @@
 #ifdef HAVE_ARPA_INET_H
 # include <arpa/inet.h>
 #endif
+#ifdef HAVE_IFADDRS_H
+# include <ifaddrs.h>
+#endif
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>
 #endif
@@ -263,6 +266,52 @@ void flom_trace_addrinfo(const char *prefix, const struct addrinfo *p)
     /* remove the lock from mutex */
     g_static_mutex_unlock(&flom_trace_mutex);
 }
+
+
+
+#ifdef HAVE_GETIFADDRS
+/* getifaddrs is not POSIX and we can not be sure it's available */
+void flom_trace_ifaddrs(const char *prefix, const struct ifaddrs *ifaddr)
+{
+    struct tm broken_time;
+    struct timeval tv;
+    const struct ifaddrs *ifa;
+    int n;
+    char *new_prefix = NULL;
+    gsize new_prefix_size;
+    
+    /* trace is closed, skipping it! */
+    if (NULL == trace_file)
+        return;    
+    /* lock the mutex */
+    for (ifa = ifaddr, n=0; NULL != ifa; ifa=ifa->ifa_next,n++) {
+        socklen_t addrlen;
+        
+        if (NULL == ifa->ifa_addr)
+            continue;
+        switch (ifa->ifa_addr->sa_family) {
+            case AF_INET:
+                addrlen = sizeof(struct sockaddr_in);
+                break;
+            case AF_INET6:
+                addrlen = sizeof(struct sockaddr_in6);
+                break;
+            default:
+                continue;
+        } /* switch (ifa->ifa_addr->sa_family) */
+        new_prefix_size = strlen(prefix) + strlen(ifa->ifa_name) + 100;
+        new_prefix = g_malloc(new_prefix_size);
+        snprintf(new_prefix, new_prefix_size, "%s ifa_name='%s'; ",
+                 prefix, ifa->ifa_name);
+        /* dump sockaddr structure */
+        flom_trace_sockaddr(new_prefix, ifa->ifa_addr, addrlen);
+        g_free(new_prefix);
+        new_prefix = NULL;
+    } /* for (ifa = ifaddrs, n=0; */
+    if (NULL != new_prefix)
+        g_free(new_prefix);
+}
+#endif /* HAVE_GETIFADDRS */
 
 
 

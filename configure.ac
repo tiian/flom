@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.1.0], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [1.1.1-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -263,6 +263,7 @@ AC_CHECK_HEADERS(arpa/inet.h assert.h)
 AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_HEADERS(glib.h)
+AC_CHECK_HEADERS(ifaddrs.h)
 AC_CHECK_HEADERS(netdb.h netinet/in.h netinet/tcp.h)
 AC_CHECK_HEADERS(poll.h pwd.h)
 AC_CHECK_HEADERS(regex.h)
@@ -317,6 +318,8 @@ AC_CHECK_SIZEOF([ssize_t])
 #AC_CHECK_SIZEOF([uint32_t])
 #AC_CHECK_SIZEOF([uuid_t], [], [[#include <uuid/uuid.h>]])
 
+AC_CHECK_FUNCS(freeifaddrs)
+AC_CHECK_FUNCS(getifaddrs)
 AC_CHECK_FUNCS(signal)
 AC_CHECK_FUNCS(snprintf)
 AC_CHECK_FUNCS(strcasestr)

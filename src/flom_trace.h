@@ -245,6 +245,26 @@ extern unsigned long flom_trace_mask;
 
 
 /**
+ * FLOM_TRACE_IPADDRS macro is used to compile trace messages only if _TRACE
+ * macro is defined;
+ * trace message is printed only for modules (FLOM_TRACE_MODULE) covered by
+ * trace mask (FLOM_TRACE_MASK) specified as environment variable
+ */
+#ifdef HAVE_GETIFADDRS
+    /* getifaddrs is not POSIX and we can not be sure it's available */
+# ifdef _TRACE
+#  define FLOM_TRACE_IFADDRS(a,b) (FLOM_TRACE_MODULE & flom_trace_mask ? \
+                                   flom_trace_ifaddrs(a,b) : 0)
+# else /* _TRACE */
+#  define FLOM_TRACE_IFADDRS(a,b)
+# endif /* _TRACE */
+#else /* HAVE_GETIFADDRS */
+# define FLOM_TRACE_IFADDRS(a,b)
+#endif /* HAVE_GETIFADDRS */
+
+
+
+/**
  * FLOM_TRACE_SOCKADDR macro is used to compile trace messages only if _TRACE
  * macro is defined;
  * trace message is printed only for modules (FLOM_TRACE_MODULE) covered by
