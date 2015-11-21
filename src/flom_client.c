@@ -306,7 +306,7 @@ int flom_client_connect_tcp(flom_config_t *config,
         } else {
             FLOM_TRACE_ADDRINFO("flom_client_connect_tcp/getaddrinfo(): ",
                                 result);
-            p = flom_client_connect_tcp_try(result, &fd);
+            p = flom_client_connect_tcp_try(config, result, &fd);
             if (NULL == p) {
                 if (start_daemon) {
                     if (0 != flom_config_get_lifespan(config)) {
@@ -317,7 +317,7 @@ int flom_client_connect_tcp(flom_config_t *config,
                                                config, result->ai_family)))
                             THROW(DAEMON_ERROR);
                         /* trying to connect again... */
-                        p = flom_client_connect_tcp_try(result, &fd);
+                        p = flom_client_connect_tcp_try(config, result, &fd);
                         if (NULL == p)
                             THROW(DAEMON_NOT_STARTED1);
                     } else {
@@ -382,12 +382,25 @@ int flom_client_connect_tcp(flom_config_t *config,
 
 
 const struct addrinfo *flom_client_connect_tcp_try(
-    const struct addrinfo *gai, int *fd)
+    flom_config_t *config, const struct addrinfo *gai, int *fd)
 {
     const struct addrinfo *found = NULL; 
     *fd = FLOM_NULL_FD;
     /* traverse the list and try to connect... */
     while (NULL != gai && NULL == found) {
+        struct sockaddr_in6 sa6;
+        struct sockaddr *sa = gai->ai_addr;
+        /* IPv6 addresses could need sin6_scope_id set if the user specified
+           a network interface */
+        if (AF_INET6 == gai->ai_family &&
+            NULL != flom_config_get_network_interface(config)) {
+            memcpy(&sa6, sa, gai->ai_addrlen);
+            sa6.sin6_scope_id = flom_config_get_sin6_scope_id(config);
+            sa = (struct sockaddr *)&sa6;
+            FLOM_TRACE(("flom_client_connect_tcp_try: overriding field "
+                        "sin6_scope_id with value %u\n", sa6.sin6_scope_id));
+        }
+            
         if (FLOM_NULL_FD == (*fd = socket(gai->ai_family, gai->ai_socktype,
                                           gai->ai_protocol))) {
             FLOM_TRACE(("flom_client_connect_tcp_try/socket(): "
@@ -397,11 +410,10 @@ const struct addrinfo *flom_client_connect_tcp_try(
         } else {
             FLOM_TRACE_HEX_DATA("flom_client_connect_tcp_try/connect(): "
                                 "gai->ai_addr ",
-                                (void *)gai->ai_addr, gai->ai_addrlen);
+                                (void *)sa, gai->ai_addrlen);
             FLOM_TRACE_SOCKADDR("flom_client_connect_tcp_try/connect(): "
-                                "gai->ai_addr ",
-                                (void *)gai->ai_addr, gai->ai_addrlen);
-            if (-1 == connect(*fd, gai->ai_addr, gai->ai_addrlen)) {
+                                "gai->ai_addr ", sa, gai->ai_addrlen);
+            if (-1 == connect(*fd, sa, gai->ai_addrlen)) {
                 FLOM_TRACE(("flom_client_connect_tcp_try/connect(): "
                             "errno=%d '%s', skipping...\n", errno,
                             strerror(errno)));

@@ -28,7 +28,7 @@
 if test $# -lt 2
 then
 	echo "At least two parameters must be specified"
-	exit 1
+	exit 77
 fi
 
 INTERFACE=$1

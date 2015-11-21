@@ -1,74 +1,74 @@
 AT_BANNER([Distributed environement use case checks (IPv4, IPv6)])
 
-AT_SETUP([Unicast IPv4 lo address])
+AT_SETUP([Unicast IPv4 1st interface])
 # skip if the address is not available
-AT_CHECK([iface_ip_address.sh lo 4], [0], [ignore], [ignore])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 1) 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh lo 4)"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh $(iface_name.sh inet 1) 4)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Unicast IPv4-Mapped IPv6 lo address])
+AT_SETUP([Unicast IPv4-Mapped IPv6 1st interface])
 # skip if the address is not available
-AT_CHECK([iface_ip_address.sh lo 4], [0], [ignore], [ignore])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 1) 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a ::FFFF:$(iface_ip_address.sh lo 4)"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a ::FFFF:$(iface_ip_address.sh $(iface_name.sh inet 1) 4)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Unicast IPv6 lo address])
+AT_SETUP([Unicast IPv6 1st interface])
 # skip if the address is not available
-AT_CHECK([iface_ip_address.sh lo 6], [0], [ignore], [ignore])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 1) 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh lo 6)"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh $(iface_name.sh inet6 1) 6)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Unicast IPv4 eth0 address])
+AT_SETUP([Unicast IPv4 2nd interface])
 # skip if the address is not available
-AT_CHECK([iface_ip_address.sh eth0 4], [0], [ignore], [ignore])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 2) 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth0 4)"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh $(iface_name.sh inet 2) 4)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Unicast IPv4-Mapped IPv6 eth0 address])
+AT_SETUP([Unicast IPv4-Mapped IPv6 2nd interface])
 # skip if the address is not available
-AT_CHECK([iface_ip_address.sh eth0 4], [0], [ignore], [ignore])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 2) 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a ::FFFF:$(iface_ip_address.sh eth0 4)"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a ::FFFF:$(iface_ip_address.sh $(iface_name.sh inet6 2) 4)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Unicast IPv6 eth0 address])
+AT_SETUP([Unicast IPv6 2nd interface])
 # skip if the address is not available
-AT_CHECK([iface_ip_address.sh eth0 6], [0], [ignore], [ignore])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 2) 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth0 6)%eth0"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh $(iface_name.sh inet6 2) 6) -n $(iface_name.sh inet6 2)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Unicast IPv4 eth1 address])
+AT_SETUP([Unicast IPv4 3rd interface])
 # skip if the address is not available
-AT_CHECK([iface_ip_address.sh eth1 4], [0], [ignore], [ignore])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 3) 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth1 4)"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh $(iface_name.sh inet 3) 4)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Unicast IPv4-Mapped IPv6 eth1 address])
+AT_SETUP([Unicast IPv4-Mapped IPv6 3rd interface])
 # skip if the address is not available
-AT_CHECK([iface_ip_address.sh eth1 4], [0], [ignore], [ignore])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 3) 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a ::FFFF:$(iface_ip_address.sh eth1 4)"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a ::FFFF:$(iface_ip_address.sh $(iface_name.sh inet 3) 4)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Unicast IPv6 eth1 address])
+AT_SETUP([Unicast IPv6 3rd interface])
 # skip if the address is not available
-AT_CHECK([iface_ip_address.sh eth1 6], [0], [ignore], [ignore])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 3) 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth1 6)%eth1"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh $(iface_name.sh inet6 3) 6) -n $(iface_name.sh inet6 3)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
@@ -110,91 +110,140 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000" ; sleep 6], [0], [ignore], [ignore]
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with unlimit lifespan (IPv4, eth0)])
-AT_CHECK([iface_ip_address.sh eth0 4], [0], [ignore], [ignore])
+AT_SETUP([Net daemon with unlimit lifespan {IPv4, 1st iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 1) 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth0 4)"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh $(iface_name.sh inet 1) 4)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with unlimit lifespan (IPv4, eth1)])
-AT_CHECK([iface_ip_address.sh eth1 4], [0], [ignore], [ignore])
+AT_SETUP([Net daemon with unlimit lifespan {IPv4, 2nd iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 2) 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth1 4)"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh $(iface_name.sh inet 2) 4)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with unlimit lifespan (IPv6, eth0)])
-AT_CHECK([iface_ip_address.sh eth0 6], [0], [ignore], [ignore])
+AT_SETUP([Net daemon with unlimit lifespan {IPv4, 3rd iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 3) 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth0 6)%eth0"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh $(iface_name.sh inet 3) 4)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with unlimit lifespan (IPv6, eth1)])
-AT_CHECK([iface_ip_address.sh eth1 6], [0], [ignore], [ignore])
+AT_SETUP([Net daemon with unlimit lifespan {IPv6, 1st iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 1) 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh eth1 6)%eth1"], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh $(iface_name.sh inet6 1) 6) -n $(iface_name.sh inet6 1)"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Network daemon not started (IPv4, eth0)])
-AT_CHECK([iface_ip_address.sh eth0 4], [0], [ignore], [ignore])
+AT_SETUP([Net daemon with unlimit lifespan {IPv6, 2nd iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 2) 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh eth0 4)"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh $(iface_name.sh inet6 2) 6) -n $(iface_name.sh inet6 2)"], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Net daemon with unlimit lifespan {IPv6, 3rd iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 3) 6], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d -1 -a $(iface_ip_address.sh $(iface_name.sh inet6 3) 6) -n $(iface_name.sh inet6 3)"], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Network daemon not started {IPv4, 1st iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 1) 4], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh $(iface_name.sh inet 1) 4)"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Network daemon not started (IPv4, eth1)])
-AT_CHECK([iface_ip_address.sh eth1 4], [0], [ignore], [ignore])
+AT_SETUP([Network daemon not started {IPv4, 2nd iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 2) 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh eth1 4)"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh $(iface_name.sh inet 2) 4)"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Network daemon not started (IPv6, eth0)])
-AT_CHECK([iface_ip_address.sh eth0 6], [0], [ignore], [ignore])
+AT_SETUP([Network daemon not started {IPv4, 3rd iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 3) 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh eth0 6)%eth0"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh $(iface_name.sh inet 3) 4)"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Network daemon not started (IPv6, eth1)])
-AT_CHECK([iface_ip_address.sh eth1 6], [0], [ignore], [ignore])
+AT_SETUP([Network daemon not started {IPv6, 1st iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 1) 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh eth1 6)%eth1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh $(iface_name.sh inet6 1) 6) -n $(iface_name.sh inet6 1)"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with limited life (IPv4, eth0)])
-AT_CHECK([iface_ip_address.sh eth0 4], [0], [ignore], [ignore])
+AT_SETUP([Network daemon not started {IPv6, 2nd iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 2) 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(iface_ip_address.sh eth0 4)" ; sleep 6], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh $(iface_name.sh inet6 2) 6) -n $(iface_name.sh inet6 2)"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with limited life (IPv4, eth1)])
-AT_CHECK([iface_ip_address.sh eth1 4], [0], [ignore], [ignore])
+AT_SETUP([Network daemon not started {IPv6, 3rd iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 3) 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(iface_ip_address.sh eth1 4)" ; sleep 6], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh $(iface_name.sh inet6 3) 6) -n $(iface_name.sh inet6 3)"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with limited life (IPv6, eth0)])
+AT_SETUP([Net daemon with limited life {IPv4, 1st iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 1) 4], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(iface_ip_address.sh $(iface_name.sh inet 1) 4)" ; sleep 6], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Net daemon with limited life {IPv4, 2nd iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 2) 4], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(iface_ip_address.sh $(iface_name.sh inet 2) 4)" ; sleep 6], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Net daemon with limited life {IPv4, 3rd iface}])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet 3) 4], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(iface_ip_address.sh $(iface_name.sh inet 3) 4)" ; sleep 6], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [1], [ignore], [ignore])
+AT_CLEANUP
+#### @@@
+AT_SETUP([Net daemon with limited life {IPv6, %eth0}])
 AT_CHECK([iface_ip_address.sh eth0 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(iface_ip_address.sh eth0 6)%eth0" ; sleep 6], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with limited life (IPv6, eth1)])
+AT_SETUP([Net daemon with limited life {IPv6, -n eth0}])
+AT_CHECK([iface_ip_address.sh eth0 6], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(iface_ip_address.sh eth0 6) -n eth0" ; sleep 6], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Net daemon with limited life {IPv6, %eth1}])
 AT_CHECK([iface_ip_address.sh eth1 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(iface_ip_address.sh eth1 6)%eth1" ; sleep 6], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net dynamic daemon with unlimited life (IPv4)])
+AT_SETUP([Net daemon with limited life {IPv6, -n eth1}])
+AT_CHECK([iface_ip_address.sh eth1 6], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(iface_ip_address.sh eth1 6) -n eth1" ; sleep 6], [0], [ignore], [ignore])
+AT_CHECK([pgrep flom], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Net dynamic daemon with unlimited life {IPv4}])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A 224.0.0.1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
@@ -205,7 +254,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A 224.0.0.1"], [0], [ignore], [ignore]
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net dynamic daemon with unlimited life (IPv6)])
+AT_SETUP([Net dynamic daemon with unlimited life {IPv6}])
 # skip for some Linux distributions
 AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
@@ -218,7 +267,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A ff01::1"], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net dynamic daemon with limited life (IPv4)])
+AT_SETUP([Net dynamic daemon with limited life {IPv4}])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A 224.0.0.1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
@@ -234,7 +283,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-V -d 0 -A 224.0.0.1" | grep "network addres
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net dynamic daemon with limited life (IPv6)])
+AT_SETUP([Net dynamic daemon with limited life {IPv6}])
 # skipping for some Linux distributions
 AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
@@ -248,14 +297,14 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-V -d 0 -A ff01::1" | grep "network address\
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Network dynamic daemon not started (IPv4)])
+AT_SETUP([Network dynamic daemon not started {IPv4}])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
 AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A 224.0.0.1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Network dynamic daemon not started (IPv6)])
+AT_SETUP([Network dynamic daemon not started {IPv6}])
 # skipping for some Linux distributions
 AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
@@ -264,7 +313,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -A ff01::1"], [@_ES_GENERIC_ERROR@], [i
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with autodisc and unl. life (IPv4, eth0)])
+AT_SETUP([Net daemon with autodisc and unl. life {IPv4, eth0}])
 AT_CHECK([iface_ip_address.sh eth0 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
@@ -280,7 +329,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh eth0 4)"], [0]
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with autodisc and unl. life (IPv4, eth1)])
+AT_SETUP([Net daemon with autodisc and unl. life {IPv4, eth1}])
 AT_CHECK([iface_ip_address.sh eth1 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
@@ -296,7 +345,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh eth1 4)"], [0]
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with autodisc and unl. life (IPv6, eth0)])
+AT_SETUP([Net daemon with autodisc and unl. life {IPv6, %eth0}])
 # skipping for some Linux distributions
 AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([iface_ip_address.sh eth0 6], [0], [ignore], [ignore])
@@ -314,7 +363,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh eth0 6)%eth0"]
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with autodisc and unl. life (IPv6, eth1)])
+AT_SETUP([Net daemon with autodisc and unl. life {IPv6, %eth1}])
 # skipping for some Linux distributions
 AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
 AT_CHECK([iface_ip_address.sh eth1 6], [0], [ignore], [ignore])
@@ -332,7 +381,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh eth1 6)%eth1"]
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with autodisc and lim. life (IPv4, eth0)])
+AT_SETUP([Net daemon with autodisc and lim. life {IPv4, eth0}])
 AT_CHECK([iface_ip_address.sh eth0 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
@@ -341,7 +390,7 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 3000 -a $(iface_ip_address.sh eth0 4) -A 
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with autodisc and lim. life (IPv4, eth1)])
+AT_SETUP([Net daemon with autodisc and lim. life {IPv4, eth1}])
 AT_CHECK([iface_ip_address.sh eth1 4], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon

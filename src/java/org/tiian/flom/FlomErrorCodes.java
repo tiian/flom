@@ -41,6 +41,7 @@ public class FlomErrorCodes {
 	public final static int FLOM_RC_API_INVALID_SEQUENCE = -17;
 	public final static int FLOM_RC_INVALID_AI_FAMILY_ERROR = -18;
 	public final static int FLOM_RC_INVALID_IP_ADDRESS = -19;
+	public final static int FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE = -20;
 	public final static int FLOM_RC_ACCEPT_ERROR = -100;
 	public final static int FLOM_RC_BIND_ERROR = -101;
 	public final static int FLOM_RC_CHDIR_ERROR = -102;

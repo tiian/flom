@@ -142,6 +142,7 @@ struct flom_conn_data_s {
          * Client address for AF_INET connections
          */
         struct sockaddr_in sain;
+        /* @@@ */
     };
     /**
      * Last received message (allocated by malloc)

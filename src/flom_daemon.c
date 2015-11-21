@@ -460,6 +460,8 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
         struct addrinfo hints, *gai = NULL;
         int errcode;
         char port[100];
+        struct sockaddr_in6 sa6;
+        struct sockaddr *sa = NULL;
 
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_PASSIVE;
@@ -486,8 +488,21 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
             /* traverse the list and try to bind... */
             gai = result;
             while (NULL != gai && !bound) {
-                FLOM_TRACE_HEX_DATA("flom_listen_tcp_configured: ai_addr ",
-                                    (void *)gai->ai_addr, gai->ai_addrlen);
+                /* @@@ */
+                sa = gai->ai_addr;
+                /* IPv6 addresses could need sin6_scope_id set if the user
+                   specified a network interface */
+                if (AF_INET6 == gai->ai_family &&
+                    NULL != flom_config_get_network_interface(config)) {
+                    memcpy(&sa6, sa, gai->ai_addrlen);
+                    sa6.sin6_scope_id = flom_config_get_sin6_scope_id(config);
+                    sa = (struct sockaddr *)&sa6;
+                    FLOM_TRACE(("flom_listen_tcp_configured: overriding field "
+                                "sin6_scope_id with value %u\n",
+                                sa6.sin6_scope_id));
+                }
+                FLOM_TRACE_SOCKADDR("flom_listen_tcp_configured: ai_addr ",
+                                    (void *)sa, gai->ai_addrlen);
                 if (-1 == (fd = socket(gai->ai_family, gai->ai_socktype,
                                        gai->ai_protocol))) {
                     FLOM_TRACE(("flom_listen_tcp_configured/socket(): "
@@ -503,7 +518,7 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
                     gai = gai->ai_next;
                     close(fd);
                     fd = FLOM_NULL_FD;
-                } else if (-1 == bind(fd, gai->ai_addr, gai->ai_addrlen)) {
+                } else if (-1 == bind(fd, sa, gai->ai_addrlen)) {
                     FLOM_TRACE(("flom_listen_tcp_configured/bind() : "
                                 "errno=%d '%s', skipping...\n", errno,
                                 strerror(errno)));
@@ -522,7 +537,7 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
             THROW(LISTEN_ERROR);
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
                                conns, fd, SOCK_STREAM, gai->ai_addrlen,
-                               gai->ai_addr, TRUE)))
+                               sa, TRUE)))
             THROW(CONNS_ADD_ERROR);
         fd = FLOM_NULL_FD; /* avoid socket close by clean-up section */
         THROW(NONE);

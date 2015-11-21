@@ -110,8 +110,11 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: address family is not a valid IP address family "
                 "(AF_INET, AF_INET6)";
         case FLOM_RC_INVALID_IP_ADDRESS:
-            return "ERROR: a specified IP address is not valid for the "
+            return "ERROR: the specified IP address is not valid for the "
                 "current function";
+        case FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE:
+            return "ERROR: the specified network interface is not valid for "
+                "IPv6 networking";
             /* system function error */
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";

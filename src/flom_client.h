@@ -95,13 +95,14 @@ extern "C" {
 
     /**
      * A TCP/IP connection chance: it can be reapeted after daemon start-up
+     * @param config IN configuration object, NULL for global config
      * @param gai IN result obtained by getaddrinfo function
      * @param fd OUT file descriptor associated to the connected socket
      * @return the pointer to the element successfully connected, NULL if no
      *         element is available
      */
     const struct addrinfo *flom_client_connect_tcp_try(
-        const struct addrinfo *gai, int *fd);
+        flom_config_t *config, const struct addrinfo *gai, int *fd);
     
 
 
