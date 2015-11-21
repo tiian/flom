@@ -30,9 +30,6 @@
 #ifdef HAVE_ARPA_INET_H
 # include <arpa/inet.h>
 #endif
-#ifdef HAVE_IFADDRS_H
-# include <ifaddrs.h>
-#endif
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>
 #endif
@@ -273,8 +270,6 @@ void flom_trace_addrinfo(const char *prefix, const struct addrinfo *p)
 /* getifaddrs is not POSIX and we can not be sure it's available */
 void flom_trace_ifaddrs(const char *prefix, const struct ifaddrs *ifaddr)
 {
-    struct tm broken_time;
-    struct timeval tv;
     const struct ifaddrs *ifa;
     int n;
     char *new_prefix = NULL;

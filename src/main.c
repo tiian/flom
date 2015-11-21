@@ -58,6 +58,7 @@ static gchar *unicast_address = NULL;
 static gint unicast_port = _DEFAULT_DAEMON_PORT;
 static gchar *multicast_address = NULL;
 static gint multicast_port = _DEFAULT_DAEMON_PORT;
+static gchar *network_interface = NULL;
 static gint discovery_attempts = _DEFAULT_DISCOVERY_ATTEMPTS;
 static gint discovery_timeout = _DEFAULT_DISCOVERY_TIMEOUT;
 static gint discovery_ttl = _DEFAULT_DISCOVERY_TTL;
@@ -90,6 +91,7 @@ static GOptionEntry entries[] =
     { "unicast-port", 'p', 0, G_OPTION_ARG_INT, &unicast_port, "Daemon TCP/IP port", NULL },
     { "multicast-address", 'A', 0, G_OPTION_ARG_STRING, &multicast_address, "Daemon UDP/IP (multicast) address", NULL },
     { "multicast-port", 'P', 0, G_OPTION_ARG_INT, &multicast_port, "Daemon UDP/IP (multicast) port", NULL },
+    { "network-interface", 'n', 0, G_OPTION_ARG_STRING, &network_interface, "Network interface that must be used for IPv6 link local addresses", NULL },
     { "discovery-attempts", 'D', 0, G_OPTION_ARG_INT, &discovery_attempts, "UDP/IP (multicast) max number of requests", NULL },
     { "discovery-timeout", 'I', 0, G_OPTION_ARG_INT, &discovery_timeout, "UDP/IP (multicast) request timeout", NULL },
     { "discovery-ttl", 0, 0, G_OPTION_ARG_INT, &discovery_ttl, "UDP/IP (multicast) hop limit", NULL },
@@ -234,6 +236,9 @@ int main (int argc, char *argv[])
     }
     if (_DEFAULT_DAEMON_PORT != multicast_port) {
         flom_config_set_multicast_port(NULL, multicast_port);
+    }
+    if (NULL != network_interface) {
+        flom_config_set_network_interface(NULL, network_interface);
     }
     if (_DEFAULT_DISCOVERY_ATTEMPTS != discovery_attempts) {
         flom_config_set_discovery_attempts(NULL, discovery_attempts);

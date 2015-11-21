@@ -35,6 +35,9 @@
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
+#ifdef HAVE_IFADDRS_H
+# include <ifaddrs.h>
+#endif
 #ifdef HAVE_PWD_H
 # include <pwd.h>
 #endif
@@ -109,6 +112,7 @@ const gchar *FLOM_CONFIG_KEY_UNICAST_PORT = _CONFIG_KEY_UNICAST_PORT;
 const gchar *FLOM_CONFIG_KEY_MULTICAST_ADDRESS = _CONFIG_KEY_MULTICAST_ADDRESS;
 const gchar *FLOM_CONFIG_KEY_MULTICAST_PORT = _CONFIG_KEY_MULTICAST_PORT;
 const gchar *FLOM_CONFIG_GROUP_NETWORK = _CONFIG_GROUP_NETWORK;
+const gchar *FLOM_CONFIG_KEY_NETWORK_INTERFACE = _CONFIG_KEY_NETWORK_INTERFACE;
 const gchar *FLOM_CONFIG_KEY_DISCOVERY_ATTEMPTS = _CONFIG_KEY_DISCOVERY_ATTEMPTS;
 const gchar *FLOM_CONFIG_KEY_DISCOVERY_TIMEOUT = _CONFIG_KEY_DISCOVERY_TIMEOUT;
 const gchar *FLOM_CONFIG_KEY_DISCOVERY_TTL = _CONFIG_KEY_DISCOVERY_TTL;
@@ -166,6 +170,8 @@ void flom_config_reset(flom_config_t *config)
     config->unicast_port = _DEFAULT_DAEMON_PORT;
     config->multicast_address = NULL;
     config->multicast_port = _DEFAULT_DAEMON_PORT;
+    config->network_interface = NULL;
+    config->sin6_scope_id = 0;
     config->discovery_attempts = _DEFAULT_DISCOVERY_ATTEMPTS;
     config->discovery_timeout = _DEFAULT_DISCOVERY_TIMEOUT;
     config->discovery_ttl = _DEFAULT_DISCOVERY_TTL;
@@ -178,7 +184,8 @@ void flom_config_reset(flom_config_t *config)
 
 int flom_config_check(flom_config_t *config)
 {
-    enum Exception { INVALID_OPTION
+    enum Exception { INVALID_OPTION1
+                     , INVALID_OPTION2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -196,8 +203,16 @@ int flom_config_check(flom_config_t *config)
             g_print("ERROR: flom can not be configured for local "
                     "(UNIX socket) and network (TCP-UDP/IP) communication "
                     "at the same time.\n");
-            THROW(INVALID_OPTION);
+            THROW(INVALID_OPTION1);
         }
+        /* network interface is useless if getifaddrs is not available */
+#ifndef HAVE_GETIFADDRS
+        if (NULL != flom_config_get_network_interface(config)) {
+            g_print("ERROR: network interface can not be set because function "
+                    "getifaddrs() is not available.\n");
+            THROW(INVALID_OPTION2);
+        }
+#endif /* HAVE_GETIFADDRS */
         /* if neither local nor network communication were configured,
            use default local */
         if (NULL == flom_config_get_socket_name(config) &&
@@ -240,7 +255,8 @@ int flom_config_check(flom_config_t *config)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case INVALID_OPTION:
+            case INVALID_OPTION1:
+            case INVALID_OPTION2:
                 ret_cod = FLOM_RC_INVALID_OPTION;
                 break;
             case NONE:
@@ -317,6 +333,11 @@ void flom_config_print(flom_config_t *config)
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_MULTICAST_PORT,
             flom_config_get_multicast_port(config));
+    g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_NETWORK,
+            FLOM_CONFIG_KEY_NETWORK_INTERFACE,
+            NULL == flom_config_get_network_interface(config) ?
+            FLOM_EMPTY_STRING :
+            flom_config_get_network_interface(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_NETWORK,
             FLOM_CONFIG_KEY_DISCOVERY_ATTEMPTS,
             flom_config_get_discovery_attempts(config));
@@ -356,6 +377,8 @@ void flom_config_free(flom_config_t *config)
     config->unicast_address = NULL;
     g_free(config->multicast_address);
     config->multicast_address = NULL;    
+    g_free(config->network_interface);
+    config->network_interface = NULL;
 }
 
 
@@ -918,6 +941,26 @@ int flom_config_init_load(flom_config_t *config,
                         FLOM_CONFIG_KEY_MULTICAST_PORT, ivalue));
             flom_config_set_multicast_port(config, ivalue);
         }
+        /* pick-up network interface configuration */
+        if (NULL == (value = g_key_file_get_string(
+                         gkf, FLOM_CONFIG_GROUP_NETWORK,
+                         FLOM_CONFIG_KEY_NETWORK_INTERFACE, &error))) {
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_NETWORK,
+                        FLOM_CONFIG_KEY_NETWORK_INTERFACE,
+                        error->code,
+                        error->message));
+            g_error_free(error);
+            error = NULL;
+        } else {
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
+                        FLOM_CONFIG_GROUP_NETWORK,
+                        FLOM_CONFIG_KEY_NETWORK_INTERFACE, value));
+            flom_config_set_network_interface(config, value);
+            g_free(value);
+            value = NULL;
+        }
         /* pick-up discovery attempts from configuration */
         ivalue = g_key_file_get_integer(gkf, FLOM_CONFIG_GROUP_NETWORK,
                                         FLOM_CONFIG_KEY_DISCOVERY_ATTEMPTS,
@@ -1141,6 +1184,7 @@ int flom_config_clone(flom_config_t *config)
         config->socket_name = g_strdup(global_config.socket_name);
         config->unicast_address = g_strdup(global_config.unicast_address);
         config->multicast_address = g_strdup(global_config.multicast_address);
+        config->network_interface = g_strdup(global_config.network_interface);
         
         THROW(NONE);
     } CATCH {
@@ -1355,6 +1399,66 @@ void flom_config_set_multicast_port(flom_config_t *config, gint port)
         global_config.multicast_port = port;
     else
         config->multicast_port = port;
+}
+
+
+
+int flom_config_set_network_interface(flom_config_t *config,
+                                      const gchar *value)
+{
+    enum Exception { GETIFADDRS_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+#ifdef HAVE_GETIFADDRS
+    /* getifaddrs is not POSIX and we can not be sure it's available */
+    struct ifaddrs *ifaddr = NULL, *ifa;
+#endif /* HAVE_GETIFADDRS */
+    
+    FLOM_TRACE(("flom_config_set_network_interface\n"));
+    TRY {
+        if (NULL == config) {
+            g_free(global_config.network_interface);
+            global_config.network_interface = g_strdup(value);
+        } else {
+            g_free(config->network_interface);
+            config->network_interface = g_strdup(value);
+        }
+
+        /* set sin6_scope_id derived from network_interface */
+#ifdef HAVE_GETIFADDRS
+        /* getifaddrs is not POSIX and we can not be sure it's available */
+        if (-1 == getifaddrs(&ifaddr)) {
+            FLOM_TRACE(("flom_config_set_network_interface/getifaddrs(): "
+                        "errno=%d '%s'\n", errno, strerror(errno)));
+            THROW(GETIFADDRS_ERROR);
+        } else {
+            FLOM_TRACE_IFADDRS("flom_config_set_network_interface/"
+                               "getifaddrs(): ", ifaddr);
+        }
+#endif /* HAVE_GETIFADDRS */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case GETIFADDRS_ERROR:
+                ret_cod = FLOM_RC_GETIFADDRS_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+#ifdef HAVE_FREEIFADDRS
+    /* freeifaddrs is not POSIX and we can not be sure it's available */
+    if (NULL != ifaddr)
+        freeifaddrs(ifaddr);
+#endif /* HAVE_FREEIFADDRS */
+    FLOM_TRACE(("flom_config_set_network_interface/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 

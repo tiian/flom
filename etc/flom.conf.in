@@ -86,14 +86,16 @@
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_LIFESPAN@=@_DEFAULT_DAEMON_LIFESPAN@
 # TCP/IP address used by flom daemon
-# (Uncomment below row if necessary)
+# (Uncomment one of the rows below if necessary)
 #@_CONFIG_KEY_UNICAST_ADDRESS@=127.0.0.1
+#@_CONFIG_KEY_UNICAST_ADDRESS@=::1
 # TCP/IP port used by flom daemon
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_UNICAST_PORT@=@_DEFAULT_DAEMON_PORT@
 # UDP/IP multicast address used to discover flom daemon unicast address & port
-# (Uncomment below row if necessary)
+# (Uncomment one of the rows below if necessary)
 #@_CONFIG_KEY_MULTICAST_ADDRESS@=224.0.0.1
+#@_CONFIG_KEY_MULTICAST_ADDRESS@=ff01::1
 # UDP/IP multicast port used to discover flom daemon unicast address & port
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_MULTICAST_PORT@=@_DEFAULT_DAEMON_PORT@
@@ -101,6 +103,9 @@
 # This section (configuration group) is related to network and communication
 # parameters 
 [@_CONFIG_GROUP_NETWORK@]
+# Network interface that must be used to read IPv6 link local addresses
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_NETWORK_INTERFACE@=eth0
 # Number of UDP/IP multicast attempts that will be tried to locate a
 # flom daemon using autodiscovery feature
 # (Uncomment below row if necessary)

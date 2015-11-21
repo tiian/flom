@@ -232,6 +232,9 @@
 /* Label of "Name" key inside config files */
 #undef _CONFIG_KEY_NAME
 
+/* Label of "NetworkInterface" key inside config files */
+#undef _CONFIG_KEY_NETWORK_INTERFACE
+
 /* Label of "Quantity" key inside config files */
 #undef _CONFIG_KEY_QUANTITY
 

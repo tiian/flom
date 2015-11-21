@@ -368,6 +368,23 @@ AT_DATA([flom.conf],
 AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_MULTICAST_PORT@], [0], [expout], [ignore])
 AT_CLEANUP
 
+AT_SETUP([Network interface: -n, --network-interface])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_NETWORK@]/@_CONFIG_KEY_NETWORK_INTERFACE@='dummy_eth'
+]])
+AT_CHECK([flom -V -n dummy_eth -- ls | grep @_CONFIG_KEY_NETWORK_INTERFACE@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --network-interface=dummy_eth -- ls | grep @_CONFIG_KEY_NETWORK_INTERFACE@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+[@_CONFIG_GROUP_NETWORK@]
+@_CONFIG_KEY_NETWORK_INTERFACE@=dummy_eth
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_NETWORK_INTERFACE@], [0], [expout], [ignore])
+AT_CLEANUP
+
 AT_SETUP([Discovery attempts: -D, --discovery-attempts])
 AT_DATA([expout],
 [[[@_CONFIG_GROUP_NETWORK@]/@_CONFIG_KEY_DISCOVERY_ATTEMPTS@=3

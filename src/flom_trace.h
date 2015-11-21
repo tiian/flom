@@ -32,6 +32,9 @@
 
 
 
+#ifdef HAVE_IFADDRS_H
+# include <ifaddrs.h>
+#endif
 #ifdef HAVE_NETDB_H
 # include <netdb.h>
 #endif
@@ -348,6 +351,19 @@ extern "C" {
 
 
 
+#ifdef HAVE_IFADDRS_H
+    /**
+     * Dump the content of an ifaddrs list typically returned by getifaddrs
+     * non POSIX function
+     * @param prefix IN trace prefix to print before dump (it is a fixed
+     *               prefix, not a format with values)
+     * @param ifaddr IN pointer to the first element of the list
+     */
+    void flom_trace_ifaddrs(const char *prefix, const struct ifaddrs *ifaddr);
+#endif
+
+
+    
     /**
      * Dump the content of a sockaddr struct
      * @param prefix IN trace prefix to print before dump (it is a fixed

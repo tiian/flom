@@ -218,6 +218,10 @@ extern const gchar *FLOM_CONFIG_KEY_MULTICAST_PORT;
  */
 extern const gchar *FLOM_CONFIG_GROUP_NETWORK;
 /**
+ * Label associated to "NetworkInterface" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_NETWORK_INTERFACE;
+/**
  * Label associated to "DiscoveryAttempts" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_DISCOVERY_ATTEMPTS;
@@ -344,6 +348,14 @@ typedef struct flom_config_s {
      * Daemon UDP/IP multicast port
      */
     gint               multicast_port;
+    /**
+     * Network interface that must be used to reach IPv6 link local addresses
+     */
+    gchar             *network_interface;
+    /**
+     * IPv6 interface scope ID derived from @ref network_interface
+     */
+    uint32_t           sin6_scope_id;
     /**
      * Discovery attempts: how many time a request will be issued
      */
@@ -858,6 +870,44 @@ extern "C" {
     }
 
 
+    
+    /**
+     * Set network_interface in config object
+     * @param config IN/OUT configuration object, NULL for global config
+     * @param value IN set the new value for network_interface property
+     * @return a reason code
+     */
+    int flom_config_set_network_interface(flom_config_t *config,
+                                          const gchar *value);
+        
+
+
+    /**
+     * Retrieve the network interface that must be used to reach IPv6 link
+     * local addresses
+     * @param config IN/OUT configuration object, NULL for global config
+     * @return network interface
+     */
+    static inline const gchar *flom_config_get_network_interface(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.network_interface : config->network_interface;
+    }
+
+
+
+    /**
+     * Retrieve the IPv6 scope ID associated to the network interface
+     * @param config IN/OUT configuration object, NULL for global config
+     * @return IPv6 scope ID
+     */
+    static inline uint32_t flom_config_get_sin6_scope_id(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.sin6_scope_id : config->sin6_scope_id;
+    }
+
+    
     
     /**
      * Set UDP/IP discovery attempts config parameter
