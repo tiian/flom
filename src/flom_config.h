@@ -897,6 +897,17 @@ extern "C" {
 
 
     /**
+     * Directly set the IPv6 scope id (typecally retrieved by an incoming
+     * connection)
+     * @param config IN/OUT configuration object, NULL for global config
+     * @param value IN set the new value for sin6_scope_id property
+     * @return
+     */
+    int flom_config_set_sin6_scope_id(flom_config_t *config, uint32_t value);
+
+    
+
+    /**
      * Retrieve the IPv6 scope ID associated to the network interface
      * @param config IN/OUT configuration object, NULL for global config
      * @return IPv6 scope ID

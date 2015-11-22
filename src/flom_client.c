@@ -392,7 +392,9 @@ const struct addrinfo *flom_client_connect_tcp_try(
         struct sockaddr *sa = gai->ai_addr;
         /* IPv6 addresses could need sin6_scope_id set if the user specified
            a network interface */
-        if (AF_INET6 == gai->ai_family &&
+        FLOM_TRACE_SOCKADDR("flom_client_connect_tcp_try: sa ",
+                            sa, gai->ai_addrlen);
+        if (AF_INET6 == sa->sa_family &&
             NULL != flom_config_get_network_interface(config)) {
             memcpy(&sa6, sa, gai->ai_addrlen);
             sa6.sin6_scope_id = flom_config_get_sin6_scope_id(config);
@@ -408,11 +410,8 @@ const struct addrinfo *flom_client_connect_tcp_try(
                         strerror(errno)));
             gai = gai->ai_next;
         } else {
-            FLOM_TRACE_HEX_DATA("flom_client_connect_tcp_try/connect(): "
-                                "gai->ai_addr ",
-                                (void *)sa, gai->ai_addrlen);
-            FLOM_TRACE_SOCKADDR("flom_client_connect_tcp_try/connect(): "
-                                "gai->ai_addr ", sa, gai->ai_addrlen);
+            FLOM_TRACE_SOCKADDR("flom_client_connect_tcp_try: sa ",
+                                sa, gai->ai_addrlen);
             if (-1 == connect(*fd, sa, gai->ai_addrlen)) {
                 FLOM_TRACE(("flom_client_connect_tcp_try/connect(): "
                             "errno=%d '%s', skipping...\n", errno,
@@ -443,6 +442,7 @@ int flom_client_discover_udp(flom_config_t *config,
                      , RECVFROM_ERROR
                      , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
                      , MSG_DESERIALIZE_ERROR
+                     , SET_SIN6_SCOPE_ID_ERROR
                      , CLIENT_CONNECT_TCP_ERROR
                      , INVALID_AI_FAMILY2
                      , CLIENT_DISCOVER_UDP_CONNECT_ERROR
@@ -664,7 +664,7 @@ int flom_client_discover_udp(flom_config_t *config,
             THROW(CONNECTION_REFUSED);
         FLOM_TRACE(("flom_client_discover_udp: recvfrom()='%*.*s', %d\n",
                     received, received, in_buffer, received));        
-        FLOM_TRACE_HEX_DATA("flom_client_discover_udp: from ",
+        FLOM_TRACE_SOCKADDR("flom_client_discover_udp: from ",
                             (void *)&from, addrlen);
         /* this UDP/IP socket is no more useful */
         close(fd);
@@ -698,6 +698,15 @@ int flom_client_discover_udp(flom_config_t *config,
                 config, msg.body.discover_16.network.address);
             flom_config_set_unicast_port(
                 config, msg.body.discover_16.network.port);
+            /* IPv6 must save sin6_scope_id to reply using the right network
+               interface */
+            if (AF_INET6 == gai->ai_family) {
+                struct sockaddr_in6 from6;
+                memcpy(&from6, &from, addrlen = sizeof(from6));
+                if (FLOM_RC_OK != (ret_cod = flom_config_set_sin6_scope_id(
+                                       config, from6.sin6_scope_id)))
+                    THROW(SET_SIN6_SCOPE_ID_ERROR);
+            }   
             /* switch to normal TCP connect phase */
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(
                                    config, cd, start_daemon)))
@@ -762,6 +771,7 @@ int flom_client_discover_udp(flom_config_t *config,
                 ret_cod = FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR;
                 break;
             case MSG_DESERIALIZE_ERROR:
+            case SET_SIN6_SCOPE_ID_ERROR:
             case CLIENT_CONNECT_TCP_ERROR:
                 break;
             case INVALID_AI_FAMILY2:

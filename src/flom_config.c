@@ -1466,7 +1466,6 @@ int flom_config_set_network_interface(flom_config_t *config,
             g_free(config->network_interface);
             config->network_interface = g_strdup(value);
         }
-
         
         THROW(NONE);
     } CATCH {
@@ -1490,6 +1489,96 @@ int flom_config_set_network_interface(flom_config_t *config,
         freeifaddrs(ifaddr);
 #endif /* HAVE_FREEIFADDRS */
     FLOM_TRACE(("flom_config_set_network_interface/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_config_set_sin6_scope_id(flom_config_t *config, uint32_t value)
+{
+    enum Exception { GETIFADDRS_ERROR
+                     , INVALID_IPV6_SIN6_SCOPE_ID
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+#ifdef HAVE_GETIFADDRS
+    /* getifaddrs is not POSIX and we can not be sure it's available */
+    struct ifaddrs *ifaddr = NULL, *ifa;
+#endif /* HAVE_GETIFADDRS */
+    
+    FLOM_TRACE(("flom_config_set_sin6_scope_id\n"));
+    TRY {
+        int found = FALSE;
+        
+        /* pick-up network_interface using sin6_scope_id as the key*/
+#ifdef HAVE_GETIFADDRS
+        /* getifaddrs is not POSIX and we can not be sure it's available */
+        if (-1 == getifaddrs(&ifaddr)) {
+            FLOM_TRACE(("flom_config_set_sin6_scope_id/getifaddrs(): "
+                        "errno=%d '%s'\n", errno, strerror(errno)));
+            THROW(GETIFADDRS_ERROR);
+        } else {
+            FLOM_TRACE_IFADDRS("flom_config_set_sin6_scope_id/"
+                               "getifaddrs(): ", ifaddr);
+        }
+        /* search interface for IPv6 networking */
+        for (ifa=ifaddr; NULL!=ifa; ifa=ifa->ifa_next) {
+            struct sockaddr_in6 sa6;
+            
+            if (NULL == ifa->ifa_addr) continue;
+            if (AF_INET6 != ifa->ifa_addr->sa_family) continue;
+            memcpy(&sa6, ifa->ifa_addr, sizeof(sa6));
+            if (value == sa6.sin6_scope_id) {
+                FLOM_TRACE(("flom_config_set_sin6_scope_id: found "
+                            "interface ifa_name='%s', sin6_scope_id=%u\n",
+                            ifa->ifa_name, sa6.sin6_scope_id));
+                FLOM_TRACE_SOCKADDR("flom_config_set_sin6_scope_id: "
+                                    "associated IPv6 address is ",
+                                    (struct sockaddr *)&sa6, sizeof(sa6));
+                if (NULL == config) {
+                    g_free(global_config.network_interface);
+                    global_config.network_interface = g_strdup(ifa->ifa_name);
+                    global_config.sin6_scope_id = sa6.sin6_scope_id;
+                } else {
+                    config->sin6_scope_id = sa6.sin6_scope_id;
+                    g_free(config->network_interface);
+                    config->network_interface = g_strdup(ifa->ifa_name);
+                }
+                found = TRUE;
+                break;
+            } /* if (0 == strcmp(value, ifa->ifa_name)) { */
+        } /* for (ifa=ifaddr */
+        if (!found) {
+            FLOM_TRACE(("flom_config_set_sin6_scope_id: a valid network "
+                        "interface has been found for sin6_scope_id='%u'\n",
+                        value));
+            THROW(INVALID_IPV6_SIN6_SCOPE_ID);
+        }
+#endif /* HAVE_GETIFADDRS */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case GETIFADDRS_ERROR:
+                ret_cod = FLOM_RC_GETIFADDRS_ERROR;
+                break;
+            case INVALID_IPV6_SIN6_SCOPE_ID:
+                ret_cod = FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+#ifdef HAVE_FREEIFADDRS
+    /* freeifaddrs is not POSIX and we can not be sure it's available */
+    if (NULL != ifaddr)
+        freeifaddrs(ifaddr);
+#endif /* HAVE_FREEIFADDRS */
+    FLOM_TRACE(("flom_config_set_sin6_scope_id/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
