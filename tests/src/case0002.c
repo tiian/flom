@@ -38,7 +38,7 @@ const char *nd_multicast_address = "224.0.0.1";
 /*
  * Happy path usage with a static handle
  */
-void static_handle_happy_path(void) {
+void static_handle_happy_path(const char *nd_network_interface) {
     int ret_cod;
     flom_handle_t my_handle;
 
@@ -115,7 +115,8 @@ void static_handle_happy_path(void) {
     /* check resource create 1/2 */
     if (flom_handle_get_resource_create(&my_handle)) {
         fprintf(stderr,
-                "Unexpected result from flom_handle_set/get_resource_create\n");
+                "Unexpected result from flom_handle_set/"
+                "get_resource_create\n");
         exit(1);
     }
     /* set a new value for resource create property */
@@ -214,7 +215,7 @@ void static_handle_happy_path(void) {
     /* get current multicast address */
     printf("flom_handle_get_multicast_address() = '%s'\n",
            flom_handle_get_multicast_address(&my_handle));
-    /* set a new multicast_address */
+    /* set a new multicast address */
     flom_handle_set_multicast_address(&my_handle, nd_multicast_address);
     /* get new multicast address */
     printf("flom_handle_get_multicast_address() = '%s'\n",
@@ -225,6 +226,29 @@ void static_handle_happy_path(void) {
         fprintf(stderr,
                 "Unexpected result from flom_handle_set/"
                 "get_multicast_address\n");
+        exit(1);
+    }
+    
+    /* get current network interface */
+    fprintf(stderr, "flom_handle_get_network_interface() = '%s'\n",
+           flom_handle_get_network_interface(&my_handle));
+    /* set a new network interface */
+    if (FLOM_RC_OK == flom_handle_set_network_interface(
+            &my_handle, nd_network_interface)) {
+        /* get new network interface */
+        fprintf(stderr, "flom_handle_get_network_interface() = '%s'\n",
+               flom_handle_get_network_interface(&my_handle));
+        /* check network interface */
+        if (strcmp(nd_network_interface,
+                   flom_handle_get_network_interface(&my_handle))) {
+            fprintf(stderr,
+                    "Unexpected result from flom_handle_set/"
+                    "get_network_interface\n");
+            exit(1);
+        }
+    } else {
+        fprintf(stderr, "'%s' is not a valid IPv6 network interface for "
+                "this system\n", nd_network_interface);
         exit(1);
     }
     
@@ -341,7 +365,7 @@ void static_handle_happy_path(void) {
 /*
  * Happy path usage with a dynamic handle
  */
-void dynamic_handle_happy_path(void) {
+void dynamic_handle_happy_path(const char *nd_network_interface) {
     int ret_cod;
     flom_handle_t *my_handle = NULL;
 
@@ -531,6 +555,29 @@ void dynamic_handle_happy_path(void) {
         exit(1);
     }
     
+    /* get current network interface */
+    fprintf(stderr, "flom_handle_get_network_interface() = '%s'\n",
+           flom_handle_get_network_interface(my_handle));
+    /* set a new network interface */
+    if (FLOM_RC_OK == flom_handle_set_network_interface(
+            my_handle, nd_network_interface)) {
+        /* get new network interface */
+        fprintf(stderr, "flom_handle_get_network_interface() = '%s'\n",
+               flom_handle_get_network_interface(my_handle));
+        /* check network interface */
+        if (strcmp(nd_network_interface,
+                   flom_handle_get_network_interface(my_handle))) {
+            fprintf(stderr,
+                    "Unexpected result from flom_handle_set/"
+                    "get_network_interface\n");
+            exit(1);
+        }
+    } else {
+        fprintf(stderr, "'%s' is not a valid IPv6 network interface for "
+                "this system\n", nd_network_interface);
+        exit(1);
+    }
+    
     /* set AF_UNIX/PF_LOCAL socket_name again */
     if (FLOM_RC_OK != (ret_cod = flom_handle_set_socket_name(
                            my_handle, nd_socket_name))) {
@@ -638,10 +685,15 @@ void dynamic_handle_happy_path(void) {
 
 
 int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "First argument must be a valid IPv6 network "
+                "interface\n");
+        exit(1);
+    }
     /* static handle tests */
-    static_handle_happy_path();
+    static_handle_happy_path(argv[1]);
     /* dynamic handle test */
-    dynamic_handle_happy_path();
+    dynamic_handle_happy_path(argv[1]);
     /* exit */
     return 0;
 }

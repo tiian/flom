@@ -1,11 +1,5 @@
 Road map:
 
-fix flom_conns, look at @@@
-implement C++ and Java methods for resource_network property; sin6_scope_id
-is internal and must not be exposed to client API
-implement "interface" command line option like in ping6 to support IPv6
-network aliases
-
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 
 implement a loop for connect/bind if bind returns an error: this shuold help

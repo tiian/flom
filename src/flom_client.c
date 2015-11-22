@@ -271,6 +271,7 @@ int flom_client_connect_tcp(flom_config_t *config,
                      , CONNECT_ERROR1
                      , DAEMON_NOT_STARTED2
                      , SETSOCKOPT_ERROR
+                     , INVALID_AI_FAMILY_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -337,7 +338,16 @@ int flom_client_connect_tcp(flom_config_t *config,
         /* set connection definition object attributes */
         cd->fd = fd;
         cd->type = SOCK_STREAM;
-        memcpy(&cd->sain, &p->ai_addr, p->ai_addrlen);
+        switch (result->ai_family) {
+            case AF_INET:
+                memcpy(&cd->sain, &p->ai_addr, p->ai_addrlen);
+                break;
+            case AF_INET6:
+                memcpy(&cd->sain6, &p->ai_addr, p->ai_addrlen);
+                break;
+            default:
+                THROW(INVALID_AI_FAMILY_ERROR);
+        } /* switch (result->ai_family) */
         cd->addr_len = p->ai_addrlen;
 
         /* avoid socket close operated by clean-up step */
@@ -362,6 +372,9 @@ int flom_client_connect_tcp(flom_config_t *config,
                 break;
             case SETSOCKOPT_ERROR:
                 ret_cod = FLOM_RC_SETSOCKOPT_ERROR;
+                break;
+            case INVALID_AI_FAMILY_ERROR:
+                ret_cod = FLOM_RC_INVALID_AI_FAMILY_ERROR;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

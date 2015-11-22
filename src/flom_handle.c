@@ -624,6 +624,41 @@ int flom_handle_set_multicast_port(flom_handle_t *handle, int value)
 
 
 
+int flom_handle_set_network_interface(flom_handle_t *handle,
+                                      const char *value)
+{
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_handle_set_network_interface: "
+                "old value='%s', new value='%s'\n",
+                STRORNULL(flom_config_get_network_interface(handle->config)),
+                STRORNULL(value)));
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            ret_cod = flom_config_set_network_interface(
+                handle->config, (const gchar *)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_network_interface: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+            ret_cod = FLOM_RC_API_IMMUTABLE_HANDLE;
+    } /* switch (handle->state) */
+    return ret_cod;
+}
+
+
+
+const char *flom_handle_get_network_interface(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_network_interface: value=%d\n",
+                flom_config_get_network_interface(handle->config)));
+    return flom_config_get_network_interface(handle->config);
+}
+
+
+
 int flom_handle_get_resource_create(const flom_handle_t *handle)
 {
     FLOM_TRACE(("flom_handle_get_resource_create: value=%d\n",

@@ -38,7 +38,7 @@ const string ndMulticastAddress("224.0.0.1");
 /*
  * Happy path usage with a static handle
  */
-void staticHandleHappyPath(void) {
+void staticHandleHappyPath(const string ndNetworkInterface) {
     int retCod;
     FlomHandle myHandle;
 
@@ -285,6 +285,26 @@ void staticHandleHappyPath(void) {
         exit(1);
     }
     
+    /* get current network interface */
+    cerr << "FlomHandle.getNetworkInterface() = '"
+         << myHandle.getNetworkInterface() << "'" << endl;
+    /* set a new network interface */
+    if (FLOM_RC_OK == myHandle.setNetworkInterface(ndNetworkInterface)) {
+        /* get new network interface */
+        cerr << "FlomHandle.getNetworkInterface() = '"
+             << myHandle.getNetworkInterface() << "'" << endl;
+        /* check network interface */
+        if (ndNetworkInterface.compare(myHandle.getNetworkInterface())) {
+            cerr << "Unexpected result from FlomHandle/getNetworkInterface"
+                 << endl;
+            exit(1);
+        }
+    } else {
+        cerr << "'" << ndNetworkInterface << "' is not a valid IPv6 network "
+             << "interface for this system" << endl;
+        exit(1);
+    }
+    
     /* set AF_UNIX/PF_LOCAL socket_name again */
     if (FLOM_RC_OK != (retCod = myHandle.setSocketName(ndSocketName))) {
         cerr << "FlomHandle.setSocketName() returned " << retCod << " '" <<
@@ -314,7 +334,7 @@ void staticHandleHappyPath(void) {
 /*
  * Happy path usage with a dynamic handle
  */
-void dynamicHandleHappyPath(void) {
+void dynamicHandleHappyPath(const string ndNetworkInterface) {
     int retCod;
     FlomHandle *myHandle = NULL;
 
@@ -348,7 +368,8 @@ void dynamicHandleHappyPath(void) {
     /* set a new trace filename */
     myHandle->setTraceFilename(ndTraceFilename);
     /* get new trace filename */
-    cout << "FlomHandle->getTraceFilename() = '" << myHandle->getTraceFilename()
+    cout << "FlomHandle->getTraceFilename() = '"
+         << myHandle->getTraceFilename()
          << "'" << endl;
     /* check trace filename */
     if (ndTraceFilename.compare(myHandle->getTraceFilename())) {
@@ -492,6 +513,26 @@ void dynamicHandleHappyPath(void) {
         exit(1);
     }
     
+    /* get current network interface */
+    cerr << "FlomHandle->getNetworkInterface() = '"
+         << myHandle->getNetworkInterface() << "'" << endl;
+    /* set a new network interface */
+    if (FLOM_RC_OK == myHandle->setNetworkInterface(ndNetworkInterface)) {
+        /* get new network interface */
+        cerr << "FlomHandle->getNetworkInterface() = '" 
+             << myHandle->getNetworkInterface() << "'" << endl;
+        /* check network interface */
+        if (ndNetworkInterface.compare(myHandle->getNetworkInterface())) {
+            cerr << "Unexpected result from FlomHandle/getNetworkInterface"
+                 << endl;
+            exit(1);
+        }
+    } else {
+        cerr << "'" << ndNetworkInterface << "' is not a valid IPv6 network "
+             << "interface for this system" << endl;
+        exit(1);
+    }
+    
     /* set AF_UNIX/PF_LOCAL socket_name again */
     if (FLOM_RC_OK != (retCod = myHandle->setSocketName(ndSocketName))) {
         cerr << "FlomHandle->setSocketName() returned " << retCod << " '" <<
@@ -597,10 +638,16 @@ void dynamicHandleHappyPath(void) {
 
 
 int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        cerr << "First argument must be a valid IPv6 network interface"
+             << endl;
+        exit(1);
+    }
+    string NetworkInterface = string(argv[1]);
     /* static handle tests */
-    staticHandleHappyPath();
+    staticHandleHappyPath(NetworkInterface);
     /* dynamic handle test */
-    dynamicHandleHappyPath();
+    dynamicHandleHappyPath(NetworkInterface);
     /* exit */
     return 0;
 }

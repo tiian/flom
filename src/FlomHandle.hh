@@ -319,6 +319,47 @@ namespace flom {
             return flom_handle_set_multicast_port(&handle, value); }
 
         /**
+         * Gets the network interface that must be used for IPv6 link local
+         * addresses
+         * The current value can be altered using method
+         * @ref setNetworkInterface.
+         * @return the current value as a C null terminated string
+         */
+        const char *getNetworkInterfaceAsCStr() {
+            return flom_handle_get_network_interface(&handle); }
+        /**
+         * Gets the network interface that must be used for IPv6 link local
+         * addresses
+         * The current value can be altered using method
+         * @ref setNetworkInterface.
+         * @return the current value as a C++ standard string
+         */
+        string getNetworkInterface() {
+            return NULL != flom_handle_get_network_interface(&handle) ?
+                flom_handle_get_network_interface(&handle) : ""; }
+
+        /**
+         * Sets the network interface that must be used for IPv6 link local
+         * addresses
+         * The current value can be inspected using method
+         * @ref getNetworkInterface.
+         * @param value (Input): the new value (C null terminted string)
+         * @return a reason code
+         */
+        int setNetworkInterface(const char *value) {
+            return flom_handle_set_network_interface(&handle, value); }
+        /**
+         * Sets the network interface that must be used for IPv6 link local
+         * addresses
+         * The current value can be inspected using method
+         * @ref getNetworkInterface.
+         * @param value (Input): the new value (C++ standard string)
+         * @return a reason code
+         */
+        int setNetworkInterface(const string &value) {
+            flom_handle_set_network_interface(&handle, value.c_str()); }
+
+        /**
          * Gets "resource create" boolean property: it specifies if method
          * @ref lock can create a new resource when the specified
          * one is not defined; the default value is TRUE. 

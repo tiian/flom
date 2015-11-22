@@ -355,6 +355,29 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setMulticastPortJNI
 
 
 
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getNetworkInterfaceJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getNetworkInterfaceJNI\n"));
+    return (*env)->NewStringUTF(
+        env,
+        flom_handle_get_network_interface(
+            Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj)));
+}
+
+
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setNetworkInterfaceJNI
+(JNIEnv *env, jobject this_obj, jstring value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setNetworkInterfaceJNI\n"));
+    const char *cstr = (*env)->GetStringUTFChars(env, value, NULL);
+    return (jint)flom_handle_set_network_interface(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj), cstr);
+}
+
+
+    
 JNIEXPORT jboolean JNICALL Java_org_tiian_flom_FlomHandle_getResourceCreateJNI
 (JNIEnv *env, jobject this_obj)
 {

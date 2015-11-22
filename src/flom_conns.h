@@ -133,16 +133,19 @@ struct flom_conn_data_s {
         /**
          * Client address for generic connections
          */
-        struct sockaddr    sa;
+        struct sockaddr     sa;
         /**
          * Client address for AF_UNIX connections
          */
-        struct sockaddr_un saun;
+        struct sockaddr_un  saun;
         /**
          * Client address for AF_INET connections
          */
-        struct sockaddr_in sain;
-        /* @@@ */
+        struct sockaddr_in  sain;
+        /**
+         * Client address for AF_INET6 connections
+         */
+        struct sockaddr_in6 sain6;
     };
     /**
      * Last received message (allocated by malloc)
@@ -284,7 +287,7 @@ extern "C" {
      * Return the file descriptor associated to a connection
      * @param conns IN connections object
      * @param id IN identificator (position in array) of the connection
-     * @return the associated file descriptor or @ref NULL_FD if any error
+     * @return the associated file descriptor or @ref FLOM_NULL_FD if any error
      *         happens
      */
     static inline int flom_conns_get_fd(const flom_conns_t *conns, guint id) {
@@ -389,7 +392,7 @@ extern "C" {
 
 
     /**
-     * Close a file descriptor and set it to @ref NULL_FD; use
+     * Close a file descriptor and set it to @ref FLOM_NULL_FD; use
      * @ref flom_conns_clean to remove the connections associated to closed
      * file descriptors
      * @param conns IN/OUT connections object

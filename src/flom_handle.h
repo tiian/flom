@@ -358,6 +358,32 @@ extern "C" {
 
 
     /**
+     * Gets the network interface that must be used for IPv6 link local
+     * addresses
+     * The current value can be altered using function
+     *         @ref flom_handle_set_network_interface.
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    const char *flom_handle_get_network_interface(const flom_handle_t *handle);
+
+
+
+    /**
+     * Sets the network interface that must be used for IPv6 link local
+     * addresses
+     * The current value can be inspected using function
+     *         @ref flom_handle_get_network_interface.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
+     * @return a reason code
+     */
+    int flom_handle_set_network_interface(flom_handle_t *handle,
+                                          const char *value);
+
+
+    
+    /**
      * Gets "resource create" boolean property: it specifies if function
      * @ref flom_handle_lock can create a new resource when the specified
      * one is not defined; the default value is TRUE. 

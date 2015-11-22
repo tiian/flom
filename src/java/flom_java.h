@@ -145,6 +145,22 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setMulticastPortJNI
 
 /*
  * Class:     org_tiian_flom_FlomHandle
+ * Method:    getNetworkInterfaceJNI
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getNetworkInterfaceJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setNetworkInterfaceJNI
+ * Signature: (Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setNetworkInterfaceJNI
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
  * Method:    getResourceCreateJNI
  * Signature: ()Z
  */

@@ -30,7 +30,7 @@ public class case4002 {
     private final static String ndUnicastAddress = "127.0.0.1";
     private final static String ndMulticastAddress = "224.0.0.1";
     
-    private static void HappyPath() {
+    private static void HappyPath(String ndNetworkInterface) {
         try {
             FlomHandle myHandle = new FlomHandle();
             int retCod;
@@ -282,6 +282,29 @@ public class case4002 {
                 System.exit(1);
             }
     
+            /* get current network interface */
+            System.err.println("FlomHandle.getNetworkInterface() = '" +
+                               myHandle.getNetworkInterface() + "'");
+            /* set a new network interface */
+            if (FlomErrorCodes.FLOM_RC_OK ==
+                myHandle.setNetworkInterface(ndNetworkInterface)) {
+                /* get new metwork interface */
+                System.err.println("FlomHandle.getNetworkInterface() = '" +
+                                   myHandle.getNetworkInterface() + "'");
+                /* check network interface */
+                if (!ndNetworkInterface.equals(
+                        myHandle.getNetworkInterface())) {
+                    System.err.println("Unexpected result from " +
+                                       "FlomHandle.set/getNetworkInterface");
+                    System.exit(1);
+                }
+            } else {
+                System.err.println("'" + ndNetworkInterface + "' is not a " +
+                                   "valid IPv6 network interface for this " +
+                                   "system");
+                System.exit(1);
+            }
+    
             // set AF_UNIX/PF_LOCAL socket_name
             if (FlomErrorCodes.FLOM_RC_OK != (
                     retCod = myHandle.setSocketName(ndSocketName))) {
@@ -305,7 +328,12 @@ public class case4002 {
     }
     
     public static void main(String[] args) {
-        HappyPath();
-        HappyPath();
+        if (args.length < 1) {
+            System.err.println("First argument must be a valid IPv6 " +
+                               "network interface");
+            System.exit(1);
+        }
+        HappyPath(args[0]);
+        HappyPath(args[0]);
     }
 }

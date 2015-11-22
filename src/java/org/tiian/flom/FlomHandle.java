@@ -448,6 +448,51 @@ public class FlomHandle {
 
     
     /**
+     * Native method for getNetworkInterface
+     */
+    private native String getNetworkInterfaceJNI();
+    /**
+     * Gets the network interface that must be used for IPv6 link local
+     * addresses
+     * The current value can be altered using method
+     * setNetworkInterface.
+     * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
+     */
+    public String getNetworkInterface() throws FlomException {
+        String ReturnString = null;
+        nullCheck();
+        if (null == (ReturnString = getNetworkInterfaceJNI()))
+            ReturnString = new String("");
+        return ReturnString;
+    }
+
+
+    
+    /**
+     * Native method for setNetworkInterface
+     */
+    private native int setNetworkInterfaceJNI(String value);
+    /**
+     * Sets the network interface that must be used for IPv6 link local
+     * addresses
+     * The current value can be inspected using method
+     * getNetworkInterface.
+     * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
+     */
+    public int setNetworkInterface(String value) throws FlomException {
+        nullCheck(value);
+        return setNetworkInterfaceJNI(value);
+    }
+
+    
+    
+    /**
      * Native method for getResourceCreate
      */
     private native boolean getResourceCreateJNI();

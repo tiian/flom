@@ -99,6 +99,8 @@ abstract class flom {
 
 	const FLOM_RC_INVALID_IP_ADDRESS = FLOM_RC_INVALID_IP_ADDRESS;
 
+	const FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE = FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE;
+
 	const FLOM_RC_ACCEPT_ERROR = FLOM_RC_ACCEPT_ERROR;
 
 	const FLOM_RC_BIND_ERROR = FLOM_RC_BIND_ERROR;
@@ -116,6 +118,8 @@ abstract class flom {
 	const FLOM_RC_FORK_ERROR = FLOM_RC_FORK_ERROR;
 
 	const FLOM_RC_GETADDRINFO_ERROR = FLOM_RC_GETADDRINFO_ERROR;
+
+	const FLOM_RC_GETIFADDRS_ERROR = FLOM_RC_GETIFADDRS_ERROR;
 
 	const FLOM_RC_GETNAMEINFO_ERROR = FLOM_RC_GETNAMEINFO_ERROR;
 
@@ -317,6 +321,14 @@ abstract class flom {
 
 	static function flom_handle_set_multicast_port($handle,$value) {
 		return flom_handle_set_multicast_port($handle,$value);
+	}
+
+	static function flom_handle_get_network_interface($handle) {
+		return flom_handle_get_network_interface($handle);
+	}
+
+	static function flom_handle_set_network_interface($handle,$value) {
+		return flom_handle_set_network_interface($handle,$value);
 	}
 
 	static function flom_handle_get_resource_create($handle) {

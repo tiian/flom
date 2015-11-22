@@ -10,6 +10,8 @@ AT_CHECK([case0001], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([C Getter and setter methods])
+# skip if the address is not available
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 1) 6], [0], [ignore], [ignore])
 AT_DATA([expout],
 [[flom_handle_get_socket_name() = '/tmp/flom-@USER@'
 flom_handle_get_socket_name() = '/tmp/flom_socket_name'
@@ -76,7 +78,7 @@ dynamicHandleHappyPath locked element is green
 ]])
 AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
-AT_CHECK([case0002], [0], [expout], [ignore])
+AT_CHECK([case0002 $(iface_name.sh inet6 1)], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([C wrong resource unlock])
@@ -99,6 +101,8 @@ AT_CHECK([case1001], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([C++ Getter and setter methods])
+# skip if the address is not available
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 1) 6], [0], [ignore], [ignore])
 AT_DATA([expout],
 [[FlomHandle.getSocketName() = '/tmp/flom-@USER@'
 FlomHandle.getSocketName() = '/tmp/flom_socket_name'
@@ -166,7 +170,7 @@ dynamicHandleHappyPath locked element is blue
 AT_CHECK([if test "$CPPAPI" = "no"; then exit 77; fi])
 AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
-AT_CHECK([case1002], [0], [expout], [ignore])
+AT_CHECK([case1002 $(iface_name.sh inet6 1)], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Java Happy path])
@@ -186,6 +190,8 @@ AT_CHECK([java -Djava.library.path=@abs_top_builddir@/src/java/.libs -cp @abs_to
 AT_CLEANUP
 
 AT_SETUP([Java Getter and setter methods])
+# skip if the address is not available
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 1) 6], [0], [ignore], [ignore])
 AT_DATA([expout],
 [[FlomHandle.getSocketName() = '/tmp/flom-@USER@'
 FlomHandle.getSocketName() = '/tmp/flom_socket_name'
@@ -253,7 +259,7 @@ HappyPath locked element is blue
 AT_CHECK([if test "$JAVAAPI" = "no"; then exit 77; fi])
 AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
-AT_CHECK([java -Djava.library.path=@abs_top_builddir@/src/java/.libs -cp @abs_top_builddir@/src/java/flom.jar:@abs_top_builddir@/tests/src case4002], [0], [expout], [ignore])
+AT_CHECK([java -Djava.library.path=@abs_top_builddir@/src/java/.libs -cp @abs_top_builddir@/src/java/flom.jar:@abs_top_builddir@/tests/src case4002 $(iface_name.sh inet6 1)], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([PHP Happy path])

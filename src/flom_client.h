@@ -125,7 +125,7 @@ extern "C" {
      * Connect to a daemon using TCP/IP; daemon was previously discovered
      * using multicast UDP/IP
      * @param cd IN/OUT connection data
-     * @param sa IN address (IPv4 or IPv6) and port of daemon
+     * @param so IN address (IPv4 or IPv6) and port of daemon
      * @param addrlen size of sa struct
      * @return a reason code
      */

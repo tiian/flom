@@ -109,8 +109,10 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
                 tmp->saun = *((struct sockaddr_un *)sa);
                 break;
             case AF_INET:
-            case AF_INET6:
                 tmp->sain = *((struct sockaddr_in *)sa);
+                break;
+            case AF_INET6:
+                tmp->sain6 = *((struct sockaddr_in6 *)sa);
                 break;
             default:
                 THROW(INVALID_DOMAIN);

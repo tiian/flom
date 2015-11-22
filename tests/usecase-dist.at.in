@@ -492,23 +492,33 @@ AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh $(iface_name.s
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with autodisc not started (IPv6, eth0)])
+AT_SETUP([Net daemon with autodisc not started {IPv6, 1st iface}])
 # skipping for some Linux distributions
 AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
-AT_CHECK([iface_ip_address.sh eth0 6], [0], [ignore], [ignore])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 1) 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh eth0 6)%eth0 -A ff01::1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh $(iface_name.sh inet6 1) 6) -n $(iface_name.sh inet6 1) -A ff01::1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Net daemon with autodisc not started (IPv6, eth1)])
+AT_SETUP([Net daemon with autodisc not started {IPv6, 2nd iface}])
 # skipping for some Linux distributions
 AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
-AT_CHECK([iface_ip_address.sh eth1 6], [0], [ignore], [ignore])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 2) 6], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 # this must fail because there's no an active daemon
-AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh eth1 6)%eth1 -A ff01::1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh $(iface_name.sh inet6 2) 6) -n $(iface_name.sh inet6 2) -A ff01::1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([pgrep flom], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Net daemon with autodisc not started {IPv6, 3rd iface}])
+# skipping for some Linux distributions
+AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 3) 6], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+# this must fail because there's no an active daemon
+AT_CHECK([flom_test_exec3.sh 1 0 0 "-d 0 -a $(iface_ip_address.sh $(iface_name.sh inet6 3) 6) -n $(iface_name.sh inet6 3) -A ff01::1"], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 

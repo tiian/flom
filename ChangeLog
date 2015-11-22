@@ -1,5 +1,9 @@
 LOG:
 
+         - 1.1.1 IoGaCo, release of IPv6 improvement
+	New option -n, --network-interface to specify the network interface
+	that must be used to send packets to an IPv6 link local address
+
 20151117 - 1.1.0 IoGaCo, first release: IPv6 support
 	New option --debug-feature to debug some special feature
 	IPv6 support; please pay attention to this unresolved bug:
