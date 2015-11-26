@@ -1,6 +1,6 @@
 LOG:
 
-         - 1.1.1 IoGaCo, release of IPv6 improvement
+20151126 - 1.1.1 IoGaCo, release of IPv6 improvement
 	New option -n, --network-interface to specify the network interface
 	that must be used to send packets to an IPv6 link local address
 

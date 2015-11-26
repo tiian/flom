@@ -753,7 +753,10 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
         /* prepare hints for getaddressinfo() */
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_CANONNAME;
-        hints.ai_family = AF_UNSPEC; 
+        if (NULL != flom_config_get_network_interface(config))
+            hints.ai_family = AF_INET6;
+        else
+            hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_DGRAM;
         /* prepare a local address structure for incoming datagrams */
         switch (family) {

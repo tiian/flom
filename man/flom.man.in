@@ -74,7 +74,7 @@ UDP/IP multicast address that must be used to discover the location of a running
 UDP/IP multicast port that must be used to discover the location of a running daemon; if the daemon must be started locally, \fIIPport\fP must be a port not used by another process on this host. If \fIIPaddress\fP (see \fB-A\fP, \fB--multicast-address\fP) is specified and \fIIPport\fP is not specified, the default value is @_DEFAULT_DAEMON_PORT@
 .TP
 .B -n, --network-interface=\fIinterface
-Network \fIinterface\fP that must be used to reach IPv6 \fIlink-local\fP addresses. It's the equivalent of the % notation that can be used for network addresses but can not be used for network aliases. Typical values are \fIeth0\fP, \fIeth1\fP and so on.
+Network \fIinterface\fP that must be used to reach IPv6 \fIlink-local\fP addresses. It's the equivalent of the % notation that can be used for network addresses but can not be used for network aliases. Typical values are \fIeth0\fP, \fIeth1\fP and so on. If this option is specified, only IPv6 network adresses will be used.
 .TP
 .B -d, --daemon-lifespan=\fImilliseconds
 lifespan of \fBflom\fP daemon if activated, expressed using milliseconds. The value of \fImilliseconds\fP can be and integer greater than 0, equal to 0 or less than 0: values greater than 0 are interpreted as minimum daemon lifetime (in milliseconds), the value 0 is interpreted as "don't start a daemon process" and values less than 0 are interpreted as "run forever" (or until a kill message is sent to \fBflom\fP daemon). If not specified, the default value is @_DEFAULT_DAEMON_LIFESPAN@ milliseconds

@@ -292,7 +292,11 @@ int flom_client_connect_tcp(flom_config_t *config,
         memset(&hints, 0, sizeof(hints));
 
         hints.ai_flags = AI_CANONNAME;
-        hints.ai_family = AF_UNSPEC; 
+        /* interface name is specified, IPv6 is forced */
+        if (NULL != flom_config_get_network_interface(config))
+            hints.ai_family = AF_INET6;
+        else
+            hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = IPPROTO_TCP;
         snprintf(port_string, sizeof(port_string), "%u",
@@ -490,7 +494,10 @@ int flom_client_discover_udp(flom_config_t *config,
                     flom_config_get_multicast_port(config)));
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_PASSIVE;
-        hints.ai_family = AF_UNSPEC;
+        if (NULL != flom_config_get_network_interface(config))
+            hints.ai_family = AF_INET6;
+        else
+            hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_DGRAM;
         hints.ai_protocol = IPPROTO_UDP;
         snprintf(port, sizeof(port), "%u",
