@@ -24,7 +24,7 @@ This is a brief list of the available features:
   the others node)
 - easy API (Application Programming Interface) to synchronize your own
   programs with shell executed flom commands. These languages have a ready
-  to use binding: C, C++, PHP, Python.
+  to use binding: C, C++, Java, PHP, Python.
 
 FLoM central documentation site is hosted by SourceForge Wiki: https://sourceforge.net/p/flom/wiki/Home/
 
@@ -108,14 +108,14 @@ times.
 
 Dependencies report:
 O.S.		Feature		Packages
-Ubuntu		Basic		make gcc libglib2.0-dev pkg-config automake
+Ubuntu		Basic		make gcc libglib2.0-dev libdbus-1-dev pkg-config automake
 Ubuntu		C++ API		g++
 Ubuntu		PHP API		swig php5-cli php5-dev
 Ubuntu		Python API	swig python-dev
 Ubuntu	10.04	Java API	openjdk-6-jdk
 Ubuntu	12.04	Java API	default-jdk (openjdk 6)
 Ubuntu	14.04	Java API	default-jdk (openjdk 7)
-CentOS		Basic		gcc glib2-devel autoconf
+CentOS		Basic		gcc glib2-devel dbus-devel autoconf
 CentOS		C++ API		gcc-c++
 CentOS		PHP API		swig php-cli php-devel
 CentOS		Python API	swig python-devel

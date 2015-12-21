@@ -24,6 +24,9 @@
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
+#ifdef HAVE_DBUS_DBUS_H
+# include <dbus/dbus.h>
+#endif
 
 
 
@@ -128,14 +131,18 @@ int main (int argc, char *argv[])
     g_option_context_free(option_context);
 
     if (print_version) {
+        char *machine_id = dbus_get_local_machine_id();
         g_print("FLoM: Free LOck Manager\n"
                 "Copyright (c) 2013-2015, Christian Ferrari; "
                 "all rights reserved.\n"
                 "License: GPL (GNU Public License) version 2\n"
                 "Package name: %s; package version: %s; release date: %s\n"
+                "Machine-id: %s\n"
                 "Access http://sourceforge.net/projects/flom/ for "
                 "project community activities\n",
-                FLOM_PACKAGE_NAME, FLOM_PACKAGE_VERSION, FLOM_PACKAGE_DATE);
+                FLOM_PACKAGE_NAME, FLOM_PACKAGE_VERSION, FLOM_PACKAGE_DATE,
+                machine_id);
+        dbus_free(machine_id);
         exit(FLOM_ES_OK);
     }
 

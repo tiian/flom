@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.1.1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [1.1.2-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -186,6 +186,16 @@ fi
 CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
 #GLIB2_LIBS automatically set by PKG_CHECK_MODULES macro
 
+# DBUS check
+pkg-config --atleast-version=1.2.16 dbus-1
+if test $? -eq 0
+then
+	PKG_CHECK_MODULES([DBUS1], [dbus-1 >= 1.2.16])
+	CPPFLAGS="$CPPFLAGS $DBUS1_CFLAGS"
+else
+        AC_MSG_ERROR([cannot find dbus package at level 1.2.16 or above])
+fi
+
 # Checking the availability of some utility programs
 AC_CHECK_PROGS(DOXYGEN, [doxygen], [true])
 AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
@@ -262,6 +272,7 @@ AM_CONDITIONAL([COND_PYTHONAPI], [test "$PYTHONAPI" = "yes"])
 AC_DEFINE_UNQUOTED([_ES_GENERIC_ERROR], [$_ES_GENERIC_ERROR], [Exit status for generic error])
 
 AC_CHECK_HEADERS(arpa/inet.h assert.h)
+AC_CHECK_HEADERS(dbus/dbus.h)
 AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_HEADERS(glib.h)
@@ -329,6 +340,7 @@ AC_CHECK_FUNCS(vsnprintf)
 
 AC_SUBST(GLIB2_LIBS)
 AC_SUBST(GTHREAD2_LIBS)
+AC_SUBST(DBUS1_LIBS)
 AC_SUBST(HAVE_DOT)
 
 # substitution of the current logged user
