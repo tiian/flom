@@ -1,12 +1,16 @@
 	FLoM, Free Lock Manager, a free and open source lock manager
 
 FLoM (Free Lock Manager) is an open source and free lock manager designed to
-serialize and synchronize shell command execution.
-Since version 0.9.0 it's a library to synchronize your own program too; basic
-usage examples are in doc/examples directory (default installation path is
-/usr/local/share/doc/flom/examples/)
+serialize and synchronize shell command execution and custom programs
+developed in C, C++, Java, PHP, Python.
+Basic usage examples are in doc/examples directory (default installation path 
+is /usr/local/share/doc/flom/examples/)
 API documentation is distributed in directory doc/html/ (default installation
 path is /usr/local/share/doc/flom/html/) and on the web at http://flom.sourceforge.net/
+FLoM is implemented using state of the art reactive programming: a set of
+independent non blocking threads reach unparalleled scalability and 
+performance. The usage of mutexes is reduced to trifling functions: FLoM can be
+considered a "lock free lock manager".
 
 A list of implemented use cases is listed at this URL: 
 http://sourceforge.net/p/flom/wiki/FLOM%20by%20examples/
@@ -18,9 +22,10 @@ This is a brief list of the available features:
 - resource utilization leveling to avoid too many similar tasks run at the
   same time 
 - all the synchronization features are available inside a single host or in
-  a distributed environment using TCP/IP networking
+  a distributed environment using TCP/IP networking (both IPv4 and IPv6 are
+  suppoted)
 - an autodiscovery feature is available to reduce deployment complexity in a
-  distributed environment (every node at any time may become a "server" for
+  cloud environment (every node at any time may become a "server" for
   the others node)
 - easy API (Application Programming Interface) to synchronize your own
   programs with shell executed flom commands. These languages have a ready
@@ -108,14 +113,14 @@ times.
 
 Dependencies report:
 O.S.		Feature		Packages
-Ubuntu		Basic		make gcc libglib2.0-dev libdbus-1-dev pkg-config automake
+Ubuntu		Basic		make gcc libglib2.0-dev dbus libdbus-1-dev pkg-config automake
 Ubuntu		C++ API		g++
 Ubuntu		PHP API		swig php5-cli php5-dev
 Ubuntu		Python API	swig python-dev
 Ubuntu	10.04	Java API	openjdk-6-jdk
 Ubuntu	12.04	Java API	default-jdk (openjdk 6)
 Ubuntu	14.04	Java API	default-jdk (openjdk 7)
-CentOS		Basic		gcc glib2-devel dbus-devel autoconf
+CentOS		Basic		gcc glib2-devel dbus dbus-devel autoconf
 CentOS		C++ API		gcc-c++
 CentOS		PHP API		swig php-cli php-devel
 CentOS		Python API	swig python-devel

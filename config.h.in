@@ -51,6 +51,15 @@
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #undef HAVE_NETINET_TCP_H
 
+/* Define to 1 if you have the <openssl/err.h> header file. */
+#undef HAVE_OPENSSL_ERR_H
+
+/* Define to 1 if you have the <openssl/ssl.h> header file. */
+#undef HAVE_OPENSSL_SSL_H
+
+/* Define to 1 if you have the <openssl/x509v3.h> header file. */
+#undef HAVE_OPENSSL_X509V3_H
+
 /* Define to 1 if the system has the type `pid_t'. */
 #undef HAVE_PID_T
 
@@ -273,6 +282,12 @@
 
 /* Label of "IPv6 Multicast Server" debug feature */
 #undef _DEBUG_FEATURES_IPV6_MULTICAST_SERVER
+
+/* Label of "TLS Client" debug feature */
+#undef _DEBUG_FEATURES_TLS_CLIENT
+
+/* Label of "TLS Server" debug feature */
+#undef _DEBUG_FEATURES_TLS_SERVER
 
 /* Default value for option daemon lifespan (milliseconds) */
 #undef _DEFAULT_DAEMON_LIFESPAN

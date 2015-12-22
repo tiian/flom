@@ -145,6 +145,11 @@
  */
 #define FLOM_TRACE_MOD_DEBUG_FEATURES     0x00010000
 
+/**
+ * trace module for TLS/SSL functions
+ */
+#define FLOM_TRACE_MOD_TLS                0x00020000
+
 
 
 /**

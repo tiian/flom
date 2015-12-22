@@ -1,4 +1,6 @@
 LOG:
+         - 1.1.2 IoGaCo, SSL/TLS
+	New option --unique-id to retrieve the FLoM unique identificator
 
 20151126 - 1.1.1 IoGaCo, release of IPv6 improvement
 	New option -n, --network-interface to specify the network interface

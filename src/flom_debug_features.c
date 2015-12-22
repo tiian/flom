@@ -43,6 +43,8 @@
 
 const char *FLOM_DEBUG_FEATURES_IPV6_MULTICAST_SERVER = _DEBUG_FEATURES_IPV6_MULTICAST_SERVER;
 const char *FLOM_DEBUG_FEATURES_IPV6_MULTICAST_CLIENT = _DEBUG_FEATURES_IPV6_MULTICAST_CLIENT;
+const char *FLOM_DEBUG_FEATURES_TLS_SERVER = _DEBUG_FEATURES_TLS_SERVER;
+const char *FLOM_DEBUG_FEATURES_TLS_CLIENT = _DEBUG_FEATURES_TLS_CLIENT;
 
 
 
@@ -61,6 +63,11 @@ int flom_debug_features(const char *name)
         else if (0 == strcasecmp(name,
                                  FLOM_DEBUG_FEATURES_IPV6_MULTICAST_CLIENT))
             ret_cod = flom_debug_features_ipv6_multicast_client();
+        else if (0 == strcasecmp(name, FLOM_DEBUG_FEATURES_TLS_SERVER))
+            ret_cod = flom_debug_features_tls_server();
+        else if (0 == strcasecmp(name,
+                                 FLOM_DEBUG_FEATURES_TLS_CLIENT))
+            ret_cod = flom_debug_features_tls_client();
         else {
             FLOM_TRACE(("flom_debug_features: debug feature '%s' "
                         "is not available\n", name));
@@ -567,6 +574,56 @@ int flom_debug_features_ipv6_multicast_client(void)
     if (FLOM_NULL_FD != fdo)
         close(fdo);
     FLOM_TRACE(("flom_debug_features_ipv6_multicast_client/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_debug_features_tls_server(void)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_debug_features_tls_server\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_debug_features_tls_server/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_debug_features_tls_client(void)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_debug_features_tls_client\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_debug_features_tls_client/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

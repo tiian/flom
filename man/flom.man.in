@@ -106,6 +106,9 @@ file destination of the trace messages produced by the daemon (background) proce
 .B --append-trace-file=\fIyes|no
 \fBdefault\fP (\fIno\fP): the command will truncate the trace file(s), otherwise (\fIyes\fP) it will append the trace file(s). The number and the name of the trace files depends on \fB-T, --command-trace-file\fP and \fB-t, --daemon-trace-file\fP options
 .TP
+.B --unique-id
+print flom unique ID and exit
+.TP
 .B --debug-feature=\fPipv6.multicast.server
 activate an IPv6 multicast server (requester) for debugging purposes
 .TP

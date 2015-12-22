@@ -12,7 +12,7 @@ AM_CPPFLAGS = -D_SYSCONFDIR='"@sysconfdir@"'
 AM_CFLAGS = -Wall
 lib_LTLIBRARIES = libflom.la
 libflom_la_LDFLAGS = -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
-flom_LDADD=@GLIB2_LIBS@ @DBUS1_LIBS@ libflom.la
+flom_LDADD=@GLIB2_LIBS@ @DBUS1_LIBS@ @OPENSSL_LIBS@ libflom.la
 flom_LDFLAGS = -Wl,-rpath -Wl,$(libdir)
 bin_PROGRAMS = flom
 EXTRA_DIST = flom_errors.h.in
@@ -41,12 +41,12 @@ noinst_HEADERS = flom_client.h flom_config.h flom_conns.h \
 	flom_locker.h flom_msg.h flom_resource_hier.h \
 	flom_resource_numeric.h flom_resource_set.h \
 	flom_resource_simple.h flom_rsrc.h \
-	flom_syslog.h flom_trace.h $(NOINST_CPPAPI)
+	flom_syslog.h flom_tls.h flom_trace.h $(NOINST_CPPAPI)
 
 libflom_la_SOURCES = flom_client.c flom_config.c flom_conns.c \
 	flom_daemon.c flom_daemon_mngmnt.c flom_errors.c flom_locker.c \
 	flom_msg.c flom_handle.c \
 	flom_resource_hier.c flom_resource_numeric.c flom_resource_set.c \
-	flom_resource_simple.c flom_rsrc.c flom_trace.c
+	flom_resource_simple.c flom_rsrc.c flom_tls.c flom_trace.c
 
 flom_SOURCES = main.c flom_exec.c flom_debug_features.c

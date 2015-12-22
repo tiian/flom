@@ -73,6 +73,7 @@ static gint immediate_exit = 0;
 static gchar *command_trace_file = NULL;
 static gchar *daemon_trace_file = NULL;
 static gchar *append_trace_file = NULL;
+static gboolean unique_id = FALSE;
 static gchar *debug_feature = NULL;
 static gchar **command_argv = NULL;
 /* command line options */
@@ -106,6 +107,7 @@ static GOptionEntry entries[] =
     { "append-trace-file", 0, 0, G_OPTION_ARG_STRING, &append_trace_file, "Specify if the trace file(s) must be appended or truncated for every execution (accepted values 'yes', 'no')", NULL },
     { "quiesce-exit", 'x', 0, G_OPTION_ARG_NONE, &quiesce_exit, "Start daemon termination completing current requests", NULL },
     { "immediate-exit", 'X', 0, G_OPTION_ARG_NONE, &immediate_exit, "Start daemon termination immediately and interrupting current requests", NULL },
+    { "unique-id", 0, 0, G_OPTION_ARG_NONE, &unique_id, "Print unique ID and exit", NULL },
     { "debug-feature", 0, 0, G_OPTION_ARG_STRING, &debug_feature, "Debug execution, specify the debug feature to execute", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_STRING_ARRAY, &command_argv, "Command must be executed under flom control" },
     { NULL }
@@ -131,21 +133,23 @@ int main (int argc, char *argv[])
     g_option_context_free(option_context);
 
     if (print_version) {
-        char *machine_id = dbus_get_local_machine_id();
         g_print("FLoM: Free LOck Manager\n"
                 "Copyright (c) 2013-2015, Christian Ferrari; "
                 "all rights reserved.\n"
                 "License: GPL (GNU Public License) version 2\n"
                 "Package name: %s; package version: %s; release date: %s\n"
-                "Machine-id: %s\n"
                 "Access http://sourceforge.net/projects/flom/ for "
                 "project community activities\n",
-                FLOM_PACKAGE_NAME, FLOM_PACKAGE_VERSION, FLOM_PACKAGE_DATE,
-                machine_id);
+                FLOM_PACKAGE_NAME, FLOM_PACKAGE_VERSION, FLOM_PACKAGE_DATE);
+    }
+
+    if (unique_id) {
+        char *machine_id = dbus_get_local_machine_id();
+        g_print("%s\n", machine_id);
         dbus_free(machine_id);
         exit(FLOM_ES_OK);
     }
-
+    
     /* initialize trace destination if necessary */
     FLOM_TRACE_INIT;
     

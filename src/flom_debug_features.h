@@ -49,6 +49,14 @@ extern "C" {
      * Label associated to IPv6 Multicast Client debug feature
      */
     extern const char *FLOM_DEBUG_FEATURES_IPV6_MULTICAST_CLIENT;
+    /**
+     * Label associated to TLS Server debug feature
+     */
+    extern const char *FLOM_DEBUG_FEATURES_TLS_SERVER;
+    /**
+     * Label associated to TLS Client debug feature
+     */
+    extern const char *FLOM_DEBUG_FEATURES_TLS_CLIENT;
 
 
 
@@ -76,6 +84,23 @@ extern "C" {
     int flom_debug_features_ipv6_multicast_client(void);
     
 
+
+    /**
+     * Execute a TLS Server to test SSL/TLS security setup
+     * @return a reason code
+     */
+    int flom_debug_features_tls_server(void);
+    
+
+
+    /**
+     * Execute a TLS Client to test SSL/TLS security setup
+     * @return a reason code
+     */
+    int flom_debug_features_tls_client(void);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
