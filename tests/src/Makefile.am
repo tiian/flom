@@ -34,7 +34,7 @@ dist_noinst_DATA = $(JAVA_SOURCE_FILES) $(PHP_SOURCE_FILES) \
 	$(PYTHON_SOURCE_FILES)
 noinst_DATA = $(MAYBE_PHPAPI) $(MAYBE_JAVAAPI)
 
-LDADD = ../../src/libflom.la @GLIB2_LIBS@
+LDADD = ../../src/libflom.la @GLIB2_LIBS@ @OPENSSL_LIBS@
 
 case2000.php:	case2000.php.in ../../config.status
 	sed \

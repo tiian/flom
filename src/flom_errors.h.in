@@ -219,6 +219,10 @@
  * The specified network interface is not valid for IPv6 networking
  */
 #define FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE       -20
+/**
+ * No valid TLS/SSL method was found
+ */
+#define FLOM_RC_TLS_NO_VALID_METHOD                  -21
 
 
 

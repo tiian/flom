@@ -39,6 +39,9 @@
 /* Define to 1 if you have the <jni_md.h> header file. */
 #undef HAVE_JNI_MD_H
 
+/* Define to 1 if you have the `ssl' library (-lssl). */
+#undef HAVE_LIBSSL
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
@@ -80,6 +83,9 @@
 
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
+
+/* Define to 1 if you have the `SSLv3_method' function. */
+#undef HAVE_SSLV3_METHOD
 
 /* Define to 1 if you have the <stdarg.h> header file. */
 #undef HAVE_STDARG_H
@@ -128,6 +134,18 @@
 
 /* Define to 1 if you have the <time.h> header file. */
 #undef HAVE_TIME_H
+
+/* Define to 1 if you have the `TLSv1_1_method' function. */
+#undef HAVE_TLSV1_1_METHOD
+
+/* Define to 1 if you have the `TLSv1_2_method' function. */
+#undef HAVE_TLSV1_2_METHOD
+
+/* Define to 1 if you have the `TLSv1_method' function. */
+#undef HAVE_TLSV1_METHOD
+
+/* Define to 1 if you have the `TLS_method' function. */
+#undef HAVE_TLS_METHOD
 
 /* Define to 1 if the system has the type `uint32_t'. */
 #undef HAVE_UINT32_T

@@ -17434,6 +17434,52 @@ _ACEOF
 #AC_CHECK_SIZEOF([uint32_t])
 #AC_CHECK_SIZEOF([uuid_t], [], [[#include <uuid/uuid.h>]])
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_library_init in -lssl" >&5
+$as_echo_n "checking for SSL_library_init in -lssl... " >&6; }
+if test "${ac_cv_lib_ssl_SSL_library_init+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lssl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char SSL_library_init ();
+int
+main ()
+{
+return SSL_library_init ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_ssl_SSL_library_init=yes
+else
+  ac_cv_lib_ssl_SSL_library_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ssl_SSL_library_init" >&5
+$as_echo "$ac_cv_lib_ssl_SSL_library_init" >&6; }
+if test "x$ac_cv_lib_ssl_SSL_library_init" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBSSL 1
+_ACEOF
+
+  LIBS="-lssl $LIBS"
+
+fi
+
+
 for ac_func in freeifaddrs
 do :
   ac_fn_c_check_func "$LINENO" "freeifaddrs" "ac_cv_func_freeifaddrs"
@@ -17495,6 +17541,61 @@ do :
 if test "x$ac_cv_func_vsnprintf" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_VSNPRINTF 1
+_ACEOF
+
+fi
+done
+
+for ac_func in SSLv3_method
+do :
+  ac_fn_c_check_func "$LINENO" "SSLv3_method" "ac_cv_func_SSLv3_method"
+if test "x$ac_cv_func_SSLv3_method" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SSLV3_METHOD 1
+_ACEOF
+
+fi
+done
+
+for ac_func in TLSv1_method
+do :
+  ac_fn_c_check_func "$LINENO" "TLSv1_method" "ac_cv_func_TLSv1_method"
+if test "x$ac_cv_func_TLSv1_method" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_TLSV1_METHOD 1
+_ACEOF
+
+fi
+done
+
+for ac_func in TLSv1_1_method
+do :
+  ac_fn_c_check_func "$LINENO" "TLSv1_1_method" "ac_cv_func_TLSv1_1_method"
+if test "x$ac_cv_func_TLSv1_1_method" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_TLSV1_1_METHOD 1
+_ACEOF
+
+fi
+done
+
+for ac_func in TLSv1_2_method
+do :
+  ac_fn_c_check_func "$LINENO" "TLSv1_2_method" "ac_cv_func_TLSv1_2_method"
+if test "x$ac_cv_func_TLSv1_2_method" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_TLSV1_2_METHOD 1
+_ACEOF
+
+fi
+done
+
+for ac_func in TLS_method
+do :
+  ac_fn_c_check_func "$LINENO" "TLS_method" "ac_cv_func_TLS_method"
+if test "x$ac_cv_func_TLS_method" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_TLS_METHOD 1
 _ACEOF
 
 fi

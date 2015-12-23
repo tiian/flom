@@ -29,6 +29,7 @@
 #include "flom_config.h"
 #include "flom_errors.h"
 #include "flom_debug_features.h"
+#include "flom_tls.h"
 #include "flom_trace.h"
 
 
@@ -582,15 +583,26 @@ int flom_debug_features_ipv6_multicast_client(void)
 
 int flom_debug_features_tls_server(void)
 {
-    enum Exception { NONE } excp;
+    enum Exception { TLS_CREATE_CONTEXT_ERROR
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_debug_features_tls_server\n"));
     TRY {
+        SSL_CTX *ctx;
+        
+        /* initialize TLS/SSL support */
+        flom_tls_init();
+        
+        /* create a TLS/SSL context */
+        if (FLOM_RC_OK != (ret_cod = flom_tls_create_context(&ctx, FALSE)))
+            THROW(TLS_CREATE_CONTEXT_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case TLS_CREATE_CONTEXT_ERROR:
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -607,15 +619,26 @@ int flom_debug_features_tls_server(void)
 
 int flom_debug_features_tls_client(void)
 {
-    enum Exception { NONE } excp;
+    enum Exception { TLS_CREATE_CONTEXT_ERROR
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_debug_features_tls_client\n"));
     TRY {
+        SSL_CTX *ctx;
+        
+        /* initialize TLS/SSL support */
+        flom_tls_init();
+
+        /* create a TLS/SSL context */
+        if (FLOM_RC_OK != (ret_cod = flom_tls_create_context(&ctx, TRUE)))
+            THROW(TLS_CREATE_CONTEXT_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case TLS_CREATE_CONTEXT_ERROR:
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;

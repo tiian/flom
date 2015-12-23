@@ -53,6 +53,23 @@ extern "C" {
 
 
 
+    /**
+     * Initialize (OpenSSL) TLS/SSL library
+     */
+    void flom_tls_init(void);
+
+    
+
+    /**
+     * Create a new TLS/SSL context
+     * @param cts OUT the new context
+     * @param client IN boolean value TRUE=client, FALSE=server
+     * @return a reason code
+     */
+    int flom_tls_create_context(SSL_CTX **ctx, int client);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

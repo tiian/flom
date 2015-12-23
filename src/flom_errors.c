@@ -115,6 +115,8 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE:
             return "ERROR: the specified network interface is not valid for "
                 "IPv6 networking";
+        case FLOM_RC_TLS_NO_VALID_METHOD:
+            return "ERROR: no valid TLS/SSL method was found";
             /* system function error */
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";

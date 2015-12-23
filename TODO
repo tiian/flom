@@ -1,5 +1,8 @@
 Road map:
 
+check command lines for unique-id
+implement different TLS levels: with unique-id, without unique-id, server only
+
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 
 implement a loop for connect/bind if bind returns an error: this shuold help

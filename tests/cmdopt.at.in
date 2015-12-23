@@ -495,6 +495,10 @@ AT_CHECK([flom -X], [0], [ignore], [ignore])
 AT_CHECK([flom --immediate-exit], [0], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([Unique ID: --unique-id])
+AT_CHECK([flom --unique-id], [0], [ignore], [ignore])
+AT_CLEANUP
+
 AT_SETUP([Invalid option: -Z, --ZZZ-ZZZ])
 AT_CHECK([flom -z FOO -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([flom --ZZZ-ZZZ=BAR -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])

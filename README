@@ -7,10 +7,10 @@ Basic usage examples are in doc/examples directory (default installation path
 is /usr/local/share/doc/flom/examples/)
 API documentation is distributed in directory doc/html/ (default installation
 path is /usr/local/share/doc/flom/html/) and on the web at http://flom.sourceforge.net/
-FLoM is implemented using state of the art reactive programming: a set of
-independent non blocking threads reach unparalleled scalability and 
-performance. The usage of mutexes is reduced to trifling functions: FLoM can be
-considered a "lock free lock manager".
+FLoM is implemented using state of the art reactive programming:
+independent non blocking threads reach unparalleled scalability and C language
+source code guarantee the best performance. The usage of mutexes is reduced to
+trifling functions: FLoM can be considered a "lock free lock manager".
 
 A list of implemented use cases is listed at this URL: 
 http://sourceforge.net/p/flom/wiki/FLOM%20by%20examples/

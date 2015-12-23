@@ -141,6 +141,7 @@ int main (int argc, char *argv[])
                 "Access http://sourceforge.net/projects/flom/ for "
                 "project community activities\n",
                 FLOM_PACKAGE_NAME, FLOM_PACKAGE_VERSION, FLOM_PACKAGE_DATE);
+        exit(FLOM_ES_OK);
     }
 
     if (unique_id) {
