@@ -30,6 +30,12 @@
 #ifdef HAVE_ARPA_INET_H
 # include <arpa/inet.h>
 #endif
+#ifdef HAVE_OPENSSL_SSL_H
+# include <openssl/ssl.h>
+#endif
+#ifdef HAVE_OPENSSL_ERR_H
+# include <openssl/err.h>
+#endif
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>
 #endif
@@ -390,4 +396,38 @@ void flom_trace_sockaddr(const char *prefix, const struct sockaddr *addr,
     /* hex dump if necessary */
     if (trace_hex)
         flom_trace_hex_data(prefix, (byte_t *)addr, addrlen);
+}
+
+
+
+void flom_trace_sslerr(const char *prefix)
+{
+    int trace_hex = FALSE;
+    struct tm broken_time;
+    struct timeval tv;
+    unsigned long err;
+    
+    /* trace is closed, skipping it! */
+    if (NULL == trace_file)
+        return;    
+    /* lock the mutex */
+    g_static_mutex_lock(&flom_trace_mutex);
+    /* loop on errors */
+    while (SSL_ERROR_NONE != (err = ERR_get_error())) {
+        gettimeofday(&tv, NULL);
+        localtime_r(&tv.tv_sec, &broken_time);
+        /* default header */
+        fprintf(trace_file,
+                "%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%6.6d ["
+                PID_T_FORMAT "/%p] %s",
+                broken_time.tm_year + 1900, broken_time.tm_mon + 1,
+                broken_time.tm_mday, broken_time.tm_hour,
+                broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
+                getpid(), g_thread_self(), prefix);
+        char buf[1024];
+        ERR_error_string_n(err, buf, sizeof(buf));
+        fprintf(trace_file, " %s\n", buf);
+    } /* while (SSL_ERROR_NONE != (err = ERR_get_error())) */
+    /* remove the lock from mutex */
+    g_static_mutex_unlock(&flom_trace_mutex);
 }

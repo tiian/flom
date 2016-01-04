@@ -42,7 +42,6 @@ public class FlomErrorCodes {
 	public final static int FLOM_RC_INVALID_AI_FAMILY_ERROR = -18;
 	public final static int FLOM_RC_INVALID_IP_ADDRESS = -19;
 	public final static int FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE = -20;
-	public final static int FLOM_RC_TLS_NO_VALID_METHOD = -21;
 	public final static int FLOM_RC_ACCEPT_ERROR = -100;
 	public final static int FLOM_RC_BIND_ERROR = -101;
 	public final static int FLOM_RC_CHDIR_ERROR = -102;
@@ -95,6 +94,8 @@ public class FlomErrorCodes {
 	public final static int FLOM_RC_GET_FIELD_ID_ERROR = -300;
 	public final static int FLOM_RC_GET_OBJECT_CLASS_ERROR = -301;
 	public final static int FLOM_RC_NEW_DIRECT_BYTE_BUFFER_ERROR = -302;
+	public final static int FLOM_RC_SSL_CTX_NEW_ERROR = -400;
+	public final static int FLOM_RC_TLS_NO_VALID_METHOD = -401;
 	/**
 	 * Retrieve the text associated to a FLoM code
 	 * @param code is the code returned by the C native functions

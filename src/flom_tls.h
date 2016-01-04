@@ -47,6 +47,52 @@
 
 
 
+/**
+ * Custom data passed to verify callback OpenSSL function
+ */
+struct flom_tls_callback_data_s {
+    /**
+     * Certification chain verification depth
+     */
+    int      depth;
+    /**
+     * Don't stop, do another step
+     */
+    int      dont_stop;
+};
+
+
+
+/**
+ * Object used to manage a TLS connection: it contains all the necessary data
+ * and avoid the usage of static data
+ */
+typedef struct {
+    /**
+     * SSL context
+     */
+    SSL_CTX                              *ctx;
+    /**
+     * Boolean: is the TLS connection related to the client side (TRUE) or
+     *          the server side (FALSE)
+     */
+    int                                   client;
+    /**
+     * Struct used to pass custom data to callback function
+     */
+    struct flom_tls_callback_data_s       callback_data;
+} flom_tls_t;
+
+
+
+/**
+ * Status of OpenSSL library initialization: TRUE = initialized,
+ * FALSE = not initialized
+ */
+extern int flom_tls_initialized;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -54,19 +100,22 @@ extern "C" {
 
 
     /**
-     * Initialize (OpenSSL) TLS/SSL library
+     * Initialize (OpenSSL) TLS/SSL library and an object that must be used
+     * for the next operations
+     * @param obj OUT the object that must be initialized
+     * @param client IN the TLS connection is related to the client side
+     *        (TRUE) or to the server side (FALSE)
      */
-    void flom_tls_init(void);
+    void flom_tls_init(flom_tls_t *obj, int client);
 
     
 
     /**
      * Create a new TLS/SSL context
-     * @param cts OUT the new context
-     * @param client IN boolean value TRUE=client, FALSE=server
+     * @param obj IN/OUT the connection object
      * @return a reason code
      */
-    int flom_tls_create_context(SSL_CTX **ctx, int client);
+    int flom_tls_context(flom_tls_t *obj);
 
 
     

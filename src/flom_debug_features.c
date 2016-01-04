@@ -589,13 +589,13 @@ int flom_debug_features_tls_server(void)
     
     FLOM_TRACE(("flom_debug_features_tls_server\n"));
     TRY {
-        SSL_CTX *ctx;
+        flom_tls_t tls;
         
         /* initialize TLS/SSL support */
-        flom_tls_init();
+        flom_tls_init(&tls, FALSE);
         
         /* create a TLS/SSL context */
-        if (FLOM_RC_OK != (ret_cod = flom_tls_create_context(&ctx, FALSE)))
+        if (FLOM_RC_OK != (ret_cod = flom_tls_context(&tls)))
             THROW(TLS_CREATE_CONTEXT_ERROR);
         
         THROW(NONE);
@@ -625,13 +625,13 @@ int flom_debug_features_tls_client(void)
     
     FLOM_TRACE(("flom_debug_features_tls_client\n"));
     TRY {
-        SSL_CTX *ctx;
+        flom_tls_t tls;
         
         /* initialize TLS/SSL support */
-        flom_tls_init();
+        flom_tls_init(&tls, TRUE);
 
         /* create a TLS/SSL context */
-        if (FLOM_RC_OK != (ret_cod = flom_tls_create_context(&ctx, TRUE)))
+        if (FLOM_RC_OK != (ret_cod = flom_tls_context(&tls)))
             THROW(TLS_CREATE_CONTEXT_ERROR);
         
         THROW(NONE);

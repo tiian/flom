@@ -115,8 +115,6 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE:
             return "ERROR: the specified network interface is not valid for "
                 "IPv6 networking";
-        case FLOM_RC_TLS_NO_VALID_METHOD:
-            return "ERROR: no valid TLS/SSL method was found";
             /* system function error */
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";
@@ -238,6 +236,11 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_NEW_DIRECT_BYTE_BUFFER_ERROR:
             return "ERROR: 'JNI NewDirectByteBuffer' function returned NULL "
                 "pointer";
+            /* OpenSSL related errors */
+        case FLOM_RC_SSL_CTX_NEW_ERROR:
+            return "ERROR: 'OpenSSL SSL_CTX_new' function returned an error";
+        case FLOM_RC_TLS_NO_VALID_METHOD:
+            return "ERROR: no valid TLS/SSL method was found";
         default:
             return "ERROR: unknown error";
     } /* switch (ret_cod) */

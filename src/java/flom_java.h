@@ -388,8 +388,6 @@ extern "C" {
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_INVALID_IP_ADDRESS -19L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE -20L
-#undef org_tiian_flom_FlomErrorCodes_FLOM_RC_TLS_NO_VALID_METHOD
-#define org_tiian_flom_FlomErrorCodes_FLOM_RC_TLS_NO_VALID_METHOD -21L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_ACCEPT_ERROR
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_ACCEPT_ERROR -100L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_BIND_ERROR
@@ -494,6 +492,10 @@ extern "C" {
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_GET_OBJECT_CLASS_ERROR -301L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_NEW_DIRECT_BYTE_BUFFER_ERROR
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_NEW_DIRECT_BYTE_BUFFER_ERROR -302L
+#undef org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_CTX_NEW_ERROR
+#define org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_CTX_NEW_ERROR -400L
+#undef org_tiian_flom_FlomErrorCodes_FLOM_RC_TLS_NO_VALID_METHOD
+#define org_tiian_flom_FlomErrorCodes_FLOM_RC_TLS_NO_VALID_METHOD -401L
 /*
  * Class:     org_tiian_flom_FlomErrorCodes
  * Method:    getText

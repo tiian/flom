@@ -287,6 +287,21 @@ extern unsigned long flom_trace_mask;
     
 
 
+/**
+ * FLOM_TRACE_SSLERR macro is used to compile trace messages only if _TRACE
+ * macro is defined;
+ * trace message is printed only for modules (FLOM_TRACE_MODULE) covered by
+ * trace mask (FLOM_TRACE_MASK) specified as environment variable
+ */
+#ifdef _TRACE
+# define FLOM_TRACE_SSLERR(p)    (FLOM_TRACE_MODULE & flom_trace_mask ? \
+                                  flom_trace_sslerr(p) : 0)
+#else
+# define FLOM_TRACE_SSLERR(p)
+#endif /* _TRACE */
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -380,6 +395,15 @@ extern "C" {
     void flom_trace_sockaddr(const char *prefix, const struct sockaddr *addr,
                              socklen_t addrlen);
     
+
+
+    /**
+     * Dump the content of the OpenSSL error queue
+     * @param prefix IN trace prefix to print before dump (it is a fixed
+     *               prefix, not a format with values)
+     */
+    void flom_trace_sslerr(const char *prefix);
+
 
     
 #ifdef __cplusplus
