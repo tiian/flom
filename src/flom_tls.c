@@ -19,6 +19,13 @@
 #include <config.h>
 
 
+
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
+
+
+
 #include "flom_config.h"
 #include "flom_errors.h"
 #include "flom_tls.h"
@@ -35,6 +42,8 @@
 
 
 int flom_tls_initialized = FALSE;
+
+
 
 /**
  * This mutex is used to double initialization of the OpenSSL library
@@ -58,8 +67,11 @@ void flom_tls_init(flom_tls_t *obj, int client)
     /* remove the lock from the mutex */
     g_static_mutex_unlock(&flom_tls_mutex);
 
+    /* reset object content */
+    memset(obj, 0, sizeof(flom_tls_t));
     /* initialize a valid context */
     obj->client = client;
+    obj->depth = FLOM_TLS_MAX_DEPTH_CERT_CHAIN_VERIF;
     return;
 }
 
@@ -76,6 +88,8 @@ int flom_tls_context(flom_tls_t *obj)
     TRY {
         SSL_METHOD *method = NULL;
         const char *side = obj->client ? "client" : "server";
+        int mode;
+        
         /* set TLS/SSL method */
 #ifdef HAVE_TLS_METHOD
         FLOM_TRACE(("flom_tls_context: setting TLS/SSL method to "
@@ -112,7 +126,18 @@ int flom_tls_context(flom_tls_t *obj)
             THROW(SSL_CTX_NEW_ERROR);
         }
         
-        /* set custom data struct */
+        /* set callback data index */
+        obj->callback_data_index = SSL_get_ex_new_index(
+            0, "callback data index", NULL, NULL, NULL);
+        /* set callback function */
+        mode = SSL_VERIFY_PEER;
+        if (!obj->client)
+            mode |= SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
+        FLOM_TRACE(("flom_tls_context: SSL_CTX_set_verify(%p, %d, "
+                    "flom_tls_callback)\n", obj->ctx, mode));
+        SSL_CTX_set_verify(obj->ctx, mode, flom_tls_callback);
+        /* set max depth for the certificate chain verification */
+        SSL_CTX_set_verify_depth(obj->ctx, obj->depth+1);
         
         THROW(NONE);
     } CATCH {
@@ -131,6 +156,93 @@ int flom_tls_context(flom_tls_t *obj)
         } /* switch (excp) */
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_tls_context/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_tls_callback(int preverify_ok, X509_STORE_CTX *x509_ctx)
+{
+    int ret_cod = TRUE;
+    FLOM_TRACE(("flom_tls_callback: preverify_ok=%d\n", preverify_ok));
+    FLOM_TRACE(("flom_tls_callback: ret_cod=%d\n", ret_cod));
+    return ret_cod;
+}
+
+
+
+int flom_tls_set_cert(flom_tls_t *obj, const char *cert_file,
+                      const char *priv_key_file, const char *ca_cert_file)
+{
+    enum Exception { SSL_CTX_USE_CERTIFICATE_FILE_ERROR
+                     , SSL_CTX_USE_PRIVATEKEY_FILE_ERROR
+                     , SSL_CTX_CHECK_PRIVATE_KEY_ERROR
+                     , SSL_CTX_LOAD_VERIFY_LOCATIONS_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_tls_set_cert\n"));
+    TRY {
+        /* loads the first certificate stored in file into ctx */
+        FLOM_TRACE(("flom_tls_set_cert: SSL_CTX_use_certificate_file("
+                    "obj->ctx, '%s', SSL_FILETYPE_PEM)\n", cert_file));
+        if (1 != SSL_CTX_use_certificate_file(
+                obj->ctx, cert_file, SSL_FILETYPE_PEM)) {
+            FLOM_TRACE_SSLERR(("flom_tls_set_cert:"));
+            THROW(SSL_CTX_USE_CERTIFICATE_FILE_ERROR);
+        }
+        /* adds the first private key found in file to ctx */
+        FLOM_TRACE(("flom_tls_set_cert: SSL_CTX_use_PrivateKey_file("
+                    "obj->ctx, '%s', SSL_FILETYPE_PEM)\n", priv_key_file));
+        if (1 != SSL_CTX_use_PrivateKey_file(
+                obj->ctx, priv_key_file, SSL_FILETYPE_PEM)) {
+            FLOM_TRACE_SSLERR(("flom_tls_set_cert:"));
+            THROW(SSL_CTX_USE_PRIVATEKEY_FILE_ERROR);
+        }
+        
+        /* checks the consistency of a private key with the corresponding
+           certificate loaded into ctx */
+        FLOM_TRACE(("flom_tls_set_cert: SSL_CTX_check_private_key("
+                    "obj->ctx)\n"));
+        if (1 != SSL_CTX_check_private_key(obj->ctx)) {
+            FLOM_TRACE_SSLERR(("flom_tls_set_cert:"));
+            THROW(SSL_CTX_CHECK_PRIVATE_KEY_ERROR);
+        }
+
+        /* specifies the locations for ctx, at which CA certificates for
+           verification purposes are located */
+        FLOM_TRACE(("flom_tls_set_cert: SSL_CTX_load_verify_locations("
+                    "obj->ctx, '%s', NULL)\n", ca_cert_file));
+        if (1 != SSL_CTX_load_verify_locations(
+                obj->ctx, ca_cert_file, NULL)) {
+            FLOM_TRACE_SSLERR(("flom_tls_set_cert:"));
+            THROW(SSL_CTX_LOAD_VERIFY_LOCATIONS_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case SSL_CTX_USE_CERTIFICATE_FILE_ERROR:
+                ret_cod = FLOM_RC_SSL_CTX_USE_CERTIFICATE_FILE_ERROR;
+                break;
+            case SSL_CTX_USE_PRIVATEKEY_FILE_ERROR:
+                ret_cod = FLOM_RC_SSL_CTX_USE_PRIVATEKEY_FILE_ERROR;
+                break;
+            case SSL_CTX_CHECK_PRIVATE_KEY_ERROR:
+                ret_cod = FLOM_RC_SSL_CTX_CHECK_PRIVATE_KEY_ERROR;
+                break;
+            case SSL_CTX_LOAD_VERIFY_LOCATIONS_ERROR:
+                ret_cod = FLOM_RC_SSL_CTX_LOAD_VERIFY_LOCATIONS_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_tls_set_cert/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

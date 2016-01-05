@@ -440,14 +440,29 @@
 /* OpenSSL related errors */
 
 /**
+ * OpenSSL "SSL_CTX_check_private_key" function error
+ */
+#define FLOM_RC_SSL_CTX_CHECK_PRIVATE_KEY_ERROR     -400
+/**
+ * OpenSSL "SSL_CTX_load_verify_locations" function error
+ */
+#define FLOM_RC_SSL_CTX_LOAD_VERIFY_LOCATIONS_ERROR -401
+/**
  * OpenSSL "SSL_CTX_new" function error
  */
-#define FLOM_RC_SSL_CTX_NEW_ERROR                   -400
+#define FLOM_RC_SSL_CTX_NEW_ERROR                   -402
+/**
+ * OpenSSL "SSL_CTX_use_certificate_file" function error
+ */
+#define FLOM_RC_SSL_CTX_USE_CERTIFICATE_FILE_ERROR  -403
+/**
+ * OpenSSL "SSL_CTX_use_PrivateKey_file" function error
+ */
+#define FLOM_RC_SSL_CTX_USE_PRIVATEKEY_FILE_ERROR   -404
 /**
  * No valid TLS/SSL method was found
  */
-#define FLOM_RC_TLS_NO_VALID_METHOD                 -401
-
+#define FLOM_RC_TLS_NO_VALID_METHOD                 -405
 
 #ifdef __cplusplus
 extern "C" {

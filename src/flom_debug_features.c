@@ -584,6 +584,7 @@ int flom_debug_features_ipv6_multicast_client(void)
 int flom_debug_features_tls_server(void)
 {
     enum Exception { TLS_CREATE_CONTEXT_ERROR
+                     , TLS_SET_CERT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -597,11 +598,21 @@ int flom_debug_features_tls_server(void)
         /* create a TLS/SSL context */
         if (FLOM_RC_OK != (ret_cod = flom_tls_context(&tls)))
             THROW(TLS_CREATE_CONTEXT_ERROR);
-        
+
+        /* set certificates */
+        /* @@@ remove hardwired names! */
+        if (FLOM_RC_OK != (ret_cod = flom_tls_set_cert(
+                               &tls, "/home/tiian/ssl/CA/servercert.pem",
+                               "/home/tiian/ssl/CA/serverkey.pem",
+                               "/home/tiian/ssl/CA/cacert.pem")))
+            THROW(TLS_SET_CERT_ERROR);
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case TLS_CREATE_CONTEXT_ERROR:
+                break;
+            case TLS_SET_CERT_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -620,6 +631,7 @@ int flom_debug_features_tls_server(void)
 int flom_debug_features_tls_client(void)
 {
     enum Exception { TLS_CREATE_CONTEXT_ERROR
+                     , TLS_SET_CERT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -634,10 +646,20 @@ int flom_debug_features_tls_client(void)
         if (FLOM_RC_OK != (ret_cod = flom_tls_context(&tls)))
             THROW(TLS_CREATE_CONTEXT_ERROR);
         
+        /* set certificates */
+        /* @@@ remove hardwired names! */
+        if (FLOM_RC_OK != (ret_cod = flom_tls_set_cert(
+                               &tls, "/home/tiian/ssl/CA/clientcert.pem",
+                               "/home/tiian/ssl/CA/clientkey.pem",
+                               "/home/tiian/ssl/CA/cacert.pem")))
+            THROW(TLS_SET_CERT_ERROR);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case TLS_CREATE_CONTEXT_ERROR:
+                break;
+            case TLS_SET_CERT_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

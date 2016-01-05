@@ -237,8 +237,20 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'JNI NewDirectByteBuffer' function returned NULL "
                 "pointer";
             /* OpenSSL related errors */
+        case FLOM_RC_SSL_CTX_CHECK_PRIVATE_KEY_ERROR:
+            return "ERROR: 'OpenSSL SSL_CTX_check_private_key' function "
+                "returned an error";
+        case FLOM_RC_SSL_CTX_LOAD_VERIFY_LOCATIONS_ERROR:
+            return "ERROR: 'OpenSSL SSL_CTX_load_verify_locations' function "
+                "returned an error";
         case FLOM_RC_SSL_CTX_NEW_ERROR:
             return "ERROR: 'OpenSSL SSL_CTX_new' function returned an error";
+        case FLOM_RC_SSL_CTX_USE_CERTIFICATE_FILE_ERROR:
+            return "ERROR: 'OpenSSL SSL_CTX_use_certificate_file' function "
+                "returned an error";
+        case FLOM_RC_SSL_CTX_USE_PRIVATEKEY_FILE_ERROR:
+            return "ERROR: 'OpenSSL SSL_CTX_use_PrivateKey_file' function "
+                "returned an error";
         case FLOM_RC_TLS_NO_VALID_METHOD:
             return "ERROR: no valid TLS/SSL method was found";
         default:

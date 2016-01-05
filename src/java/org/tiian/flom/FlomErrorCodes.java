@@ -94,8 +94,12 @@ public class FlomErrorCodes {
 	public final static int FLOM_RC_GET_FIELD_ID_ERROR = -300;
 	public final static int FLOM_RC_GET_OBJECT_CLASS_ERROR = -301;
 	public final static int FLOM_RC_NEW_DIRECT_BYTE_BUFFER_ERROR = -302;
-	public final static int FLOM_RC_SSL_CTX_NEW_ERROR = -400;
-	public final static int FLOM_RC_TLS_NO_VALID_METHOD = -401;
+	public final static int FLOM_RC_SSL_CTX_CHECK_PRIVATE_KEY_ERROR = -400;
+	public final static int FLOM_RC_SSL_CTX_LOAD_VERIFY_LOCATIONS_ERROR = -401;
+	public final static int FLOM_RC_SSL_CTX_NEW_ERROR = -402;
+	public final static int FLOM_RC_SSL_CTX_USE_CERTIFICATE_FILE_ERROR = -403;
+	public final static int FLOM_RC_SSL_CTX_USE_PRIVATEKEY_FILE_ERROR = -404;
+	public final static int FLOM_RC_TLS_NO_VALID_METHOD = -405;
 	/**
 	 * Retrieve the text associated to a FLoM code
 	 * @param code is the code returned by the C native functions
