@@ -150,6 +150,11 @@
  */
 #define FLOM_TRACE_MOD_TLS                0x00020000
 
+/**
+ * trace module for TCP functions
+ */
+#define FLOM_TRACE_MOD_TCP                0x00040000
+
 
 
 /**

@@ -73,6 +73,7 @@
 #include "flom_errors.h"
 #include "flom_locker.h"
 #include "flom_msg.h"
+#include "flom_tcp.h"
 #include "flom_syslog.h"
 
 
@@ -488,7 +489,6 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
             /* traverse the list and try to bind... */
             gai = result;
             while (NULL != gai && !bound) {
-                /* @@@ */
                 sa = gai->ai_addr;
                 /* IPv6 addresses could need sin6_scope_id set if the user
                    specified a network interface */
@@ -625,7 +625,7 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
                             family));
                 THROW(INVALID_AI_FAMILY1);
         } /* switch (family) */
-        FLOM_TRACE_SOCKADDR("flom_listen_tcp_automatic: bindind address ",
+        FLOM_TRACE_SOCKADDR("flom_listen_tcp_automatic: binding address ",
                             sa, sa_len);
         if (-1 == bind(fd, sa, sa_len))
             THROW(BIND_ERROR);
