@@ -446,111 +446,31 @@ int flom_listen_tcp(flom_config_t *config, flom_conns_t *conns)
 
 int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
 {
-    enum Exception { GETADDRINFO_ERROR
-                     , BIND_ERROR
-                     , LISTEN_ERROR
+    enum Exception { LISTEN_ERROR
                      , CONNS_ADD_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
-    struct addrinfo *result = NULL;
-    int fd = FLOM_NULL_FD;
-    
     FLOM_TRACE(("flom_listen_tcp_configured\n"));
     TRY {
-        struct addrinfo hints, *gai = NULL;
-        int errcode;
-        char port[100];
-        struct sockaddr_in6 sa6;
-        struct sockaddr *sa = NULL;
-
-        memset(&hints, 0, sizeof(hints));
-        hints.ai_flags = AI_PASSIVE;
-        hints.ai_family = flom_conns_get_domain(conns);
-        hints.ai_socktype = SOCK_STREAM;
-        hints.ai_protocol = IPPROTO_TCP;
-        snprintf(port, sizeof(port), "%u",
-                 flom_config_get_unicast_port(config));
-        FLOM_TRACE(("flom_listen_tcp_configured: binding address '%s' "
-                    "and port %s\n", flom_config_get_unicast_address(config),
-                    port));
-
-        if (0 != (errcode = getaddrinfo(
-                      flom_config_get_unicast_address(config),
-                      port, &hints, &result))) {
-            FLOM_TRACE(("flom_listen_tcp_configured/getaddrinfo(): "
-                        "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
-            THROW(GETADDRINFO_ERROR);
-        } else {
-            int bound = FALSE;
-            int sock_opt = 1;
-            FLOM_TRACE_ADDRINFO("flom_listen_tcp_configured/getaddrinfo(): ",
-                                result);
-            /* traverse the list and try to bind... */
-            gai = result;
-            while (NULL != gai && !bound) {
-                sa = gai->ai_addr;
-                /* IPv6 addresses could need sin6_scope_id set if the user
-                   specified a network interface */
-                if (AF_INET6 == gai->ai_family &&
-                    NULL != flom_config_get_network_interface(config)) {
-                    memcpy(&sa6, sa, gai->ai_addrlen);
-                    sa6.sin6_scope_id = flom_config_get_sin6_scope_id(config);
-                    sa = (struct sockaddr *)&sa6;
-                    FLOM_TRACE(("flom_listen_tcp_configured: overriding field "
-                                "sin6_scope_id with value %u\n",
-                                sa6.sin6_scope_id));
-                }
-                FLOM_TRACE_SOCKADDR("flom_listen_tcp_configured: ai_addr ",
-                                    (void *)sa, gai->ai_addrlen);
-                if (-1 == (fd = socket(gai->ai_family, gai->ai_socktype,
-                                       gai->ai_protocol))) {
-                    FLOM_TRACE(("flom_listen_tcp_configured/socket(): "
-                                "errno=%d '%s', skipping...\n", errno,
-                                strerror(errno)));
-                    gai = gai->ai_next;
-                } else if (-1 == setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
-                                            (void *)&sock_opt,
-                                            sizeof(sock_opt))) {
-                    FLOM_TRACE(("flom_listen_tcp_configured/setsockopt() : "
-                                "errno=%d '%s', skipping...\n", errno,
-                                strerror(errno)));
-                    gai = gai->ai_next;
-                    close(fd);
-                    fd = FLOM_NULL_FD;
-                } else if (-1 == bind(fd, sa, gai->ai_addrlen)) {
-                    FLOM_TRACE(("flom_listen_tcp_configured/bind() : "
-                                "errno=%d '%s', skipping...\n", errno,
-                                strerror(errno)));
-                    gai = gai->ai_next;
-                    close(fd);
-                    fd = FLOM_NULL_FD;
-                } else {
-                    bound = TRUE;
-                    FLOM_TRACE(("flom_listen_tcp_configured: bound!\n"));
-                }
-            } /* while (NULL != gai && !bound) */
-            if (!bound)
-                THROW(BIND_ERROR);
-        }        
-        if (-1 == listen(fd, LISTEN_BACKLOG))
+        size_t addrlen;
+        struct sockaddr_storage address;
+        int sockfd;
+        
+        if (FLOM_RC_OK != (ret_cod = flom_tcp_listen(
+                               config, flom_conns_get_domain(conns),
+                               &sockfd, &addrlen,
+                               (struct sockaddr *)&address)))
             THROW(LISTEN_ERROR);
+        
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                               conns, fd, SOCK_STREAM, gai->ai_addrlen,
-                               sa, TRUE)))
+                               conns, sockfd, SOCK_STREAM, addrlen,
+                               (struct sockaddr *)&address, TRUE)))
             THROW(CONNS_ADD_ERROR);
-        fd = FLOM_NULL_FD; /* avoid socket close by clean-up section */
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case GETADDRINFO_ERROR:
-                ret_cod = FLOM_RC_GETADDRINFO_ERROR;
-                break;
-            case BIND_ERROR:
-                ret_cod = FLOM_RC_BIND_ERROR;
-                break;
             case LISTEN_ERROR:
-                ret_cod = FLOM_RC_LISTEN_ERROR;
                 break;
             case CONNS_ADD_ERROR:
                 break;
@@ -561,10 +481,6 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    if (NULL != result)
-        freeaddrinfo(result);
-    if (FLOM_NULL_FD != fd)
-        close(fd);
     FLOM_TRACE(("flom_listen_tcp_configured/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

@@ -29,6 +29,7 @@
 #include "flom_config.h"
 #include "flom_errors.h"
 #include "flom_debug_features.h"
+#include "flom_tcp.h"
 #include "flom_tls.h"
 #include "flom_trace.h"
 
@@ -585,12 +586,16 @@ int flom_debug_features_tls_server(void)
 {
     enum Exception { TLS_CREATE_CONTEXT_ERROR
                      , TLS_SET_CERT_ERROR
+                     , TCP_LISTEN_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_debug_features_tls_server\n"));
     TRY {
         flom_tls_t tls;
+        int sockfd;
+        size_t addrlen;
+        struct sockaddr_storage address;
         
         /* initialize TLS/SSL support */
         flom_tls_init(&tls, FALSE);
@@ -607,12 +612,20 @@ int flom_debug_features_tls_server(void)
                                "/home/tiian/ssl/CA/cacert.pem")))
             THROW(TLS_SET_CERT_ERROR);
 
+        /* open an incoming connection using FLoM configuration */
+        if (FLOM_RC_OK != (ret_cod = flom_tcp_listen(
+                               NULL, AF_UNSPEC, &sockfd, &addrlen,
+                               (struct sockaddr *)&address)))
+            THROW(TCP_LISTEN_ERROR);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case TLS_CREATE_CONTEXT_ERROR:
                 break;
             case TLS_SET_CERT_ERROR:
+                break;
+            case TCP_LISTEN_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -653,7 +666,6 @@ int flom_debug_features_tls_client(void)
                                "/home/tiian/ssl/CA/clientkey.pem",
                                "/home/tiian/ssl/CA/cacert.pem")))
             THROW(TLS_SET_CERT_ERROR);
-        
         THROW(NONE);
     } CATCH {
         switch (excp) {

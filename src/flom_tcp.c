@@ -48,7 +48,7 @@
 
 
 int flom_tcp_listen(flom_config_t *config, int domain,
-                    int *sockfd)
+                    int *sockfd, size_t *addrlen, struct sockaddr *address)
 {
     enum Exception { GETADDRINFO_ERROR
                      , BIND_ERROR
@@ -138,7 +138,10 @@ int flom_tcp_listen(flom_config_t *config, int domain,
         }        
         if (-1 == listen(fd, LISTEN_BACKLOG))
             THROW(LISTEN_ERROR);
+        /* set output values */
         *sockfd = fd;
+        *addrlen = gai->ai_addrlen;
+        memcpy(address, sa, *addrlen);
         fd = FLOM_NULL_FD; /* avoid socket close by clean-up section */        
         THROW(NONE);
     } CATCH {

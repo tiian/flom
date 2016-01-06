@@ -72,6 +72,10 @@ extern "C" {
  *                  which will be used for communication (AF_INET for IPv4,
  *                  AF_INET6 for IPv6)
  * @param sockfd OUT file descriptor associated to the opened socket
+ * @param addrlen OUT size of the returned address
+ * @param address OUT address associated with the connection, it must be
+ *                    pre-allocated with the size of struct sockaddr_storage
  * @return a reason code
  */
-int flom_tcp_listen(flom_config_t *config, int domain, int *sockfd);
+int flom_tcp_listen(flom_config_t *config, int domain,
+                    int *sockfd, size_t *addrlen, struct sockaddr *address);
