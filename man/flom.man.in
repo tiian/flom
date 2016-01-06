@@ -135,20 +135,16 @@ A list of example use cases is avalaible at this web page \fIhttp://sourceforge.
 [COMMAND [ARG]...]
 .P
 hangs due to a deadlock: the inner flom instance waits the lock obtained by the first flom instance.
-.SH BUGS
-.B IPv6 multicast issue
-.P
-on some Linux distributions/versions the automatic (dynamic) discovery feature does not work with IPv6 multicast addresses; the bug description is available at this web page \fIhttps://sourceforge.net/p/flom/tickets/2/\fP
 .SH AUTHOR
 Christian Ferrari (tiian@users.sourceforge.net)
 .SH REPORTING BUGS
 Bugs should be reported using \fIhttp://sourceforge.net/p/flom/tickets/\fP. Suggestions, hints and helps should be asked using \fIhttp://sourceforge.net/p/flom/discussion/\fP
 .SH COPYRIGHT
-Copyright (C) 2013-2015, Christian Ferrari. License GPL version 2 \fIhttp://www.gnu.org/licenses/\fP. This is free software: you are free to change and redistribute it. There is 
+Copyright (C) 2013-2016, Christian Ferrari. License GPL version 2 \fIhttp://www.gnu.org/licenses/\fP. This is free software: you are free to change and redistribute it. There is 
 .B NO WARRANTY
 , to the extent permitted by law.
 .SH SEE ALSO
-More documentation available at project wiki page
+More documentation is available at project wiki page
 .P
 \fIhttp://sourceforge.net/p/flom/wiki/Home/\fP
 .P

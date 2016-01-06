@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2013-2016, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of FLoM and libflom (FLoM API client library)
@@ -402,7 +402,6 @@ void flom_trace_sockaddr(const char *prefix, const struct sockaddr *addr,
 
 void flom_trace_sslerr(const char *prefix)
 {
-    int trace_hex = FALSE;
     struct tm broken_time;
     struct timeval tv;
     unsigned long err;
