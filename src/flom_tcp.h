@@ -46,6 +46,56 @@ extern "C" {
 
 
 
+    /**
+     * Prepare an incoming TCP/IP connection ready to accept new clients
+     * @param config IN configuration object, NULL for global config
+     * @param domain IN communication domain; this selects the protocol family
+     *                  which will be used for communication (AF_INET for IPv4,
+     *                  AF_INET6 for IPv6)
+     * @param sockfd OUT file descriptor associated to the opened socket
+     * @param addrlen OUT size of the returned address
+     * @param address OUT address associated with the connection, it must be
+     *                    pre-allocated with the size of struct
+     *                    sockaddr_storage
+     * @return a reason code
+     */
+    int flom_tcp_listen(flom_config_t *config, int domain,
+                        int *sockfd, size_t *addrlen,
+                        struct sockaddr *address);
+
+
+
+    /**
+     * Try to establish a TCP/IP connection; it must considered a "private"
+     * method because it's used only by @ref flom_tcp_connect
+     * @param config IN configuration object, NULL for global config
+     * @param gai IN result obtained by getaddrinfo function
+     * @param fd OUT file descriptor associated to the connected socket
+     * @return the pointer to the element successfully connected, NULL if no
+     *         element is available
+     */
+    const struct addrinfo *flom_tcp_try_connect(
+        flom_config_t *config, const struct addrinfo *gai, int *fd);
+    
+
+
+    /**
+     * Establish a TCP/IP connection peeking address, port and interface from
+     * configuration
+     * @param config IN configuration object, NULL for global config
+     * @param domain OUT domain/family of the created connection (IPv4, IPv6)
+     * @param sockfd OUT file descriptor associated to the opened socket
+     * @param addrlen OUT size of the returned address
+     * @param address OUT address associated with the connection, it must be
+     *                    pre-allocated with the size of struct
+     *                    sockaddr_storage
+     * @return a reason code
+     */
+    int flom_tcp_connect(flom_config_t *config, int *domain, int *sockfd,
+                         size_t *addrlen, struct sockaddr *address);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
@@ -65,17 +115,3 @@ extern "C" {
 
 
 
-/**
- * Prepare an incoming TCP/IP connection ready to accept new clients
- * @param config IN configuration object, NULL for global config
- * @param domain IN communication domain; this selects the protocol family
- *                  which will be used for communication (AF_INET for IPv4,
- *                  AF_INET6 for IPv6)
- * @param sockfd OUT file descriptor associated to the opened socket
- * @param addrlen OUT size of the returned address
- * @param address OUT address associated with the connection, it must be
- *                    pre-allocated with the size of struct sockaddr_storage
- * @return a reason code
- */
-int flom_tcp_listen(flom_config_t *config, int domain,
-                    int *sockfd, size_t *addrlen, struct sockaddr *address);

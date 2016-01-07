@@ -52,6 +52,7 @@
 #include "flom_daemon.h"
 #include "flom_errors.h"
 #include "flom_msg.h"
+#include "flom_tcp.h"
 #include "flom_trace.h"
 
 
@@ -265,7 +266,7 @@ int flom_client_connect_local(flom_config_t *config,
 int flom_client_connect_tcp(flom_config_t *config,
                             struct flom_conn_data_s *cd, int start_daemon)
 {
-    enum Exception { GETADDRINFO_ERROR
+    enum Exception { TCP_CONNECT_ERROR
                      , DAEMON_ERROR
                      , DAEMON_NOT_STARTED1
                      , CONNECT_ERROR1
@@ -275,56 +276,35 @@ int flom_client_connect_tcp(flom_config_t *config,
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
-    struct addrinfo *result = NULL;
-    
-    int fd = FLOM_NULL_FD;
     
     FLOM_TRACE(("flom_client_connect_tcp\n"));
     TRY {
-        struct addrinfo hints;
-        int errcode, sock_opt = 1;
-        const struct addrinfo *p = NULL;
-        char port_string[100];
-        
-        FLOM_TRACE(("flom_client_connect_tcp: connecting to address '%s' "
-                    "and port %d\n", flom_config_get_unicast_address(config),
-                    flom_config_get_unicast_port(config)));
-        memset(&hints, 0, sizeof(hints));
+        int domain;
+        int fd = FLOM_NULL_FD;
+        int sock_opt = 1;
+        size_t addrlen;
+        struct sockaddr_storage address;
 
-        hints.ai_flags = AI_CANONNAME;
-        /* interface name is specified, IPv6 is forced */
-        if (NULL != flom_config_get_network_interface(config))
-            hints.ai_family = AF_INET6;
-        else
-            hints.ai_family = AF_UNSPEC;
-        hints.ai_socktype = SOCK_STREAM;
-        hints.ai_protocol = IPPROTO_TCP;
-        snprintf(port_string, sizeof(port_string), "%u",
-                 flom_config_get_unicast_port(config));
-        
-        if (0 != (errcode = getaddrinfo(
-                      flom_config_get_unicast_address(config),
-                      port_string, &hints, &result))) {
-            FLOM_TRACE(("flom_client_connect_tcp/getaddrinfo(): "
-                        "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
-            THROW(GETADDRINFO_ERROR);
-        } else {
-            FLOM_TRACE_ADDRINFO("flom_client_connect_tcp/getaddrinfo(): ",
-                                result);
-            p = flom_client_connect_tcp_try(config, result, &fd);
-            if (NULL == p) {
+        ret_cod = flom_tcp_connect(config, &domain, &fd, &addrlen,
+                                   (struct sockaddr *)&address);
+        switch (ret_cod) {
+            case FLOM_RC_OK:
+                break;
+            case FLOM_RC_CONNECTION_REFUSED:
                 if (start_daemon) {
                     if (0 != flom_config_get_lifespan(config)) {
                         FLOM_TRACE(("flom_client_connect_tcp: connection "
                                     "failed, activating a new daemon\n"));
                         /* daemon is not active, starting it... */
                         if (FLOM_RC_OK != (ret_cod = flom_daemon(
-                                               config, result->ai_family)))
+                                               config, domain)))
                             THROW(DAEMON_ERROR);
                         /* trying to connect again... */
-                        p = flom_client_connect_tcp_try(config, result, &fd);
-                        if (NULL == p)
+                        if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(
+                                               config, cd, FALSE))) {
                             THROW(DAEMON_NOT_STARTED1);
+                        } else /* recursive call, bypass next steps */
+                            THROW(NONE); 
                     } else {
                         FLOM_TRACE(("flom_client_connect_tcp: connection "
                                     "failed, a new daemon can not be started "
@@ -333,35 +313,33 @@ int flom_client_connect_tcp(flom_config_t *config,
                     }
                 } else {
                     THROW(DAEMON_NOT_STARTED2)
-                } /* if (start_daemon) */
-            }
-        } /* if (0 != (errcode = getaddrinfo( */
+                        } /* if (start_daemon) */
+                break;
+            default:
+                THROW(TCP_CONNECT_ERROR);
+        } /* switch (ret_cod) */
         if (0 != setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
                             (void *)(&sock_opt), sizeof(sock_opt)))
             THROW(SETSOCKOPT_ERROR);
         /* set connection definition object attributes */
         cd->fd = fd;
         cd->type = SOCK_STREAM;
-        switch (result->ai_family) {
+        switch (domain) {
             case AF_INET:
-                memcpy(&cd->sain, &p->ai_addr, p->ai_addrlen);
+                memcpy(&cd->sain, &address, addrlen);
                 break;
             case AF_INET6:
-                memcpy(&cd->sain6, &p->ai_addr, p->ai_addrlen);
+                memcpy(&cd->sain6, &address, addrlen);
                 break;
             default:
                 THROW(INVALID_AI_FAMILY_ERROR);
         } /* switch (result->ai_family) */
-        cd->addr_len = p->ai_addrlen;
-
-        /* avoid socket close operated by clean-up step */
-        fd = FLOM_NULL_FD;
+        cd->addr_len = addrlen;
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case GETADDRINFO_ERROR:
-                ret_cod = FLOM_RC_GETADDRINFO_ERROR;
+            case TCP_CONNECT_ERROR:
                 break;
             case DAEMON_ERROR:
                 break;
@@ -387,60 +365,9 @@ int flom_client_connect_tcp(flom_config_t *config,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    if (NULL != result)
-        freeaddrinfo(result);
-    if (FLOM_NULL_FD != fd)
-        close(fd);
     FLOM_TRACE(("flom_client_connect_tcp/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
-}
-
-
-
-const struct addrinfo *flom_client_connect_tcp_try(
-    flom_config_t *config, const struct addrinfo *gai, int *fd)
-{
-    const struct addrinfo *found = NULL; 
-    *fd = FLOM_NULL_FD;
-    /* traverse the list and try to connect... */
-    while (NULL != gai && NULL == found) {
-        struct sockaddr_in6 sa6;
-        struct sockaddr *sa = gai->ai_addr;
-        /* IPv6 addresses could need sin6_scope_id set if the user specified
-           a network interface */
-        FLOM_TRACE_SOCKADDR("flom_client_connect_tcp_try: sa ",
-                            sa, gai->ai_addrlen);
-        if (AF_INET6 == sa->sa_family &&
-            NULL != flom_config_get_network_interface(config)) {
-            memcpy(&sa6, sa, gai->ai_addrlen);
-            sa6.sin6_scope_id = flom_config_get_sin6_scope_id(config);
-            sa = (struct sockaddr *)&sa6;
-            FLOM_TRACE(("flom_client_connect_tcp_try: overriding field "
-                        "sin6_scope_id with value %u\n", sa6.sin6_scope_id));
-        }
-            
-        if (FLOM_NULL_FD == (*fd = socket(gai->ai_family, gai->ai_socktype,
-                                          gai->ai_protocol))) {
-            FLOM_TRACE(("flom_client_connect_tcp_try/socket(): "
-                        "errno=%d '%s', skipping...\n", errno,
-                        strerror(errno)));
-            gai = gai->ai_next;
-        } else {
-            FLOM_TRACE_SOCKADDR("flom_client_connect_tcp_try: sa ",
-                                sa, gai->ai_addrlen);
-            if (-1 == connect(*fd, sa, gai->ai_addrlen)) {
-                FLOM_TRACE(("flom_client_connect_tcp_try/connect(): "
-                            "errno=%d '%s', skipping...\n", errno,
-                            strerror(errno)));
-                gai = gai->ai_next;
-                close(*fd);
-                *fd = FLOM_NULL_FD;
-            } else
-                found = gai;
-        } /* if (-1 == (*fd = socket( */
-    } /* while (NULL != gai && !connected) */
-    return found;
 }
 
 
