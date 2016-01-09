@@ -587,6 +587,7 @@ int flom_debug_features_tls_server(void)
     enum Exception { TLS_CREATE_CONTEXT_ERROR
                      , TLS_SET_CERT_ERROR
                      , TCP_LISTEN_ERROR
+                     , ACCEPT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -594,6 +595,10 @@ int flom_debug_features_tls_server(void)
     TRY {
         flom_tls_t tls;
         flom_tcp_t tcp;
+        /* network data of the peer socket */
+        int peer_sockfd;
+        size_t peer_addrlen;
+        struct sockaddr_storage peer_address;
         
         /* initialize TLS/SSL support */
         flom_tls_init(&tls, FALSE);
@@ -616,6 +621,15 @@ int flom_debug_features_tls_server(void)
         /* open an incoming connection using FLoM configuration */
         if (FLOM_RC_OK != (ret_cod = flom_tcp_listen(&tcp)))
             THROW(TCP_LISTEN_ERROR);
+
+        /* waiting an incoming connection */
+        if (-1 == (peer_sockfd = accept(flom_tcp_get_sockfd(&tcp),
+                                        (struct sockaddr *)&peer_address,
+                                        &peer_addrlen)))
+            THROW(ACCEPT_ERROR);
+        FLOM_TRACE_SOCKADDR("flom_debug_features_tls_server: incoming "
+                            "connection address data: ",
+                            (struct sockaddr *)&peer_address, peer_addrlen);
         
         THROW(NONE);
     } CATCH {
@@ -625,6 +639,9 @@ int flom_debug_features_tls_server(void)
             case TLS_SET_CERT_ERROR:
                 break;
             case TCP_LISTEN_ERROR:
+                break;
+            case ACCEPT_ERROR:
+                ret_cod = FLOM_RC_ACCEPT_ERROR;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -644,12 +661,14 @@ int flom_debug_features_tls_client(void)
 {
     enum Exception { TLS_CREATE_CONTEXT_ERROR
                      , TLS_SET_CERT_ERROR
+                     , TCP_CONNECT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_debug_features_tls_client\n"));
     TRY {
         flom_tls_t tls;
+        flom_tcp_t tcp;
         
         /* initialize TLS/SSL support */
         flom_tls_init(&tls, TRUE);
@@ -665,12 +684,22 @@ int flom_debug_features_tls_client(void)
                                "/home/tiian/ssl/CA/clientkey.pem",
                                "/home/tiian/ssl/CA/cacert.pem")))
             THROW(TLS_SET_CERT_ERROR);
+        
+        /* initialize TCP object */
+        flom_tcp_init(&tcp, NULL);
+        
+        /* open an outcoming connection using FLoM configuration */
+        if (FLOM_RC_OK != (ret_cod = flom_tcp_connect(&tcp)))
+            THROW(TCP_CONNECT_ERROR);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case TLS_CREATE_CONTEXT_ERROR:
                 break;
             case TLS_SET_CERT_ERROR:
+                break;
+            case TCP_CONNECT_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

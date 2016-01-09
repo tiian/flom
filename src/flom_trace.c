@@ -353,7 +353,7 @@ void flom_trace_sockaddr(const char *prefix, const struct sockaddr *addr,
                             addrlen, sizeof(sin));
                     trace_hex = TRUE;
                 } else {
-                    fprintf(trace_file, " IPv4 address:");
+                    fprintf(trace_file, " IPv4 address");
                     memcpy(&sin, addr, addrlen);
                     fprintf(trace_file, ", sin_port=" IN_PORT_T_FORMAT,
                             htons(sin.sin_port));

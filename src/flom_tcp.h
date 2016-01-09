@@ -84,6 +84,16 @@ extern "C" {
 
 
     /**
+     * Getter method for domain property
+     * @param obj IN TCP connection object
+     * @return socket file descriptor
+     */
+    static inline int flom_tcp_get_domain(const flom_tcp_t *obj) {
+        return obj->domain; }
+
+
+
+    /**
      * Getter method for sockfd property
      * @param obj IN TCP connection object
      * @return socket file descriptor
@@ -139,17 +149,10 @@ extern "C" {
     /**
      * Establish a TCP/IP connection peeking address, port and interface from
      * configuration
-     * @param config IN configuration object, NULL for global config
-     * @param domain OUT domain/family of the created connection (IPv4, IPv6)
-     * @param sockfd OUT file descriptor associated to the opened socket
-     * @param addrlen OUT size of the returned address
-     * @param address OUT address associated with the connection, it must be
-     *                    pre-allocated with the size of struct
-     *                    sockaddr_storage
+     * @param obj IN/OUT TCP communication object
      * @return a reason code
      */
-    int flom_tcp_connect(flom_config_t *config, int *domain, int *sockfd,
-                         size_t *addrlen, struct sockaddr *address);
+    int flom_tcp_connect(flom_tcp_t *obj);
 
 
     

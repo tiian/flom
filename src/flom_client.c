@@ -279,14 +279,12 @@ int flom_client_connect_tcp(flom_config_t *config,
     
     FLOM_TRACE(("flom_client_connect_tcp\n"));
     TRY {
-        int domain;
-        int fd = FLOM_NULL_FD;
-        int sock_opt = 1;
-        size_t addrlen;
-        struct sockaddr_storage address;
+        flom_tcp_t tcp;
 
-        ret_cod = flom_tcp_connect(config, &domain, &fd, &addrlen,
-                                   (struct sockaddr *)&address);
+        flom_tcp_init(&tcp, config);
+        int sock_opt = 1;
+
+        ret_cod = flom_tcp_connect(&tcp);
         switch (ret_cod) {
             case FLOM_RC_OK:
                 break;
@@ -296,8 +294,9 @@ int flom_client_connect_tcp(flom_config_t *config,
                         FLOM_TRACE(("flom_client_connect_tcp: connection "
                                     "failed, activating a new daemon\n"));
                         /* daemon is not active, starting it... */
-                        if (FLOM_RC_OK != (ret_cod = flom_daemon(
-                                               config, domain)))
+                        if (FLOM_RC_OK != (
+                                ret_cod = flom_daemon(
+                                    config, flom_tcp_get_domain(&tcp))))
                             THROW(DAEMON_ERROR);
                         /* trying to connect again... */
                         if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(
@@ -318,23 +317,26 @@ int flom_client_connect_tcp(flom_config_t *config,
             default:
                 THROW(TCP_CONNECT_ERROR);
         } /* switch (ret_cod) */
-        if (0 != setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
+        if (0 != setsockopt(flom_tcp_get_sockfd(&tcp),
+                            IPPROTO_TCP, TCP_NODELAY,
                             (void *)(&sock_opt), sizeof(sock_opt)))
             THROW(SETSOCKOPT_ERROR);
         /* set connection definition object attributes */
-        cd->fd = fd;
+        cd->fd = flom_tcp_get_sockfd(&tcp);
         cd->type = SOCK_STREAM;
-        switch (domain) {
+        switch (flom_tcp_get_domain(&tcp)) {
             case AF_INET:
-                memcpy(&cd->sain, &address, addrlen);
+                memcpy(&cd->sain, flom_tcp_get_address(&tcp),
+                       flom_tcp_get_addrlen(&tcp));
                 break;
             case AF_INET6:
-                memcpy(&cd->sain6, &address, addrlen);
+                memcpy(&cd->sain6, flom_tcp_get_address(&tcp),
+                       flom_tcp_get_addrlen(&tcp));
                 break;
             default:
                 THROW(INVALID_AI_FAMILY_ERROR);
         } /* switch (result->ai_family) */
-        cd->addr_len = addrlen;
+        cd->addr_len = flom_tcp_get_addrlen(&tcp);
         
         THROW(NONE);
     } CATCH {

@@ -151,7 +151,7 @@ int flom_tcp_listen(flom_tcp_t *obj)
         /* set output values */
         obj->sockfd = fd;
         obj->addrlen = gai->ai_addrlen;
-        memcpy((struct sockaddr *)&obj->address, sa, obj->addrlen);
+        memcpy(&obj->address, sa, obj->addrlen);
         fd = FLOM_NULL_FD; /* avoid socket close by clean-up section */        
         THROW(NONE);
     } CATCH {
@@ -230,8 +230,7 @@ const struct addrinfo *flom_tcp_try_connect(
 
 
 
-int flom_tcp_connect(flom_config_t *config, int *domain, int *sockfd,
-                     size_t *addrlen, struct sockaddr *address)
+int flom_tcp_connect(flom_tcp_t *obj)
 {
     enum Exception { GETADDRINFO_ERROR
                      , CONNECTION_REFUSED
@@ -249,23 +248,24 @@ int flom_tcp_connect(flom_config_t *config, int *domain, int *sockfd,
         int errcode;
         
         FLOM_TRACE(("flom_tcp_connect: connecting to address '%s' "
-                    "and port %d\n", flom_config_get_unicast_address(config),
-                    flom_config_get_unicast_port(config)));
+                    "and port %d\n",
+                    flom_config_get_unicast_address(obj->config),
+                    flom_config_get_unicast_port(obj->config)));
         memset(&hints, 0, sizeof(hints));
 
         hints.ai_flags = AI_CANONNAME;
         /* interface name is specified, IPv6 is forced */
-        if (NULL != flom_config_get_network_interface(config))
+        if (NULL != flom_config_get_network_interface(obj->config))
             hints.ai_family = AF_INET6;
         else
             hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = IPPROTO_TCP;
         snprintf(port_string, sizeof(port_string), "%u",
-                 flom_config_get_unicast_port(config));
+                 flom_config_get_unicast_port(obj->config));
         
         if (0 != (errcode = getaddrinfo(
-                      flom_config_get_unicast_address(config),
+                      flom_config_get_unicast_address(obj->config),
                       port_string, &hints, &result))) {
             FLOM_TRACE(("flom_tcp_connect/getaddrinfo(): "
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
@@ -273,20 +273,21 @@ int flom_tcp_connect(flom_config_t *config, int *domain, int *sockfd,
         } 
         FLOM_TRACE_ADDRINFO("flom_tcp_connect/getaddrinfo(): ",
                             result);
-        if (NULL == (p = flom_tcp_try_connect(config, result, &fd))) {
+        if (NULL == (p = flom_tcp_try_connect(obj->config, result, &fd))) {
             /* domain must be set even if the connection failed because it's
                necessary to start a new daemon */
-            *domain = result->ai_family;
+            obj->domain = result->ai_family;
             THROW(CONNECTION_REFUSED);
         }
 
-        *domain = result->ai_family;
-        *sockfd = fd;
-        *addrlen = p->ai_addrlen;
-        memcpy(address, p->ai_addr, *addrlen);
+        obj->domain = result->ai_family;
+        obj->sockfd = fd;
+        obj->addrlen = p->ai_addrlen;
+        memcpy(&obj->address, p->ai_addr, obj->addrlen);
         FLOM_TRACE(("flom_tcp_connect: domain=%d, sockfd=%d, addrlen=%u\n",
-                    *domain, *sockfd, *addrlen));
-        FLOM_TRACE_SOCKADDR("flom_tcp_connect: ", address, *addrlen);
+                    obj->domain, obj->sockfd, obj->addrlen));
+        FLOM_TRACE_SOCKADDR("flom_tcp_connect: ",
+                            (struct sockaddr *)&obj->address, obj->addrlen);
         
         THROW(NONE);
     } CATCH {
