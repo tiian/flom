@@ -593,9 +593,7 @@ int flom_debug_features_tls_server(void)
     FLOM_TRACE(("flom_debug_features_tls_server\n"));
     TRY {
         flom_tls_t tls;
-        int sockfd;
-        size_t addrlen;
-        struct sockaddr_storage address;
+        flom_tcp_t tcp;
         
         /* initialize TLS/SSL support */
         flom_tls_init(&tls, FALSE);
@@ -612,10 +610,11 @@ int flom_debug_features_tls_server(void)
                                "/home/tiian/ssl/CA/cacert.pem")))
             THROW(TLS_SET_CERT_ERROR);
 
+        /* initialize TCP object */
+        flom_tcp_init(&tcp, NULL);
+        
         /* open an incoming connection using FLoM configuration */
-        if (FLOM_RC_OK != (ret_cod = flom_tcp_listen(
-                               NULL, AF_UNSPEC, &sockfd, &addrlen,
-                               (struct sockaddr *)&address)))
+        if (FLOM_RC_OK != (ret_cod = flom_tcp_listen(&tcp)))
             THROW(TCP_LISTEN_ERROR);
         
         THROW(NONE);

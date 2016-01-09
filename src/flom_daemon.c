@@ -453,19 +453,17 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
 
     FLOM_TRACE(("flom_listen_tcp_configured\n"));
     TRY {
-        size_t addrlen;
-        struct sockaddr_storage address;
-        int sockfd;
+        flom_tcp_t tcp;
+
+        flom_tcp_init(&tcp, config);
         
-        if (FLOM_RC_OK != (ret_cod = flom_tcp_listen(
-                               config, flom_conns_get_domain(conns),
-                               &sockfd, &addrlen,
-                               (struct sockaddr *)&address)))
+        if (FLOM_RC_OK != (ret_cod = flom_tcp_listen(&tcp)))
             THROW(LISTEN_ERROR);
         
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                               conns, sockfd, SOCK_STREAM, addrlen,
-                               (struct sockaddr *)&address, TRUE)))
+                               conns, flom_tcp_get_sockfd(&tcp),
+                               SOCK_STREAM, flom_tcp_get_addrlen(&tcp),
+                               flom_tcp_get_address(&tcp), TRUE)))
             THROW(CONNS_ADD_ERROR);
         THROW(NONE);
     } CATCH {

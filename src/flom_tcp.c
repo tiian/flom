@@ -47,8 +47,17 @@
 
 
 
-int flom_tcp_listen(flom_config_t *config, int domain,
-                    int *sockfd, size_t *addrlen, struct sockaddr *address)
+void flom_tcp_init(flom_tcp_t *obj, flom_config_t *config)
+{
+    FLOM_TRACE(("flom_tcp_init\n"));
+    /* memory reset */
+    memset(obj, 0, sizeof(flom_tcp_t));
+    obj->config = config;
+}
+
+
+
+int flom_tcp_listen(flom_tcp_t *obj)
 {
     enum Exception { GETADDRINFO_ERROR
                      , BIND_ERROR
@@ -69,17 +78,17 @@ int flom_tcp_listen(flom_config_t *config, int domain,
 
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_PASSIVE;
-        hints.ai_family = domain;
+        hints.ai_family = obj->domain;
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = IPPROTO_TCP;
         snprintf(port, sizeof(port), "%u",
-                 flom_config_get_unicast_port(config));
+                 flom_config_get_unicast_port(obj->config));
         FLOM_TRACE(("flom_tcp_listen: binding address '%s' "
-                    "and port %s\n", flom_config_get_unicast_address(config),
-                    port));
+                    "and port %s\n", flom_config_get_unicast_address(
+                        obj->config), port));
 
         if (0 != (errcode = getaddrinfo(
-                      flom_config_get_unicast_address(config),
+                      flom_config_get_unicast_address(obj->config),
                       port, &hints, &result))) {
             FLOM_TRACE(("flom_tcp_listen/getaddrinfo(): "
                         "errcode=%d '%s'\n", errcode, gai_strerror(errcode)));
@@ -96,9 +105,10 @@ int flom_tcp_listen(flom_config_t *config, int domain,
                 /* IPv6 addresses could need sin6_scope_id set if the user
                    specified a network interface */
                 if (AF_INET6 == gai->ai_family &&
-                    NULL != flom_config_get_network_interface(config)) {
+                    NULL != flom_config_get_network_interface(obj->config)) {
                     memcpy(&sa6, sa, gai->ai_addrlen);
-                    sa6.sin6_scope_id = flom_config_get_sin6_scope_id(config);
+                    sa6.sin6_scope_id = flom_config_get_sin6_scope_id(
+                        obj->config);
                     sa = (struct sockaddr *)&sa6;
                     FLOM_TRACE(("flom_tcp_listen: overriding field "
                                 "sin6_scope_id with value %u\n",
@@ -139,9 +149,9 @@ int flom_tcp_listen(flom_config_t *config, int domain,
         if (-1 == listen(fd, LISTEN_BACKLOG))
             THROW(LISTEN_ERROR);
         /* set output values */
-        *sockfd = fd;
-        *addrlen = gai->ai_addrlen;
-        memcpy(address, sa, *addrlen);
+        obj->sockfd = fd;
+        obj->addrlen = gai->ai_addrlen;
+        memcpy((struct sockaddr *)&obj->address, sa, obj->addrlen);
         fd = FLOM_NULL_FD; /* avoid socket close by clean-up section */        
         THROW(NONE);
     } CATCH {

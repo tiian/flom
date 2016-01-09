@@ -40,6 +40,34 @@
 
 
 
+/**
+ * Struct used to manipulate a TCP connection
+ */
+typedef struct {
+    /**
+     * Configuration reference or NULL (default configuration)
+     */
+    flom_config_t            *config;
+    /**
+     * Communication domain/family (AF_INET, AF_INET6)
+     */
+    int                       domain;
+    /**
+     * Socket file descriptor
+     */
+    int                       sockfd;
+    /**
+     * Size of the address (see @ref address field)
+     */
+    size_t                    addrlen;
+    /**
+     * Peer address
+     */
+    struct sockaddr_storage   address;
+} flom_tcp_t;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -47,21 +75,50 @@ extern "C" {
 
 
     /**
+     * Initialize a flom_tcp_t object
+     * @param obj IN/OUT to be initialized
+     * @param config IN a reference to configuration object or NULL
+     */
+    void flom_tcp_init(flom_tcp_t *obj, flom_config_t *config);
+    
+
+
+    /**
+     * Getter method for sockfd property
+     * @param obj IN TCP connection object
+     * @return socket file descriptor
+     */
+    static inline int flom_tcp_get_sockfd(const flom_tcp_t *obj) {
+        return obj->sockfd; }
+
+
+
+    /**
+     * Getter method for addrlen property
+     * @param obj IN TCP connection object
+     * @return the lenght of the TCP address
+     */
+    static inline size_t flom_tcp_get_addrlen(const flom_tcp_t *obj) {
+        return obj->addrlen; }
+
+
+    
+    /**
+     * Getter method for address property
+     * @param obj IN TCP connection object
+     * @return the TCP address
+     */
+    static inline struct sockaddr *flom_tcp_get_address(
+        const flom_tcp_t *obj) {
+        return (struct sockaddr*)&obj->address; }
+    
+    
+    /**
      * Prepare an incoming TCP/IP connection ready to accept new clients
-     * @param config IN configuration object, NULL for global config
-     * @param domain IN communication domain; this selects the protocol family
-     *                  which will be used for communication (AF_INET for IPv4,
-     *                  AF_INET6 for IPv6)
-     * @param sockfd OUT file descriptor associated to the opened socket
-     * @param addrlen OUT size of the returned address
-     * @param address OUT address associated with the connection, it must be
-     *                    pre-allocated with the size of struct
-     *                    sockaddr_storage
+     * @param obj IN/OUT TCP communication object
      * @return a reason code
      */
-    int flom_tcp_listen(flom_config_t *config, int domain,
-                        int *sockfd, size_t *addrlen,
-                        struct sockaddr *address);
+    int flom_tcp_listen(flom_tcp_t *obj);
 
 
 
