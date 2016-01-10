@@ -460,9 +460,29 @@
  */
 #define FLOM_RC_SSL_CTX_USE_PRIVATEKEY_FILE_ERROR   -404
 /**
+ * OpenSSL "SSL_acceept" function error
+ */
+#define FLOM_RC_SSL_ACCEPT_ERROR                    -405
+/**
+ * OpenSSL "SSL_connect" function error
+ */
+#define FLOM_RC_SSL_CONNECT_ERROR                   -406
+/**
+ * OpenSSL "SSL_new" function error
+ */
+#define FLOM_RC_SSL_NEW_ERROR                       -407
+/**
+ * OpenSSL "SSL_set_ex_data" function error
+ */
+#define FLOM_RC_SSL_SET_EX_DATA_ERROR               -408
+/**
+ * OpenSSL "SSL_set_fd" function error
+ */
+#define FLOM_RC_SSL_SET_FD_ERROR                    -409
+/**
  * No valid TLS/SSL method was found
  */
-#define FLOM_RC_TLS_NO_VALID_METHOD                 -405
+#define FLOM_RC_TLS_NO_VALID_METHOD                 -410
 
 #ifdef __cplusplus
 extern "C" {

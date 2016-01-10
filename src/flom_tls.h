@@ -24,6 +24,7 @@
 #include <config.h>
 
 
+
 #ifdef HAVE_OPENSSL_SSL_H
 # include <openssl/ssl.h>
 #endif
@@ -80,6 +81,10 @@ typedef struct {
      */
     SSL_CTX                              *ctx;
     /**
+     * SSL structure
+     */
+    SSL                                  *ssl;
+    /**
      * Boolean: is the TLS connection related to the client side (TRUE) or
      *          the server side (FALSE)
      */
@@ -115,6 +120,15 @@ extern "C" {
 
 
     /**
+     * Numeric/string conversion for some SSL errors...
+     * Why is not supplied by the library?!?! Where am I wrong?!?!
+     * @return a human readable label
+     */
+    const char *flom_tls_get_error_label(int error);
+    
+    
+
+    /**
      * Initialize (OpenSSL) TLS/SSL library and an object that must be used
      * for the next operations
      * @param obj OUT connection object reference
@@ -125,6 +139,15 @@ extern "C" {
 
     
 
+    /**
+     * Release the TLS/SSL object created and encapsulated by flom_tls_t;
+     * NOTE: the object must be initialized before this method can be applied
+     * @param obj IN/OUT TLS object
+     */
+    void flom_tls_free(flom_tls_t *obj);
+
+
+    
     /**
      * Create a new TLS/SSL context
      * @param obj IN/OUT connection object reference
@@ -158,6 +181,36 @@ extern "C" {
     int flom_tls_set_cert(flom_tls_t *obj, const char *cert_file,
                           const char *priv_key_file, const char *ca_cert_file);
 
+
+
+    /**
+     * Prepare a standard TCP connection to be switched to a TLS connection
+     * @param obj IN/OUT TLS object
+     * @param sockfd IN file descriptor of the socket already connected
+     * @return a reason code
+     */
+    int flom_tls_prepare(flom_tls_t *obj, int sockfd);
+    
+
+    
+    /**
+     * Switch a standard TCP client connection to a TLS client connection
+     * @param obj IN/OUT TLS object
+     * @param sockfd IN file descriptor of the socket already connected
+     * @return a reason code
+     */
+    int flom_tls_connect(flom_tls_t *obj, int sockfd);
+    
+
+    
+    /**
+     * Switch a standard TCP server connection to a TLS server connection
+     * @param obj IN/OUT TLS object
+     * @param sockfd IN file descriptor of the socket already connected
+     * @return a reason code
+     */
+    int flom_tls_accept(flom_tls_t *obj, int sockfd);
+    
 
     
 #ifdef __cplusplus

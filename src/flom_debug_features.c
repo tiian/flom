@@ -588,16 +588,18 @@ int flom_debug_features_tls_server(void)
                      , TLS_SET_CERT_ERROR
                      , TCP_LISTEN_ERROR
                      , ACCEPT_ERROR
+                     , TLS_ACCEPT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
+    flom_tls_t tls;
+    
     FLOM_TRACE(("flom_debug_features_tls_server\n"));
     TRY {
-        flom_tls_t tls;
         flom_tcp_t tcp;
         /* network data of the peer socket */
         int peer_sockfd;
-        size_t peer_addrlen;
+        socklen_t peer_addrlen;
         struct sockaddr_storage peer_address;
         
         /* initialize TLS/SSL support */
@@ -631,6 +633,11 @@ int flom_debug_features_tls_server(void)
                             "connection address data: ",
                             (struct sockaddr *)&peer_address, peer_addrlen);
         
+        /* switch the server connection to TLS */
+        if (FLOM_RC_OK != (ret_cod = flom_tls_accept(
+                               &tls, flom_tcp_get_sockfd(&tcp))))
+            THROW(TLS_ACCEPT_ERROR);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -643,6 +650,8 @@ int flom_debug_features_tls_server(void)
             case ACCEPT_ERROR:
                 ret_cod = FLOM_RC_ACCEPT_ERROR;
                 break;
+            case TLS_ACCEPT_ERROR:
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -650,6 +659,8 @@ int flom_debug_features_tls_server(void)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* TLS object clean-up */
+    flom_tls_free(&tls);
     FLOM_TRACE(("flom_debug_features_tls_server/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -662,12 +673,14 @@ int flom_debug_features_tls_client(void)
     enum Exception { TLS_CREATE_CONTEXT_ERROR
                      , TLS_SET_CERT_ERROR
                      , TCP_CONNECT_ERROR
+                     , TLS_CONNECT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
+    flom_tls_t tls;
+        
     FLOM_TRACE(("flom_debug_features_tls_client\n"));
     TRY {
-        flom_tls_t tls;
         flom_tcp_t tcp;
         
         /* initialize TLS/SSL support */
@@ -691,6 +704,11 @@ int flom_debug_features_tls_client(void)
         /* open an outcoming connection using FLoM configuration */
         if (FLOM_RC_OK != (ret_cod = flom_tcp_connect(&tcp)))
             THROW(TCP_CONNECT_ERROR);
+
+        /* switch the client connection to TLS */
+        if (FLOM_RC_OK != (ret_cod = flom_tls_connect(
+                               &tls, flom_tcp_get_sockfd(&tcp))))
+            THROW(TLS_CONNECT_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -701,6 +719,8 @@ int flom_debug_features_tls_client(void)
                 break;
             case TCP_CONNECT_ERROR:
                 break;
+            case TLS_CONNECT_ERROR:
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -708,6 +728,8 @@ int flom_debug_features_tls_client(void)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* TLS object clean-up */
+    flom_tls_free(&tls);
     FLOM_TRACE(("flom_debug_features_tls_client/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

@@ -502,8 +502,18 @@ extern "C" {
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_CTX_USE_CERTIFICATE_FILE_ERROR -403L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_CTX_USE_PRIVATEKEY_FILE_ERROR
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_CTX_USE_PRIVATEKEY_FILE_ERROR -404L
+#undef org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_ACCEPT_ERROR
+#define org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_ACCEPT_ERROR -405L
+#undef org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_CONNECT_ERROR
+#define org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_CONNECT_ERROR -406L
+#undef org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_NEW_ERROR
+#define org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_NEW_ERROR -407L
+#undef org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_SET_EX_DATA_ERROR
+#define org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_SET_EX_DATA_ERROR -408L
+#undef org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_SET_FD_ERROR
+#define org_tiian_flom_FlomErrorCodes_FLOM_RC_SSL_SET_FD_ERROR -409L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_TLS_NO_VALID_METHOD
-#define org_tiian_flom_FlomErrorCodes_FLOM_RC_TLS_NO_VALID_METHOD -405L
+#define org_tiian_flom_FlomErrorCodes_FLOM_RC_TLS_NO_VALID_METHOD -410L
 /*
  * Class:     org_tiian_flom_FlomErrorCodes
  * Method:    getText
