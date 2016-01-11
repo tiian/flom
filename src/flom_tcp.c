@@ -23,6 +23,9 @@
 #ifdef HAVE_NETDB_H
 # include <netdb.h>
 #endif
+#ifdef HAVE_POLL_H
+# include <poll.h>
+#endif
 #ifdef HAVE_STRING_H
 # include <string.h>
 #endif
@@ -79,7 +82,7 @@ int flom_tcp_listen(flom_tcp_t *obj)
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = AI_PASSIVE;
         hints.ai_family = obj->domain;
-        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_socktype = obj->socket_type;
         hints.ai_protocol = IPPROTO_TCP;
         snprintf(port, sizeof(port), "%u",
                  flom_config_get_unicast_port(obj->config));
@@ -282,10 +285,11 @@ int flom_tcp_connect(flom_tcp_t *obj)
 
         obj->domain = result->ai_family;
         obj->sockfd = fd;
+        obj->socket_type = hints.ai_socktype;
         obj->addrlen = p->ai_addrlen;
         memcpy(&obj->address, p->ai_addr, obj->addrlen);
-        FLOM_TRACE(("flom_tcp_connect: domain=%d, sockfd=%d, addrlen=%u\n",
-                    obj->domain, obj->sockfd, obj->addrlen));
+        FLOM_TRACE(("flom_tcp_connect: domain=%d, sockfd=%d, socket_type=%d, "
+                    "addrlen=%u\n", obj->domain, obj->sockfd, obj->addrlen));
         FLOM_TRACE_SOCKADDR("flom_tcp_connect: ",
                             (struct sockaddr *)&obj->address, obj->addrlen);
         
@@ -311,6 +315,162 @@ int flom_tcp_connect(flom_tcp_t *obj)
     if (FLOM_RC_OK != ret_cod && FLOM_NULL_FD != fd)
         close(fd);
     FLOM_TRACE(("flom_tcp_connect/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_tcp_retrieve(int fd, int type, char *buf, size_t buf_size,
+                      ssize_t *read_bytes, int timeout,
+                      struct sockaddr *src_addr, socklen_t *addrlen)
+{
+    enum Exception { POLL_ERROR
+                     , NETWORK_TIMEOUT
+                     , INTERNAL_ERROR
+                     , INVALID_SOCKET_TYPE
+                     , RECV_ERROR
+                     , RECVFROM_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_tcp_retrieve\n"));
+    TRY {
+        if (timeout >= 0) {
+            struct pollfd fds[1];
+            int rc;
+            /* use poll to check the filedescriptor for a limited amount of
+               time */
+            fds[0].fd = fd;
+            fds[0].events = POLLIN;
+            fds[0].revents = 0;
+            rc = poll(fds, 1, timeout);
+            switch (rc) {
+                case -1: /* error in poll function */
+                    THROW(POLL_ERROR);
+                    break;
+                case 0: /* timeout, return! */
+                    THROW(NETWORK_TIMEOUT);
+                    break;
+                case 1: /* data arrived, go on... */
+                    break;
+                default: /* unexpected result, internal error! */
+                    THROW(INTERNAL_ERROR);
+            } /* switch (rc) */
+        } /* if (timeout >= 0) */
+
+        switch (type) {
+            case SOCK_STREAM:
+                if (0 > (*read_bytes = recv(fd, buf, buf_size, 0)))
+                    THROW(RECV_ERROR);
+                break;
+            case SOCK_DGRAM:
+                if (0 > (*read_bytes = recvfrom(
+                             fd, buf, buf_size, 0,
+                             (struct sockaddr *)src_addr, addrlen)))
+                    THROW(RECVFROM_ERROR);
+                FLOM_TRACE_HEX_DATA("flom_tcp_retrieve: from ",
+                                    (void *)src_addr, *addrlen);        
+                break;
+            default:
+                THROW(INVALID_SOCKET_TYPE);
+        } /* switch (type) */
+        
+        FLOM_TRACE(("flom_tcp_retrieve: fd=%d returned "
+                    SSIZE_T_FORMAT " bytes '%*.*s'\n", fd, *read_bytes,
+                    *read_bytes, *read_bytes, buf));
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case POLL_ERROR:
+                ret_cod = FLOM_RC_POLL_ERROR;
+                break;
+            case NETWORK_TIMEOUT:
+                ret_cod = FLOM_RC_NETWORK_TIMEOUT;
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+                break;
+            case INVALID_SOCKET_TYPE:
+                ret_cod = FLOM_RC_INVALID_OPTION;
+                break;
+            case RECV_ERROR:
+                ret_cod = FLOM_RC_RECV_ERROR;
+                break;
+            case RECVFROM_ERROR:
+                ret_cod = FLOM_RC_RECVFROM_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_tcp_retrieve/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_tcp_send(int fd, const char *buf, size_t buf_size)
+{
+    enum Exception { GETSOCKOPT_ERROR
+                     , CONNECTION_CLOSED
+                     , SEND_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_tcp_send: fd=%d\n", fd));
+    TRY {
+        ssize_t wrote_bytes;
+        int optval;
+        socklen_t optlen = sizeof(optval);
+
+        if (0 != getsockopt(fd, SOL_SOCKET, SO_ERROR, &optval, &optlen))
+            THROW(GETSOCKOPT_ERROR);
+        FLOM_TRACE(("flom_tcp_send: so_error=%d (EPIPE=%d, ECONNRESET=%d)\n",
+                    optval, EPIPE, ECONNRESET));
+        if (EPIPE == optval || ECONNRESET == optval) {
+            int rc = 0;
+            rc = shutdown(fd, SHUT_RDWR);
+            FLOM_TRACE(("flom_tcp_send: socket with fd=%d was shutdown "
+                        "(rc=%d,errno=%d)\n", fd, rc, errno));
+            THROW(CONNECTION_CLOSED);
+        }
+        FLOM_TRACE(("flom_tcp_send: sending " SIZE_T_FORMAT
+                    " bytes (fd=%d) '%*.*s'...\n", buf_size, fd,
+                    buf_size, buf_size, buf));
+        wrote_bytes = send(fd, buf, buf_size, MSG_NOSIGNAL);
+        if (buf_size != wrote_bytes) {
+            FLOM_TRACE(("flom_tcp_send: sent " SSIZE_T_FORMAT
+                        " bytes instead of " SIZE_T_FORMAT "\n",
+                        wrote_bytes, buf_size));
+            THROW(SEND_ERROR);
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case GETSOCKOPT_ERROR:
+                ret_cod = FLOM_RC_GETSOCKOPT_ERROR;
+                break;
+            case CONNECTION_CLOSED:
+                ret_cod = FLOM_RC_CONNECTION_CLOSED;
+                break;
+            case SEND_ERROR:
+                ret_cod = FLOM_RC_SEND_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_tcp_send/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

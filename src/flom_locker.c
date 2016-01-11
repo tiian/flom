@@ -43,6 +43,7 @@
 #include "flom_errors.h"
 #include "flom_locker.h"
 #include "flom_rsrc.h"
+#include "flom_tcp.h"
 #include "flom_trace.h"
 
 
@@ -393,7 +394,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
             ssize_t read_bytes;
             GMarkupParseContext *gmpc;
             /* it's data from an existing connection */
-            if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
+            if (FLOM_RC_OK != (ret_cod = flom_tcp_retrieve(
                                    curr_cd->fd, curr_cd->type,
                                    buffer, sizeof(buffer),
                                    &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT,
@@ -455,7 +456,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                                            msg, buffer, sizeof(buffer),
                                            &msg_len)))
                         THROW(MSG_SERIALIZE_ERROR);
-                    ret_cod = flom_msg_send(curr_cd->fd, buffer, msg_len);
+                    ret_cod = flom_tcp_send(curr_cd->fd, buffer, msg_len);
                     if (FLOM_RC_SEND_ERROR == ret_cod) {
                         FLOM_TRACE(("flom_locker_loop_pollin: error while "
                                     "sending message to client (the "

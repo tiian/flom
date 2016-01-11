@@ -38,6 +38,7 @@
 #include "flom_errors.h"
 #include "flom_rsrc.h"
 #include "flom_resource_set.h"
+#include "flom_tcp.h"
 #include "flom_trace.h"
 #include "flom_syslog.h"
 
@@ -456,10 +457,11 @@ int flom_resource_set_waitings(flom_resource_t *resource)
                                        3*FLOM_MSG_STEP_INCR,
                                        FLOM_RC_OK, rdse->name)))
                     THROW(MSG_BUILD_ANSWER_ERROR);
-                if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
-                                       &msg, buffer, sizeof(buffer), &to_send)))
+                if (FLOM_RC_OK != (
+                        ret_cod = flom_msg_serialize(
+                            &msg, buffer, sizeof(buffer), &to_send)))
                     THROW(MSG_SERIALIZE_ERROR);
-                if (FLOM_RC_OK != (ret_cod = flom_msg_send(
+                if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
                                        cl->conn->fd, buffer, to_send)))
                     THROW(MSG_SEND_ERROR);
                 cl->conn->last_step = msg.header.pvs.step;

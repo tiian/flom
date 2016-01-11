@@ -1117,7 +1117,7 @@ int flom_accept_loop_pollin(flom_config_t *config,
             socklen_t addrlen = sizeof(src_addr);
             memset(&src_addr, 0, addrlen);
             /* it's data from an existing connection */
-            if (FLOM_RC_OK != (ret_cod = flom_msg_retrieve(
+            if (FLOM_RC_OK != (ret_cod = flom_tcp_retrieve(
                                    c->fd, c->type, buffer, sizeof(buffer),
                                    &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT,
                                    (struct sockaddr *)&src_addr, &addrlen)))
@@ -1731,7 +1731,7 @@ int flom_accept_loop_reply(struct flom_conn_data_s *cd, int rc)
                                &msg, buffer, sizeof(buffer), &to_send)))
             THROW(MSG_SERIALIZE_ERROR);
         /* send message to client (requester) */
-        if (FLOM_RC_OK != (ret_cod = flom_msg_send(
+        if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
                                cd->fd, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
         cd->last_step = msg.header.pvs.step;

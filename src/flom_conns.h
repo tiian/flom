@@ -133,19 +133,23 @@ struct flom_conn_data_s {
         /**
          * Client address for generic connections
          */
-        struct sockaddr     sa;
+        struct sockaddr             sa;
         /**
          * Client address for AF_UNIX connections
          */
-        struct sockaddr_un  saun;
+        struct sockaddr_un          saun;
         /**
          * Client address for AF_INET connections
          */
-        struct sockaddr_in  sain;
+        struct sockaddr_in          sain;
         /**
          * Client address for AF_INET6 connections
          */
-        struct sockaddr_in6 sain6;
+        struct sockaddr_in6         sain6;
+        /**
+         * Maximum size necessary to store an address
+         */
+        struct sockaddr_storage     sa_storage;
     };
     /**
      * Last received message (allocated by malloc)

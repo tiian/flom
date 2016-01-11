@@ -865,7 +865,7 @@ int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
             THROW(MSG_SERIALIZE_ERROR);
 
         /* send the request message */
-        if (FLOM_RC_OK != (ret_cod = flom_msg_send(
+        if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
                                cd->fd, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
         cd->last_step = msg.header.pvs.step;
@@ -875,7 +875,7 @@ int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
         flom_msg_init(&msg);
 
         /* retrieve the reply message */
-        ret_cod = flom_msg_retrieve(
+        ret_cod = flom_tcp_retrieve(
             cd->fd, cd->type, buffer, sizeof(buffer), &to_read, timeout,
             NULL, NULL);
         switch (ret_cod) {
@@ -1063,7 +1063,7 @@ int flom_client_wait_lock(struct flom_conn_data_s *cd,
         /* more than one answer can arrive */
         while (TRUE) {
             /* retrieve the reply message */
-            ret_cod = flom_msg_retrieve(
+            ret_cod = flom_tcp_retrieve(
                 cd->fd, cd->type, buffer, sizeof(buffer), &to_read, timeout,
                 NULL, NULL);
             switch (ret_cod) {
@@ -1178,7 +1178,7 @@ int flom_client_unlock(flom_config_t *config,
             THROW(MSG_SERIALIZE_ERROR);
 
         /* send the request message */
-        if (FLOM_RC_OK != (ret_cod = flom_msg_send(
+        if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
                                cd->fd, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
         cd->last_step = msg.header.pvs.step;
@@ -1302,7 +1302,7 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
             THROW(MSG_SERIALIZE_ERROR);
 
         /* send the request message */
-        if (FLOM_RC_OK != (ret_cod = flom_msg_send(cd.fd, buffer, to_send)))
+        if (FLOM_RC_OK != (ret_cod = flom_tcp_send(cd.fd, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
         cd.last_step = msg.header.pvs.step;
         FLOM_TRACE(("flom_client_shutdown: shutdown message sent "
