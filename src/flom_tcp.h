@@ -67,7 +67,28 @@ typedef struct {
     /**
      * Peer address
      */
-    struct sockaddr_storage   address;
+    union {
+        /**
+         * Client address for generic connections
+         */
+        struct sockaddr             sa;
+        /**
+         * Client address for AF_UNIX connections
+         */
+        struct sockaddr_un          sa_un;
+        /**
+         * Client address for AF_INET connections
+         */
+        struct sockaddr_in          sa_in;
+        /**
+         * Client address for AF_INET6 connections
+         */
+        struct sockaddr_in6         sa_in6;
+        /**
+         * Maximum size necessary to store an address
+         */
+        struct sockaddr_storage     sa_storage;
+    };
 } flom_tcp_t;
 
 
@@ -106,6 +127,39 @@ extern "C" {
         return obj->sockfd; }
 
 
+    
+    /**
+     * Setter method for sockfd property
+     * @param obj IN TCP connection object
+     * @param sockfd IN socket file descriptor
+     * @return the same value passed with sockfd parameter
+     */
+    static inline int flom_tcp_set_sockfd(flom_tcp_t *obj, int sockfd) {
+        obj->sockfd = sockfd;
+        return sockfd; }
+
+
+
+    /**
+     * Getter method for socket_type property
+     * @param obj IN TCP connection object
+     * @return socket file descriptor
+     */
+    static inline int flom_tcp_get_socket_type(const flom_tcp_t *obj) {
+        return obj->socket_type; }
+
+
+    
+    /**
+     * Setter method for socket_type property
+     * @param obj IN TCP connection object
+     * @param socket_type IN socket type
+     */
+    static inline void flom_tcp_set_socket_type(
+        flom_tcp_t *obj, int socket_type) {
+        obj->socket_type = socket_type; }
+
+
 
     /**
      * Getter method for addrlen property
@@ -122,9 +176,8 @@ extern "C" {
      * @param obj IN TCP connection object
      * @return the TCP address
      */
-    static inline struct sockaddr *flom_tcp_get_address(
-        const flom_tcp_t *obj) {
-        return (struct sockaddr*)&obj->address; }
+    static inline struct sockaddr *flom_tcp_get_address(flom_tcp_t *obj) {
+        return &obj->sa; }
     
     
     /**

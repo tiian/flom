@@ -365,7 +365,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
         if (NULL == (curr_cd = flom_conns_get_cd(conns, id)))
             THROW(CONNS_GET_CD_ERROR);
         FLOM_TRACE(("flom_locker_loop_pollin: id=%d, fd=%d\n",
-                    id, curr_cd->fd));
+                    id, flom_tcp_get_sockfd(&curr_cd->tcp)));
         locker->idle_periods = 0;
         if (0 == id) {
             struct flom_locker_token_s flt;
@@ -395,7 +395,8 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
             GMarkupParseContext *gmpc;
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_tcp_retrieve(
-                                   curr_cd->fd, curr_cd->type,
+                                   flom_tcp_get_sockfd(&curr_cd->tcp),
+                                   flom_tcp_get_socket_type(&curr_cd->tcp),
                                    buffer, sizeof(buffer),
                                    &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT,
                                    NULL, NULL)))
@@ -405,7 +406,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 /* connection closed */
                 FLOM_TRACE(("flom_locker_loop_pollin: id=%d, fd=%d "
                             "returned 0 bytes: disconnecting...\n",
-                            id, curr_cd->fd));
+                            id, flom_tcp_get_sockfd(&curr_cd->tcp)));
                 if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                        conns, id)))
                     THROW(CONNS_CLOSE_ERROR1);
@@ -456,7 +457,8 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                                            msg, buffer, sizeof(buffer),
                                            &msg_len)))
                         THROW(MSG_SERIALIZE_ERROR);
-                    ret_cod = flom_tcp_send(curr_cd->fd, buffer, msg_len);
+                    ret_cod = flom_tcp_send(
+                        flom_tcp_get_sockfd(&curr_cd->tcp), buffer, msg_len);
                     if (FLOM_RC_SEND_ERROR == ret_cod) {
                         FLOM_TRACE(("flom_locker_loop_pollin: error while "
                                     "sending message to client (the "

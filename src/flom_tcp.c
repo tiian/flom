@@ -154,7 +154,7 @@ int flom_tcp_listen(flom_tcp_t *obj)
         /* set output values */
         obj->sockfd = fd;
         obj->addrlen = gai->ai_addrlen;
-        memcpy(&obj->address, sa, obj->addrlen);
+        memcpy(&obj->sa_storage, sa, obj->addrlen);
         fd = FLOM_NULL_FD; /* avoid socket close by clean-up section */        
         THROW(NONE);
     } CATCH {
@@ -287,11 +287,10 @@ int flom_tcp_connect(flom_tcp_t *obj)
         obj->sockfd = fd;
         obj->socket_type = hints.ai_socktype;
         obj->addrlen = p->ai_addrlen;
-        memcpy(&obj->address, p->ai_addr, obj->addrlen);
+        memcpy(&obj->sa_storage, p->ai_addr, obj->addrlen);
         FLOM_TRACE(("flom_tcp_connect: domain=%d, sockfd=%d, socket_type=%d, "
                     "addrlen=%u\n", obj->domain, obj->sockfd, obj->addrlen));
-        FLOM_TRACE_SOCKADDR("flom_tcp_connect: ",
-                            (struct sockaddr *)&obj->address, obj->addrlen);
+        FLOM_TRACE_SOCKADDR("flom_tcp_connect: ", &obj->sa, obj->addrlen);
         
         THROW(NONE);
     } CATCH {

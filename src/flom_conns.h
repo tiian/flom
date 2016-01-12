@@ -55,6 +55,7 @@
 
 #include "flom_config.h"
 #include "flom_msg.h"
+#include "flom_tcp.h"
 
 
 
@@ -107,15 +108,6 @@ typedef enum flom_conn_state_e {
  */
 struct flom_conn_data_s {
     /**
-     * File descriptor associated to the connection
-     */
-    int                   fd;
-    /**
-     * Socket type associated to file descriptor;
-     * possible values are: SOCK_STREAM and SOCK_DGRAM
-     */
-    int                   type;
-    /**
      * Connection state
      */
     flom_conn_state_t     state;
@@ -151,6 +143,10 @@ struct flom_conn_data_s {
          */
         struct sockaddr_storage     sa_storage;
     };
+    /**
+     * TCP/IP connection data
+     */
+    flom_tcp_t             tcp;
     /**
      * Last received message (allocated by malloc)
      */
@@ -296,8 +292,9 @@ extern "C" {
      */
     static inline int flom_conns_get_fd(const flom_conns_t *conns, guint id) {
         if (id < conns->array->len)
-            return ((struct flom_conn_data_s *)
-                    g_ptr_array_index(conns->array, id))->fd;
+            return flom_tcp_get_sockfd(
+                &((struct flom_conn_data_s *)
+                 g_ptr_array_index(conns->array, id))->tcp);
         else
             return FLOM_NULL_FD;
     }
@@ -313,8 +310,9 @@ extern "C" {
     static inline int flom_conns_get_type(
         const flom_conns_t *conns, guint id) {
         if (id < conns->array->len)
-            return ((struct flom_conn_data_s *)
-                    g_ptr_array_index(conns->array, id))->type;
+            return flom_tcp_get_socket_type(
+                &((struct flom_conn_data_s *)
+                  g_ptr_array_index(conns->array, id))->tcp);
         else
             return 0;
     }

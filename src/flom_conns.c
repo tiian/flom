@@ -117,9 +117,10 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
             default:
                 THROW(INVALID_DOMAIN);
         }
-        tmp->fd = fd;
+        flom_tcp_init(&tmp->tcp, NULL);
+        flom_tcp_set_sockfd(&tmp->tcp, fd);
         assert(SOCK_STREAM == type || SOCK_DGRAM == type);
-        tmp->type = type;
+        flom_tcp_set_socket_type(&tmp->tcp, type);
         tmp->state = main_thread ?
             FLOM_CONN_STATE_DAEMON : FLOM_CONN_STATE_LOCKER;
         tmp->wait = FALSE;
@@ -204,9 +205,9 @@ struct pollfd *flom_conns_get_fds(flom_conns_t *conns)
     memset(tmp, 0, (size_t)(conns->array->len*sizeof(struct pollfd)));
     /* fill the poll array with file descriptors */
     for (i=0; i<conns->array->len; ++i) {
-        tmp[i].fd =
-            ((struct flom_conn_data_s *)g_ptr_array_index(
-                conns->array, i))->fd;
+        tmp[i].fd = flom_tcp_get_sockfd(
+            &((struct flom_conn_data_s *)g_ptr_array_index(
+                  conns->array, i))->tcp);
     }
     conns->poll_array = tmp;
     return conns->poll_array;
@@ -227,7 +228,7 @@ int flom_conns_set_events(flom_conns_t *conns, short events)
         for (i=0; i<conns->array->len; ++i) {
             struct flom_conn_data_s *c =
                 (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
-            if (FLOM_NULL_FD != c->fd)
+            if (FLOM_NULL_FD != flom_tcp_get_sockfd(&c->tcp))
                 conns->poll_array[i].events = events;
             else {
                 FLOM_TRACE(("flom_conns_set_events: i=%u, "
@@ -276,14 +277,15 @@ int flom_conns_close_fd(flom_conns_t *conns, guint id)
             THROW(NULL_OBJECT);
         if (FLOM_CONN_STATE_REMOVE != c->state) {
             c->state = FLOM_CONN_STATE_REMOVE;
-            if (FLOM_NULL_FD == c->fd) {
+            if (FLOM_NULL_FD == flom_tcp_get_sockfd(&c->tcp)) {
                 FLOM_TRACE(("flom_conns_close: connection id=%u already "
                             "closed, skipping...\n", id));
             } else {
-                FLOM_TRACE(("flom_conns_close: closing fd=%d\n", c->fd));
-                if (0 != close(c->fd))
+                FLOM_TRACE(("flom_conns_close: closing fd=%d\n",
+                            flom_tcp_get_sockfd(&c->tcp)));
+                if (0 != close(flom_tcp_get_sockfd(&c->tcp)))
                     THROW(CLOSE_ERROR);
-                c->fd = FLOM_NULL_FD;
+                flom_tcp_set_sockfd(&c->tcp, FLOM_NULL_FD);
             }
         } else {
             FLOM_TRACE(("flom_conns_close: connection id=%u already "
@@ -375,7 +377,7 @@ int flom_conns_clean(flom_conns_t *conns)
                 (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
             FLOM_TRACE(("flom_conns_clean: i=%u, state=%d, wait=%d, "
                         "fd=%d %s\n",
-                        i, c->state, c->wait, c->fd,
+                        i, c->state, c->wait, flom_tcp_get_sockfd(&c->tcp),
                         FLOM_CONN_STATE_REMOVE == c->state ?
                         "(removing...)" : FLOM_EMPTY_STRING));
             flom_conn_data_trace(c);
@@ -454,8 +456,10 @@ void flom_conn_data_trace(const struct flom_conn_data_s *conn)
     FLOM_TRACE(("flom_conn_data_trace: "
                 "fd=%d, type=%d, state=%d, wait=%d, msg=%p, gmpc=%p, "
                 "addr_len=%d\n",
-                conn->fd, conn->type, conn->state, conn->wait, conn->msg,
-                conn->gmpc, conn->addr_len));
+                flom_tcp_get_sockfd(&conn->tcp),
+                flom_tcp_get_socket_type(&conn->tcp),
+                conn->state, conn->wait, conn->msg, conn->gmpc,
+                conn->addr_len));
 }
 
 
