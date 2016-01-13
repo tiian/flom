@@ -118,35 +118,9 @@ struct flom_conn_data_s {
      */
     int                   wait;
     /**
-     * Client address len
-     */
-    socklen_t addr_len;
-    union {
-        /**
-         * Client address for generic connections
-         */
-        struct sockaddr             sa;
-        /**
-         * Client address for AF_UNIX connections
-         */
-        struct sockaddr_un          saun;
-        /**
-         * Client address for AF_INET connections
-         */
-        struct sockaddr_in          sain;
-        /**
-         * Client address for AF_INET6 connections
-         */
-        struct sockaddr_in6         sain6;
-        /**
-         * Maximum size necessary to store an address
-         */
-        struct sockaddr_storage     sa_storage;
-    };
-    /**
      * TCP/IP connection data
      */
-    flom_tcp_t             tcp;
+    flom_tcp_t            tcp;
     /**
      * Last received message (allocated by malloc)
      */

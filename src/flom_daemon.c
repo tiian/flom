@@ -463,7 +463,7 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
                                conns, flom_tcp_get_sockfd(&tcp),
                                SOCK_STREAM, flom_tcp_get_addrlen(&tcp),
-                               flom_tcp_get_address(&tcp), TRUE)))
+                               flom_tcp_get_sa(&tcp), TRUE)))
             THROW(CONNS_ADD_ERROR);
         THROW(NONE);
     } CATCH {

@@ -104,27 +104,31 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
         if (NULL == (tmp = g_try_malloc0(sizeof(struct flom_conn_data_s))))
             THROW(G_TRY_MALLOC_ERROR1);
         FLOM_TRACE(("flom_conns_add: allocated a new connection (%p)\n", tmp));
+        flom_tcp_init(&tmp->tcp, NULL);
+        flom_tcp_set_domain(&tmp->tcp, conns->domain);
         switch (conns->domain) {
             case AF_UNIX:
-                tmp->saun = *((struct sockaddr_un *)sa);
+                memcpy(flom_tcp_get_sa_un(&tmp->tcp), sa,
+                       sizeof(struct sockaddr_un));
                 break;
             case AF_INET:
-                tmp->sain = *((struct sockaddr_in *)sa);
+                memcpy(flom_tcp_get_sa_in(&tmp->tcp), sa,
+                       sizeof(struct sockaddr_in));
                 break;
             case AF_INET6:
-                tmp->sain6 = *((struct sockaddr_in6 *)sa);
+                memcpy(flom_tcp_get_sa_in6(&tmp->tcp), sa,
+                       sizeof(struct sockaddr_in6));
                 break;
             default:
                 THROW(INVALID_DOMAIN);
         }
-        flom_tcp_init(&tmp->tcp, NULL);
         flom_tcp_set_sockfd(&tmp->tcp, fd);
         assert(SOCK_STREAM == type || SOCK_DGRAM == type);
         flom_tcp_set_socket_type(&tmp->tcp, type);
         tmp->state = main_thread ?
             FLOM_CONN_STATE_DAEMON : FLOM_CONN_STATE_LOCKER;
         tmp->wait = FALSE;
-        tmp->addr_len = addr_len;
+        flom_tcp_set_addrlen(&tmp->tcp, addr_len);
         /* reset the associated message */
         if (NULL == (tmp->msg =
                      g_try_malloc(sizeof(struct flom_msg_s))))
@@ -459,7 +463,7 @@ void flom_conn_data_trace(const struct flom_conn_data_s *conn)
                 flom_tcp_get_sockfd(&conn->tcp),
                 flom_tcp_get_socket_type(&conn->tcp),
                 conn->state, conn->wait, conn->msg, conn->gmpc,
-                conn->addr_len));
+                flom_tcp_get_addrlen(&conn->tcp)));
 }
 
 

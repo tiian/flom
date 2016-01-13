@@ -61,7 +61,7 @@ typedef struct {
      */
     int                       socket_type;
     /**
-     * Size of the address (see @ref address field)
+     * Size of the address field
      */
     size_t                    addrlen;
     /**
@@ -119,6 +119,17 @@ extern "C" {
 
 
     /**
+     * Setter method for domain property
+     * @param obj IN TCP connection object
+     * @param value IN new value for domain
+     * @return socket file descriptor
+     */
+    static inline void flom_tcp_set_domain(flom_tcp_t *obj, int value) {
+        obj->domain = value; }
+
+
+
+    /**
      * Getter method for sockfd property
      * @param obj IN TCP connection object
      * @return socket file descriptor
@@ -131,12 +142,12 @@ extern "C" {
     /**
      * Setter method for sockfd property
      * @param obj IN TCP connection object
-     * @param sockfd IN socket file descriptor
+     * @param value IN new value for socket file descriptor
      * @return the same value passed with sockfd parameter
      */
-    static inline int flom_tcp_set_sockfd(flom_tcp_t *obj, int sockfd) {
-        obj->sockfd = sockfd;
-        return sockfd; }
+    static inline int flom_tcp_set_sockfd(flom_tcp_t *obj, int value) {
+        obj->sockfd = value;
+        return obj->sockfd; }
 
 
 
@@ -153,11 +164,11 @@ extern "C" {
     /**
      * Setter method for socket_type property
      * @param obj IN TCP connection object
-     * @param socket_type IN socket type
+     * @param value IN new value for socket type
      */
     static inline void flom_tcp_set_socket_type(
-        flom_tcp_t *obj, int socket_type) {
-        obj->socket_type = socket_type; }
+        flom_tcp_t *obj, int value) {
+        obj->socket_type = value; }
 
 
 
@@ -172,12 +183,68 @@ extern "C" {
 
     
     /**
-     * Getter method for address property
+     * Setter method for addrlen property
+     * @param obj IN/OUT TCP connection object
+     * @param value IN new value for addrlen property
+     * @return the lenght of the TCP address
+     */
+    static inline void flom_tcp_set_addrlen(flom_tcp_t *obj, size_t value) {
+        obj->addrlen = value; }
+
+
+    
+    /**
+     * Getter method for storage address
      * @param obj IN TCP connection object
      * @return the TCP address
      */
-    static inline struct sockaddr *flom_tcp_get_address(flom_tcp_t *obj) {
+    static inline struct sockaddr_storage *flom_tcp_get_sa_storage(
+        flom_tcp_t *obj) {
+        return &obj->sa_storage; }
+    
+
+
+    /**
+     * Getter method for generic address
+     * @param obj IN TCP connection object
+     * @return the generic address
+     */
+    static inline struct sockaddr *flom_tcp_get_sa(flom_tcp_t *obj) {
         return &obj->sa; }
+    
+
+
+    /**
+     * Getter method for UNIX address
+     * @param obj IN TCP connection object
+     * @return the UNIX address
+     */
+    static inline struct sockaddr_un *flom_tcp_get_sa_un(flom_tcp_t *obj) {
+        return &obj->sa_un; }
+
+
+    
+    
+    /**
+     * Getter method for IPv4 address
+     * @param obj IN TCP connection object
+     * @return the IPv4 address
+     */
+    static inline struct sockaddr_in *flom_tcp_get_sa_in(flom_tcp_t *obj) {
+        return &obj->sa_in; }
+
+
+    
+    
+    /**
+     * Getter method for IPv6 address
+     * @param obj IN TCP connection object
+     * @return the IPv6 address
+     */
+    static inline struct sockaddr_in6 *flom_tcp_get_sa_in6(flom_tcp_t *obj) {
+        return &obj->sa_in6; }
+
+
     
     
     /**

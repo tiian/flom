@@ -1,6 +1,9 @@
 Road map:
 
-change flom_tcp_connect signature (flom_tcp_t only!)
+transform flom_conn_data_s to flom_conn_t and encapsulate the data related
+to TCP (flom_tcp_t) and TLS (flom_tls_t)
+flom_conn_t must become the type used for I/O and it should wrap
+	flom_tcp_retrieve, flom_tcp_send, flom_tls_retrieve, flom_tls_send
 TLS/SSL (in progress...)
 
 check command lines for unique-id
@@ -27,8 +30,9 @@ ask for a unique timestamp during the same second (the second client will wait)
 
 "vector" resources with an associative array of memory areas, managed by FLoM (evolution of "object"; for flom client, the vector will be dumped/restored to/from a zip file or a directory
 
-
 RESTful interface implemented using Mongoose (?)
+
+replace poll custom based implementation with libevent... (is it interesting?)
 
 put inside function flom_accept_loop_chklockers a check if the thread associated to the locker is really active; if the thread leaved (due to an error), make a clean-up phase. This avoid a daemon crash after a thread terminated with an error, but listener thread has a "locker object" already active
 

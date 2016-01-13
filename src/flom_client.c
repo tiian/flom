@@ -197,25 +197,29 @@ int flom_client_connect_local(flom_config_t *config,
                        &cd->tcp, socket(AF_LOCAL, SOCK_STREAM, 0))))
             THROW(SOCKET_ERROR);
         flom_tcp_set_socket_type(&cd->tcp, SOCK_STREAM);
-        cd->saun.sun_family = AF_LOCAL;
-        strcpy(cd->saun.sun_path, flom_config_get_socket_name(config));
-        cd->addr_len = sizeof(cd->saun);
+        flom_tcp_get_sa_un(&cd->tcp)->sun_family = AF_LOCAL;
+        strcpy(flom_tcp_get_sa_un(&cd->tcp)->sun_path,
+               flom_config_get_socket_name(config));
+        flom_tcp_set_addrlen(&cd->tcp, sizeof(struct sockaddr_un));
         if (-1 == connect(flom_tcp_get_sockfd(&cd->tcp),
-                          (struct sockaddr *)&cd->saun,
-                          cd->addr_len)) {
+                          flom_tcp_get_sa(&cd->tcp),
+                          flom_tcp_get_addrlen(&cd->tcp))) {
             if (ENOENT == errno || ECONNREFUSED == errno) {
                 if (start_daemon) {
                     if (0 != flom_config_get_lifespan(config)) {
                         FLOM_TRACE(("flom_client_connect_local: connection "
                                     "failed, activating a new daemon\n"));
                         /* daemon is not active, starting it... */
-                        if (FLOM_RC_OK != (ret_cod = flom_daemon(
-                                               config, cd->saun.sun_family)))
+                        if (FLOM_RC_OK != (
+                                ret_cod = flom_daemon(
+                                    config,
+                                    flom_tcp_get_sa_un(&cd->tcp)->sun_family)))
                             THROW(DAEMON_ERROR);
                         /* trying to connect again... */
-                        if (-1 == connect(flom_tcp_get_sockfd(&cd->tcp),
-                                          (struct sockaddr *)&cd->saun,
-                                          cd->addr_len))
+                        if (-1 == connect(
+                                flom_tcp_get_sockfd(&cd->tcp),
+                                flom_tcp_get_sa(&cd->tcp),
+                                flom_tcp_get_addrlen(&cd->tcp)))
                             THROW(DAEMON_NOT_STARTED1);
                         FLOM_TRACE(("flom_client_connect_local: connected to "
                                     "flom daemon\n"));
@@ -276,7 +280,6 @@ int flom_client_connect_tcp(flom_config_t *config,
                      , CONNECT_ERROR1
                      , DAEMON_NOT_STARTED2
                      , SETSOCKOPT_ERROR
-                     , INVALID_AI_FAMILY_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -325,19 +328,6 @@ int flom_client_connect_tcp(flom_config_t *config,
             THROW(SETSOCKOPT_ERROR);
         /* set connection definition object attributes */
         flom_tcp_set_socket_type(&cd->tcp, SOCK_STREAM);
-        switch (flom_tcp_get_domain(&cd->tcp)) {
-            case AF_INET:
-                memcpy(&cd->sain, flom_tcp_get_address(&cd->tcp),
-                       flom_tcp_get_addrlen(&cd->tcp));
-                break;
-            case AF_INET6:
-                memcpy(&cd->sain6, flom_tcp_get_address(&cd->tcp),
-                       flom_tcp_get_addrlen(&cd->tcp));
-                break;
-            default:
-                THROW(INVALID_AI_FAMILY_ERROR);
-        } /* switch (result->ai_family) */
-        cd->addr_len = flom_tcp_get_addrlen(&cd->tcp);
         
         THROW(NONE);
     } CATCH {
@@ -357,9 +347,6 @@ int flom_client_connect_tcp(flom_config_t *config,
                 break;
             case SETSOCKOPT_ERROR:
                 ret_cod = FLOM_RC_SETSOCKOPT_ERROR;
-                break;
-            case INVALID_AI_FAMILY_ERROR:
-                ret_cod = FLOM_RC_INVALID_AI_FAMILY_ERROR;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -776,8 +763,8 @@ int flom_client_discover_udp_connect(struct flom_conn_data_s *cd,
         /* set connection definition object attributes */
         flom_tcp_set_sockfd(&cd->tcp, fd);
         flom_tcp_set_socket_type(&cd->tcp, SOCK_STREAM);
-        memcpy(&cd->sa, sa, addrlen);
-        cd->addr_len = addrlen;
+        memcpy(flom_tcp_get_sa(&cd->tcp), sa, addrlen);
+        flom_tcp_set_addrlen(&cd->tcp, addrlen);
         /* avoid socket close operated by clean-up step */
         fd = FLOM_NULL_FD;
         
