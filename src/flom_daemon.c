@@ -1076,10 +1076,10 @@ int flom_accept_loop_pollin(flom_config_t *config,
     
     FLOM_TRACE(("flom_accept_loop_pollin\n"));
     TRY {
-        struct flom_conn_data_s *c;
+        flom_conn_t *c;
 
         *moved = FALSE;
-        if (NULL == (c = flom_conns_get_cd(conns, id)))
+        if (NULL == (c = flom_conns_get_conn(conns, id)))
             THROW(CONNS_GET_CD_ERROR);
         FLOM_TRACE(("flom_accept_loop_pollin: id=%u, fd=%d\n",
                     id, flom_tcp_get_sockfd(&c->tcp)));
@@ -1278,14 +1278,14 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
         GThread *locker_thread = NULL;
         struct flom_msg_s *msg = NULL;
         flom_rsrc_type_t flrt;
-        struct flom_conn_data_s *cd = NULL;
+        flom_conn_t *conn = NULL;
         struct flom_locker_s *locker = NULL;
         int locker_is_new = FALSE;
         /* check if there is a locker running for this request */
         if (NULL == lockers)
             THROW(NULL_OBJECT1);
         /* retrieve client connection */
-        if (NULL == (cd = flom_conns_get_cd(conns, id)))
+        if (NULL == (conn = flom_conns_get_conn(conns, id)))
             THROW(CONNS_GET_CD_ERROR1);
         /* check message */
         if (NULL == (msg = flom_conns_get_msg(conns, id)))
@@ -1302,19 +1302,19 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                 flrt = flom_rsrc_get_type(
                     msg->body.lock_8.resource.name))) {
             if (FLOM_RC_OK != (ret_cod = flom_accept_loop_reply(
-                                   cd, FLOM_RC_INVALID_RESOURCE_NAME)))
+                                   conn, FLOM_RC_INVALID_RESOURCE_NAME)))
                 THROW(ACCEPT_LOOP_REPLY_ERROR1);
             /* start socket termination... */
             FLOM_TRACE(("flom_accept_loop_transfer: client sent an invalid "
                         "resource name ('%s'), "
                         "starting connection termination for fd=%d\n",
                         msg->body.lock_8.resource.name,
-                        flom_tcp_get_sockfd(&cd->tcp)));
-            if (-1 == shutdown(flom_tcp_get_sockfd(&cd->tcp), SHUT_WR))
+                        flom_tcp_get_sockfd(&conn->tcp)));
+            if (-1 == shutdown(flom_tcp_get_sockfd(&conn->tcp), SHUT_WR))
                 FLOM_TRACE(("flom_accept_loop_transfer/shutdown"
                             "(%d,SHUT_WR)=%d "
                             "('%s')\n",
-                            flom_tcp_get_sockfd(&cd->tcp), errno,
+                            flom_tcp_get_sockfd(&conn->tcp), errno,
                             strerror(errno)));
             /* return to caller */
             THROW(INVALID_RESOURCE_NAME_ERROR);
@@ -1353,18 +1353,18 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                    can not be kept and returns immediately to the requester */
                 if (!msg->body.lock_8.resource.wait) {
                     if (FLOM_RC_OK != (ret_cod = flom_accept_loop_reply(
-                                           cd, FLOM_RC_LOCK_CANT_WAIT)))
+                                           conn, FLOM_RC_LOCK_CANT_WAIT)))
                         THROW(ACCEPT_LOOP_REPLY_ERROR2);
                     /* start socket termination... */
                     FLOM_TRACE(("flom_accept_loop_transfer: client can't "
                                 "create a new resource and can't wait, "
                                 "starting connection termination for fd=%d\n",
-                                flom_tcp_get_sockfd(&cd->tcp)));
-                    if (-1 == shutdown(flom_tcp_get_sockfd(&cd->tcp), SHUT_WR))
+                                flom_tcp_get_sockfd(&conn->tcp)));
+                    if (-1 == shutdown(flom_tcp_get_sockfd(&conn->tcp), SHUT_WR))
                         FLOM_TRACE(("flom_accept_loop_transfer/shutdown"
                                     "(%d,SHUT_WR)=%d "
                                     "('%s')\n",
-                                    flom_tcp_get_sockfd(&cd->tcp), errno,
+                                    flom_tcp_get_sockfd(&conn->tcp), errno,
                                     strerror(errno)));
                     /* return to caller */
                     THROW(CANT_WAIT_CONDITION);
@@ -1373,9 +1373,9 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                                 "create a new resource but can wait, "
                                 "putting it inside 'incubator'\n"));
                     if (FLOM_RC_OK != (ret_cod = flom_accept_loop_reply(
-                                           cd, FLOM_RC_LOCK_WAIT_RESOURCE)))
+                                           conn, FLOM_RC_LOCK_WAIT_RESOURCE)))
                         THROW(ACCEPT_LOOP_REPLY_ERROR3);
-                    cd->wait = TRUE;
+                    conn->wait = TRUE;
                     /* return to caller */
                     THROW(PUT_INTO_INCUBATOR);
                 } /* if (!msg->body.lock_8.resource.wait) */
@@ -1391,7 +1391,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
             locker_thread = locker->thread;
 
         if (FLOM_RC_OK != (ret_cod = flom_accept_loop_transfer_conn(
-                               conns, id, locker, cd)))
+                               conns, id, locker, conn)))
             THROW(ACCEPT_LOOP_TRANSFER_CONN_ERROR1);
 
         /* if the a new locker has been created, check the resources
@@ -1402,26 +1402,26 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                resource */
             i=1;
             while (i < flom_conns_get_used(conns)) {
-                struct flom_conn_data_s *loop_cd = NULL;
-                if (NULL == (loop_cd = flom_conns_get_cd(conns, i)))
+                flom_conn_t *loop_conn = NULL;
+                if (NULL == (loop_conn = flom_conns_get_conn(conns, i)))
                     THROW(CONNS_GET_CD_ERROR2);
                 /* check if the connection is really waiting resource
                    creation, else skip it */
-                if (!loop_cd->wait) {
+                if (!loop_conn->wait) {
                     i++;
                     continue;
                 }
                 if (!locker->resource.compare_name(
                         &locker->resource,
-                        loop_cd->msg->body.lock_8.resource.name)) {
+                        loop_conn->msg->body.lock_8.resource.name)) {
                     FLOM_TRACE(("flom_accept_loop_transfer: connection %u "
                                 "(fd=%d) is waiting for resource '%s' and "
                                 "can be transferred to this locker\n",
-                                i, flom_tcp_get_sockfd(&loop_cd->tcp),
-                                loop_cd->msg->body.lock_8.resource.name));
+                                i, flom_tcp_get_sockfd(&loop_conn->tcp),
+                                loop_conn->msg->body.lock_8.resource.name));
                     if (FLOM_RC_OK != (ret_cod =
                                        flom_accept_loop_transfer_conn(
-                                           conns, i, locker, loop_cd)))
+                                           conns, i, locker, loop_conn)))
                         THROW(ACCEPT_LOOP_TRANSFER_CONN_ERROR2);
                 } else
                     i++;
@@ -1485,7 +1485,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
 
 int flom_accept_loop_transfer_conn(flom_conns_t *conns, guint id,
                                    struct flom_locker_s *locker,
-                                   struct flom_conn_data_s *cd)
+                                   flom_conn_t *conn)
 {
     enum Exception { WRITE_ERROR1
                      , CONNS_TRNS_FD
@@ -1516,7 +1516,7 @@ int flom_accept_loop_transfer_conn(flom_conns_t *conns, guint id,
             THROW(CONNS_TRNS_FD);
         /* send connection data (pointer is used because this object will
            be managed by child thread */
-        if (sizeof(cd) != write(locker->write_pipe, &cd, sizeof(cd)))
+        if (sizeof(conn) != write(locker->write_pipe, &conn, sizeof(conn)))
             THROW(WRITE_ERROR2);
         
         THROW(NONE);
@@ -1711,7 +1711,7 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers, int *again)
 
 
 
-int flom_accept_loop_reply(struct flom_conn_data_s *cd, int rc)
+int flom_accept_loop_reply(flom_conn_t *conn, int rc)
 {
     enum Exception { MSG_BUILD_ANSWER_ERROR
                      , MSG_SERIALIZE_ERROR
@@ -1738,10 +1738,10 @@ int flom_accept_loop_reply(struct flom_conn_data_s *cd, int rc)
             THROW(MSG_SERIALIZE_ERROR);
         /* send message to client (requester) */
         if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
-                               flom_tcp_get_sockfd(&cd->tcp),
+                               flom_tcp_get_sockfd(&conn->tcp),
                                buffer, to_send)))
             THROW(MSG_SEND_ERROR);
-        cd->last_step = msg.header.pvs.step;
+        conn->last_step = msg.header.pvs.step;
         /* free message dynamic allocated memory (if any) */
         if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
             THROW(MSG_FREE_ERROR);

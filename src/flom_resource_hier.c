@@ -326,7 +326,7 @@ int flom_resource_hier_init(flom_resource_t *resource,
 
 
 int flom_resource_hier_inmsg(flom_resource_t *resource,
-                             struct flom_conn_data_s *conn,
+                             flom_conn_t *conn,
                              struct flom_msg_s *msg)
 {
     enum Exception { G_STRSPLIT_ERROR
@@ -571,7 +571,7 @@ void flom_resource_hier_gc(
 
     
 int flom_resource_hier_clean(flom_resource_t *resource,
-                             struct flom_conn_data_s *conn)
+                             flom_conn_t *conn)
 {
     enum Exception { NULL_OBJECT
                      , G_STRSPLIT_ERROR

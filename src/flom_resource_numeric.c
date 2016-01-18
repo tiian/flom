@@ -118,8 +118,8 @@ int flom_resource_numeric_init(flom_resource_t *resource,
 
 
 int flom_resource_numeric_inmsg(flom_resource_t *resource,
-                               struct flom_conn_data_s *conn,
-                               struct flom_msg_s *msg)
+                                flom_conn_t *conn,
+                                struct flom_msg_s *msg)
 {
     enum Exception { MSG_FREE_ERROR1
                      , G_TRY_MALLOC_ERROR1
@@ -282,7 +282,7 @@ int flom_resource_numeric_inmsg(flom_resource_t *resource,
 
 
 int flom_resource_numeric_clean(flom_resource_t *resource,
-                                struct flom_conn_data_s *conn)
+                                flom_conn_t *conn)
 {
     enum Exception { NULL_OBJECT
                      , NUMERIC_WAITINGS_ERROR

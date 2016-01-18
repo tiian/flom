@@ -97,11 +97,11 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
-    struct flom_conn_data_s *tmp;
+    flom_conn_t *tmp;
     
     FLOM_TRACE(("flom_conns_add\n"));
     TRY {
-        if (NULL == (tmp = g_try_malloc0(sizeof(struct flom_conn_data_s))))
+        if (NULL == (tmp = g_try_malloc0(sizeof(flom_conn_t))))
             THROW(G_TRY_MALLOC_ERROR1);
         FLOM_TRACE(("flom_conns_add: allocated a new connection (%p)\n", tmp));
         flom_tcp_init(&tmp->tcp, NULL);
@@ -182,12 +182,11 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
 
 
 
-void flom_conns_import(flom_conns_t *conns, int fd,
-                      struct flom_conn_data_s *cd)
+void flom_conns_import(flom_conns_t *conns, int fd, flom_conn_t *conn)
 {
     FLOM_TRACE(("flom_conns_import\n"));
-    flom_conn_data_trace(cd);
-    g_ptr_array_add(conns->array, cd);
+    flom_conn_trace(conn);
+    g_ptr_array_add(conns->array, conn);
 }
     
 
@@ -210,8 +209,7 @@ struct pollfd *flom_conns_get_fds(flom_conns_t *conns)
     /* fill the poll array with file descriptors */
     for (i=0; i<conns->array->len; ++i) {
         tmp[i].fd = flom_tcp_get_sockfd(
-            &((struct flom_conn_data_s *)g_ptr_array_index(
-                  conns->array, i))->tcp);
+            &((flom_conn_t *)g_ptr_array_index(conns->array, i))->tcp);
     }
     conns->poll_array = tmp;
     return conns->poll_array;
@@ -230,8 +228,8 @@ int flom_conns_set_events(flom_conns_t *conns, short events)
     TRY {
         guint i;
         for (i=0; i<conns->array->len; ++i) {
-            struct flom_conn_data_s *c =
-                (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
+            flom_conn_t *c =
+                (flom_conn_t *)g_ptr_array_index(conns->array, i);
             if (FLOM_NULL_FD != flom_tcp_get_sockfd(&c->tcp))
                 conns->poll_array[i].events = events;
             else {
@@ -272,11 +270,11 @@ int flom_conns_close_fd(flom_conns_t *conns, guint id)
     
     FLOM_TRACE(("flom_conns_close_fd\n"));
     TRY {
-        struct flom_conn_data_s *c;
+        flom_conn_t *c;
         FLOM_TRACE(("flom_conns_close: closing connection id=%u\n", id));
         if (id >= conns->array->len)
             THROW(OUT_OF_RANGE);
-        if (NULL == (c = (struct flom_conn_data_s *)
+        if (NULL == (c = (flom_conn_t *)
                      g_ptr_array_index(conns->array, id)))
             THROW(NULL_OBJECT);
         if (FLOM_CONN_STATE_REMOVE != c->state) {
@@ -330,13 +328,13 @@ int flom_conns_trns_fd(flom_conns_t *conns, guint id)
     
     FLOM_TRACE(("flom_conns_trns_fd\n"));
     TRY {
-        struct flom_conn_data_s *c;
+        flom_conn_t *c;
         FLOM_TRACE(("flom_conns_trns: marking as transferred connection "
                     "id=%u\n", id));
         if (id >= conns->array->len)
             THROW(OUT_OF_RANGE);
         /* update connection state */
-        c = (struct flom_conn_data_s *)g_ptr_array_index(conns->array, id);
+        c = (flom_conn_t *)g_ptr_array_index(conns->array, id);
         c->state = FLOM_CONN_STATE_LOCKER;
         /* detach the connection from this connections object (it
            will be attached by a locker connections object */
@@ -377,14 +375,14 @@ int flom_conns_clean(flom_conns_t *conns)
     FLOM_TRACE(("flom_conns_clean\n"));
     TRY {
         while (i<conns->array->len) {
-            struct flom_conn_data_s *c =
-                (struct flom_conn_data_s *)g_ptr_array_index(conns->array, i);
+            flom_conn_t *c =
+                (flom_conn_t *)g_ptr_array_index(conns->array, i);
             FLOM_TRACE(("flom_conns_clean: i=%u, state=%d, wait=%d, "
                         "fd=%d %s\n",
                         i, c->state, c->wait, flom_tcp_get_sockfd(&c->tcp),
                         FLOM_CONN_STATE_REMOVE == c->state ?
                         "(removing...)" : FLOM_EMPTY_STRING));
-            flom_conn_data_trace(c);
+            flom_conn_trace(c);
             if (FLOM_CONN_STATE_REMOVE == c->state) {
                 /* connections with this state are no more valid and must be
                    removed and destroyed */
@@ -454,10 +452,10 @@ void flom_conns_free(flom_conns_t *conns)
 
 
 
-void flom_conn_data_trace(const struct flom_conn_data_s *conn)
+void flom_conn_trace(const flom_conn_t *conn)
 {
-    FLOM_TRACE(("flom_conn_data_trace: object=%p\n", conn));
-    FLOM_TRACE(("flom_conn_data_trace: "
+    FLOM_TRACE(("flom_conn_trace: object=%p\n", conn));
+    FLOM_TRACE(("flom_conn_trace: "
                 "fd=%d, type=%d, state=%d, wait=%d, msg=%p, gmpc=%p, "
                 "addr_len=%d\n",
                 flom_tcp_get_sockfd(&conn->tcp),

@@ -44,6 +44,7 @@
 
 
 
+#include "flom_conns.h"
 #include "flom_msg.h"
 #include "flom_trace.h"
 
@@ -118,7 +119,7 @@ struct flom_rsrc_conn_lock_s {
     /**
      * Connection requesting the lock
      */
-    struct flom_conn_data_s    *conn;
+    flom_conn_t                *conn;
 };
 
 
@@ -196,7 +197,7 @@ struct flom_rsrc_data_set_element_s {
     /**
      * Connection holding the lock on the element
      */
-    struct flom_conn_data_s       *conn;
+    flom_conn_t                   *conn;
 };
 
 
@@ -274,12 +275,11 @@ struct flom_resource_s {
      * Method called to process incoming messages (it depends from resource
      * type)
      */
-    int   (*inmsg)   (flom_resource_t *,
-                      struct flom_conn_data_s *, struct flom_msg_s *);
+    int   (*inmsg)   (flom_resource_t *, flom_conn_t *, struct flom_msg_s *);
     /**
      * Method called to process a clean-up signal (client disconnected)
      */
-    int   (*clean)   (flom_resource_t *, struct flom_conn_data_s *);
+    int   (*clean)   (flom_resource_t *, flom_conn_t *);
     /**
      * Method called to clean-up the entire resource (it's the destructor)
      */

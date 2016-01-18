@@ -58,24 +58,24 @@ extern "C" {
     /**
      * Try to connect to flom daemon
      * @param config IN configuration object, NULL for global config
-     * @param cd OUT connection data
+     * @param conn OUT connection object
      * @param start_daemon IN try to start a new daemon if connection fails
      * @result a reason code
      */
     int flom_client_connect(flom_config_t *config,
-                            struct flom_conn_data_s *cd, int start_daemon);
+                            flom_conn_t *conn, int start_daemon);
     
 
 
     /**
      * Try to connect to flom daemon using local (AF_LOCAL) socket
      * @param config IN configuration object, NULL for global config
-     * @param cd OUT connection data
+     * @param conn OUT connection object
      * @param start_daemon IN try to start a new daemon if connection fails
      * @result a reason code
      */
     int flom_client_connect_local(flom_config_t *config,
-                                  struct flom_conn_data_s *cd,
+                                  flom_conn_t *conn,
                                   int start_daemon);
     
 
@@ -83,12 +83,12 @@ extern "C" {
     /**
      * Try to connect to flom daemon using network (TCP/IP) socket
      * @param config IN configuration object, NULL for global config
-     * @param cd OUT connection data
+     * @param conn OUT connection object
      * @param start_daemon IN try to start a new daemon if connection fails
      * @result a reason code
      */
     int flom_client_connect_tcp(flom_config_t *config,
-                                struct flom_conn_data_s *cd,
+                                flom_conn_t *conn,
                                 int start_daemon);
 
 
@@ -96,13 +96,13 @@ extern "C" {
     /**
      * Discover flom daemon address using multicast UDP
      * @param config IN configuration object, NULL for global config
-     * @param cd IN/OUT connection data
+     * @param conn IN/OUT connection object
      * @param start_daemon IN try to start a new daemon if connection fails
      * @param family OUT AF_INET or AF_INET6
      * @return a reason code
      */
     int flom_client_discover_udp(flom_config_t *config,
-                                 struct flom_conn_data_s *cd,
+                                 flom_conn_t *conn,
                                  int start_daemon,
                                  sa_family_t *family);
 
@@ -111,12 +111,12 @@ extern "C" {
     /**
      * Connect to a daemon using TCP/IP; daemon was previously discovered
      * using multicast UDP/IP
-     * @param cd IN/OUT connection data
+     * @param conn IN/OUT connection object
      * @param so IN address (IPv4 or IPv6) and port of daemon
      * @param addrlen size of sa struct
      * @return a reason code
      */
-    int flom_client_discover_udp_connect(struct flom_conn_data_s *cd,
+    int flom_client_discover_udp_connect(flom_conn_t *conn,
                                          const struct sockaddr *so,
                                          socklen_t addrlen);
     
@@ -124,17 +124,17 @@ extern "C" {
 
     /**
      * Disconnect from lock daemon
-     * @param cd IN/OUT connection data
+     * @param conn IN/OUT connection object
      * @result a reason code
      */
-    int flom_client_disconnect(struct flom_conn_data_s *cd);
+    int flom_client_disconnect(flom_conn_t *conn);
     
 
 
     /**
      * Send lock command to the daemon
      * @param config IN configuration object
-     * @param cd IN connection data
+     * @param conn IN connection object
      * @param timeout IN maximum wait time for lock acquisition
      * @param element OUT the obtained element if the locked resource is of
      *        type resource set, NULL if the locked resource
@@ -143,19 +143,19 @@ extern "C" {
      *        caller using g_free!
      * @return a reason code
      */
-    int flom_client_lock(flom_config_t *config, struct flom_conn_data_s *cd,
+    int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
                          int timeout, char **element);
 
 
 
     /**
      * Wait while the desired resource is busy, then go on
-     * @param cd IN connection data
+     * @param conn IN connection object
      * @param msg IN/OUT message used to deserialize the replies
      * @param timeout IN maximum wait time for lock acquisition
      * @return a reason code
      */     
-    int flom_client_wait_lock(struct flom_conn_data_s *cd,
+    int flom_client_wait_lock(flom_conn_t *conn,
                               struct flom_msg_s *msg, int timeout);
     
 
@@ -163,11 +163,10 @@ extern "C" {
     /**
      * Send unlock command to the daemon
      * @param config IN configuration object
-     * @param cd IN connection data
+     * @param conn IN connection object
      * @return a reason code
      */
-    int flom_client_unlock(flom_config_t *config,
-                           struct flom_conn_data_s *cd);
+    int flom_client_unlock(flom_config_t *config, flom_conn_t *conn);
 
 
 

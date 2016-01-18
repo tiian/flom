@@ -80,7 +80,7 @@ typedef struct flom_handle_s {
     /**
      * Connection data
      */
-    void                 *conn_data;
+    void                 *conn;
     /**
      * Configuration data
      */

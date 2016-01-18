@@ -186,12 +186,12 @@ extern "C" {
      * @param id IN connection id
      * @param locker IN/OUT locker object associated to locker thread that
      *                      will host the connection
-     * @param cd IN connection that must be transferred to the locker
+     * @param conn IN connection that must be transferred to the locker
      * @return a reason code
      */
     int flom_accept_loop_transfer_conn(flom_conns_t *conns, guint id,
                                        struct flom_locker_s *locker,
-                                       struct flom_conn_data_s *cd);
+                                       flom_conn_t *conn);
 
     
 
@@ -226,11 +226,11 @@ extern "C" {
 
     /**
      * Send a reply message to the to client
-     * @param cd IN/OUT client connection data
+     * @param conn IN/OUT client connection object
      * @param rc IN answer return code
      * @return a reason code
      */
-    int flom_accept_loop_reply(struct flom_conn_data_s *cd, int rc);
+    int flom_accept_loop_reply(flom_conn_t *conn, int rc);
 
     
 

@@ -85,7 +85,7 @@ extern "C" {
      * @return a reason code
      */
     int flom_resource_set_inmsg(flom_resource_t *resource,
-                                struct flom_conn_data_s *conn,
+                                flom_conn_t *conn,
                                 struct flom_msg_s *msg);
 
 
@@ -97,7 +97,7 @@ extern "C" {
      * @return a reason code
      */
     int flom_resource_set_clean(flom_resource_t *resource,
-                                struct flom_conn_data_s *conn);
+                                flom_conn_t *conn);
 
 
 

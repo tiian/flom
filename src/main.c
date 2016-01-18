@@ -121,7 +121,7 @@ int main (int argc, char *argv[])
     GOptionContext *option_context;
     int child_status = 0;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    struct flom_conn_data_s cd;
+    flom_conn_t conn;
     char *locked_element = NULL;
 
     option_context = g_option_context_new("[-- command to execute]");
@@ -314,14 +314,14 @@ int main (int argc, char *argv[])
     }
 
     /* open connection to a valid flom lock manager... */
-    if (FLOM_RC_OK != (ret_cod = flom_client_connect(NULL, &cd, TRUE))) {
+    if (FLOM_RC_OK != (ret_cod = flom_client_connect(NULL, &conn, TRUE))) {
         g_printerr("flom_client_connect: ret_cod=%d (%s)\n",
                    ret_cod, flom_strerror(ret_cod));
         exit(FLOM_ES_GENERIC_ERROR);
     }
 
     /* sending lock command */
-    ret_cod = flom_client_lock(NULL, &cd,
+    ret_cod = flom_client_lock(NULL, &conn,
                                flom_config_get_resource_timeout(NULL),
                                &locked_element);
     switch (ret_cod) {
@@ -333,7 +333,7 @@ int main (int argc, char *argv[])
             g_printerr("Resource already locked, the lock cannot be "
                        "obtained\n");
             /* gracefully disconnect from daemon */
-            if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
+            if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&conn))) {
                 g_printerr("flom_client_unlock: ret_cod=%d (%s)\n",
                           ret_cod, flom_strerror(ret_cod));
             }
@@ -343,7 +343,7 @@ int main (int argc, char *argv[])
             g_printerr("The resource could be available in the future, "
                        "but the requester can't wait\n");
             /* gracefully disconnect from daemon */
-            if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
+            if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&conn))) {
                 g_printerr("flom_client_unlock: ret_cod=%d (%s)\n",
                            ret_cod, flom_strerror(ret_cod));
             }
@@ -353,7 +353,7 @@ int main (int argc, char *argv[])
             g_printerr("Resource will never satisfy the request, the lock "
                        "cannot be obtained\n");
             /* gracefully disconnect from daemon */
-            if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
+            if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&conn))) {
                 g_printerr("flom_client_unlock: ret_cod=%d (%s)\n",
                           ret_cod, flom_strerror(ret_cod));
             }
@@ -364,7 +364,7 @@ int main (int argc, char *argv[])
                        "(%d milliseconds) expired\n",
                        flom_config_get_resource_timeout(NULL));
             /* gracefully disconnect from daemon */
-            if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
+            if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&conn))) {
                 g_printerr("flom_client_unlock: ret_cod=%d (%s)\n",
                            ret_cod, flom_strerror(ret_cod));
             }
@@ -393,14 +393,14 @@ int main (int argc, char *argv[])
     locked_element = NULL;
     
     /* sending unlock command */
-    if (FLOM_RC_OK != (ret_cod = flom_client_unlock(NULL, &cd))) {
+    if (FLOM_RC_OK != (ret_cod = flom_client_unlock(NULL, &conn))) {
         g_printerr("flom_client_unlock: ret_cod=%d (%s)\n",
                    ret_cod, flom_strerror(ret_cod));
         exit(FLOM_ES_GENERIC_ERROR);
     }
 
     /* gracefully disconnect from daemon */
-    if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&cd))) {
+    if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(&conn))) {
         g_printerr("flom_client_unlock: ret_cod=%d (%s)\n",
                    ret_cod, flom_strerror(ret_cod));
     }

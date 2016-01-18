@@ -134,7 +134,7 @@ gpointer flom_locker_loop(gpointer data)
     TRY {
         int loop = TRUE;
         struct flom_locker_s *locker = (struct flom_locker_s *)data;
-        struct flom_conn_data_s cd;
+        flom_conn_t conn;
 
         /* as a first action, it marks the identifier */
         locker->thread = g_thread_self();
@@ -145,11 +145,11 @@ gpointer flom_locker_loop(gpointer data)
         /* initialize a connections object for this locker thread */
         flom_conns_init(&conns, AF_UNIX);
         /* add the parent communication pipe to connections */
-        memset(&cd, 0, sizeof(cd));
+        memset(&conn, 0, sizeof(conn));
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
                                &conns, locker->read_pipe, SOCK_STREAM,
                                sizeof(struct sockaddr_storage),
-                               flom_tcp_get_sa(&cd.tcp),
+                               flom_tcp_get_sa(&conn.tcp),
                                FALSE)))
             THROW(CONNS_ADD_ERROR);
         
@@ -237,7 +237,7 @@ gpointer flom_locker_loop(gpointer data)
                     if (FLOM_RC_OK != (ret_cod =
                                        locker->resource.clean(
                                            &locker->resource,
-                                           flom_conns_get_cd(&conns, i))))
+                                           flom_conns_get_conn(&conns, i))))
                         THROW(RESOURCE_CLEAN_ERROR1);
                     /* conns is no more consistent, break the loop and poll
                        again */
@@ -257,7 +257,7 @@ gpointer flom_locker_loop(gpointer data)
                         if (FLOM_RC_OK != (ret_cod =
                                            locker->resource.clean(
                                                &locker->resource,
-                                               flom_conns_get_cd(&conns, i))))
+                                               flom_conns_get_conn(&conns, i))))
                             THROW(RESOURCE_CLEAN_ERROR2);
                         /* conns is no more consistent, break the loop and poll
                            again */
@@ -280,7 +280,7 @@ gpointer flom_locker_loop(gpointer data)
                         if (FLOM_RC_OK != (ret_cod =
                                            locker->resource.clean(
                                                &locker->resource,
-                                               flom_conns_get_cd(&conns, i))))
+                                               flom_conns_get_conn(&conns, i))))
                             THROW(RESOURCE_CLEAN_ERROR3);
                     } else {
                         /* locker termination asked by parent thread */
@@ -356,18 +356,18 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
-    struct flom_conn_data_s *new_cd = NULL;
+    flom_conn_t *new_conn = NULL;
     
     FLOM_TRACE(("flom_locker_loop_pollin\n"));
     TRY {
         *refresh_conns = FALSE;
         struct flom_msg_s *msg = NULL;
-        struct flom_conn_data_s *curr_cd;
+        flom_conn_t *curr_conn;
         
-        if (NULL == (curr_cd = flom_conns_get_cd(conns, id)))
+        if (NULL == (curr_conn = flom_conns_get_conn(conns, id)))
             THROW(CONNS_GET_CD_ERROR);
         FLOM_TRACE(("flom_locker_loop_pollin: id=%d, fd=%d\n",
-                    id, flom_tcp_get_sockfd(&curr_cd->tcp)));
+                    id, flom_tcp_get_sockfd(&curr_conn->tcp)));
         locker->idle_periods = 0;
         if (0 == id) {
             struct flom_locker_token_s flt;
@@ -382,23 +382,23 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                         flt.domain, flt.client_fd, flt.sequence,
                         locker->read_pipe));
             /* pick-up connection data pointer parent thread */
-            if (sizeof(new_cd) != read(
-                    locker->read_pipe, &new_cd, sizeof(new_cd)))
+            if (sizeof(new_conn) != read(
+                    locker->read_pipe, &new_conn, sizeof(new_conn)))
                 THROW(READ_ERROR2);
             /* import the connection passed by parent thread */
-            flom_conns_import(conns, flt.client_fd, new_cd);
+            flom_conns_import(conns, flt.client_fd, new_conn);
             /* set the locker sequence */
             locker->read_sequence = flt.sequence;
             /* retrieve the message sent by the client */
-            msg = new_cd->msg;
+            msg = new_conn->msg;
         } else {
             char buffer[FLOM_MSG_BUFFER_SIZE];
             ssize_t read_bytes;
             GMarkupParseContext *gmpc;
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_tcp_retrieve(
-                                   flom_tcp_get_sockfd(&curr_cd->tcp),
-                                   flom_tcp_get_socket_type(&curr_cd->tcp),
+                                   flom_tcp_get_sockfd(&curr_conn->tcp),
+                                   flom_tcp_get_socket_type(&curr_conn->tcp),
                                    buffer, sizeof(buffer),
                                    &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT,
                                    NULL, NULL)))
@@ -408,7 +408,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 /* connection closed */
                 FLOM_TRACE(("flom_locker_loop_pollin: id=%d, fd=%d "
                             "returned 0 bytes: disconnecting...\n",
-                            id, flom_tcp_get_sockfd(&curr_cd->tcp)));
+                            id, flom_tcp_get_sockfd(&curr_conn->tcp)));
                 if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                        conns, id)))
                     THROW(CONNS_CLOSE_ERROR1);
@@ -416,7 +416,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 /* clean lock state if any lock was acquired... */
                 if (FLOM_RC_OK != (ret_cod = 
                                    locker->resource.clean(
-                                       &locker->resource, curr_cd)))
+                                       &locker->resource, curr_conn)))
                     THROW(RESOURCE_CLEAN_ERROR);
             } else {
                 /* data arrived */
@@ -429,7 +429,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
                                        buffer, read_bytes, msg, gmpc)))
                     THROW(MSG_DESERIALIZE_ERROR);
-                curr_cd->last_step = msg->header.pvs.step;
+                curr_conn->last_step = msg->header.pvs.step;
                 /* if the message is not valid the client must be terminated */
                 if (FLOM_MSG_STATE_INVALID == msg->state) {
                     FLOM_TRACE(("flom_locker_loop_pollin: message from client "
@@ -442,14 +442,14 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
         } /* if (0 == id) */
         
         if (NULL != msg) {
-            if (NULL != new_cd)
-                curr_cd = new_cd;
+            if (NULL != new_conn)
+                curr_conn = new_conn;
             if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb ||
                 FLOM_MSG_VERB_UNLOCK == msg->header.pvs.verb) {
                 /* process input message */
                 if (FLOM_RC_OK != (ret_cod = 
                                    locker->resource.inmsg(
-                                       &locker->resource, curr_cd, msg)))
+                                       &locker->resource, curr_conn, msg)))
                     THROW(RESOURCE_INMSG_ERROR);
                 /* reply with output message */
                 if (FLOM_MSG_STATE_READY == msg->state) {
@@ -460,7 +460,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                                            &msg_len)))
                         THROW(MSG_SERIALIZE_ERROR);
                     ret_cod = flom_tcp_send(
-                        flom_tcp_get_sockfd(&curr_cd->tcp), buffer, msg_len);
+                        flom_tcp_get_sockfd(&curr_conn->tcp), buffer, msg_len);
                     if (FLOM_RC_SEND_ERROR == ret_cod) {
                         FLOM_TRACE(("flom_locker_loop_pollin: error while "
                                     "sending message to client (the "
@@ -468,7 +468,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                                     "poll loop...\n"));
                     } else if (FLOM_RC_OK != ret_cod)
                         THROW(MSG_SEND_ERROR);
-                    curr_cd->last_step = msg->header.pvs.step;
+                    curr_conn->last_step = msg->header.pvs.step;
                 } /* if (FLOM_MSG_STATE_READY == msg->state) */
             } else {
                 /* Implement ping message here... */

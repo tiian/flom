@@ -80,8 +80,8 @@ int flom_handle_init(flom_handle_t *handle)
         /* memory reset */
         memset(handle, 0, sizeof(flom_handle_t));
         /* allocate memory for connection data structure */
-        if (NULL == (handle->conn_data = g_try_malloc0(
-                         sizeof(struct flom_conn_data_s))))
+        if (NULL == (handle->conn = g_try_malloc0(
+                         sizeof(flom_conn_t))))
             THROW(G_TRY_MALLOC_ERROR1);
         /* allocate memory for configuration data structure */
         if (NULL == (handle->config = g_try_malloc0(
@@ -120,10 +120,10 @@ int flom_handle_init(flom_handle_t *handle)
             g_free(handle->config);
             handle->config = NULL;
         } /* if (NULL != handle->config) */
-        if (NULL != handle->conn_data) {
-            g_free(handle->conn_data);
-            handle->conn_data = NULL;
-        } /* if (NULL != handle->conn_data) */
+        if (NULL != handle->conn) {
+            g_free(handle->conn);
+            handle->conn = NULL;
+        } /* if (NULL != handle->conn) */
     } /* if (NONE != excp) */
     FLOM_TRACE(("flom_handle_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -200,8 +200,8 @@ int flom_handle_clean(flom_handle_t *handle)
         g_free(handle->config);
         handle->config = NULL;
         /* release memory of connection data structure */
-        g_free(handle->conn_data);
-        handle->conn_data = NULL;
+        g_free(handle->conn);
+        handle->conn = NULL;
         /* release memory of locked element */
         g_free(handle->locked_element);
         handle->locked_element = NULL;
@@ -279,12 +279,12 @@ int flom_handle_lock(flom_handle_t *handle)
     
     FLOM_TRACE(("flom_handle_lock\n"));
     TRY {
-        struct flom_conn_data_s *cd = NULL;
+        flom_conn_t *conn = NULL;
         /* check handle is not NULL */
         if (NULL == handle)
             THROW(NULL_OBJECT);
-        /* cast and retrieve conn_data fron the proxy object */
-        cd = (struct flom_conn_data_s *)handle->conn_data;
+        /* cast and retrieve conn fron the proxy object */
+        conn = (flom_conn_t *)handle->conn;
         /* check handle state */
         if (FLOM_HANDLE_STATE_INIT != handle->state &&
             FLOM_HANDLE_STATE_CONNECTED != handle->state &&
@@ -295,12 +295,12 @@ int flom_handle_lock(flom_handle_t *handle)
         }
         /* check the connection data pointer is not NULL (we can't be sure
            it's a valid pointer) */
-        if (NULL == handle->conn_data)
+        if (NULL == handle->conn)
             THROW(OBJ_CORRUPTED);
         /* open a connection to a valid lock manager */
         if (FLOM_HANDLE_STATE_CONNECTED != handle->state) {
             if (FLOM_RC_OK != (ret_cod = flom_client_connect(
-                                   handle->config, cd, TRUE)))
+                                   handle->config, conn, TRUE)))
                 THROW(CLIENT_CONNECT_ERROR);
             /* state update */
             handle->state = FLOM_HANDLE_STATE_CONNECTED;
@@ -310,7 +310,7 @@ int flom_handle_lock(flom_handle_t *handle)
         }
         /* lock acquisition */
         if (FLOM_RC_OK != (ret_cod = flom_client_lock(
-                               handle->config, cd,
+                               handle->config, conn,
                                flom_config_get_resource_timeout(
                                    handle->config),
                                &(handle->locked_element))))
@@ -363,12 +363,12 @@ int flom_handle_unlock(flom_handle_t *handle)
     
     FLOM_TRACE(("flom_handle_unlock\n"));
     TRY {
-        struct flom_conn_data_s *cd = NULL;
+        flom_conn_t *conn = NULL;
         /* check handle is not NULL */
         if (NULL == handle)
             THROW(NULL_OBJECT);
-        /* cast and retrieve conn_data fron the proxy object */
-        cd = (struct flom_conn_data_s *)handle->conn_data;
+        /* cast and retrieve conn fron the proxy object */
+        conn = (flom_conn_t *)handle->conn;
         /* check handle state */
         if (FLOM_HANDLE_STATE_LOCKED != handle->state &&
             FLOM_HANDLE_STATE_CONNECTED != handle->state) {
@@ -378,12 +378,12 @@ int flom_handle_unlock(flom_handle_t *handle)
         }
         /* check the connection data pointer is not NULL (we can't be sure
            it's a valid pointer) */
-        if (NULL == handle->conn_data)
+        if (NULL == handle->conn)
             THROW(OBJ_CORRUPTED);
         if (FLOM_HANDLE_STATE_LOCKED == handle->state) {
             /* lock release */
             if (FLOM_RC_OK != (ret_cod = flom_client_unlock(
-                                   handle->config, cd)))
+                                   handle->config, conn)))
                 THROW(CLIENT_UNLOCK_ERROR);
             /* state update */
             handle->state = FLOM_HANDLE_STATE_CONNECTED;
@@ -392,7 +392,7 @@ int flom_handle_unlock(flom_handle_t *handle)
                         "skipping...\n", handle->state));
         }
         /* gracefully disconnect from daemon */
-        if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(cd)))
+        if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(conn)))
             THROW(CLIENT_DISCONNECT_ERROR);
         /* free locked element name is allocated */
         g_free(handle->locked_element);

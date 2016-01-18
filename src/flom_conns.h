@@ -104,9 +104,9 @@ typedef enum flom_conn_state_e {
 
 
 /**
- * A structured object used to store connection data
+ * Class of objects used to store connection data
  */
-struct flom_conn_data_s {
+typedef struct {
     /**
      * Connection state
      */
@@ -133,7 +133,7 @@ struct flom_conn_data_s {
      * GMarkup Parser context (allocated by g_markup_parse_context_new)
      */
     GMarkupParseContext   *gmpc;
-};
+} flom_conn_t;
 
 
 
@@ -152,7 +152,7 @@ struct flom_conns_s {
     int domain;
     /**
      * Array of connection data (it's an array of pointer for @ref
-     * flom_conn_data_s)
+     * flom_conn_t)
      */
     GPtrArray     *array;
 };
@@ -209,15 +209,14 @@ extern "C" {
 
     
     /**
-     * Import a connection: the imported connection (@ref flom_conn_data_s)
+     * Import a connection: the imported connection (@ref flom_conn_t)
      * must not be freed by the caller because the import does not make a copy
      * of the structure, it picks up the passed reference
      * @param conns IN/OUT connections object
      * @param fd IN file descriptor
-     * @param cd IN connection data struct
+     * @param conn IN connection object
      */
-    void flom_conns_import(flom_conns_t *conns, int fd,
-                           struct flom_conn_data_s *cd);
+    void flom_conns_import(flom_conns_t *conns, int fd, flom_conn_t *conn);
 
     
 
@@ -267,8 +266,7 @@ extern "C" {
     static inline int flom_conns_get_fd(const flom_conns_t *conns, guint id) {
         if (id < conns->array->len)
             return flom_tcp_get_sockfd(
-                &((struct flom_conn_data_s *)
-                 g_ptr_array_index(conns->array, id))->tcp);
+                &((flom_conn_t *)g_ptr_array_index(conns->array, id))->tcp);
         else
             return FLOM_NULL_FD;
     }
@@ -285,8 +283,7 @@ extern "C" {
         const flom_conns_t *conns, guint id) {
         if (id < conns->array->len)
             return flom_tcp_get_socket_type(
-                &((struct flom_conn_data_s *)
-                  g_ptr_array_index(conns->array, id))->tcp);
+                &((flom_conn_t *)g_ptr_array_index(conns->array, id))->tcp);
         else
             return 0;
     }
@@ -300,11 +297,10 @@ extern "C" {
      * @param id IN identificator (position in array) of the connection
      * @return a reference to the asked structure or NULL
      */
-    static inline struct flom_conn_data_s *flom_conns_get_cd(
+    static inline flom_conn_t *flom_conns_get_conn(
         const flom_conns_t *conns, guint id) {
         if (id < conns->array->len)
-            return ((struct flom_conn_data_s *)
-                    g_ptr_array_index(conns->array, id));
+            return ((flom_conn_t *)g_ptr_array_index(conns->array, id));
         else
             return NULL;
     }
@@ -330,8 +326,7 @@ extern "C" {
     static inline struct flom_msg_s *flom_conns_get_msg(
         flom_conns_t *conns, guint id) {
         if (id < conns->array->len)
-            return ((struct flom_conn_data_s *)
-                    g_ptr_array_index(conns->array, id))->msg;
+            return ((flom_conn_t *)g_ptr_array_index(conns->array, id))->msg;
         else
             return NULL;
     }
@@ -347,8 +342,7 @@ extern "C" {
     static inline GMarkupParseContext *flom_conns_get_gmpc(        
         flom_conns_t *conns, guint id) {
         if (id < conns->array->len)
-            return ((struct flom_conn_data_s *)
-                    g_ptr_array_index(conns->array, id))->gmpc;
+            return ((flom_conn_t *)g_ptr_array_index(conns->array, id))->gmpc;
         else
             return NULL;
     }
@@ -409,9 +403,9 @@ extern "C" {
 
     /**
      * Trace the content of a connection data struct
-     * @param conn IN connection data to trace
+     * @param conn IN connection object to trace
      */
-    void flom_conn_data_trace(const struct flom_conn_data_s *conn);
+    void flom_conn_trace(const flom_conn_t *conn);
 
 
     
