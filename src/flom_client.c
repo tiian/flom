@@ -134,10 +134,11 @@ int flom_client_connect(flom_config_t *config,
             THROW(INTERNAL_ERROR);
         /* set CLOSE on EXEC to avoid this file descriptor remains open after
            execution of controlled child command */
-        if (-1 == fcntl(flom_tcp_get_sockfd(&conn->tcp), F_SETFD, FD_CLOEXEC))
+        if (-1 == fcntl(flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
+                                            F_SETFD, FD_CLOEXEC))
             THROW(FCNTL_ERROR);
         FLOM_TRACE(("flom_client_connect: set FD_CLOEXEC to fd=%d\n",
-                    flom_tcp_get_sockfd(&conn->tcp)));
+                    flom_tcp_get_sockfd(flom_conn_get_tcp(conn))));
         
         THROW(NONE);
     } CATCH {
@@ -194,16 +195,18 @@ int flom_client_connect_local(flom_config_t *config,
                     flom_config_get_socket_name(config)));
 
         if (-1 == (flom_tcp_set_sockfd(
-                       &conn->tcp, socket(AF_LOCAL, SOCK_STREAM, 0))))
+                       flom_conn_get_tcp(conn),
+                       socket(AF_LOCAL, SOCK_STREAM, 0))))
             THROW(SOCKET_ERROR);
-        flom_tcp_set_socket_type(&conn->tcp, SOCK_STREAM);
-        flom_tcp_get_sa_un(&conn->tcp)->sun_family = AF_LOCAL;
-        strcpy(flom_tcp_get_sa_un(&conn->tcp)->sun_path,
+        flom_tcp_set_socket_type(flom_conn_get_tcp(conn), SOCK_STREAM);
+        flom_tcp_get_sa_un(flom_conn_get_tcp(conn))->sun_family = AF_LOCAL;
+        strcpy(flom_tcp_get_sa_un(flom_conn_get_tcp(conn))->sun_path,
                flom_config_get_socket_name(config));
-        flom_tcp_set_addrlen(&conn->tcp, sizeof(struct sockaddr_un));
-        if (-1 == connect(flom_tcp_get_sockfd(&conn->tcp),
-                          flom_tcp_get_sa(&conn->tcp),
-                          flom_tcp_get_addrlen(&conn->tcp))) {
+        flom_tcp_set_addrlen(flom_conn_get_tcp(conn),
+                             sizeof(struct sockaddr_un));
+        if (-1 == connect(flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
+                          flom_tcp_get_sa(flom_conn_get_tcp(conn)),
+                          flom_tcp_get_addrlen(flom_conn_get_tcp(conn)))) {
             if (ENOENT == errno || ECONNREFUSED == errno) {
                 if (start_daemon) {
                     if (0 != flom_config_get_lifespan(config)) {
@@ -214,13 +217,13 @@ int flom_client_connect_local(flom_config_t *config,
                                 ret_cod = flom_daemon(
                                     config,
                                     flom_tcp_get_sa_un(
-                                        &conn->tcp)->sun_family)))
+                                        flom_conn_get_tcp(conn))->sun_family)))
                             THROW(DAEMON_ERROR);
                         /* trying to connect again... */
                         if (-1 == connect(
-                                flom_tcp_get_sockfd(&conn->tcp),
-                                flom_tcp_get_sa(&conn->tcp),
-                                flom_tcp_get_addrlen(&conn->tcp)))
+                                flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
+                                flom_tcp_get_sa(flom_conn_get_tcp(conn)),
+                                flom_tcp_get_addrlen(flom_conn_get_tcp(conn))))
                             THROW(DAEMON_NOT_STARTED1);
                         FLOM_TRACE(("flom_client_connect_local: connected to "
                                     "flom daemon\n"));
@@ -287,10 +290,10 @@ int flom_client_connect_tcp(flom_config_t *config,
     
     FLOM_TRACE(("flom_client_connect_tcp\n"));
     TRY {
-        flom_tcp_init(&conn->tcp, config);
+        flom_tcp_init(flom_conn_get_tcp(conn), config);
         int sock_opt = 1;
 
-        ret_cod = flom_tcp_connect(&conn->tcp);
+        ret_cod = flom_tcp_connect(flom_conn_get_tcp(conn));
         switch (ret_cod) {
             case FLOM_RC_OK:
                 break;
@@ -302,7 +305,9 @@ int flom_client_connect_tcp(flom_config_t *config,
                         /* daemon is not active, starting it... */
                         if (FLOM_RC_OK != (
                                 ret_cod = flom_daemon(
-                                    config, flom_tcp_get_domain(&conn->tcp))))
+                                    config,
+                                    flom_tcp_get_domain(
+                                        flom_conn_get_tcp(conn)))))
                             THROW(DAEMON_ERROR);
                         /* trying to connect again... */
                         if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(
@@ -323,12 +328,12 @@ int flom_client_connect_tcp(flom_config_t *config,
             default:
                 THROW(TCP_CONNECT_ERROR);
         } /* switch (ret_cod) */
-        if (0 != setsockopt(flom_tcp_get_sockfd(&conn->tcp),
+        if (0 != setsockopt(flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
                             IPPROTO_TCP, TCP_NODELAY,
                             (void *)(&sock_opt), sizeof(sock_opt)))
             THROW(SETSOCKOPT_ERROR);
         /* set connection definition object attributes */
-        flom_tcp_set_socket_type(&conn->tcp, SOCK_STREAM);
+        flom_tcp_set_socket_type(flom_conn_get_tcp(conn), SOCK_STREAM);
         
         THROW(NONE);
     } CATCH {
@@ -762,10 +767,10 @@ int flom_client_discover_udp_connect(flom_conn_t *conn,
                             (void *)(&sock_opt), sizeof(sock_opt)))
             THROW(SETSOCKOPT_ERROR);
         /* set connection definition object attributes */
-        flom_tcp_set_sockfd(&conn->tcp, fd);
-        flom_tcp_set_socket_type(&conn->tcp, SOCK_STREAM);
-        memcpy(flom_tcp_get_sa(&conn->tcp), sa, addrlen);
-        flom_tcp_set_addrlen(&conn->tcp, addrlen);
+        flom_tcp_set_sockfd(flom_conn_get_tcp(conn), fd);
+        flom_tcp_set_socket_type(flom_conn_get_tcp(conn), SOCK_STREAM);
+        memcpy(flom_tcp_get_sa(flom_conn_get_tcp(conn)), sa, addrlen);
+        flom_tcp_set_addrlen(flom_conn_get_tcp(conn), addrlen);
         /* avoid socket close operated by clean-up step */
         fd = FLOM_NULL_FD;
         
@@ -855,7 +860,7 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
 
         /* send the request message */
         if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
-                               flom_tcp_get_sockfd(&conn->tcp),
+                               flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
                                buffer, to_send)))
             THROW(MSG_SEND_ERROR);
         conn->last_step = msg.header.pvs.step;
@@ -866,7 +871,8 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
 
         /* retrieve the reply message */
         ret_cod = flom_tcp_retrieve(
-            flom_tcp_get_sockfd(&conn->tcp), flom_tcp_get_socket_type(&conn->tcp),
+            flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
+            flom_tcp_get_socket_type(flom_conn_get_tcp(conn)),
             buffer, sizeof(buffer), &to_read, timeout, NULL, NULL);
         switch (ret_cod) {
             case FLOM_RC_OK:
@@ -1054,8 +1060,8 @@ int flom_client_wait_lock(flom_conn_t *conn,
         while (TRUE) {
             /* retrieve the reply message */
             ret_cod = flom_tcp_retrieve(
-                flom_tcp_get_sockfd(&conn->tcp),
-                flom_tcp_get_socket_type(&conn->tcp),
+                flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
+                flom_tcp_get_socket_type(flom_conn_get_tcp(conn)),
                 buffer, sizeof(buffer), &to_read, timeout, NULL, NULL);
             switch (ret_cod) {
                 case FLOM_RC_OK:
@@ -1169,7 +1175,7 @@ int flom_client_unlock(flom_config_t *config, flom_conn_t *conn)
 
         /* send the request message */
         if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
-                               flom_tcp_get_sockfd(&conn->tcp),
+                               flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
                                buffer, to_send)))
             THROW(MSG_SEND_ERROR);
         conn->last_step = msg.header.pvs.step;
@@ -1210,22 +1216,27 @@ int flom_client_disconnect(flom_conn_t *conn)
     TRY {
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
         /* gracely shutdown write half socket */
-        if (-1 == shutdown(flom_tcp_get_sockfd(&conn->tcp), SHUT_WR))
+        if (-1 == shutdown(flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
+                           SHUT_WR))
             FLOM_TRACE(("flom_client_disconnect/shutdown(%d,SHUT_WR)=%d "
-                        "('%s')\n", flom_tcp_get_sockfd(&conn->tcp), errno,
+                        "('%s')\n",
+                        flom_tcp_get_sockfd(flom_conn_get_tcp(conn)), errno,
                         strerror(errno)));
         /* pick-up socket close/error but does not wait */
-        if (-1 == recv(flom_tcp_get_sockfd(&conn->tcp), buffer, sizeof(buffer),
-                       0 /* MSG_DONTWAIT */)) 
+        if (-1 == recv(flom_tcp_get_sockfd(flom_conn_get_tcp(conn)), buffer,
+                       sizeof(buffer), 0 /* MSG_DONTWAIT */)) 
             FLOM_TRACE(("flom_client_disconnect/recv(%d,,%u,0)=%d "
-                        "('%s')\n", flom_tcp_get_sockfd(&conn->tcp),
+                        "('%s')\n",
+                        flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
                         sizeof(buffer), errno, strerror(errno)));
         /* shutdown read half socket */
-        if (-1 == shutdown(flom_tcp_get_sockfd(&conn->tcp), SHUT_RD))
+        if (-1 == shutdown(flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
+                           SHUT_RD))
             FLOM_TRACE(("flom_client_disconnect/shutdown(%d,SHUT_RD)=%d "
-                        "('%s')\n", flom_tcp_get_sockfd(&conn->tcp), errno,
+                        "('%s')\n",
+                        flom_tcp_get_sockfd(flom_conn_get_tcp(conn)), errno,
                         strerror(errno)));
-        flom_tcp_set_sockfd(&conn->tcp, FLOM_NULL_FD);
+        flom_tcp_set_sockfd(flom_conn_get_tcp(conn), FLOM_NULL_FD);
         
         THROW(NONE);
     } CATCH {
@@ -1297,7 +1308,7 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
 
         /* send the request message */
         if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
-                               flom_tcp_get_sockfd(&conn.tcp),
+                               flom_tcp_get_sockfd(flom_conn_get_tcp(&conn)),
                                buffer, to_send)))
             THROW(MSG_SEND_ERROR);
         conn.last_step = msg.header.pvs.step;

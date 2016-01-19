@@ -121,7 +121,7 @@ typedef struct {
      * TCP/IP connection data
      */
     flom_tcp_t            tcp;
-    /**
+    /** @@@ restart from this field
      * Last received message (allocated by malloc)
      */
     struct flom_msg_s     *msg;
@@ -169,6 +169,92 @@ extern "C" {
 
 
 
+    /**
+     * Getter method for state property
+     * @param obj IN connection object
+     * @return state
+     */
+    static inline int flom_conn_get_state(const flom_conn_t *obj) {
+        return obj->state;
+    }
+    
+    
+    
+    /**
+     * Setter method for state property
+     * @param obj IN/OUT connection object
+     * @param value IN new value for state
+     */
+    static inline void flom_conn_set_state(flom_conn_t *obj, int value) {
+        obj->state = value;
+    }
+
+
+    
+    /**
+     * Getter method for wait property
+     * @param obj IN connection object
+     * @return wait
+     */
+    static inline int flom_conn_get_wait(const flom_conn_t *obj) {
+        return obj->wait;
+    }
+    
+    
+    
+    /**
+     * Setter method for wait property
+     * @param obj IN/OUT connection object
+     * @param value IN new value for wait
+     */
+    static inline void flom_conn_set_wait(flom_conn_t *obj, int value) {
+        obj->wait = value;
+    }
+
+
+    
+    /**
+     * Getter method for tcp property
+     * @param obj IN connection object
+     * @return tcp
+     */
+    static inline flom_tcp_t *flom_conn_get_tcp(flom_conn_t *obj) {
+        return &obj->tcp;
+    }
+    
+    
+    
+    /**
+     * Setter method for tcp property
+     * @param obj IN/OUT connection object
+     * @param value IN new value for tcp
+     */
+    static inline void flom_conn_set_tcp(flom_conn_t *obj,
+                                         const flom_tcp_t *value) {
+        obj->tcp = *value;
+    }
+
+
+    
+    /**
+     * Trace the content of a connection data struct
+     * @param conn IN connection object to trace
+     */
+    void flom_conn_trace(const flom_conn_t *conn);
+
+
+    
+    /**
+     * Set SO_KEEPALIVE and correlated parameters for the socket associated
+     * to the passed file descriptor
+     * @param config IN configuration object, NULL for global config
+     * @param fd IN/OUT socket file descriptor
+     * @return a reason code
+     */
+    int flom_conn_set_keepalive(flom_config_t *config, int fd);
+
+
+    
     /**
      * Check if n field of the object and the real size of the underlying
      * array match
@@ -266,7 +352,8 @@ extern "C" {
     static inline int flom_conns_get_fd(const flom_conns_t *conns, guint id) {
         if (id < conns->array->len)
             return flom_tcp_get_sockfd(
-                &((flom_conn_t *)g_ptr_array_index(conns->array, id))->tcp);
+                flom_conn_get_tcp(
+                    (flom_conn_t *)g_ptr_array_index(conns->array, id)));
         else
             return FLOM_NULL_FD;
     }
@@ -283,7 +370,8 @@ extern "C" {
         const flom_conns_t *conns, guint id) {
         if (id < conns->array->len)
             return flom_tcp_get_socket_type(
-                &((flom_conn_t *)g_ptr_array_index(conns->array, id))->tcp);
+                flom_conn_get_tcp(
+                    (flom_conn_t *)g_ptr_array_index(conns->array, id)));
         else
             return 0;
     }
@@ -402,14 +490,6 @@ extern "C" {
 
 
     /**
-     * Trace the content of a connection data struct
-     * @param conn IN connection object to trace
-     */
-    void flom_conn_trace(const flom_conn_t *conn);
-
-
-    
-    /**
      * Trace the content of a connections object
      * @param conns IN connections object to trace
      */
@@ -417,17 +497,6 @@ extern "C" {
 
 
 
-    /**
-     * Set SO_KEEPALIVE and correlated parameters for the socket associated
-     * to the passed file descriptor
-     * @param config IN configuration object, NULL for global config
-     * @param fd IN/OUT socket file descriptor
-     * @return a reason code
-     */
-    int flom_conn_set_keepalive(flom_config_t *config, int fd);
-
-
-    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

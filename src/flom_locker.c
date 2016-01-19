@@ -149,7 +149,7 @@ gpointer flom_locker_loop(gpointer data)
         if (FLOM_RC_OK != (ret_cod = flom_conns_add(
                                &conns, locker->read_pipe, SOCK_STREAM,
                                sizeof(struct sockaddr_storage),
-                               flom_tcp_get_sa(&conn.tcp),
+                               flom_tcp_get_sa(flom_conn_get_tcp(&conn)),
                                FALSE)))
             THROW(CONNS_ADD_ERROR);
         
@@ -367,7 +367,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
         if (NULL == (curr_conn = flom_conns_get_conn(conns, id)))
             THROW(CONNS_GET_CD_ERROR);
         FLOM_TRACE(("flom_locker_loop_pollin: id=%d, fd=%d\n",
-                    id, flom_tcp_get_sockfd(&curr_conn->tcp)));
+                    id, flom_tcp_get_sockfd(flom_conn_get_tcp(curr_conn))));
         locker->idle_periods = 0;
         if (0 == id) {
             struct flom_locker_token_s flt;
@@ -397,8 +397,10 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
             GMarkupParseContext *gmpc;
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_tcp_retrieve(
-                                   flom_tcp_get_sockfd(&curr_conn->tcp),
-                                   flom_tcp_get_socket_type(&curr_conn->tcp),
+                                   flom_tcp_get_sockfd(
+                                       flom_conn_get_tcp(curr_conn)),
+                                   flom_tcp_get_socket_type(
+                                       flom_conn_get_tcp(curr_conn)),
                                    buffer, sizeof(buffer),
                                    &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT,
                                    NULL, NULL)))
@@ -408,7 +410,8 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 /* connection closed */
                 FLOM_TRACE(("flom_locker_loop_pollin: id=%d, fd=%d "
                             "returned 0 bytes: disconnecting...\n",
-                            id, flom_tcp_get_sockfd(&curr_conn->tcp)));
+                            id, flom_tcp_get_sockfd(
+                                flom_conn_get_tcp(curr_conn))));
                 if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                        conns, id)))
                     THROW(CONNS_CLOSE_ERROR1);
@@ -460,7 +463,8 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                                            &msg_len)))
                         THROW(MSG_SERIALIZE_ERROR);
                     ret_cod = flom_tcp_send(
-                        flom_tcp_get_sockfd(&curr_conn->tcp), buffer, msg_len);
+                        flom_tcp_get_sockfd(flom_conn_get_tcp(curr_conn)),
+                        buffer, msg_len);
                     if (FLOM_RC_SEND_ERROR == ret_cod) {
                         FLOM_TRACE(("flom_locker_loop_pollin: error while "
                                     "sending message to client (the "

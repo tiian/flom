@@ -462,7 +462,8 @@ int flom_resource_set_waitings(flom_resource_t *resource)
                             &msg, buffer, sizeof(buffer), &to_send)))
                     THROW(MSG_SERIALIZE_ERROR);
                 if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
-                                       flom_tcp_get_sockfd(&cl->conn->tcp),
+                                       flom_tcp_get_sockfd(
+                                           flom_conn_get_tcp(cl->conn)),
                                        buffer, to_send)))
                     THROW(MSG_SEND_ERROR);
                 cl->conn->last_step = msg.header.pvs.step;

@@ -1082,13 +1082,14 @@ int flom_accept_loop_pollin(flom_config_t *config,
         if (NULL == (c = flom_conns_get_conn(conns, id)))
             THROW(CONNS_GET_CD_ERROR);
         FLOM_TRACE(("flom_accept_loop_pollin: id=%u, fd=%d\n",
-                    id, flom_tcp_get_sockfd(&c->tcp)));
+                    id, flom_tcp_get_sockfd(flom_conn_get_tcp(c))));
         if (0 == id) {
             /* it's a new connection */
             int conn_fd;
             struct sockaddr_storage cliaddr;
             socklen_t clilen = sizeof(cliaddr);
-            if (-1 == (conn_fd = accept(flom_tcp_get_sockfd(&c->tcp),
+            if (-1 == (conn_fd = accept(flom_tcp_get_sockfd(
+                                            flom_conn_get_tcp(c)),
                                         (struct sockaddr *)&cliaddr,
                                         &clilen)))
                 THROW(ACCEPT_ERROR);
@@ -1119,8 +1120,9 @@ int flom_accept_loop_pollin(flom_config_t *config,
             memset(&src_addr, 0, addrlen);
             /* it's data from an existing connection */
             if (FLOM_RC_OK != (ret_cod = flom_tcp_retrieve(
-                                   flom_tcp_get_sockfd(&c->tcp),
-                                   flom_tcp_get_socket_type(&c->tcp),
+                                   flom_tcp_get_sockfd(flom_conn_get_tcp(c)),
+                                   flom_tcp_get_socket_type(
+                                       flom_conn_get_tcp(c)),
                                    buffer, sizeof(buffer),
                                    &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT,
                                    (struct sockaddr *)&src_addr, &addrlen)))
@@ -1309,13 +1311,14 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                         "resource name ('%s'), "
                         "starting connection termination for fd=%d\n",
                         msg->body.lock_8.resource.name,
-                        flom_tcp_get_sockfd(&conn->tcp)));
-            if (-1 == shutdown(flom_tcp_get_sockfd(&conn->tcp), SHUT_WR))
+                        flom_tcp_get_sockfd(flom_conn_get_tcp(conn))));
+            if (-1 == shutdown(flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
+                               SHUT_WR))
                 FLOM_TRACE(("flom_accept_loop_transfer/shutdown"
                             "(%d,SHUT_WR)=%d "
                             "('%s')\n",
-                            flom_tcp_get_sockfd(&conn->tcp), errno,
-                            strerror(errno)));
+                            flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
+                            errno, strerror(errno)));
             /* return to caller */
             THROW(INVALID_RESOURCE_NAME_ERROR);
         }
@@ -1359,12 +1362,14 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                     FLOM_TRACE(("flom_accept_loop_transfer: client can't "
                                 "create a new resource and can't wait, "
                                 "starting connection termination for fd=%d\n",
-                                flom_tcp_get_sockfd(&conn->tcp)));
-                    if (-1 == shutdown(flom_tcp_get_sockfd(&conn->tcp), SHUT_WR))
+                                flom_tcp_get_sockfd(flom_conn_get_tcp(conn))));
+                    if (-1 == shutdown(flom_tcp_get_sockfd(
+                                           flom_conn_get_tcp(conn)), SHUT_WR))
                         FLOM_TRACE(("flom_accept_loop_transfer/shutdown"
                                     "(%d,SHUT_WR)=%d "
                                     "('%s')\n",
-                                    flom_tcp_get_sockfd(&conn->tcp), errno,
+                                    flom_tcp_get_sockfd(
+                                        flom_conn_get_tcp(conn)), errno,
                                     strerror(errno)));
                     /* return to caller */
                     THROW(CANT_WAIT_CONDITION);
@@ -1375,7 +1380,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                     if (FLOM_RC_OK != (ret_cod = flom_accept_loop_reply(
                                            conn, FLOM_RC_LOCK_WAIT_RESOURCE)))
                         THROW(ACCEPT_LOOP_REPLY_ERROR3);
-                    conn->wait = TRUE;
+                    flom_conn_set_wait(conn, TRUE);
                     /* return to caller */
                     THROW(PUT_INTO_INCUBATOR);
                 } /* if (!msg->body.lock_8.resource.wait) */
@@ -1407,7 +1412,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                     THROW(CONNS_GET_CD_ERROR2);
                 /* check if the connection is really waiting resource
                    creation, else skip it */
-                if (!loop_conn->wait) {
+                if (!flom_conn_get_wait(loop_conn)) {
                     i++;
                     continue;
                 }
@@ -1417,7 +1422,8 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                     FLOM_TRACE(("flom_accept_loop_transfer: connection %u "
                                 "(fd=%d) is waiting for resource '%s' and "
                                 "can be transferred to this locker\n",
-                                i, flom_tcp_get_sockfd(&loop_conn->tcp),
+                                i, flom_tcp_get_sockfd(
+                                    flom_conn_get_tcp(loop_conn)),
                                 loop_conn->msg->body.lock_8.resource.name));
                     if (FLOM_RC_OK != (ret_cod =
                                        flom_accept_loop_transfer_conn(
@@ -1738,7 +1744,7 @@ int flom_accept_loop_reply(flom_conn_t *conn, int rc)
             THROW(MSG_SERIALIZE_ERROR);
         /* send message to client (requester) */
         if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
-                               flom_tcp_get_sockfd(&conn->tcp),
+                               flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
                                buffer, to_send)))
             THROW(MSG_SEND_ERROR);
         conn->last_step = msg.header.pvs.step;
