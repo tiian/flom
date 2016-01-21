@@ -1,6 +1,5 @@
 Road map:
 
-transform flom_conn_data_s to flom_conn_t and remove direct access to the properties (temporary rename to _property...)
 encapsulate the data related to TCP (flom_tcp_t) and TLS (flom_tls_t)
 flom_conn_t must become the type used for I/O and it should wrap
 	flom_tcp_retrieve, flom_tcp_send, flom_tls_retrieve, flom_tls_send

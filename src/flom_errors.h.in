@@ -219,6 +219,10 @@
  * The specified network interface is not valid for IPv6 networking
  */
 #define FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE       -20
+/**
+ * Error while creating a new object in the heap
+ */
+#define FLOM_RC_NEW_OBJ                              -21
 
 
 

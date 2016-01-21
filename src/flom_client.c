@@ -33,6 +33,9 @@
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
 #endif
+#ifdef HAVE_GLIB_H
+# include <glib.h>
+#endif
 #ifdef HAVE_NETDB_H
 # include <netdb.h>
 #endif
@@ -409,6 +412,7 @@ int flom_client_discover_udp(flom_config_t *config,
         ssize_t received;
         struct sockaddr_storage from;
         socklen_t addrlen = sizeof(from);
+        GMarkupParseContext *tmp_parser;
         
         flom_msg_init(&msg);
         
@@ -617,13 +621,15 @@ int flom_client_discover_udp(flom_config_t *config,
         flom_msg_init(&msg);
 
         /* instantiate a new parser */
-        if (NULL == (conn->gmpc = g_markup_parse_context_new(
+        if (NULL == (tmp_parser = g_markup_parse_context_new(
                          &flom_msg_parser, 0, (gpointer)&msg, NULL)))
             THROW(G_MARKUP_PARSE_CONTEXT_NEW_ERROR);
+        flom_conn_set_parser(conn, tmp_parser);
         
         /* deserialize the reply message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
-                               in_buffer, received, &msg, conn->gmpc)))
+                               in_buffer, received, &msg,
+                               flom_conn_get_parser(conn))))
             THROW(MSG_DESERIALIZE_ERROR);
 
         flom_msg_trace(&msg);        
@@ -833,6 +839,7 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
         size_t to_send;
         ssize_t to_read;
+        GMarkupParseContext *tmp_parser;
 
         /* initialize message */
         flom_msg_init(&msg);
@@ -863,7 +870,7 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
                                flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
                                buffer, to_send)))
             THROW(MSG_SEND_ERROR);
-        conn->last_step = msg.header.pvs.step;
+        flom_conn_set_last_step(conn, msg.header.pvs.step);
         
         if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
             THROW(MSG_FREE_ERROR1);
@@ -885,15 +892,17 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
         } /* switch (ret_cod) */
 
         /* instantiate a new parser */
-        if (NULL == (conn->gmpc = g_markup_parse_context_new(
+        if (NULL == (tmp_parser = g_markup_parse_context_new(
                          &flom_msg_parser, 0, (gpointer)&msg, NULL)))
             THROW(G_MARKUP_PARSE_CONTEXT_NEW_ERROR);
+        flom_conn_set_parser(conn, tmp_parser);
         
         /* deserialize the reply message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
-                               buffer, to_read, &msg, conn->gmpc)))
+                               buffer, to_read, &msg,
+                               flom_conn_get_parser(conn))))
             THROW(MSG_DESERIALIZE_ERROR1);
-        conn->last_step = msg.header.pvs.step;
+        flom_conn_set_last_step(conn, msg.header.pvs.step);
         /* check the parser completed without errors */
         if (FLOM_MSG_STATE_READY != msg.state) {
             /* check message level */
@@ -933,13 +942,15 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
                 switch (ret_cod) {
                     case FLOM_RC_OK:
                         /* copy element if available */
-                        if (3*FLOM_MSG_STEP_INCR == conn->last_step) {
+                        if (3*FLOM_MSG_STEP_INCR ==
+                            flom_conn_get_last_step(conn)) {
                             if (NULL != msg.body.lock_24.answer.element) {
                                 g_free(*element);
                                 *element = g_strdup(
                                     msg.body.lock_24.answer.element);
                             }
-                        } else if (4*FLOM_MSG_STEP_INCR == conn->last_step) {
+                        } else if (4*FLOM_MSG_STEP_INCR ==
+                                   flom_conn_get_last_step(conn)) {
                             if (NULL != msg.body.lock_24.answer.element) {
                                 g_free(*element);
                                 *element = g_strdup(
@@ -1025,10 +1036,7 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
     } /* TRY-CATCH */
 
     /* release markup parser */
-    if (NULL != conn->gmpc) {
-        g_markup_parse_context_free(conn->gmpc);
-        conn->gmpc = NULL;
-    }
+    flom_conn_free_parser(conn);
     if (NONE > excp)
         flom_msg_free(&msg);        
     
@@ -1078,9 +1086,10 @@ int flom_client_wait_lock(flom_conn_t *conn,
             
             /* deserialize the reply message */
             if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
-                                   buffer, to_read, msg, conn->gmpc)))
+                                   buffer, to_read, msg,
+                                   flom_conn_get_parser(conn))))
                 THROW(MSG_DESERIALIZE_ERROR);
-            conn->last_step = msg->header.pvs.step;
+            flom_conn_set_last_step(conn, msg->header.pvs.step);
             flom_msg_trace(msg);
 
             /* is arriving an intermediate message (resource does not exist
@@ -1178,7 +1187,7 @@ int flom_client_unlock(flom_config_t *config, flom_conn_t *conn)
                                flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
                                buffer, to_send)))
             THROW(MSG_SEND_ERROR);
-        conn->last_step = msg.header.pvs.step;
+        flom_conn_set_last_step(conn, msg.header.pvs.step);
         
         if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
             THROW(MSG_FREE_ERROR);
@@ -1311,7 +1320,7 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
                                flom_tcp_get_sockfd(flom_conn_get_tcp(&conn)),
                                buffer, to_send)))
             THROW(MSG_SEND_ERROR);
-        conn.last_step = msg.header.pvs.step;
+        flom_conn_set_last_step(&conn, msg.header.pvs.step);
         FLOM_TRACE(("flom_client_shutdown: shutdown message sent "
                     "to daemon...\n"));
 

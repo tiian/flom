@@ -1139,13 +1139,13 @@ int flom_accept_loop_pollin(flom_config_t *config,
             if (NULL == (msg = flom_conns_get_msg(conns, id)))
                 THROW(CONNS_GET_MSG_ERROR);
 
-            if (NULL == (gmpc = flom_conns_get_gmpc(conns, id)))
+            if (NULL == (gmpc = flom_conns_get_parser(conns, id)))
                 THROW(CONNS_GET_GMPC_ERROR);
             
             if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
                                    buffer, read_bytes, msg, gmpc)))
                 THROW(MSG_DESERIALIZE_ERROR);
-            c->last_step = msg->header.pvs.step;
+            flom_conn_set_last_step(c, msg->header.pvs.step);
             flom_msg_trace(msg);
             /* if the message is not valid the client must be terminated */
             if (FLOM_MSG_STATE_INVALID == msg->state) {
@@ -1418,13 +1418,15 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                 }
                 if (!locker->resource.compare_name(
                         &locker->resource,
-                        loop_conn->msg->body.lock_8.resource.name)) {
+                        flom_conn_get_msg(loop_conn)->
+                        body.lock_8.resource.name)) {
                     FLOM_TRACE(("flom_accept_loop_transfer: connection %u "
                                 "(fd=%d) is waiting for resource '%s' and "
                                 "can be transferred to this locker\n",
                                 i, flom_tcp_get_sockfd(
                                     flom_conn_get_tcp(loop_conn)),
-                                loop_conn->msg->body.lock_8.resource.name));
+                                flom_conn_get_msg(loop_conn)->
+                                body.lock_8.resource.name));
                     if (FLOM_RC_OK != (ret_cod =
                                        flom_accept_loop_transfer_conn(
                                            conns, i, locker, loop_conn)))
@@ -1747,7 +1749,7 @@ int flom_accept_loop_reply(flom_conn_t *conn, int rc)
                                flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
                                buffer, to_send)))
             THROW(MSG_SEND_ERROR);
-        conn->last_step = msg.header.pvs.step;
+        flom_conn_set_last_step(conn, msg.header.pvs.step);
         /* free message dynamic allocated memory (if any) */
         if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
             THROW(MSG_FREE_ERROR);

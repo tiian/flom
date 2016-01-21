@@ -57,6 +57,55 @@
 
 
 
+flom_conn_t *flom_conn_new(void)
+{
+    flom_conn_t *tmp;
+    /* allocate the object itself */
+    if (NULL != (tmp = g_try_malloc0(sizeof(flom_conn_t)))) {
+        /* allocate msg struct */
+        if (NULL != (tmp->msg = g_try_malloc(sizeof(struct flom_msg_s)))) {
+            /* initialize the message */
+            flom_msg_init(tmp->msg);
+        } else {
+            /* remove connection object because msg struct was not allocated */
+            g_free(tmp);
+            tmp = NULL;
+        }
+    } /* if (NULL != (tmp = g_try_malloc0(sizeof(flom_conn_t)))) */
+    FLOM_TRACE(("flom_conn_new: obj=%p\n", tmp));
+    return tmp;
+}
+
+    
+
+void flom_conn_delete(flom_conn_t *obj)
+{
+    if (NULL != obj) {
+        /* remove msg struct */
+        if (NULL != obj->msg) {
+            flom_msg_free(obj->msg);
+            g_free(obj->msg);
+            obj->msg = NULL;
+        }
+        /* remove object itself */
+        g_free(obj);
+    }
+}
+
+
+
+void flom_conn_free_parser(flom_conn_t *obj)
+{
+    if (NULL != obj) {
+        if (NULL != obj->parser) {
+            g_markup_parse_context_free(obj->parser);
+            obj->parser = NULL;
+        } /* if (NULL != obj->parser) */
+    } /* if (NULL != obj) */
+}
+
+
+
 int flom_conns_check_n(flom_conns_t *conns)
 {
     /* this is a dirty hack because this struct is opaque and this operation
@@ -90,9 +139,8 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
                    socklen_t addr_len, const struct sockaddr *sa,
                    int main_thread)
 {
-    enum Exception { G_TRY_MALLOC_ERROR1
+    enum Exception { NEW_OBJ
                      , INVALID_DOMAIN
-                     , G_TRY_MALLOC_ERROR2
                      , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -101,8 +149,9 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
     
     FLOM_TRACE(("flom_conns_add\n"));
     TRY {
-        if (NULL == (tmp = g_try_malloc0(sizeof(flom_conn_t))))
-            THROW(G_TRY_MALLOC_ERROR1);
+        GMarkupParseContext *tmp_parser;
+        if (NULL == (tmp = flom_conn_new()))
+            THROW(NEW_OBJ);
         FLOM_TRACE(("flom_conns_add: allocated a new connection (%p)\n", tmp));
         flom_tcp_init(flom_conn_get_tcp(tmp), NULL);
         flom_tcp_set_domain(flom_conn_get_tcp(tmp), conns->domain);
@@ -129,34 +178,23 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
                             FLOM_CONN_STATE_DAEMON : FLOM_CONN_STATE_LOCKER);
         flom_conn_set_wait(tmp, FALSE);
         flom_tcp_set_addrlen(flom_conn_get_tcp(tmp), addr_len);
-        /* reset the associated message */
-        if (NULL == (tmp->msg =
-                     g_try_malloc(sizeof(struct flom_msg_s))))
-            THROW(G_TRY_MALLOC_ERROR2); 
-        FLOM_TRACE(("flom_conns_add: allocated a new message (%p)\n",
-                    tmp->msg));
-        flom_msg_init(tmp->msg);
         
         /* initialize the associated parser */
-        tmp->gmpc = g_markup_parse_context_new (
-            &flom_msg_parser, 0, (gpointer)(tmp->msg), NULL);
-        if (NULL == tmp->gmpc)
+        if (NULL == (tmp_parser = g_markup_parse_context_new (
+                         &flom_msg_parser, 0,
+                         (gpointer)(flom_conn_get_msg(tmp)), NULL)))
             THROW(G_MARKUP_PARSE_CONTEXT_NEW_ERROR);
-        FLOM_TRACE(("flom_conns_add: allocated a new parser (%p)\n",
-                    tmp->gmpc));
+        flom_conn_set_parser(tmp, tmp_parser);
         g_ptr_array_add(conns->array, tmp);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case G_TRY_MALLOC_ERROR1:
-                ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
+            case NEW_OBJ:
+                ret_cod = FLOM_RC_NEW_OBJ;
                 break;
             case INVALID_DOMAIN:
                 ret_cod = FLOM_RC_OBJ_CORRUPTED;
-                break;
-            case G_TRY_MALLOC_ERROR2:
-                ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
                 break;
             case G_MARKUP_PARSE_CONTEXT_NEW_ERROR:
                 ret_cod = FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR;
@@ -170,10 +208,8 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_conns_add: excp=%d\n", excp));
     if (NONE != excp) {
-        if (G_TRY_MALLOC_ERROR2 < excp) /* release message */
-            g_free(tmp->msg);
-        if (G_TRY_MALLOC_ERROR1 < excp) /* release connection data */
-            g_free(tmp);
+        if (NEW_OBJ < excp) /* release connection data */
+            flom_conn_delete(tmp);
     }
     FLOM_TRACE(("flom_conns_add/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -390,23 +426,15 @@ int flom_conns_clean(flom_conns_t *conns)
                 /* connections with this state are no more valid and must be
                    removed and destroyed */
                 /* removing message object */
-                if (NULL != c->msg) {
-                    flom_msg_free(c->msg);
-                    g_free(c->msg);
-                    c->msg = NULL;
-                }
                 /* removing parser object */
-                if (NULL != c->gmpc) {
-                    g_markup_parse_context_free(c->gmpc);
-                    c->gmpc = NULL;
-                }
+                flom_conn_free_parser(c);
                 /* removing from array */
                 if (NULL == g_ptr_array_remove_index_fast(conns->array, i)) {
                     THROW(G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR);
                 }
                 /* release connection */
                 FLOM_TRACE(("flom_conns_clean: releasing connection %p\n", c));
-                g_free(c);
+                flom_conn_delete(c);
             } else i++;
         } /* while (i<conns->n) */
         
@@ -459,12 +487,11 @@ void flom_conn_trace(const flom_conn_t *conn)
 {
     FLOM_TRACE(("flom_conn_trace: object=%p\n", conn));
     FLOM_TRACE(("flom_conn_trace: "
-                "fd=%d, type=%d, state=%d, wait=%d, msg=%p, gmpc=%p, "
+                "fd=%d, type=%d, state=%d, wait=%d, msg=%p, parser=%p, "
                 "addr_len=%d\n",
                 flom_tcp_get_sockfd(&conn->tcp),
                 flom_tcp_get_socket_type(&conn->tcp),
-                flom_conn_get_state(conn), flom_conn_get_wait(conn),
-                conn->msg, conn->gmpc,
+                conn->state, conn->wait, conn->msg, conn->parser,
                 flom_tcp_get_addrlen(&conn->tcp)));
 }
 

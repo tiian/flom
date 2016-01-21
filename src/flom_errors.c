@@ -115,6 +115,8 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE:
             return "ERROR: the specified network interface is not valid for "
                 "IPv6 networking";
+        case FLOM_RC_NEW_OBJ:
+            return "ERROR: creation of a new object in the heap failed";
             /* system function error */
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";

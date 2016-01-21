@@ -118,21 +118,22 @@ typedef struct {
      */
     int                   wait;
     /**
+     * Step of the last sent/received  message
+     */
+    int                   last_step;
+    /**
      * TCP/IP connection data
      */
     flom_tcp_t            tcp;
-    /** @@@ restart from this field
+    /**
      * Last received message (allocated by malloc)
      */
-    struct flom_msg_s     *msg;
-    /**
-     * Step of the last sent/received  message
-     */
-    int                    last_step;
+    struct flom_msg_s    *msg;
+    /* @@@ restart from this field */
     /**
      * GMarkup Parser context (allocated by g_markup_parse_context_new)
      */
-    GMarkupParseContext   *gmpc;
+    GMarkupParseContext  *parser;
 } flom_conn_t;
 
 
@@ -169,6 +170,22 @@ extern "C" {
 
 
 
+    /**
+     * Factory method to create a new flom_conn_t object
+     * @return a new object or NULL if any error occurred
+     */
+    flom_conn_t *flom_conn_new(void);
+    
+
+
+    /**
+     * Destroy an object of type flom_conn_t
+     * @param obj IN object to be destroyed
+     */
+    void flom_conn_delete(flom_conn_t *obj);
+
+
+    
     /**
      * Getter method for state property
      * @param obj IN connection object
@@ -214,6 +231,28 @@ extern "C" {
 
     
     /**
+     * Getter method for last_step property
+     * @param obj IN connection object
+     * @return last_step
+     */
+    static inline int flom_conn_get_last_step(const flom_conn_t *obj) {
+        return obj->last_step;
+    }
+    
+    
+    
+    /**
+     * Setter method for last_step property
+     * @param obj IN/OUT connection object
+     * @param value IN new value for last_step
+     */
+    static inline void flom_conn_set_last_step(flom_conn_t *obj, int value) {
+        obj->last_step = value;
+    }
+
+
+    
+    /**
      * Getter method for tcp property
      * @param obj IN connection object
      * @return tcp
@@ -233,6 +272,63 @@ extern "C" {
                                          const flom_tcp_t *value) {
         obj->tcp = *value;
     }
+
+
+    
+    /**
+     * Getter method for msg property
+     * @param obj IN connection object
+     * @return msg
+     */
+    static inline struct flom_msg_s *flom_conn_get_msg(flom_conn_t *obj) {
+        return obj->msg;
+    }
+    
+    
+    
+    /**
+     * Setter method for msg property
+     * @param obj IN/OUT connection object
+     * @param value IN new value for msg
+     */
+    static inline void flom_conn_set_msg(flom_conn_t *obj,
+                                         struct flom_msg_s *value) {
+        obj->msg = value;
+    }
+
+
+    
+    /**
+     * Getter method for parser property
+     * @param obj IN connection object
+     * @return msg
+     */
+    static inline GMarkupParseContext *flom_conn_get_parser(flom_conn_t *obj) {
+        return obj->parser;
+    }
+    
+    
+    
+    /**
+     * Setter method for parser property
+     * @param obj IN connection object
+     * @param ref IN reference to the new parser
+     * @return msg
+     */
+    static inline void flom_conn_set_parser(
+        flom_conn_t *obj, GMarkupParseContext *ref) {
+        if (NULL != obj->parser)
+            g_markup_parse_context_free(obj->parser);
+        obj->parser = ref;
+    }
+    
+    
+
+    /**
+     * Release the parser object used by the connection
+     * @param obj IN/OUT connection object
+     */
+    void flom_conn_free_parser(flom_conn_t *obj);
 
 
     
@@ -414,7 +510,8 @@ extern "C" {
     static inline struct flom_msg_s *flom_conns_get_msg(
         flom_conns_t *conns, guint id) {
         if (id < conns->array->len)
-            return ((flom_conn_t *)g_ptr_array_index(conns->array, id))->msg;
+            return flom_conn_get_msg(
+                (flom_conn_t *)g_ptr_array_index(conns->array, id));
         else
             return NULL;
     }
@@ -427,10 +524,11 @@ extern "C" {
      * @param id IN identificator (position in array) of the connection
      * @return the associated GMarkupParseContext or NULL if any error happens
      */
-    static inline GMarkupParseContext *flom_conns_get_gmpc(        
+    static inline GMarkupParseContext *flom_conns_get_parser(
         flom_conns_t *conns, guint id) {
         if (id < conns->array->len)
-            return ((flom_conn_t *)g_ptr_array_index(conns->array, id))->gmpc;
+            return flom_conn_get_parser(
+                (flom_conn_t *)g_ptr_array_index(conns->array, id));
         else
             return NULL;
     }

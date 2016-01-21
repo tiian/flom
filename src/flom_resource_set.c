@@ -182,7 +182,7 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
                         resource->data.set.elements->len;
                     if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                            msg, FLOM_MSG_VERB_LOCK,
-                                           conn->last_step +
+                                           flom_conn_get_last_step(conn) +
                                            FLOM_MSG_STEP_INCR,
                                            FLOM_RC_OK, rdse->name)))
                         THROW(MSG_BUILD_ANSWER_ERROR1);
@@ -202,7 +202,7 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
                             (gpointer)cl);
                         if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                                msg, FLOM_MSG_VERB_LOCK,
-                                               conn->last_step +
+                                               flom_conn_get_last_step(conn) +
                                                FLOM_MSG_STEP_INCR,
                                                FLOM_RC_LOCK_ENQUEUED, NULL)))
                             THROW(MSG_BUILD_ANSWER_ERROR2);
@@ -212,7 +212,7 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
                                     "rejecting...\n", conn));
                         if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                                msg, FLOM_MSG_VERB_LOCK,
-                                               conn->last_step +
+                                               flom_conn_get_last_step(conn) +
                                                FLOM_MSG_STEP_INCR,
                                                FLOM_RC_LOCK_BUSY, NULL)))
                             THROW(MSG_BUILD_ANSWER_ERROR3);
@@ -466,7 +466,7 @@ int flom_resource_set_waitings(flom_resource_t *resource)
                                            flom_conn_get_tcp(cl->conn)),
                                        buffer, to_send)))
                     THROW(MSG_SEND_ERROR);
-                cl->conn->last_step = msg.header.pvs.step;
+                flom_conn_set_last_step(cl->conn, msg.header.pvs.step);
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
                     THROW(MSG_FREE_ERROR);                
                 /* track locker connection */

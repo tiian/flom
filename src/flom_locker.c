@@ -390,7 +390,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
             /* set the locker sequence */
             locker->read_sequence = flt.sequence;
             /* retrieve the message sent by the client */
-            msg = new_conn->msg;
+            msg = flom_conn_get_msg(new_conn);
         } else {
             char buffer[FLOM_MSG_BUFFER_SIZE];
             ssize_t read_bytes;
@@ -426,13 +426,13 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 if (NULL == (msg = flom_conns_get_msg(conns, id)))
                     THROW(CONNS_GET_MSG_ERROR);
 
-                if (NULL == (gmpc = flom_conns_get_gmpc(conns, id)))
+                if (NULL == (gmpc = flom_conns_get_parser(conns, id)))
                     THROW(CONNS_GET_GMPC_ERROR);
             
                 if (FLOM_RC_OK != (ret_cod = flom_msg_deserialize(
                                        buffer, read_bytes, msg, gmpc)))
                     THROW(MSG_DESERIALIZE_ERROR);
-                curr_conn->last_step = msg->header.pvs.step;
+                flom_conn_set_last_step(curr_conn, msg->header.pvs.step);
                 /* if the message is not valid the client must be terminated */
                 if (FLOM_MSG_STATE_INVALID == msg->state) {
                     FLOM_TRACE(("flom_locker_loop_pollin: message from client "
@@ -472,7 +472,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                                     "poll loop...\n"));
                     } else if (FLOM_RC_OK != ret_cod)
                         THROW(MSG_SEND_ERROR);
-                    curr_conn->last_step = msg->header.pvs.step;
+                    flom_conn_set_last_step(curr_conn, msg->header.pvs.step);
                 } /* if (FLOM_MSG_STATE_READY == msg->state) */
             } else {
                 /* Implement ping message here... */
