@@ -57,55 +57,6 @@
 
 
 
-flom_conn_t *flom_conn_new(void)
-{
-    flom_conn_t *tmp;
-    /* allocate the object itself */
-    if (NULL != (tmp = g_try_malloc0(sizeof(flom_conn_t)))) {
-        /* allocate msg struct */
-        if (NULL != (tmp->msg = g_try_malloc(sizeof(struct flom_msg_s)))) {
-            /* initialize the message */
-            flom_msg_init(tmp->msg);
-        } else {
-            /* remove connection object because msg struct was not allocated */
-            g_free(tmp);
-            tmp = NULL;
-        }
-    } /* if (NULL != (tmp = g_try_malloc0(sizeof(flom_conn_t)))) */
-    FLOM_TRACE(("flom_conn_new: obj=%p\n", tmp));
-    return tmp;
-}
-
-    
-
-void flom_conn_delete(flom_conn_t *obj)
-{
-    if (NULL != obj) {
-        /* remove msg struct */
-        if (NULL != obj->msg) {
-            flom_msg_free(obj->msg);
-            g_free(obj->msg);
-            obj->msg = NULL;
-        }
-        /* remove object itself */
-        g_free(obj);
-    }
-}
-
-
-
-void flom_conn_free_parser(flom_conn_t *obj)
-{
-    if (NULL != obj) {
-        if (NULL != obj->parser) {
-            g_markup_parse_context_free(obj->parser);
-            obj->parser = NULL;
-        } /* if (NULL != obj->parser) */
-    } /* if (NULL != obj) */
-}
-
-
-
 int flom_conns_check_n(flom_conns_t *conns)
 {
     /* this is a dirty hack because this struct is opaque and this operation
@@ -150,7 +101,7 @@ int flom_conns_add(flom_conns_t *conns, int fd, int type,
     FLOM_TRACE(("flom_conns_add\n"));
     TRY {
         GMarkupParseContext *tmp_parser;
-        if (NULL == (tmp = flom_conn_new()))
+        if (NULL == (tmp = flom_conn_new(NULL)))
             THROW(NEW_OBJ);
         FLOM_TRACE(("flom_conns_add: allocated a new connection (%p)\n", tmp));
         flom_tcp_init(flom_conn_get_tcp(tmp), NULL);
@@ -483,20 +434,6 @@ void flom_conns_free(flom_conns_t *conns)
 
 
 
-void flom_conn_trace(const flom_conn_t *conn)
-{
-    FLOM_TRACE(("flom_conn_trace: object=%p\n", conn));
-    FLOM_TRACE(("flom_conn_trace: "
-                "fd=%d, type=%d, state=%d, wait=%d, msg=%p, parser=%p, "
-                "addr_len=%d\n",
-                flom_tcp_get_sockfd(&conn->tcp),
-                flom_tcp_get_socket_type(&conn->tcp),
-                conn->state, conn->wait, conn->msg, conn->parser,
-                flom_tcp_get_addrlen(&conn->tcp)));
-}
-
-
-
 void flom_conns_trace(const flom_conns_t *conns)
 {
     FLOM_TRACE(("flom_conns_trace: object=%p\n", conns));
@@ -505,67 +442,3 @@ void flom_conns_trace(const flom_conns_t *conns)
                 conns->domain, conns->array->len, conns->array,
                 conns->poll_array));
 }
-
-
-
-int flom_conn_set_keepalive(flom_config_t *config, int fd)
-{
-    enum Exception { NULL_OBJECT
-                     , SETSOCKOPT_ERROR1
-                     , SETSOCKOPT_ERROR2
-                     , SETSOCKOPT_ERROR3
-                     , SETSOCKOPT_ERROR4
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
-    FLOM_TRACE(("flom_conn_set_keepalive\n"));
-    TRY {
-        int optval;
-        socklen_t optlen = sizeof(optval);
-        
-        if (FLOM_NULL_FD == fd)
-            THROW(NULL_OBJECT);
-
-        FLOM_TRACE(("flom_conn_set_keepalive: setting SO_KEEPALIVE "
-                    "for socket fd=%d\n", fd));
-        /* set SO_KEEPALIVE feature for this socket */
-        optval = 1;
-        if (-1 == setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen))
-            THROW(SETSOCKOPT_ERROR1);
-        /* set tcp_keepalive_time parameter related to SO_KEEPALIVE */
-        optval = flom_config_get_tcp_keepalive_time(config);
-        if (-1 == setsockopt(fd, SOL_TCP, TCP_KEEPIDLE, &optval, optlen))
-            THROW(SETSOCKOPT_ERROR2);
-        /* set tcp_keepalive_intvl parameter related to SO_KEEPALIVE */
-        optval = flom_config_get_tcp_keepalive_intvl(config);
-        if (-1 == setsockopt(fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen))
-            THROW(SETSOCKOPT_ERROR3);
-        /* set tcp_keepalive_probes parameter related to SO_KEEPALIVE */
-        optval = flom_config_get_tcp_keepalive_probes(config);
-        if (-1 == setsockopt(fd, SOL_TCP, TCP_KEEPCNT, &optval, optlen))
-            THROW(SETSOCKOPT_ERROR4);
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NULL_OBJECT:
-                ret_cod = FLOM_RC_NULL_OBJECT;
-                break;
-            case SETSOCKOPT_ERROR1:
-            case SETSOCKOPT_ERROR2:
-            case SETSOCKOPT_ERROR3:
-            case SETSOCKOPT_ERROR4:
-                ret_cod = FLOM_RC_SETSOCKOPT_ERROR;
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("flom_conn_set_keepalive/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-

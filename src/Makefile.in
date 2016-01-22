@@ -77,9 +77,9 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(includedir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libflom_la_LIBADD =
-am_libflom_la_OBJECTS = flom_client.lo flom_config.lo flom_conns.lo \
-	flom_daemon.lo flom_daemon_mngmnt.lo flom_errors.lo \
-	flom_locker.lo flom_msg.lo flom_handle.lo \
+am_libflom_la_OBJECTS = flom_client.lo flom_config.lo flom_conn.lo \
+	flom_conns.lo flom_daemon.lo flom_daemon_mngmnt.lo \
+	flom_errors.lo flom_locker.lo flom_msg.lo flom_handle.lo \
 	flom_resource_hier.lo flom_resource_numeric.lo \
 	flom_resource_set.lo flom_resource_simple.lo flom_rsrc.lo \
 	flom_tcp.lo flom_tls.lo flom_trace.lo
@@ -119,10 +119,10 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	ps-recursive uninstall-recursive
 am__dist_include_HEADERS_DIST = flom.h flom_handle.h flom_types.h \
 	flom.hh FlomHandle.hh
-am__noinst_HEADERS_DIST = flom_client.h flom_config.h flom_conns.h \
-	flom_debug_features.h flom_daemon.h flom_daemon_mngmnt.h \
-	flom_defines.h flom_exec.h flom_locker.h flom_msg.h \
-	flom_resource_hier.h flom_resource_numeric.h \
+am__noinst_HEADERS_DIST = flom_client.h flom_config.h flom_conn.h \
+	flom_conns.h flom_debug_features.h flom_daemon.h \
+	flom_daemon_mngmnt.h flom_defines.h flom_exec.h flom_locker.h \
+	flom_msg.h flom_resource_hier.h flom_resource_numeric.h \
 	flom_resource_set.h flom_resource_simple.h flom_rsrc.h \
 	flom_syslog.h flom_tcp.h flom_tls.h flom_trace.h flom.hh \
 	FlomHandle.hh
@@ -380,7 +380,7 @@ dist_include_HEADERS = flom.h flom_handle.h flom_types.h \
 	$(INST_CPPAPI)
 
 nodist_include_HEADERS = flom_errors.h
-noinst_HEADERS = flom_client.h flom_config.h flom_conns.h \
+noinst_HEADERS = flom_client.h flom_config.h flom_conn.h flom_conns.h \
 	flom_debug_features.h flom_daemon.h flom_daemon_mngmnt.h \
 	flom_defines.h flom_exec.h \
 	flom_locker.h flom_msg.h flom_resource_hier.h \
@@ -388,7 +388,7 @@ noinst_HEADERS = flom_client.h flom_config.h flom_conns.h \
 	flom_resource_simple.h flom_rsrc.h \
 	flom_syslog.h flom_tcp.h flom_tls.h flom_trace.h $(NOINST_CPPAPI)
 
-libflom_la_SOURCES = flom_client.c flom_config.c flom_conns.c \
+libflom_la_SOURCES = flom_client.c flom_config.c flom_conn.c flom_conns.c \
 	flom_daemon.c flom_daemon_mngmnt.c flom_errors.c flom_locker.c \
 	flom_msg.c flom_handle.c \
 	flom_resource_hier.c flom_resource_numeric.c flom_resource_set.c \
@@ -518,6 +518,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_client.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_config.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_conn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_conns.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon_mngmnt.Plo@am__quote@

@@ -376,6 +376,11 @@ int flom_tls_connect(flom_tls_t *obj, int sockfd)
                         rc, flom_tls_get_error_label(rc)));
             FLOM_TRACE_SSLERR(("flom_tls_connect/SSL_connect:"));
             THROW(SSL_CONNECT_ERROR);
+        } else {
+            FLOM_TRACE(("flom_tls_connect: connection established with %s "
+                        "encryption\n",
+                        SSL_CIPHER_get_name(SSL_get_current_cipher(
+                                                obj->ssl))));
         }
         
         THROW(NONE);
@@ -421,6 +426,11 @@ int flom_tls_accept(flom_tls_t *obj, int sockfd)
                         rc, flom_tls_get_error_label(rc)));
             FLOM_TRACE_SSLERR(("flom_tls_accept/SSL_accept:"));
             THROW(SSL_ACCEPT_ERROR);
+        } else {
+            FLOM_TRACE(("flom_tls_accepted: connection accepted with %s "
+                        "encryption\n",
+                        SSL_CIPHER_get_name(SSL_get_current_cipher(
+                                                obj->ssl))));
         }
         
         THROW(NONE);
