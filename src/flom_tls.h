@@ -212,6 +212,15 @@ extern "C" {
     int flom_tls_accept(flom_tls_t *obj, int sockfd);
     
 
+
+    /**
+     * Retrieve the certificate presented by the peer
+     * @param obj IN/OUT TLS object
+     * @return a reason code
+     */
+    int flom_tls_check_peer_cert(flom_tls_t *obj);
+
+
     
 #ifdef __cplusplus
 }

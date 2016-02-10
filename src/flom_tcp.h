@@ -205,6 +205,21 @@ extern "C" {
 
 
     /**
+     * Setter method for storage address: it can be used to store any valid
+     * type of address that can be managed by struct sockaddr_storage
+     * @param obj IN/OUT TCP connection object
+     * @param sa IN socket address
+     * @param sa_len IN socket address lenght
+     */
+    static inline void flom_tcp_set_sa_storage(
+        flom_tcp_t *obj, struct sockaddr_storage *sa, size_t sa_len) {
+        memcpy(&obj->sa_storage, sa, sa_len);
+        obj->addrlen = sa_len;
+    }
+
+    
+
+    /**
      * Getter method for generic address
      * @param obj IN TCP connection object
      * @return the generic address

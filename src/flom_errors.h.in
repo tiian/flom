@@ -223,6 +223,10 @@
  * Error while creating a new object in the heap
  */
 #define FLOM_RC_NEW_OBJ                              -21
+/**
+ * The peer did not supply a valid certificate for a TLS/SSL connection
+ */
+#define FLOM_RC_NO_CERTIFICATE                       -22
 
 
 

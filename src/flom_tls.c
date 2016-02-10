@@ -86,10 +86,13 @@ void flom_tls_init(flom_tls_t *obj, int client)
     /* lock the mutex */
     g_static_mutex_lock(&flom_tls_mutex);
     if (!flom_tls_initialized) {
-        FLOM_TRACE(("flom_tls_init: calling SSL_load_error_strings()...\n"));
-        SSL_load_error_strings();
         FLOM_TRACE(("flom_tls_init: calling SSL_library_init()...\n"));
         SSL_library_init();
+        FLOM_TRACE(("flom_tls_init: calling SSL_load_error_strings()...\n"));
+        SSL_load_error_strings();
+        FLOM_TRACE(("flom_tls_init: calling "
+                    "OpenSSL_add_all_algorithms()...\n"));
+        OpenSSL_add_all_algorithms();
         flom_tls_initialized = TRUE;
     }
     /* remove the lock from the mutex */
@@ -130,7 +133,7 @@ int flom_tls_context(flom_tls_t *obj)
         SSL_METHOD *method = NULL;
         const char *side = obj->client ? "client" : "server";
         int mode;
-        
+
         /* set TLS/SSL method */
 #ifdef HAVE_TLS_METHOD
         FLOM_TRACE(("flom_tls_context: setting TLS/SSL method to "
@@ -449,6 +452,50 @@ int flom_tls_accept(flom_tls_t *obj, int sockfd)
         } /* switch (excp) */
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_tls_accept/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_tls_check_peer_cert(flom_tls_t *obj)
+{
+    enum Exception { NO_CERTIFICATE
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    X509 *peer_cert = NULL;
+    
+    FLOM_TRACE(("flom_tls_check_peer_cert\n"));
+    TRY {
+        char *line = NULL;
+        
+        if (NULL == (peer_cert = SSL_get_peer_certificate(obj->ssl))) {
+            FLOM_TRACE(("flom_tls_check_peer_cert: certificate is not "
+                        "available\n"));
+            THROW(NO_CERTIFICATE);
+        }
+        /* @@@ go on ... */
+        FLOM_TRACE(("flom_tls_check_peer_cert: peer certificate subject: %s\n",
+                    line));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NO_CERTIFICATE:
+                ret_cod = FLOM_RC_NO_CERTIFICATE;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* clean-up certificate object */
+    if (NULL != peer_cert)
+        X509_free(peer_cert);
+    FLOM_TRACE(("flom_tls_check_peer_cert/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

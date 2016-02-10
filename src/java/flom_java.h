@@ -390,6 +390,8 @@ extern "C" {
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE -20L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_NEW_OBJ
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_NEW_OBJ -21L
+#undef org_tiian_flom_FlomErrorCodes_FLOM_RC_NO_CERTIFICATE
+#define org_tiian_flom_FlomErrorCodes_FLOM_RC_NO_CERTIFICATE -22L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_ACCEPT_ERROR
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_ACCEPT_ERROR -100L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_BIND_ERROR

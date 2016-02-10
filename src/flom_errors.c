@@ -117,6 +117,9 @@ const char *flom_strerror(int ret_cod)
                 "IPv6 networking";
         case FLOM_RC_NEW_OBJ:
             return "ERROR: creation of a new object in the heap failed";
+        case FLOM_RC_NO_CERTIFICATE:
+            return "ERROR: the peer did not supply a valid certificate for a "
+                "TLS/SSL connection";
             /* system function error */
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";
