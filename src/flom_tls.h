@@ -72,6 +72,30 @@ struct flom_tls_callback_data_s {
 
 
 /**
+ * Breakdown structure used to store all the strings related to a certificate
+ */
+struct flom_tls_cert_s {
+    char *countryName;
+    char *stateOrProvinceName;
+    char *organizationName;
+    char *organizationalUnitName;
+    char *commonName;
+};
+
+
+
+/**
+ * Object to store the metadata strings that can be retrieved by a "standard"
+ * X509 certificate for issuer and subject
+ */
+typedef struct {
+    struct flom_tls_cert_s issuer;
+    struct flom_tls_cert_s subject;
+} flom_tls_cert_t;
+
+
+
+/**
  * Object used to manage a TLS connection: it contains all the necessary data
  * and avoid the usage of static data
  */
@@ -93,6 +117,10 @@ typedef struct {
      * Maximum depth for the certificate chain verification
      */
     int                                   depth;
+    /**
+     * Certificate returned by the peer
+     */
+    flom_tls_cert_t                      *cert;
     /**
      * Struct used to pass custom data to callback function
      */
@@ -219,6 +247,43 @@ extern "C" {
      * @return a reason code
      */
     int flom_tls_check_peer_cert(flom_tls_t *obj);
+
+
+
+    /**
+     * Create a new object of type flom_tls_cert_t
+     * @return a new object or NULL if any error occurred
+     */
+    static inline flom_tls_cert_t *flom_tls_cert_new() {
+        return (flom_tls_cert_t *)g_try_malloc0(sizeof(flom_tls_cert_t));
+    }
+
+
+
+    /**
+     * Release all the strings related to the struct
+     * @param s IN struct names
+     */
+    void flom_tls_cert_struct_delete(struct flom_tls_cert_s *s);
+
+    
+    
+    /**
+     * Delete an object previously created with @ref flom_tls_cert_new
+     * @param obj IN TLS object
+     */
+    void flom_tls_cert_delete(flom_tls_cert_t *obj);
+
+
+
+    /**
+     * Parse the X509 certificate passed by the peer and extract all the
+     * "standard" metada for "issuer" and "subject"
+     * @param obj IN/OUT TLS object
+     * @param ssl IN SSL object (as in OpenSSL library)
+     * @return a reason code
+     */
+    int flom_tls_cert_parse(flom_tls_cert_t *obj, SSL *ssl);
 
 
     

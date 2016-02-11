@@ -109,6 +109,10 @@ void flom_tls_init(flom_tls_t *obj, int client)
 
 
 void flom_tls_free(flom_tls_t *obj) {
+    if (NULL != obj->cert) {
+        flom_tls_cert_delete(obj->cert);
+        obj->cert = NULL;
+    }
     if (NULL != obj->ssl) {
         SSL_free(obj->ssl);
         obj->ssl = NULL;
@@ -362,6 +366,7 @@ int flom_tls_connect(flom_tls_t *obj, int sockfd)
 {
     enum Exception { TSL_PREPARE_ERROR
                      , SSL_CONNECT_ERROR
+                     , TLS_CERT_PARSE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -385,6 +390,11 @@ int flom_tls_connect(flom_tls_t *obj, int sockfd)
                         SSL_CIPHER_get_name(SSL_get_current_cipher(
                                                 obj->ssl))));
         }
+        /* get peer certificate */
+        obj->cert = flom_tls_cert_new();
+        if (FLOM_RC_OK != (ret_cod = flom_tls_cert_parse(
+                               obj->cert, obj->ssl)))
+            THROW(TLS_CERT_PARSE_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -393,6 +403,8 @@ int flom_tls_connect(flom_tls_t *obj, int sockfd)
                 break;
             case SSL_CONNECT_ERROR:
                 ret_cod = FLOM_RC_SSL_CONNECT_ERROR;
+                break;
+            case TLS_CERT_PARSE_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -412,6 +424,7 @@ int flom_tls_accept(flom_tls_t *obj, int sockfd)
 {
     enum Exception { TSL_PREPARE_ERROR
                      , SSL_ACCEPT_ERROR
+                     , TLS_CERT_PARSE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -435,6 +448,11 @@ int flom_tls_accept(flom_tls_t *obj, int sockfd)
                         SSL_CIPHER_get_name(SSL_get_current_cipher(
                                                 obj->ssl))));
         }
+        /* get peer certificate */
+        obj->cert = flom_tls_cert_new();
+        if (FLOM_RC_OK != (ret_cod = flom_tls_cert_parse(
+                               obj->cert, obj->ssl)))
+            THROW(TLS_CERT_PARSE_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -443,6 +461,8 @@ int flom_tls_accept(flom_tls_t *obj, int sockfd)
                 break;
             case SSL_ACCEPT_ERROR:
                 ret_cod = FLOM_RC_SSL_ACCEPT_ERROR;
+                break;
+            case TLS_CERT_PARSE_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -496,6 +516,86 @@ int flom_tls_check_peer_cert(flom_tls_t *obj)
     if (NULL != peer_cert)
         X509_free(peer_cert);
     FLOM_TRACE(("flom_tls_check_peer_cert/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+void flom_tls_cert_struct_delete(struct flom_tls_cert_s *s) {
+    if (NULL != s->countryName) {
+        g_free(s->countryName);
+        s->countryName = NULL;
+    }
+    if (NULL != s->stateOrProvinceName) {
+        g_free(s->stateOrProvinceName);
+        s->stateOrProvinceName = NULL;
+    }
+    if (NULL != s->organizationName) {
+        g_free(s->organizationName);
+        s->organizationName = NULL;
+    }
+    if (NULL != s->organizationalUnitName) {
+        g_free(s->organizationalUnitName);
+        s->organizationalUnitName = NULL;
+    }
+    if (NULL != s->commonName) {
+        g_free(s->commonName);
+        s->commonName = NULL;
+    }
+}
+
+
+
+void flom_tls_cert_delete(flom_tls_cert_t *obj) {
+    if (NULL == obj)
+        return;
+    flom_tls_cert_struct_delete(&obj->issuer);
+    flom_tls_cert_struct_delete(&obj->subject);
+    g_free(obj);
+}
+
+
+
+int flom_tls_cert_parse(flom_tls_cert_t *obj, SSL *ssl)
+{
+    enum Exception { NO_CERTIFICATE
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    X509 *cert = NULL;
+    
+    FLOM_TRACE(("flom_tls_cert_parse\n"));
+    TRY {
+        /* retrieve certificate */
+        if (NULL == (cert = SSL_get_peer_certificate(ssl))) {
+            FLOM_TRACE(("flom_tls_cert_parse: there's no available peer "
+                        "certificate\n"));
+            THROW(NO_CERTIFICATE);
+        }
+
+        /* @@@ restart from here */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NO_CERTIFICATE:
+                ret_cod = FLOM_RC_NO_CERTIFICATE;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* memory clean-up */
+    if (NULL != cert) {
+        X509_free(cert);
+        cert = NULL;
+    }
+    
+    FLOM_TRACE(("flom_tls_cert_parse/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

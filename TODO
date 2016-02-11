@@ -1,5 +1,7 @@
 Road map:
 
+restart from flom_tls_cert_parse method...
+
 flom_conn_t must become the type used for I/O and it should wrap
 	flom_tcp_retrieve, flom_tcp_send, flom_tls_retrieve, flom_tls_send
 TLS/SSL (in progress...)
