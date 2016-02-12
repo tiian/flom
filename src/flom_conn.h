@@ -54,6 +54,7 @@
 
 
 #include "flom_config.h"
+#include "flom_errors.h"
 #include "flom_msg.h"
 #include "flom_tcp.h"
 #include "flom_tls.h"
@@ -118,7 +119,7 @@ typedef struct {
     /**
      * TLS/SSL connection data
      */
-    flom_tls_t            tls;
+    flom_tls_t           *tls;
     /**
      * Last received message (allocated by malloc)
      */
@@ -238,7 +239,7 @@ extern "C" {
      * @return tls
      */
     static inline flom_tls_t *flom_conn_get_tls(flom_conn_t *obj) {
-        return &obj->tls;
+        return obj->tls;
     }
     
     
@@ -306,8 +307,10 @@ extern "C" {
      * @param client IN boolean value: TRUE for TLS client connection, FALSE
      *                  for TLS server connection
      */
-    static inline void flom_conn_init_tls(flom_conn_t *obj, int client) {
-        flom_tls_init(&obj->tls, client);
+    static inline int flom_conn_init_tls(flom_conn_t *obj, int client) {
+        if (NULL == (obj->tls = flom_tls_new(client)))
+            return FLOM_RC_NEW_OBJ;
+        return FLOM_RC_OK;
     }
 
 

@@ -89,7 +89,8 @@ void flom_conn_delete(flom_conn_t *obj)
             obj->msg = NULL;
         }
         /* clean TLS object */
-        flom_tls_free(&obj->tls);
+        flom_tls_delete(obj->tls);
+        obj->tls = NULL;
         /* remove object itself */
         g_free(obj);
     }

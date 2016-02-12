@@ -80,8 +80,10 @@ const char *flom_tls_get_error_label(int error)
 
 
 
-void flom_tls_init(flom_tls_t *obj, int client)
+flom_tls_t *flom_tls_new(int client)
 {
+    flom_tls_t *tmp;
+    
     /* initialize OpenSSL library if necessary */
     /* lock the mutex */
     g_static_mutex_lock(&flom_tls_mutex);
@@ -98,17 +100,20 @@ void flom_tls_init(flom_tls_t *obj, int client)
     /* remove the lock from the mutex */
     g_static_mutex_unlock(&flom_tls_mutex);
 
-    /* reset object content */
-    memset(obj, 0, sizeof(flom_tls_t));
+    /* allocate a new object */
+    tmp = g_try_malloc0(sizeof(flom_tls_t));
+
     /* initialize a valid context */
-    obj->client = client;
-    obj->depth = FLOM_TLS_MAX_DEPTH_CERT_CHAIN_VERIF;
-    return;
+    if (NULL != tmp) {
+        tmp->client = client;
+        tmp->depth = FLOM_TLS_MAX_DEPTH_CERT_CHAIN_VERIF;
+    }
+    return tmp;
 }
 
 
 
-void flom_tls_free(flom_tls_t *obj) {
+void flom_tls_delete(flom_tls_t *obj) {
     if (NULL != obj->cert) {
         flom_tls_cert_delete(obj->cert);
         obj->cert = NULL;
@@ -121,6 +126,8 @@ void flom_tls_free(flom_tls_t *obj) {
         SSL_CTX_free(obj->ctx);
         obj->ctx = NULL;
     }
+    /* remove the object itself */
+    g_free(obj);
 }
 
 

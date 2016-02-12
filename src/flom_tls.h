@@ -172,13 +172,12 @@ extern "C" {
     
 
     /**
-     * Initialize (OpenSSL) TLS/SSL library and an object that must be used
-     * for the next operations
-     * @param obj OUT connection object reference
+     * Create a new TLS/SSL object and, 
+     * initialize (OpenSSL) TLS/SSL library if necessary
      * @param client IN the TLS connection is related to the client side
      *        (TRUE) or to the server side (FALSE)
      */
-    void flom_tls_init(flom_tls_t *obj, int client);
+    flom_tls_t *flom_tls_new(int client);
 
     
 
@@ -187,7 +186,7 @@ extern "C" {
      * NOTE: the object must be initialized before this method can be applied
      * @param obj IN/OUT TLS object
      */
-    void flom_tls_free(flom_tls_t *obj);
+    void flom_tls_delete(flom_tls_t *obj);
 
 
     
