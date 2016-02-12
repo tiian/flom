@@ -523,26 +523,90 @@ int flom_tls_check_peer_cert(flom_tls_t *obj)
 
 
 void flom_tls_cert_struct_delete(struct flom_tls_cert_s *s) {
-    if (NULL != s->countryName) {
-        g_free(s->countryName);
-        s->countryName = NULL;
+    if (NULL != s->c_str) {
+        g_free(s->c_str);
+        s->c_str = NULL;
     }
-    if (NULL != s->stateOrProvinceName) {
-        g_free(s->stateOrProvinceName);
-        s->stateOrProvinceName = NULL;
+    if (NULL != s->st_str) {
+        g_free(s->st_str);
+        s->st_str = NULL;
     }
-    if (NULL != s->organizationName) {
-        g_free(s->organizationName);
-        s->organizationName = NULL;
+    if (NULL != s->o_str) {
+        g_free(s->o_str);
+        s->o_str = NULL;
     }
-    if (NULL != s->organizationalUnitName) {
-        g_free(s->organizationalUnitName);
-        s->organizationalUnitName = NULL;
+    if (NULL != s->ou_str) {
+        g_free(s->ou_str);
+        s->ou_str = NULL;
     }
-    if (NULL != s->commonName) {
-        g_free(s->commonName);
-        s->commonName = NULL;
+    if (NULL != s->cn_str) {
+        g_free(s->cn_str);
+        s->cn_str = NULL;
     }
+}
+
+
+
+int flom_tls_cert_struct_fill(struct flom_tls_cert_s *s, int nid,
+                              const unsigned char *str)
+{
+    enum Exception { G_STRDUP_ERROR1
+                     , G_STRDUP_ERROR2
+                     , G_STRDUP_ERROR3
+                     , G_STRDUP_ERROR4
+                     , G_STRDUP_ERROR5
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_tls_cert_struct_fill\n"));
+    TRY {
+        switch (nid) {
+            case NID_countryName:
+                if (NULL == (s->c_str = g_strdup((const gchar *)str)))
+                    THROW(G_STRDUP_ERROR1);
+                break;
+            case NID_stateOrProvinceName:
+                if (NULL == (s->st_str = g_strdup((const gchar *)str)))
+                    THROW(G_STRDUP_ERROR2);
+                break;
+            case NID_organizationName:
+                if (NULL == (s->o_str = g_strdup((const gchar *)str)))
+                    THROW(G_STRDUP_ERROR3);
+                break;
+            case NID_organizationalUnitName:
+                if (NULL == (s->ou_str = g_strdup((const gchar *)str)))
+                    THROW(G_STRDUP_ERROR4);
+                break;
+            case NID_commonName:
+                if (NULL == (s->cn_str = g_strdup((const gchar *)str)))
+                    THROW(G_STRDUP_ERROR5);
+                break;
+            default:
+                FLOM_TRACE(("flom_tls_cert_struct_fill: NID=%d (%s/%s) "
+                            "ignored\n", nid, OBJ_nid2sn(nid),
+                            OBJ_nid2ln(nid)));
+        } /* switch (nid) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_STRDUP_ERROR1:
+            case G_STRDUP_ERROR2:
+            case G_STRDUP_ERROR3:
+            case G_STRDUP_ERROR4:
+            case G_STRDUP_ERROR5:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_tls_cert_struct_fill/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 
@@ -560,6 +624,9 @@ void flom_tls_cert_delete(flom_tls_cert_t *obj) {
 int flom_tls_cert_parse(flom_tls_cert_t *obj, SSL *ssl)
 {
     enum Exception { NO_CERTIFICATE
+                     , TLS_CERT_STRUCT_FILL_ERROR1
+                     , TLS_CERT_STRUCT_FILL_ERROR2
+                     , SSL_GET_VERIFY_RESULT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
@@ -567,6 +634,10 @@ int flom_tls_cert_parse(flom_tls_cert_t *obj, SSL *ssl)
     
     FLOM_TRACE(("flom_tls_cert_parse\n"));
     TRY {
+        X509_NAME *issuer_name, *subject_name;
+        int i;
+        long verify_result;
+        
         /* retrieve certificate */
         if (NULL == (cert = SSL_get_peer_certificate(ssl))) {
             FLOM_TRACE(("flom_tls_cert_parse: there's no available peer "
@@ -574,13 +645,74 @@ int flom_tls_cert_parse(flom_tls_cert_t *obj, SSL *ssl)
             THROW(NO_CERTIFICATE);
         }
 
-        /* @@@ restart from here */
+        /* retrieve issuer and subject names */
+        issuer_name = X509_get_issuer_name(cert);
+        subject_name = X509_get_subject_name(cert);
+
+        /* retrieving certificate fields for issuer */
+        for (i=0; i<X509_NAME_entry_count(issuer_name); ++i) {
+            X509_NAME_ENTRY *e = X509_NAME_get_entry(issuer_name, i);
+            ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
+            unsigned char *str = ASN1_STRING_data(d);
+            ASN1_OBJECT *o = X509_NAME_ENTRY_get_object(e);
+            int nid = OBJ_obj2nid(o);
+            if (FLOM_RC_OK != (ret_cod = flom_tls_cert_struct_fill(
+                                   &obj->issuer, nid, str)))
+                THROW(TLS_CERT_STRUCT_FILL_ERROR1);
+        } /* for (i=0; i<X509_NAME_entry_count(issuer_name); ++i) */
+        FLOM_TRACE(("flom_tls_cert_parse: issuer fields are "
+                    "%s=%s/%s=%s/%s=%s/%s=%s/%s=%s\n",
+                    OBJ_nid2sn(NID_countryName), STRORNULL(obj->issuer.c_str),
+                    OBJ_nid2sn(NID_stateOrProvinceName),
+                    STRORNULL(obj->issuer.st_str),
+                    OBJ_nid2sn(NID_organizationName),
+                    STRORNULL(obj->issuer.o_str),
+                    OBJ_nid2sn(NID_organizationalUnitName),
+                    STRORNULL(obj->issuer.ou_str),
+                    OBJ_nid2sn(NID_commonName),
+                    STRORNULL(obj->issuer.cn_str)));
+        
+        /* retrieving certificate fields for subject */
+        for (i=0; i<X509_NAME_entry_count(subject_name); ++i) {
+            X509_NAME_ENTRY *e = X509_NAME_get_entry(subject_name, i);
+            ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
+            unsigned char *str = ASN1_STRING_data(d);
+            ASN1_OBJECT *o = X509_NAME_ENTRY_get_object(e);
+            int nid = OBJ_obj2nid(o);
+            if (FLOM_RC_OK != (ret_cod = flom_tls_cert_struct_fill(
+                                   &obj->subject, nid, str)))
+                THROW(TLS_CERT_STRUCT_FILL_ERROR2);
+        } /* for (i=0; i<X509_NAME_entry_count(issuer_name); ++i) */
+        FLOM_TRACE(("flom_tls_cert_parse: subject fields are "
+                    "%s=%s/%s=%s/%s=%s/%s=%s/%s=%s\n",
+                    OBJ_nid2sn(NID_countryName), STRORNULL(obj->subject.c_str),
+                    OBJ_nid2sn(NID_stateOrProvinceName),
+                    STRORNULL(obj->subject.st_str),
+                    OBJ_nid2sn(NID_organizationName),
+                    STRORNULL(obj->subject.o_str),
+                    OBJ_nid2sn(NID_organizationalUnitName),
+                    STRORNULL(obj->subject.ou_str),
+                    OBJ_nid2sn(NID_commonName),
+                    STRORNULL(obj->subject.cn_str)));
+        
+        /* verify TLS/SSL chain */
+        if (X509_V_OK != (verify_result = SSL_get_verify_result(ssl))) {
+            FLOM_TRACE(("flom_tls_cert_parse/SSL_get_verify_result: "
+                        "verify_result=%ld\n", verify_result));
+            THROW(SSL_GET_VERIFY_RESULT_ERROR);
+        } /* if (X509_V_OK != (verify_result... */
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case NO_CERTIFICATE:
                 ret_cod = FLOM_RC_NO_CERTIFICATE;
+                break;
+            case TLS_CERT_STRUCT_FILL_ERROR1:
+            case TLS_CERT_STRUCT_FILL_ERROR2:
+                break;
+            case SSL_GET_VERIFY_RESULT_ERROR:
+                ret_cod = FLOM_RC_SSL_GET_VERIFY_RESULT_ERROR;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

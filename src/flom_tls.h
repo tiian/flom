@@ -75,11 +75,26 @@ struct flom_tls_callback_data_s {
  * Breakdown structure used to store all the strings related to a certificate
  */
 struct flom_tls_cert_s {
-    char *countryName;
-    char *stateOrProvinceName;
-    char *organizationName;
-    char *organizationalUnitName;
-    char *commonName;
+    /**
+     * Country Name string
+     */
+    gchar *c_str;
+    /**
+     * State or Province Name string
+     */
+    gchar *st_str;
+    /**
+     * Organization Name string
+     */
+    gchar *o_str;
+    /**
+     * Organizational Unit Name NID
+     */
+    gchar *ou_str;
+    /**
+     * Common Name string
+     */
+    gchar *cn_str;
 };
 
 
@@ -260,6 +275,18 @@ extern "C" {
 
 
 
+    /**
+     * Fills in all the strings related to the struct
+     * @param s IN/OUT struct names
+     * @param nid IN field identificator
+     * @param str IN value associated to the field
+     * @return a reason code
+     */
+    int flom_tls_cert_struct_fill(struct flom_tls_cert_s *s, int nid,
+                                  const unsigned char *str);
+
+
+    
     /**
      * Release all the strings related to the struct
      * @param s IN struct names

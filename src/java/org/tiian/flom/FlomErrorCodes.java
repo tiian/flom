@@ -103,10 +103,11 @@ public class FlomErrorCodes {
 	public final static int FLOM_RC_SSL_CTX_USE_PRIVATEKEY_FILE_ERROR = -404;
 	public final static int FLOM_RC_SSL_ACCEPT_ERROR = -405;
 	public final static int FLOM_RC_SSL_CONNECT_ERROR = -406;
-	public final static int FLOM_RC_SSL_NEW_ERROR = -407;
-	public final static int FLOM_RC_SSL_SET_EX_DATA_ERROR = -408;
-	public final static int FLOM_RC_SSL_SET_FD_ERROR = -409;
-	public final static int FLOM_RC_TLS_NO_VALID_METHOD = -410;
+	public final static int FLOM_RC_SSL_GET_VERIFY_RESULT_ERROR = -407;
+	public final static int FLOM_RC_SSL_NEW_ERROR = -408;
+	public final static int FLOM_RC_SSL_SET_EX_DATA_ERROR = -409;
+	public final static int FLOM_RC_SSL_SET_FD_ERROR = -410;
+	public final static int FLOM_RC_TLS_NO_VALID_METHOD = -411;
 	/**
 	 * Retrieve the text associated to a FLoM code
 	 * @param code is the code returned by the C native functions

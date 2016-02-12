@@ -259,6 +259,9 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_SSL_CONNECT_ERROR:
             return "ERROR: 'OpenSSL SSL_connect' function "
                 "returned an error";
+        case FLOM_RC_SSL_GET_VERIFY_RESULT_ERROR:
+            return "ERROR: 'OpenSSL SSL_get_verify_result' function "
+                "returned an error";
         case FLOM_RC_SSL_NEW_ERROR:
             return "ERROR: 'OpenSSL SSL_new' function "
                 "returned an error";
