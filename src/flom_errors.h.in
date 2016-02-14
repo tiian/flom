@@ -484,17 +484,25 @@
  */
 #define FLOM_RC_SSL_NEW_ERROR                       -408
 /**
+ * OpenSSL "SSL_read" function error
+ */
+#define FLOM_RC_SSL_READ_ERROR                      -409
+/**
  * OpenSSL "SSL_set_ex_data" function error
  */
-#define FLOM_RC_SSL_SET_EX_DATA_ERROR               -409
+#define FLOM_RC_SSL_SET_EX_DATA_ERROR               -410
 /**
  * OpenSSL "SSL_set_fd" function error
  */
-#define FLOM_RC_SSL_SET_FD_ERROR                    -410
+#define FLOM_RC_SSL_SET_FD_ERROR                    -411
+/**
+ * OpenSSL "SSL_write" function error
+ */
+#define FLOM_RC_SSL_WRITE_ERROR                     -412
 /**
  * No valid TLS/SSL method was found
  */
-#define FLOM_RC_TLS_NO_VALID_METHOD                 -411
+#define FLOM_RC_TLS_NO_VALID_METHOD                 -413
 
 #ifdef __cplusplus
 extern "C" {

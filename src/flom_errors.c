@@ -265,11 +265,17 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_SSL_NEW_ERROR:
             return "ERROR: 'OpenSSL SSL_new' function "
                 "returned an error";
+        case FLOM_RC_SSL_READ_ERROR:
+            return "ERROR: 'OpenSSL SSL_read' function "
+                "returned an error";
         case FLOM_RC_SSL_SET_EX_DATA_ERROR:
             return "ERROR: 'OpenSSL SSL_set_ex_data' function "
                 "returned an error";
         case FLOM_RC_SSL_SET_FD_ERROR:
             return "ERROR: 'OpenSSL SSL_set_fd' function "
+                "returned an error";
+        case FLOM_RC_SSL_WRITE_ERROR:
+            return "ERROR: 'OpenSSL SSL_write' function "
                 "returned an error";
         case FLOM_RC_TLS_NO_VALID_METHOD:
             return "ERROR: no valid TLS/SSL method was found";

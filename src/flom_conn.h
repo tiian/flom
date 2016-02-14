@@ -302,6 +302,30 @@ extern "C" {
 
 
     /**
+     * Send a buffer using raw TCP/IP or TLS over TCP/IP
+     * @param obj IN/OUT connection object
+     * @param buf IN buffer to send
+     * @param len IN buffer lenght
+     * @return a reason code
+     */
+    int flom_conn_send(flom_conn_t *obj, const void *buf, size_t len);
+
+    
+    
+    /**
+     * Receive a buffer using raw TCP/IP or TLS over TCP/IP
+     * @param obj IN/OUT TLS object
+     * @param buf OUT buffer to send
+     * @param len IN buffer lenght
+     * @param received OUT number of read bytes
+     * @return a reason code
+     */
+    int flom_conn_recv(flom_conn_t *obj, void *buf, size_t len,
+                       size_t *received);
+
+
+    
+    /**
      * Initialize the TLS object related to a connection
      * @param obj IN/OUT connection object
      * @param client IN boolean value: TRUE for TLS client connection, FALSE

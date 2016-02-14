@@ -590,6 +590,8 @@ int flom_debug_features_tls_server(void)
                      , TCP_LISTEN_ERROR
                      , ACCEPT_ERROR
                      , TLS_ACCEPT_ERROR
+                     , CONN_RECV_ERROR
+                     , CONN_SEND_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -597,9 +599,12 @@ int flom_debug_features_tls_server(void)
     
     FLOM_TRACE(("flom_debug_features_tls_server\n"));
     TRY {
+        char msg[100];
+        size_t received = 0;
+        
         /* network data of the peer socket */
         int peer_sockfd;
-        socklen_t peer_addrlen;
+        socklen_t peer_addrlen = sizeof(struct sockaddr_storage);
         struct sockaddr_storage peer_address;
 
         if (NULL == (listen_conn = flom_conn_new(NULL)))
@@ -619,8 +624,8 @@ int flom_debug_features_tls_server(void)
         /* @@@ remove hardwired names! */
         if (FLOM_RC_OK != (ret_cod = flom_tls_set_cert(
                                flom_conn_get_tls(client_conn),
-                               "/home/tiian/ssl/CA/servercert.pem",
-                               "/home/tiian/ssl/CA/serverkey.pem",
+                               "/home/tiian/ssl/CA/peer1cert.pem",
+                               "/home/tiian/ssl/CA/peer1key.pem",
                                "/home/tiian/ssl/CA/cacert.pem")))
             THROW(TLS_SET_CERT_ERROR);
 
@@ -650,6 +655,24 @@ int flom_debug_features_tls_server(void)
                                flom_tcp_get_sockfd(flom_conn_get_tcp(
                                                        client_conn)))))
             THROW(TLS_ACCEPT_ERROR);
+
+        /* retrieving a message */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_recv(
+                               client_conn, &msg, sizeof(msg), &received)))
+            THROW(CONN_RECV_ERROR);
+        FLOM_TRACE(("flom_debug_features_tls_server: received " SIZE_T_FORMAT
+                    " bytes, '%*.*s'\n", received, received, received, msg));
+
+        /* preparing a trivial reply message */
+        msg[received] = '\0';
+        strcat(msg, " world!");
+        FLOM_TRACE(("flom_debug_features_tls_server: replying with '%s'\n",
+                    msg));
+
+        /* replying with a trivial answer */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_send(
+                               client_conn, msg, strlen(msg))))
+            THROW(CONN_SEND_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -659,15 +682,15 @@ int flom_debug_features_tls_server(void)
                 ret_cod = FLOM_RC_NEW_OBJ;
                 break;
             case TLS_CREATE_CONTEXT_ERROR:
-                break;
             case TLS_SET_CERT_ERROR:
-                break;
             case TCP_LISTEN_ERROR:
                 break;
             case ACCEPT_ERROR:
                 ret_cod = FLOM_RC_ACCEPT_ERROR;
                 break;
             case TLS_ACCEPT_ERROR:
+            case CONN_RECV_ERROR:
+            case CONN_SEND_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -695,6 +718,8 @@ int flom_debug_features_tls_client(void)
                      , TLS_SET_CERT_ERROR
                      , TCP_CONNECT_ERROR
                      , TLS_CONNECT_ERROR
+                     , CONN_SEND_ERROR
+                     , CONN_RECV_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
@@ -702,6 +727,9 @@ int flom_debug_features_tls_client(void)
         
     FLOM_TRACE(("flom_debug_features_tls_client\n"));
     TRY {
+        char msg[100] = "Hello";
+        size_t received = 0;
+        
         if (NULL == (conn = flom_conn_new(NULL)))
             THROW(NEW_OBJ);
         /* initialize TLS/SSL support */
@@ -716,8 +744,8 @@ int flom_debug_features_tls_client(void)
         /* @@@ remove hardwired names! */
         if (FLOM_RC_OK != (ret_cod = flom_tls_set_cert(
                                flom_conn_get_tls(conn),
-                               "/home/tiian/ssl/CA/clientcert.pem",
-                               "/home/tiian/ssl/CA/clientkey.pem",
+                               "/home/tiian/ssl/CA/peer2cert.pem",
+                               "/home/tiian/ssl/CA/peer2key.pem",
                                "/home/tiian/ssl/CA/cacert.pem")))
             THROW(TLS_SET_CERT_ERROR);
         
@@ -731,6 +759,17 @@ int flom_debug_features_tls_client(void)
                                flom_conn_get_tls(conn),
                                flom_tcp_get_sockfd(flom_conn_get_tcp(conn)))))
             THROW(TLS_CONNECT_ERROR);
+
+        /* sending a trivial message */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_send(conn, msg, strlen(msg))))
+            THROW(CONN_SEND_ERROR);
+
+        /* waiting the response */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_recv(
+                               conn, &msg, sizeof(msg), &received)))
+            THROW(CONN_RECV_ERROR);
+        FLOM_TRACE(("flom_debug_features_tls_client: received " SIZE_T_FORMAT
+                    " bytes, '%*.*s'\n", received, received, received, msg));
         
         THROW(NONE);
     } CATCH {
@@ -739,12 +778,11 @@ int flom_debug_features_tls_client(void)
                 ret_cod = FLOM_RC_NEW_OBJ;
                 break;
             case TLS_CREATE_CONTEXT_ERROR:
-                break;
             case TLS_SET_CERT_ERROR:
-                break;
             case TCP_CONNECT_ERROR:
-                break;
             case TLS_CONNECT_ERROR:
+            case CONN_SEND_ERROR:
+            case CONN_RECV_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

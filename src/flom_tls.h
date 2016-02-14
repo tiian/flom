@@ -84,6 +84,10 @@ struct flom_tls_cert_s {
      */
     gchar *st_str;
     /**
+     * Locality Name string
+     */
+    gchar *l_str;
+    /**
      * Organization Name string
      */
     gchar *o_str;
@@ -91,6 +95,10 @@ struct flom_tls_cert_s {
      * Organizational Unit Name NID
      */
     gchar *ou_str;
+    /**
+     * E-mail address string
+     */
+    gchar *e_str;
     /**
      * Common Name string
      */
@@ -256,14 +264,29 @@ extern "C" {
 
 
     /**
-     * Retrieve the certificate presented by the peer
+     * Send a buffer using TLS over TCP/IP
      * @param obj IN/OUT TLS object
+     * @param buf IN buffer to send
+     * @param len IN buffer lenght
      * @return a reason code
      */
-    int flom_tls_check_peer_cert(flom_tls_t *obj);
+    int flom_tls_send(flom_tls_t *obj, const void *buf, size_t len);
+
+    
+
+    /**
+     * Receive a buffer using TLS over TCP/IP
+     * @param obj IN/OUT TLS object
+     * @param buf OUT buffer to send
+     * @param len IN buffer lenght
+     * @param received OUT number of read bytes
+     * @return a reason code
+     */
+    int flom_tls_recv(flom_tls_t *obj, void *buf, size_t len,
+                      size_t *received);
 
 
-
+    
     /**
      * Create a new object of type flom_tls_cert_t
      * @return a new object or NULL if any error occurred
@@ -313,6 +336,15 @@ extern "C" {
 
 
     
+    /**
+     * Check the certificate presented by the peer
+     * @param obj IN/OUT TLS object
+     * @return a reason code
+     */
+    int flom_tls_cert_check(flom_tls_t *obj);
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

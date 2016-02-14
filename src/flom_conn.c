@@ -110,6 +110,41 @@ void flom_conn_free_parser(flom_conn_t *obj)
 
 
 
+int flom_conn_send(flom_conn_t *obj, const void *buf, size_t len)
+{
+    int ret_cod = FLOM_RC_OK;
+    FLOM_TRACE(("flom_conn_send\n"));
+
+    if (NULL != obj->tls)
+        ret_cod = flom_tls_send(obj->tls, buf, len);
+    /* @@@ implement me
+    else
+        ret_cod = flom_tcp_send(&obj->tcp, buf, len);
+    */
+    FLOM_TRACE(("flom_conn_send/"
+                "ret_cod=%d/errno=%d\n", ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_conn_recv(flom_conn_t *obj, void *buf, size_t len, size_t *received)
+{
+    int ret_cod = FLOM_RC_OK;
+    FLOM_TRACE(("flom_conn_recv\n"));
+
+    if (NULL != obj->tls)
+        ret_cod = flom_tls_recv(obj->tls, buf, len, received);
+    /* @@@ implement me
+    else
+        ret_cod = flom_tcp_send(&obj->tcp, buf, len, received);
+    */
+    FLOM_TRACE(("flom_conn_recv/"
+                "ret_cod=%d/errno=%d\n", ret_cod, errno));
+    return ret_cod;
+}
+
+
 void flom_conn_trace(const flom_conn_t *conn)
 {
     FLOM_TRACE(("flom_conn_trace: object=%p\n", conn));
