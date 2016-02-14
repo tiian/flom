@@ -297,33 +297,30 @@ extern "C" {
     
     /**
      * Retrieve the first XML message from a TCP/IP socket (file descriptor)
-     * @param fd IN file descriptor associated to the TCP/IP socket
-     * @param type IN file descriptor associated type (SOCK_STREAM or
-     *             SOCK_DGRAM)
+     * @param obj IN TCP communication object
      * @param buf OUT buffer will be used to store the XML message
-     * @param buf_size IN size of buf
-     * @param read_bytes OUT number of bytes read, XML message length
-     * @param timeout IN maximum wait time to receive the answer (milliseconds)
+     * @param len IN size of buf
+     * @param received OUT number of bytes read, XML message length
      * @param src_addr OUT transparently passed to recvfrom if type is
      *                 SOCK_DGRAM (see recvfrom man page)
      * @param addrlen OUT transparently passed to recvfrom if type is
      *                 SOCK_DGRAM (see recvfrom man page)
      * @return a reason code
      */
-    int flom_tcp_retrieve(int fd, int type, char *buf, size_t buf_size,
-                          ssize_t *read_bytes, int timeout,
-                          struct sockaddr *src_addr, socklen_t *addrlen);
+    int flom_tcp_recv(const flom_tcp_t *obj, void *buf, size_t len,
+                      size_t *received,
+                      struct sockaddr *src_addr, socklen_t *addrlen);
 
 
 
     /**
      * Send a message to a TCP/IP socket (file descriptor)
-     * @param fd IN file descriptor associated to the TCP/IP socket
+     * @param obj IN TCP communication object
      * @param buf IN buffer will be used to store the XML message
-     * @param buf_size IN size of buf
+     * @param len IN size of buf
      * @return a reason code
      */
-    int flom_tcp_send(int fd, const char *buf, size_t buf_size);
+    int flom_tcp_send(const flom_tcp_t *obj, const void *buf, size_t len);
 
     
     

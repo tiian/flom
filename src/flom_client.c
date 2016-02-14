@@ -838,7 +838,7 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
     TRY {
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
         size_t to_send;
-        ssize_t to_read;
+        size_t to_read;
         GMarkupParseContext *tmp_parser;
 
         /* initialize message */
@@ -866,9 +866,7 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
             THROW(MSG_SERIALIZE_ERROR);
 
         /* send the request message */
-        if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
-                               flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
-                               buffer, to_send)))
+        if (FLOM_RC_OK != (ret_cod = flom_conn_send(conn, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
         flom_conn_set_last_step(conn, msg.header.pvs.step);
         
@@ -877,10 +875,8 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
         flom_msg_init(&msg);
 
         /* retrieve the reply message */
-        ret_cod = flom_tcp_retrieve(
-            flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
-            flom_tcp_get_socket_type(flom_conn_get_tcp(conn)),
-            buffer, sizeof(buffer), &to_read, timeout, NULL, NULL);
+        ret_cod = flom_conn_recv(conn, buffer, sizeof(buffer), &to_read,
+                                 timeout, NULL, NULL);
         switch (ret_cod) {
             case FLOM_RC_OK:
                 break;
@@ -1061,16 +1057,14 @@ int flom_client_wait_lock(flom_conn_t *conn,
     FLOM_TRACE(("flom_client_wait_lock\n"));
     TRY {
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
-        ssize_t to_read;
+        size_t to_read;
         struct flom_msg_body_answer_s mba;
 
         /* more than one answer can arrive */
         while (TRUE) {
             /* retrieve the reply message */
-            ret_cod = flom_tcp_retrieve(
-                flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
-                flom_tcp_get_socket_type(flom_conn_get_tcp(conn)),
-                buffer, sizeof(buffer), &to_read, timeout, NULL, NULL);
+            ret_cod = flom_conn_recv(
+                conn, buffer, sizeof(buffer), &to_read, timeout, NULL, NULL);
             switch (ret_cod) {
                 case FLOM_RC_OK:
                     break;
@@ -1183,9 +1177,7 @@ int flom_client_unlock(flom_config_t *config, flom_conn_t *conn)
             THROW(MSG_SERIALIZE_ERROR);
 
         /* send the request message */
-        if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
-                               flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
-                               buffer, to_send)))
+        if (FLOM_RC_OK != (ret_cod = flom_conn_send(conn, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
         flom_conn_set_last_step(conn, msg.header.pvs.step);
         
@@ -1316,9 +1308,7 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
             THROW(MSG_SERIALIZE_ERROR);
 
         /* send the request message */
-        if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
-                               flom_tcp_get_sockfd(flom_conn_get_tcp(&conn)),
-                               buffer, to_send)))
+        if (FLOM_RC_OK != (ret_cod = flom_conn_send(&conn, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
         flom_conn_set_last_step(&conn, msg.header.pvs.step);
         FLOM_TRACE(("flom_client_shutdown: shutdown message sent "

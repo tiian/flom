@@ -1,8 +1,8 @@
 Road map:
 
-flom_conn_t must become the type used for I/O and it should wrap
-	flom_tcp_retrieve, flom_tcp_send, flom_tls_retrieve, flom_tls_send
-TLS/SSL (in progress...)
+TLS/SSL (in progress...): complete debug-feature with connection shutdown and
+removing hardwired filenames
+Implement TLS/SSL in the real FLoM code...
 
 check command lines for unique-id
 implement different TLS levels: with unique-id, without unique-id, server only

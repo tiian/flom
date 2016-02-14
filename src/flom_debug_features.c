@@ -658,7 +658,8 @@ int flom_debug_features_tls_server(void)
 
         /* retrieving a message */
         if (FLOM_RC_OK != (ret_cod = flom_conn_recv(
-                               client_conn, &msg, sizeof(msg), &received)))
+                               client_conn, &msg, sizeof(msg), &received,
+                               FLOM_NETWORK_WAIT_TIMEOUT, NULL, NULL)))
             THROW(CONN_RECV_ERROR);
         FLOM_TRACE(("flom_debug_features_tls_server: received " SIZE_T_FORMAT
                     " bytes, '%*.*s'\n", received, received, received, msg));
@@ -666,10 +667,10 @@ int flom_debug_features_tls_server(void)
         /* preparing a trivial reply message */
         msg[received] = '\0';
         strcat(msg, " world!");
-        FLOM_TRACE(("flom_debug_features_tls_server: replying with '%s'\n",
-                    msg));
 
         /* replying with a trivial answer */
+        FLOM_TRACE(("flom_debug_features_tls_server: sending " SIZE_T_FORMAT
+                    " bytes, '%s'\n", strlen(msg), msg));
         if (FLOM_RC_OK != (ret_cod = flom_conn_send(
                                client_conn, msg, strlen(msg))))
             THROW(CONN_SEND_ERROR);
@@ -761,12 +762,15 @@ int flom_debug_features_tls_client(void)
             THROW(TLS_CONNECT_ERROR);
 
         /* sending a trivial message */
+        FLOM_TRACE(("flom_debug_features_tls_client: sending " SIZE_T_FORMAT
+                    " bytes, '%s'\n", strlen(msg), msg));
         if (FLOM_RC_OK != (ret_cod = flom_conn_send(conn, msg, strlen(msg))))
             THROW(CONN_SEND_ERROR);
 
         /* waiting the response */
         if (FLOM_RC_OK != (ret_cod = flom_conn_recv(
-                               conn, &msg, sizeof(msg), &received)))
+                               conn, &msg, sizeof(msg), &received,
+                               FLOM_NETWORK_WAIT_TIMEOUT, NULL, NULL)))
             THROW(CONN_RECV_ERROR);
         FLOM_TRACE(("flom_debug_features_tls_client: received " SIZE_T_FORMAT
                     " bytes, '%*.*s'\n", received, received, received, msg));

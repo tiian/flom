@@ -1112,18 +1112,15 @@ int flom_accept_loop_pollin(flom_config_t *config,
                 THROW(CONNS_ADD_ERROR);
         } else {
             char buffer[FLOM_MSG_BUFFER_SIZE];
-            ssize_t read_bytes;
+            size_t read_bytes;
             struct flom_msg_s *msg;
             GMarkupParseContext *gmpc;
             struct sockaddr_storage src_addr;
             socklen_t addrlen = sizeof(src_addr);
             memset(&src_addr, 0, addrlen);
             /* it's data from an existing connection */
-            if (FLOM_RC_OK != (ret_cod = flom_tcp_retrieve(
-                                   flom_tcp_get_sockfd(flom_conn_get_tcp(c)),
-                                   flom_tcp_get_socket_type(
-                                       flom_conn_get_tcp(c)),
-                                   buffer, sizeof(buffer),
+            if (FLOM_RC_OK != (ret_cod = flom_conn_recv(
+                                   c, buffer, sizeof(buffer),
                                    &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT,
                                    (struct sockaddr *)&src_addr, &addrlen)))
                 THROW(MSG_RETRIEVE_ERROR);
@@ -1745,9 +1742,7 @@ int flom_accept_loop_reply(flom_conn_t *conn, int rc)
                                &msg, buffer, sizeof(buffer), &to_send)))
             THROW(MSG_SERIALIZE_ERROR);
         /* send message to client (requester) */
-        if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
-                               flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
-                               buffer, to_send)))
+        if (FLOM_RC_OK != (ret_cod = flom_conn_send(conn, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
         flom_conn_set_last_step(conn, msg.header.pvs.step);
         /* free message dynamic allocated memory (if any) */

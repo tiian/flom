@@ -457,10 +457,8 @@ int flom_resource_numeric_waitings(flom_resource_t *resource)
                         ret_cod = flom_msg_serialize(
                             &msg, buffer, sizeof(buffer), &to_send)))
                     THROW(MSG_SERIALIZE_ERROR);
-                if (FLOM_RC_OK != (ret_cod = flom_tcp_send(
-                                       flom_tcp_get_sockfd(
-                                           flom_conn_get_tcp(cl->conn)),
-                                       buffer, to_send)))
+                if (FLOM_RC_OK != (ret_cod = flom_conn_send(
+                                       cl->conn, buffer, to_send)))
                     THROW(MSG_SEND_ERROR);
                 flom_conn_set_last_step(cl->conn, msg.header.pvs.step);
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))

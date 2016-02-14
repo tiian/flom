@@ -117,10 +117,8 @@ int flom_conn_send(flom_conn_t *obj, const void *buf, size_t len)
 
     if (NULL != obj->tls)
         ret_cod = flom_tls_send(obj->tls, buf, len);
-    /* @@@ implement me
     else
         ret_cod = flom_tcp_send(&obj->tcp, buf, len);
-    */
     FLOM_TRACE(("flom_conn_send/"
                 "ret_cod=%d/errno=%d\n", ret_cod, errno));
     return ret_cod;
@@ -128,21 +126,71 @@ int flom_conn_send(flom_conn_t *obj, const void *buf, size_t len)
 
 
 
-int flom_conn_recv(flom_conn_t *obj, void *buf, size_t len, size_t *received)
+int flom_conn_recv(flom_conn_t *obj, void *buf, size_t len, size_t *received,
+                   int timeout, struct sockaddr *src_addr, socklen_t *addrlen)
 {
-    int ret_cod = FLOM_RC_OK;
+    enum Exception { POLL_ERROR
+                     , NETWORK_TIMEOUT
+                     , INTERNAL_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
     FLOM_TRACE(("flom_conn_recv\n"));
+    TRY {
+        if (timeout >= 0) {
+            struct pollfd fds[1];
+            int rc;
+            /* use poll to check the filedescriptor for a limited amount of
+               time */
+            fds[0].fd = flom_tcp_get_sockfd(&obj->tcp);
+            fds[0].events = POLLIN;
+            fds[0].revents = 0;
+            rc = poll(fds, 1, timeout);
+            switch (rc) {
+                case -1: /* error in poll function */
+                    THROW(POLL_ERROR);
+                    break;
+                case 0: /* timeout, return! */
+                    THROW(NETWORK_TIMEOUT);
+                    break;
+                case 1: /* data arrived, go on... */
+                    break;
+                default: /* unexpected result, internal error! */
+                    THROW(INTERNAL_ERROR);
+            } /* switch (rc) */
+        } /* if (timeout >= 0) */
 
-    if (NULL != obj->tls)
-        ret_cod = flom_tls_recv(obj->tls, buf, len, received);
-    /* @@@ implement me
-    else
-        ret_cod = flom_tcp_send(&obj->tcp, buf, len, received);
-    */
-    FLOM_TRACE(("flom_conn_recv/"
-                "ret_cod=%d/errno=%d\n", ret_cod, errno));
+        
+        if (NULL != obj->tls)
+            ret_cod = flom_tls_recv(obj->tls, buf, len, received);
+        else
+            ret_cod = flom_tcp_recv(&obj->tcp, buf, len, received,
+                                    src_addr, addrlen);
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case POLL_ERROR:
+                ret_cod = FLOM_RC_POLL_ERROR;
+                break;
+            case NETWORK_TIMEOUT:
+                ret_cod = FLOM_RC_NETWORK_TIMEOUT;
+                break;
+            case INTERNAL_ERROR:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_conn_recv/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
 
 
 void flom_conn_trace(const flom_conn_t *conn)

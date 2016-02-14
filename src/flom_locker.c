@@ -393,15 +393,11 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
             msg = flom_conn_get_msg(new_conn);
         } else {
             char buffer[FLOM_MSG_BUFFER_SIZE];
-            ssize_t read_bytes;
+            size_t read_bytes;
             GMarkupParseContext *gmpc;
             /* it's data from an existing connection */
-            if (FLOM_RC_OK != (ret_cod = flom_tcp_retrieve(
-                                   flom_tcp_get_sockfd(
-                                       flom_conn_get_tcp(curr_conn)),
-                                   flom_tcp_get_socket_type(
-                                       flom_conn_get_tcp(curr_conn)),
-                                   buffer, sizeof(buffer),
+            if (FLOM_RC_OK != (ret_cod = flom_conn_recv(
+                                   curr_conn, buffer, sizeof(buffer),
                                    &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT,
                                    NULL, NULL)))
                 THROW(MSG_RETRIEVE_ERROR);
@@ -462,9 +458,7 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                                            msg, buffer, sizeof(buffer),
                                            &msg_len)))
                         THROW(MSG_SERIALIZE_ERROR);
-                    ret_cod = flom_tcp_send(
-                        flom_tcp_get_sockfd(flom_conn_get_tcp(curr_conn)),
-                        buffer, msg_len);
+                    ret_cod = flom_conn_send(curr_conn, buffer, msg_len);
                     if (FLOM_RC_SEND_ERROR == ret_cod) {
                         FLOM_TRACE(("flom_locker_loop_pollin: error while "
                                     "sending message to client (the "

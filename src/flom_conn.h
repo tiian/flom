@@ -124,7 +124,6 @@ typedef struct {
      * Last received message (allocated by malloc)
      */
     struct flom_msg_s    *msg;
-    /* @@@ restart from this field */
     /**
      * GMarkup Parser context (allocated by g_markup_parse_context_new)
      */
@@ -302,6 +301,29 @@ extern "C" {
 
 
     /**
+     * Receive a buffer using raw TCP/IP or TLS over TCP/IP
+     * @param obj IN/OUT TLS object
+     * @param buf OUT buffer to send
+     * @param len IN buffer lenght
+     * @param received OUT number of read bytes
+     * @param timeout IN maximum wait time to receive the answer
+     *        (milliseconds); use @ref FLOM_NETWORK_WAIT_TIMEOUT for indefinite
+     *        wait
+     * @param src_addr OUT transparently passed to recvfrom if type is
+     *                 SOCK_DGRAM (see recvfrom man page); it applies only to
+     *                 UDP/IP
+     * @param addrlen OUT transparently passed to recvfrom if type is
+     *                 SOCK_DGRAM (see recvfrom man page); it applied only to
+     *                 UDP/IP
+     * @return a reason code
+     */
+    int flom_conn_recv(flom_conn_t *obj, void *buf, size_t len,
+                       size_t *received, int timeout,
+                       struct sockaddr *src_addr, socklen_t *addrlen);
+
+
+    
+    /**
      * Send a buffer using raw TCP/IP or TLS over TCP/IP
      * @param obj IN/OUT connection object
      * @param buf IN buffer to send
@@ -311,19 +333,6 @@ extern "C" {
     int flom_conn_send(flom_conn_t *obj, const void *buf, size_t len);
 
     
-    
-    /**
-     * Receive a buffer using raw TCP/IP or TLS over TCP/IP
-     * @param obj IN/OUT TLS object
-     * @param buf OUT buffer to send
-     * @param len IN buffer lenght
-     * @param received OUT number of read bytes
-     * @return a reason code
-     */
-    int flom_conn_recv(flom_conn_t *obj, void *buf, size_t len,
-                       size_t *received);
-
-
     
     /**
      * Initialize the TLS object related to a connection
