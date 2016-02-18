@@ -775,8 +775,8 @@ int flom_client_discover_udp_connect(flom_conn_t *conn,
         /* set connection definition object attributes */
         flom_tcp_set_sockfd(flom_conn_get_tcp(conn), fd);
         flom_tcp_set_socket_type(flom_conn_get_tcp(conn), SOCK_STREAM);
-        memcpy(flom_tcp_get_sa(flom_conn_get_tcp(conn)), sa, addrlen);
-        flom_tcp_set_addrlen(flom_conn_get_tcp(conn), addrlen);
+        flom_tcp_set_sa_storage(flom_conn_get_tcp(conn),
+                                (const struct sockaddr_storage *)sa, addrlen);
         /* avoid socket close operated by clean-up step */
         fd = FLOM_NULL_FD;
         

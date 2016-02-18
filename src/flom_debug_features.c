@@ -592,6 +592,8 @@ int flom_debug_features_tls_server(void)
                      , TLS_ACCEPT_ERROR
                      , CONN_RECV_ERROR
                      , CONN_SEND_ERROR
+                     , CONN_CLOSE_ERROR1
+                     , CONN_CLOSE_ERROR2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -599,6 +601,7 @@ int flom_debug_features_tls_server(void)
     
     FLOM_TRACE(("flom_debug_features_tls_server\n"));
     TRY {
+        char unique_id[FLOM_TLS_UNIQUE_ID_LENGHT+1];
         char msg[100];
         size_t received = 0;
         
@@ -664,16 +667,22 @@ int flom_debug_features_tls_server(void)
         FLOM_TRACE(("flom_debug_features_tls_server: received " SIZE_T_FORMAT
                     " bytes, '%*.*s'\n", received, received, received, msg));
 
-        /* preparing a trivial reply message */
-        msg[received] = '\0';
-        strcat(msg, " world!");
-
-        /* replying with a trivial answer */
+        /* retrieving FLoM unique ID */
+        flom_tls_get_unique_id(unique_id, FLOM_TLS_UNIQUE_ID_LENGHT);
+        
+        /* replying with unique ID */
         FLOM_TRACE(("flom_debug_features_tls_server: sending " SIZE_T_FORMAT
-                    " bytes, '%s'\n", strlen(msg), msg));
+                    " bytes, '%s'\n", strlen(unique_id), unique_id));
         if (FLOM_RC_OK != (ret_cod = flom_conn_send(
-                               client_conn, msg, strlen(msg))))
+                               client_conn, unique_id, strlen(unique_id))))
             THROW(CONN_SEND_ERROR);
+
+        /* closing client connection */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_close(client_conn)))
+            THROW(CONN_CLOSE_ERROR1);
+        /* closing listen connection */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_close(listen_conn)))
+            THROW(CONN_CLOSE_ERROR2);
         
         THROW(NONE);
     } CATCH {
@@ -692,6 +701,8 @@ int flom_debug_features_tls_server(void)
             case TLS_ACCEPT_ERROR:
             case CONN_RECV_ERROR:
             case CONN_SEND_ERROR:
+            case CONN_CLOSE_ERROR1:
+            case CONN_CLOSE_ERROR2:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -721,6 +732,7 @@ int flom_debug_features_tls_client(void)
                      , TLS_CONNECT_ERROR
                      , CONN_SEND_ERROR
                      , CONN_RECV_ERROR
+                     , CONN_CLOSE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
@@ -728,7 +740,8 @@ int flom_debug_features_tls_client(void)
         
     FLOM_TRACE(("flom_debug_features_tls_client\n"));
     TRY {
-        char msg[100] = "Hello";
+        char unique_id[FLOM_TLS_UNIQUE_ID_LENGHT+1];
+        char msg[100];
         size_t received = 0;
         
         if (NULL == (conn = flom_conn_new(NULL)))
@@ -761,10 +774,14 @@ int flom_debug_features_tls_client(void)
                                flom_tcp_get_sockfd(flom_conn_get_tcp(conn)))))
             THROW(TLS_CONNECT_ERROR);
 
-        /* sending a trivial message */
+        /* retrieving FLoM unique ID */
+        flom_tls_get_unique_id(unique_id, FLOM_TLS_UNIQUE_ID_LENGHT);
+        
+        /* sending unique ID */
         FLOM_TRACE(("flom_debug_features_tls_client: sending " SIZE_T_FORMAT
-                    " bytes, '%s'\n", strlen(msg), msg));
-        if (FLOM_RC_OK != (ret_cod = flom_conn_send(conn, msg, strlen(msg))))
+                    " bytes, '%s'\n", strlen(unique_id), unique_id));
+        if (FLOM_RC_OK != (ret_cod = flom_conn_send(
+                               conn, unique_id, strlen(unique_id))))
             THROW(CONN_SEND_ERROR);
 
         /* waiting the response */
@@ -774,6 +791,10 @@ int flom_debug_features_tls_client(void)
             THROW(CONN_RECV_ERROR);
         FLOM_TRACE(("flom_debug_features_tls_client: received " SIZE_T_FORMAT
                     " bytes, '%*.*s'\n", received, received, received, msg));
+        
+        /* closing connection */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_close(conn)))
+            THROW(CONN_CLOSE_ERROR);
         
         THROW(NONE);
     } CATCH {
@@ -787,6 +808,7 @@ int flom_debug_features_tls_client(void)
             case TLS_CONNECT_ERROR:
             case CONN_SEND_ERROR:
             case CONN_RECV_ERROR:
+            case CONN_CLOSE_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

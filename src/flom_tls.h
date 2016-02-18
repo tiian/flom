@@ -25,6 +25,9 @@
 
 
 
+#ifdef HAVE_DBUS_DBUS_H
+# include <dbus/dbus.h>
+#endif
 #ifdef HAVE_OPENSSL_SSL_H
 # include <openssl/ssl.h>
 #endif
@@ -52,6 +55,13 @@
  * Maximum depth for the certificate chain verification
  */
 #define FLOM_TLS_MAX_DEPTH_CERT_CHAIN_VERIF    3
+
+
+
+/**
+ * Number of characters of a unique ID value
+ */
+#define FLOM_TLS_UNIQUE_ID_LENGHT             32
 
 
 
@@ -169,6 +179,22 @@ extern "C" {
 #endif /* __cplusplus */
 
 
+    
+    /**
+     * Unique ID of the FLoM installation
+     * @param dest IN/OUT pre-allocated destination string
+     * @param n IN maximum number of bytes copied in dest string
+     * @return the FLoM unique id string
+     */
+    static inline const char *flom_tls_get_unique_id(char *dest, size_t n) {
+        char *machine_id = dbus_get_local_machine_id();
+        strncpy(dest, machine_id, n);
+        dest[n] = '\0';
+        dbus_free(machine_id);
+        return dest;
+    }
+    
+    
 
     /**
      * Numeric/string conversion for some SSL errors...

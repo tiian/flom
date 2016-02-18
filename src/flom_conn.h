@@ -332,6 +332,17 @@ extern "C" {
      */
     int flom_conn_send(flom_conn_t *obj, const void *buf, size_t len);
 
+
+
+    /**
+     * Close a raw TCP/IP or TLS over TCP/IP connection
+     * @param obj IN/OUT connection object
+     * @return a reason code
+     */
+    static inline int flom_conn_close(flom_conn_t *obj) {
+        return flom_tcp_close(&obj->tcp);
+    }
+    
     
     
     /**

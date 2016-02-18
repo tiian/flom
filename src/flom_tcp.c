@@ -442,3 +442,37 @@ int flom_tcp_send(const flom_tcp_t *obj, const void *buf, size_t len)
 
 
 
+int flom_tcp_close(flom_tcp_t *obj)
+{
+    enum Exception { CLOSE_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_tcp_close\n"));
+    TRY {
+        if (FLOM_NULL_FD == obj->sockfd) {
+            FLOM_TRACE(("flom_tcp_close: sockfd is NULL, skipping...\n"));
+        } else {
+            if (0 != close(obj->sockfd))
+                THROW(CLOSE_ERROR);
+            obj->sockfd = FLOM_NULL_FD;
+        } /* if (FLOM_NULL_FD == obj->sockfd) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case CLOSE_ERROR:
+                ret_cod = FLOM_RC_CLOSE_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_tcp_close/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

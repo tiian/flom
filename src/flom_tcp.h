@@ -212,7 +212,7 @@ extern "C" {
      * @param sa_len IN socket address lenght
      */
     static inline void flom_tcp_set_sa_storage(
-        flom_tcp_t *obj, struct sockaddr_storage *sa, size_t sa_len) {
+        flom_tcp_t *obj, const struct sockaddr_storage *sa, size_t sa_len) {
         memcpy(&obj->sa_storage, sa, sa_len);
         obj->addrlen = sa_len;
     }
@@ -323,6 +323,15 @@ extern "C" {
     int flom_tcp_send(const flom_tcp_t *obj, const void *buf, size_t len);
 
     
+
+    /**
+     * Close a TCP/IP connection
+     * @param obj IN/OUT TCP communication object
+     * @return a reason code
+     */
+    int flom_tcp_close(flom_tcp_t *obj);
+
+
     
 #ifdef __cplusplus
 }

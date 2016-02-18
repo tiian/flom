@@ -252,7 +252,7 @@ int flom_conns_close_fd(flom_conns_t *conns, guint id)
 {
     enum Exception { OUT_OF_RANGE
                      , NULL_OBJECT
-                     , CLOSE_ERROR
+                     , TCP_CLOSE
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -273,9 +273,9 @@ int flom_conns_close_fd(flom_conns_t *conns, guint id)
             } else {
                 FLOM_TRACE(("flom_conns_close: closing fd=%d\n",
                             flom_tcp_get_sockfd(flom_conn_get_tcp(c))));
-                if (0 != close(flom_tcp_get_sockfd(flom_conn_get_tcp(c))))
-                    THROW(CLOSE_ERROR);
-                flom_tcp_set_sockfd(flom_conn_get_tcp(c), FLOM_NULL_FD);
+                if (FLOM_RC_OK != (ret_cod = flom_tcp_close(
+                                       flom_conn_get_tcp(c))))
+                    THROW(TCP_CLOSE);
             }
         } else {
             FLOM_TRACE(("flom_conns_close: connection id=%u already "
@@ -291,8 +291,7 @@ int flom_conns_close_fd(flom_conns_t *conns, guint id)
             case NULL_OBJECT:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
-            case CLOSE_ERROR:
-                ret_cod = FLOM_RC_CLOSE_ERROR;
+            case TCP_CLOSE:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

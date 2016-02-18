@@ -1,6 +1,7 @@
 Road map:
 
-TLS/SSL (in progress...): complete debug-feature with connection shutdown and
+implement unique-id check
+TLS/SSL (in progress...): complete debug-feature
 removing hardwired filenames
 Implement TLS/SSL in the real FLoM code...
 

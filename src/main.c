@@ -24,9 +24,6 @@
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
-#ifdef HAVE_DBUS_DBUS_H
-# include <dbus/dbus.h>
-#endif
 
 
 
@@ -145,9 +142,9 @@ int main (int argc, char *argv[])
     }
 
     if (unique_id) {
-        char *machine_id = dbus_get_local_machine_id();
-        g_print("%s\n", machine_id);
-        dbus_free(machine_id);
+        char unique_id[FLOM_TLS_UNIQUE_ID_LENGHT+1];
+        g_print("%s\n", flom_tls_get_unique_id(
+                    unique_id, FLOM_TLS_UNIQUE_ID_LENGHT));
         exit(FLOM_ES_OK);
     }
     
