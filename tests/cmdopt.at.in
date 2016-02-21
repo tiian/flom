@@ -485,6 +485,74 @@ AT_DATA([flom.conf],
 AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_TCP_KEEPALIVE_PROBES@], [0], [expout], [ignore])
 AT_CLEANUP
 
+AT_SETUP([TLS peer certificate: --tls-peer-certificate])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_TLS@]/@_CONFIG_KEY_TLS_PEER_CERTIFICATE@='peer_cert.pem'
+]])
+AT_CHECK([flom --verbose --tls-peer-certificate=peer_cert.pem -- ls | grep @_CONFIG_KEY_TLS_PEER_CERTIFICATE@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+[@_CONFIG_GROUP_NETWORK@]
+[@_CONFIG_GROUP_TLS@]
+@_CONFIG_KEY_TLS_PEER_CERTIFICATE@=peer_cert.pem
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_TLS_PEER_CERTIFICATE@], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TLS peer private key: --tls-peer-private-key])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_TLS@]/@_CONFIG_KEY_TLS_PEER_PRIVATE_KEY@='peer_priv_key.pem'
+]])
+AT_CHECK([flom --verbose --tls-peer-private-key=peer_priv_key.pem -- ls | grep @_CONFIG_KEY_TLS_PEER_PRIVATE_KEY@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+[@_CONFIG_GROUP_NETWORK@]
+[@_CONFIG_GROUP_TLS@]
+@_CONFIG_KEY_TLS_PEER_PRIVATE_KEY@=peer_priv_key.pem
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_TLS_PEER_PRIVATE_KEY@], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TLS CA certificate: --tls-ca-certificate])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_TLS@]/@_CONFIG_KEY_TLS_CA_CERTIFICATE@='ca_cert.pem'
+]])
+AT_CHECK([flom --verbose --tls-ca-certificate=ca_cert.pem -- ls | grep @_CONFIG_KEY_TLS_CA_CERTIFICATE@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+[@_CONFIG_GROUP_NETWORK@]
+[@_CONFIG_GROUP_TLS@]
+@_CONFIG_KEY_TLS_CA_CERTIFICATE@=ca_cert.pem
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_TLS_CA_CERTIFICATE@], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TLS check peer unique id: --tls-check-peer-id])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_TLS@]/@_CONFIG_KEY_TLS_CHECK_PEER_ID@=1
+]])
+AT_CHECK([flom --verbose --tls-check-peer-id -- ls | grep @_CONFIG_KEY_TLS_CHECK_PEER_ID@], [0], [expout], [ignore])
+AT_DATA([flom.conf],
+[[
+[@_CONFIG_GROUP_TRACE@]
+[@_CONFIG_GROUP_RESOURCE@]
+[@_CONFIG_GROUP_DAEMON@]
+[@_CONFIG_GROUP_NETWORK@]
+[@_CONFIG_GROUP_TLS@]
+@_CONFIG_KEY_TLS_CHECK_PEER_ID@=yes
+]])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_TLS_CHECK_PEER_ID@], [0], [expout], [ignore])
+AT_CLEANUP
+
 AT_SETUP([Quiesce shutdown: -x, --quiesce-exit])
 AT_CHECK([flom -x], [0], [ignore], [ignore])
 AT_CHECK([flom --quiesce-exit], [0], [ignore], [ignore])

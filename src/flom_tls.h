@@ -182,16 +182,15 @@ extern "C" {
     
     /**
      * Unique ID of the FLoM installation
-     * @param dest IN/OUT pre-allocated destination string
-     * @param n IN maximum number of bytes copied in dest string
-     * @return the FLoM unique id string
+     * @return the FLoM unique id string that must be released with g_free
+     *         function
      */
-    static inline const char *flom_tls_get_unique_id(char *dest, size_t n) {
+    static inline gchar *flom_tls_get_unique_id() {
+        gchar *tmp = NULL;
         char *machine_id = dbus_get_local_machine_id();
-        strncpy(dest, machine_id, n);
-        dest[n] = '\0';
+        tmp = g_strdup(machine_id);
         dbus_free(machine_id);
-        return dest;
+        return tmp;
     }
     
     

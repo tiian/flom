@@ -145,3 +145,20 @@
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_TCP_KEEPALIVE_PROBES@=@_DEFAULT_TCP_KEEPALIVE_PROBES@
 
+# This section (configuration group) is related to TLS/SSL
+[@_CONFIG_GROUP_TLS@]
+# Name of the file that contains the X509 certificate assigned to this peer
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_TLS_PEER_CERTIFICATE@=peer_cert.pem
+# Name of the file that contains the private key of this peer
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_TLS_PEER_PRIVATE_KEY@=peer_key.pem
+# Name of the file that contains the X509 certificate of the certification
+# authority used to sign the certificate of this peer
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_TLS_CA_CERTIFICATE@=peer_cert.pem
+# Check if the CommonName (CN) of the peer certificate matches the peer unique
+# identifier; valid values are "yes" and "no" (case insensitive)
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_TLS_CHECK_PEER_ID@=yes
+

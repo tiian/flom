@@ -764,6 +764,11 @@ _DEBUG_FEATURES_TLS_CLIENT
 _DEBUG_FEATURES_TLS_SERVER
 _DEBUG_FEATURES_IPV6_MULTICAST_CLIENT
 _DEBUG_FEATURES_IPV6_MULTICAST_SERVER
+_CONFIG_KEY_TLS_CHECK_PEER_ID
+_CONFIG_KEY_TLS_CA_CERTIFICATE
+_CONFIG_KEY_TLS_PEER_PRIVATE_KEY
+_CONFIG_KEY_TLS_PEER_CERTIFICATE
+_CONFIG_GROUP_TLS
 _CONFIG_KEY_TCP_KEEPALIVE_PROBES
 _CONFIG_KEY_TCP_KEEPALIVE_INTVL
 _CONFIG_KEY_TCP_KEEPALIVE_TIME
@@ -4955,13 +4960,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4958: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4963: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4961: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4966: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4964: output\"" >&5)
+  (eval echo "\"\$as_me:4969: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6167,7 +6172,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6170 "configure"' > conftest.$ac_ext
+  echo '#line 6175 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7697,11 +7702,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7700: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7705: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7704: \$? = $ac_status" >&5
+   echo "$as_me:7709: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8036,11 +8041,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8039: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8044: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8043: \$? = $ac_status" >&5
+   echo "$as_me:8048: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8141,11 +8146,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8144: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8149: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8148: \$? = $ac_status" >&5
+   echo "$as_me:8153: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8196,11 +8201,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8199: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8204: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8203: \$? = $ac_status" >&5
+   echo "$as_me:8208: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10580,7 +10585,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10583 "configure"
+#line 10588 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10676,7 +10681,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10679 "configure"
+#line 10684 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10959,6 +10964,11 @@ _CONFIG_KEY_DISCOVERY_TTL="DiscoveryTTL"
 _CONFIG_KEY_TCP_KEEPALIVE_TIME="TcpKeepaliveTime"
 _CONFIG_KEY_TCP_KEEPALIVE_INTVL="TcpKeepaliveIntvl"
 _CONFIG_KEY_TCP_KEEPALIVE_PROBES="TcpKeepaliveProbes"
+_CONFIG_GROUP_TLS="TLS"
+_CONFIG_KEY_TLS_PEER_CERTIFICATE="TlsPeerCertificate"
+_CONFIG_KEY_TLS_PEER_PRIVATE_KEY="TlsPeerPrivateKey"
+_CONFIG_KEY_TLS_CA_CERTIFICATE="TlsCaCertificate"
+_CONFIG_KEY_TLS_CHECK_PEER_ID="TlsCheckPeerId"
 _DEBUG_FEATURES_IPV6_MULTICAST_SERVER="IPv6.Multicast.Server"
 _DEBUG_FEATURES_IPV6_MULTICAST_CLIENT="IPv6.Multicast.Client"
 _DEBUG_FEATURES_TLS_SERVER="TLS.Server"
@@ -11171,6 +11181,31 @@ _ACEOF
 
 cat >>confdefs.h <<_ACEOF
 #define _CONFIG_KEY_TCP_KEEPALIVE_PROBES "$_CONFIG_KEY_TCP_KEEPALIVE_PROBES"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define _CONFIG_GROUP_TLS "$_CONFIG_GROUP_TLS"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define _CONFIG_KEY_TLS_PEER_CERTIFICATE "$_CONFIG_KEY_TLS_PEER_CERTIFICATE"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define _CONFIG_KEY_TLS_PEER_PRIVATE_KEY "$_CONFIG_KEY_TLS_PEER_PRIVATE_KEY"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define _CONFIG_KEY_TLS_CA_CERTIFICATE "$_CONFIG_KEY_TLS_CA_CERTIFICATE"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define _CONFIG_KEY_TLS_CHECK_PEER_ID "$_CONFIG_KEY_TLS_CHECK_PEER_ID"
 _ACEOF
 
 
@@ -14540,11 +14575,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14543: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14578: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14547: \$? = $ac_status" >&5
+   echo "$as_me:14582: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14639,11 +14674,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14642: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14677: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14646: \$? = $ac_status" >&5
+   echo "$as_me:14681: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14691,11 +14726,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14694: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14729: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14698: \$? = $ac_status" >&5
+   echo "$as_me:14733: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17627,6 +17662,11 @@ done
 
 
 # substitution inside *.in for hardwired configuration
+
+
+
+
+
 
 
 

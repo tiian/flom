@@ -220,6 +220,9 @@
 /* Label of "resource" group inside config files */
 #undef _CONFIG_GROUP_RESOURCE
 
+/* Label of "TLS" group inside config files */
+#undef _CONFIG_GROUP_TLS
+
 /* Label of "trace" group inside config files */
 #undef _CONFIG_GROUP_TRACE
 
@@ -282,6 +285,18 @@
 
 /* Label of "Timeout" key inside config files */
 #undef _CONFIG_KEY_TIMEOUT
+
+/* Label of "TlsCaCertificate" key inside config files */
+#undef _CONFIG_KEY_TLS_CA_CERTIFICATE
+
+/* Label of "TlsSkipPeerId" key inside config files */
+#undef _CONFIG_KEY_TLS_CHECK_PEER_ID
+
+/* Label of "TlsPeerCertificate" key inside config files */
+#undef _CONFIG_KEY_TLS_PEER_CERTIFICATE
+
+/* Label of "TlsPeerPrivateKey" key inside config files */
+#undef _CONFIG_KEY_TLS_PEER_PRIVATE_KEY
 
 /* Label of "UnicastAddress" key inside config files */
 #undef _CONFIG_KEY_UNICAST_ADDRESS

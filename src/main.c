@@ -65,6 +65,10 @@ static gint discovery_ttl = _DEFAULT_DISCOVERY_TTL;
 static gint tcp_keepalive_time = _DEFAULT_TCP_KEEPALIVE_TIME;
 static gint tcp_keepalive_intvl = _DEFAULT_TCP_KEEPALIVE_INTVL;
 static gint tcp_keepalive_probes = _DEFAULT_TCP_KEEPALIVE_PROBES;
+static gchar* tls_peer_certificate = NULL;
+static gchar* tls_peer_private_key = NULL;
+static gchar* tls_ca_certificate = NULL;
+static gboolean tls_check_peer_id = FALSE;
 static gint quiesce_exit = 0;
 static gint immediate_exit = 0;
 static gchar *command_trace_file = NULL;
@@ -99,6 +103,10 @@ static GOptionEntry entries[] =
     { "tcp-keepalive-time", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_time, "Local override for SO_KEEPALIVE feature", NULL },
     { "tcp-keepalive-intvl", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_intvl, "Local override for SO_KEEPALIVE feature", NULL },
     { "tcp-keepalive-probes", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_probes, "Local override for SO_KEEPALIVE feature", NULL },
+    { "tls-peer-certificate", 0, 0, G_OPTION_ARG_STRING, &tls_peer_certificate, "Name of the file that contains the X509 certificate of this peer", NULL },
+    { "tls-peer-private-key", 0, 0, G_OPTION_ARG_STRING, &tls_peer_private_key, "Name of the file that contains the private key of this peer", NULL },
+    { "tls-ca-certificate", 0, 0, G_OPTION_ARG_STRING, &tls_ca_certificate, "Name of the file that contains the X509 certificate of the certification authority that signed the certificate of this peer", NULL },
+    { "tls-check-peer-id", 0, 0, G_OPTION_ARG_NONE, &tls_check_peer_id, "Check the unique id of the peer", NULL },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
     { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
     { "append-trace-file", 0, 0, G_OPTION_ARG_STRING, &append_trace_file, "Specify if the trace file(s) must be appended or truncated for every execution (accepted values 'yes', 'no')", NULL },
@@ -142,9 +150,9 @@ int main (int argc, char *argv[])
     }
 
     if (unique_id) {
-        char unique_id[FLOM_TLS_UNIQUE_ID_LENGHT+1];
-        g_print("%s\n", flom_tls_get_unique_id(
-                    unique_id, FLOM_TLS_UNIQUE_ID_LENGHT));
+        char *unique_id = flom_tls_get_unique_id();
+        g_print("%s\n", unique_id);
+        g_free(unique_id);
         exit(FLOM_ES_OK);
     }
     
@@ -267,6 +275,18 @@ int main (int argc, char *argv[])
     if (_DEFAULT_TCP_KEEPALIVE_PROBES != tcp_keepalive_probes) {
         flom_config_set_tcp_keepalive_probes(NULL, tcp_keepalive_probes);
     }
+    if (NULL != tls_peer_certificate) {
+        flom_config_set_tls_peer_certificate(NULL, tls_peer_certificate);
+    }
+    if (NULL != tls_peer_private_key) {
+        flom_config_set_tls_peer_private_key(NULL, tls_peer_private_key);
+    }
+    if (NULL != tls_ca_certificate) {
+        flom_config_set_tls_ca_certificate(NULL, tls_ca_certificate);
+    }
+    if (tls_check_peer_id)
+        flom_config_set_tls_check_peer_id(NULL, tls_check_peer_id);
+
     if (NULL != append_trace_file) {
         flom_bool_value_t fbv;
         if (FLOM_BOOL_INVALID == (

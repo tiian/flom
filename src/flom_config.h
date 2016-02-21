@@ -245,6 +245,27 @@ extern const gchar *FLOM_CONFIG_KEY_TCP_KEEPALIVE_INTVL;
  * Label associated to "TcpKeepaliveProbes" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_TCP_KEEPALIVE_PROBES;
+/**
+ * Label associated to TLS group inside config files
+ */
+extern const gchar *FLOM_CONFIG_GROUP_TLS;
+/**
+ * Label associated to "TlsPeerCertificate" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_TLS_PEER_CERTIFICATE;
+/**
+ * Label associated to "TlsPeerPrivateKey" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_TLS_PEER_PRIVATE_KEY;
+/**
+ * Label associated to "TlsCaCertificate" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_TLS_CA_CERTIFICATE;
+/**
+ * Label associated to "TlsCheckPeerId" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_TLS_CHECK_PEER_ID;
+
 
 
 
@@ -380,6 +401,25 @@ typedef struct flom_config_s {
      * per socket value of parameter tcp_keepalive_probes
      */
     gint               tcp_keepalive_probes;
+    /**
+     * name of the file that contains the X509 certificate assigned to this
+     * peer
+     */
+    gchar             *tls_peer_certificate;
+    /**
+     * name of the file that contains the private key of this peer
+     */
+    gchar             *tls_peer_private_key;
+    /**
+     * name of the file that contains the X509 certificate of the
+     * certification authority used to sign the certificate of this peer
+     */
+    gchar             *tls_ca_certificate;
+    /**
+     * check if the CommonName (CN) of the peer certificate matches the peer
+     * unique identifier
+     */
+    gint               tls_check_peer_id;
 } flom_config_t;
 
 
@@ -1054,7 +1094,107 @@ extern "C" {
     }
 
 
+
+    /**
+     * Set tls_peer_certificate in config object
+     * @param config IN/OUT configuration object, NULL for global config
+     * @param value IN set the new value for tls_peer_certificate property
+     * @return a reason code
+     */
+    void flom_config_set_tls_peer_certificate(flom_config_t *config,
+                                              const gchar *value);
+        
+
+
+    /**
+     * Get tls_peer_certificate value
+     * @param config IN/OUT configuration object, NULL for global config
+     * @return current value
+     */
+    static inline gchar *flom_config_get_tls_peer_certificate(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.tls_peer_certificate : config->tls_peer_certificate;
+    }
     
+
+    
+    /**
+     * Set tls_peer_private_key in config object
+     * @param config IN/OUT configuration object, NULL for global config
+     * @param value IN set the new value for tls_peer_certificate property
+     * @return a reason code
+     */
+    void flom_config_set_tls_peer_private_key(flom_config_t *config,
+                                              const gchar *value);
+        
+
+
+    /**
+     * Get tls_peer_private_key value
+     * @param config IN/OUT configuration object, NULL for global config
+     * @return current value
+     */
+    static inline gchar *flom_config_get_tls_peer_private_key(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.tls_peer_private_key : config->tls_peer_private_key;
+    }
+    
+
+    
+    /**
+     * Set tls_ca_certificate in config object
+     * @param config IN/OUT configuration object, NULL for global config
+     * @param value IN set the new value for tls_ca_certificate property
+     * @return a reason code
+     */
+    void flom_config_set_tls_ca_certificate(flom_config_t *config,
+                                           const gchar *value);
+        
+
+
+    /**
+     * Get tls_ca_certificate value
+     * @param config IN/OUT configuration object, NULL for global config
+     * @return current value
+     */
+    static inline gchar *flom_config_get_tls_ca_certificate(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.tls_ca_certificate : config->tls_ca_certificate;
+    }
+    
+
+    
+    /**
+     * Set tls_check_peer_id parameter value
+     * @param config IN/OUT configuration object, NULL for global config
+     * @param value IN new (boolean) value
+     */
+    static inline void flom_config_set_tls_check_peer_id(
+        flom_config_t *config, gint value) {
+        if (NULL == config)
+            global_config.tls_check_peer_id = value;
+        else
+            config->tls_check_peer_id = value;
+    }
+
+
+
+    /**
+     * Get tls_check_peer_id parameter value
+     * @param config IN/OUT configuration object, NULL for global config
+     * @return current value
+     */
+    static inline gint flom_config_get_tls_check_peer_id(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.tls_check_peer_id : config->tls_check_peer_id;
+    }
+
+
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
