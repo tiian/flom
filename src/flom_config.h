@@ -252,11 +252,11 @@ extern const gchar *FLOM_CONFIG_GROUP_TLS;
 /**
  * Label associated to "TlsPeerCertificate" key inside config files
  */
-extern const gchar *FLOM_CONFIG_KEY_TLS_PEER_CERTIFICATE;
+extern const gchar *FLOM_CONFIG_KEY_TLS_CERTIFICATE;
 /**
  * Label associated to "TlsPeerPrivateKey" key inside config files
  */
-extern const gchar *FLOM_CONFIG_KEY_TLS_PEER_PRIVATE_KEY;
+extern const gchar *FLOM_CONFIG_KEY_TLS_PRIVATE_KEY;
 /**
  * Label associated to "TlsCaCertificate" key inside config files
  */
@@ -405,11 +405,11 @@ typedef struct flom_config_s {
      * name of the file that contains the X509 certificate assigned to this
      * peer
      */
-    gchar             *tls_peer_certificate;
+    gchar             *tls_certificate;
     /**
      * name of the file that contains the private key of this peer
      */
-    gchar             *tls_peer_private_key;
+    gchar             *tls_private_key;
     /**
      * name of the file that contains the X509 certificate of the
      * certification authority used to sign the certificate of this peer
@@ -1096,49 +1096,49 @@ extern "C" {
 
 
     /**
-     * Set tls_peer_certificate in config object
+     * Set tls_certificate in config object
      * @param config IN/OUT configuration object, NULL for global config
-     * @param value IN set the new value for tls_peer_certificate property
+     * @param value IN set the new value for tls_certificate property
      * @return a reason code
      */
-    void flom_config_set_tls_peer_certificate(flom_config_t *config,
+    void flom_config_set_tls_certificate(flom_config_t *config,
                                               const gchar *value);
         
 
 
     /**
-     * Get tls_peer_certificate value
+     * Get tls_certificate value
      * @param config IN/OUT configuration object, NULL for global config
      * @return current value
      */
-    static inline gchar *flom_config_get_tls_peer_certificate(
+    static inline gchar *flom_config_get_tls_certificate(
         flom_config_t *config) {
         return NULL == config ?
-            global_config.tls_peer_certificate : config->tls_peer_certificate;
+            global_config.tls_certificate : config->tls_certificate;
     }
     
 
     
     /**
-     * Set tls_peer_private_key in config object
+     * Set tls_private_key in config object
      * @param config IN/OUT configuration object, NULL for global config
-     * @param value IN set the new value for tls_peer_certificate property
+     * @param value IN set the new value for tls_private_key property
      * @return a reason code
      */
-    void flom_config_set_tls_peer_private_key(flom_config_t *config,
+    void flom_config_set_tls_private_key(flom_config_t *config,
                                               const gchar *value);
         
 
 
     /**
-     * Get tls_peer_private_key value
+     * Get tls_private_key value
      * @param config IN/OUT configuration object, NULL for global config
      * @return current value
      */
-    static inline gchar *flom_config_get_tls_peer_private_key(
+    static inline gchar *flom_config_get_tls_private_key(
         flom_config_t *config) {
         return NULL == config ?
-            global_config.tls_peer_private_key : config->tls_peer_private_key;
+            global_config.tls_private_key : config->tls_private_key;
     }
     
 

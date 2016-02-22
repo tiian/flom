@@ -65,8 +65,8 @@ static gint discovery_ttl = _DEFAULT_DISCOVERY_TTL;
 static gint tcp_keepalive_time = _DEFAULT_TCP_KEEPALIVE_TIME;
 static gint tcp_keepalive_intvl = _DEFAULT_TCP_KEEPALIVE_INTVL;
 static gint tcp_keepalive_probes = _DEFAULT_TCP_KEEPALIVE_PROBES;
-static gchar* tls_peer_certificate = NULL;
-static gchar* tls_peer_private_key = NULL;
+static gchar* tls_certificate = NULL;
+static gchar* tls_private_key = NULL;
 static gchar* tls_ca_certificate = NULL;
 static gboolean tls_check_peer_id = FALSE;
 static gint quiesce_exit = 0;
@@ -103,8 +103,8 @@ static GOptionEntry entries[] =
     { "tcp-keepalive-time", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_time, "Local override for SO_KEEPALIVE feature", NULL },
     { "tcp-keepalive-intvl", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_intvl, "Local override for SO_KEEPALIVE feature", NULL },
     { "tcp-keepalive-probes", 0, 0, G_OPTION_ARG_INT, &tcp_keepalive_probes, "Local override for SO_KEEPALIVE feature", NULL },
-    { "tls-peer-certificate", 0, 0, G_OPTION_ARG_STRING, &tls_peer_certificate, "Name of the file that contains the X509 certificate of this peer", NULL },
-    { "tls-peer-private-key", 0, 0, G_OPTION_ARG_STRING, &tls_peer_private_key, "Name of the file that contains the private key of this peer", NULL },
+    { "tls-certificate", 0, 0, G_OPTION_ARG_STRING, &tls_certificate, "Name of the file that contains the X509 certificate of this peer", NULL },
+    { "tls-private-key", 0, 0, G_OPTION_ARG_STRING, &tls_private_key, "Name of the file that contains the private key of this peer", NULL },
     { "tls-ca-certificate", 0, 0, G_OPTION_ARG_STRING, &tls_ca_certificate, "Name of the file that contains the X509 certificate of the certification authority that signed the certificate of this peer", NULL },
     { "tls-check-peer-id", 0, 0, G_OPTION_ARG_NONE, &tls_check_peer_id, "Check the unique id of the peer", NULL },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
@@ -275,11 +275,11 @@ int main (int argc, char *argv[])
     if (_DEFAULT_TCP_KEEPALIVE_PROBES != tcp_keepalive_probes) {
         flom_config_set_tcp_keepalive_probes(NULL, tcp_keepalive_probes);
     }
-    if (NULL != tls_peer_certificate) {
-        flom_config_set_tls_peer_certificate(NULL, tls_peer_certificate);
+    if (NULL != tls_certificate) {
+        flom_config_set_tls_certificate(NULL, tls_certificate);
     }
-    if (NULL != tls_peer_private_key) {
-        flom_config_set_tls_peer_private_key(NULL, tls_peer_private_key);
+    if (NULL != tls_private_key) {
+        flom_config_set_tls_private_key(NULL, tls_private_key);
     }
     if (NULL != tls_ca_certificate) {
         flom_config_set_tls_ca_certificate(NULL, tls_ca_certificate);

@@ -1,6 +1,5 @@
 Road map:
 
-removing hardwired filenames
 implement unique-id check
 TLS/SSL (in progress...): complete debug-feature
 Implement TLS/SSL in the real FLoM code...

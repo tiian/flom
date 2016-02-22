@@ -1,8 +1,8 @@
 LOG:
          - 1.1.2 IoGaCo, SSL/TLS
 	New option --unique-id to retrieve the FLoM unique identificator
-	New options for TLS support: --tls-peer-certificate,
-	--tls-peer-private-key, --tls-ca-certificate, --tls-check-peer-id
+	New options for TLS support: --tls-certificate,
+	--tls-private-key, --tls-ca-certificate, --tls-check-peer-id
 
 20151126 - 1.1.1 IoGaCo, release of IPv6 improvement
 	New option -n, --network-interface to specify the network interface

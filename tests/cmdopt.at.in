@@ -485,11 +485,11 @@ AT_DATA([flom.conf],
 AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_TCP_KEEPALIVE_PROBES@], [0], [expout], [ignore])
 AT_CLEANUP
 
-AT_SETUP([TLS peer certificate: --tls-peer-certificate])
+AT_SETUP([TLS certificate: --tls-certificate])
 AT_DATA([expout],
-[[[@_CONFIG_GROUP_TLS@]/@_CONFIG_KEY_TLS_PEER_CERTIFICATE@='peer_cert.pem'
+[[[@_CONFIG_GROUP_TLS@]/@_CONFIG_KEY_TLS_CERTIFICATE@='cert.pem'
 ]])
-AT_CHECK([flom --verbose --tls-peer-certificate=peer_cert.pem -- ls | grep @_CONFIG_KEY_TLS_PEER_CERTIFICATE@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --tls-certificate=cert.pem -- ls | grep @_CONFIG_KEY_TLS_CERTIFICATE@], [0], [expout], [ignore])
 AT_DATA([flom.conf],
 [[
 [@_CONFIG_GROUP_TRACE@]
@@ -497,16 +497,16 @@ AT_DATA([flom.conf],
 [@_CONFIG_GROUP_DAEMON@]
 [@_CONFIG_GROUP_NETWORK@]
 [@_CONFIG_GROUP_TLS@]
-@_CONFIG_KEY_TLS_PEER_CERTIFICATE@=peer_cert.pem
+@_CONFIG_KEY_TLS_CERTIFICATE@=cert.pem
 ]])
-AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_TLS_PEER_CERTIFICATE@], [0], [expout], [ignore])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_TLS_CERTIFICATE@], [0], [expout], [ignore])
 AT_CLEANUP
 
-AT_SETUP([TLS peer private key: --tls-peer-private-key])
+AT_SETUP([TLS private key: --tls-peer-private-key])
 AT_DATA([expout],
-[[[@_CONFIG_GROUP_TLS@]/@_CONFIG_KEY_TLS_PEER_PRIVATE_KEY@='peer_priv_key.pem'
+[[[@_CONFIG_GROUP_TLS@]/@_CONFIG_KEY_TLS_PRIVATE_KEY@='priv_key.pem'
 ]])
-AT_CHECK([flom --verbose --tls-peer-private-key=peer_priv_key.pem -- ls | grep @_CONFIG_KEY_TLS_PEER_PRIVATE_KEY@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --tls-private-key=priv_key.pem -- ls | grep @_CONFIG_KEY_TLS_PRIVATE_KEY@], [0], [expout], [ignore])
 AT_DATA([flom.conf],
 [[
 [@_CONFIG_GROUP_TRACE@]
@@ -514,9 +514,9 @@ AT_DATA([flom.conf],
 [@_CONFIG_GROUP_DAEMON@]
 [@_CONFIG_GROUP_NETWORK@]
 [@_CONFIG_GROUP_TLS@]
-@_CONFIG_KEY_TLS_PEER_PRIVATE_KEY@=peer_priv_key.pem
+@_CONFIG_KEY_TLS_PRIVATE_KEY@=priv_key.pem
 ]])
-AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_TLS_PEER_PRIVATE_KEY@], [0], [expout], [ignore])
+AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_TLS_PRIVATE_KEY@], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TLS CA certificate: --tls-ca-certificate])

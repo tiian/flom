@@ -289,14 +289,14 @@
 /* Label of "TlsCaCertificate" key inside config files */
 #undef _CONFIG_KEY_TLS_CA_CERTIFICATE
 
+/* Label of "TlsPeerCertificate" key inside config files */
+#undef _CONFIG_KEY_TLS_CERTIFICATE
+
 /* Label of "TlsSkipPeerId" key inside config files */
 #undef _CONFIG_KEY_TLS_CHECK_PEER_ID
 
-/* Label of "TlsPeerCertificate" key inside config files */
-#undef _CONFIG_KEY_TLS_PEER_CERTIFICATE
-
 /* Label of "TlsPeerPrivateKey" key inside config files */
-#undef _CONFIG_KEY_TLS_PEER_PRIVATE_KEY
+#undef _CONFIG_KEY_TLS_PRIVATE_KEY
 
 /* Label of "UnicastAddress" key inside config files */
 #undef _CONFIG_KEY_UNICAST_ADDRESS

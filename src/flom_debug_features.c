@@ -591,6 +591,7 @@ int flom_debug_features_tls_server(void)
                      , ACCEPT_ERROR
                      , TLS_ACCEPT_ERROR
                      , CONN_RECV_ERROR
+                     , NULL_OBJECT
                      , CONN_SEND_ERROR
                      , CONN_CLOSE_ERROR1
                      , CONN_CLOSE_ERROR2
@@ -598,10 +599,10 @@ int flom_debug_features_tls_server(void)
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     flom_conn_t *client_conn = NULL, *listen_conn;
+    char *unique_id = NULL;
     
     FLOM_TRACE(("flom_debug_features_tls_server\n"));
     TRY {
-        char unique_id[FLOM_TLS_UNIQUE_ID_LENGHT+1];
         char msg[100];
         size_t received = 0;
         
@@ -624,12 +625,11 @@ int flom_debug_features_tls_server(void)
             THROW(TLS_CREATE_CONTEXT_ERROR);
 
         /* set certificates */
-        /* @@@ remove hardwired names! */
         if (FLOM_RC_OK != (ret_cod = flom_tls_set_cert(
                                flom_conn_get_tls(client_conn),
-                               "/home/tiian/ssl/CA/peer1cert.pem",
-                               "/home/tiian/ssl/CA/peer1key.pem",
-                               "/home/tiian/ssl/CA/cacert.pem")))
+                               flom_config_get_tls_certificate(NULL),
+                               flom_config_get_tls_private_key(NULL),
+                               flom_config_get_tls_ca_certificate(NULL))))
             THROW(TLS_SET_CERT_ERROR);
 
         /* open an incoming connection using FLoM configuration */
@@ -668,7 +668,8 @@ int flom_debug_features_tls_server(void)
                     " bytes, '%*.*s'\n", received, received, received, msg));
 
         /* retrieving FLoM unique ID */
-        flom_tls_get_unique_id(unique_id, FLOM_TLS_UNIQUE_ID_LENGHT);
+        if (NULL == (unique_id = flom_tls_get_unique_id()))
+            THROW(NULL_OBJECT);
         
         /* replying with unique ID */
         FLOM_TRACE(("flom_debug_features_tls_server: sending " SIZE_T_FORMAT
@@ -700,6 +701,10 @@ int flom_debug_features_tls_server(void)
                 break;
             case TLS_ACCEPT_ERROR:
             case CONN_RECV_ERROR:
+                break;
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
             case CONN_SEND_ERROR:
             case CONN_CLOSE_ERROR1:
             case CONN_CLOSE_ERROR2:
@@ -711,6 +716,9 @@ int flom_debug_features_tls_server(void)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* unique id object clean-up */
+    if (NULL != unique_id)
+        g_free(unique_id);
     /* conns object clean-up */
     if (NULL != client_conn)
         flom_conn_delete(client_conn);
@@ -730,6 +738,7 @@ int flom_debug_features_tls_client(void)
                      , TLS_SET_CERT_ERROR
                      , TCP_CONNECT_ERROR
                      , TLS_CONNECT_ERROR
+                     , NULL_OBJECT
                      , CONN_SEND_ERROR
                      , CONN_RECV_ERROR
                      , CONN_CLOSE_ERROR
@@ -737,10 +746,10 @@ int flom_debug_features_tls_client(void)
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     flom_conn_t *conn = NULL;
+    char *unique_id = NULL;
         
     FLOM_TRACE(("flom_debug_features_tls_client\n"));
     TRY {
-        char unique_id[FLOM_TLS_UNIQUE_ID_LENGHT+1];
         char msg[100];
         size_t received = 0;
         
@@ -755,12 +764,11 @@ int flom_debug_features_tls_client(void)
             THROW(TLS_CREATE_CONTEXT_ERROR);
         
         /* set certificates */
-        /* @@@ remove hardwired names! */
         if (FLOM_RC_OK != (ret_cod = flom_tls_set_cert(
                                flom_conn_get_tls(conn),
-                               "/home/tiian/ssl/CA/peer2cert.pem",
-                               "/home/tiian/ssl/CA/peer2key.pem",
-                               "/home/tiian/ssl/CA/cacert.pem")))
+                               flom_config_get_tls_certificate(NULL),
+                               flom_config_get_tls_private_key(NULL),
+                               flom_config_get_tls_ca_certificate(NULL))))
             THROW(TLS_SET_CERT_ERROR);
         
         /* open an outcoming connection using FLoM configuration */
@@ -775,7 +783,8 @@ int flom_debug_features_tls_client(void)
             THROW(TLS_CONNECT_ERROR);
 
         /* retrieving FLoM unique ID */
-        flom_tls_get_unique_id(unique_id, FLOM_TLS_UNIQUE_ID_LENGHT);
+        if (NULL == (unique_id = flom_tls_get_unique_id()))
+            THROW(NULL_OBJECT);
         
         /* sending unique ID */
         FLOM_TRACE(("flom_debug_features_tls_client: sending " SIZE_T_FORMAT
@@ -806,6 +815,10 @@ int flom_debug_features_tls_client(void)
             case TLS_SET_CERT_ERROR:
             case TCP_CONNECT_ERROR:
             case TLS_CONNECT_ERROR:
+                break;
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
             case CONN_SEND_ERROR:
             case CONN_RECV_ERROR:
             case CONN_CLOSE_ERROR:
@@ -817,6 +830,9 @@ int flom_debug_features_tls_client(void)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* unique id object clean-up */
+    if (NULL != unique_id)
+        g_free(unique_id);
     /* conn object clean-up */
     if (NULL != conn)
         flom_conn_delete(conn);

@@ -120,8 +120,8 @@ const gchar *FLOM_CONFIG_KEY_TCP_KEEPALIVE_TIME = _CONFIG_KEY_TCP_KEEPALIVE_TIME
 const gchar *FLOM_CONFIG_KEY_TCP_KEEPALIVE_INTVL = _CONFIG_KEY_TCP_KEEPALIVE_INTVL;
 const gchar *FLOM_CONFIG_KEY_TCP_KEEPALIVE_PROBES = _CONFIG_KEY_TCP_KEEPALIVE_PROBES;
 const gchar *FLOM_CONFIG_GROUP_TLS = _CONFIG_GROUP_TLS;
-const gchar *FLOM_CONFIG_KEY_TLS_PEER_CERTIFICATE = _CONFIG_KEY_TLS_PEER_CERTIFICATE;
-const gchar *FLOM_CONFIG_KEY_TLS_PEER_PRIVATE_KEY = _CONFIG_KEY_TLS_PEER_PRIVATE_KEY;
+const gchar *FLOM_CONFIG_KEY_TLS_CERTIFICATE = _CONFIG_KEY_TLS_CERTIFICATE;
+const gchar *FLOM_CONFIG_KEY_TLS_PRIVATE_KEY = _CONFIG_KEY_TLS_PRIVATE_KEY;
 const gchar *FLOM_CONFIG_KEY_TLS_CA_CERTIFICATE = _CONFIG_KEY_TLS_CA_CERTIFICATE;
 const gchar *FLOM_CONFIG_KEY_TLS_CHECK_PEER_ID = _CONFIG_KEY_TLS_CHECK_PEER_ID;
 
@@ -183,8 +183,8 @@ void flom_config_reset(flom_config_t *config)
     config->tcp_keepalive_time = _DEFAULT_TCP_KEEPALIVE_TIME;
     config->tcp_keepalive_intvl = _DEFAULT_TCP_KEEPALIVE_INTVL;
     config->tcp_keepalive_probes = _DEFAULT_TCP_KEEPALIVE_PROBES;
-    config->tls_peer_certificate = NULL;
-    config->tls_peer_private_key = NULL;
+    config->tls_certificate = NULL;
+    config->tls_private_key = NULL;
     config->tls_ca_certificate = NULL;
     config->tls_check_peer_id = FALSE;
 }
@@ -366,15 +366,15 @@ void flom_config_print(flom_config_t *config)
             FLOM_CONFIG_KEY_TCP_KEEPALIVE_PROBES,
             flom_config_get_tcp_keepalive_probes(config));
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_TLS,
-            FLOM_CONFIG_KEY_TLS_PEER_CERTIFICATE,
-            NULL == flom_config_get_tls_peer_certificate(config) ?
+            FLOM_CONFIG_KEY_TLS_CERTIFICATE,
+            NULL == flom_config_get_tls_certificate(config) ?
             FLOM_EMPTY_STRING :
-            flom_config_get_tls_peer_certificate(config));
+            flom_config_get_tls_certificate(config));
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_TLS,
-            FLOM_CONFIG_KEY_TLS_PEER_PRIVATE_KEY,
-            NULL == flom_config_get_tls_peer_private_key(config) ?
+            FLOM_CONFIG_KEY_TLS_PRIVATE_KEY,
+            NULL == flom_config_get_tls_private_key(config) ?
             FLOM_EMPTY_STRING :
-            flom_config_get_tls_peer_private_key(config));
+            flom_config_get_tls_private_key(config));
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_TLS,
             FLOM_CONFIG_KEY_TLS_CA_CERTIFICATE,
             NULL == flom_config_get_tls_ca_certificate(config) ?
@@ -406,10 +406,10 @@ void flom_config_free(flom_config_t *config)
     config->multicast_address = NULL;    
     g_free(config->network_interface);
     config->network_interface = NULL;
-    g_free(config->tls_peer_certificate);
-    config->tls_peer_certificate = NULL;
-    g_free(config->tls_peer_private_key);
-    config->tls_peer_private_key = NULL;
+    g_free(config->tls_certificate);
+    config->tls_certificate = NULL;
+    g_free(config->tls_private_key);
+    config->tls_private_key = NULL;
     g_free(config->tls_ca_certificate);
     config->tls_ca_certificate = NULL;
 }
@@ -1151,11 +1151,11 @@ int flom_config_init_load(flom_config_t *config,
         /* pick-up TLS peer certificate */
         if (NULL == (value = g_key_file_get_string(
                          gkf, FLOM_CONFIG_GROUP_TLS,
-                         FLOM_CONFIG_KEY_TLS_PEER_CERTIFICATE, &error))) {
+                         FLOM_CONFIG_KEY_TLS_CERTIFICATE, &error))) {
             FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
                         "(...,%s,%s,...): code=%d, message='%s'\n",
                         FLOM_CONFIG_GROUP_TLS,
-                        FLOM_CONFIG_KEY_TLS_PEER_CERTIFICATE,
+                        FLOM_CONFIG_KEY_TLS_CERTIFICATE,
                         error->code,
                         error->message));
             g_error_free(error);
@@ -1163,19 +1163,19 @@ int flom_config_init_load(flom_config_t *config,
         } else {
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_TLS,
-                        FLOM_CONFIG_KEY_TLS_PEER_CERTIFICATE, value));
-            flom_config_set_tls_peer_certificate(config, value);
+                        FLOM_CONFIG_KEY_TLS_CERTIFICATE, value));
+            flom_config_set_tls_certificate(config, value);
             g_free(value);
             value = NULL;
         }
         /* pick-up TLS peer private key */
         if (NULL == (value = g_key_file_get_string(
                          gkf, FLOM_CONFIG_GROUP_TLS,
-                         FLOM_CONFIG_KEY_TLS_PEER_PRIVATE_KEY, &error))) {
+                         FLOM_CONFIG_KEY_TLS_PRIVATE_KEY, &error))) {
             FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
                         "(...,%s,%s,...): code=%d, message='%s'\n",
                         FLOM_CONFIG_GROUP_TLS,
-                        FLOM_CONFIG_KEY_TLS_PEER_PRIVATE_KEY,
+                        FLOM_CONFIG_KEY_TLS_PRIVATE_KEY,
                         error->code,
                         error->message));
             g_error_free(error);
@@ -1183,8 +1183,8 @@ int flom_config_init_load(flom_config_t *config,
         } else {
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_TLS,
-                        FLOM_CONFIG_KEY_TLS_PEER_PRIVATE_KEY, value));
-            flom_config_set_tls_peer_private_key(config, value);
+                        FLOM_CONFIG_KEY_TLS_PRIVATE_KEY, value));
+            flom_config_set_tls_private_key(config, value);
             g_free(value);
             value = NULL;
         }
@@ -1779,29 +1779,29 @@ void flom_config_set_tcp_keepalive_probes(flom_config_t *config, gint value)
 
 
 
-void flom_config_set_tls_peer_certificate(flom_config_t *config,
+void flom_config_set_tls_certificate(flom_config_t *config,
                                           const gchar *value)
 {
     if (NULL == config) {
-        g_free(global_config.tls_peer_certificate);
-        global_config.tls_peer_certificate = g_strdup(value);
+        g_free(global_config.tls_certificate);
+        global_config.tls_certificate = g_strdup(value);
     } else {
-        g_free(config->tls_peer_certificate);
-        config->tls_peer_certificate = g_strdup(value);
+        g_free(config->tls_certificate);
+        config->tls_certificate = g_strdup(value);
     }
 }
 
 
 
-void flom_config_set_tls_peer_private_key(flom_config_t *config,
+void flom_config_set_tls_private_key(flom_config_t *config,
                                           const gchar *value)
 {
     if (NULL == config) {
-        g_free(global_config.tls_peer_private_key);
-        global_config.tls_peer_private_key = g_strdup(value);
+        g_free(global_config.tls_private_key);
+        global_config.tls_private_key = g_strdup(value);
     } else {
-        g_free(config->tls_peer_private_key);
-        config->tls_peer_private_key = g_strdup(value);
+        g_free(config->tls_private_key);
+        config->tls_private_key = g_strdup(value);
     }
 }
 
