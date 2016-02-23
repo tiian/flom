@@ -28,6 +28,7 @@
 
 #include "flom_config.h"
 #include "flom_errors.h"
+#include "flom_syslog.h"
 #include "flom_tls.h"
 #include "flom_trace.h"
 
@@ -578,40 +579,6 @@ int flom_tls_recv(flom_tls_t *obj, void *buf, size_t len, size_t *received)
 
 
 
-int flom_tls_cert_check(flom_tls_t *obj)
-{
-    enum Exception { NO_CERTIFICATE
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-
-    X509 *peer_cert = NULL;
-    
-    FLOM_TRACE(("flom_tls_cert_check\n"));
-    TRY {
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case NO_CERTIFICATE:
-                ret_cod = FLOM_RC_NO_CERTIFICATE;
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    /* clean-up certificate object */
-    if (NULL != peer_cert)
-        X509_free(peer_cert);
-    FLOM_TRACE(("flom_tls_cert_check/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
 void flom_tls_cert_struct_delete(struct flom_tls_cert_s *s) {
     if (NULL != s->c_str) {
         g_free(s->c_str);
@@ -752,6 +719,7 @@ int flom_tls_cert_parse(flom_tls_cert_t *obj, SSL *ssl)
         if (NULL == (cert = SSL_get_peer_certificate(ssl))) {
             FLOM_TRACE(("flom_tls_cert_parse: there's no available peer "
                         "certificate\n"));
+            syslog(LOG_WARNING, FLOM_SYSLOG_FLM010W);
             THROW(NO_CERTIFICATE);
         }
 
@@ -785,6 +753,20 @@ int flom_tls_cert_parse(flom_tls_cert_t *obj, SSL *ssl)
                     STRORNULL(obj->issuer.e_str),
                     OBJ_nid2sn(NID_commonName),
                     STRORNULL(obj->issuer.cn_str)));
+        syslog(LOG_INFO, FLOM_SYSLOG_FLM011I,
+               OBJ_nid2sn(NID_countryName), STRORNULL(obj->issuer.c_str),
+               OBJ_nid2sn(NID_stateOrProvinceName),
+               STRORNULL(obj->issuer.st_str),
+               OBJ_nid2sn(NID_localityName),
+               STRORNULL(obj->issuer.l_str),
+               OBJ_nid2sn(NID_organizationName),
+               STRORNULL(obj->issuer.o_str),
+               OBJ_nid2sn(NID_organizationalUnitName),
+               STRORNULL(obj->issuer.ou_str),
+               OBJ_nid2sn(NID_pkcs9_emailAddress),
+               STRORNULL(obj->issuer.e_str),
+               OBJ_nid2sn(NID_commonName),
+               STRORNULL(obj->issuer.cn_str));
         
         /* retrieving certificate fields for subject */
         for (i=0; i<X509_NAME_entry_count(subject_name); ++i) {
@@ -812,6 +794,20 @@ int flom_tls_cert_parse(flom_tls_cert_t *obj, SSL *ssl)
                     STRORNULL(obj->subject.e_str),
                     OBJ_nid2sn(NID_commonName),
                     STRORNULL(obj->subject.cn_str)));
+        syslog(LOG_INFO, FLOM_SYSLOG_FLM012I,
+               OBJ_nid2sn(NID_countryName), STRORNULL(obj->subject.c_str),
+               OBJ_nid2sn(NID_stateOrProvinceName),
+               STRORNULL(obj->subject.st_str),
+               OBJ_nid2sn(NID_localityName),
+               STRORNULL(obj->subject.l_str),
+               OBJ_nid2sn(NID_organizationName),
+               STRORNULL(obj->subject.o_str),
+               OBJ_nid2sn(NID_organizationalUnitName),
+               STRORNULL(obj->subject.ou_str),
+               OBJ_nid2sn(NID_pkcs9_emailAddress),
+               STRORNULL(obj->subject.e_str),
+               OBJ_nid2sn(NID_commonName),
+               STRORNULL(obj->subject.cn_str));
         
         /* verify TLS/SSL chain */
         if (X509_V_OK != (verify_result = SSL_get_verify_result(ssl))) {
@@ -846,6 +842,57 @@ int flom_tls_cert_parse(flom_tls_cert_t *obj, SSL *ssl)
     }
     
     FLOM_TRACE(("flom_tls_cert_parse/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_tls_cert_check(flom_tls_t *obj, const gchar *peer_unique_id,
+                        const gchar *peer_address)
+{
+    enum Exception { NULL_OBJECT
+                     ,UNIQUE_ID_DOES_NOT_MATCH
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_tls_cert_check\n"));
+    TRY {
+        FLOM_TRACE(("flom_tls_cert_check: peer address='%s', CN='%s', peer "
+                    "unique ID='%s'\n",
+                    STRORNULL(peer_address),
+                    STRORNULL(obj->cert->subject.cn_str),
+                    STRORNULL(peer_unique_id)));
+        if (NULL == obj->cert->subject.cn_str || NULL == peer_unique_id)
+            THROW(NULL_OBJECT);
+        if (0 != strcmp(obj->cert->subject.cn_str, peer_unique_id)) {
+            FLOM_TRACE(("flom_tls_cert_check: the unique ID provided by the "
+                        "peer does not match the CN field inside the "
+                        "presented X509 certificate\n"));
+            syslog(LOG_ERR, FLOM_SYSLOG_FLM013E, peer_address, peer_unique_id,
+                   obj->cert->subject.cn_str);
+            THROW(UNIQUE_ID_DOES_NOT_MATCH);
+        }
+        syslog(LOG_INFO, FLOM_SYSLOG_FLM014I, peer_address, peer_unique_id,
+               obj->cert->subject.cn_str);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case UNIQUE_ID_DOES_NOT_MATCH:
+                ret_cod = FLOM_RC_UNIQUE_ID_DOES_NOT_MATCH;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_tls_cert_check/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

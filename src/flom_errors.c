@@ -120,6 +120,9 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_NO_CERTIFICATE:
             return "ERROR: the peer did not supply a valid certificate for a "
                 "TLS/SSL connection";
+        case FLOM_RC_UNIQUE_ID_DOES_NOT_MATCH:
+            return "ERROR: the unique ID sent by the peer does not match the "
+                "CN field inside the X509 provided certificate";
             /* system function error */
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";

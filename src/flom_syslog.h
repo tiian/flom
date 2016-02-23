@@ -67,7 +67,12 @@ extern "C" {
     "shutdown"
 #define FLOM_SYSLOG_FLM009W "FLM009W a client wants to unlock resource '%s' " \
     "but it has locked resource '%s'"
-    
+#define FLOM_SYSLOG_FLM010W "FLM010W the peer has not presented an X509 certificate"
+#define FLOM_SYSLOG_FLM011I "FLM011I X509 CA certificate fields are %s=%s/%s=%s/%s=%s/%s=%s/%s=%s/%s=%s/%s=%s"
+#define FLOM_SYSLOG_FLM012I "FLM012I X509 peer certificate fields are %s=%s/%s=%s/%s=%s/%s=%s/%s=%s/%s=%s/%s=%s"
+#define FLOM_SYSLOG_FLM013E "FLM013E peer '%s' sent unique ID '%s' that does not match che CN field '%s' inside the presented X509 certificate"
+#define FLOM_SYSLOG_FLM014I "FLM014I peer '%s' with unique ID '%s' was authenticated using CN field '%s' inside the presented X509 certificate"
+
     
 
 #ifdef __cplusplus

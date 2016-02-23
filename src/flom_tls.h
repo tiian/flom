@@ -362,11 +362,16 @@ extern "C" {
 
     
     /**
-     * Check the certificate presented by the peer
+     * Check the certificate presented by the peer: the CN in the certificate
+     * must match the unique id of the peer; @ref flom_tls_cert_parse must be
+     * called before this function
      * @param obj IN/OUT TLS object
+     * @param peer_unique_id IN unique id presented by the peer
+     * @param peer_address IN network address of the peer (source) connection
      * @return a reason code
      */
-    int flom_tls_cert_check(flom_tls_t *obj);
+    int flom_tls_cert_check(flom_tls_t *obj, const gchar *peer_unique_id,
+                            const gchar *peer_address);
 
 
 

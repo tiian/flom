@@ -179,8 +179,7 @@ int flom_conn_recv(flom_conn_t *obj, void *buf, size_t len, size_t *received,
             case INTERNAL_ERROR:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
                 break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
+            case NONE: /* return the ret_cod of the recv operation */
                 break;
             default:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;

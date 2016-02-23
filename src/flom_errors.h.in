@@ -227,6 +227,11 @@
  * The peer did not supply a valid certificate for a TLS/SSL connection
  */
 #define FLOM_RC_NO_CERTIFICATE                       -22
+/**
+ * The unique ID sent by the peer does not match the CN field inside the
+ * X509 provided certificate
+ */
+#define FLOM_RC_UNIQUE_ID_DOES_NOT_MATCH             -23
 
 
 

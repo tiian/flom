@@ -591,6 +591,7 @@ int flom_debug_features_tls_server(void)
                      , ACCEPT_ERROR
                      , TLS_ACCEPT_ERROR
                      , CONN_RECV_ERROR
+                     , TLS_CERT_CHECK_ERROR
                      , NULL_OBJECT
                      , CONN_SEND_ERROR
                      , CONN_CLOSE_ERROR1
@@ -599,7 +600,8 @@ int flom_debug_features_tls_server(void)
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     flom_conn_t *client_conn = NULL, *listen_conn;
-    char *unique_id = NULL;
+    gchar *unique_id = NULL;
+    gchar *peer_addr = NULL;
     
     FLOM_TRACE(("flom_debug_features_tls_server\n"));
     TRY {
@@ -660,6 +662,7 @@ int flom_debug_features_tls_server(void)
             THROW(TLS_ACCEPT_ERROR);
 
         /* retrieving a message */
+        memset(msg, 0 , sizeof(msg));
         if (FLOM_RC_OK != (ret_cod = flom_conn_recv(
                                client_conn, &msg, sizeof(msg), &received,
                                FLOM_NETWORK_WAIT_TIMEOUT, NULL, NULL)))
@@ -667,6 +670,16 @@ int flom_debug_features_tls_server(void)
         FLOM_TRACE(("flom_debug_features_tls_server: received " SIZE_T_FORMAT
                     " bytes, '%*.*s'\n", received, received, received, msg));
 
+        /* check the certificate presented by the peer */
+        if (flom_config_get_tls_check_peer_id(NULL)) {
+            peer_addr = flom_tcp_retrieve_peer_name(
+                flom_conn_get_tcp(client_conn));
+            if (FLOM_RC_OK != (ret_cod = flom_tls_cert_check(
+                                   flom_conn_get_tls(client_conn), msg,
+                                   peer_addr)))
+                THROW(TLS_CERT_CHECK_ERROR);
+        } /* if (flom_config_get_tls_check_peer_id(NULL)) { */
+                
         /* retrieving FLoM unique ID */
         if (NULL == (unique_id = flom_tls_get_unique_id()))
             THROW(NULL_OBJECT);
@@ -701,6 +714,7 @@ int flom_debug_features_tls_server(void)
                 break;
             case TLS_ACCEPT_ERROR:
             case CONN_RECV_ERROR:
+            case TLS_CERT_CHECK_ERROR:
                 break;
             case NULL_OBJECT:
                 ret_cod = FLOM_RC_NULL_OBJECT;
@@ -719,6 +733,9 @@ int flom_debug_features_tls_server(void)
     /* unique id object clean-up */
     if (NULL != unique_id)
         g_free(unique_id);
+    /* peer address object clean-up */
+    if (NULL != peer_addr)
+        g_free(peer_addr);
     /* conns object clean-up */
     if (NULL != client_conn)
         flom_conn_delete(client_conn);
@@ -741,12 +758,14 @@ int flom_debug_features_tls_client(void)
                      , NULL_OBJECT
                      , CONN_SEND_ERROR
                      , CONN_RECV_ERROR
+                     , TLS_CERT_CHECK_ERROR
                      , CONN_CLOSE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     flom_conn_t *conn = NULL;
-    char *unique_id = NULL;
+    gchar *unique_id = NULL;
+    gchar *peer_addr = NULL;
         
     FLOM_TRACE(("flom_debug_features_tls_client\n"));
     TRY {
@@ -794,12 +813,24 @@ int flom_debug_features_tls_client(void)
             THROW(CONN_SEND_ERROR);
 
         /* waiting the response */
+        memset(msg, 0, sizeof(msg));
         if (FLOM_RC_OK != (ret_cod = flom_conn_recv(
                                conn, &msg, sizeof(msg), &received,
                                FLOM_NETWORK_WAIT_TIMEOUT, NULL, NULL)))
             THROW(CONN_RECV_ERROR);
         FLOM_TRACE(("flom_debug_features_tls_client: received " SIZE_T_FORMAT
-                    " bytes, '%*.*s'\n", received, received, received, msg));
+                    " bytes, '%s'\n", received, msg));
+
+        /* check the certificate presented by the peer */
+        if (flom_config_get_tls_check_peer_id(NULL)) {
+            peer_addr = flom_tcp_retrieve_peer_name(
+                flom_conn_get_tcp(conn));
+            if (FLOM_RC_OK != (ret_cod = flom_tls_cert_check(
+                                   flom_conn_get_tls(conn), msg, peer_addr))) {
+                flom_conn_close(conn);
+                THROW(TLS_CERT_CHECK_ERROR);
+            }
+        } /* if (flom_config_get_tls_check_peer_id(NULL)) { */
         
         /* closing connection */
         if (FLOM_RC_OK != (ret_cod = flom_conn_close(conn)))
@@ -821,6 +852,7 @@ int flom_debug_features_tls_client(void)
                 break;
             case CONN_SEND_ERROR:
             case CONN_RECV_ERROR:
+            case TLS_CERT_CHECK_ERROR:
             case CONN_CLOSE_ERROR:
                 break;
             case NONE:
@@ -833,6 +865,9 @@ int flom_debug_features_tls_client(void)
     /* unique id object clean-up */
     if (NULL != unique_id)
         g_free(unique_id);
+    /* peer address object clean-up */
+    if (NULL != peer_addr)
+        g_free(peer_addr);
     /* conn object clean-up */
     if (NULL != conn)
         flom_conn_delete(conn);
@@ -840,4 +875,6 @@ int flom_debug_features_tls_client(void)
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
 

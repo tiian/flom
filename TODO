@@ -1,11 +1,8 @@
 Road map:
 
-implement unique-id check
-TLS/SSL (in progress...): complete debug-feature
+Implement TLS/SSL debug-feature test cases...
 Implement TLS/SSL in the real FLoM code...
-
-check command lines for unique-id
-implement different TLS levels: with unique-id, without unique-id, server only
+Implement TLS/SSL real FLoM code test cases...
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 

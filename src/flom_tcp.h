@@ -332,6 +332,16 @@ extern "C" {
     int flom_tcp_close(flom_tcp_t *obj);
 
 
+
+    /**
+     * Retrieve a string containing IP address and port of the connected
+     * peer
+     * @param obj IN TCP communication object
+     * @return a string that must be released by the caller using g_free
+     */
+    gchar *flom_tcp_retrieve_peer_name(const flom_tcp_t *obj);
+
+
     
 #ifdef __cplusplus
 }

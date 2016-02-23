@@ -476,3 +476,34 @@ int flom_tcp_close(flom_tcp_t *obj)
     return ret_cod;
 }
 
+
+
+gchar *flom_tcp_retrieve_peer_name(const flom_tcp_t *obj)
+{
+    struct sockaddr_storage sa;
+    socklen_t addrlen;
+    char host[NI_MAXHOST+1];
+    char serv[NI_MAXSERV+1];
+    int ret_cod;
+    char *tmp;
+    size_t tmp_size;
+
+    if (0 != getpeername(obj->sockfd, (struct sockaddr *)&sa, &addrlen)) {
+        FLOM_TRACE(("flom_tcp_retrieve_peer_name/getpeername: errno=%d\n",
+                    errno));
+        return NULL;
+    }
+    if (0 != (ret_cod = getnameinfo(
+                  (struct sockaddr *)&sa, addrlen,
+                  host, sizeof(host), serv, sizeof(serv),
+                  NI_NUMERICHOST|NI_NUMERICSERV))) {
+        FLOM_TRACE(("flom_tcp_retrieve_peer_name/getnameinfo: ret_cod=%d, "
+                    "errno=%d\n", ret_cod, errno));
+        return NULL;
+    }
+    tmp_size = strlen(host) + strlen(serv) + 2;
+    if (NULL != (tmp = g_try_malloc0(tmp_size))) {
+        snprintf(tmp, tmp_size, "%s/%s", host, serv);
+    }
+    return tmp;
+}
