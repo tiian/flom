@@ -4,6 +4,10 @@ export PATH
 LD_LIBRARY_PATH=@abs_top_builddir@/src/.libs:$LT_LIBRARY_PATH
 export LD_LIBRARY_PATH
 
+
+ETCPATH=@abs_top_builddir@/etc
+export ETCPATH
+
 CPPAPI=@CPPAPI@
 export CPPAPI
 JAVAAPI=@JAVAAPI@

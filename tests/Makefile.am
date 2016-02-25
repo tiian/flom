@@ -26,6 +26,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	shutdown.at \
 	incompopt.at.in \
 	debug-features.at \
+	tls.at \
 	usecase.at.in \
 	usecase-dist.at.in \
 	usecase-hier.at \
@@ -121,6 +122,7 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/shutdown.at \
 	$(srcdir)/incompopt.at \
 	$(srcdir)/debug-features.at \
+	$(srcdir)/tls.at \
 	$(srcdir)/usecase.at \
 	$(srcdir)/usecase-dist.at \
 	$(srcdir)/usecase-lt.at \

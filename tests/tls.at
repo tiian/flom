@@ -1,0 +1,6 @@
+AT_BANNER([TLS features check])
+
+AT_SETUP([Peer to peer])
+AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
+AT_CLEANUP
+
