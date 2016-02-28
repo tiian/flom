@@ -1,5 +1,6 @@
 dist_noinst_DATA = flom.conf.in
 nodist_doc_DATA = flom.conf 
+dist_doc_DATA = flom_openssl.conf
 CLEANFILES = flom.conf
 flom.conf : flom.conf.in
 	sed \

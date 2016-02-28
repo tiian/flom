@@ -120,7 +120,7 @@ Ubuntu		Python API	swig python-dev
 Ubuntu	10.04	Java API	openjdk-6-jdk
 Ubuntu	12.04	Java API	default-jdk (openjdk 6)
 Ubuntu	14.04	Java API	default-jdk (openjdk 7)
-CentOS		Basic		gcc glib2-devel dbus dbus-devel autoconf
+CentOS		Basic		gcc glib2-devel dbus dbus-devel autoconf openssl-devel
 CentOS		C++ API		gcc-c++
 CentOS		PHP API		swig php-cli php-devel
 CentOS		Python API	swig python-devel

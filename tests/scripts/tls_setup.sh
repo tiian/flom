@@ -26,22 +26,22 @@ echo "Creating certification authorities and certificates"
 create_ca () {
 	echo "Creating CA $CA"
 	mkdir -v ${CA} || exit $?
-	cp -v $ETCPATH/openssl.cnf ${CA} || exit $?
+	cp -v $ETCPATH/flom_openssl.conf ${CA} || exit $?
 	# entering first CA directory
 	cd $CA || exit $?
 	mkdir certs crl newcerts private || exit $?
 	echo "01" > serial || exit $?
 	cp /dev/null index.txt || exit $?
 	# creating CA certificate
-	openssl req -new -x509 -keyout private/cakey.pem -out cacert.pem -days 365 -config openssl.cnf -subj "/C=IT/ST=TV/L=Mogliano Veneto/O=FLoM Software/OU=R and D/CN=FLoM $CA" -passout pass:flom$CA || exit $?
+	openssl req -new -x509 -keyout private/cakey.pem -out cacert.pem -days 365 -config flom_openssl.conf -subj "/C=IT/ST=TV/L=Mogliano Veneto/O=FLoM Software/OU=R and D/CN=FLoM $CA" -passout pass:flom$CA || exit $?
 }
 
 create_cert() {
 	echo "Creating certificate for peer $PEER"
 	# creating peers' certificates
-	openssl req -nodes -new -x509 -keyout ${PEER}_${CA}_key.pem -out ${PEER}_${CA}_req.pem -days 365 -config openssl.cnf -subj "/C=IT/ST=TV/L=Mogliano Veneto/O=FLoM Software/OU=${PEER}/CN=${UNIQUE_ID}" || exit $?
+	openssl req -nodes -new -x509 -keyout ${PEER}_${CA}_key.pem -out ${PEER}_${CA}_req.pem -days 365 -config flom_openssl.conf -subj "/C=IT/ST=TV/L=Mogliano Veneto/O=FLoM Software/OU=${PEER}/CN=${UNIQUE_ID}" || exit $?
 	openssl x509 -x509toreq -in ${PEER}_${CA}_req.pem -signkey ${PEER}_${CA}_key.pem -out tmp.pem || exit $?
-	openssl ca -batch -config openssl.cnf -policy policy_anything -passin pass:flom${CA} -out ${PEER}_${CA}_cert.pem -infiles tmp.pem || exit $?
+	openssl ca -batch -config flom_openssl.conf -policy policy_anything -passin pass:flom${CA} -out ${PEER}_${CA}_cert.pem -infiles tmp.pem || exit $?
 	rm tmp.pem || exit $?
 }
 
