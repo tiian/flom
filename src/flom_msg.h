@@ -103,7 +103,7 @@ typedef enum flom_msg_state_e {
  * Current protocol level; it's used to recognize incompatible client/server
  * configuration at run-time
  */
-#define FLOM_MSG_LEVEL           2
+#define FLOM_MSG_LEVEL           3
 
 
 
@@ -132,6 +132,10 @@ typedef enum flom_msg_state_e {
  * Id assigned to verb "management"
  */
 #define FLOM_MSG_VERB_MNGMNT    5
+/**
+ * Id assigned to verb "hndshk"
+ */
+#define FLOM_MSG_VERB_HNDSHK    6
 
 /**
  * Default increment for message step
@@ -177,6 +181,10 @@ extern const gchar *FLOM_MSG_PROP_MODE;
  */
 extern const gchar *FLOM_MSG_PROP_NAME;
 /**
+ * Label used to specify "peerid" property
+ */
+extern const gchar *FLOM_MSG_PROP_PEERID;
+/**
  * Label used to specify "port" property
  */
 extern const gchar *FLOM_MSG_PROP_PORT;
@@ -216,6 +224,10 @@ extern const gchar *FLOM_MSG_TAG_NETWORK;
  * Label used to specify "resource" tag
  */
 extern const gchar *FLOM_MSG_TAG_RESOURCE;
+/**
+ * Label used to specify "session" tag
+ */
+extern const gchar *FLOM_MSG_TAG_SESSION;
 /**
  * Label used to specify "shutdown" tag
  */
@@ -442,6 +454,48 @@ struct flom_msg_body_mngmnt_8_shutdown_s {
 
 
 /**
+ * Convenience struct for @ref flom_msg_body_hndshk_8_s
+ */
+struct flom_msg_body_hndshk_8_session_s {
+    /**
+     * unique id sent by the connecting peer (client)
+     */
+    gchar     *peerid;
+};
+
+    
+
+/**
+ * Message body for verb "hndshk", step "8"
+ */
+struct flom_msg_body_hndshk_8_s {
+    struct flom_msg_body_hndshk_8_session_s   session;
+};
+
+
+
+/**
+ * Convenience struct for @ref flom_msg_body_hndshk_16_s
+ */
+struct flom_msg_body_hndshk_16_session_s {
+    /**
+     * unique id sent by the listening peer (server)
+     */
+    gchar     *peerid;
+};
+
+    
+
+/**
+ * Message body for verb "hndshk", step "16"
+ */
+struct flom_msg_body_hndshk_16_s {
+    struct flom_msg_body_hndshk_16_session_s   session;
+};
+
+
+
+/**
  * Action that can be performed by a management message
  */
 typedef enum flom_msg_mngmnt_action_e {
@@ -508,6 +562,8 @@ struct flom_msg_s {
         struct flom_msg_body_discover_8_s     discover_8;
         struct flom_msg_body_discover_16_s    discover_16;
         struct flom_msg_body_mngmnt_8_s       mngmnt_8;
+        struct flom_msg_body_hndshk_8_s       hndshk_8;
+        struct flom_msg_body_hndshk_16_s      hndshk_16;
     } body;
 };
 
@@ -759,6 +815,42 @@ extern "C" {
 
 
     /**
+     * Serialize the "hndshk_8" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int flom_msg_serialize_hndshk_8(const struct flom_msg_s *msg,
+                                    char *buffer,
+                                    size_t *offset, size_t *free_chars);
+
+
+    
+    /**
+     * Serialize the "hndshk_16" specific body part of a message
+     * @param msg IN the object must be serialized
+     * @param buffer OUT the buffer will contain the XML serialized object
+     *                   (the size has fixed size of
+     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
+     *                   null terminated
+     * @param offset IN/OUT offset must be used to start serialization inside
+     *                      the buffer
+     * @param free_chars IN/OUT remaing free chars inside the buffer
+     * @return a reason code
+     */
+    int flom_msg_serialize_hndshk_16(const struct flom_msg_s *msg,
+                                     char *buffer,
+                                     size_t *offset, size_t *free_chars);
+
+
+
+    /**
      * Display the content of a message
      * @param msg IN the message must be massaged
      * @return a reason code
@@ -809,6 +901,15 @@ extern "C" {
      * @return a reason code
      */
     int flom_msg_trace_mngmnt(const struct flom_msg_s *msg);
+
+    
+    
+    /**
+     * Display the content of a hndshk message
+     * @param msg IN the message must be massaged
+     * @return a reason code
+     */
+    int flom_msg_trace_hndshk(const struct flom_msg_s *msg);
 
     
     

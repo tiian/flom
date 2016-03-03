@@ -179,6 +179,16 @@ extern "C" {
     int flom_client_shutdown(flom_config_t *config, int immediate);
 
 
+
+    /**
+     * Initiate the client part of the peer to peer handshake
+     * @param config IN configuration object
+     * @param conn IN connection object
+     * @return a reason code
+     */
+    int flom_client_handshake(flom_config_t *config, flom_conn_t *conn);
+
+
     
 #ifdef __cplusplus
 }

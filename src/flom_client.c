@@ -80,6 +80,7 @@ int flom_client_connect(flom_config_t *config,
                      , CLIENT_DISCOVER_UDP_ERROR2
                      , INTERNAL_ERROR
                      , FCNTL_ERROR
+                     , CLIENT_HANDSHAKE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -143,6 +144,10 @@ int flom_client_connect(flom_config_t *config,
         FLOM_TRACE(("flom_client_connect: set FD_CLOEXEC to fd=%d\n",
                     flom_tcp_get_sockfd(flom_conn_get_tcp(conn))));
         
+        /* initiate connection handshake */
+        if (FLOM_RC_OK != (ret_cod = flom_client_handshake(config, conn)))
+            THROW(CLIENT_HANDSHAKE_ERROR);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -164,6 +169,8 @@ int flom_client_connect(flom_config_t *config,
                 break;
             case FCNTL_ERROR:
                 ret_cod = FLOM_RC_FCNTL_ERROR;
+                break;
+            case CLIENT_HANDSHAKE_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -337,7 +344,7 @@ int flom_client_connect_tcp(flom_config_t *config,
             THROW(SETSOCKOPT_ERROR);
         /* set connection definition object attributes */
         flom_tcp_set_socket_type(flom_conn_get_tcp(conn), SOCK_STREAM);
-        
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -1349,3 +1356,70 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int flom_client_handshake(flom_config_t *config, flom_conn_t *conn)
+{
+    enum Exception { G_STRDUP_ERROR
+                     , MSG_SERIALIZE_ERROR
+                     , MSG_SEND_ERROR
+                     , MSG_FREE_ERROR1
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    struct flom_msg_s msg;
+    
+    FLOM_TRACE(("flom_client_handshake\n"));
+    TRY {
+        char buffer[FLOM_NETWORK_BUFFER_SIZE];
+        size_t to_send;
+
+        /* initialize message */
+        flom_msg_init(&msg);
+        /* prepare a request (hndshk) message */
+        msg.header.level = FLOM_MSG_LEVEL;
+        msg.header.pvs.verb = FLOM_MSG_VERB_HNDSHK;
+        msg.header.pvs.step = FLOM_MSG_STEP_INCR;
+        
+        if (NULL == (msg.body.hndshk_8.session.peerid =
+                     g_strdup(flom_tls_get_unique_id())))
+            THROW(G_STRDUP_ERROR);
+        
+        /* serialize the request message */
+        if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(
+                               &msg, buffer, sizeof(buffer), &to_send)))
+            THROW(MSG_SERIALIZE_ERROR);
+
+        /* send the request message */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_send(conn, buffer, to_send)))
+            THROW(MSG_SEND_ERROR);
+        flom_conn_set_last_step(conn, msg.header.pvs.step);
+        
+        if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
+            THROW(MSG_FREE_ERROR1);
+        flom_msg_init(&msg);
+
+        /* @@@ restart from here, server must answer this message... */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
+            case MSG_SERIALIZE_ERROR:
+            case MSG_SEND_ERROR:
+            case MSG_FREE_ERROR1:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_client_handshake/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

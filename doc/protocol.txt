@@ -11,7 +11,7 @@ as a serialization/deserialization tool to avoid portability nightmares and
 cross platform issues (server is big endian, client is little endian or server
 is ASCII, client is EBCDIC...).
 
-Every message must have two distinctive fields in the header:
+Every message must have three distinctive fields in the header:
 - level: the level of implemented protocol
 - verb: the operation correlated to the data contained in the XML document
 - step: the progress inside the operation
@@ -40,18 +40,18 @@ verb=1 (lock)
   lifespan: N = number of milliseconds to keep the resource after last usage
 
   client->server message (ask for a lock)
-  <msg level="0" verb="1" step="8">
+  <msg level="3" verb="1" step="8" id="unique_id.....">
     <resource name="_RESOURCE" mode="5" wait="1" quantity="N" create="1"
       lifespan="5000"/>
   </msg>
 
   server->client message (answer: lock obtained/not obtained/wait)
-  <msg level="0" verb="1" step="16">
+  <msg level="3" verb="1" step="16" id="unique_id.....">
     <answer rc="0/..." element="XYZ"/>
   </msg>
 
   server->client message (answer: lock obtained)
-  <msg level="0" verb="1" step="24">
+  <msg level="3" verb="1" step="24">
     <answer rc="0/..." element="XYZ"/>
   </msg>
 
@@ -110,14 +110,14 @@ verb=4 (discover)
 
   server->client (I'm here)
   <msg level="0" verb="4" step="16">
-    <network port="X"/>
+    <network address="IPv4 or IPv6 address" port="X"/>
   </msg>
 
   Note: this is an UDP/IP communication: client sends a datagram to a 
         multicast address, server replies with a unicast datagram to sender
         address
   Note2: client extracts address from reply datagram, but port may be different
-         (use choosed different ports for TCP/IP unicast and UDP/IP multicast)
+         (choose different ports for TCP/IP unicast and UDP/IP multicast)
 
 ***************************************************************************
 
@@ -131,4 +131,25 @@ verb=5 (management)
   <msg level="0" verb="5" step="8">
     <shutdown immediate="1"/>
   </msg>
+
+***************************************************************************
+
+verb=6 (handshake hndshk)
+
+  level: message level, version
+  verb:  session -> 6
+  step:  8, 16
+
+  client->server message (session initiation & authorization if necessary)
+  <msg level="3" verb="6" step="8">
+    <session peerid="unique id of peer1"/>
+  </msg>
+
+  server->client message (session initiation & authorization if necessary)
+  <msg level="3" verb="6" step="16">
+    <session peerid="unique id of peer2"/>
+  </msg>
+
+
+
 

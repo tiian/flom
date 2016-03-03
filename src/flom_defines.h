@@ -71,6 +71,17 @@
 
 
 
+#ifndef STROREMPTY
+/**
+ * STRing OR EMPTY:
+ * it can be used to print C strings even if they could be NULL; if passed
+ * string pointer is NULL, it returns ""
+ */
+# define STROREMPTY(a)   (NULL != a ? a : "")
+#endif
+
+
+
 /**
  * This value is the null file descriptor convention
  */

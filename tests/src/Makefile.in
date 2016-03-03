@@ -345,7 +345,7 @@ dist_noinst_DATA = $(JAVA_SOURCE_FILES) $(PHP_SOURCE_FILES) \
 	$(PYTHON_SOURCE_FILES)
 
 noinst_DATA = $(MAYBE_PHPAPI) $(MAYBE_JAVAAPI)
-LDADD = ../../src/libflom.la @GLIB2_LIBS@ @OPENSSL_LIBS@
+LDADD = ../../src/libflom.la @GLIB2_LIBS@ @DBUS1_LIBS@ @OPENSSL_LIBS@
 all: all-am
 
 .SUFFIXES:
