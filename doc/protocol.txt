@@ -41,12 +41,14 @@ verb=1 (lock)
 
   client->server message (ask for a lock)
   <msg level="3" verb="1" step="8" id="unique_id.....">
+    <session peerid="unique id of peer1"/>
     <resource name="_RESOURCE" mode="5" wait="1" quantity="N" create="1"
       lifespan="5000"/>
   </msg>
 
   server->client message (answer: lock obtained/not obtained/wait)
   <msg level="3" verb="1" step="16" id="unique_id.....">
+    <session peerid="unique id of peer2"/>
     <answer rc="0/..." element="XYZ"/>
   </msg>
 
@@ -133,23 +135,4 @@ verb=5 (management)
   </msg>
 
 ***************************************************************************
-
-verb=6 (handshake hndshk)
-
-  level: message level, version
-  verb:  session -> 6
-  step:  8, 16
-
-  client->server message (session initiation & authorization if necessary)
-  <msg level="3" verb="6" step="8">
-    <session peerid="unique id of peer1"/>
-  </msg>
-
-  server->client message (session initiation & authorization if necessary)
-  <msg level="3" verb="6" step="16">
-    <session peerid="unique id of peer2"/>
-  </msg>
-
-
-
 

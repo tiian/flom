@@ -145,7 +145,6 @@ int flom_msg_free(struct flom_msg_s *msg)
                      , INVALID_STEP_PING
                      , INVALID_STEP_DISCOVER
                      , INVALID_STEP_MNGMNT
-                     , INVALID_STEP_HNDSHK
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -159,12 +158,20 @@ int flom_msg_free(struct flom_msg_s *msg)
             case FLOM_MSG_VERB_LOCK:
                 switch (msg->header.pvs.step) {
                     case FLOM_MSG_STEP_INCR:
+                        if (NULL != msg->body.lock_8.session.peerid) {
+                            g_free(msg->body.lock_8.session.peerid);
+                            msg->body.lock_16.session.peerid = NULL;
+                        }
                         if (NULL != msg->body.lock_8.resource.name) {
                             g_free(msg->body.lock_8.resource.name);
                             msg->body.lock_8.resource.name = NULL;
                         }
                         break;
                     case 2*FLOM_MSG_STEP_INCR:
+                        if (NULL != msg->body.lock_16.session.peerid) {
+                            g_free(msg->body.lock_16.session.peerid);
+                            msg->body.lock_16.session.peerid = NULL;
+                        }
                         if (NULL != msg->body.lock_16.answer.element) {
                             g_free(msg->body.lock_16.answer.element);
                             msg->body.lock_16.answer.element = NULL;
@@ -231,24 +238,6 @@ int flom_msg_free(struct flom_msg_s *msg)
                         THROW(INVALID_STEP_MNGMNT);
                 }
                 break;
-            case FLOM_MSG_VERB_HNDSHK:
-                switch (msg->header.pvs.step) {
-                    case FLOM_MSG_STEP_INCR: /* release peerid */
-                        if (NULL != msg->body.hndshk_8.session.peerid) {
-                            g_free(msg->body.hndshk_8.session.peerid);
-                            msg->body.hndshk_16.session.peerid = NULL;
-                        }
-                        break;
-                    case 2*FLOM_MSG_STEP_INCR: /* release peerid */
-                        if (NULL != msg->body.hndshk_16.session.peerid) {
-                            g_free(msg->body.hndshk_16.session.peerid);
-                            msg->body.hndshk_16.session.peerid = NULL;
-                        }
-                        break;
-                    default:
-                        THROW(INVALID_STEP_HNDSHK);
-                }
-                break;                
             default:
                 THROW(INVALID_VERB);
         } /* switch (msg->header.pvs.verb) */
@@ -261,7 +250,6 @@ int flom_msg_free(struct flom_msg_s *msg)
             case INVALID_STEP_PING:
             case INVALID_STEP_DISCOVER:
             case INVALID_STEP_MNGMNT:
-            case INVALID_STEP_HNDSHK:
             case INVALID_VERB:
                 FLOM_TRACE(("flom_msg_free: verb=%d, step=%d\n",
                             msg->header.pvs.verb, msg->header.pvs.step));
@@ -342,18 +330,6 @@ int flom_msg_check_protocol(const struct flom_msg_s *msg, int client)
                     break;
             } /* switch(msg->header.pvs.step) */
             break;
-        case FLOM_MSG_VERB_HNDSHK:
-            switch (msg->header.pvs.step) {
-                case FLOM_MSG_STEP_INCR:
-                    ret_cod = client ? TRUE : FALSE;
-                    break;
-                case 2*FLOM_MSG_STEP_INCR:
-                    ret_cod = client ? FALSE : TRUE;
-                    break;
-                default:
-                    break;
-            } /* switch (msg->header.pvs.step) */                
-            break;
         default:
             break;
     } /* switch (msg->header.pvs.verb) */
@@ -384,9 +360,6 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
                      , INVALID_DISCOVER_STEP
                      , SERIALIZE_MNGMNT_8_ERROR
                      , INVALID_MNGMNT_STEP
-                     , SERIALIZE_HNDSHK_8_ERROR
-                     , SERIALIZE_HNDSHK_16_ERROR
-                     , INVALID_HNDSHK_STEP
                      , INVALID_VERB
                      , BUFFER_TOO_SHORT3
                      , NONE } excp;
@@ -511,24 +484,6 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
                         THROW(INVALID_MNGMNT_STEP);
                 }
                 break;
-            case FLOM_MSG_VERB_HNDSHK:
-                switch (msg->header.pvs.step) {
-                    case FLOM_MSG_STEP_INCR:
-                        if (FLOM_RC_OK != (
-                                ret_cod = flom_msg_serialize_hndshk_8(
-                                    msg, buffer, &offset, &free_chars)))
-                            THROW(SERIALIZE_HNDSHK_8_ERROR);
-                        break;
-                    case 2*FLOM_MSG_STEP_INCR:
-                        if (FLOM_RC_OK != (
-                                ret_cod = flom_msg_serialize_hndshk_16(
-                                    msg, buffer, &offset, &free_chars)))
-                            THROW(SERIALIZE_HNDSHK_16_ERROR);
-                        break;
-                    default:
-                        THROW(INVALID_HNDSHK_STEP);
-                }
-                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -562,15 +517,12 @@ int flom_msg_serialize(const struct flom_msg_s *msg,
             case SERIALIZE_DISCOVER_8_ERROR:
             case SERIALIZE_DISCOVER_16_ERROR:
             case SERIALIZE_MNGMNT_8_ERROR:
-            case SERIALIZE_HNDSHK_8_ERROR:
-            case SERIALIZE_HNDSHK_16_ERROR:
                 break;
             case INVALID_LOCK_STEP:
             case INVALID_UNLOCK_STEP:
             case INVALID_PING_STEP:
             case INVALID_DISCOVER_STEP:
             case INVALID_MNGMNT_STEP:
-            case INVALID_HNDSHK_STEP:
             case INVALID_VERB:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
                 break;
@@ -596,8 +548,9 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                               size_t *offset, size_t *free_chars)
 {
     enum Exception { G_BASE64_ENCODE_ERROR
+                     , BUFFER_TOO_SHORT1
                      , INVALID_RESOURCE_TYPE
-                     , BUFFER_TOO_SHORT
+                     , BUFFER_TOO_SHORT2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     gchar *base64_resource_name = NULL;
@@ -612,6 +565,18 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                      g_base64_encode((guchar *)msg->body.lock_8.resource.name,
                                      strlen(msg->body.lock_8.resource.name))))
             THROW(G_BASE64_ENCODE_ERROR);
+        /* <session> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%s\"/>",
+                              FLOM_MSG_TAG_SESSION,
+                              FLOM_MSG_PROP_PEERID,
+                              NULL != msg->body.lock_8.session.peerid ?
+                              msg->body.lock_8.session.peerid :
+                              FLOM_EMPTY_STRING);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT1);
+        *free_chars -= used_chars;
+        *offset += used_chars;
         /* <resource> */
         frt = flom_rsrc_get_type(msg->body.lock_8.resource.name);
         switch (frt) {
@@ -682,7 +647,7 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
         } /* switch (frt) */
         
         if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT);
+            THROW(BUFFER_TOO_SHORT2);
         *free_chars -= used_chars;
         *offset += used_chars;
         
@@ -692,10 +657,13 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
             case G_BASE64_ENCODE_ERROR:
                 ret_cod = FLOM_RC_G_BASE64_ENCODE_ERROR;
                 break;
+            case BUFFER_TOO_SHORT1:
+                ret_cod = FLOM_RC_CONTAINER_FULL;
+                break;
             case INVALID_RESOURCE_TYPE:
                 ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
                 break;
-            case BUFFER_TOO_SHORT:
+            case BUFFER_TOO_SHORT2:
                 ret_cod = FLOM_RC_CONTAINER_FULL;
                 break;
             case NONE:
@@ -721,7 +689,8 @@ int flom_msg_serialize_lock_16(const struct flom_msg_s *msg,
                                char *buffer,
                                size_t *offset, size_t *free_chars)
 {
-    enum Exception { BUFFER_TOO_SHORT
+    enum Exception { BUFFER_TOO_SHORT1
+                     , BUFFER_TOO_SHORT2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -729,6 +698,18 @@ int flom_msg_serialize_lock_16(const struct flom_msg_s *msg,
     TRY {
         int used_chars;
         
+        /* <session> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%s\"/>",
+                              FLOM_MSG_TAG_SESSION,
+                              FLOM_MSG_PROP_PEERID,
+                              NULL != msg->body.lock_16.session.peerid ?
+                              msg->body.lock_16.session.peerid :
+                              FLOM_EMPTY_STRING);
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT1);
+        *free_chars -= used_chars;
+        *offset += used_chars;
         /* <answer> */
         if (NULL == msg->body.lock_16.answer.element) {
             used_chars = snprintf(buffer + *offset, *free_chars,
@@ -746,14 +727,15 @@ int flom_msg_serialize_lock_16(const struct flom_msg_s *msg,
                                   msg->body.lock_16.answer.element);
         } /* if (NULL == msg->body.lock_16.answer.element) */
         if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT);
+            THROW(BUFFER_TOO_SHORT2);
         *free_chars -= used_chars;
         *offset += used_chars;
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case BUFFER_TOO_SHORT:
+            case BUFFER_TOO_SHORT1:
+            case BUFFER_TOO_SHORT2:
                 ret_cod = FLOM_RC_CONTAINER_FULL;
                 break;
             case NONE:
@@ -1106,96 +1088,6 @@ int flom_msg_serialize_mngmnt_8(const struct flom_msg_s *msg,
 
 
 
-int flom_msg_serialize_hndshk_8(const struct flom_msg_s *msg,
-                                char *buffer,
-                                size_t *offset, size_t *free_chars)
-{
-    enum Exception { BUFFER_TOO_SHORT
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
-    FLOM_TRACE(("flom_msg_serialize_hndshk_8\n"));
-    TRY {
-        int used_chars;
-        
-        /* <session> */
-        used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%s\"/>",
-                              FLOM_MSG_TAG_NETWORK,
-                              FLOM_MSG_PROP_PEERID,
-                              NULL != msg->body.hndshk_8.session.peerid ?
-                              msg->body.hndshk_8.session.peerid :
-                              FLOM_EMPTY_STRING);
-        if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT);
-        *free_chars -= used_chars;
-        *offset += used_chars;
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case BUFFER_TOO_SHORT:
-                ret_cod = FLOM_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("flom_msg_serialize_hndshk_8/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-int flom_msg_serialize_hndshk_16(const struct flom_msg_s *msg,
-                                 char *buffer,
-                                 size_t *offset, size_t *free_chars)
-{
-    enum Exception { BUFFER_TOO_SHORT
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
-    FLOM_TRACE(("flom_msg_serialize_hndshk_16\n"));
-    TRY {
-        int used_chars;
-        
-        /* <session> */
-        used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%s\"/>",
-                              FLOM_MSG_TAG_SESSION,
-                              FLOM_MSG_PROP_PEERID,
-                              NULL != msg->body.hndshk_16.session.peerid ?
-                              msg->body.hndshk_16.session.peerid :
-                              FLOM_EMPTY_STRING);
-        if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT);
-        *free_chars -= used_chars;
-        *offset += used_chars;
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case BUFFER_TOO_SHORT:
-                ret_cod = FLOM_RC_CONTAINER_FULL;
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("flom_msg_serialize_hndshk_16/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
 int flom_msg_trace(const struct flom_msg_s *msg)
 {
     enum Exception { TRACE_LOCK_ERROR
@@ -1203,7 +1095,6 @@ int flom_msg_trace(const struct flom_msg_s *msg)
                      , TRACE_PING_ERROR
                      , TRACE_DISCOVER_ERROR
                      , TRACE_MNGMNT_ERROR
-                     , TRACE_HNDSHK_ERROR
                      , INVALID_VERB
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -1237,10 +1128,6 @@ int flom_msg_trace(const struct flom_msg_s *msg)
                 if (FLOM_RC_OK != (ret_cod = flom_msg_trace_mngmnt(msg)))
                     THROW(TRACE_MNGMNT_ERROR);
                 break;
-            case FLOM_MSG_VERB_HNDSHK: /* hndshk */
-                if (FLOM_RC_OK != (ret_cod = flom_msg_trace_hndshk(msg)))
-                    THROW(TRACE_HNDSHK_ERROR);
-                break;
             default:
                 THROW(INVALID_VERB);
         }
@@ -1253,7 +1140,6 @@ int flom_msg_trace(const struct flom_msg_s *msg)
             case TRACE_PING_ERROR:
             case TRACE_DISCOVER_ERROR:
             case TRACE_MNGMNT_ERROR:
-            case TRACE_HNDSHK_ERROR:
                 break;
             case INVALID_VERB:
                 ret_cod = FLOM_RC_INVALID_PROPERTY_VALUE;
@@ -1282,12 +1168,16 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
     TRY {
         switch (msg->header.pvs.step) {
             case FLOM_MSG_STEP_INCR:
-                FLOM_TRACE(("flom_msg_trace_lock: body[%s["
-                            "%s='%s',%s=%d,%s=%d,%s=%d,%s=%d,%s=%d]]\n",
+                FLOM_TRACE(("flom_msg_trace_lock: body["
+                            "%s[%s='%s'], "
+                            "%s[%s='%s',%s=%d,%s=%d,%s=%d,%s=%d,%s=%d]"
+                            "]\n",
+                            FLOM_MSG_TAG_SESSION,
+                            FLOM_MSG_PROP_PEERID,
+                            STROREMPTY(msg->body.lock_8.session.peerid),
                             FLOM_MSG_TAG_RESOURCE,
                             FLOM_MSG_PROP_NAME,
-                            msg->body.lock_8.resource.name != NULL ?
-                            msg->body.lock_8.resource.name : FLOM_EMPTY_STRING,
+                            STROREMPTY(msg->body.lock_8.resource.name),
                             FLOM_MSG_PROP_MODE,
                             msg->body.lock_8.resource.mode,
                             FLOM_MSG_PROP_WAIT,
@@ -1300,8 +1190,12 @@ int flom_msg_trace_lock(const struct flom_msg_s *msg)
                             msg->body.lock_8.resource.lifespan));
                 break;
             case 2*FLOM_MSG_STEP_INCR:
-                FLOM_TRACE(("flom_msg_trace_lock: body[%s["
-                            "%s=%d,%s='%s']]\n",
+                FLOM_TRACE(("flom_msg_trace_lock: body["
+                            "%s[%s='%s'], "
+                            "%s[%s=%d,%s='%s']]\n",
+                            FLOM_MSG_TAG_SESSION,
+                            FLOM_MSG_PROP_PEERID,
+                            STROREMPTY(msg->body.lock_16.session.peerid),
                             FLOM_MSG_TAG_RESOURCE,
                             FLOM_MSG_PROP_RC,
                             msg->body.lock_16.answer.rc,
@@ -1517,53 +1411,6 @@ int flom_msg_trace_mngmnt(const struct flom_msg_s *msg)
         } /* switch (excp) */
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_msg_trace_mngmnt/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-    
-int flom_msg_trace_hndshk(const struct flom_msg_s *msg)
-{
-    enum Exception { INVALID_STEP
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
-    FLOM_TRACE(("flom_msg_trace_hndshk\n"));
-    TRY {
-        switch (msg->header.pvs.step) {
-            case FLOM_MSG_STEP_INCR:
-                FLOM_TRACE(("flom_msg_trace_hndshk: body[%s["
-                            "%s='%s']]\n",
-                            FLOM_MSG_TAG_SESSION,
-                            FLOM_MSG_PROP_PEERID,
-                            STROREMPTY(msg->body.hndshk_8.session.peerid)));
-                break;
-            case 2*FLOM_MSG_STEP_INCR:
-                FLOM_TRACE(("flom_msg_trace_hndshk: body[%s["
-                            "%s='%s']]\n",
-                            FLOM_MSG_TAG_SESSION,
-                            FLOM_MSG_PROP_PEERID,
-                            STROREMPTY(msg->body.hndshk_16.session.peerid)));
-                break;
-            default:
-                THROW(INVALID_STEP);
-        }
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case INVALID_STEP:
-                ret_cod = FLOM_RC_INVALID_PROPERTY_VALUE;
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    FLOM_TRACE(("flom_msg_trace_hndshk/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -1889,7 +1736,7 @@ void flom_msg_deserialize_start_element(
                     break;
                 case session_tag:
                     /* check if this tag is OK for the current message */
-                    if (FLOM_MSG_VERB_HNDSHK == msg->header.pvs.verb &&
+                    if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb &&
                         ((FLOM_MSG_STEP_INCR == msg->header.pvs.step) ||
                          (2*FLOM_MSG_STEP_INCR == msg->header.pvs.step))) {
                         if (!strcmp(*name_cursor, FLOM_MSG_PROP_PEERID)) {
@@ -1901,9 +1748,9 @@ void flom_msg_deserialize_start_element(
                                 THROW(G_STRDUP_ERROR3);
                             }
                             if (FLOM_MSG_STEP_INCR == msg->header.pvs.step)
-                                msg->body.hndshk_8.session.peerid = tmp;
+                                msg->body.lock_8.session.peerid = tmp;
                             else
-                                msg->body.hndshk_16.session.peerid = tmp;
+                                msg->body.lock_16.session.peerid = tmp;
                         }
                     }
                     break;
@@ -2052,7 +1899,8 @@ int flom_msg_build_answer(struct flom_msg_s *msg,
                           int verb, int step, int rc, const gchar *element)
 {
     enum Exception { NULL_OBJECT
-                     , G_STRDUP_ERROR
+                     , G_STRDUP_ERROR1
+                     , G_STRDUP_ERROR2
                      , INVALID_STEP
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -2064,7 +1912,7 @@ int flom_msg_build_answer(struct flom_msg_s *msg,
             THROW(NULL_OBJECT);
         if (NULL != element &&
             NULL == (tmp_element = g_strdup(element)))
-            THROW(G_STRDUP_ERROR);
+            THROW(G_STRDUP_ERROR1);
             
         msg->state = FLOM_MSG_STATE_PARSING;
         msg->header.level = FLOM_MSG_LEVEL;
@@ -2072,6 +1920,12 @@ int flom_msg_build_answer(struct flom_msg_s *msg,
         msg->header.pvs.step = step;
         switch (step) {
             case 2*FLOM_MSG_STEP_INCR:
+                if (NULL != msg->body.lock_16.session.peerid)
+                    g_free(msg->body.lock_16.session.peerid);
+                if (NULL == (msg->body.lock_16.session.peerid =
+                             g_strdup(flom_tls_get_unique_id())))
+                    THROW(G_STRDUP_ERROR2);
+
                 msg->body.lock_16.answer.rc = rc;
                 msg->body.lock_16.answer.element = tmp_element;
                 tmp_element = NULL;
@@ -2098,7 +1952,8 @@ int flom_msg_build_answer(struct flom_msg_s *msg,
             case NULL_OBJECT:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
-            case G_STRDUP_ERROR:
+            case G_STRDUP_ERROR1:
+            case G_STRDUP_ERROR2:
                 ret_cod = FLOM_RC_G_STRDUP_ERROR;
                 break;
             case INVALID_STEP:

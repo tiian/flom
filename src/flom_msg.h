@@ -83,8 +83,8 @@ typedef enum flom_msg_state_e {
      */
     FLOM_MSG_STATE_INITIALIZED,
     /**
-     * The parser is filling the message fields, but the values are not ready to
-     * be read
+     * The parser is filling the message fields, but the values are not ready
+     * to be read
      */
     FLOM_MSG_STATE_PARSING,
     /**
@@ -132,10 +132,6 @@ typedef enum flom_msg_state_e {
  * Id assigned to verb "management"
  */
 #define FLOM_MSG_VERB_MNGMNT    5
-/**
- * Id assigned to verb "hndshk"
- */
-#define FLOM_MSG_VERB_HNDSHK    6
 
 /**
  * Default increment for message step
@@ -294,6 +290,18 @@ struct flom_msg_body_answer_s {
 /**
  * Convenience struct for @ref flom_msg_body_lock_8_s
  */
+struct flom_msg_body_lock_8_session_s {
+    /**
+     * unique id sent by the connecting peer (client)
+     */
+    gchar     *peerid;
+};
+
+    
+
+/**
+ * Convenience struct for @ref flom_msg_body_lock_8_s
+ */
 struct flom_msg_body_lock_8_resource_s {
     /**
      * name of the resource to lock
@@ -328,15 +336,29 @@ struct flom_msg_body_lock_8_resource_s {
  * Message body for verb "lock", step "8"
  */
 struct flom_msg_body_lock_8_s {
+    struct flom_msg_body_lock_8_session_s    session;
     struct flom_msg_body_lock_8_resource_s   resource;
 };
 
 
 
 /**
+ * Convenience struct for @ref flom_msg_body_hndshk_16_s
+ */
+struct flom_msg_body_lock_16_session_s {
+    /**
+     * unique id sent by the listening peer (server)
+     */
+    gchar     *peerid;
+};
+
+    
+
+/**
  * Message body for verb "lock", step "16"
  */
 struct flom_msg_body_lock_16_s {
+    struct flom_msg_body_lock_16_session_s   session;
     struct flom_msg_body_answer_s            answer;
 };
 
@@ -454,48 +476,6 @@ struct flom_msg_body_mngmnt_8_shutdown_s {
 
 
 /**
- * Convenience struct for @ref flom_msg_body_hndshk_8_s
- */
-struct flom_msg_body_hndshk_8_session_s {
-    /**
-     * unique id sent by the connecting peer (client)
-     */
-    gchar     *peerid;
-};
-
-    
-
-/**
- * Message body for verb "hndshk", step "8"
- */
-struct flom_msg_body_hndshk_8_s {
-    struct flom_msg_body_hndshk_8_session_s   session;
-};
-
-
-
-/**
- * Convenience struct for @ref flom_msg_body_hndshk_16_s
- */
-struct flom_msg_body_hndshk_16_session_s {
-    /**
-     * unique id sent by the listening peer (server)
-     */
-    gchar     *peerid;
-};
-
-    
-
-/**
- * Message body for verb "hndshk", step "16"
- */
-struct flom_msg_body_hndshk_16_s {
-    struct flom_msg_body_hndshk_16_session_s   session;
-};
-
-
-
-/**
  * Action that can be performed by a management message
  */
 typedef enum flom_msg_mngmnt_action_e {
@@ -562,8 +542,6 @@ struct flom_msg_s {
         struct flom_msg_body_discover_8_s     discover_8;
         struct flom_msg_body_discover_16_s    discover_16;
         struct flom_msg_body_mngmnt_8_s       mngmnt_8;
-        struct flom_msg_body_hndshk_8_s       hndshk_8;
-        struct flom_msg_body_hndshk_16_s      hndshk_16;
     } body;
 };
 
@@ -815,42 +793,6 @@ extern "C" {
 
 
     /**
-     * Serialize the "hndshk_8" specific body part of a message
-     * @param msg IN the object must be serialized
-     * @param buffer OUT the buffer will contain the XML serialized object
-     *                   (the size has fixed size of
-     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
-     *                   null terminated
-     * @param offset IN/OUT offset must be used to start serialization inside
-     *                      the buffer
-     * @param free_chars IN/OUT remaing free chars inside the buffer
-     * @return a reason code
-     */
-    int flom_msg_serialize_hndshk_8(const struct flom_msg_s *msg,
-                                    char *buffer,
-                                    size_t *offset, size_t *free_chars);
-
-
-    
-    /**
-     * Serialize the "hndshk_16" specific body part of a message
-     * @param msg IN the object must be serialized
-     * @param buffer OUT the buffer will contain the XML serialized object
-     *                   (the size has fixed size of
-     *                   @ref FLOM_MSG_BUFFER_SIZE bytes) and will be
-     *                   null terminated
-     * @param offset IN/OUT offset must be used to start serialization inside
-     *                      the buffer
-     * @param free_chars IN/OUT remaing free chars inside the buffer
-     * @return a reason code
-     */
-    int flom_msg_serialize_hndshk_16(const struct flom_msg_s *msg,
-                                     char *buffer,
-                                     size_t *offset, size_t *free_chars);
-
-
-
-    /**
      * Display the content of a message
      * @param msg IN the message must be massaged
      * @return a reason code
@@ -901,15 +843,6 @@ extern "C" {
      * @return a reason code
      */
     int flom_msg_trace_mngmnt(const struct flom_msg_s *msg);
-
-    
-    
-    /**
-     * Display the content of a hndshk message
-     * @param msg IN the message must be massaged
-     * @return a reason code
-     */
-    int flom_msg_trace_hndshk(const struct flom_msg_s *msg);
 
     
     
