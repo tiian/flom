@@ -849,9 +849,11 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
         msg.header.pvs.verb = FLOM_MSG_VERB_LOCK;
         msg.header.pvs.step = FLOM_MSG_STEP_INCR;
 
+        /* session */
         if (NULL == (msg.body.lock_8.session.peerid =
                      g_strdup(flom_tls_get_unique_id())))
             THROW(G_STRDUP_ERROR1);
+        /* resource */
         if (NULL == (msg.body.lock_8.resource.name =
                      g_strdup(flom_config_get_resource_name(config))))
             THROW(G_STRDUP_ERROR2);
@@ -1172,7 +1174,7 @@ int flom_client_unlock(flom_config_t *config, flom_conn_t *conn)
         msg.header.pvs.verb = FLOM_MSG_VERB_UNLOCK;
         msg.header.pvs.step = FLOM_MSG_STEP_INCR;
 
-        if (NULL == (msg.body.lock_8.resource.name =
+        if (NULL == (msg.body.unlock_8.resource.name =
                      g_strdup(flom_config_get_resource_name(config))))
             THROW(G_STRDUP_ERROR);
 
@@ -1265,6 +1267,7 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
 {
     enum Exception { DAEMON_NOT_STARTED
                      , CLIENT_CONNECT_ERROR
+                     , G_STRDUP_ERROR
                      , MSG_SERIALIZE_ERROR
                      , MSG_SEND_ERROR
                      , CLIENT_DISCONNECT_ERROR
@@ -1298,12 +1301,17 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
                 THROW(CLIENT_CONNECT_ERROR);
         } /* switch (ret_cod) */
 
-        /* prepare a shutdoen message */
+        /* prepare a shutdown message */
         /* header values */
         msg.header.level = FLOM_MSG_LEVEL;
         msg.header.pvs.verb = FLOM_MSG_VERB_MNGMNT;
         msg.header.pvs.step = FLOM_MSG_STEP_INCR;
         /* body values */
+        /* session */
+        if (NULL == (msg.body.mngmnt_8.session.peerid =
+                     g_strdup(flom_tls_get_unique_id())))
+            THROW(G_STRDUP_ERROR);
+        /* action */
         msg.body.mngmnt_8.action = FLOM_MSG_MNGMNT_ACTION_SHUTDOWN;
         msg.body.mngmnt_8.action_data.shutdown.immediate = immediate;
         
@@ -1335,6 +1343,10 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
         switch (excp) {
             case DAEMON_NOT_STARTED:
             case CLIENT_CONNECT_ERROR:
+                break;
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
             case MSG_SERIALIZE_ERROR:
             case MSG_SEND_ERROR:
             case CLIENT_DISCONNECT_ERROR:

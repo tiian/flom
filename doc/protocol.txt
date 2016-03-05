@@ -131,6 +131,7 @@ verb=5 (management)
 
   client->server message (action)
   <msg level="0" verb="5" step="8">
+    <session peerid="unique id of peer1"/>
     <shutdown immediate="1"/>
   </msg>
 

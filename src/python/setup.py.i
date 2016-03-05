@@ -11,7 +11,7 @@ flom_module = Extension('_@_FLOM_PREFIX@',
 	sources=['flom_wrap.c'],
 	library_dirs=['../.libs'],
 	runtime_library_dirs=['@libdir@'],
-	libraries=['@_FLOM_PREFIX@','@GTHREAD2_PYTHON@','@GLIB2_PYTHON@']
+	libraries=['@_FLOM_PREFIX@','@GTHREAD2_PYTHON@','@GLIB2_PYTHON@','@DBUS1_PYTHON@','@OPENSSL_PYTHON@','@CRYPTO_PYTHON@']
 	)
 
 setup (name = '@_FLOM_PREFIX@',

@@ -201,20 +201,26 @@ CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
 #GLIB2_LIBS automatically set by PKG_CHECK_MODULES macro
 
 # DBUS check
+DBUS1_PYTHON=""
 pkg-config --atleast-version=1.2.16 dbus-1
 if test $? -eq 0
 then
 	PKG_CHECK_MODULES([DBUS1], [dbus-1 >= 1.2.16])
+	DBUS1_PYTHON="dbus-1"
 	CPPFLAGS="$CPPFLAGS $DBUS1_CFLAGS"
 else
         AC_MSG_ERROR([cannot find dbus package at level 1.2.16 or higher])
 fi
 
 # OpenSSL check
+OPENSSL_PYTHON=""
+CRYPTO_PYTHON=""
 pkg-config --atleast-version=0.9.8k openssl
 if test $? -eq 0
 then
 	PKG_CHECK_MODULES([OPENSSL], [openssl >= 0.9.8k])
+	OPENSSL_PYTHON="ssl"
+	CRYPTO_PYTHON="crypto"
 	CPPFLAGS="$CPPFLAGS $OPENSSL_CFLAGS"
 else
 	AC_MSG_ERROR([cannot find openssl package at level 0.9.8k or higher])
@@ -388,6 +394,9 @@ AC_SUBST(PYTHONAPI)
 AC_SUBST(PYTHON_INCLUDES)
 AC_SUBST(GLIB2_PYTHON)
 AC_SUBST(GTHREAD2_PYTHON)
+AC_SUBST(DBUS1_PYTHON)
+AC_SUBST(OPENSSL_PYTHON)
+AC_SUBST(CRYPTO_PYTHON)
 
 # substitution of LibTool values for library version
 AC_SUBST(LT_CURRENT)

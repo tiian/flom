@@ -160,7 +160,7 @@ int flom_msg_free(struct flom_msg_s *msg)
                     case FLOM_MSG_STEP_INCR:
                         if (NULL != msg->body.lock_8.session.peerid) {
                             g_free(msg->body.lock_8.session.peerid);
-                            msg->body.lock_16.session.peerid = NULL;
+                            msg->body.lock_8.session.peerid = NULL;
                         }
                         if (NULL != msg->body.lock_8.resource.name) {
                             g_free(msg->body.lock_8.resource.name);
@@ -230,9 +230,13 @@ int flom_msg_free(struct flom_msg_s *msg)
                         THROW(INVALID_STEP_DISCOVER);
                 }
                 break;
-            case FLOM_MSG_VERB_MNGMNT: /* nothing to release */
+            case FLOM_MSG_VERB_MNGMNT:
                 switch (msg->header.pvs.step) {
-                    case FLOM_MSG_STEP_INCR: /* nothing to release */
+                    case FLOM_MSG_STEP_INCR:
+                        if (NULL != msg->body.mngmnt_8.session.peerid) {
+                            g_free(msg->body.mngmnt_8.session.peerid);
+                            msg->body.mngmnt_8.session.peerid = NULL;
+                        }
                         break;
                     default:
                         THROW(INVALID_STEP_MNGMNT);
@@ -874,8 +878,9 @@ int flom_msg_serialize_unlock_8(const struct flom_msg_s *msg,
         
         /* encode resource name using base64 encoding */
         if (NULL == (base64_resource_name =
-                     g_base64_encode((guchar *)msg->body.lock_8.resource.name,
-                                     strlen(msg->body.lock_8.resource.name))))
+                     g_base64_encode(
+                         (guchar *)msg->body.unlock_8.resource.name,
+                         strlen(msg->body.unlock_8.resource.name))))
             THROW(G_BASE64_ENCODE_ERROR);
         /* <resource> */
         used_chars = snprintf(buffer + *offset, *free_chars,
@@ -1048,7 +1053,8 @@ int flom_msg_serialize_mngmnt_8(const struct flom_msg_s *msg,
                                 char *buffer,
                                 size_t *offset, size_t *free_chars)
 {
-    enum Exception { BUFFER_TOO_SHORT
+    enum Exception { BUFFER_TOO_SHORT1
+                     , BUFFER_TOO_SHORT2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -1056,6 +1062,16 @@ int flom_msg_serialize_mngmnt_8(const struct flom_msg_s *msg,
     TRY {
         int used_chars = 0;
         
+        /* <session> */
+        used_chars = snprintf(buffer + *offset, *free_chars,
+                              "<%s %s=\"%s\"/>",
+                              FLOM_MSG_TAG_SESSION,
+                              FLOM_MSG_PROP_PEERID,
+                              STROREMPTY(msg->body.mngmnt_8.session.peerid));
+        if (used_chars >= *free_chars)
+            THROW(BUFFER_TOO_SHORT1);
+        *free_chars -= used_chars;
+        *offset += used_chars;
         /* shutdown action */
         if (FLOM_MSG_MNGMNT_ACTION_SHUTDOWN == msg->body.mngmnt_8.action) {
             used_chars = snprintf(
@@ -1064,14 +1080,15 @@ int flom_msg_serialize_mngmnt_8(const struct flom_msg_s *msg,
                 msg->body.mngmnt_8.action_data.shutdown.immediate);
         }
         if (used_chars >= *free_chars)
-            THROW(BUFFER_TOO_SHORT);
+            THROW(BUFFER_TOO_SHORT2);
         *free_chars -= used_chars;
         *offset += used_chars;
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case BUFFER_TOO_SHORT:
+            case BUFFER_TOO_SHORT1:
+            case BUFFER_TOO_SHORT2:
                 ret_cod = FLOM_RC_CONTAINER_FULL;
                 break;
             case NONE:
@@ -1388,7 +1405,13 @@ int flom_msg_trace_mngmnt(const struct flom_msg_s *msg)
                 if (FLOM_MSG_MNGMNT_ACTION_SHUTDOWN ==
                     msg->body.mngmnt_8.action) {
                     FLOM_TRACE(
-                        ("flom_msg_trace_mngmnt: body[%s[%s=%d]]\n",
+                        ("flom_msg_trace_mngmnt: body["
+                         "%s[%s='%s'], "
+                         "%s[%s=%d]"
+                         "]\n",
+                         FLOM_MSG_TAG_SESSION,
+                         FLOM_MSG_PROP_PEERID,
+                         STROREMPTY(msg->body.mngmnt_8.session.peerid),
                          FLOM_MSG_TAG_SHUTDOWN, FLOM_MSG_PROP_IMMEDIATE,
                          msg->body.mngmnt_8.action_data.shutdown.immediate));
                 }
@@ -1736,9 +1759,13 @@ void flom_msg_deserialize_start_element(
                     break;
                 case session_tag:
                     /* check if this tag is OK for the current message */
-                    if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb &&
+                    if (
+                        (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb &&
                         ((FLOM_MSG_STEP_INCR == msg->header.pvs.step) ||
-                         (2*FLOM_MSG_STEP_INCR == msg->header.pvs.step))) {
+                         (2*FLOM_MSG_STEP_INCR == msg->header.pvs.step))) ||
+                        (FLOM_MSG_VERB_MNGMNT == msg->header.pvs.verb &&
+                         FLOM_MSG_STEP_INCR == msg->header.pvs.step)
+                        ) {
                         if (!strcmp(*name_cursor, FLOM_MSG_PROP_PEERID)) {
                             gchar *tmp = g_strdup(*value_cursor);
                             if (NULL == tmp) {
@@ -1747,12 +1774,18 @@ void flom_msg_deserialize_start_element(
                                             "*value_cursor\n"));
                                 THROW(G_STRDUP_ERROR3);
                             }
-                            if (FLOM_MSG_STEP_INCR == msg->header.pvs.step)
-                                msg->body.lock_8.session.peerid = tmp;
-                            else
-                                msg->body.lock_16.session.peerid = tmp;
+                            if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb) {
+                                /* lock verb message */
+                                if (FLOM_MSG_STEP_INCR == msg->header.pvs.step)
+                                    msg->body.lock_8.session.peerid = tmp;
+                                else
+                                    msg->body.lock_16.session.peerid = tmp;
+                            } else {
+                                /* mngmnt verb message */
+                                msg->body.mngmnt_8.session.peerid = tmp;
+                            }
                         }
-                    }
+                    } 
                     break;
                 case shutdown_tag:
                     /* check if this tag is OK for the current message */
@@ -1973,5 +2006,32 @@ int flom_msg_build_answer(struct flom_msg_s *msg,
     FLOM_TRACE(("flom_msg_build_answer/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+gchar *flom_msg_get_peerid(const struct flom_msg_s *msg)
+{
+    gchar *ret = NULL;
+    FLOM_TRACE(("flom_msg_get_peerid\n"));
+    if (NULL == msg) {
+        FLOM_TRACE(("flom_msg_get_peerid: passed message is NULL!\n"));
+    } else {
+        switch (msg->header.pvs.verb) {
+            case FLOM_MSG_VERB_LOCK:
+                if (FLOM_MSG_STEP_INCR == msg->header.pvs.step)
+                    ret = msg->body.lock_8.session.peerid;
+                else if (2*FLOM_MSG_STEP_INCR == msg->header.pvs.step)
+                    ret = msg->body.lock_16.session.peerid;
+                break;
+            case FLOM_MSG_VERB_MNGMNT:
+                if (FLOM_MSG_STEP_INCR == msg->header.pvs.step)
+                    ret = msg->body.mngmnt_8.session.peerid;
+                break;
+            default:
+                break;
+        } /* switch (msg->header.pvs.verb) */
+    } /* if (NULL == msg) */
+    return ret;
 }
 

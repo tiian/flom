@@ -2,7 +2,7 @@
 AM_CPPFLAGS = @PHP_INCLUDES@ -I ..
 JAVA_PKGDIR = org/tiian/flom
 AM_LDFLAGS = -module -Wl,--no-as-needed -Wl,-lglib-2.0 -Wl,--as-needed
-libflom_java_la_LIBADD = @GLIB2_LIBS@ ../libflom.la
+libflom_java_la_LIBADD = @GLIB2_LIBS@ @DBUS1_LIBS@ @OPENSSL_LIBS@ ../libflom.la
 
 libflom_java_la_SOURCES = flom_java.c flom_java.h
 dist_noinst_HEADERS = flom_java.h

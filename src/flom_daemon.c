@@ -1163,9 +1163,17 @@ int flom_accept_loop_pollin(flom_config_t *config,
             /* check if the message is completely parsed and can be transferred
                to a slave thread (a locker) */
             if (FLOM_MSG_STATE_READY == msg->state) {
+                gchar *peerid = NULL;
                 /* check the message is protocol correct */
                 if (!flom_msg_check_protocol(msg, TRUE))
                     THROW(PROTOCOL_ERROR);
+                /* retrieve peer id */
+                if (NULL != (peerid = flom_msg_get_peerid(msg))) {
+                    FLOM_TRACE(("flom_accept_loop_pollin: peer is presenting "
+                                "itself with id='%s'\n", peerid));
+                    syslog(LOG_INFO, FLOM_SYSLOG_FLM015I, peerid,
+                           msg->header.pvs.verb, msg->header.pvs.step);
+                }
                 /* is the message a discover message? */
                 if (FLOM_MSG_VERB_DISCOVER == msg->header.pvs.verb) {
                     char host[256];

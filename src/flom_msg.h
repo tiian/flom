@@ -343,7 +343,7 @@ struct flom_msg_body_lock_8_s {
 
 
 /**
- * Convenience struct for @ref flom_msg_body_hndshk_16_s
+ * Convenience struct for @ref flom_msg_body_lock_16_s
  */
 struct flom_msg_body_lock_16_session_s {
     /**
@@ -469,6 +469,18 @@ struct flom_msg_body_discover_16_s {
 /**
  * Convenience struct for @ref flom_msg_body_mngmnt_8_s
  */
+struct flom_msg_body_mngmnt_8_session_s {
+    /**
+     * unique id sent by the connecting peer (client)
+     */
+    gchar     *peerid;
+};
+
+    
+
+/**
+ * Convenience struct for @ref flom_msg_body_mngmnt_8_s
+ */
 struct flom_msg_body_mngmnt_8_shutdown_s {
     int    immediate;
 };
@@ -499,6 +511,7 @@ typedef enum flom_msg_mngmnt_action_e {
  * Message body for verb "management", step "8"
  */
 struct flom_msg_body_mngmnt_8_s {
+    struct flom_msg_body_mngmnt_8_session_s    session;
     /**
      * management action
      */
@@ -923,7 +936,17 @@ extern "C" {
                               const gchar *element);
 
 
-                              
+
+
+    /**
+     * Retrieve, if available, the ID of the peer that sent the message
+     * @param msg IN message struct
+     * @return a reference to the peerid value stored inside msg or NULL
+     */
+    gchar *flom_msg_get_peerid(const struct flom_msg_s *msg);
+
+    
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
