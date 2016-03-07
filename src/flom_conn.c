@@ -206,6 +206,55 @@ void flom_conn_trace(const flom_conn_t *conn)
 
 
 
+int flom_conn_authenticate(flom_conn_t *conn, const gchar *peer_id,
+                           int tls_check_peer_id)
+{
+    enum Exception { TLS_CERT_CHECK_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    gchar *unique_id = NULL;
+    gchar *peer_addr = NULL;
+
+    FLOM_TRACE(("flom_conn_authenticate\n"));
+    TRY {
+        if (NULL == flom_conn_get_tls(conn)) {
+            FLOM_TRACE(("flom_conn_authenticate: this is not a TLS coonection "
+                        "and authentication can not be performed\n"));
+        } else if (tls_check_peer_id) {
+            peer_addr = flom_tcp_retrieve_peer_name(
+                flom_conn_get_tcp(conn));
+            if (FLOM_RC_OK != (ret_cod = flom_tls_cert_check(
+                                   flom_conn_get_tls(conn), peer_id,
+                                   peer_addr))) {
+                THROW(TLS_CERT_CHECK_ERROR);
+            }            
+        } /* if (tls_check_peer_id) */
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case TLS_CERT_CHECK_ERROR:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* unique id object clean-up */
+    if (NULL != unique_id)
+        g_free(unique_id);
+    /* peer address object clean-up */
+    if (NULL != peer_addr)
+        g_free(peer_addr);
+    FLOM_TRACE(("flom_conn_authenticate/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int flom_conn_set_keepalive(flom_config_t *config, int fd)
 {
     enum Exception { NULL_OBJECT

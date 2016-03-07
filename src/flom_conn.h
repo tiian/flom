@@ -366,6 +366,18 @@ extern "C" {
     void flom_conn_trace(const flom_conn_t *conn);
 
 
+
+    /**
+     * Perform connection authentication
+     * @param conn IN/OUT connection object
+     * @param peer_id IN unique ID passed by the peer during handshake
+     * @param tls_check_peer_id IN boolean value
+     * @return a reason code
+     */
+    int flom_conn_authenticate(flom_conn_t *conn, const gchar *peer_id,
+                               int tls_check_peer_id);
+
+
     
     /**
      * Set SO_KEEPALIVE and correlated parameters for the socket associated
@@ -378,6 +390,7 @@ extern "C" {
      * @return a reason code
      */
     int flom_conn_set_keepalive(flom_config_t *config, int fd);
+
 
 
     

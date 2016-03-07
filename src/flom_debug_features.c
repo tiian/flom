@@ -591,7 +591,7 @@ int flom_debug_features_tls_server(void)
                      , ACCEPT_ERROR
                      , TLS_ACCEPT_ERROR
                      , CONN_RECV_ERROR
-                     , TLS_CERT_CHECK_ERROR
+                     , CONN_AUTHENTICATE_ERROR
                      , NULL_OBJECT
                      , CONN_SEND_ERROR
                      , CONN_CLOSE_ERROR1
@@ -670,16 +670,12 @@ int flom_debug_features_tls_server(void)
         FLOM_TRACE(("flom_debug_features_tls_server: received " SIZE_T_FORMAT
                     " bytes, '%*.*s'\n", received, received, received, msg));
 
-        /* check the certificate presented by the peer */
-        if (flom_config_get_tls_check_peer_id(NULL)) {
-            peer_addr = flom_tcp_retrieve_peer_name(
-                flom_conn_get_tcp(client_conn));
-            if (FLOM_RC_OK != (ret_cod = flom_tls_cert_check(
-                                   flom_conn_get_tls(client_conn), msg,
-                                   peer_addr)))
-                THROW(TLS_CERT_CHECK_ERROR);
-        } /* if (flom_config_get_tls_check_peer_id(NULL)) { */
-                
+        /* authenticate the connection */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_authenticate(
+                               client_conn, msg,
+                               flom_config_get_tls_check_peer_id(NULL))))
+            THROW(CONN_AUTHENTICATE_ERROR);
+        
         /* retrieving FLoM unique ID */
         if (NULL == (unique_id = flom_tls_get_unique_id()))
             THROW(NULL_OBJECT);
@@ -714,7 +710,7 @@ int flom_debug_features_tls_server(void)
                 break;
             case TLS_ACCEPT_ERROR:
             case CONN_RECV_ERROR:
-            case TLS_CERT_CHECK_ERROR:
+            case CONN_AUTHENTICATE_ERROR:
                 break;
             case NULL_OBJECT:
                 ret_cod = FLOM_RC_NULL_OBJECT;
@@ -758,7 +754,7 @@ int flom_debug_features_tls_client(void)
                      , NULL_OBJECT
                      , CONN_SEND_ERROR
                      , CONN_RECV_ERROR
-                     , TLS_CERT_CHECK_ERROR
+                     , CONN_AUTHENTICATE_ERROR
                      , CONN_CLOSE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -821,16 +817,11 @@ int flom_debug_features_tls_client(void)
         FLOM_TRACE(("flom_debug_features_tls_client: received " SIZE_T_FORMAT
                     " bytes, '%s'\n", received, msg));
 
-        /* check the certificate presented by the peer */
-        if (flom_config_get_tls_check_peer_id(NULL)) {
-            peer_addr = flom_tcp_retrieve_peer_name(
-                flom_conn_get_tcp(conn));
-            if (FLOM_RC_OK != (ret_cod = flom_tls_cert_check(
-                                   flom_conn_get_tls(conn), msg, peer_addr))) {
-                flom_conn_close(conn);
-                THROW(TLS_CERT_CHECK_ERROR);
-            }
-        } /* if (flom_config_get_tls_check_peer_id(NULL)) { */
+        /* authenticate the connection */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_authenticate(
+                               conn, msg,
+                               flom_config_get_tls_check_peer_id(NULL))))
+            THROW(CONN_AUTHENTICATE_ERROR);
         
         /* closing connection */
         if (FLOM_RC_OK != (ret_cod = flom_conn_close(conn)))
@@ -852,7 +843,7 @@ int flom_debug_features_tls_client(void)
                 break;
             case CONN_SEND_ERROR:
             case CONN_RECV_ERROR:
-            case TLS_CERT_CHECK_ERROR:
+            case CONN_AUTHENTICATE_ERROR:
             case CONN_CLOSE_ERROR:
                 break;
             case NONE:

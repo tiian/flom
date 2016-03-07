@@ -80,6 +80,9 @@ int flom_client_connect(flom_config_t *config,
                      , CLIENT_DISCOVER_UDP_ERROR2
                      , INTERNAL_ERROR
                      , FCNTL_ERROR
+                     , TLS_CREATE_CONTEXT_ERROR
+                     , TLS_SET_CERT_ERROR
+                     , TLS_CONNECT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -142,6 +145,35 @@ int flom_client_connect(flom_config_t *config,
             THROW(FCNTL_ERROR);
         FLOM_TRACE(("flom_client_connect: set FD_CLOEXEC to fd=%d\n",
                     flom_tcp_get_sockfd(flom_conn_get_tcp(conn))));
+
+        /* switch to TLS? */
+        if (NULL != flom_config_get_tls_certificate(config) ||
+            NULL != flom_config_get_tls_private_key(config) ||
+            NULL != flom_config_get_tls_ca_certificate(config)) {
+            /* initialize TLS/SSL support */
+            flom_conn_init_tls(conn, TRUE);
+
+            /* create a TLS/SSL context */
+            if (FLOM_RC_OK != (ret_cod = flom_tls_context(
+                                   flom_conn_get_tls(conn))))
+                THROW(TLS_CREATE_CONTEXT_ERROR);
+            
+            /* set certificates */
+            if (FLOM_RC_OK != (
+                    ret_cod = flom_tls_set_cert(
+                        flom_conn_get_tls(conn),
+                        flom_config_get_tls_certificate(config),
+                        flom_config_get_tls_private_key(config),
+                        flom_config_get_tls_ca_certificate(config))))
+                THROW(TLS_SET_CERT_ERROR);
+            
+            /* switch the client connection to TLS */
+            if (FLOM_RC_OK != (ret_cod = flom_tls_connect(
+                                   flom_conn_get_tls(conn),
+                                   flom_tcp_get_sockfd(
+                                       flom_conn_get_tcp(conn)))))
+                THROW(TLS_CONNECT_ERROR);
+        } /* switched to TLS! */
         
         THROW(NONE);
     } CATCH {
@@ -164,6 +196,10 @@ int flom_client_connect(flom_config_t *config,
                 break;
             case FCNTL_ERROR:
                 ret_cod = FLOM_RC_FCNTL_ERROR;
+                break;
+            case TLS_CREATE_CONTEXT_ERROR:
+            case TLS_SET_CERT_ERROR:
+            case TLS_CONNECT_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

@@ -1095,6 +1095,14 @@ int flom_accept_loop_pollin(flom_config_t *config,
                 THROW(ACCEPT_ERROR);
             FLOM_TRACE(("flom_accept_loop_pollin: new client connected "
                         "with fd=%d\n", conn_fd));
+            
+            /* switch to TLS? */
+            if (NULL != flom_config_get_tls_certificate(config) ||
+                NULL != flom_config_get_tls_private_key(config) ||
+                NULL != flom_config_get_tls_ca_certificate(config)) {
+                /* @@@ restart from here: implement TLS as in debug features */
+            } /* switched to TLS! */
+            
             if (AF_INET == flom_conns_get_domain(conns)) {
                 int sock_opt = 1;
                 /* set TCP_NODELAY for socket */
