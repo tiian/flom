@@ -98,6 +98,82 @@ void flom_conn_delete(flom_conn_t *obj)
 
 
 
+int flom_conn_init(flom_conn_t *obj, int domain, int sockfd, int type,
+                   socklen_t addrlen, const struct sockaddr *sa,
+                   int main_thread)
+{
+    enum Exception { NULL_OBJECT
+                     , INVALID_DOMAIN
+                     , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("\n"));
+    TRY {
+        GMarkupParseContext *tmp_parser = NULL;
+        if (NULL == obj)
+            THROW(NULL_OBJECT);
+        
+        flom_tcp_init(&obj->tcp, NULL);
+        flom_tcp_set_domain(&obj->tcp, domain);
+        /* set address */
+        switch (domain) {
+            case AF_UNIX:
+                memcpy(flom_tcp_get_sa_un(&obj->tcp), sa,
+                       sizeof(struct sockaddr_un));
+                break;
+            case AF_INET:
+                memcpy(flom_tcp_get_sa_in(&obj->tcp), sa,
+                       sizeof(struct sockaddr_in));
+                break;
+            case AF_INET6:
+                memcpy(flom_tcp_get_sa_in6(&obj->tcp), sa,
+                       sizeof(struct sockaddr_in6));
+                break;
+            default:
+                THROW(INVALID_DOMAIN);
+        }
+        flom_tcp_set_addrlen(&obj->tcp, addrlen);
+        flom_tcp_set_sockfd(&obj->tcp, sockfd);
+        assert(SOCK_STREAM == type || SOCK_DGRAM == type);
+        flom_tcp_set_socket_type(&obj->tcp, type);
+        flom_conn_set_state(obj, main_thread ?
+                            FLOM_CONN_STATE_DAEMON : FLOM_CONN_STATE_LOCKER);
+        flom_conn_set_wait(obj, FALSE);
+        
+        /* initialize the associated parser */
+        if (NULL == (tmp_parser = g_markup_parse_context_new (
+                         &flom_msg_parser, 0,
+                         (gpointer)(obj->msg), NULL)))
+            THROW(G_MARKUP_PARSE_CONTEXT_NEW_ERROR);
+        flom_conn_set_parser(obj, tmp_parser);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case INVALID_DOMAIN:
+                ret_cod = FLOM_RC_OBJ_CORRUPTED;
+                break;
+            case G_MARKUP_PARSE_CONTEXT_NEW_ERROR:
+                ret_cod = FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_conn_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 void flom_conn_free_parser(flom_conn_t *obj)
 {
     if (NULL != obj) {

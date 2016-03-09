@@ -154,6 +154,26 @@ extern "C" {
     void flom_conn_delete(flom_conn_t *obj);
 
 
+
+    /**
+     * Initialize a connection object with network parameters
+     * @param obj IN connection object
+     * @param domain IN communication domain (AF_UNIX/AF_LOCAL, AF_INET,
+     *                  AF_INET6)
+     * @param sockfd IN TCP socket file descriptor
+     * @param type IN TCP socket type
+     * @param addrlen IN address lenght
+     * @param sa IN socket address
+     * @param main_thread IN boolean value: TRUE for daemon main thread
+     *                       (father/listener), FALSE for locker child thread
+     *                       (child/locker)
+     * @return a reason code
+     */
+    int flom_conn_init(flom_conn_t *obj, int domain, int sockfd, int type,
+                       socklen_t addrlen, const struct sockaddr *sa,
+                       int main_thread);
+
+    
     
     /**
      * Getter method for state property

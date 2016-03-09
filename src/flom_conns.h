@@ -136,21 +136,14 @@ extern "C" {
 
 
     /**
-     * Add a new connection
-     * @param conns IN/OUT connections object
-     * @param fd IN file descriptor
-     * @param type IN socket type associated to file descriptor (SOCK_STREAM,
-     *                SOCK_DGRAM)
-     * @param addr_len IN lenght of address
-     * @param sa IN address
-     * @param main_thread IN thread is asking the connection: TRUE = father
-     *        (listener) thread, FALSE = child (locker) thread
-     * @return a reason code
+     * Add a new connection to the pool
+     * @param conns IN/OUT connection pool object
+     * @param conn IN connection object to add
      */
-    int flom_conns_add(flom_conns_t *conns, int fd, int type,
-                       socklen_t addr_len, const struct sockaddr *sa,
-                       int main_thread);
-
+    static inline void flom_conns_add_conn(
+        flom_conns_t *conns, flom_conn_t *conn) {
+        g_ptr_array_add(conns->array, conn);
+    }
 
 
     

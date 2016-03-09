@@ -114,8 +114,9 @@ void flom_locker_array_del(flom_locker_array_t *lockers,
 
 gpointer flom_locker_loop(gpointer data)
 {
-    enum Exception { CONNS_CLEAN_ERROR
-                     , CONNS_ADD_ERROR
+    enum Exception { NEW_OBJ
+                     , CONN_INIT_ERROR
+                     , CONNS_CLEAN_ERROR
                      , CONNS_GET_FDS_ERROR
                      , CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
@@ -129,12 +130,13 @@ gpointer flom_locker_loop(gpointer data)
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     flom_conns_t conns;
+    flom_conn_t *conn = NULL;
     
     FLOM_TRACE(("flom_locker_loop: new thread in progress (first message)\n"));
     TRY {
         int loop = TRUE;
         struct flom_locker_s *locker = (struct flom_locker_s *)data;
-        flom_conn_t conn;
+        struct sockaddr_storage sa_storage;
 
         /* as a first action, it marks the identifier */
         locker->thread = g_thread_self();
@@ -144,14 +146,24 @@ gpointer flom_locker_loop(gpointer data)
                     flom_resource_get_type(&locker->resource)));
         /* initialize a connections object for this locker thread */
         flom_conns_init(&conns, AF_UNIX);
-        /* add the parent communication pipe to connections */
-        memset(&conn, 0, sizeof(conn));
-        if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                               &conns, locker->read_pipe, SOCK_STREAM,
+        /* create a new connection object */
+        if (NULL == (conn = flom_conn_new(NULL)))
+            THROW(NEW_OBJ);
+        FLOM_TRACE(("flom_locker_loop: allocated a new connection (%p)\n",
+                    conn));
+        /* initialize the connection */
+        memset(&sa_storage, 0, sizeof(sa_storage));
+        if (FLOM_RC_OK != (ret_cod = flom_conn_init(
+                               conn, flom_conns_get_domain(&conns),
+                               locker->read_pipe, SOCK_STREAM,
                                sizeof(struct sockaddr_storage),
-                               flom_tcp_get_sa(flom_conn_get_tcp(&conn)),
+                               (struct sockaddr *)&sa_storage,
                                FALSE)))
-            THROW(CONNS_ADD_ERROR);
+            THROW(CONN_INIT_ERROR);
+        
+        /* add the parent communication pipe to connections */
+        flom_conns_add_conn(&conns, conn);
+        conn = NULL; /* avoid connection delete from this function */
         
         while (loop) {
             int ready_fd;
@@ -257,7 +269,8 @@ gpointer flom_locker_loop(gpointer data)
                         if (FLOM_RC_OK != (ret_cod =
                                            locker->resource.clean(
                                                &locker->resource,
-                                               flom_conns_get_conn(&conns, i))))
+                                               flom_conns_get_conn(
+                                                   &conns, i))))
                             THROW(RESOURCE_CLEAN_ERROR2);
                         /* conns is no more consistent, break the loop and poll
                            again */
@@ -280,7 +293,8 @@ gpointer flom_locker_loop(gpointer data)
                         if (FLOM_RC_OK != (ret_cod =
                                            locker->resource.clean(
                                                &locker->resource,
-                                               flom_conns_get_conn(&conns, i))))
+                                               flom_conns_get_conn(
+                                                   &conns, i))))
                             THROW(RESOURCE_CLEAN_ERROR3);
                     } else {
                         /* locker termination asked by parent thread */
@@ -300,8 +314,11 @@ gpointer flom_locker_loop(gpointer data)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NEW_OBJ:
+                ret_cod = FLOM_RC_NEW_OBJ;
+                break;
+            case CONN_INIT_ERROR:
             case CONNS_CLEAN_ERROR:
-            case CONNS_ADD_ERROR:
                 break;
             case CONNS_GET_FDS_ERROR:
                 ret_cod = FLOM_RC_NULL_OBJECT;
@@ -323,6 +340,9 @@ gpointer flom_locker_loop(gpointer data)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release conn if necessary */
+    if (NULL != conn)
+        flom_conn_delete(conn);
     /* clean-up connections object */
     flom_conns_free(&conns);
     FLOM_TRACE(("flom_locker_loop/excp=%d/"

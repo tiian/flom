@@ -368,11 +368,13 @@ int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
                      , UNLINK_ERROR
                      , BIND_ERROR
                      , LISTEN_ERROR
-                     , CONNS_ADD_ERROR
+                     , NEW_OBJ
+                     , CONN_INIT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     int fd = 0;
+    flom_conn_t *conn = NULL;
     
     FLOM_TRACE(("flom_listen_local\n"));
     TRY {
@@ -390,10 +392,23 @@ int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
             THROW(BIND_ERROR);
         if (-1 == listen(fd, LISTEN_BACKLOG))
             THROW(LISTEN_ERROR);
-        if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                               conns, fd, SOCK_STREAM, sizeof(servaddr),
+        
+        /* create a new connection object */
+        if (NULL == (conn = flom_conn_new(NULL)))
+            THROW(NEW_OBJ);
+        FLOM_TRACE(("flom_listen_local: allocated a new connection "
+                    "(%p)\n", conn));
+        /* initialize the connection */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_init(
+                               conn,
+                               flom_conns_get_domain(conns),
+                               fd, SOCK_STREAM, sizeof(servaddr),
                                (struct sockaddr *)&servaddr, TRUE)))
-            THROW(CONNS_ADD_ERROR);
+            THROW(CONN_INIT_ERROR);
+        /* add connection */
+        flom_conns_add_conn(conns, conn);
+        conn = NULL; /* avoid connection delete from this function */
+        
         syslog(LOG_NOTICE, FLOM_SYSLOG_FLM000I,
                flom_config_get_socket_name(config));
         THROW(NONE);
@@ -411,7 +426,10 @@ int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
             case LISTEN_ERROR:
                 ret_cod = FLOM_RC_LISTEN_ERROR;
                 break;
-            case CONNS_ADD_ERROR:
+            case NEW_OBJ:
+                ret_cod = FLOM_RC_NEW_OBJ;
+                break;
+            case CONN_INIT_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -420,6 +438,9 @@ int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release conn if necessary */
+    if (NULL != conn)
+        flom_conn_delete(conn);
     FLOM_TRACE(("flom_listen_local/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -447,9 +468,12 @@ int flom_listen_tcp(flom_config_t *config, flom_conns_t *conns)
 int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
 {
     enum Exception { LISTEN_ERROR
-                     , CONNS_ADD_ERROR
+                     , NEW_OBJ
+                     , CONN_INIT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    flom_conn_t *conn = NULL;
 
     FLOM_TRACE(("flom_listen_tcp_configured\n"));
     TRY {
@@ -460,17 +484,32 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
         if (FLOM_RC_OK != (ret_cod = flom_tcp_listen(&tcp)))
             THROW(LISTEN_ERROR);
         
-        if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                               conns, flom_tcp_get_sockfd(&tcp),
+        /* create a new connection object */
+        if (NULL == (conn = flom_conn_new(NULL)))
+            THROW(NEW_OBJ);
+        FLOM_TRACE(("flom_listen_tcp_configured: allocated a new connection "
+                    "(%p)\n", conn));
+        /* initialize the connection */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_init(
+                               conn,
+                               flom_conns_get_domain(conns),
+                               flom_tcp_get_sockfd(&tcp),
                                SOCK_STREAM, flom_tcp_get_addrlen(&tcp),
                                flom_tcp_get_sa(&tcp), TRUE)))
-            THROW(CONNS_ADD_ERROR);
+            THROW(CONN_INIT_ERROR);
+        /* add connection */
+        flom_conns_add_conn(conns, conn);
+        conn = NULL; /* avoid connection delete from this function */
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case LISTEN_ERROR:
                 break;
-            case CONNS_ADD_ERROR:
+            case NEW_OBJ:
+                ret_cod = FLOM_RC_NEW_OBJ;
+                break;
+            case CONN_INIT_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -479,6 +518,9 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release conn if necessary */
+    if (NULL != conn)
+        flom_conn_delete(conn);
     FLOM_TRACE(("flom_listen_tcp_configured/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -495,10 +537,12 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
                      , LISTEN_ERROR
                      , GETSOCKNAME_ERROR
                      , INVALID_AI_FAMILY2
-                     , CONNS_ADD_ERROR
+                     , NEW_OBJ
+                     , CONN_INIT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int fd = FLOM_NULL_FD;
+    flom_conn_t *conn = NULL;
     
     FLOM_TRACE(("flom_listen_tcp_automatic\n"));
     TRY {
@@ -576,11 +620,21 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
         FLOM_TRACE(("flom_listen_tcp_automatic: set unicast port to value "
                     "%d\n", unicast_port));
         flom_config_set_unicast_port(config, unicast_port);
-        /* add connection to pool */
-        if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                               conns, fd, SOCK_STREAM, addrlen,
+        /* create a new connection object */
+        if (NULL == (conn = flom_conn_new(NULL)))
+            THROW(NEW_OBJ);
+        FLOM_TRACE(("flom_listen_tcp_automatic: allocated a new connection "
+                    "(%p)\n", conn));
+        /* initialize the connection */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_init(
+                               conn,
+                               flom_conns_get_domain(conns),
+                               fd, SOCK_STREAM, addrlen,
                                (struct sockaddr *)&addr, TRUE)))
-            THROW(CONNS_ADD_ERROR);
+            THROW(CONN_INIT_ERROR);
+        /* add connection */
+        flom_conns_add_conn(conns, conn);
+        conn = NULL; /* avoid connection delete from this function */
         fd = FLOM_NULL_FD; /* avoid socket close by clean-up section */
         
         THROW(NONE);
@@ -607,7 +661,10 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
             case INVALID_AI_FAMILY2:
                 ret_cod = FLOM_RC_INVALID_AI_FAMILY_ERROR;
                 break;
-            case CONNS_ADD_ERROR:
+            case NEW_OBJ:
+                ret_cod = FLOM_RC_NEW_OBJ;
+                break;
+            case CONN_INIT_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -618,6 +675,9 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
     } /* TRY-CATCH */
     if (FLOM_NULL_FD != fd)
         close(fd);
+    /* release conn if necessary */
+    if (NULL != conn)
+        flom_conn_delete(conn);
     FLOM_TRACE(("flom_listen_tcp_automatic/excp=%d/"
                 "ret_cod=%d/errno=%d ('%s')\n", excp, ret_cod, errno,
                 strerror(errno)));
@@ -633,12 +693,14 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
                      , GETADDRINFO_ERROR
                      , INVALID_AI_FAMILY_ERROR2
                      , CONNECT_ERROR
-                     , CONNS_ADD_ERROR
+                     , NEW_OBJ
+                     , CONN_INIT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     struct addrinfo *result = NULL;
     int fd = FLOM_NULL_FD;
+    flom_conn_t *conn = NULL;
     
     FLOM_TRACE(("flom_listen_udp\n"));
     TRY {
@@ -789,11 +851,20 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
             FLOM_TRACE(("flom_listen_udp: unable to use multicast\n"));
             THROW(CONNECT_ERROR);
         }
-        /* add connection */
-        if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                               conns, fd, SOCK_DGRAM, gai->ai_addrlen,
+        /* create a new connection object */
+        if (NULL == (conn = flom_conn_new(NULL)))
+            THROW(NEW_OBJ);
+        FLOM_TRACE(("flom_listen_udp: allocated a new connection (%p)\n",
+                    conn));
+        /* initialize the connection */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_init(
+                               conn, family, fd, SOCK_DGRAM, gai->ai_addrlen,
                                gai->ai_addr, TRUE)))
-            THROW(CONNS_ADD_ERROR);
+            THROW(CONN_INIT_ERROR);
+        
+        /* add connection */
+        flom_conns_add_conn(conns, conn);
+        conn = NULL; /* avoid connection delete from this function */
         fd = FLOM_NULL_FD; /* avoid socket close by clean-up section */        
         syslog(LOG_NOTICE, FLOM_SYSLOG_FLM002I,
                flom_config_get_multicast_address(config),
@@ -817,7 +888,10 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
             case CONNECT_ERROR:
                 ret_cod = FLOM_RC_CONNECT_ERROR;
                 break;
-            case CONNS_ADD_ERROR:
+            case NEW_OBJ:
+                ret_cod = FLOM_RC_NEW_OBJ;
+                break;
+            case CONN_INIT_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -826,6 +900,9 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release conn if necessary */
+    if (NULL != conn)
+        flom_conn_delete(conn);
     if (NULL != result)
         freeaddrinfo(result);
     if (FLOM_NULL_FD != fd)
@@ -1059,7 +1136,8 @@ int flom_accept_loop_pollin(flom_config_t *config,
                      , ACCEPT_ERROR
                      , SETSOCKOPT_ERROR
                      , CONN_SET_KEEPALIVE_ERROR
-                     , CONNS_ADD_ERROR
+                     , NEW_OBJ
+                     , CONN_INIT_ERROR
                      , MSG_RETRIEVE_ERROR
                      , EMPTY_MESSAGE
                      , CONNS_GET_MSG_ERROR
@@ -1073,6 +1151,8 @@ int flom_accept_loop_pollin(flom_config_t *config,
                      , ACCEPT_LOOP_TRANSFER_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    flom_conn_t *conn = NULL;
     
     FLOM_TRACE(("flom_accept_loop_pollin\n"));
     TRY {
@@ -1114,10 +1194,21 @@ int flom_accept_loop_pollin(flom_config_t *config,
                                        config, conn_fd)))
                     THROW(CONN_SET_KEEPALIVE_ERROR);
             }
-            if (FLOM_RC_OK != (ret_cod = flom_conns_add(
-                                   conns, conn_fd, SOCK_STREAM, clilen,
+            /* create a new connection object */
+            if (NULL == (conn = flom_conn_new(NULL)))
+                THROW(NEW_OBJ);
+            FLOM_TRACE(("flom_accept_loop_pollin: allocated a new connection "
+                        "(%p)\n", conn));
+            /* initialize the connection */
+            if (FLOM_RC_OK != (ret_cod = flom_conn_init(
+                                   conn,
+                                   flom_conns_get_domain(conns),
+                                   conn_fd, SOCK_STREAM, clilen,
                                    (struct sockaddr *)&cliaddr, TRUE)))
-                THROW(CONNS_ADD_ERROR);
+                THROW(CONN_INIT_ERROR);
+            /* add connection */
+            flom_conns_add_conn(conns, conn);
+            conn = NULL; /* avoid connection delete from this function */
         } else {
             char buffer[FLOM_MSG_BUFFER_SIZE];
             size_t read_bytes;
@@ -1227,7 +1318,11 @@ int flom_accept_loop_pollin(flom_config_t *config,
                 ret_cod = FLOM_RC_SETSOCKOPT_ERROR;
                 break;
             case CONN_SET_KEEPALIVE_ERROR:
-            case CONNS_ADD_ERROR:
+                break;
+            case NEW_OBJ:
+                ret_cod = FLOM_RC_NEW_OBJ;
+                break;
+            case CONN_INIT_ERROR:
             case MSG_RETRIEVE_ERROR:
                 break;
             case EMPTY_MESSAGE:
@@ -1258,6 +1353,9 @@ int flom_accept_loop_pollin(flom_config_t *config,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release conn if necessary */
+    if (NULL != conn)
+        flom_conn_delete(conn);
     FLOM_TRACE(("flom_accept_loop_pollin/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
