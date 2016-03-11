@@ -299,6 +299,12 @@ else
 fi
 AM_CONDITIONAL([COND_PYTHONAPI], [test "$PYTHONAPI" = "yes"])
 
+AC_CHECK_PROG(HAVE_DBUS_UUIDGEN, [dbus-uuidgen], [yes], [no])
+if test "$HAVE_DBUS_UUIDGEN" = "no"
+then
+	AC_MSG_ERROR([cannot find dbus-uuidgen utility])
+fi
+
 AC_DEFINE_UNQUOTED([_ES_GENERIC_ERROR], [$_ES_GENERIC_ERROR], [Exit status for generic error])
 
 AC_CHECK_HEADERS(arpa/inet.h assert.h)
