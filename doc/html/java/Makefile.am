@@ -7,6 +7,12 @@ dist_html_DATA = package-list *.html *.css
 package-list:	$(top_srcdir)/src/java/org/tiian/flom/*.java
 	javadoc $^
 
+*.html:	$(top_srcdir)/src/java/org/tiian/flom/*.java
+	touch index.html
+
+*.css:	$(top_srcdir)/src/java/org/tiian/flom/*.java
+	touch stylesheet.css
+
 uninstall-hook:
 	if test -d ${docdir}/html/java/resources; then rmdir ${docdir}/html/java/resources; fi
 	if test -d ${docdir}/html/java/org/tiian/flom; then rmdir ${docdir}/html/java/org/tiian/flom; fi

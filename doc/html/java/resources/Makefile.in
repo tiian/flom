@@ -493,6 +493,9 @@ uninstall-am: uninstall-dist_htmlDATA
 	uninstall uninstall-am uninstall-dist_htmlDATA
 
 
+inherit.gif:	$(top_srcdir)/src/java/org/tiian/flom/*.java
+	touch inherit.gif
+
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
