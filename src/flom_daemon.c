@@ -1138,13 +1138,18 @@ int flom_accept_loop_pollin(flom_config_t *config,
                      , CONN_SET_KEEPALIVE_ERROR
                      , NEW_OBJ
                      , CONN_INIT_ERROR
+                     , ACCEPT_LOOP_POLLIN_TLS_ERROR
                      , MSG_RETRIEVE_ERROR
                      , EMPTY_MESSAGE
                      , CONNS_GET_MSG_ERROR
                      , CONNS_GET_GMPC_ERROR
                      , MSG_DESERIALIZE_ERROR
-                     , CONNS_CLOSE_ERROR
+                     , CONNS_CLOSE_ERROR1
                      , PROTOCOL_ERROR
+                     , NO_TLS_CONNECTION
+                     , NULL_OBJECT
+                     , CONNS_CLOSE_ERROR2
+                     , TLS_CERT_CHECK_ERROR
                      , GETNAMEINFO_ERROR
                      , ACCEPT_DISCOVER_REPLY_ERROR
                      , DAEMON_MANAGEMENT_ERROR
@@ -1153,6 +1158,7 @@ int flom_accept_loop_pollin(flom_config_t *config,
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     flom_conn_t *conn = NULL;
+    gchar *peer_name = NULL;
     
     FLOM_TRACE(("flom_accept_loop_pollin\n"));
     TRY {
@@ -1175,13 +1181,6 @@ int flom_accept_loop_pollin(flom_config_t *config,
                 THROW(ACCEPT_ERROR);
             FLOM_TRACE(("flom_accept_loop_pollin: new client connected "
                         "with fd=%d\n", conn_fd));
-            
-            /* switch to TLS? */
-            if (NULL != flom_config_get_tls_certificate(config) ||
-                NULL != flom_config_get_tls_private_key(config) ||
-                NULL != flom_config_get_tls_ca_certificate(config)) {
-                /* @@@ restart from here: implement TLS as in debug features */
-            } /* switched to TLS! */
             
             if (AF_INET == flom_conns_get_domain(conns)) {
                 int sock_opt = 1;
@@ -1206,6 +1205,11 @@ int flom_accept_loop_pollin(flom_config_t *config,
                                    conn_fd, SOCK_STREAM, clilen,
                                    (struct sockaddr *)&cliaddr, TRUE)))
                 THROW(CONN_INIT_ERROR);
+            /* switch the connection to TLS if required by the configuration */
+            if (FLOM_RC_OK != (ret_cod = flom_accept_loop_pollin_tls(
+                                   config, conn)))
+                THROW(ACCEPT_LOOP_POLLIN_TLS_ERROR);
+            
             /* add connection */
             flom_conns_add_conn(conns, conn);
             conn = NULL; /* avoid connection delete from this function */
@@ -1257,7 +1261,7 @@ int flom_accept_loop_pollin(flom_config_t *config,
                             "is invalid, disconneting...\n", id));
                 if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
                                        conns, id)))
-                    THROW(CONNS_CLOSE_ERROR);            
+                    THROW(CONNS_CLOSE_ERROR1);
             }
             /* check if the message is completely parsed and can be transferred
                to a slave thread (a locker) */
@@ -1268,19 +1272,38 @@ int flom_accept_loop_pollin(flom_config_t *config,
                     THROW(PROTOCOL_ERROR);
                 /* retrieve peer id */
                 if (NULL != (peerid = flom_msg_get_peerid(msg))) {
-                    FLOM_TRACE(("flom_accept_loop_pollin: peer is presenting "
-                                "itself with id='%s'\n", peerid));
+                    FLOM_TRACE(("flom_accept_loop_pollin: remote peer is "
+                                "presenting itself with id='%s'\n", peerid));
                     syslog(LOG_INFO, FLOM_SYSLOG_FLM015I, peerid,
                            msg->header.pvs.verb, msg->header.pvs.step);
                 }
+                /* check peer id if requested */
+                if (FLOM_MSG_VERB_DISCOVER != msg->header.pvs.verb &&
+                    flom_config_get_tls_check_peer_id(config)) {
+                    flom_tls_t *tls = NULL;
+                    /* check it's a TLS connection; if not, maybe an internal
+                       error */
+                    if (NULL == (tls = flom_conn_get_tls(c)))
+                        THROW(NO_TLS_CONNECTION);
+                    if (NULL == (peer_name = flom_tcp_retrieve_peer_name(
+                                     flom_conn_get_tcp(c))))
+                        THROW(NULL_OBJECT);
+                    if (FLOM_RC_OK != (ret_cod = flom_tls_cert_check(
+                                           tls, peerid, peer_name))) {
+                        if (FLOM_RC_OK != (ret_cod = flom_conns_close_fd(
+                                               conns, id)))
+                            THROW(CONNS_CLOSE_ERROR2);
+                        THROW(TLS_CERT_CHECK_ERROR);
+                    }
+                } /* if (FLOM_MSG_VERB_DISCOVER != msg->header.pvs.verb) */
                 /* is the message a discover message? */
                 if (FLOM_MSG_VERB_DISCOVER == msg->header.pvs.verb) {
                     char host[256];
                     char port[25];
                     *host = *port = '\0';
                     if (-1 == getnameinfo((const struct sockaddr *)&src_addr,
-                                         addrlen, host, sizeof(host),
-                                         port, sizeof(port),
+                                          addrlen, host, sizeof(host),
+                                          port, sizeof(port),
                                           NI_DGRAM | NI_NUMERICHOST |
                                           NI_NUMERICSERV))
                         THROW(GETNAMEINFO_ERROR);
@@ -1323,6 +1346,7 @@ int flom_accept_loop_pollin(flom_config_t *config,
                 ret_cod = FLOM_RC_NEW_OBJ;
                 break;
             case CONN_INIT_ERROR:
+            case ACCEPT_LOOP_POLLIN_TLS_ERROR:
             case MSG_RETRIEVE_ERROR:
                 break;
             case EMPTY_MESSAGE:
@@ -1334,10 +1358,21 @@ int flom_accept_loop_pollin(flom_config_t *config,
             case CONNS_GET_GMPC_ERROR:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
-            case CONNS_CLOSE_ERROR:
+            case CONNS_CLOSE_ERROR1:
                 break;
             case PROTOCOL_ERROR:
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;
+                break;
+            case NO_TLS_CONNECTION:
+                ret_cod = FLOM_RC_NO_TLS_CONNECTION;
+                break;
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case CONNS_CLOSE_ERROR2:
+                break;
+            case TLS_CERT_CHECK_ERROR:
+                ret_cod = FLOM_RC_CONNECTION_CLOSED;
                 break;
             case GETNAMEINFO_ERROR:
                 ret_cod = FLOM_RC_GETNAMEINFO_ERROR;
@@ -1353,10 +1388,81 @@ int flom_accept_loop_pollin(flom_config_t *config,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release peer address if necessary */
+    if (NULL != peer_name)
+        g_free(peer_name);
     /* release conn if necessary */
     if (NULL != conn)
         flom_conn_delete(conn);
     FLOM_TRACE(("flom_accept_loop_pollin/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_accept_loop_pollin_tls(flom_config_t *config,
+                                flom_conn_t *conn)
+{
+    enum Exception { TLS_NOT_REQUIRED
+                     , TLS_CREATE_CONTEXT_ERROR
+                     , TLS_SET_CERT_ERROR
+                     , TLS_ACCEPT_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_accept_loop_pollin_tls: conn=%p\n", conn));
+    TRY {
+        /* switch to TLS? */
+        if (NULL == flom_config_get_tls_certificate(config) ||
+            NULL == flom_config_get_tls_private_key(config) ||
+            NULL == flom_config_get_tls_ca_certificate(config)) {
+            FLOM_TRACE(("flom_accept_loop_pollin_tls: TLS parameters are "
+                        "not configured, TLS will not be used for this "
+                        "connection...\n"));
+            THROW(TLS_NOT_REQUIRED);
+        }
+        
+        /* initialize TLS/SSL support */
+        flom_conn_init_tls(conn, FALSE);
+        
+        /* create a TLS/SSL context */
+        if (FLOM_RC_OK != (ret_cod = flom_tls_context(
+                               flom_conn_get_tls(conn))))
+            THROW(TLS_CREATE_CONTEXT_ERROR);
+
+        /* set certificates */
+        if (FLOM_RC_OK != (ret_cod = flom_tls_set_cert(
+                               flom_conn_get_tls(conn),
+                               flom_config_get_tls_certificate(config),
+                               flom_config_get_tls_private_key(config),
+                               flom_config_get_tls_ca_certificate(config))))
+            THROW(TLS_SET_CERT_ERROR);
+
+        /* switch the server connection to TLS */
+        if (FLOM_RC_OK != (ret_cod = flom_tls_accept(
+                               flom_conn_get_tls(conn),
+                               flom_tcp_get_sockfd(flom_conn_get_tcp(conn)))))
+            THROW(TLS_ACCEPT_ERROR);
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case TLS_NOT_REQUIRED:
+                ret_cod = FLOM_RC_OK;
+                break;
+            case TLS_CREATE_CONTEXT_ERROR:
+            case TLS_SET_CERT_ERROR:
+            case TLS_ACCEPT_ERROR:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_accept_loop_pollin_tls/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

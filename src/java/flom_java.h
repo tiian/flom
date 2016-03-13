@@ -394,6 +394,8 @@ extern "C" {
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_NO_CERTIFICATE -22L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_UNIQUE_ID_DOES_NOT_MATCH
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_UNIQUE_ID_DOES_NOT_MATCH -23L
+#undef org_tiian_flom_FlomErrorCodes_FLOM_RC_NO_TLS_CONNECTION
+#define org_tiian_flom_FlomErrorCodes_FLOM_RC_NO_TLS_CONNECTION -24L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_ACCEPT_ERROR
 #define org_tiian_flom_FlomErrorCodes_FLOM_RC_ACCEPT_ERROR -100L
 #undef org_tiian_flom_FlomErrorCodes_FLOM_RC_BIND_ERROR

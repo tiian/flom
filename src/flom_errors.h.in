@@ -232,6 +232,10 @@
  * X509 provided certificate
  */
 #define FLOM_RC_UNIQUE_ID_DOES_NOT_MATCH             -23
+/**
+ * The connection is not a TLS connection, but a TLS operation was requested
+ */
+#define FLOM_RC_NO_TLS_CONNECTION                    -24
 
 
 

@@ -169,6 +169,17 @@ extern "C" {
 
 
     /**
+     * Perform the TLS accept step for the connection (if necessary)
+     * @param config IN configuration object, NULL for global config
+     * @param conn IN/OUT conenction object
+     * @return a reason code
+     */
+    int flom_accept_loop_pollin_tls(flom_config_t *config,
+                                    flom_conn_t *conn);
+
+    
+
+    /**
      * Transfer the arrived message to a slave thread (locker)
      * @param conns IN/OUT connections object
      * @param id IN connection id

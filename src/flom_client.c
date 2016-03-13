@@ -55,6 +55,7 @@
 #include "flom_daemon.h"
 #include "flom_errors.h"
 #include "flom_msg.h"
+#include "flom_syslog.h"
 #include "flom_tcp.h"
 #include "flom_trace.h"
 
@@ -147,8 +148,8 @@ int flom_client_connect(flom_config_t *config,
                     flom_tcp_get_sockfd(flom_conn_get_tcp(conn))));
 
         /* switch to TLS? */
-        if (NULL != flom_config_get_tls_certificate(config) ||
-            NULL != flom_config_get_tls_private_key(config) ||
+        if (NULL != flom_config_get_tls_certificate(config) &&
+            NULL != flom_config_get_tls_private_key(config) &&
             NULL != flom_config_get_tls_ca_certificate(config)) {
             /* initialize TLS/SSL support */
             flom_conn_init_tls(conn, TRUE);
@@ -859,6 +860,9 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
                      , PROTOCOL_LEVEL_MISMATCH
                      , MSG_DESERIALIZE_ERROR2
                      , PROTOCOL_ERROR1
+                     , NO_TLS_CONNECTION
+                     , NULL_OBJECT
+                     , TLS_CERT_CHECK_ERROR
                      , INTERNAL_ERROR
                      , NETWORK_TIMEOUT2
                      , CONNECT_WAIT_LOCK_ERROR
@@ -870,6 +874,7 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     struct flom_msg_s msg;
+    gchar *peer_name = NULL;
     
     FLOM_TRACE(("flom_client_lock\n"));
     TRY {
@@ -877,6 +882,7 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
         size_t to_send;
         size_t to_read;
         GMarkupParseContext *tmp_parser;
+        gchar *peerid = NULL;
 
         /* initialize message */
         flom_msg_init(&msg);
@@ -957,6 +963,30 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
         if (FLOM_MSG_VERB_LOCK != msg.header.pvs.verb ||
             2*FLOM_MSG_STEP_INCR != msg.header.pvs.step)
             THROW(PROTOCOL_ERROR1);
+        /* retrieve peer id */
+        if (NULL != (peerid = flom_msg_get_peerid(&msg))) {
+            FLOM_TRACE(("flom_client_lock: remote peer is presenting "
+                        "itself with id='%s'\n", peerid));
+            syslog(LOG_INFO, FLOM_SYSLOG_FLM016I, peerid,
+                   msg.header.pvs.verb, msg.header.pvs.step);
+        }
+        
+        /* check peer id if requested */
+        if (flom_config_get_tls_check_peer_id(config)) {
+            flom_tls_t *tls = NULL;
+            /* check it's a TLS connection; if not, maybe an internal
+               error */
+            if (NULL == (tls = flom_conn_get_tls(conn)))
+                THROW(NO_TLS_CONNECTION);
+            if (NULL == (peer_name = flom_tcp_retrieve_peer_name(
+                             flom_conn_get_tcp(conn))))
+                THROW(NULL_OBJECT);
+            if (FLOM_RC_OK != (ret_cod = flom_tls_cert_check(
+                                   tls, peerid, peer_name))) {
+                THROW(TLS_CERT_CHECK_ERROR);
+            }
+        } /* if (flom_config_get_tls_check_peer_id(config)) */
+
         switch (msg.body.lock_16.answer.rc) {
             case FLOM_RC_OK:
                 /* copy element if available */
@@ -1055,6 +1085,13 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
             case PROTOCOL_ERROR1:
                 ret_cod = FLOM_RC_PROTOCOL_ERROR;
                 break;
+            case NO_TLS_CONNECTION:
+                ret_cod = FLOM_RC_NO_TLS_CONNECTION;
+                break;
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case TLS_CERT_CHECK_ERROR:
             case NETWORK_TIMEOUT2:
                 break;                
             case PROTOCOL_ERROR2:
@@ -1073,7 +1110,9 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-
+    /* release peer_name if necessary */
+    if (NULL != peer_name)
+        g_free(peer_name);
     /* release markup parser */
     flom_conn_free_parser(conn);
     if (NONE > excp)

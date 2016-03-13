@@ -1,8 +1,9 @@
 Road map:
 
-Implement TLS/SSL in the real FLoM code...
-Implement TLS/SSL real FLoM code test cases...
-Implement client code for TLS options...
+--tls-check-peer-id only if all --tls-... are set!
+Implement TLS/SSL real FLoM code test cases...: positive and negative!!!
+TLS in man page
+TLS in client API
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 
