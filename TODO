@@ -1,6 +1,5 @@
 Road map:
 
---tls-check-peer-id only if all --tls-... are set!
 Implement TLS/SSL real FLoM code test cases...: positive and negative!!!
 TLS in man page
 TLS in client API

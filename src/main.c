@@ -128,6 +128,7 @@ int main (int argc, char *argv[])
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     flom_conn_t conn;
     char *locked_element = NULL;
+    char resolved_path[PATH_MAX+1];
 
     option_context = g_option_context_new("[-- command to execute]");
     g_option_context_add_main_entries(option_context, entries, NULL);
@@ -276,17 +277,32 @@ int main (int argc, char *argv[])
         flom_config_set_tcp_keepalive_probes(NULL, tcp_keepalive_probes);
     }
     if (NULL != tls_certificate) {
-        flom_config_set_tls_certificate(NULL, tls_certificate);
+        if (NULL == realpath(tls_certificate, resolved_path)) {
+            g_printerr("tls-certificate: can't resolve path for '%s'\n",
+                       tls_certificate);
+            exit(FLOM_ES_GENERIC_ERROR);
+        }
+        flom_config_set_tls_certificate(NULL, resolved_path);
     }
     if (NULL != tls_private_key) {
-        flom_config_set_tls_private_key(NULL, tls_private_key);
+        if (NULL == realpath(tls_private_key, resolved_path)) {
+            g_printerr("tls-private-key: can't resolve path for '%s'\n",
+                       tls_private_key);
+            exit(FLOM_ES_GENERIC_ERROR);
+        }
+        flom_config_set_tls_private_key(NULL, resolved_path);
     }
     if (NULL != tls_ca_certificate) {
-        flom_config_set_tls_ca_certificate(NULL, tls_ca_certificate);
+        if (NULL == realpath(tls_ca_certificate, resolved_path)) {
+            g_printerr("tls-ca-certificate: can't resolve path for '%s'\n",
+                       tls_ca_certificate);
+            exit(FLOM_ES_GENERIC_ERROR);
+        }
+        flom_config_set_tls_ca_certificate(NULL, resolved_path);
     }
     if (tls_check_peer_id)
         flom_config_set_tls_check_peer_id(NULL, tls_check_peer_id);
-
+    
     if (NULL != append_trace_file) {
         flom_bool_value_t fbv;
         if (FLOM_BOOL_INVALID == (

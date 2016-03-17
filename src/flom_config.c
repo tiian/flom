@@ -195,6 +195,7 @@ int flom_config_check(flom_config_t *config)
 {
     enum Exception { INVALID_OPTION1
                      , INVALID_OPTION2
+                     , INVALID_OPTION3
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -260,12 +261,21 @@ int flom_config_check(flom_config_t *config)
                           frt, flom_config_get_resource_quantity(config));
             flom_config_set_resource_quantity(config, 1);
         }
-        
+        /* check peer id */
+        if (flom_config_get_tls_check_peer_id(config) &&
+            (NULL == flom_config_get_tls_certificate(config) ||
+             NULL == flom_config_get_tls_private_key(config) ||
+             NULL == flom_config_get_tls_ca_certificate(config))) {
+            g_print("ERROR: TLS check peer id can not be specified without "
+                    "full TLS configuration.\n");
+            THROW(INVALID_OPTION3);
+        }
         THROW(NONE);
     } CATCH {
         switch (excp) {
             case INVALID_OPTION1:
             case INVALID_OPTION2:
+            case INVALID_OPTION3:
                 ret_cod = FLOM_RC_INVALID_OPTION;
                 break;
             case NONE:
