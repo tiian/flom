@@ -400,11 +400,10 @@ void flom_trace_sockaddr(const char *prefix, const struct sockaddr *addr,
 
 
 
-void flom_trace_sslerr(const char *prefix)
+void flom_trace_sslerr(const char *prefix, unsigned long err)
 {
     struct tm broken_time;
     struct timeval tv;
-    unsigned long err;
     
     /* trace is closed, skipping it! */
     if (NULL == trace_file)
@@ -412,7 +411,7 @@ void flom_trace_sslerr(const char *prefix)
     /* lock the mutex */
     g_static_mutex_lock(&flom_trace_mutex);
     /* loop on errors */
-    while (SSL_ERROR_NONE != (err = ERR_get_error())) {
+    if (SSL_ERROR_NONE != err) {
         gettimeofday(&tv, NULL);
         localtime_r(&tv.tv_sec, &broken_time);
         /* default header */
@@ -426,7 +425,7 @@ void flom_trace_sslerr(const char *prefix)
         char buf[1024];
         ERR_error_string_n(err, buf, sizeof(buf));
         fprintf(trace_file, " %s\n", buf);
-    } /* while (SSL_ERROR_NONE != (err = ERR_get_error())) */
+    } /* if (SSL_ERROR_NONE != err) */
     /* remove the lock from mutex */
     g_static_mutex_unlock(&flom_trace_mutex);
 }

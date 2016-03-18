@@ -26,7 +26,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	shutdown.at \
 	incompopt.at.in \
 	debug-features.at \
-	tls.at \
+	tls.at.in \
 	usecase.at.in \
 	usecase-dist.at.in \
 	usecase-hier.at \
@@ -86,6 +86,11 @@ incompopt.at: incompopt.at.in
 	-e 's|@_ES_UNABLE_TO_EXECUTE_COMMAND[@]|$(_ES_UNABLE_TO_EXECUTE_COMMAND)|g' \
 	$< >$@
 
+tls.at: tls.at.in
+	sed \
+	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
+	$< >$@
+
 usecase.at: usecase.at.in
 	sed \
 	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
@@ -133,5 +138,5 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	mv $@.tmp $@
 
 DISTCLEANFILES = atconfig
-CLEANFILES = api.at cmdopt.at incompopt.at usecase.at usecase-dist.at \
+CLEANFILES = api.at cmdopt.at incompopt.at tls.at usecase.at usecase-dist.at \
 	usecase-lt.at

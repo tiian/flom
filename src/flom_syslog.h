@@ -74,7 +74,9 @@ extern "C" {
 #define FLOM_SYSLOG_FLM014I "FLM014I peer '%s' with unique ID '%s' was authenticated using CN field '%s' inside the presented X509 certificate"
 #define FLOM_SYSLOG_FLM015I "FLM015I a connecting peer sent id '%s' for verb %d and step %d"
 #define FLOM_SYSLOG_FLM016I "FLM016I the serving peer sent id '%s' for verb %d and step %d"
-
+#define FLOM_SYSLOG_FLM017E "FLM017E X509 certificate error, SSL_get_verify_result returned %ld"
+#define FLOM_SYSLOG_FLM018E "FLM018E X509 certificate error related to private key: %s"
+    
     
 
 #ifdef __cplusplus

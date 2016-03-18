@@ -299,10 +299,10 @@ extern unsigned long flom_trace_mask;
  * trace mask (FLOM_TRACE_MASK) specified as environment variable
  */
 #ifdef _TRACE
-# define FLOM_TRACE_SSLERR(p)    (FLOM_TRACE_MODULE & flom_trace_mask ? \
-                                  flom_trace_sslerr(p) : 0)
+# define FLOM_TRACE_SSLERR(p,e)    (FLOM_TRACE_MODULE & flom_trace_mask ? \
+                                    flom_trace_sslerr(p,e) : 0)
 #else
-# define FLOM_TRACE_SSLERR(p)
+# define FLOM_TRACE_SSLERR(p,e)
 #endif /* _TRACE */
 
 
@@ -406,8 +406,9 @@ extern "C" {
      * Dump the content of the OpenSSL error queue
      * @param prefix IN trace prefix to print before dump (it is a fixed
      *               prefix, not a format with values)
+     * @param err IN error retrieved with function ERR_get_error
      */
-    void flom_trace_sslerr(const char *prefix);
+    void flom_trace_sslerr(const char *prefix, unsigned long err);
 
 
     

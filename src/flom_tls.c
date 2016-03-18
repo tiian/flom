@@ -181,7 +181,8 @@ int flom_tls_context(flom_tls_t *obj)
 
         /* create a mew context from method */
         if (NULL == (obj->ctx = SSL_CTX_new(method))) {
-            FLOM_TRACE_SSLERR(("flom_tls_context/SSL_CTX_new:"));
+            unsigned long err = ERR_get_error();
+            FLOM_TRACE_SSLERR("flom_tls_context/SSL_CTX_new:", err);
             THROW(SSL_CTX_NEW_ERROR);
         }
         
@@ -248,8 +249,9 @@ int flom_tls_set_cert(flom_tls_t *obj, const char *cert_file,
                     "obj->ctx, '%s', SSL_FILETYPE_PEM)\n", cert_file));
         if (1 != SSL_CTX_use_certificate_file(
                 obj->ctx, cert_file, SSL_FILETYPE_PEM)) {
-            FLOM_TRACE_SSLERR(("flom_tls_set_cert/"
-                               "SSL_CTX_use_certificate_file:"));
+            unsigned long err = ERR_get_error();
+            FLOM_TRACE_SSLERR("flom_tls_set_cert/"
+                              "SSL_CTX_use_certificate_file:", err);
             THROW(SSL_CTX_USE_CERTIFICATE_FILE_ERROR);
         }
         /* adds the first private key found in file to ctx */
@@ -257,8 +259,12 @@ int flom_tls_set_cert(flom_tls_t *obj, const char *cert_file,
                     "obj->ctx, '%s', SSL_FILETYPE_PEM)\n", priv_key_file));
         if (1 != SSL_CTX_use_PrivateKey_file(
                 obj->ctx, priv_key_file, SSL_FILETYPE_PEM)) {
-            FLOM_TRACE_SSLERR(("flom_tls_set_cert/"
-                               "SSL_CTX_use_PrivateKey_file:"));
+            unsigned long err = ERR_get_error();
+            char buf[1024];
+            FLOM_TRACE_SSLERR("flom_tls_set_cert/"
+                              "SSL_CTX_use_PrivateKey_file:", err);
+            ERR_error_string_n(err, buf, sizeof(buf));
+            syslog(LOG_ERR, FLOM_SYSLOG_FLM018E, buf);
             THROW(SSL_CTX_USE_PRIVATEKEY_FILE_ERROR);
         }
         
@@ -267,8 +273,9 @@ int flom_tls_set_cert(flom_tls_t *obj, const char *cert_file,
         FLOM_TRACE(("flom_tls_set_cert: SSL_CTX_check_private_key("
                     "obj->ctx)\n"));
         if (1 != SSL_CTX_check_private_key(obj->ctx)) {
-            FLOM_TRACE_SSLERR(("flom_tls_set_cert/"
-                               "SSL_CTX_check_private_key:"));
+            unsigned long err = ERR_get_error();
+            FLOM_TRACE_SSLERR("flom_tls_set_cert/"
+                              "SSL_CTX_check_private_key:", err);
             THROW(SSL_CTX_CHECK_PRIVATE_KEY_ERROR);
         }
 
@@ -278,7 +285,8 @@ int flom_tls_set_cert(flom_tls_t *obj, const char *cert_file,
                     "obj->ctx, '%s', NULL)\n", ca_cert_file));
         if (1 != SSL_CTX_load_verify_locations(
                 obj->ctx, ca_cert_file, NULL)) {
-            FLOM_TRACE_SSLERR(("flom_tls_set_cert:"));
+            unsigned long err = ERR_get_error();
+            FLOM_TRACE_SSLERR("flom_tls_set_cert:", err);
             THROW(SSL_CTX_LOAD_VERIFY_LOCATIONS_ERROR);
         }
         
@@ -331,19 +339,22 @@ int flom_tls_prepare(flom_tls_t *obj, int sockfd)
         /* creates a new SSL structure which is needed to hold the data for
            a TLS/SSL connection */
         if (NULL == (obj->ssl = SSL_new(obj->ctx))) {
-            FLOM_TRACE_SSLERR(("flom_tls_prepare/SSL_new:"));
+            unsigned long err = ERR_get_error();
+            FLOM_TRACE_SSLERR("flom_tls_prepare/SSL_new:", err);
             THROW(SSL_NEW_ERROR);
         }
         /* sets the file descriptor sockfd as the input/output facility for
            the TLS/SSL */
         if (1 != SSL_set_fd(obj->ssl, sockfd)) {
-            FLOM_TRACE_SSLERR(("flom_tls_prepare/SSL_set_fd:"));
+            unsigned long err = ERR_get_error();
+            FLOM_TRACE_SSLERR("flom_tls_prepare/SSL_set_fd:", err);
             THROW(SSL_SET_FD_ERROR);
         }
         /* store application data at arg for idx into the ssl object */
         if (1 != SSL_set_ex_data(obj->ssl, obj->callback_data_index,
                                  &obj->callback_data)) {
-            FLOM_TRACE_SSLERR(("flom_tls_prepare/SSL_set_ex_data:"));
+            unsigned long err = ERR_get_error();
+            FLOM_TRACE_SSLERR("flom_tls_prepare/SSL_set_ex_data:", err);
             THROW(SSL_SET_EX_DATA_ERROR);
         }
         
@@ -393,7 +404,8 @@ int flom_tls_connect(flom_tls_t *obj, int sockfd)
                                    obj->ssl, SSL_connect(obj->ssl)))) {
             FLOM_TRACE(("flom_tls_connect/SSL_connect: SSL error=%d (%s)\n",
                         rc, flom_tls_get_error_label(rc)));
-            FLOM_TRACE_SSLERR(("flom_tls_connect/SSL_connect:"));
+            unsigned long err = ERR_get_error();
+            FLOM_TRACE_SSLERR("flom_tls_connect/SSL_connect:", err);
             THROW(SSL_CONNECT_ERROR);
         } else {
             FLOM_TRACE(("flom_tls_connect: connection established with %s "
@@ -449,9 +461,11 @@ int flom_tls_accept(flom_tls_t *obj, int sockfd)
         /* initiates the TLS/SSL handshake with the server */
         if (SSL_ERROR_NONE != (rc = SSL_get_error(
                                    obj->ssl, SSL_accept(obj->ssl)))) {
+            unsigned long err;
             FLOM_TRACE(("flom_tls_accept/SSL_accept: SSL error=%d (%s)\n",
                         rc, flom_tls_get_error_label(rc)));
-            FLOM_TRACE_SSLERR(("flom_tls_accept/SSL_accept:"));
+            err = ERR_get_error();
+            FLOM_TRACE_SSLERR("flom_tls_accept/SSL_accept:", err);
             THROW(SSL_ACCEPT_ERROR);
         } else {
             FLOM_TRACE(("flom_tls_accepted: connection accepted with %s "
@@ -502,10 +516,12 @@ int flom_tls_send(flom_tls_t *obj, const void *buf, size_t len)
 
         sent_bytes = SSL_write(obj->ssl, buf, (int)len);
         if (0 >= sent_bytes) {
+            unsigned long err;
             ssl_rc = SSL_get_error(obj->ssl, sent_bytes);
             FLOM_TRACE(("flom_tls_send/SSL_write: SSL error=%d (%s)\n",
                         ssl_rc, flom_tls_get_error_label(ssl_rc)));
-            FLOM_TRACE_SSLERR(("flom_tls_send/SSL_write:"));
+            err = ERR_get_error();
+            FLOM_TRACE_SSLERR("flom_tls_send/SSL_write:", err);
             THROW(SSL_WRITE_ERROR);
         } else if (sent_bytes != (int)len) {
             FLOM_TRACE(("flom_tls_send: send %d instead of %d bytes\n",
@@ -548,10 +564,12 @@ int flom_tls_recv(flom_tls_t *obj, void *buf, size_t len, size_t *received)
 
         read_bytes = SSL_read(obj->ssl, buf, (int)len);
         if (0 >= read_bytes) {
+            unsigned long err;
             ssl_rc = SSL_get_error(obj->ssl, read_bytes);
             FLOM_TRACE(("flom_tls_recv/SSL_read: SSL error=%d (%s)\n",
                         ssl_rc, flom_tls_get_error_label(ssl_rc)));
-            FLOM_TRACE_SSLERR(("flom_tls_recv/SSL_read:"));
+            err = ERR_get_error();
+            FLOM_TRACE_SSLERR("flom_tls_recv/SSL_read:", err);
             THROW(SSL_READ_ERROR);
         } else {
             FLOM_TRACE(("flom_tls_recv: received %d of %d bytes\n",
@@ -813,6 +831,7 @@ int flom_tls_cert_parse(flom_tls_cert_t *obj, SSL *ssl)
         if (X509_V_OK != (verify_result = SSL_get_verify_result(ssl))) {
             FLOM_TRACE(("flom_tls_cert_parse/SSL_get_verify_result: "
                         "verify_result=%ld\n", verify_result));
+            syslog(LOG_ERR, FLOM_SYSLOG_FLM017E, verify_result);
             THROW(SSL_GET_VERIFY_RESULT_ERROR);
         } /* if (X509_V_OK != (verify_result... */
         
