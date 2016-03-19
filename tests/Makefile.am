@@ -89,6 +89,11 @@ incompopt.at: incompopt.at.in
 tls.at: tls.at.in
 	sed \
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
+	-e 's|@_CONFIG_GROUP_TLS[@]|$(_CONFIG_GROUP_TLS)|g' \
+	-e 's|@_CONFIG_KEY_TLS_CERTIFICATE[@]|$(_CONFIG_KEY_TLS_CERTIFICATE)|g' \
+	-e 's|@_CONFIG_KEY_TLS_PRIVATE_KEY[@]|$(_CONFIG_KEY_TLS_PRIVATE_KEY)|g' \
+	-e 's|@_CONFIG_KEY_TLS_CA_CERTIFICATE[@]|$(_CONFIG_KEY_TLS_CA_CERTIFICATE)|g' \
+	-e 's|@_CONFIG_KEY_TLS_CHECK_PEER_ID[@]|$(_CONFIG_KEY_TLS_CHECK_PEER_ID)|g' \
 	$< >$@
 
 usecase.at: usecase.at.in

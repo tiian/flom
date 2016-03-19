@@ -38,6 +38,9 @@
 #ifdef HAVE_IFADDRS_H
 # include <ifaddrs.h>
 #endif
+#ifdef HAVE_LIMITS_H
+# include <limits.h>
+#endif
 #ifdef HAVE_PWD_H
 # include <pwd.h>
 #endif
@@ -46,6 +49,9 @@
 #endif
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
+#endif
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -1789,44 +1795,58 @@ void flom_config_set_tcp_keepalive_probes(flom_config_t *config, gint value)
 
 
 
-void flom_config_set_tls_certificate(flom_config_t *config,
-                                          const gchar *value)
+int flom_config_set_tls_certificate(flom_config_t *config, const gchar *value)
 {
+    char resolved_path[PATH_MAX+1];
+
+    if (NULL == realpath(value, resolved_path))
+        return FLOM_RC_REALPATH_ERROR;
     if (NULL == config) {
         g_free(global_config.tls_certificate);
-        global_config.tls_certificate = g_strdup(value);
+        global_config.tls_certificate = g_strdup(resolved_path);
     } else {
         g_free(config->tls_certificate);
-        config->tls_certificate = g_strdup(value);
+        config->tls_certificate = g_strdup(resolved_path);
     }
+    return FLOM_RC_OK;
 }
 
 
 
-void flom_config_set_tls_private_key(flom_config_t *config,
-                                          const gchar *value)
+int flom_config_set_tls_private_key(flom_config_t *config,
+                                     const gchar *value)
 {
+    char resolved_path[PATH_MAX+1];
+
+    if (NULL == realpath(value, resolved_path))
+        return FLOM_RC_REALPATH_ERROR;
     if (NULL == config) {
         g_free(global_config.tls_private_key);
-        global_config.tls_private_key = g_strdup(value);
+        global_config.tls_private_key = g_strdup(resolved_path);
     } else {
         g_free(config->tls_private_key);
-        config->tls_private_key = g_strdup(value);
+        config->tls_private_key = g_strdup(resolved_path);
     }
+    return FLOM_RC_OK;
 }
 
 
 
-void flom_config_set_tls_ca_certificate(flom_config_t *config,
-                                        const gchar *value)
+int flom_config_set_tls_ca_certificate(flom_config_t *config,
+                                       const gchar *value)
 {
+    char resolved_path[PATH_MAX+1];
+
+    if (NULL == realpath(value, resolved_path))
+        return FLOM_RC_REALPATH_ERROR;
     if (NULL == config) {
         g_free(global_config.tls_ca_certificate);
-        global_config.tls_ca_certificate = g_strdup(value);
+        global_config.tls_ca_certificate = g_strdup(resolved_path);
     } else {
         g_free(config->tls_ca_certificate);
-        config->tls_ca_certificate = g_strdup(value);
+        config->tls_ca_certificate = g_strdup(resolved_path);
     }
+    return FLOM_RC_OK;
 }
 
 

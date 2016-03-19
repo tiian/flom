@@ -23,36 +23,36 @@ AT_CLEANUP
 
 AT_SETUP([TLS mutual authentication])
 AT_CHECK([time tls_setup.sh], [0], [ignore], [ignore])
-AT_CHECK([flom --debug-feature=tls.server -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id &], [0], [ignore], [ignore])
-AT_CHECK([flom --debug-feature=tls.client -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id], [0], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=tls.server -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes &], [0], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=tls.client -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TLS peers with different cert. auth.])
 AT_CHECK([time tls_setup.sh], [0], [ignore], [ignore])
-AT_CHECK([flom --debug-feature=tls.server -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id &], [0], [ignore], [ignore])
-AT_CHECK([flom --debug-feature=tls.client -a localhost --tls-certificate=CA2/peer2_CA2_cert.pem --tls-private-key=CA2/peer2_CA2_key.pem --tls-ca-certificate=CA2/cacert.pem --tls-check-peer-id], [1], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=tls.server -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes &], [0], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=tls.client -a localhost --tls-certificate=CA2/peer2_CA2_cert.pem --tls-private-key=CA2/peer2_CA2_key.pem --tls-ca-certificate=CA2/cacert.pem --tls-check-peer-id=yes], [1], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TLS wrong private key])
 AT_CHECK([time tls_setup.sh], [0], [ignore], [ignore])
-AT_CHECK([flom --debug-feature=tls.server -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id &], [0], [ignore], [ignore])
-AT_CHECK([flom --debug-feature=tls.client -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id], [1], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=tls.server -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes &], [0], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=tls.client -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes], [1], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TLS wrong cert. auth.])
 AT_CHECK([time tls_setup.sh], [0], [ignore], [ignore])
-AT_CHECK([flom --debug-feature=tls.server -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id &], [0], [ignore], [ignore])
-AT_CHECK([flom --debug-feature=tls.client -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA2/cacert.pem --tls-check-peer-id], [1], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=tls.server -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes &], [0], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=tls.client -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA2/cacert.pem --tls-check-peer-id=yes], [1], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TLS wrong unique id])
 AT_CHECK([time tls_setup.sh], [0], [ignore], [ignore])
-AT_CHECK([flom --debug-feature=tls.server -a localhost --tls-certificate=CA1/peer3_CA1_cert.pem --tls-private-key=CA1/peer3_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id &], [0], [ignore], [ignore])
-AT_CHECK([flom --debug-feature=tls.client -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id], [1], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=tls.server -a localhost --tls-certificate=CA1/peer3_CA1_cert.pem --tls-private-key=CA1/peer3_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes &], [0], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=tls.client -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes], [1], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 

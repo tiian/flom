@@ -166,6 +166,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'poll' function returned an error condition";
         case FLOM_RC_READ_ERROR:
             return "ERROR: 'read' function returned an error condition";
+        case FLOM_RC_REALPATH_ERROR:
+            return "ERROR: 'realpath' function returned an error condition";
         case FLOM_RC_RECV_ERROR:
             return "ERROR: 'recv' function returned an error condition";
         case FLOM_RC_RECVFROM_ERROR:

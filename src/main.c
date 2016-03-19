@@ -68,7 +68,7 @@ static gint tcp_keepalive_probes = _DEFAULT_TCP_KEEPALIVE_PROBES;
 static gchar* tls_certificate = NULL;
 static gchar* tls_private_key = NULL;
 static gchar* tls_ca_certificate = NULL;
-static gboolean tls_check_peer_id = FALSE;
+static gchar* tls_check_peer_id = NULL;
 static gint quiesce_exit = 0;
 static gint immediate_exit = 0;
 static gchar *command_trace_file = NULL;
@@ -87,7 +87,7 @@ static GOptionEntry entries[] =
     { "resource-wait", 'w', 0, G_OPTION_ARG_STRING, &resource_wait, "Specify if the command enques when the resource is already locked (accepted values 'yes', 'no')", NULL },
     { "resource-timeout", 'o', 0, G_OPTION_ARG_INT, &resource_timeout, "Specify maximum wait time (milliseconds) if a resource is already locked", NULL },
     { "resource-quantity", 'q', 0, G_OPTION_ARG_INT, &resource_quantity, "Specify how many numeric resources must be locked", NULL },
-    { "resource-create", 'e', 0, G_OPTION_ARG_STRING, &resource_create, "Specify if the command can create the resource to lock (accepted values 'yes', 'no')", NULL },
+    { "resource-create", 'e', 0, G_OPTION_ARG_STRING, &resource_create, "Specify if the command can create the resource to lock (accepted values are 'yes', 'no')", NULL },
     { "resource-idle-lifespan", 'i', 0, G_OPTION_ARG_INT, &resource_idle_lifespan, "Specify how long (milliseconds) a resource will be kept after usage termination", NULL },
     { "lock-mode", 'l', 0, G_OPTION_ARG_STRING, &lock_mode, "Resource lock mode ('NL', 'CR', 'CW', 'PR', 'PW', 'EX')", NULL },
     { "socket-name", 's', 0, G_OPTION_ARG_STRING, &socket_name, "Daemon/command communication socket name", NULL },
@@ -106,7 +106,7 @@ static GOptionEntry entries[] =
     { "tls-certificate", 0, 0, G_OPTION_ARG_STRING, &tls_certificate, "Name of the file that contains the X509 certificate of this peer", NULL },
     { "tls-private-key", 0, 0, G_OPTION_ARG_STRING, &tls_private_key, "Name of the file that contains the private key of this peer", NULL },
     { "tls-ca-certificate", 0, 0, G_OPTION_ARG_STRING, &tls_ca_certificate, "Name of the file that contains the X509 certificate of the certification authority that signed the certificate of this peer", NULL },
-    { "tls-check-peer-id", 0, 0, G_OPTION_ARG_NONE, &tls_check_peer_id, "Check the unique id of the peer", NULL },
+    { "tls-check-peer-id", 0, 0, G_OPTION_ARG_STRING, &tls_check_peer_id, "Check the unique id of the peer (accepted values are 'yes', 'no')", NULL },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
     { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
     { "append-trace-file", 0, 0, G_OPTION_ARG_STRING, &append_trace_file, "Specify if the trace file(s) must be appended or truncated for every execution (accepted values 'yes', 'no')", NULL },
@@ -128,7 +128,6 @@ int main (int argc, char *argv[])
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     flom_conn_t conn;
     char *locked_element = NULL;
-    char resolved_path[PATH_MAX+1];
 
     option_context = g_option_context_new("[-- command to execute]");
     g_option_context_add_main_entries(option_context, entries, NULL);
@@ -277,31 +276,39 @@ int main (int argc, char *argv[])
         flom_config_set_tcp_keepalive_probes(NULL, tcp_keepalive_probes);
     }
     if (NULL != tls_certificate) {
-        if (NULL == realpath(tls_certificate, resolved_path)) {
-            g_printerr("tls-certificate: can't resolve path for '%s'\n",
+        if (FLOM_RC_OK != flom_config_set_tls_certificate(
+                NULL, tls_certificate)) {
+            g_printerr("tls-certificate: '%s' is not a valid value\n",
                        tls_certificate);
             exit(FLOM_ES_GENERIC_ERROR);
-        }
-        flom_config_set_tls_certificate(NULL, resolved_path);
+        }   
     }
     if (NULL != tls_private_key) {
-        if (NULL == realpath(tls_private_key, resolved_path)) {
-            g_printerr("tls-private-key: can't resolve path for '%s'\n",
+        if (FLOM_RC_OK != flom_config_set_tls_private_key(
+                NULL, tls_private_key)) {
+            g_printerr("tls-private-key: '%s' is not a valid value\n",
                        tls_private_key);
             exit(FLOM_ES_GENERIC_ERROR);
         }
-        flom_config_set_tls_private_key(NULL, resolved_path);
     }
     if (NULL != tls_ca_certificate) {
-        if (NULL == realpath(tls_ca_certificate, resolved_path)) {
-            g_printerr("tls-ca-certificate: can't resolve path for '%s'\n",
+        if (FLOM_RC_OK != flom_config_set_tls_ca_certificate(
+                NULL, tls_ca_certificate))  {
+            g_printerr("tls-ca-certificate: '%s' is not a valid value\n",
                        tls_ca_certificate);
             exit(FLOM_ES_GENERIC_ERROR);
         }
-        flom_config_set_tls_ca_certificate(NULL, resolved_path);
     }
-    if (tls_check_peer_id)
-        flom_config_set_tls_check_peer_id(NULL, tls_check_peer_id);
+    if (NULL != tls_check_peer_id) {
+        flom_bool_value_t fbv;
+        if (FLOM_BOOL_INVALID == (
+                fbv = flom_bool_value_retrieve(tls_check_peer_id))) {
+            g_print("tls-check-peer-id: '%s' is an invalid value\n",
+                    tls_check_peer_id);
+            exit(FLOM_ES_GENERIC_ERROR);
+        }
+        flom_config_set_tls_check_peer_id(NULL, fbv);
+    }
     
     if (NULL != append_trace_file) {
         flom_bool_value_t fbv;

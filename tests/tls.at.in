@@ -12,7 +12,7 @@ AT_CLEANUP
 
 AT_SETUP([Local socket check peer id])
 AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
-AT_CHECK([flom --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes -- ls], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 
@@ -24,57 +24,189 @@ AT_CLEANUP
 
 AT_SETUP([TCP/IP check peer id])
 AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
-AT_CHECK([flom -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes -- ls], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TLS client/server])
+AT_DATA([flom.conf],
+[[
+[Trace]
+[Resource]
+[Daemon]
+[Network]
+[@_CONFIG_GROUP_TLS@]
+@_CONFIG_KEY_TLS_CERTIFICATE@=CA1/peer1_CA1_cert.pem
+@_CONFIG_KEY_TLS_PRIVATE_KEY@=CA1/peer1_CA1_key.pem
+@_CONFIG_KEY_TLS_CA_CERTIFICATE@=CA1/cacert.pem
+@_CONFIG_KEY_TLS_CHECK_PEER_ID@=yes
+]])
 AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
 # activate the server using CA1
-AT_CHECK([flom -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id -d -1 -- true], [0], [ignore], [ignore])
+AT_CHECK([flom -c flom.conf -a localhost -d -1 -- true], [0], [ignore], [ignore])
 # activate the client using CA1
-AT_CHECK([flom -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id -- ls], [0], [ignore], [ignore])
+AT_CHECK([flom -c flom.conf -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem -- ls], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TLS different CA])
+AT_DATA([flom.conf],
+[[
+[Trace]
+[Resource]
+[Daemon]
+[Network]
+[@_CONFIG_GROUP_TLS@]
+@_CONFIG_KEY_TLS_CERTIFICATE@=CA1/peer1_CA1_cert.pem
+@_CONFIG_KEY_TLS_PRIVATE_KEY@=CA1/peer1_CA1_key.pem
+@_CONFIG_KEY_TLS_CA_CERTIFICATE@=CA1/cacert.pem
+@_CONFIG_KEY_TLS_CHECK_PEER_ID@=yes
+]])
 AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
 # activate the server using CA1
-AT_CHECK([flom -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id -d -1 -- true], [0], [ignore], [ignore])
+AT_CHECK([flom -c flom.conf -a localhost -d -1 -- true], [0], [ignore], [ignore])
 # activate the client using CA2
-AT_CHECK([flom -a localhost --tls-certificate=CA2/peer1_CA2_cert.pem --tls-private-key=CA2/peer1_CA2_key.pem --tls-ca-certificate=CA2/cacert.pem --tls-check-peer-id -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom -c flom.conf -a localhost --tls-certificate=CA2/peer1_CA2_cert.pem --tls-private-key=CA2/peer1_CA2_key.pem --tls-ca-certificate=CA2/cacert.pem -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TLS wrong server key])
+AT_DATA([flom.conf],
+[[
+[Trace]
+[Resource]
+[Daemon]
+[Network]
+[@_CONFIG_GROUP_TLS@]
+@_CONFIG_KEY_TLS_CERTIFICATE@=CA1/peer1_CA1_cert.pem
+@_CONFIG_KEY_TLS_PRIVATE_KEY@=CA1/peer1_CA1_key.pem
+@_CONFIG_KEY_TLS_CA_CERTIFICATE@=CA1/cacert.pem
+@_CONFIG_KEY_TLS_CHECK_PEER_ID@=yes
+]])
 AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
 # activate the server with wrong key
-AT_CHECK([flom -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id -d -1 -- true], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom -c flom.conf -a localhost --tls-private-key=CA1/peer2_CA1_key.pem -d -1 -- true], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TLS wrong client key])
+AT_DATA([flom.conf],
+[[
+[Trace]
+[Resource]
+[Daemon]
+[Network]
+[@_CONFIG_GROUP_TLS@]
+@_CONFIG_KEY_TLS_CERTIFICATE@=CA1/peer1_CA1_cert.pem
+@_CONFIG_KEY_TLS_PRIVATE_KEY@=CA1/peer1_CA1_key.pem
+@_CONFIG_KEY_TLS_CA_CERTIFICATE@=CA1/cacert.pem
+@_CONFIG_KEY_TLS_CHECK_PEER_ID@=yes
+]])
 AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
 # activate the server
-AT_CHECK([flom -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id -d -1 -- true], [0], [ignore], [ignore])
+AT_CHECK([flom -c flom.conf -a localhost -d -1 -- true], [0], [ignore], [ignore])
 # activate the client with wrong key
-AT_CHECK([flom -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom -c flom.conf -a localhost --tls-private-key=CA1/peer2_CA1_key.pem -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TLS wrong server CA])
+AT_DATA([flom.conf],
+[[
+[Trace]
+[Resource]
+[Daemon]
+[Network]
+[@_CONFIG_GROUP_TLS@]
+@_CONFIG_KEY_TLS_CERTIFICATE@=CA1/peer1_CA1_cert.pem
+@_CONFIG_KEY_TLS_PRIVATE_KEY@=CA1/peer1_CA1_key.pem
+@_CONFIG_KEY_TLS_CA_CERTIFICATE@=CA1/cacert.pem
+@_CONFIG_KEY_TLS_CHECK_PEER_ID@=yes
+]])
 AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
 # activate the server with wrong CA
-AT_CHECK([flom -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA2/cacert.pem --tls-check-peer-id -d -1 -- true], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom -c flom.conf -a localhost --tls-ca-certificate=CA2/cacert.pem -d -1 -- true], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TLS wrong client CA])
+AT_DATA([flom.conf],
+[[
+[Trace]
+[Resource]
+[Daemon]
+[Network]
+[@_CONFIG_GROUP_TLS@]
+@_CONFIG_KEY_TLS_CERTIFICATE@=CA1/peer1_CA1_cert.pem
+@_CONFIG_KEY_TLS_PRIVATE_KEY@=CA1/peer1_CA1_key.pem
+@_CONFIG_KEY_TLS_CA_CERTIFICATE@=CA1/cacert.pem
+@_CONFIG_KEY_TLS_CHECK_PEER_ID@=yes
+]])
 AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
 # activate the server
-AT_CHECK([flom -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id -d -1 -- true], [0], [ignore], [ignore])
-# activate the client with wrong key
-AT_CHECK([flom -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA2/cacert.pem --tls-check-peer-id -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom -c flom.conf -a localhost -d -1 -- true], [0], [ignore], [ignore])
+# activate the client with wrong CA
+AT_CHECK([flom -c flom.conf -a localhost --tls-ca-certificate=CA2/cacert.pem -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TLS wrong client id, no server check])
+AT_DATA([flom.conf],
+[[
+[Trace]
+[Resource]
+[Daemon]
+[Network]
+[@_CONFIG_GROUP_TLS@]
+@_CONFIG_KEY_TLS_CERTIFICATE@=CA1/peer1_CA1_cert.pem
+@_CONFIG_KEY_TLS_PRIVATE_KEY@=CA1/peer1_CA1_key.pem
+@_CONFIG_KEY_TLS_CA_CERTIFICATE@=CA1/cacert.pem
+@_CONFIG_KEY_TLS_CHECK_PEER_ID@=yes
+]])
+AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
+# activate the server using peer1 certificate
+AT_CHECK([flom -c flom.conf -a localhost --tls-check-peer-id=no -d -1 -- true], [0], [ignore], [ignore])
+# activate the client using peer3 certificate
+AT_CHECK([flom -a localhost --tls-certificate=CA1/peer3_CA1_cert.pem --tls-private-key=CA1/peer3_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem -- ls], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TLS wrong client id, server check])
+AT_DATA([flom.conf],
+[[
+[Trace]
+[Resource]
+[Daemon]
+[Network]
+[@_CONFIG_GROUP_TLS@]
+@_CONFIG_KEY_TLS_CERTIFICATE@=CA1/peer1_CA1_cert.pem
+@_CONFIG_KEY_TLS_PRIVATE_KEY@=CA1/peer1_CA1_key.pem
+@_CONFIG_KEY_TLS_CA_CERTIFICATE@=CA1/cacert.pem
+@_CONFIG_KEY_TLS_CHECK_PEER_ID@=yes
+]])
+AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
+# activate the server using peer1 certificate
+AT_CHECK([flom -c flom.conf -a localhost -d -1 -- true], [0], [ignore], [ignore])
+# activate the client using peer3 certificate
+AT_CHECK([flom -c flom.conf -a localhost --tls-certificate=CA1/peer3_CA1_cert.pem --tls-private-key=CA1/peer3_CA1_key.pem -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TLS wrong server id, no client check])
+AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
+# activate the server using peer1 certificate
+AT_CHECK([flom -a localhost --tls-certificate=CA1/peer3_CA1_cert.pem --tls-private-key=CA1/peer3_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem -d -1 -- true], [0], [ignore], [ignore])
+# activate the client using peer3 certificate
+AT_CHECK([flom -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem -- ls], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([TLS wrong server id, client check])
+AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
+# activate the server using peer1 certificate
+AT_CHECK([flom -a localhost --tls-certificate=CA1/peer3_CA1_cert.pem --tls-private-key=CA1/peer3_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem -d -1 -- true], [0], [ignore], [ignore])
+# activate the client using peer3 certificate
+AT_CHECK([flom -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 

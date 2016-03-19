@@ -1,7 +1,6 @@
 Road map:
 
-Implement TLS/SSL real FLoM code test cases...: positive and negative!!!
-TLS in man page
+test on all the distributions...
 TLS in client API
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait

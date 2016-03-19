@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.1.2-alpha], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [1.1.2-rc], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -17,7 +17,7 @@ LT_REVISION=0
 
 # hardwired configuration
 _FLOM_PREFIX="flom"
-_RELEASE_DATE="2015-11-26"
+_RELEASE_DATE="2016-03-20"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"
@@ -313,6 +313,7 @@ AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_HEADERS(glib.h)
 AC_CHECK_HEADERS(ifaddrs.h)
+AC_CHECK_HEADERS(limits.h)
 AC_CHECK_HEADERS(netdb.h netinet/in.h netinet/tcp.h)
 AC_CHECK_HEADERS(openssl/ssl.h openssl/err.h openssl/x509v3.h)
 AC_CHECK_HEADERS(poll.h pwd.h)

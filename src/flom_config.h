@@ -1101,8 +1101,8 @@ extern "C" {
      * @param value IN set the new value for tls_certificate property
      * @return a reason code
      */
-    void flom_config_set_tls_certificate(flom_config_t *config,
-                                              const gchar *value);
+    int flom_config_set_tls_certificate(flom_config_t *config,
+                                        const gchar *value);
         
 
 
@@ -1125,8 +1125,8 @@ extern "C" {
      * @param value IN set the new value for tls_private_key property
      * @return a reason code
      */
-    void flom_config_set_tls_private_key(flom_config_t *config,
-                                              const gchar *value);
+    int flom_config_set_tls_private_key(flom_config_t *config,
+                                        const gchar *value);
         
 
 
@@ -1149,7 +1149,7 @@ extern "C" {
      * @param value IN set the new value for tls_ca_certificate property
      * @return a reason code
      */
-    void flom_config_set_tls_ca_certificate(flom_config_t *config,
+    int flom_config_set_tls_ca_certificate(flom_config_t *config,
                                            const gchar *value);
         
 

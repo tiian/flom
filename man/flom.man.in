@@ -97,6 +97,18 @@ IP hop limit for outgoing UDP/IP multicast datagrams (this option may be useful 
 .B --tcp-keepalive-probes=\fIprobes
 \fBflom\fP daemon sets SO_KEEPALIVE attribute to every TCP/IP socket connected with a \fBflom\fP command; this parameter allows you to change how many \fIprobes\fP for a suspicious connection will be tried by the kernel before the connection will be terminated. A good explanation of \fBtcp_keepalive_probes\fP kernel parameter can be found at this URL: \fIhttp://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO\fP. If not specified, the default value set by \fBflom\fP daemon is @_DEFAULT_TCP_KEEPALIVE_PROBES@ probes
 .TP
+.B --tls-certificate=\fIFILENAME
+PEM file containing the X509 certificate of the peer
+.TP
+.B --tls-private-key=\fIFILENAME
+PEM file containing the private key of the peer
+.TP
+.B --tls-ca-certificate=\fIFILENAME
+PEM file containing the X509 certificate of the certification authority used to sign the peers' certificates
+.TP
+.B --tls-check-peer-id=\fIyes|no
+perform peer authentication comparing the unique ID sent by the peer (see \fB--unique-id\fP option) with the content of the CN field inside the certificate presented by the peer
+.TP
 .B -T, --command-trace-file=\fIFILENAME
 file destination of the trace messages produced by the command (foreground) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module
 .TP
@@ -114,6 +126,12 @@ activate an IPv6 multicast server (requester) for debugging purposes
 .TP
 .B --debug-feature=\fPipv6.multicast.client
 activate an IPv6 multicast client (replier) for debugging purposes
+.TP
+.B --debug-feature=\fPtls.server
+activate a TLS server for debugging purposes
+.TP
+.B --debug-feature=\fPtls.client
+activate a TLS client for debugging purposes
 .P
 .SH EXIT STATUS
 if anything runs as expected, \fBflom\fP exit status is the same of the controlled (serialized) command. Sometimes an error occurs and \fBflom\fP reports it using dedicated exit statuses you can check with \fI$?\fP environment variable:
