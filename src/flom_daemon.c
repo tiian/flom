@@ -1138,7 +1138,7 @@ int flom_accept_loop_pollin(flom_config_t *config,
                      , CONN_SET_KEEPALIVE_ERROR
                      , NEW_OBJ
                      , CONN_INIT_ERROR
-                     , ACCEPT_LOOP_POLLIN_TLS_ERROR
+                     , CONN_TERMINATE_ERROR
                      , MSG_RETRIEVE_ERROR
                      , EMPTY_MESSAGE
                      , CONNS_GET_MSG_ERROR
@@ -1207,8 +1207,13 @@ int flom_accept_loop_pollin(flom_config_t *config,
                 THROW(CONN_INIT_ERROR);
             /* switch the connection to TLS if required by the configuration */
             if (FLOM_RC_OK != (ret_cod = flom_accept_loop_pollin_tls(
-                                   config, conn)))
-                THROW(ACCEPT_LOOP_POLLIN_TLS_ERROR);
+                                   config, conn))) {
+                FLOM_TRACE(("flom_accept_loop_pollin: TLS negotiation "
+                            "returned %d, closing the TCP connection...\n",
+                            ret_cod));
+                if (FLOM_RC_OK != (ret_cod = flom_conn_terminate(conn)))
+                    THROW(CONN_TERMINATE_ERROR);
+            }
             
             /* add connection */
             flom_conns_add_conn(conns, conn);
@@ -1346,7 +1351,7 @@ int flom_accept_loop_pollin(flom_config_t *config,
                 ret_cod = FLOM_RC_NEW_OBJ;
                 break;
             case CONN_INIT_ERROR:
-            case ACCEPT_LOOP_POLLIN_TLS_ERROR:
+            case CONN_TERMINATE_ERROR:
             case MSG_RETRIEVE_ERROR:
                 break;
             case EMPTY_MESSAGE:

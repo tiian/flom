@@ -489,6 +489,7 @@ AT_SETUP([TLS certificate: --tls-certificate])
 AT_DATA([expout],
 [[[@_CONFIG_GROUP_TLS@]/@_CONFIG_KEY_TLS_CERTIFICATE@='/tmp/foo.pem'
 ]])
+AT_CHECK([touch /tmp/foo.pem], [ignore], [ignore])
 AT_CHECK([flom --verbose --tls-certificate=/tmp/foo.pem -- ls | grep @_CONFIG_KEY_TLS_CERTIFICATE@], [0], [expout], [ignore])
 AT_DATA([flom.conf],
 [[
@@ -563,7 +564,7 @@ AT_CLEANUP
 
 AT_SETUP([Immediate shutdown: -X, --immediate-exit])
 AT_CHECK([flom -X], [0], [ignore], [ignore])
-AT_CHECK([flom --immediate-exit], [0], [ignore], [ignore])
+AT_CHECK([flom --immediate-exit], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Unique ID: --unique-id])

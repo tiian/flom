@@ -169,36 +169,22 @@ int flom_conns_close_fd(flom_conns_t *conns, guint id)
 {
     enum Exception { OUT_OF_RANGE
                      , NULL_OBJECT
-                     , TCP_CLOSE
+                     , CONN_TERMINATE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_conns_close_fd\n"));
     TRY {
         flom_conn_t *c;
-        FLOM_TRACE(("flom_conns_close: closing connection id=%u\n", id));
+        FLOM_TRACE(("flom_conns_close_fd: closing connection id=%u\n", id));
         if (id >= conns->array->len)
             THROW(OUT_OF_RANGE);
         if (NULL == (c = (flom_conn_t *)
                      g_ptr_array_index(conns->array, id)))
             THROW(NULL_OBJECT);
-        if (FLOM_CONN_STATE_REMOVE != flom_conn_get_state(c)) {
-            flom_conn_set_state(c, FLOM_CONN_STATE_REMOVE);
-            if (FLOM_NULL_FD == flom_tcp_get_sockfd(flom_conn_get_tcp(c))) {
-                FLOM_TRACE(("flom_conns_close: connection id=%u already "
-                            "closed, skipping...\n", id));
-            } else {
-                FLOM_TRACE(("flom_conns_close: closing fd=%d\n",
-                            flom_tcp_get_sockfd(flom_conn_get_tcp(c))));
-                if (FLOM_RC_OK != (ret_cod = flom_tcp_close(
-                                       flom_conn_get_tcp(c))))
-                    THROW(TCP_CLOSE);
-            }
-        } else {
-            FLOM_TRACE(("flom_conns_close: connection id=%u already "
-                        "in state %d, skipping...\n", id,
-                        flom_conn_get_state(c)));
-        } /* if (FLOM_CONN_STATE_REMOVE == flom_conn_get_state(c)) */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_terminate(c)))
+            THROW(CONN_TERMINATE_ERROR);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -208,7 +194,7 @@ int flom_conns_close_fd(flom_conns_t *conns, guint id)
             case NULL_OBJECT:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
-            case TCP_CLOSE:
+            case CONN_TERMINATE_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

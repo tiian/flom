@@ -363,6 +363,15 @@ extern "C" {
         return flom_tcp_close(&obj->tcp);
     }
     
+
+
+    /**
+     * Start connection termination
+     * @param obj IN/OUT connection object
+     * @return a reason code
+     */
+    int flom_conn_terminate(flom_conn_t *obj);
+
     
     
     /**

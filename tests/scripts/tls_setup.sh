@@ -56,7 +56,7 @@ TRUE_UNIQUE_ID=${UNIQUE_ID}
 UNIQUE_ID=00112233445566778899aabbccddeeff
 PEER=peer3
 create_cert || exit $?
-UNIQUE_ID=${UNIQUE_ID}
+UNIQUE_ID=${TRUE_UNIQUE_ID}
 
 cd ..
 

@@ -268,6 +268,51 @@ int flom_conn_recv(flom_conn_t *obj, void *buf, size_t len, size_t *received,
 
 
 
+int flom_conn_terminate(flom_conn_t *obj)
+{
+    enum Exception { TCP_CLOSE
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_conn_terminate\n"));
+    TRY {
+        if (FLOM_CONN_STATE_REMOVE != flom_conn_get_state(obj)) {
+            flom_conn_set_state(obj, FLOM_CONN_STATE_REMOVE);
+            if (FLOM_NULL_FD == flom_tcp_get_sockfd(&obj->tcp)) {
+                FLOM_TRACE(("flom_conn_terminate: connection %p already "
+                            "closed, skipping...\n", obj));
+            } else {
+                FLOM_TRACE(("flom_conn_terminate: closing fd=%d\n",
+                            flom_tcp_get_sockfd(&obj->tcp)));
+                if (FLOM_RC_OK != (ret_cod = flom_tcp_close(&obj->tcp)))
+                    THROW(TCP_CLOSE);
+            }
+        } else {
+            FLOM_TRACE(("flom_conn_terminate: connection %p already "
+                        "in state %d, skipping...\n", obj,
+                        flom_conn_get_state(obj)));
+        } /* if (FLOM_CONN_STATE_REMOVE == flom_conn_get_state(c)) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case TCP_CLOSE:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_conn_terminate/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+
 void flom_conn_trace(const flom_conn_t *conn)
 {
     FLOM_TRACE(("flom_conn_trace: object=%p\n", conn));

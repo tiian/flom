@@ -343,8 +343,8 @@ int main (int argc, char *argv[])
     if (quiesce_exit || immediate_exit) {
         g_print("Starting FLoM daemon %s shutdown...\n",
                 immediate_exit ? "immediate" : "quiesce");
-        flom_client_shutdown(NULL, immediate_exit);
-        exit(0);
+        exit(FLOM_RC_OK == flom_client_shutdown(NULL, immediate_exit) ?
+             FLOM_RC_OK : FLOM_ES_GENERIC_ERROR);
     }
     
     /* check the command is not null */
