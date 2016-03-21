@@ -81,7 +81,9 @@ flom_conn_t *flom_conn_new(flom_config_t *config)
 
 void flom_conn_delete(flom_conn_t *obj)
 {
+    FLOM_TRACE(("flom_conn_delete: obj=%p\n", obj));
     if (NULL != obj) {
+        FLOM_TRACE(("flom_conn_delete: obj->msg=%p\n", obj->msg));
         /* remove msg struct */
         if (NULL != obj->msg) {
             flom_msg_free(obj->msg);

@@ -89,9 +89,6 @@ int flom_client_connect(flom_config_t *config,
     
     FLOM_TRACE(("flom_client_connect\n"));
     TRY {
-        /* reset connection data struct */
-        memset(conn, 0, sizeof(flom_conn_t));
-
         /* choose and instantiate connection type */
         if (NULL != flom_config_get_socket_name(config)) {
             if (FLOM_RC_OK != (ret_cod = flom_client_connect_local(
@@ -848,8 +845,8 @@ int flom_client_discover_udp_connect(flom_conn_t *conn,
 int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
                      int timeout, char **element)
 {
-    enum Exception { G_STRDUP_ERROR1
-                     , G_STRDUP_ERROR2
+    enum Exception { NULL_OBJECT1
+                     , G_STRDUP_ERROR
                      , MSG_SERIALIZE_ERROR
                      , MSG_SEND_ERROR
                      , MSG_FREE_ERROR1
@@ -861,7 +858,7 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
                      , MSG_DESERIALIZE_ERROR2
                      , PROTOCOL_ERROR1
                      , NO_TLS_CONNECTION
-                     , NULL_OBJECT
+                     , NULL_OBJECT2
                      , TLS_CERT_CHECK_ERROR
                      , INTERNAL_ERROR
                      , NETWORK_TIMEOUT2
@@ -893,12 +890,12 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
 
         /* session */
         if (NULL == (msg.body.lock_8.session.peerid =
-                     g_strdup(flom_tls_get_unique_id())))
-            THROW(G_STRDUP_ERROR1);
+                     flom_tls_get_unique_id()))
+            THROW(NULL_OBJECT1);
         /* resource */
         if (NULL == (msg.body.lock_8.resource.name =
                      g_strdup(flom_config_get_resource_name(config))))
-            THROW(G_STRDUP_ERROR2);
+            THROW(G_STRDUP_ERROR);
         msg.body.lock_8.resource.mode = flom_config_get_lock_mode(config);
         msg.body.lock_8.resource.wait = flom_config_get_resource_wait(config);
         msg.body.lock_8.resource.quantity =
@@ -917,7 +914,8 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
         if (FLOM_RC_OK != (ret_cod = flom_conn_send(conn, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
         flom_conn_set_last_step(conn, msg.header.pvs.step);
-        
+
+        flom_msg_trace(&msg);
         if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
             THROW(MSG_FREE_ERROR1);
         flom_msg_init(&msg);
@@ -980,7 +978,7 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
                 THROW(NO_TLS_CONNECTION);
             if (NULL == (peer_name = flom_tcp_retrieve_peer_name(
                              flom_conn_get_tcp(conn))))
-                THROW(NULL_OBJECT);
+                THROW(NULL_OBJECT2);
             if (FLOM_RC_OK != (ret_cod = flom_tls_cert_check(
                                    tls, peerid, peer_name))) {
                 THROW(TLS_CERT_CHECK_ERROR);
@@ -1050,15 +1048,14 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
                 THROW(PROTOCOL_ERROR2);
                 break;
         } /* switch (msg.body.lock_16.answer.rc) */
-        
-        if (FLOM_RC_OK != (ret_cod = flom_msg_free(&msg)))
-            THROW(MSG_FREE_ERROR2);
-        
+
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case G_STRDUP_ERROR1:
-            case G_STRDUP_ERROR2:
+            case NULL_OBJECT1:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case G_STRDUP_ERROR:
                 ret_cod = FLOM_RC_G_STRDUP_ERROR;
                 break;
             case MSG_SERIALIZE_ERROR:
@@ -1088,7 +1085,7 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
             case NO_TLS_CONNECTION:
                 ret_cod = FLOM_RC_NO_TLS_CONNECTION;
                 break;
-            case NULL_OBJECT:
+            case NULL_OBJECT2:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
             case TLS_CERT_CHECK_ERROR:
@@ -1115,8 +1112,7 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
         g_free(peer_name);
     /* release markup parser */
     flom_conn_free_parser(conn);
-    if (NONE > excp)
-        flom_msg_free(&msg);        
+    flom_msg_free(&msg);        
     
     FLOM_TRACE(("flom_client_lock/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -1292,7 +1288,8 @@ int flom_client_unlock(flom_config_t *config, flom_conn_t *conn)
 
 int flom_client_disconnect(flom_conn_t *conn)
 {
-    enum Exception { NONE } excp;
+    enum Exception { CONN_TERMINATE_ERROR
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_client_disconnect\n"));
@@ -1319,11 +1316,15 @@ int flom_client_disconnect(flom_conn_t *conn)
                         "('%s')\n",
                         flom_tcp_get_sockfd(flom_conn_get_tcp(conn)), errno,
                         strerror(errno)));
-        flom_tcp_set_sockfd(flom_conn_get_tcp(conn), FLOM_NULL_FD);
+        /* connection termination */
+        if (FLOM_RC_OK != (ret_cod = flom_conn_terminate(conn)))
+            THROW(CONN_TERMINATE_ERROR);
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case CONN_TERMINATE_ERROR:
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -1340,28 +1341,33 @@ int flom_client_disconnect(flom_conn_t *conn)
 
 int flom_client_shutdown(flom_config_t *config, int immediate)
 {
-    enum Exception { DAEMON_NOT_STARTED
+    enum Exception { NULL_OBJECT1
+                     , DAEMON_NOT_STARTED
                      , CLIENT_CONNECT_ERROR
-                     , G_STRDUP_ERROR
+                     , NULL_OBJECT2
                      , MSG_SERIALIZE_ERROR
                      , MSG_SEND_ERROR
                      , CLIENT_DISCONNECT_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
-    flom_conn_t conn;
+    flom_conn_t *conn;
     struct flom_msg_s msg;
     
     FLOM_TRACE(("flom_client_shutdown\n"));
     TRY {
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
         size_t to_send;
+
+        /* creating a new connection object */
+        if (NULL == (conn = flom_conn_new(config)))
+            THROW(NULL_OBJECT1);
         
         /* initializing */
         flom_msg_init(&msg);
 
         /* connect to daemon */
-        ret_cod = flom_client_connect(config, &conn, FALSE);
+        ret_cod = flom_client_connect(config, conn, FALSE);
         switch (ret_cod) {
             case FLOM_RC_OK:
                 FLOM_TRACE(("flom_client_shutdown: connection with daemon "
@@ -1384,8 +1390,8 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
         /* body values */
         /* session */
         if (NULL == (msg.body.mngmnt_8.session.peerid =
-                     g_strdup(flom_tls_get_unique_id())))
-            THROW(G_STRDUP_ERROR);
+                     flom_tls_get_unique_id()))
+            THROW(NULL_OBJECT2);
         /* action */
         msg.body.mngmnt_8.action = FLOM_MSG_MNGMNT_ACTION_SHUTDOWN;
         msg.body.mngmnt_8.action_data.shutdown.immediate = immediate;
@@ -1396,14 +1402,14 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
             THROW(MSG_SERIALIZE_ERROR);
 
         /* send the request message */
-        if (FLOM_RC_OK != (ret_cod = flom_conn_send(&conn, buffer, to_send)))
+        if (FLOM_RC_OK != (ret_cod = flom_conn_send(conn, buffer, to_send)))
             THROW(MSG_SEND_ERROR);
-        flom_conn_set_last_step(&conn, msg.header.pvs.step);
+        flom_conn_set_last_step(conn, msg.header.pvs.step);
         FLOM_TRACE(("flom_client_shutdown: shutdown message sent "
                     "to daemon...\n"));
 
         /* gracefully disconnect from daemon */
-        ret_cod = flom_client_disconnect(&conn);
+        ret_cod = flom_client_disconnect(conn);
         switch (ret_cod) {
             case FLOM_RC_OK:
                 FLOM_TRACE(("flom_client_shutdown: disconnected "
@@ -1416,11 +1422,14 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NULL_OBJECT1:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
             case DAEMON_NOT_STARTED:
             case CLIENT_CONNECT_ERROR:
                 break;
-            case G_STRDUP_ERROR:
-                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+            case NULL_OBJECT2:
+                ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
             case MSG_SERIALIZE_ERROR:
             case MSG_SEND_ERROR:
@@ -1433,7 +1442,9 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-
+    /* release connection object */
+    flom_conn_delete(conn);
+    
     /* release msg dynamically allocated memory */
     flom_msg_free(&msg);
     

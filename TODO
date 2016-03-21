@@ -1,5 +1,6 @@
 Road map:
 
+go on with Valgrind sanification, restart from "Local socket basic setup"
 test on all the distributions...
 TLS in client API
 

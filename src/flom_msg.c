@@ -156,6 +156,8 @@ int flom_msg_free(struct flom_msg_s *msg)
             case FLOM_MSG_VERB_NULL: /* nothing to release */
                 break;
             case FLOM_MSG_VERB_LOCK:
+                FLOM_TRACE(("flom_msg_free: peerid=%s\n",
+                            msg->body.lock_8.session.peerid));
                 switch (msg->header.pvs.step) {
                     case FLOM_MSG_STEP_INCR:
                         if (NULL != msg->body.lock_8.session.peerid) {
@@ -192,6 +194,8 @@ int flom_msg_free(struct flom_msg_s *msg)
                     default:
                         THROW(INVALID_STEP_LOCK);
                 }
+                FLOM_TRACE(("flom_msg_free: peerid=%s\n",
+                            msg->body.lock_8.session.peerid));
                 break;
             case FLOM_MSG_VERB_UNLOCK:
                 switch (msg->header.pvs.step) {
@@ -1931,9 +1935,9 @@ void flom_msg_deserialize_end_element(GMarkupParseContext *context,
 int flom_msg_build_answer(struct flom_msg_s *msg,
                           int verb, int step, int rc, const gchar *element)
 {
-    enum Exception { NULL_OBJECT
-                     , G_STRDUP_ERROR1
-                     , G_STRDUP_ERROR2
+    enum Exception { NULL_OBJECT1
+                     , G_STRDUP_ERROR
+                     , NULL_OBJECT2
                      , INVALID_STEP
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -1942,10 +1946,10 @@ int flom_msg_build_answer(struct flom_msg_s *msg,
     FLOM_TRACE(("flom_msg_build_answer: verb=%d, step=%d\n", verb, step));
     TRY {    
         if (NULL == msg)
-            THROW(NULL_OBJECT);
+            THROW(NULL_OBJECT1);
         if (NULL != element &&
             NULL == (tmp_element = g_strdup(element)))
-            THROW(G_STRDUP_ERROR1);
+            THROW(G_STRDUP_ERROR);
             
         msg->state = FLOM_MSG_STATE_PARSING;
         msg->header.level = FLOM_MSG_LEVEL;
@@ -1956,8 +1960,8 @@ int flom_msg_build_answer(struct flom_msg_s *msg,
                 if (NULL != msg->body.lock_16.session.peerid)
                     g_free(msg->body.lock_16.session.peerid);
                 if (NULL == (msg->body.lock_16.session.peerid =
-                             g_strdup(flom_tls_get_unique_id())))
-                    THROW(G_STRDUP_ERROR2);
+                             flom_tls_get_unique_id()))
+                    THROW(NULL_OBJECT2);
 
                 msg->body.lock_16.answer.rc = rc;
                 msg->body.lock_16.answer.element = tmp_element;
@@ -1982,12 +1986,14 @@ int flom_msg_build_answer(struct flom_msg_s *msg,
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case NULL_OBJECT:
+            case NULL_OBJECT1:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
-            case G_STRDUP_ERROR1:
-            case G_STRDUP_ERROR2:
+            case G_STRDUP_ERROR:
                 ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
+            case NULL_OBJECT2:
+                ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
             case INVALID_STEP:
                 ret_cod = FLOM_RC_INVALID_OPTION;

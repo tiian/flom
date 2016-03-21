@@ -183,7 +183,7 @@ extern "C" {
     /**
      * Unique ID of the FLoM installation
      * @return the FLoM unique id string that must be released with g_free
-     *         function
+     *         function or NULL in case of error
      */
     static inline gchar *flom_tls_get_unique_id() {
         gchar *tmp = NULL;
