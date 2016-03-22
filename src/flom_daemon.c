@@ -1230,8 +1230,12 @@ int flom_accept_loop_pollin(flom_config_t *config,
             if (FLOM_RC_OK != (ret_cod = flom_conn_recv(
                                    c, buffer, sizeof(buffer),
                                    &read_bytes, FLOM_NETWORK_WAIT_TIMEOUT,
-                                   (struct sockaddr *)&src_addr, &addrlen)))
+                                   (struct sockaddr *)&src_addr, &addrlen))) {
+                FLOM_TRACE(("flom_accept_loop_pollin/flom_conn_recv: "
+                            "ret_cod=%d (%s), leaving...\n",
+                            ret_cod, flom_strerror(ret_cod)));
                 THROW(MSG_RETRIEVE_ERROR);
+            }
 
             /* has the client disconnected in the meantime? */
             if (0 == read_bytes) {
@@ -1352,8 +1356,8 @@ int flom_accept_loop_pollin(flom_config_t *config,
                 break;
             case CONN_INIT_ERROR:
             case CONN_TERMINATE_ERROR:
-            case MSG_RETRIEVE_ERROR:
                 break;
+            case MSG_RETRIEVE_ERROR:
             case EMPTY_MESSAGE:
                 ret_cod = FLOM_RC_CONNECTION_CLOSED;
                 break;

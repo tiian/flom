@@ -481,13 +481,14 @@ int flom_tcp_close(flom_tcp_t *obj)
 gchar *flom_tcp_retrieve_peer_name(const flom_tcp_t *obj)
 {
     struct sockaddr_storage sa;
-    socklen_t addrlen;
+    socklen_t addrlen = sizeof(sa);
     char host[NI_MAXHOST+1];
     char serv[NI_MAXSERV+1];
     int ret_cod;
     char *tmp;
     size_t tmp_size;
 
+    memset(&sa, 0, sizeof(sa));
     if (0 != getpeername(obj->sockfd, (struct sockaddr *)&sa, &addrlen)) {
         FLOM_TRACE(("flom_tcp_retrieve_peer_name/getpeername: errno=%d\n",
                     errno));
