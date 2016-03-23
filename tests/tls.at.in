@@ -206,7 +206,7 @@ AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
 # activate the server using peer1 certificate
 AT_CHECK([flom -a localhost --tls-certificate=CA1/peer3_CA1_cert.pem --tls-private-key=CA1/peer3_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem -d -1 -- true], [0], [ignore], [ignore])
 # activate the client using peer2 certificate
-AT_CHECK([flom -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
+AT_CHECK([flom -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes -- ls], [@_ES_GENERIC_ERROR@], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 

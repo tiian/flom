@@ -1812,7 +1812,7 @@ int flom_accept_loop_start_locker(flom_locker_array_t *lockers,
         locker->write_pipe = pipefd[1];
         locker->idle_lifespan = msg->body.lock_8.resource.lifespan;
         *new_thread = g_thread_create(flom_locker_loop, (gpointer)locker,
-                                        TRUE, &error_thread);
+                                      TRUE, &error_thread);
         if (NULL == *new_thread) {
             FLOM_TRACE(("flom_accept_loop_start_locker: "
                         "error_thread->code=%d, "

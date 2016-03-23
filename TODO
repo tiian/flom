@@ -1,24 +1,16 @@
 Road map:
 
-go on with Valgrind sanification, restart from "TLS wrong client id, no server check"
+there's a design flaw in the protocol level: in flom_tls_context it's
+choosen statically at compile time; unfortunately Ubuntu 10.04 (OpenSSL 0.9.8k)
+supports TLSv1 as the higher level and CentOS 7.1 (OpenSSL 1.0.1e) supports
+TLSv1.2 as the higher level. Nor Ubuntu neither CentOS support TLS without
+version (dynamic negotiation) and the result is they can't communicate!!!
+Maybe a new parameter:
+--tls-level=SSLV3/TLSv1/TLSv1.1/TLSv1.2/TLS
+should be implemented... :(
+
 test on all the distributions...
 TLS in client API
-
-Memory leak sanification: start a daemon, stop with -X and a possibly lost appears:
-==23395== 272 bytes in 1 blocks are possibly lost in loss record 693 of 777
-==23395==    at 0x4C267CC: calloc (vg_replace_malloc.c:467)
-==23395==    by 0x4012495: _dl_allocate_tls (dl-tls.c:300)
-==23395==    by 0x5556728: pthread_create@@GLIBC_2.2.5 (allocatestack.c:561)
-==23395==    by 0x4E2F35D: ??? (in /usr/lib/libgthread-2.0.so.0.2400.1)
-==23395==    by 0x5099A8D: g_thread_create_full (in /lib/libglib-2.0.so.0.2400.1)
-==23395==    by 0x5D17D2D: flom_accept_loop_start_locker (flom_daemon.c:1810)
-==23395==    by 0x5D19BB4: flom_accept_loop_transfer (flom_daemon.c:1611)
-==23395==    by 0x5D1A49F: flom_accept_loop_pollin (flom_daemon.c:1328)
-==23395==    by 0x5D1A8AF: flom_accept_loop (flom_daemon.c:1047)
-==23395==    by 0x5D1AFDF: flom_daemon (flom_daemon.c:238)
-==23395==    by 0x5D10E46: flom_client_connect_tcp (flom_client.c:344)
-==23395==    by 0x5D12123: flom_client_connect (flom_client.c:98)
-Start a daemon, access again the same resource, stop with -X and the possibly lost disappears...
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 
