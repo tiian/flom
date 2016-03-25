@@ -1,3 +1,13 @@
+Release: 1.1.2
+Date:    2016-03-25
+Ubuntu 10.04 (OpenJDK 6) / x86 / virtual (KVM)
+Ubuntu 10.04 (OpenJDK 6) / x86_64 / virtual (KVM)
+Ubuntu 12.04 (OpenJDK 6) / x86_64 / virtual (KVM)
+Ubuntu 14.04 (OpenJDK 7) / x86_64 / virtual (KVM)
+CentOS 6.6 (OpenJDK 7) * / x86 / virtual (KVM)
+CentOS 6.6 (OpenJDK 7) * / x86_64 / virtual (KVM)
+CentOS 7.1 (OpenJDK 8)   / x86_64 / virtual (KVM)
+
 Release: 1.1.1
 Date:    2015-11-22
 Ubuntu 10.04 (OpenJDK 6) / x86_64 / virtual (KVM)

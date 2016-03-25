@@ -1,15 +1,12 @@
 Road map:
 
-there's a design flaw in the protocol level: in flom_tls_context it's
-choosen statically at compile time; unfortunately Ubuntu 10.04 (OpenSSL 0.9.8k)
-supports TLSv1 as the higher level and CentOS 7.1 (OpenSSL 1.0.1e) supports
-TLSv1.2 as the higher level. Nor Ubuntu neither CentOS support TLS without
-version (dynamic negotiation) and the result is they can't communicate!!!
-Maybe a new parameter:
---tls-level=SSLV3/TLSv1/TLSv1.1/TLSv1.2/TLS
-should be implemented... :(
+Ubuntu12.04 and 14.04 exploits an issue related to Java and dbus: case test 73:
+./api.at:179: java -Djava.library.path=/tmp/flom-1.1.2-rc2/src/java/.libs -cp /tmp/flom-1.1.2-rc2/src/java/flom.jar:/tmp/flom-1.1.2-rc2/tests/src case4000
+stderr:
+java: symbol lookup error: /tmp/flom-1.1.2-rc2/src/.libs/libflom.so.0: undefined symbol: dbus_get_local_machine_id
 
-test on all the distributions...
+
+
 TLS in client API
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait

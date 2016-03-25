@@ -149,29 +149,30 @@ int flom_tls_context(flom_tls_t *obj)
         const char *side = obj->client ? "client" : "server";
         int mode;
 
-        /* set TLS/SSL method */
+        /*
+         * set TLS method:
+         * if TLS_method is available, this is the preferred choice
+         * else the lowest TLSv1_method will be used to be compatible with
+         * OpenSSL 0.9.8k
+         */
 #ifdef HAVE_TLS_METHOD
         FLOM_TRACE(("flom_tls_context: setting TLS/SSL method to "
                     "TLS_%s_method()\n", side));
         method = obj->client ? TLS_client_method() : TLS_server_method();
-#elif HAVE_TLSV1_2_METHOD
+#elif HAVE_TLSV1_METHOD
         FLOM_TRACE(("flom_tls_context: setting TLS/SSL method to "
-                    "TLSv1_2_%s_method()\n", side));
-        method = obj->client ? TLSv1_2_client_method() :
-            TLSv1_2_server_method();
+                    "TLSv1_%s_method()\n", side));
+        method = obj->client ? TLSv1_client_method() : TLSv1_server_method();
 #elif HAVE_TLSV1_1_METHOD
         FLOM_TRACE(("flom_tls_context: setting TLS/SSL method to "
                     "TLSv1_1_%s_method()\n", side));
         method = obj->client ? TLSv1_1_client_method() :
             TLSv1_1_server_method();
-#elif HAVE_TLSV1_METHOD
+#elif HAVE_TLSV1_2_METHOD
         FLOM_TRACE(("flom_tls_context: setting TLS/SSL method to "
-                    "TLSv1_%s_method()\n", side));
-        method = obj->client ? TLSv1_client_method() : TLSv1_server_method();
-#elif HAVE_SSLV3_METHOD
-        FLOM_TRACE(("flom_tls_context: setting TLS/SSL method to "
-                    "SSLv3_%s_method()\n", side));
-        method = obj->client ? SSLv3_client_method() : SSLv3_server_method();
+                    "TLSv1_2_%s_method()\n", side));
+        method = obj->client ? TLSv1_2_client_method() :
+            TLSv1_2_server_method();
 #endif
         if (NULL == method) {
             FLOM_TRACE(("flom_tls_context: no valid method is "

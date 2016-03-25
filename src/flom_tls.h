@@ -193,8 +193,28 @@ extern "C" {
         return tmp;
     }
     
-    
 
+
+    /**
+     * TLS supported protocol(s)
+     * @return a string containing the protocol(s) supported by the build;
+     *         the value depends from the target system
+     */
+    static inline const char *flom_tls_get_protocol() {
+#ifdef HAVE_TLS_METHOD
+        const char *tls_protocol = "All TLS protocols";
+#elif HAVE_TLSV1_METHOD
+        const char *tls_protocol = "TLSv1";
+#elif HAVE_TLSV1_1_METHOD
+        const char *tls_protocol = "TLSv1.1";
+#elif HAVE_TLSV1_2_METHOD
+        const char *tls_protocol = "TLSv1.2";
+#endif
+        return tls_protocol;
+    }
+
+
+    
     /**
      * Numeric/string conversion for some SSL errors...
      * Why is not supplied by the library?!?! Where am I wrong?!?!

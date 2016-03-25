@@ -143,9 +143,11 @@ int main (int argc, char *argv[])
                 "all rights reserved.\n"
                 "License: GPL (GNU Public License) version 2\n"
                 "Package name: %s; package version: %s; release date: %s\n"
+                "TLS supported protocol(s): %s\n"
                 "Access http://sourceforge.net/projects/flom/ for "
                 "project community activities\n",
-                FLOM_PACKAGE_NAME, FLOM_PACKAGE_VERSION, FLOM_PACKAGE_DATE);
+                FLOM_PACKAGE_NAME, FLOM_PACKAGE_VERSION, FLOM_PACKAGE_DATE,
+                flom_tls_get_protocol());
         exit(FLOM_ES_OK);
     }
 
