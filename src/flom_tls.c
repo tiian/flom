@@ -53,6 +53,16 @@ GStaticMutex flom_tls_mutex = G_STATIC_MUTEX_INIT;
 
 
 
+gchar *flom_tls_get_unique_id() {
+    gchar *tmp = NULL;
+    char *machine_id = dbus_get_local_machine_id();
+    tmp = g_strdup(machine_id);
+    dbus_free(machine_id);
+    return tmp;
+}
+
+
+
 const char *flom_tls_get_error_label(int error)
 {
     switch (error) {

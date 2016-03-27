@@ -185,13 +185,7 @@ extern "C" {
      * @return the FLoM unique id string that must be released with g_free
      *         function or NULL in case of error
      */
-    static inline gchar *flom_tls_get_unique_id() {
-        gchar *tmp = NULL;
-        char *machine_id = dbus_get_local_machine_id();
-        tmp = g_strdup(machine_id);
-        dbus_free(machine_id);
-        return tmp;
-    }
+    gchar *flom_tls_get_unique_id();
     
 
 

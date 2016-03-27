@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.1.2-rc2], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [1.1.2-rc3], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -17,7 +17,7 @@ LT_REVISION=0
 
 # hardwired configuration
 _FLOM_PREFIX="flom"
-_RELEASE_DATE="2016-03-25"
+_RELEASE_DATE="2016-03-28"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"
@@ -369,7 +369,8 @@ AC_CHECK_SIZEOF([ssize_t])
 #AC_CHECK_SIZEOF([uint32_t])
 #AC_CHECK_SIZEOF([uuid_t], [], [[#include <uuid/uuid.h>]])
 
-AC_CHECK_LIB(ssl, SSL_library_init)
+AC_CHECK_LIB([dbus-1], [dbus_get_local_machine_id])
+AC_CHECK_LIB([ssl], [SSL_library_init])
 
 AC_CHECK_FUNCS(freeifaddrs)
 AC_CHECK_FUNCS(getifaddrs)

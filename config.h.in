@@ -39,6 +39,9 @@
 /* Define to 1 if you have the <jni_md.h> header file. */
 #undef HAVE_JNI_MD_H
 
+/* Define to 1 if you have the `dbus-1' library (-ldbus-1). */
+#undef HAVE_LIBDBUS_1
+
 /* Define to 1 if you have the `ssl' library (-lssl). */
 #undef HAVE_LIBSSL
 
