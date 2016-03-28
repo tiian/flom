@@ -98,13 +98,13 @@ IP hop limit for outgoing UDP/IP multicast datagrams (this option may be useful 
 \fBflom\fP daemon sets SO_KEEPALIVE attribute to every TCP/IP socket connected with a \fBflom\fP command; this parameter allows you to change how many \fIprobes\fP for a suspicious connection will be tried by the kernel before the connection will be terminated. A good explanation of \fBtcp_keepalive_probes\fP kernel parameter can be found at this URL: \fIhttp://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO\fP. If not specified, the default value set by \fBflom\fP daemon is @_DEFAULT_TCP_KEEPALIVE_PROBES@ probes
 .TP
 .B --tls-certificate=\fIFILENAME
-PEM file containing the X509 certificate of the peer
+PEM file containing the X.509 certificate of the peer
 .TP
 .B --tls-private-key=\fIFILENAME
 PEM file containing the private key of the peer
 .TP
 .B --tls-ca-certificate=\fIFILENAME
-PEM file containing the X509 certificate of the certification authority used to sign the peers' certificates
+PEM file containing the X.509 certificate of the certification authority used to sign the peers' certificates
 .TP
 .B --tls-check-peer-id=\fIyes|no
 perform peer authentication comparing the unique ID sent by the peer (see \fB--unique-id\fP option) with the content of the CN field inside the certificate presented by the peer

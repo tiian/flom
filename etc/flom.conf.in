@@ -147,13 +147,13 @@
 
 # This section (configuration group) is related to TLS/SSL
 [@_CONFIG_GROUP_TLS@]
-# Name of the file that contains the X509 certificate assigned to this peer
+# Name of the file that contains the X.509 certificate assigned to this peer
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_TLS_CERTIFICATE@=cert.pem
 # Name of the file that contains the private key of this peer
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_TLS_PRIVATE_KEY@=priv_key.pem
-# Name of the file that contains the X509 certificate of the certification
+# Name of the file that contains the X.509 certificate of the certification
 # authority used to sign the certificate of this peer
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_TLS_CA_CERTIFICATE@=ca_cert.pem

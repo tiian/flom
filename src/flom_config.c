@@ -539,6 +539,9 @@ int flom_config_init_load(flom_config_t *config,
                      , CONFIG_SET_NETWORK_TCP_KEEPALIVE_TIME_ERROR
                      , CONFIG_SET_NETWORK_TCP_KEEPALIVE_INTVL_ERROR
                      , CONFIG_SET_NETWORK_TCP_KEEPALIVE_PROBES_ERROR
+                     , CONFIG_SET_TLS_CERTIFICATE_ERROR
+                     , CONFIG_SET_TLS_PRIVATE_KEY_ERROR
+                     , CONFIG_SET_TLS_CA_CERTIFICATE_ERROR
                      , CONFIG_SET_TLS_CHECK_PEER_ID_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -1180,7 +1183,9 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_TLS,
                         FLOM_CONFIG_KEY_TLS_CERTIFICATE, value));
-            flom_config_set_tls_certificate(config, value);
+            if (FLOM_RC_OK != (ret_cod = flom_config_set_tls_certificate(
+                                   config, value)))
+                THROW(CONFIG_SET_TLS_CERTIFICATE_ERROR);
             g_free(value);
             value = NULL;
         }
@@ -1200,7 +1205,9 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_TLS,
                         FLOM_CONFIG_KEY_TLS_PRIVATE_KEY, value));
-            flom_config_set_tls_private_key(config, value);
+            if (FLOM_RC_OK != (ret_cod = flom_config_set_tls_private_key(
+                                   config, value)))
+                THROW(CONFIG_SET_TLS_PRIVATE_KEY_ERROR);
             g_free(value);
             value = NULL;
         }
@@ -1220,7 +1227,9 @@ int flom_config_init_load(flom_config_t *config,
             FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
                         FLOM_CONFIG_GROUP_TLS,
                         FLOM_CONFIG_KEY_TLS_CA_CERTIFICATE, value));
-            flom_config_set_tls_ca_certificate(config, value);
+            if (FLOM_RC_OK != (ret_cod = flom_config_set_tls_ca_certificate(
+                                   config, value)))
+                THROW(CONFIG_SET_TLS_CA_CERTIFICATE_ERROR);
             g_free(value);
             value = NULL;
         }
@@ -1281,6 +1290,12 @@ int flom_config_init_load(flom_config_t *config,
             case CONFIG_SET_NETWORK_TCP_KEEPALIVE_TIME_ERROR:
             case CONFIG_SET_NETWORK_TCP_KEEPALIVE_INTVL_ERROR:
             case CONFIG_SET_NETWORK_TCP_KEEPALIVE_PROBES_ERROR:
+                ret_cod = FLOM_RC_INVALID_OPTION;
+                break;
+            case CONFIG_SET_TLS_CERTIFICATE_ERROR:
+            case CONFIG_SET_TLS_PRIVATE_KEY_ERROR:
+            case CONFIG_SET_TLS_CA_CERTIFICATE_ERROR:
+                break;
             case CONFIG_SET_TLS_CHECK_PEER_ID_ERROR:
                 ret_cod = FLOM_RC_INVALID_OPTION;
                 break;

@@ -1,17 +1,12 @@
 Release: 1.1.2
 Date:    2016-03-28
-Ubuntu 10.04 (OpenJDK 6) / x86 / virtual (KVM)
-Ubuntu 10.04 (OpenJDK 6) / x86_64 / virtual (KVM)
-Ubuntu 12.04 (OpenJDK 6) / x86_64 / virtual (KVM)
-Ubuntu 14.04 (OpenJDK 7) / x86_64 / virtual (KVM)
-CentOS 6.6 (OpenJDK 7) * / x86 / virtual (KVM)
-CentOS 6.6 (OpenJDK 7) * / x86_64 / virtual (KVM)
-CentOS 7.1 (OpenJDK 8)   / x86_64 / virtual (KVM)
-* This operating system does not pass case test "TLS basic handshake" if executed automatically by autotest, but it pass is if executed manually.
-The reported error is: 
-2016-03-27 23:53:45.163276 [19541/0x95622b0] flom_tls_connect/SSL_connect: SSL error=5 (SSL_ERROR_SYSCALL)
-2016-03-27 23:53:45.163284 [19541/0x95622b0] flom_tls_connect/excp=1/ret_cod=-406/errno=0
-The is not related to 32/64 bits, but only to the distro version.
+Ubuntu 10.04 (OpenJDK 6) | x86    | virtual (KVM)
+Ubuntu 10.04 (OpenJDK 6) | x86_64 | virtual (KVM)
+Ubuntu 12.04 (OpenJDK 6) | x86_64 | virtual (KVM)
+Ubuntu 14.04 (OpenJDK 7) | x86_64 | virtual (KVM)
+CentOS 6.6 (OpenJDK 7)   | x86    | virtual (KVM)
+CentOS 6.6 (OpenJDK 7)   | x86_64 | virtual (KVM)
+CentOS 7.1 (OpenJDK 8)   | x86_64 | virtual (KVM)
 
 Release: 1.1.1
 Date:    2015-11-22

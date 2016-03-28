@@ -122,7 +122,7 @@ const char *flom_strerror(int ret_cod)
                 "TLS/SSL connection";
         case FLOM_RC_UNIQUE_ID_DOES_NOT_MATCH:
             return "ERROR: the unique ID sent by the peer does not match the "
-                "CN field inside the X509 provided certificate";
+                "CN field inside the X.509 provided certificate";
         case FLOM_RC_NO_TLS_CONNECTION:
             return "ERROR: the connection is not a TLS connection, but a TLS "
                 "operation was requested";

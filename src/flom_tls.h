@@ -119,7 +119,7 @@ struct flom_tls_cert_s {
 
 /**
  * Object to store the metadata strings that can be retrieved by a "standard"
- * X509 certificate for issuer and subject
+ * X.509 certificate for issuer and subject
  */
 typedef struct {
     struct flom_tls_cert_s issuer;
@@ -365,7 +365,7 @@ extern "C" {
 
 
     /**
-     * Parse the X509 certificate passed by the peer and extract all the
+     * Parse the X.509 certificate passed by the peer and extract all the
      * "standard" metada for "issuer" and "subject"
      * @param obj IN/OUT TLS object
      * @param ssl IN SSL object (as in OpenSSL library)

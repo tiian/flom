@@ -402,7 +402,7 @@ typedef struct flom_config_s {
      */
     gint               tcp_keepalive_probes;
     /**
-     * name of the file that contains the X509 certificate assigned to this
+     * name of the file that contains the X.509 certificate assigned to this
      * peer
      */
     gchar             *tls_certificate;
@@ -411,7 +411,7 @@ typedef struct flom_config_s {
      */
     gchar             *tls_private_key;
     /**
-     * name of the file that contains the X509 certificate of the
+     * name of the file that contains the X.509 certificate of the
      * certification authority used to sign the certificate of this peer
      */
     gchar             *tls_ca_certificate;

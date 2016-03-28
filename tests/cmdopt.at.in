@@ -1,6 +1,7 @@
 AT_BANNER([Command line options check])
 
 AT_SETUP([Help: -h, --help])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CHECK([flom -h], [0], [ignore], [ignore])
 AT_CHECK([flom --help], [0], [ignore], [ignore])
 AT_CLEANUP
