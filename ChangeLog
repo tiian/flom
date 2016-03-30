@@ -1,5 +1,5 @@
 LOG:
-         - 1.1.2 IoGaCo, SSL/TLS
+20150330 - 1.1.2 IoGaCo, TLS support
 	New option --unique-id to retrieve the FLoM unique identificator
 	New options for TLS support: --tls-certificate,
 	--tls-private-key, --tls-ca-certificate, --tls-check-peer-id
