@@ -440,6 +440,38 @@ abstract class flom {
 	static function flom_handle_set_unicast_port($handle,$value) {
 		return flom_handle_set_unicast_port($handle,$value);
 	}
+
+	static function flom_handle_get_tls_certificate($handle) {
+		return flom_handle_get_tls_certificate($handle);
+	}
+
+	static function flom_handle_set_tls_certificate($handle,$value) {
+		return flom_handle_set_tls_certificate($handle,$value);
+	}
+
+	static function flom_handle_get_tls_private_key($handle) {
+		return flom_handle_get_tls_private_key($handle);
+	}
+
+	static function flom_handle_set_tls_private_key($handle,$value) {
+		return flom_handle_set_tls_private_key($handle,$value);
+	}
+
+	static function flom_handle_get_tls_ca_certificate($handle) {
+		return flom_handle_get_tls_ca_certificate($handle);
+	}
+
+	static function flom_handle_set_tls_ca_certificate($handle,$value) {
+		return flom_handle_set_tls_ca_certificate($handle,$value);
+	}
+
+	static function flom_handle_get_tls_check_peer_id($handle) {
+		return flom_handle_get_tls_check_peer_id($handle);
+	}
+
+	static function flom_handle_set_tls_check_peer_id($handle,$value) {
+		return flom_handle_set_tls_check_peer_id($handle,$value);
+	}
 }
 
 /* PHP Proxy Classes */

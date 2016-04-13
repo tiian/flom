@@ -184,7 +184,7 @@ extern "C" {
 
     
     /**
-     * Gets the maximum number of attempts that will be tryed during
+     * Get the maximum number of attempts that will be tryed during
      * auto-discovery phase using UDP/IP multicast (see
      *         @ref flom_handle_get_multicast_address,
      *         @ref flom_handle_get_multicast_port).
@@ -198,7 +198,7 @@ extern "C" {
     
     
     /**
-     * Sets the maximum number of attempts that will be tryed during
+     * Set the maximum number of attempts that will be tryed during
      * auto-discovery phase using UDP/IP multicast (see
      *         @ref flom_handle_set_multicast_address,
      *         @ref flom_handle_set_multicast_port).
@@ -213,7 +213,7 @@ extern "C" {
 
 
     /**
-     * Gets the number of milliseconds between two consecutive attempts that
+     * Get the number of milliseconds between two consecutive attempts that
      * will be tryed during auto-discovery phase using UDP/IP multicast (see
      *         @ref flom_handle_get_multicast_address,
      *         @ref flom_handle_get_multicast_port).
@@ -227,7 +227,7 @@ extern "C" {
     
     
     /**
-     * Sets the number of milliseconds between two consecutive attempts that
+     * Set the number of milliseconds between two consecutive attempts that
      * will be tryed during auto-discovery phase using UDP/IP multicast (see
      *         @ref flom_handle_set_multicast_address,
      *         @ref flom_handle_set_multicast_port).
@@ -242,7 +242,7 @@ extern "C" {
 
 
     /**
-     * Gets the UDP/IP multicast TTL parameter used during auto-discovery
+     * Get the UDP/IP multicast TTL parameter used during auto-discovery
      * phase; for a definition of the parameter, see
      * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html
      * . The current value can be altered using function
@@ -255,7 +255,7 @@ extern "C" {
     
     
     /**
-     * Sets the UDP/IP multicast TTL parameter used during auto-discovery
+     * Set the UDP/IP multicast TTL parameter used during auto-discovery
      * phase; for a definition of the parameter, see
      * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html 
      * . The current value can be inspected using function
@@ -269,7 +269,7 @@ extern "C" {
 
 
     /**
-     * Gets lock mode property: how a simple or hierarchical resource will
+     * Get lock mode property: how a simple or hierarchical resource will
      * be locked when function @ref flom_handle_lock is called; FLoM
      * supports the same lock mode semantic proposed by DLM, see
      * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
@@ -284,7 +284,7 @@ extern "C" {
 
 
     /**
-     * Sets lock mode property: how a simple or hierarchical resource will
+     * Set lock mode property: how a simple or hierarchical resource will
      * be locked when function @ref flom_handle_lock is called; FLoM
      * supports the same lock mode semantic proposed by DLM, see
      * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
@@ -301,7 +301,7 @@ extern "C" {
 
 
     /**
-     * Gets the multicast address: the IP address (or a network name that the
+     * Get the multicast address: the IP address (or a network name that the
      * system can resolve) of the IP multicast group that must be contacted
      * to reach FLoM daemon (server) using UDP/IP; see also
      *         @ref flom_handle_get_multicast_port.
@@ -315,7 +315,7 @@ extern "C" {
 
 
     /**
-     * Sets the multicast address: the IP address (or a network name that the
+     * Set the multicast address: the IP address (or a network name that the
      * system can resolve) of the IP multicast group that must be contacted
      * to reach FLoM daemon (server) using UDP/IP; see also
      *         @ref flom_handle_set_multicast_port.
@@ -331,7 +331,7 @@ extern "C" {
 
     
     /**
-     * Gets the UDP/IP multicast port that must be used to contact the FLoM
+     * Get the UDP/IP multicast port that must be used to contact the FLoM
      * daemon (server) using UDP/IP; see also
      *         @ref flom_handle_get_multicast_address.
      * The current value can be altered using function
@@ -344,7 +344,7 @@ extern "C" {
 
 
     /**
-     * Sets the UDP/IP multicast port that must be used to contact the FLoM
+     * Set the UDP/IP multicast port that must be used to contact the FLoM
      * daemon (server) using UDP/IP; see also
      *         @ref flom_handle_set_multicast_address.
      * The current value can be inspected using function
@@ -358,7 +358,7 @@ extern "C" {
 
 
     /**
-     * Gets the network interface that must be used for IPv6 link local
+     * Get the network interface that must be used for IPv6 link local
      * addresses
      * The current value can be altered using function
      *         @ref flom_handle_set_network_interface.
@@ -370,7 +370,7 @@ extern "C" {
 
 
     /**
-     * Sets the network interface that must be used for IPv6 link local
+     * Set the network interface that must be used for IPv6 link local
      * addresses
      * The current value can be inspected using function
      *         @ref flom_handle_get_network_interface.
@@ -384,7 +384,7 @@ extern "C" {
 
     
     /**
-     * Gets "resource create" boolean property: it specifies if function
+     * Get "resource create" boolean property: it specifies if function
      * @ref flom_handle_lock can create a new resource when the specified
      * one is not defined; the default value is TRUE. 
      * The current value can be altered using function
@@ -397,7 +397,7 @@ extern "C" {
 
     
     /**
-     * Sets "resource create" boolean property: it specifies if function
+     * Set "resource create" boolean property: it specifies if function
      * @ref flom_handle_lock can create a new resource when the specified
      * one is not defined.
      * The current value can be inspected using function
@@ -411,7 +411,7 @@ extern "C" {
 
 
     /**
-     * Gets "resource idle lifespan" property: it specifies how many
+     * Get "resource idle lifespan" property: it specifies how many
      * milliseconds a resource will be kept after the last locker released it;
      * the expiration is necessary to avoid useless resource allocation.
      * The current value can be altered using function
@@ -424,7 +424,7 @@ extern "C" {
 
     
     /**
-     * Sets "resource idle lifespan" property: it specifies how many
+     * Set "resource idle lifespan" property: it specifies how many
      * milliseconds a resource will be kept after the last locker released it;
      * the expiration is necessary to avoid useless resource allocation.
      * The current value can be inspected using function
@@ -439,7 +439,7 @@ extern "C" {
 
 
     /**
-     * Gets the resource name: the name of the resource that can be locked and
+     * Get the resource name: the name of the resource that can be locked and
      * unlocked using @ref flom_handle_lock and @ref flom_handle_unlock
      * functions.
      * The current value can be altered using function
@@ -452,7 +452,7 @@ extern "C" {
 
     
     /**
-     * Sets the resource name: the name of the resource that can be locked and
+     * Set the resource name: the name of the resource that can be locked and
      * unlocked using @ref flom_handle_lock and @ref flom_handle_unlock
      * functions.
      * The current value can be inspected using function
@@ -470,7 +470,7 @@ extern "C" {
 
     
     /**
-     * Gets "resource quantity" property: the number of units that will be
+     * Get "resource quantity" property: the number of units that will be
      * locked and unlocked using @ref flom_handle_lock and
      * @ref flom_handle_unlock functions.
      * The current value can be altered using function
@@ -484,7 +484,7 @@ extern "C" {
     
 
     /**
-     * Sets "resource quantity" property: the number of units that will be
+     * Set "resource quantity" property: the number of units that will be
      * locked and unlocked using @ref flom_handle_lock and
      * @ref flom_handle_unlock functions.
      * The current value can be inspected using function
@@ -499,7 +499,7 @@ extern "C" {
 
     
     /**
-     * Gets "resource timeout" property: how long a lock operation
+     * Get "resource timeout" property: how long a lock operation
      * (see @ref flom_handle_lock) will wait if the resource is locked
      * by another requester.
      * The current value can be altered using function
@@ -515,7 +515,7 @@ extern "C" {
 
     
     /**
-     * Sets "resource timeout" property: how long a lock operation
+     * Set "resource timeout" property: how long a lock operation
      * (see @ref flom_handle_lock) will wait if the resource is locked
      * by another requester.
      * The current value can be inspected using function
@@ -532,7 +532,7 @@ extern "C" {
 
 
     /**
-     * Gets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+     * Get the socket name: the AF_LOCAL/AF_UNIX socket name that must be
      * used to contact a local FLoM daemon (server).
      * The current value can be altered using function
      *         @ref flom_handle_set_socket_name.
@@ -544,7 +544,7 @@ extern "C" {
     
 
     /**
-     * Sets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+     * Set the socket name: the AF_LOCAL/AF_UNIX socket name that must be
      * used to contact a local FLoM daemon (server).
      * The current value can be inspected using function
      *         @ref flom_handle_get_socket_name.
@@ -558,7 +558,7 @@ extern "C" {
 
     
     /**
-     * Gets the trace filename: the name (absolute or relative path) used
+     * Get the trace filename: the name (absolute or relative path) used
      * by libflom (FLoM client library) to record trace messages.
      * The current value can be altered using function
      *     @ref flom_handle_set_trace_filename.
@@ -570,7 +570,7 @@ extern "C" {
 
     
     /**
-     * Sets the trace filename: the name (absolute or relative path) used
+     * Set the trace filename: the name (absolute or relative path) used
      * by libflom (FLoM client library) to record trace messages.
      * The current value can be inspected using function
      *     @ref flom_handle_get_trace_filename.
@@ -584,7 +584,7 @@ extern "C" {
 
 
     /**
-     * Gets the unicast address: the IP address (or a network name that the
+     * Get the unicast address: the IP address (or a network name that the
      * system can resolve) of the host that must be contacted
      * to reach FLoM daemon (server) using TCP/IP; see also
      *         @ref flom_handle_get_unicast_port.
@@ -598,7 +598,7 @@ extern "C" {
 
 
     /**
-     * Sets the unicast address: the IP address (or a network name that the
+     * Set the unicast address: the IP address (or a network name that the
      * system can resolve) of the host that must be contacted
      * to reach FLoM daemon (server) using TCP/IP; see also
      *         @ref flom_handle_set_unicast_port.
@@ -614,7 +614,7 @@ extern "C" {
 
     
     /**
-     * Gets the TCP/IP unicast port that must be used to contact the FLoM
+     * Get the TCP/IP unicast port that must be used to contact the FLoM
      * daemon (server) using TCP/IP; see also
      *         @ref flom_handle_get_unicast_address.
      * The current value can be altered using function
@@ -627,7 +627,7 @@ extern "C" {
 
     
     /**
-     * Sets the TCP/IP unicast port that must be used to contact the FLoM
+     * Set the TCP/IP unicast port that must be used to contact the FLoM
      * daemon (server) using TCP/IP; see also
      *         @ref flom_handle_set_unicast_address.
      * The current value can be inspected using function
@@ -637,6 +637,102 @@ extern "C" {
      * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
      */
     int flom_handle_set_unicast_port(flom_handle_t *handle, int value);
+
+
+
+    /**
+     * Get the TLS certificate file name.
+     * The current value can be altered using function
+     *         @ref flom_handle_set_tls_certificate.
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    const char *flom_handle_get_tls_certificate(const flom_handle_t *handle);
+
+
+
+    /**
+     * Set the TLS certificate file name.
+     * The current value can be inspected using function
+     *         @ref flom_handle_get_tls_certificate.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
+     */
+    int flom_handle_set_tls_certificate(flom_handle_t *handle,
+                                        const char *value);
+
+
+    
+    /**
+     * Get the TLS private key file name.
+     * The current value can be altered using function
+     *         @ref flom_handle_set_tls_private_key.
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    const char *flom_handle_get_tls_private_key(const flom_handle_t *handle);
+
+
+
+    /**
+     * Set the TLS private key file name.
+     * The current value can be inspected using function
+     *         @ref flom_handle_get_tls_private_key.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
+     */
+    int flom_handle_set_tls_private_key(flom_handle_t *handle,
+                                        const char *value);
+
+
+    
+    /**
+     * Get the TLS private key file name.
+     * The current value can be altered using function
+     *         @ref flom_handle_set_tls_ca_certificate.
+     * @param handle (Input): a valid object handle
+     * @return the current value
+     */
+    const char *flom_handle_get_tls_ca_certificate(
+        const flom_handle_t *handle);
+
+
+
+    /**
+     * Set the TLS private key file name.
+     * The current value can be inspected using function
+     *         @ref flom_handle_get_tls_ca_certificate.
+     * @param handle (Input/Output): a valid object handle
+     * @param value (Input): the new value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
+     */
+    int flom_handle_set_tls_ca_certificate(flom_handle_t *handle,
+                                           const char *value);
+
+
+    
+    /**
+     * Get the TLS check peer id boolean flag
+     * The current value can be altered using function
+     *         @ref flom_handle_set_tls_check_peer_id.
+     * @param handle (Input): a valid object handle
+     * @return the current (boolean) value
+     */
+    int flom_handle_get_tls_check_peer_id(const flom_handle_t *handle);
+
+
+    
+    /**
+     * Set the TLS check peer id boolean flag
+     * The current value can be inspected using function
+     *         @ref flom_handle_get_tls_check_peer_id.
+     * @param handle (Input): a valid object handle
+     * @param value (Input): the new (boolean) value
+     * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
+     */
+    int flom_handle_set_tls_check_peer_id(flom_handle_t *handle, int value);
 
 
 

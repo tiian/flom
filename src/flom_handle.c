@@ -944,6 +944,134 @@ int flom_handle_set_unicast_port(flom_handle_t *handle, int value)
 
 
 
+const char *flom_handle_get_tls_certificate(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_tls_certificate: value='%s'\n",
+                STRORNULL(flom_config_get_tls_certificate(handle->config))));
+    return (const char *)flom_config_get_tls_certificate(handle->config);
+}
+
+
+
+int flom_handle_set_tls_certificate(flom_handle_t *handle, const char *value)
+{
+    FLOM_TRACE(("flom_handle_set_tls_certificate: "
+                "old value='%s', new value='%s'\n",
+                STRORNULL(flom_config_get_tls_certificate(handle->config)),
+                STRORNULL(value)));
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            flom_config_set_tls_certificate(handle->config,
+                                            (const gchar *)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_tls_certificate: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
+    } /* switch (handle->state) */
+    return FLOM_RC_OK;
+}
+
+
+
+const char *flom_handle_get_tls_private_key(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_tls_private_key: value='%s'\n",
+                STRORNULL(flom_config_get_tls_private_key(handle->config))));
+    return (const char *)flom_config_get_tls_private_key(handle->config);
+}
+
+
+
+int flom_handle_set_tls_private_key(flom_handle_t *handle, const char *value)
+{
+    FLOM_TRACE(("flom_handle_set_tls_private_key: "
+                "old value='%s', new value='%s'\n",
+                STRORNULL(flom_config_get_tls_private_key(handle->config)),
+                STRORNULL(value)));
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            flom_config_set_tls_private_key(handle->config,
+                                            (const gchar *)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_tls_private_key: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
+    } /* switch (handle->state) */
+    return FLOM_RC_OK;
+}
+
+
+
+const char *flom_handle_get_tls_ca_certificate(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_tls_ca_certificate: value='%s'\n",
+                STRORNULL(
+                    flom_config_get_tls_ca_certificate(handle->config))));
+    return (const char *)flom_config_get_tls_ca_certificate(handle->config);
+}
+
+
+
+int flom_handle_set_tls_ca_certificate(flom_handle_t *handle,
+                                       const char *value)
+{
+    FLOM_TRACE(("flom_handle_set_tls_ca_certificate: "
+                "old value='%s', new value='%s'\n",
+                STRORNULL(flom_config_get_tls_ca_certificate(handle->config)),
+                STRORNULL(value)));
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            flom_config_set_tls_ca_certificate(handle->config,
+                                            (const gchar *)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_tls_ca_certificate: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
+    } /* switch (handle->state) */
+    return FLOM_RC_OK;
+}
+
+
+
+int flom_handle_get_tls_check_peer_id(const flom_handle_t *handle)
+{
+    FLOM_TRACE(("flom_handle_get_tls_check_peer_id: value=%d\n",
+                flom_config_get_tls_check_peer_id(handle->config)));
+    return (int)flom_config_get_tls_check_peer_id(handle->config);
+}
+
+
+
+int flom_handle_set_tls_check_peer_id(flom_handle_t *handle, int value)
+{
+    FLOM_TRACE(("flom_handle_set_tls_check_peer_id: "
+                "old value=%d, new value=%d\n",
+                flom_config_get_tls_check_peer_id(handle->config), value));
+    switch (handle->state) {
+        case FLOM_HANDLE_STATE_INIT:
+        case FLOM_HANDLE_STATE_DISCONNECTED:
+            flom_config_set_tls_check_peer_id(handle->config, (gint)value);
+            break;
+        default:
+            FLOM_TRACE(("flom_handle_set_tls_check_peer_id: state %d " \
+                        "is not compatible with set operation\n",
+                        handle->state));
+            return FLOM_RC_API_IMMUTABLE_HANDLE;
+    } /* switch (handle->state) */
+    return FLOM_RC_OK;
+}
+
+
+
 /*
  * Internal library methods not intended for application development
  */

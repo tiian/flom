@@ -32,6 +32,9 @@ const char *nd_trace_filename = "/tmp/flom.trc";
 const char *nd_resource_name = "red.green.blue";
 const char *nd_unicast_address = "127.0.0.1";
 const char *nd_multicast_address = "224.0.0.1";
+const char *nd_tls_certificate = "CA1/peer1_CA1_cert.pem";
+const char *nd_tls_private_key = "CA1/peer1_CA1_key.pem";
+const char *nd_tls_ca_certificate = "CA1/cacert.pem";
 
 
 
@@ -336,6 +339,9 @@ void static_handle_happy_path(const char *nd_network_interface) {
                 "Unexpected result from flom_handle_set/get_discovery_ttl\n");
         exit(1);
     }
+
+    /* get current value for TLS certificate */
+    /* @@@ */
     
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle))) {

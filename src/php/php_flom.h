@@ -79,4 +79,12 @@ ZEND_NAMED_FUNCTION(_wrap_flom_handle_get_unicast_address);
 ZEND_NAMED_FUNCTION(_wrap_flom_handle_set_unicast_address);
 ZEND_NAMED_FUNCTION(_wrap_flom_handle_get_unicast_port);
 ZEND_NAMED_FUNCTION(_wrap_flom_handle_set_unicast_port);
+ZEND_NAMED_FUNCTION(_wrap_flom_handle_get_tls_certificate);
+ZEND_NAMED_FUNCTION(_wrap_flom_handle_set_tls_certificate);
+ZEND_NAMED_FUNCTION(_wrap_flom_handle_get_tls_private_key);
+ZEND_NAMED_FUNCTION(_wrap_flom_handle_set_tls_private_key);
+ZEND_NAMED_FUNCTION(_wrap_flom_handle_get_tls_ca_certificate);
+ZEND_NAMED_FUNCTION(_wrap_flom_handle_set_tls_ca_certificate);
+ZEND_NAMED_FUNCTION(_wrap_flom_handle_get_tls_check_peer_id);
+ZEND_NAMED_FUNCTION(_wrap_flom_handle_set_tls_check_peer_id);
 #endif /* PHP_FLOM_H */
