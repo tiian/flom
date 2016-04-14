@@ -118,7 +118,7 @@ namespace flom {
         int unlock() { return flom_handle_unlock(&handle); }
 
         /**
-         * Gets the name of the locked element if the resource is of
+         * Get the name of the locked element if the resource is of
          * type set.<P>
          * Note 1: this method can be used only after @ref lock and before
          *         @ref unlock<P>
@@ -133,7 +133,7 @@ namespace flom {
             return flom_handle_get_locked_element(&handle); }
         
         /**
-         * Gets the name of the locked element if the resource is of
+         * Get the name of the locked element if the resource is of
          * type set.<P>
          * Note 1: this method can be used only after @ref lock and before
          *         @ref unlock<P>
@@ -149,7 +149,7 @@ namespace flom {
                 flom_handle_get_locked_element(&handle) : ""; }
         
         /**
-         * Gets the maximum number of attempts that will be tryed during
+         * Get the maximum number of attempts that will be tryed during
          * auto-discovery phase using UDP/IP multicast (see
          *         @ref getMulticastAddress, @ref getMulticastPort).
          * The current value can be altered using method
@@ -160,7 +160,7 @@ namespace flom {
             return flom_handle_get_discovery_attempts(&handle); }
 
         /**
-         * Sets the maximum number of attempts that will be tryed during
+         * Set the maximum number of attempts that will be tryed during
          * auto-discovery phase using UDP/IP multicast (see
          *         @ref setMulticastAddress, @ref setMulticastPort).
          * The current value can be inspected using method
@@ -172,7 +172,7 @@ namespace flom {
             return flom_handle_set_discovery_attempts(&handle, value); }
 
         /**
-         * Gets the number of milliseconds between two consecutive attempts
+         * Get the number of milliseconds between two consecutive attempts
          * that will be tryed during auto-discovery phase using UDP/IP
          * multicast (see
          * @ref getMulticastAddress, @ref getMulticastPort).
@@ -184,7 +184,7 @@ namespace flom {
             return flom_handle_get_discovery_timeout(&handle); }
 
         /**
-         * Sets the number of milliseconds between two consecutive attempts
+         * Set the number of milliseconds between two consecutive attempts
          * that will be tryed during auto-discovery phase using UDP/IP
          * multicast (see
          * @ref setMulticastAddress, @ref setMulticastPort).
@@ -197,7 +197,7 @@ namespace flom {
             return flom_handle_set_discovery_timeout(&handle, value); }
 
         /**
-         * Gets the UDP/IP multicast TTL parameter used during auto-discovery
+         * Get the UDP/IP multicast TTL parameter used during auto-discovery
          * phase; for a definition of the parameter, see
          * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html
          * . The current value can be altered using method @ref setDiscoveryTtl
@@ -207,7 +207,7 @@ namespace flom {
             return flom_handle_get_discovery_ttl(&handle); }
 
         /**
-         * Sets the UDP/IP multicast TTL parameter used during auto-discovery
+         * Set the UDP/IP multicast TTL parameter used during auto-discovery
          * phase; for a definition of the parameter, see
          * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html 
          * . The current value can be inspected using method
@@ -219,7 +219,7 @@ namespace flom {
             return flom_handle_set_discovery_ttl(&handle, value); }
 
         /**
-         * Gets lock mode property: how a simple or hierarchical resource will
+         * Get lock mode property: how a simple or hierarchical resource will
          * be locked when method @ref lock is called; FLoM
          * supports the same lock mode semantic proposed by DLM, see
          * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
@@ -231,7 +231,7 @@ namespace flom {
             return flom_handle_get_lock_mode(&handle); }
 
         /**
-         * Sets lock mode property: how a simple or hierarchical resource will
+         * Set lock mode property: how a simple or hierarchical resource will
          * be locked when method @ref lock is called; FLoM
          * supports the same lock mode semantic proposed by DLM, see
          * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
@@ -244,7 +244,7 @@ namespace flom {
             return flom_handle_set_lock_mode(&handle, value); }
 
         /**
-         * Gets the multicast address: the IP address (or a network name that
+         * Get the multicast address: the IP address (or a network name that
          * the system can resolve) of the IP multicast group that must be
          * contacted to reach FLoM daemon (server) using UDP/IP; see also
          *         @ref getMulticastPort.
@@ -255,7 +255,7 @@ namespace flom {
         const char *getMulticastAddressAsCStr() {
             return flom_handle_get_multicast_address(&handle); }
         /**
-         * Gets the multicast address: the IP address (or a network name that
+         * Get the multicast address: the IP address (or a network name that
          * the system can resolve) of the IP multicast group that must be
          * contacted to reach FLoM daemon (server) using UDP/IP; see also
          *         @ref getMulticastPort.
@@ -268,7 +268,7 @@ namespace flom {
                 flom_handle_get_multicast_address(&handle) : ""; }
 
         /**
-         * Sets the multicast address: the IP address (or a network name that
+         * Set the multicast address: the IP address (or a network name that
          * the system can resolve) of the IP multicast group that must be
          * contacted to reach FLoM daemon (server) using UDP/IP; see also
          * @ref setMulticastPort.
@@ -280,7 +280,7 @@ namespace flom {
         int setMulticastAddress(const char *value) {
             return flom_handle_set_multicast_address(&handle, value); }
         /**
-         * Sets the multicast address: the IP address (or a network name that
+         * Set the multicast address: the IP address (or a network name that
          * the system can resolve) of the IP multicast group that must be
          * contacted to reach FLoM daemon (server) using UDP/IP; see also
          * @ref setMulticastPort.
@@ -292,7 +292,7 @@ namespace flom {
             flom_handle_set_multicast_address(&handle, value.c_str()); }
 
         /**
-         * Gets the UDP/IP multicast port that must be used to contact the FLoM
+         * Get the UDP/IP multicast port that must be used to contact the FLoM
          * daemon (server) using UDP/IP; see also @ref getMulticastAddress.
          * The current value can be altered using method @ref setMulticastPort.
          * @return the current value
@@ -301,7 +301,7 @@ namespace flom {
             return flom_handle_get_multicast_port(&handle); }
 
         /**
-         * Sets the UDP/IP multicast port that must be used to contact the FLoM
+         * Set the UDP/IP multicast port that must be used to contact the FLoM
          * daemon (server) using UDP/IP; see also @ref setMulticastAddress.
          * The current value can be inspected using method
          * @ref getMulticastPort.
@@ -312,7 +312,7 @@ namespace flom {
             return flom_handle_set_multicast_port(&handle, value); }
 
         /**
-         * Gets the network interface that must be used for IPv6 link local
+         * Get the network interface that must be used for IPv6 link local
          * addresses
          * The current value can be altered using method
          * @ref setNetworkInterface.
@@ -321,7 +321,7 @@ namespace flom {
         const char *getNetworkInterfaceAsCStr() {
             return flom_handle_get_network_interface(&handle); }
         /**
-         * Gets the network interface that must be used for IPv6 link local
+         * Get the network interface that must be used for IPv6 link local
          * addresses
          * The current value can be altered using method
          * @ref setNetworkInterface.
@@ -332,7 +332,7 @@ namespace flom {
                 flom_handle_get_network_interface(&handle) : ""; }
 
         /**
-         * Sets the network interface that must be used for IPv6 link local
+         * Set the network interface that must be used for IPv6 link local
          * addresses
          * The current value can be inspected using method
          * @ref getNetworkInterface.
@@ -342,7 +342,7 @@ namespace flom {
         int setNetworkInterface(const char *value) {
             return flom_handle_set_network_interface(&handle, value); }
         /**
-         * Sets the network interface that must be used for IPv6 link local
+         * Set the network interface that must be used for IPv6 link local
          * addresses
          * The current value can be inspected using method
          * @ref getNetworkInterface.
@@ -353,7 +353,7 @@ namespace flom {
             flom_handle_set_network_interface(&handle, value.c_str()); }
 
         /**
-         * Gets "resource create" boolean property: it specifies if method
+         * Get "resource create" boolean property: it specifies if method
          * @ref lock can create a new resource when the specified
          * one is not defined; the default value is TRUE. 
          * The current value can be altered using method 
@@ -364,7 +364,7 @@ namespace flom {
             return flom_handle_get_resource_create(&handle); }
 
         /**
-         * Sets "resource create" boolean property: it specifies if method
+         * Set "resource create" boolean property: it specifies if method
          * @ref lock can create a new resource when the specified
          * one is not defined.
          * The current value can be inspected using method
@@ -376,7 +376,7 @@ namespace flom {
             return flom_handle_set_resource_create(&handle, value); }
 
         /**
-         * Gets "resource idle lifespan" property: it specifies how many
+         * Get "resource idle lifespan" property: it specifies how many
          * milliseconds a resource will be kept after the last locker released
          * it; the expiration is necessary to avoid useless resource
          * allocation.
@@ -388,7 +388,7 @@ namespace flom {
             return flom_handle_get_resource_idle_lifespan(&handle); }
 
         /**
-         * Sets "resource idle lifespan" property: it specifies how many
+         * Set "resource idle lifespan" property: it specifies how many
          * milliseconds a resource will be kept after the last locker released
          * it; the expiration is necessary to avoid useless resource
          * allocation.
@@ -401,7 +401,7 @@ namespace flom {
             return flom_handle_set_resource_idle_lifespan(&handle, value); }
 
         /**
-         * Gets the resource name: the name of the resource that can be locked
+         * Get the resource name: the name of the resource that can be locked
          * and unlocked using @ref lock and @ref unlock methods.
          * The current value can be altered using method @ref setResourceName.
          * @return the current value as a null terminated C string
@@ -409,7 +409,7 @@ namespace flom {
         const char *getResourceNameAsCStr() {
             return flom_handle_get_resource_name(&handle); }
         /**
-         * Gets the resource name: the name of the resource that can be locked
+         * Get the resource name: the name of the resource that can be locked
          * and unlocked using @ref lock and @ref unlock methods.
          * The current value can be altered using method @ref setResourceName.
          * @return the current value as a C++ standard string
@@ -419,7 +419,7 @@ namespace flom {
                 flom_handle_get_resource_name(&handle) : ""; }
 
         /**
-         * Sets the resource name: the name of the resource that can be locked
+         * Set the resource name: the name of the resource that can be locked
          * and unlocked using @ref lock and @ref unlock methods.
          * The current value can be inspected using method
          * @ref getResourceName.
@@ -432,7 +432,7 @@ namespace flom {
         int setResourceName(const char *value) {
             return flom_handle_set_resource_name(&handle, value); }
         /**
-         * Sets the resource name: the name of the resource that can be locked
+         * Set the resource name: the name of the resource that can be locked
          * and unlocked using @ref lock and @ref unlock methods.
          * The current value can be inspected using method
          * @ref getResourceName.
@@ -447,7 +447,7 @@ namespace flom {
             return flom_handle_set_resource_name(&handle, value.c_str()); }
 
         /**
-         * Gets "resource quantity" property: the number of units that will be
+         * Get "resource quantity" property: the number of units that will be
          * locked and unlocked using @ref lock and @ref unlock methods.
          * The current value can be altered using method
          * @ref setResourceQuantity.
@@ -458,7 +458,7 @@ namespace flom {
             return flom_handle_get_resource_quantity(&handle); }
 
         /**
-         * Sets "resource quantity" property: the number of units that will be
+         * Set "resource quantity" property: the number of units that will be
          * locked and unlocked using @ref lock and @ref unlock methods.
          * The current value can be inspected using method
          * @ref getResourceQuantity.
@@ -470,7 +470,7 @@ namespace flom {
             return flom_handle_set_resource_quantity(&handle, value); }
 
         /**
-         * Gets "resource timeout" property: how long a lock operation
+         * Get "resource timeout" property: how long a lock operation
          * (see @ref lock) will wait if the resource is locked
          * by another requester.
          * The current value can be altered using method
@@ -484,7 +484,7 @@ namespace flom {
             return flom_handle_get_resource_timeout(&handle); }
 
         /**
-         * Sets "resource timeout" property: how long a lock operation
+         * Set "resource timeout" property: how long a lock operation
          * (see @ref lock) will wait if the resource is locked
          * by another requester.
          * The current value can be inspected using method
@@ -499,7 +499,7 @@ namespace flom {
             return flom_handle_set_resource_timeout(&handle, value); }
 
         /**
-         * Gets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+         * Get the socket name: the AF_LOCAL/AF_UNIX socket name that must be
          * used to contact a local FLoM daemon (server).
          * The current value can be altered using method @ref setSocketName.
          * @return the current value as a C null terminated string
@@ -507,7 +507,7 @@ namespace flom {
         const char *getSocketNameAsCStr() {
             return flom_handle_get_socket_name(&handle); }
         /**
-         * Gets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+         * Get the socket name: the AF_LOCAL/AF_UNIX socket name that must be
          * used to contact a local FLoM daemon (server).
          * The current value can be altered using method @ref setSocketName.
          * @return the current value as a C++ standard string
@@ -517,7 +517,7 @@ namespace flom {
                 flom_handle_get_socket_name(&handle) : ""; }
 
         /**
-         * Sets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+         * Set the socket name: the AF_LOCAL/AF_UNIX socket name that must be
          * used to contact a local FLoM daemon (server).
          * The current value can be inspected using method @ref getSocketName.
          * @param value (Input): the new value (C null terminated string)
@@ -526,7 +526,7 @@ namespace flom {
         int setSocketName(const char *value) {
             return flom_handle_set_socket_name(&handle, value); }
         /**
-         * Sets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+         * Set the socket name: the AF_LOCAL/AF_UNIX socket name that must be
          * used to contact a local FLoM daemon (server).
          * The current value can be inspected using method @ref getSocketName.
          * @param value (Input): the new value (C++ standard string)
@@ -536,7 +536,7 @@ namespace flom {
             return flom_handle_set_socket_name(&handle, value.c_str()); }
 
         /**
-         * Gets the trace filename: the name (absolute or relative path) used
+         * Get the trace filename: the name (absolute or relative path) used
          * by libflom (FLoM client library) to record trace messages.
          * The current value can be altered using method @ref setTraceFilename.
          * @return the current value as a C null terminated string
@@ -544,7 +544,7 @@ namespace flom {
         const char *getTraceFilenameAsCStr() {
             return flom_handle_get_trace_filename(&handle); }
         /**
-         * Gets the trace filename: the name (absolute or relative path) used
+         * Get the trace filename: the name (absolute or relative path) used
          * by libflom (FLoM client library) to record trace messages.
          * The current value can be altered using method @ref setTraceFilename.
          * @return the current value as a C++ standard string
@@ -554,7 +554,7 @@ namespace flom {
                 flom_handle_get_trace_filename(&handle) : ""; }
 
         /**
-         * Sets the trace filename: the name (absolute or relative path) used
+         * Set the trace filename: the name (absolute or relative path) used
          * by libflom (FLoM client library) to record trace messages.
          * The current value can be inspected using method
          * @ref getTraceFilename.
@@ -564,7 +564,7 @@ namespace flom {
         int setTraceFilename(const char *value) {
             return flom_handle_set_trace_filename(&handle, value); }
         /**
-         * Sets the trace filename: the name (absolute or relative path) used
+         * Set the trace filename: the name (absolute or relative path) used
          * by libflom (FLoM client library) to record trace messages.
          * The current value can be inspected using method
          * @ref getTraceFilename.
@@ -575,7 +575,7 @@ namespace flom {
             return flom_handle_set_trace_filename(&handle, value.c_str()); }
 
         /**
-         * Gets the unicast address: the IP address (or a network name that the
+         * Get the unicast address: the IP address (or a network name that the
          * system can resolve) of the host that must be contacted
          * to reach FLoM daemon (server) using TCP/IP; see also
          * @ref getUnicastPort.
@@ -586,7 +586,7 @@ namespace flom {
         const char *getUnicastAddressAsCStr() {
             return flom_handle_get_unicast_address(&handle); }
         /**
-         * Gets the unicast address: the IP address (or a network name that the
+         * Get the unicast address: the IP address (or a network name that the
          * system can resolve) of the host that must be contacted
          * to reach FLoM daemon (server) using TCP/IP; see also
          * @ref getUnicastPort.
@@ -599,7 +599,7 @@ namespace flom {
                 flom_handle_get_unicast_address(&handle) : ""; }
 
         /**
-         * Sets the unicast address: the IP address (or a network name that the
+         * Set the unicast address: the IP address (or a network name that the
          * system can resolve) of the host that must be contacted
          * to reach FLoM daemon (server) using TCP/IP; see also
          * @ref setUnicastPort.
@@ -611,7 +611,7 @@ namespace flom {
         int setUnicastAddress(const char *value) {
             return flom_handle_set_unicast_address(&handle, value); }
         /**
-         * Sets the unicast address: the IP address (or a network name that the
+         * Set the unicast address: the IP address (or a network name that the
          * system can resolve) of the host that must be contacted
          * to reach FLoM daemon (server) using TCP/IP; see also
          * @ref setUnicastPort.
@@ -623,7 +623,7 @@ namespace flom {
             flom_handle_set_unicast_address(&handle, value.c_str()); }
 
         /**
-         * Gets the TCP/IP unicast port that must be used to contact the FLoM
+         * Get the TCP/IP unicast port that must be used to contact the FLoM
          * daemon (server) using TCP/IP; see also @ref getUnicastAddress.
          * The current value can be altered using method @ref setUnicastPort.
          * @return the current value
@@ -632,7 +632,7 @@ namespace flom {
             return flom_handle_get_unicast_port(&handle); }
 
         /**
-         * Sets the TCP/IP unicast port that must be used to contact the FLoM
+         * Set the TCP/IP unicast port that must be used to contact the FLoM
          * daemon (server) using TCP/IP; see also @ref setUnicastAddress.
          * The current value can be inspected using method @ref getUnicastPort.
          * @param value (Input): the new value
@@ -640,6 +640,133 @@ namespace flom {
          */
         int setUnicastPort(int value) {
             return flom_handle_set_unicast_port(&handle, value); }
+
+        /**
+         * Get the TLS certificate file name.
+         * The current value can be altered using method
+         * @ref setTlsCertificate.
+         * @return the current value as a C null terminated string
+         */
+        const char *getTlsCertificateAsCStr() {
+            return flom_handle_get_tls_certificate(&handle); }
+        /**
+         * Get the TLS certificate file name.
+         * The current value can be altered using method
+         * @ref setTlsCertificate.
+         * @return the current value as a C++ standard string
+         */
+        string getTlsCertificate() {
+            return NULL != flom_handle_get_tls_certificate(&handle) ?
+                flom_handle_get_tls_certificate(&handle) : ""; }
+
+        /**
+         * Set the TLS certificate name.
+         * The current value can be inspected using method
+         * @ref getTlsCertificate.
+         * @param value (Input): the new value (C null terminted string)
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
+         */
+        int setTlsCertificate(const char *value) {
+            return flom_handle_set_tls_certificate(&handle, value); }
+        /**
+         * Set the TLS certificate name.
+         * The current value can be inspected using method
+         * @ref getTlsCertificate.
+         * @param value (Input): the new value (C++ standard string)
+         */
+        void setTlsCertificate(const string &value) {
+            flom_handle_set_tls_certificate(&handle, value.c_str()); }
+
+        /**
+         * Get the TLS private key file name.
+         * The current value can be altered using method
+         * @ref setTlsPrivateKey.
+         * @return the current value as a C null terminated string
+         */
+        const char *getTlsPrivateKeyAsCStr() {
+            return flom_handle_get_tls_private_key(&handle); }
+        /**
+         * Get the TLS private key file name.
+         * The current value can be altered using method
+         * @ref setTlsPrivateKey.
+         * @return the current value as a C++ standard string
+         */
+        string getTlsPrivateKey() {
+            return NULL != flom_handle_get_tls_private_key(&handle) ?
+                flom_handle_get_tls_private_key(&handle) : ""; }
+
+        /**
+         * Set the TLS private key name.
+         * The current value can be inspected using method
+         * @ref getTlsPrivateKey.
+         * @param value (Input): the new value (C null terminted string)
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
+         */
+        int setTlsPrivateKey(const char *value) {
+            return flom_handle_set_tls_private_key(&handle, value); }
+        /**
+         * Set the TLS private key name.
+         * The current value can be inspected using method
+         * @ref getTlsPrivateKey.
+         * @param value (Input): the new value (C++ standard string)
+         */
+        void setTlsPrivateKey(const string &value) {
+            flom_handle_set_tls_private_key(&handle, value.c_str()); }
+
+        /**
+         * Get the TLS CA certificate file name.
+         * The current value can be altered using method
+         * @ref setTlsCaCertificate.
+         * @return the current value as a C null terminated string
+         */
+        const char *getTlsCaCertificateAsCStr() {
+            return flom_handle_get_tls_ca_certificate(&handle); }
+        /**
+         * Get the TLS CA certificate file name.
+         * The current value can be altered using method
+         * @ref setTlsCaCertificate.
+         * @return the current value as a C++ standard string
+         */
+        string getTlsCaCertificate() {
+            return NULL != flom_handle_get_tls_ca_certificate(&handle) ?
+                flom_handle_get_tls_ca_certificate(&handle) : ""; }
+
+        /**
+         * Set the TLS CA certificate name.
+         * The current value can be inspected using method
+         * @ref getTlsCaCertificate.
+         * @param value (Input): the new value (C null terminted string)
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
+         */
+        int setTlsCaCertificate(const char *value) {
+            return flom_handle_set_tls_ca_certificate(&handle, value); }
+        /**
+         * Set the TLS CA certificate name.
+         * The current value can be inspected using method
+         * @ref getTlsCaCertificate.
+         * @param value (Input): the new value (C++ standard string)
+         */
+        void setTlsCaCertificate(const string &value) {
+            flom_handle_set_tls_ca_certificate(&handle, value.c_str()); }
+        
+        /**
+         * Get "TLS check peer ID"  boolean property
+         * The current value can be altered using method 
+         *     @ref setTlsCheckPeerId.
+         * @return the current value
+         */
+        int getTlsCheckPeerId() {
+            return flom_handle_get_tls_check_peer_id(&handle); }
+
+        /**
+         * Set "TLS check peer ID" boolean property
+         * The current value can be inspected using method
+         * @ref getTlsCheckPeerId.
+         * @param value (Input): the new value
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
+         */
+        int setTlsCheckPeerId(int value) {
+            return flom_handle_set_tls_check_peer_id(&handle, value); }
     }; /* class FlomHandle */
 
 } /* namespace flom */
