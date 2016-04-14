@@ -341,7 +341,77 @@ void static_handle_happy_path(const char *nd_network_interface) {
     }
 
     /* get current value for TLS certificate */
-    /* @@@ */
+    fprintf(stderr, "flom_handle_get_tls_certificate() = '%s'\n",
+            flom_handle_get_tls_certificate(&my_handle));
+    /* set a new TLS certificate */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_tls_certificate(
+                           &my_handle, nd_tls_certificate))) {
+        fprintf(stderr,
+                "flom_handle_set_tls_certificate() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* get new TLS certificate */
+    fprintf(stderr, "flom_handle_get_tls_certificate() = '%s'\n",
+            flom_handle_get_tls_certificate(&my_handle));
+
+    /* get current value for TLS private key */
+    fprintf(stderr, "flom_handle_get_tls_private_key() = '%s'\n",
+            flom_handle_get_tls_private_key(&my_handle));
+    /* set a new TLS private key */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_tls_private_key(
+                           &my_handle, nd_tls_private_key))) {
+        fprintf(stderr,
+                "flom_handle_set_tls_private_key() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* get new TLS private key */
+    fprintf(stderr, "flom_handle_get_tls_private_key() = '%s'\n",
+            flom_handle_get_tls_private_key(&my_handle));
+
+    /* get current value for TLS CA certificate */
+    fprintf(stderr, "flom_handle_get_tls_ca_certificate() = '%s'\n",
+            flom_handle_get_tls_ca_certificate(&my_handle));
+    /* set a new TLS CA certificate */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_tls_ca_certificate(
+                           &my_handle, nd_tls_ca_certificate))) {
+        fprintf(stderr,
+                "flom_handle_set_tls_ca_certificate() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* get new TLS CA certificate */
+    fprintf(stderr, "flom_handle_get_tls_ca_certificate() = '%s'\n",
+            flom_handle_get_tls_ca_certificate(&my_handle));
+
+    /* get current value for TLS check peer ID property */
+    printf("flom_handle_get_tls_check_peer_id() = %d\n",
+           flom_handle_get_tls_check_peer_id(&my_handle));
+    /* set a new value for TLS check peer ID property */
+    flom_handle_set_tls_check_peer_id(&my_handle, FALSE);
+    /* get new value for TLS check peer ID property */
+    printf("flom_handle_get_tls_check_peer_id() = %d\n",
+           flom_handle_get_tls_check_peer_id(&my_handle));
+    /* check TLS check peer ID 1/2 */
+    if (flom_handle_get_tls_check_peer_id(&my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/"
+                "get_tls_check_peer_id\n");
+        exit(1);
+    }
+    /* set a new value for TLS check peer ID property */
+    flom_handle_set_tls_check_peer_id(&my_handle, TRUE);
+    /* get new value for TLS check peer ID property */
+    printf("flom_handle_get_tls_check_peer_id() = %d\n",
+           flom_handle_get_tls_check_peer_id(&my_handle));
+    /* check TLS check peer ID 2/2 */
+    if (!flom_handle_get_tls_check_peer_id(&my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/"
+		"get_tls_check_peer_id\n");
+        exit(1);
+    }
     
     /* lock acquisition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_lock(&my_handle))) {
@@ -666,6 +736,79 @@ void dynamic_handle_happy_path(const char *nd_network_interface) {
     if (2 != flom_handle_get_discovery_ttl(my_handle)) {
         fprintf(stderr,
                 "Unexpected result from flom_handle_set/get_discovery_ttl\n");
+        exit(1);
+    }
+    
+    /* get current value for TLS certificate */
+    fprintf(stderr, "flom_handle_get_tls_certificate() = '%s'\n",
+            flom_handle_get_tls_certificate(my_handle));
+    /* set a new TLS certificate */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_tls_certificate(
+                           my_handle, nd_tls_certificate))) {
+        fprintf(stderr,
+                "flom_handle_set_tls_certificate() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* get new TLS certificate */
+    fprintf(stderr, "flom_handle_get_tls_certificate() = '%s'\n",
+            flom_handle_get_tls_certificate(my_handle));
+
+    /* get current value for TLS private key */
+    fprintf(stderr, "flom_handle_get_tls_private_key() = '%s'\n",
+            flom_handle_get_tls_private_key(my_handle));
+    /* set a new TLS private key */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_tls_private_key(
+                           my_handle, nd_tls_private_key))) {
+        fprintf(stderr,
+                "flom_handle_set_tls_private_key() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* get new TLS private key */
+    fprintf(stderr, "flom_handle_get_tls_private_key() = '%s'\n",
+            flom_handle_get_tls_private_key(my_handle));
+
+    /* get current value for TLS CA certificate */
+    fprintf(stderr, "flom_handle_get_tls_ca_certificate() = '%s'\n",
+            flom_handle_get_tls_ca_certificate(my_handle));
+    /* set a new TLS CA certificate */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_tls_ca_certificate(
+                           my_handle, nd_tls_ca_certificate))) {
+        fprintf(stderr,
+                "flom_handle_set_tls_ca_certificate() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* get new TLS CA certificate */
+    fprintf(stderr, "flom_handle_get_tls_ca_certificate() = '%s'\n",
+            flom_handle_get_tls_ca_certificate(my_handle));
+
+    /* get current value for TLS check peer ID property */
+    printf("flom_handle_get_tls_check_peer_id() = %d\n",
+           flom_handle_get_tls_check_peer_id(my_handle));
+    /* set a new value for TLS check peer ID property */
+    flom_handle_set_tls_check_peer_id(my_handle, FALSE);
+    /* get new value for TLS check peer ID property */
+    printf("flom_handle_get_tls_check_peer_id() = %d\n",
+           flom_handle_get_tls_check_peer_id(my_handle));
+    /* check TLS check peer ID 1/2 */
+    if (flom_handle_get_tls_check_peer_id(my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/"
+                "get_tls_check_peer_id\n");
+        exit(1);
+    }
+    /* set a new value for TLS check peer ID property */
+    flom_handle_set_tls_check_peer_id(my_handle, TRUE);
+    /* get new value for TLS check peer ID property */
+    printf("flom_handle_get_tls_check_peer_id() = %d\n",
+           flom_handle_get_tls_check_peer_id(my_handle));
+    /* check TLS check peer ID 2/2 */
+    if (!flom_handle_get_tls_check_peer_id(my_handle)) {
+        fprintf(stderr,
+                "Unexpected result from flom_handle_set/"
+		"get_tls_check_peer_id\n");
         exit(1);
     }
     

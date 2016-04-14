@@ -1,4 +1,8 @@
-	FLoM, Free Lock Manager, a free and open source lock manager
+FFFFF L           M   M    
+F     L      ooo  MM MM    FLoM
+FFF   L     o   o M M M    Free Lock Manager
+F     L     o   o M   M    a free and open source lock manager
+F     LLLLL  ooo  M   M
 
 FLoM (Free Lock Manager) is an open source and free lock manager designed to
 serialize and synchronize shell command execution and custom programs
@@ -33,7 +37,8 @@ This is a brief list of the available features:
 - TLS (Transport Layer Security) support to protect network communication and
   to supply peer to peer mutual authentication based on X.509 certificates
 
-FLoM central documentation site is hosted by SourceForge Wiki: https://sourceforge.net/p/flom/wiki/Home/
+FLoM central documentation site is hosted by SourceForge Wiki: 
+	https://sourceforge.net/p/flom/wiki/Home/
 
  * FLoM is free software: you can redistribute it and/or modify under the terms
  * of GNU General Public License version 2 as published by the Free Software
@@ -43,11 +48,6 @@ FLoM central documentation site is hosted by SourceForge Wiki: https://sourcefor
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
-Note: libflom is the library distributed along with FLoM; it's free software:
-      you can redistribute it and/or modify under the terms of GNU Lesser
-      General Public License version 2.1 as published by the Free Software
-      Foundation.
 
 Download the tarball from SourceForge: https://sourceforge.net/projects/flom/
 and install FLoM using standard GNU build chain: 

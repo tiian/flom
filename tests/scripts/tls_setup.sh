@@ -20,7 +20,7 @@
 
 # retrieving unique id
 UNIQUE_ID=$(flom --unique-id)
-echo "FLoM unique IS is $UNIQUE_ID"
+echo "FLoM unique ID is $UNIQUE_ID"
 echo "Creating certification authorities and certificates"
 
 create_ca () {

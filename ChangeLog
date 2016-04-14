@@ -1,4 +1,7 @@
 LOG:
+         - 1.2.0 IoGaCo, TLS API support
+	GPL only license
+
 20150330 - 1.1.2 IoGaCo, TLS support
 	New option --unique-id to retrieve the FLoM unique identificator
 	New options for TLS support: --tls-certificate,

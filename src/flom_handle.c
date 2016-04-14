@@ -2,26 +2,19 @@
  * Copyright (c) 2013-2016, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
- * This file is part of FLoM and libflom (FLoM API client library)
+ * This file is part of FLoM, Free Lock Manager
  *
  * FLoM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2.0 as
  * published by the Free Software Foundation.
- *
- * This file is part of libflom too and you can redistribute it and/or modify
- * it under the terms of one of the following licences:
- * - GNU General Public License version 2.0
- * - GNU Lesser General Public License version 2.1
- * as published by the Free Software Foundation.
  *
  * FLoM is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License and
- * GNU Lesser General Public License along with FLoM.
- * If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <config.h>
 
@@ -955,6 +948,8 @@ const char *flom_handle_get_tls_certificate(const flom_handle_t *handle)
 
 int flom_handle_set_tls_certificate(flom_handle_t *handle, const char *value)
 {
+    int ret_cod;
+    
     FLOM_TRACE(("flom_handle_set_tls_certificate: "
                 "old value='%s', new value='%s'\n",
                 STRORNULL(flom_config_get_tls_certificate(handle->config)),
@@ -962,16 +957,16 @@ int flom_handle_set_tls_certificate(flom_handle_t *handle, const char *value)
     switch (handle->state) {
         case FLOM_HANDLE_STATE_INIT:
         case FLOM_HANDLE_STATE_DISCONNECTED:
-            flom_config_set_tls_certificate(handle->config,
-                                            (const gchar *)value);
+            ret_cod = flom_config_set_tls_certificate(handle->config,
+                                                      (const gchar *)value);
             break;
         default:
             FLOM_TRACE(("flom_handle_set_tls_certificate: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
-            return FLOM_RC_API_IMMUTABLE_HANDLE;
+            ret_cod = FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
-    return FLOM_RC_OK;
+    return ret_cod;
 }
 
 
@@ -987,6 +982,8 @@ const char *flom_handle_get_tls_private_key(const flom_handle_t *handle)
 
 int flom_handle_set_tls_private_key(flom_handle_t *handle, const char *value)
 {
+    int ret_cod;
+    
     FLOM_TRACE(("flom_handle_set_tls_private_key: "
                 "old value='%s', new value='%s'\n",
                 STRORNULL(flom_config_get_tls_private_key(handle->config)),
@@ -994,16 +991,16 @@ int flom_handle_set_tls_private_key(flom_handle_t *handle, const char *value)
     switch (handle->state) {
         case FLOM_HANDLE_STATE_INIT:
         case FLOM_HANDLE_STATE_DISCONNECTED:
-            flom_config_set_tls_private_key(handle->config,
-                                            (const gchar *)value);
+            ret_cod = flom_config_set_tls_private_key(handle->config,
+                                                      (const gchar *)value);
             break;
         default:
             FLOM_TRACE(("flom_handle_set_tls_private_key: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
-            return FLOM_RC_API_IMMUTABLE_HANDLE;
+            ret_cod = FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
-    return FLOM_RC_OK;
+    return ret_cod;
 }
 
 
@@ -1021,6 +1018,8 @@ const char *flom_handle_get_tls_ca_certificate(const flom_handle_t *handle)
 int flom_handle_set_tls_ca_certificate(flom_handle_t *handle,
                                        const char *value)
 {
+    int ret_cod;
+    
     FLOM_TRACE(("flom_handle_set_tls_ca_certificate: "
                 "old value='%s', new value='%s'\n",
                 STRORNULL(flom_config_get_tls_ca_certificate(handle->config)),
@@ -1028,16 +1027,16 @@ int flom_handle_set_tls_ca_certificate(flom_handle_t *handle,
     switch (handle->state) {
         case FLOM_HANDLE_STATE_INIT:
         case FLOM_HANDLE_STATE_DISCONNECTED:
-            flom_config_set_tls_ca_certificate(handle->config,
-                                            (const gchar *)value);
+            ret_cod = flom_config_set_tls_ca_certificate(handle->config,
+                                                         (const gchar *)value);
             break;
         default:
             FLOM_TRACE(("flom_handle_set_tls_ca_certificate: state %d " \
                         "is not compatible with set operation\n",
                         handle->state));
-            return FLOM_RC_API_IMMUTABLE_HANDLE;
+            ret_cod = FLOM_RC_API_IMMUTABLE_HANDLE;
     } /* switch (handle->state) */
-    return FLOM_RC_OK;
+    return ret_cod;
 }
 
 

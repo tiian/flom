@@ -12,6 +12,12 @@ AT_CLEANUP
 AT_SETUP([C Getter and setter methods])
 # skip if the address is not available
 AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 1) 6], [0], [ignore], [ignore])
+# kill previous daemon
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+# create X.509 certificate(s)
+AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
+# restart the daemon
+AT_CHECK([flom -s /tmp/flom_socket_name --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes -d -1 -- true], [0], [ignore], [ignore])
 AT_DATA([expout],
 [[flom_handle_get_socket_name() = '/tmp/flom-@USER@'
 flom_handle_get_socket_name() = '/tmp/flom_socket_name'
@@ -43,6 +49,9 @@ flom_handle_get_discovery_timeout() = 500
 flom_handle_get_discovery_timeout() = 750
 flom_handle_get_discovery_ttl() = 1
 flom_handle_get_discovery_ttl() = 2
+flom_handle_get_tls_check_peer_id() = 0
+flom_handle_get_tls_check_peer_id() = 0
+flom_handle_get_tls_check_peer_id() = 1
 staticHandleHappyPath locked element is red
 flom_handle_get_socket_name() = '/tmp/flom-@USER@'
 flom_handle_get_socket_name() = '/tmp/flom_socket_name'
@@ -74,10 +83,11 @@ flom_handle_get_discovery_timeout() = 500
 flom_handle_get_discovery_timeout() = 750
 flom_handle_get_discovery_ttl() = 1
 flom_handle_get_discovery_ttl() = 2
+flom_handle_get_tls_check_peer_id() = 0
+flom_handle_get_tls_check_peer_id() = 0
+flom_handle_get_tls_check_peer_id() = 1
 dynamicHandleHappyPath locked element is green
 ]])
-AT_CHECK([pkill flom], [0], [ignore], [ignore])
-AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
 AT_CHECK([case0002 $(iface_name.sh inet6 1)], [0], [expout], [ignore])
 AT_CLEANUP
 

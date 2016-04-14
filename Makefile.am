@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS="-Im4"
 SUBDIRS = src man etc doc tests
 dist_noinst_DATA = doxygen.conf.in
 nodist_noinst_DATA = doxygen.conf
-dist_doc_DATA = README COPYING COPYING_LGPL ChangeLog TestLog
+dist_doc_DATA = README COPYING ChangeLog TestLog
 CLEANFILES = doxygen.conf
 
 doxygen.conf: doxygen.conf.in

@@ -2,7 +2,7 @@
  * Copyright (c) 2013-2016, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
- * This file is part of FLoM.
+ * This file is part of FLoM, Free Lock Manager
  *
  * FLoM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as published
