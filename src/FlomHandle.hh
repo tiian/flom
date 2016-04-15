@@ -287,9 +287,10 @@ namespace flom {
          * The current value can be inspected using method
          * @ref getMulticastAddress.
          * @param value (Input): the new value (C++ standard string)
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setMulticastAddress(const string &value) {
-            flom_handle_set_multicast_address(&handle, value.c_str()); }
+        int setMulticastAddress(const string &value) {
+            return flom_handle_set_multicast_address(&handle, value.c_str()); }
 
         /**
          * Get the UDP/IP multicast port that must be used to contact the FLoM
@@ -618,9 +619,10 @@ namespace flom {
          * The current value can be inspected using method
          * @ref getUnicastAddress.
          * @param value (Input): the new value (C++ standard string)
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setUnicastAddress(const string &value) {
-            flom_handle_set_unicast_address(&handle, value.c_str()); }
+        int setUnicastAddress(const string &value) {
+            return flom_handle_set_unicast_address(&handle, value.c_str()); }
 
         /**
          * Get the TCP/IP unicast port that must be used to contact the FLoM
@@ -673,9 +675,10 @@ namespace flom {
          * The current value can be inspected using method
          * @ref getTlsCertificate.
          * @param value (Input): the new value (C++ standard string)
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setTlsCertificate(const string &value) {
-            flom_handle_set_tls_certificate(&handle, value.c_str()); }
+        int setTlsCertificate(const string &value) {
+            return flom_handle_set_tls_certificate(&handle, value.c_str()); }
 
         /**
          * Get the TLS private key file name.
@@ -709,9 +712,10 @@ namespace flom {
          * The current value can be inspected using method
          * @ref getTlsPrivateKey.
          * @param value (Input): the new value (C++ standard string)
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setTlsPrivateKey(const string &value) {
-            flom_handle_set_tls_private_key(&handle, value.c_str()); }
+        int setTlsPrivateKey(const string &value) {
+            return flom_handle_set_tls_private_key(&handle, value.c_str()); }
 
         /**
          * Get the TLS CA certificate file name.
@@ -745,9 +749,11 @@ namespace flom {
          * The current value can be inspected using method
          * @ref getTlsCaCertificate.
          * @param value (Input): the new value (C++ standard string)
+         * @return @ref FLOM_RC_OK or @ref FLOM_RC_API_IMMUTABLE_HANDLE
          */
-        void setTlsCaCertificate(const string &value) {
-            flom_handle_set_tls_ca_certificate(&handle, value.c_str()); }
+        int setTlsCaCertificate(const string &value) {
+            return flom_handle_set_tls_ca_certificate(
+                &handle, value.c_str()); }
         
         /**
          * Get "TLS check peer ID"  boolean property

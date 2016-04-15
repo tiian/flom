@@ -29,6 +29,9 @@ public class case4002 {
     private final static String ndResourceName = "red.blue.green";
     private final static String ndUnicastAddress = "127.0.0.1";
     private final static String ndMulticastAddress = "224.0.0.1";
+    private final static String ndTlsCertificate = "CA1/peer1_CA1_cert.pem";
+    private final static String ndTlsPrivateKey = "CA1/peer1_CA1_key.pem";
+    private final static String ndTlsCaCertificate = "CA1/cacert.pem";
     
     private static void HappyPath(String ndNetworkInterface) {
         try {
@@ -279,6 +282,83 @@ public class case4002 {
             if (2 != myHandle.getDiscoveryTtl()) {
                 System.err.println("Unexpected result from " +
                                    "FlomHandle.set/getDiscoveryTtl");
+                System.exit(1);
+            }
+    
+            /* get current value for TLS certificate */
+            System.err.println("FlomHandle.getTlsCertificate() = '" +
+                               myHandle.getTlsCertificate() + "'");
+            /* set a new TLS certificate */
+            if (FlomErrorCodes.FLOM_RC_OK != (
+                    retCod = myHandle.setTlsCertificate(
+                        ndTlsCertificate))) {
+                FlomException e = new FlomException(retCod);
+                System.err.println("FlomHandle.setTlsCertificate() returned " +
+                                   e.getReturnCode() + ", '" + e.getMessage() +
+                                   "'");
+                System.exit(1);
+            }
+            /* get new TLS certificate */
+            System.err.println("FlomHandle.getTlsCertificate() = '" +
+                               myHandle.getTlsCertificate() + "'");
+
+            /* get current value for TLS private key */
+            System.err.println("FlomHandle.getTlsPrivateKey() = '" +
+                               myHandle.getTlsPrivateKey() + "'");
+            /* set a new TLS private key */
+            if (FlomErrorCodes.FLOM_RC_OK != (
+                    retCod = myHandle.setTlsPrivateKey(
+                        ndTlsPrivateKey))) {
+                FlomException e = new FlomException(retCod);
+                System.err.println("FlomHandle.setTlsPrivateKey() returned " +
+                                   e.getReturnCode() + ", '" + e.getMessage() +
+                                   "'");
+                System.exit(1);
+            }
+            /* get new TLS private key */
+            System.err.println("FlomHandle.getTlsPrivateKey() = '" +
+                               myHandle.getTlsPrivateKey() + "'");
+
+            /* get current value for TLS CA certificate */
+            System.err.println("FlomHandle.getTlsCaCertificate() = '" +
+                               myHandle.getTlsCaCertificate() + "'");
+            /* set a new TLS CA certificate */
+            if (FlomErrorCodes.FLOM_RC_OK != (
+                    retCod = myHandle.setTlsCaCertificate(
+                        ndTlsCaCertificate))) {
+                FlomException e = new FlomException(retCod);
+                System.err.println("FlomHandle.setTlsCaCertificate() returned "
+                                   + e.getReturnCode() + ", '" +
+                                   e.getMessage() + "'");
+                System.exit(1);
+            }
+            /* get new TLS CA certificate */
+            System.err.println("FlomHandle.getTlsCaCertificate() = '" +
+                               myHandle.getTlsCaCertificate() + "'");
+
+            /* get current value for TLS check peer ID property */
+            System.out.println("FlomHandle.getTlsCheckPeerId() = " +
+                               myHandle.getTlsCheckPeerId());
+            /* set a new value for TLS check peer ID property */
+            myHandle.setTlsCheckPeerId(false);
+            /* get new value for TLS check peer ID property */
+            System.out.println("FlomHandle.getTlsCheckPeerId() = " +
+                               myHandle.getTlsCheckPeerId());
+            /* check TLS check peer ID 1/2 */
+            if (myHandle.getTlsCheckPeerId()) {
+                System.err.println("Unexpected result from FlomHandle.set/" +
+                                   "getTlsCheckPeerId");
+                System.exit(1);
+            }
+            /* set a new value for TLS check peer ID property */
+            myHandle.setTlsCheckPeerId(true);
+            /* get new value for TLS check peer ID property */
+            System.out.println("FlomHandle.getTlsCheckPeerId() = " +
+                               myHandle.getTlsCheckPeerId());
+            /* check TLS check peer ID 2/2 */
+            if (!myHandle.getTlsCheckPeerId()) {
+                System.err.println("Unexpected result from FlomHandle.set/" +
+                                   "getTlsCheckPeerId");
                 System.exit(1);
             }
     

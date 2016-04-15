@@ -2,7 +2,7 @@
  * Copyright (c) 2013-2016, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
- * This file is part of FLoM.
+ * This file is part of FLoM, Free Lock Manager
  *
  * FLoM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as published
@@ -33,6 +33,9 @@ const string ndTraceFilename("/tmp/flom.trc");
 const string ndResourceName("red.blue.green");
 const string ndUnicastAddress("127.0.0.1");
 const string ndMulticastAddress("224.0.0.1");
+const string ndTlsCertificate("CA1/peer1_CA1_cert.pem");
+const string ndTlsPrivateKey("CA1/peer1_CA1_key.pem");
+const string ndTlsCaCertificate("CA1/cacert.pem");
 
 
 /*
@@ -285,9 +288,81 @@ void staticHandleHappyPath(const string ndNetworkInterface) {
         exit(1);
     }
     
+    /* get current value for TLS certificate */
+    cerr << "FlomHandle.getTlsCertificate() = '"
+         << myHandle.getTlsCertificate() << "'" << endl;
+    /* set a new TLS certificate */
+    if (FLOM_RC_OK != (retCod = myHandle.setTlsCertificate(
+                           ndTlsCertificate))) {
+        FlomException excp(retCod);
+        cerr << "FlomHandle.setTlsCertificate() returned "
+             << retCod << ", '" << excp.getReturnCodeText() << "'" << endl;
+        exit(1);
+    }
+    /* get new TLS certificate */
+    cerr << "FlomHandle.getTlsCertificate() = '"
+         << myHandle.getTlsCertificate() << "'" << endl;
+
+    /* get current value for TLS private key */
+    cerr << "FlomHandle.getTlsPrivateKey() = '"
+         << myHandle.getTlsPrivateKey() << "'" << endl;
+    /* set a new TLS private key */
+    if (FLOM_RC_OK != (retCod = myHandle.setTlsPrivateKey(
+                           ndTlsPrivateKey))) {
+        FlomException excp(retCod);
+        cerr << "FlomHandle.setTlsPrivateKey() returned "
+             << retCod << ", '" << excp.getReturnCodeText() << "'" << endl;
+        exit(1);
+    }
+    /* get new TLS private key */
+    cerr << "FlomHandle.getTlsPrivateKey() = '"
+         << myHandle.getTlsPrivateKey() << "'" << endl;
+
+    /* get current value for TLS CA certificate */
+    cerr << "FlomHandle.getTlsCaCertificate() = '"
+         << myHandle.getTlsCaCertificate() << "'" << endl;
+    /* set a new TLS CA certificate */
+    if (FLOM_RC_OK != (retCod = myHandle.setTlsCaCertificate(
+                           ndTlsCaCertificate))) {
+        FlomException excp(retCod);
+        cerr << "FlomHandle.setTlsCaCertificate() returned "
+             << retCod << ", '" << excp.getReturnCodeText() << "'" << endl;
+        exit(1);
+    }
+    /* get new TLS CA certificate */
+    cerr << "FlomHandle.getTlsCaCertificate() = '"
+         << myHandle.getTlsCaCertificate() << "'" << endl;
+
+    /* get current value for TLS check peer ID property */
+    cout << "FlomHandle.getTlsCheckPeerId() = " << myHandle.getTlsCheckPeerId()
+         << endl;
+    /* set a new value for TLS check peer ID property */
+    myHandle.setTlsCheckPeerId(FALSE);
+    /* get new value for TLS check peer ID property */
+    cout << "FlomHandle.getTlsCheckPeerId() = " << myHandle.getTlsCheckPeerId()
+         << endl;
+    /* check TLS check peer ID 1/2 */
+    if (myHandle.getTlsCheckPeerId()) {
+        cerr << "Unexpected result from FlomHandle.set/getTlsCheckPeerId" <<
+            endl;
+        exit(1);
+    }
+    /* set a new value for TLS check peer ID property */
+    myHandle.setTlsCheckPeerId(TRUE);
+    /* get new value for TLS check peer ID property */
+    cout << "FlomHandle.getTlsCheckPeerId() = " << myHandle.getTlsCheckPeerId()
+         << endl;
+    /* check TLS check peer ID 2/2 */
+    if (!myHandle.getTlsCheckPeerId()) {
+        cerr << "Unexpected result from FlomHandle.set/getTlsCheckPeerId" <<
+            endl;
+        exit(1);
+    }
+    
     /* get current network interface */
     cerr << "FlomHandle.getNetworkInterface() = '"
          << myHandle.getNetworkInterface() << "'" << endl;
+    myHandle.setNetworkInterface(ndNetworkInterface);
     /* set a new network interface */
     if (FLOM_RC_OK == myHandle.setNetworkInterface(ndNetworkInterface)) {
         /* get new network interface */
@@ -513,33 +588,6 @@ void dynamicHandleHappyPath(const string ndNetworkInterface) {
         exit(1);
     }
     
-    /* get current network interface */
-    cerr << "FlomHandle->getNetworkInterface() = '"
-         << myHandle->getNetworkInterface() << "'" << endl;
-    /* set a new network interface */
-    if (FLOM_RC_OK == myHandle->setNetworkInterface(ndNetworkInterface)) {
-        /* get new network interface */
-        cerr << "FlomHandle->getNetworkInterface() = '" 
-             << myHandle->getNetworkInterface() << "'" << endl;
-        /* check network interface */
-        if (ndNetworkInterface.compare(myHandle->getNetworkInterface())) {
-            cerr << "Unexpected result from FlomHandle/getNetworkInterface"
-                 << endl;
-            exit(1);
-        }
-    } else {
-        cerr << "'" << ndNetworkInterface << "' is not a valid IPv6 network "
-             << "interface for this system" << endl;
-        exit(1);
-    }
-    
-    /* set AF_UNIX/PF_LOCAL socket_name again */
-    if (FLOM_RC_OK != (retCod = myHandle->setSocketName(ndSocketName))) {
-        cerr << "FlomHandle->setSocketName() returned " << retCod << " '" <<
-            flom_strerror(retCod) << "'" << endl;
-        exit(1);
-    }
-    
     /* get current value for unicast port */
     cout << "FlomHandle->getUnicastPort() = " <<
         myHandle->getUnicastPort() << endl;
@@ -612,6 +660,104 @@ void dynamicHandleHappyPath(const string ndNetworkInterface) {
     if (2 != myHandle->getDiscoveryTtl()) {
         cerr << "Unexpected result from FlomHandle->set/getDiscoveryTtl"
              << endl;
+        exit(1);
+    }
+    
+    /* get current value for TLS certificate */
+    cerr << "FlomHandle->getTlsCertificate() = '"
+         << myHandle->getTlsCertificate() << "'" << endl;
+    /* set a new TLS certificate */
+    if (FLOM_RC_OK != (retCod = myHandle->setTlsCertificate(
+                           ndTlsCertificate))) {
+        FlomException excp(retCod);
+        cerr << "FlomHandle->setTlsCertificate() returned "
+             << retCod << ", '" << excp.getReturnCodeText() << "'" << endl;
+        exit(1);
+    }
+    /* get new TLS certificate */
+    cerr << "FlomHandle->getTlsCertificate() = '"
+         << myHandle->getTlsCertificate() << "'" << endl;
+
+    /* get current value for TLS private key */
+    cerr << "FlomHandle->getTlsPrivateKey() = '"
+         << myHandle->getTlsPrivateKey() << "'" << endl;
+    /* set a new TLS private key */
+    if (FLOM_RC_OK != (retCod = myHandle->setTlsPrivateKey(
+                           ndTlsPrivateKey))) {
+        FlomException excp(retCod);
+        cerr << "FlomHandle->setTlsPrivateKey() returned "
+             << retCod << ", '" << excp.getReturnCodeText() << "'" << endl;
+        exit(1);
+    }
+    /* get new TLS private key */
+    cerr << "FlomHandle->getTlsPrivateKey() = '"
+         << myHandle->getTlsPrivateKey() << "'" << endl;
+
+    /* get current value for TLS CA certificate */
+    cerr << "FlomHandle->getTlsCaCertificate() = '"
+         << myHandle->getTlsCaCertificate() << "'" << endl;
+    /* set a new TLS CA certificate */
+    if (FLOM_RC_OK != (retCod = myHandle->setTlsCaCertificate(
+                           ndTlsCaCertificate))) {
+        FlomException excp(retCod);
+        cerr << "FlomHandle->setTlsCaCertificate() returned "
+             << retCod << ", '" << excp.getReturnCodeText() << "'" << endl;
+        exit(1);
+    }
+    /* get new TLS CA certificate */
+    cerr << "FlomHandle->getTlsCaCertificate() = '"
+         << myHandle->getTlsCaCertificate() << "'" << endl;
+
+    /* get current value for TLS check peer ID property */
+    cout << "FlomHandle->getTlsCheckPeerId() = " <<
+        myHandle->getTlsCheckPeerId() << endl;
+    /* set a new value for TLS check peer ID property */
+    myHandle->setTlsCheckPeerId(FALSE);
+    /* get new value for TLS check peer ID property */
+    cout << "FlomHandle->getTlsCheckPeerId() = " <<
+        myHandle->getTlsCheckPeerId() << endl;
+    /* check TLS check peer ID 1/2 */
+    if (myHandle->getTlsCheckPeerId()) {
+        cerr << "Unexpected result from FlomHandle->set/getTlsCheckPeerId" <<
+            endl;
+        exit(1);
+    }
+    /* set a new value for TLS check peer ID property */
+    myHandle->setTlsCheckPeerId(TRUE);
+    /* get new value for TLS check peer ID property */
+    cout << "FlomHandle->getTlsCheckPeerId() = " <<
+        myHandle->getTlsCheckPeerId() << endl;
+    /* check TLS check peer ID 2/2 */
+    if (!myHandle->getTlsCheckPeerId()) {
+        cerr << "Unexpected result from FlomHandle->set/getTlsCheckPeerId" <<
+            endl;
+        exit(1);
+    }
+    
+    /* get current network interface */
+    cerr << "FlomHandle->getNetworkInterface() = '"
+         << myHandle->getNetworkInterface() << "'" << endl;
+    /* set a new network interface */
+    if (FLOM_RC_OK == myHandle->setNetworkInterface(ndNetworkInterface)) {
+        /* get new network interface */
+        cerr << "FlomHandle->getNetworkInterface() = '" 
+             << myHandle->getNetworkInterface() << "'" << endl;
+        /* check network interface */
+        if (ndNetworkInterface.compare(myHandle->getNetworkInterface())) {
+            cerr << "Unexpected result from FlomHandle/getNetworkInterface"
+                 << endl;
+            exit(1);
+        }
+    } else {
+        cerr << "'" << ndNetworkInterface << "' is not a valid IPv6 network "
+             << "interface for this system" << endl;
+        exit(1);
+    }
+    
+    /* set AF_UNIX/PF_LOCAL socket_name again */
+    if (FLOM_RC_OK != (retCod = myHandle->setSocketName(ndSocketName))) {
+        cerr << "FlomHandle->setSocketName() returned " << retCod << " '" <<
+            flom_strerror(retCod) << "'" << endl;
         exit(1);
     }
     

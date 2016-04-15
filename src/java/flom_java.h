@@ -303,6 +303,70 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getUnicastPortJNI
 JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setUnicastPortJNI
   (JNIEnv *, jobject, jint);
 
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getTlsCertificateJNI
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getTlsCertificateJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setTlsCertificateJNI
+ * Signature: (Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setTlsCertificateJNI
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getTlsPrivateKeyJNI
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getTlsPrivateKeyJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setTlsPrivateKeyJNI
+ * Signature: (Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setTlsPrivateKeyJNI
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getTlsCaCertificateJNI
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getTlsCaCertificateJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setTlsCaCertificateJNI
+ * Signature: (Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setTlsCaCertificateJNI
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    getTlsCheckPeerIdJNI
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_tiian_flom_FlomHandle_getTlsCheckPeerIdJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
+ * Method:    setTlsCheckPeerIdJNI
+ * Signature: (Z)I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setTlsCheckPeerIdJNI
+  (JNIEnv *, jobject, jboolean);
+
 #ifdef __cplusplus
 }
 #endif

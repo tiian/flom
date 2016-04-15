@@ -532,6 +532,8 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setTraceFilenameJNI
         cstr);
 }
 
+
+
 JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getUnicastAddressJNI
 (JNIEnv *env, jobject this_obj)
 {
@@ -555,6 +557,8 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setUnicastAddressJNI
         cstr);
 }
 
+
+
 JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_getUnicastPortJNI
 (JNIEnv *env, jobject this_obj)
 {
@@ -571,6 +575,103 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setUnicastPortJNI
 {
     FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setUnicastPortJNI\n"));
     return (jint)flom_handle_set_unicast_port(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj), value);
+}
+
+
+
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getTlsCertificateJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getTlsCertificateJNI\n"));
+    return (*env)->NewStringUTF(
+        env,
+        flom_handle_get_tls_certificate(
+            Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                env, this_obj)));
+}
+
+
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setTlsCertificateJNI
+(JNIEnv *env, jobject this_obj, jstring value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setTlsCertificateJNI\n"));
+    const char *cstr = (*env)->GetStringUTFChars(env, value, NULL);
+    return (jint)flom_handle_set_tls_certificate(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj),
+        cstr);
+}
+
+
+
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getTlsPrivateKeyJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getTlsPrivateKeyJNI\n"));
+    return (*env)->NewStringUTF(
+        env,
+        flom_handle_get_tls_private_key(
+            Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                env, this_obj)));
+}
+
+
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setTlsPrivateKeyJNI
+(JNIEnv *env, jobject this_obj, jstring value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setTlsPrivateKeyJNI\n"));
+    const char *cstr = (*env)->GetStringUTFChars(env, value, NULL);
+    return (jint)flom_handle_set_tls_private_key(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj),
+        cstr);
+}
+
+
+
+JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getTlsCaCertificateJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getTlsCaCertificateJNI\n"));
+    return (*env)->NewStringUTF(
+        env,
+        flom_handle_get_tls_ca_certificate(
+            Java_org_tiian_flom_FlomHandle_getNativeHandle(
+                env, this_obj)));
+}
+
+
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setTlsCaCertificateJNI
+(JNIEnv *env, jobject this_obj, jstring value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setTlsCaCertificateJNI\n"));
+    const char *cstr = (*env)->GetStringUTFChars(env, value, NULL);
+    return (jint)flom_handle_set_tls_ca_certificate(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj),
+        cstr);
+}
+
+
+
+JNIEXPORT jboolean JNICALL Java_org_tiian_flom_FlomHandle_getTlsCheckPeerIdJNI
+(JNIEnv *env, jobject this_obj)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_getTlsCheckPeerIdJNI\n"));
+    return (jint)flom_handle_get_tls_check_peer_id(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(
+            env, this_obj));
+}
+
+
+
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_setTlsCheckPeerIdJNI
+  (JNIEnv *env, jobject this_obj, jboolean value)
+{
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_setTlsCheckPeerIdJNI\n"));
+    return (jint)flom_handle_set_tls_check_peer_id(
         Java_org_tiian_flom_FlomHandle_getNativeHandle(
             env, this_obj), value);
 }

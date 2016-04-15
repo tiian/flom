@@ -198,7 +198,7 @@ public class FlomHandle {
      */
     private native int setDiscoveryAttemptsJNI(int value);
     /**
-     * Sets the maximum number of attempts that will be tryed during
+     * Set the maximum number of attempts that will be tryed during
      * auto-discovery phase using UDP/IP multicast (see
      *         setMulticastAddress, setMulticastPort).
      * The current value can be inspected using method
@@ -221,7 +221,7 @@ public class FlomHandle {
      */
     private native int getDiscoveryTimeoutJNI();
     /**
-     * Gets the number of milliseconds between two consecutive attempts that
+     * Get the number of milliseconds between two consecutive attempts that
      * will be tryed during auto-discovery phase using UDP/IP multicast (see
      * getMulticastAddress, getMulticastPort).
      * The current value can be altered using method
@@ -242,7 +242,7 @@ public class FlomHandle {
      */
     private native int setDiscoveryTimeoutJNI(int value);
     /**
-     * Sets the number of milliseconds between two consecutive attempts that
+     * Set the number of milliseconds between two consecutive attempts that
      * will be tryed during auto-discovery phase using UDP/IP multicast (see
      * setMulticastAddress, setMulticastPort).
      * The current value can be inspected using method
@@ -265,7 +265,7 @@ public class FlomHandle {
      */
     private native int getDiscoveryTtlJNI();
     /**
-     * Gets the UDP/IP multicast TTL parameter used during auto-discovery
+     * Get the UDP/IP multicast TTL parameter used during auto-discovery
      * phase; for a definition of the parameter, see
      * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html
      * . The current value can be altered using method setDiscoveryTtl
@@ -285,7 +285,7 @@ public class FlomHandle {
      */
     private native int setDiscoveryTtlJNI(int value);
     /**
-     * Sets the UDP/IP multicast TTL parameter used during auto-discovery
+     * Set the UDP/IP multicast TTL parameter used during auto-discovery
      * phase; for a definition of the parameter, see
      * http://www.tldp.org/HOWTO/Multicast-HOWTO-2.html
      * . The current value can be inspected using method
@@ -307,7 +307,7 @@ public class FlomHandle {
      */
     private native int getLockModeJNI();
     /**
-     * Gets lock mode property: how a simple or hierarchical resource will
+     * Get lock mode property: how a simple or hierarchical resource will
      * be locked when method lock is called; FLoM
      * supports the same lock mode semantic proposed by DLM, see
      * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
@@ -330,7 +330,7 @@ public class FlomHandle {
      */
     private native int setLockModeJNI(int value);
     /**
-     * Sets lock mode property: how a simple or hierarchical resource will
+     * Set lock mode property: how a simple or hierarchical resource will
      * be locked when method lock is called; FLoM
      * supports the same lock mode semantic proposed by DLM, see
      * http://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes
@@ -355,7 +355,7 @@ public class FlomHandle {
      */
     private native String getMulticastAddressJNI();
     /**
-     * Gets the multicast address: the IP address (or a network name that
+     * Get the multicast address: the IP address (or a network name that
      * the system can resolve) of the IP multicast group that must be
      * contacted to reach FLoM daemon (server) using UDP/IP; see also
      *         getMulticastPort.
@@ -380,7 +380,7 @@ public class FlomHandle {
      */
     private native int setMulticastAddressJNI(String value);
     /**
-     * Sets the multicast address: the IP address (or a network name that
+     * Set the multicast address: the IP address (or a network name that
      * the system can resolve) of the IP multicast group that must be
      * contacted to reach FLoM daemon (server) using UDP/IP; see also
      * setMulticastPort.
@@ -404,7 +404,7 @@ public class FlomHandle {
      */
     private native int getMulticastPortJNI();
     /**
-     * Gets the UDP/IP multicast port that must be used to contact the FLoM
+     * Get the UDP/IP multicast port that must be used to contact the FLoM
      * daemon (server) using UDP/IP; see also getMulticastAddress.
      * The current value can be altered using method setMulticastPort.
      * @return the current value
@@ -423,7 +423,7 @@ public class FlomHandle {
      */
     private native int setMulticastPortJNI(int value);
     /**
-     * Sets the UDP/IP multicast port that must be used to contact the FLoM
+     * Set the UDP/IP multicast port that must be used to contact the FLoM
      * daemon (server) using UDP/IP; see also setMulticastAddress.
      * The current value can be inspected using method
      * getMulticastPort.
@@ -445,7 +445,7 @@ public class FlomHandle {
      */
     private native String getNetworkInterfaceJNI();
     /**
-     * Gets the network interface that must be used for IPv6 link local
+     * Get the network interface that must be used for IPv6 link local
      * addresses
      * The current value can be altered using method
      * setNetworkInterface.
@@ -468,7 +468,7 @@ public class FlomHandle {
      */
     private native int setNetworkInterfaceJNI(String value);
     /**
-     * Sets the network interface that must be used for IPv6 link local
+     * Set the network interface that must be used for IPv6 link local
      * addresses
      * The current value can be inspected using method
      * getNetworkInterface.
@@ -490,7 +490,7 @@ public class FlomHandle {
      */
     private native boolean getResourceCreateJNI();
     /**
-     * Gets the UDP/IP multicast port that must be used to contact the FLoM
+     * Get the UDP/IP multicast port that must be used to contact the FLoM
      * daemon (server) using UDP/IP; see also getMulticastAddress.
      * The current value can be altered using method setResourceCreate.
      * @return the current value
@@ -509,7 +509,7 @@ public class FlomHandle {
      */
     private native int setResourceCreateJNI(boolean value);
     /**
-     * Sets "resource create" boolean property: it specifies if method
+     * Set "resource create" boolean property: it specifies if method
      * lock can create a new resource when the specified
      * one is not defined.
      * The current value can be inspected using method
@@ -532,7 +532,7 @@ public class FlomHandle {
      */
     private native int getResourceIdleLifespanJNI();
     /**
-     * Gets "resource idle lifespan" property: it specifies how many
+     * Get "resource idle lifespan" property: it specifies how many
      * milliseconds a resource will be kept after the last locker released
      * it; the expiration is necessary to avoid useless resource allocation.
      * The current value can be altered using method
@@ -553,7 +553,7 @@ public class FlomHandle {
      */
     private native int setResourceIdleLifespanJNI(int value);
     /**
-     * Sets "resource idle lifespan" property: it specifies how many
+     * Set "resource idle lifespan" property: it specifies how many
      * milliseconds a resource will be kept after the last locker released
      * it; the expiration is necessary to avoid useless resource allocation.
      * The current value can be inspected using method
@@ -576,7 +576,7 @@ public class FlomHandle {
      */
     private native String getResourceNameJNI();
     /**
-     * Gets the resource name: the name of the resource that can be locked
+     * Get the resource name: the name of the resource that can be locked
      * and unlocked using lock and unlock methods.
      * The current value can be altered using method setResourceName.
      * @return the current value
@@ -598,7 +598,7 @@ public class FlomHandle {
      */
     private native int setResourceNameJNI(String value);
     /**
-     * Sets the resource name: the name of the resource that can be locked
+     * Set the resource name: the name of the resource that can be locked
      * and unlocked using lock and unlock methods.
      * The current value can be inspected using method getResourceName.
      * NOTE: the resource type is determined by its name; take a look to
@@ -627,7 +627,7 @@ public class FlomHandle {
      */
     private native int getResourceQuantityJNI();
     /**
-     * Gets "resource quantity" property: the number of units that will be
+     * Get "resource quantity" property: the number of units that will be
      * locked and unlocked using lock and unlock methods.
      * The current value can be altered using method
      * setResourceQuantity.
@@ -648,7 +648,7 @@ public class FlomHandle {
      */
     private native int setResourceQuantityJNI(int value);
     /**
-     * Sets "resource quantity" property: the number of units that will be
+     * Set "resource quantity" property: the number of units that will be
      * locked and unlocked using lock and unlock methods.
      * The current value can be inspected using method
      * getResourceQuantity.
@@ -671,7 +671,7 @@ public class FlomHandle {
      */
     private native int getResourceTimeoutJNI();
     /**
-     * Gets "resource timeout" property: how long a lock operation
+     * Get "resource timeout" property: how long a lock operation
      * (see lock) will wait if the resource is locked
      * by another requester.
      * The current value can be altered using method
@@ -695,7 +695,7 @@ public class FlomHandle {
      */
     private native int setResourceTimeoutJNI(int value);
     /**
-     * Sets "resource timeout" property: how long a lock operation
+     * Set "resource timeout" property: how long a lock operation
      * (see lock) will wait if the resource is locked
      * by another requester.
      * The current value can be inspected using method
@@ -721,7 +721,7 @@ public class FlomHandle {
      */
     private native String getSocketNameJNI();
     /**
-     * Gets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+     * Get the socket name: the AF_LOCAL/AF_UNIX socket name that must be
      * used to contact a local FLoM daemon (server).
      * The current value can be altered using method setSocketName.
      * @return the current value as a standard
@@ -743,7 +743,7 @@ public class FlomHandle {
      */
     private native int setSocketNameJNI(String value);
     /**
-     * Sets the socket name: the AF_LOCAL/AF_UNIX socket name that must be
+     * Set the socket name: the AF_LOCAL/AF_UNIX socket name that must be
      * used to contact a local FLoM daemon (server).
      * The current value can be inspected using method getSocketName
      * @param value (Input): the new value
@@ -764,7 +764,7 @@ public class FlomHandle {
      */
     private native String getTraceFilenameJNI();
     /**
-     * Gets the trace filename: the name (absolute or relative path) used
+     * Get the trace filename: the name (absolute or relative path) used
      * by libflom (FLoM client library) to record trace messages.
      * The current value can be altered using method setTraceFilename.
      * @return the current value
@@ -786,7 +786,7 @@ public class FlomHandle {
      */
     private native int setTraceFilenameJNI(String value);
     /**
-     * Sets the trace filename: the name (absolute or relative path) used
+     * Set the trace filename: the name (absolute or relative path) used
      * by libflom (FLoM client library) to record trace messages.
      * The current value can be inspected using method
      * getTraceFilename.
@@ -808,7 +808,7 @@ public class FlomHandle {
      */
     private native String getUnicastAddressJNI();
     /**
-     * Gets the unicast address: the IP address (or a network name that the
+     * Get the unicast address: the IP address (or a network name that the
      * system can resolve) of the host that must be contacted
      * to reach FLoM daemon (server) using TCP/IP; see also
      *         getUnicastPort.
@@ -833,7 +833,7 @@ public class FlomHandle {
      */
     private native int setUnicastAddressJNI(String value);
     /**
-     * Sets the unicast address: the IP address (or a network name that the
+     * Set the unicast address: the IP address (or a network name that the
      * system can resolve) of the host that must be contacted
      * to reach FLoM daemon (server) using TCP/IP; see also
      * setUnicastPort.
@@ -857,7 +857,7 @@ public class FlomHandle {
      */
     private native int getUnicastPortJNI();
     /**
-     * Gets the TCP/IP unicast port that must be used to contact the FLoM
+     * Get the TCP/IP unicast port that must be used to contact the FLoM
      * daemon (server) using TCP/IP; see also getUnicastAddress.
      * The current value can be altered using method setUnicastPort.
      * @return the current value
@@ -876,7 +876,7 @@ public class FlomHandle {
      */
     private native int setUnicastPortJNI(int value);
     /**
-     * Sets the TCP/IP unicast port that must be used to contact the FLoM
+     * Set the TCP/IP unicast port that must be used to contact the FLoM
      * daemon (server) using TCP/IP; see also setUnicastAddress.
      * The current value can be inspected using method getUnicastPort.
      * @param value (Input): the new value
@@ -889,4 +889,173 @@ public class FlomHandle {
         nullCheck();
         return setUnicastPortJNI(value);
     }
+
+
+    
+    /**
+     * Native method for getTlsCertificate
+     */
+    private native String getTlsCertificateJNI();
+    /**
+     * Get the TLS certificate file name
+     * The current value can be altered using method
+     *         setTlsCertificate.
+     * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
+     */
+    public String getTlsCertificate() throws FlomException {
+        String ReturnString = null;
+        nullCheck();
+        if (null == (ReturnString = getTlsCertificateJNI()))
+            ReturnString = new String("");
+        return ReturnString;
+    }
+
+
+    
+    /**
+     * Native method for setTlsCertificate
+     */
+    private native int setTlsCertificateJNI(String value);
+    /**
+     * Set the TLS certificate file name
+     * The current value can be inspected using method
+     * getTlsCertificate.
+     * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
+     */
+    public int setTlsCertificate(String value) throws FlomException {
+        nullCheck(value);
+        return setTlsCertificateJNI(value);
+    }
+
+
+    
+    /**
+     * Native method for getTlsPrivateKey
+     */
+    private native String getTlsPrivateKeyJNI();
+    /**
+     * Get the TLS private key file name
+     * The current value can be altered using method
+     *         setTlsPrivateKey.
+     * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
+     */
+    public String getTlsPrivateKey() throws FlomException {
+        String ReturnString = null;
+        nullCheck();
+        if (null == (ReturnString = getTlsPrivateKeyJNI()))
+            ReturnString = new String("");
+        return ReturnString;
+    }
+
+
+    
+    /**
+     * Native method for setTlsPrivateKey
+     */
+    private native int setTlsPrivateKeyJNI(String value);
+    /**
+     * Set the TLS CA private key file name
+     * The current value can be inspected using method
+     * getTlsPrivateKey.
+     * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
+     */
+    public int setTlsPrivateKey(String value) throws FlomException {
+        nullCheck(value);
+        return setTlsPrivateKeyJNI(value);
+    }
+
+
+    
+    /**
+     * Native method for getTlsCaCertificate
+     */
+    private native String getTlsCaCertificateJNI();
+    /**
+     * Get the TLS CA certificate file name
+     * The current value can be altered using method
+     *         setTlsCaCertificate.
+     * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
+     */
+    public String getTlsCaCertificate() throws FlomException {
+        String ReturnString = null;
+        nullCheck();
+        if (null == (ReturnString = getTlsCaCertificateJNI()))
+            ReturnString = new String("");
+        return ReturnString;
+    }
+
+
+    
+    /**
+     * Native method for setTlsCaCertificate
+     */
+    private native int setTlsCaCertificateJNI(String value);
+    /**
+     * Set the TLS CA certificate file name
+     * The current value can be inspected using method
+     * getTlsCaCertificate.
+     * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
+     */
+    public int setTlsCaCertificate(String value) throws FlomException {
+        nullCheck(value);
+        return setTlsCaCertificateJNI(value);
+    }
+
+
+
+    /**
+     * Native method for getTlsCheckPeerId
+     */
+    private native boolean getTlsCheckPeerIdJNI();
+    /**
+     * Get the TLS check peer ID flag value
+     * The current value can be altered using method setTlsCheckPeerId.
+     * @return the current value
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
+     */
+    public boolean getTlsCheckPeerId() throws FlomException {
+        nullCheck();
+        return getTlsCheckPeerIdJNI();
+    }
+
+
+    
+    /**
+     * Native method for setTlsCheckPeerId
+     */
+    private native int setTlsCheckPeerIdJNI(boolean value);
+    /**
+     * Set "TLS check peer ID" boolean property: it specifies if this node
+     * must check the unique ID presented by the remote peer.
+     * The current value can be inspected using method
+     * getTlsCheckPeerId.
+     * @param value (Input): the new value
+     * @return a reason code that can be checked to be sure the property
+     *         was changed by the setter method
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
+     */
+    public int setTlsCheckPeerId(boolean value) throws FlomException {
+        nullCheck();
+        return setTlsCheckPeerIdJNI(value);
+    }    
 }

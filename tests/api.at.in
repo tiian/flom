@@ -111,8 +111,15 @@ AT_CHECK([case1001], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([C++ Getter and setter methods])
+AT_CHECK([if test "$CPPAPI" = "no"; then exit 77; fi])
 # skip if the address is not available
 AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 1) 6], [0], [ignore], [ignore])
+# kill previous daemon
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+# create X.509 certificate(s)
+AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
+# restart the daemon
+AT_CHECK([flom -s /tmp/flom_socket_name --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes -d -1 -- true], [0], [ignore], [ignore])
 AT_DATA([expout],
 [[FlomHandle.getSocketName() = '/tmp/flom-@USER@'
 FlomHandle.getSocketName() = '/tmp/flom_socket_name'
@@ -144,6 +151,9 @@ FlomHandle.getDiscoveryTimeout() = 500
 FlomHandle.getDiscoveryTimeout() = 750
 FlomHandle.getDiscoveryTtl() = 1
 FlomHandle.getDiscoveryTtl() = 2
+FlomHandle.getTlsCheckPeerId() = 0
+FlomHandle.getTlsCheckPeerId() = 0
+FlomHandle.getTlsCheckPeerId() = 1
 staticHandleHappyPath locked element is red
 FlomHandle->getSocketName() = '/tmp/flom-@USER@'
 FlomHandle->getSocketName() = '/tmp/flom_socket_name'
@@ -175,16 +185,17 @@ FlomHandle->getDiscoveryTimeout() = 500
 FlomHandle->getDiscoveryTimeout() = 750
 FlomHandle->getDiscoveryTtl() = 1
 FlomHandle->getDiscoveryTtl() = 2
+FlomHandle->getTlsCheckPeerId() = 0
+FlomHandle->getTlsCheckPeerId() = 0
+FlomHandle->getTlsCheckPeerId() = 1
 dynamicHandleHappyPath locked element is blue
 ]])
-AT_CHECK([if test "$CPPAPI" = "no"; then exit 77; fi])
-AT_CHECK([pkill flom], [0], [ignore], [ignore])
-AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
 AT_CHECK([case1002 $(iface_name.sh inet6 1)], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Java Happy path])
 AT_CHECK([if test "$JAVAAPI" = "no"; then exit 77; fi])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
 AT_CHECK([java -Djava.library.path=@abs_top_builddir@/src/java/.libs -cp @abs_top_builddir@/src/java/flom.jar:@abs_top_builddir@/tests/src case4000], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -200,8 +211,15 @@ AT_CHECK([java -Djava.library.path=@abs_top_builddir@/src/java/.libs -cp @abs_to
 AT_CLEANUP
 
 AT_SETUP([Java Getter and setter methods])
+AT_CHECK([if test "$JAVAAPI" = "no"; then exit 77; fi])
 # skip if the address is not available
 AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 1) 6], [0], [ignore], [ignore])
+# kill previous daemon
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+# create X.509 certificate(s)
+AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
+# restart the daemon
+AT_CHECK([flom -s /tmp/flom_socket_name --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes -d -1 -- true], [0], [ignore], [ignore])
 AT_DATA([expout],
 [[FlomHandle.getSocketName() = '/tmp/flom-@USER@'
 FlomHandle.getSocketName() = '/tmp/flom_socket_name'
@@ -233,6 +251,9 @@ FlomHandle.getDiscoveryTimeout() = 500
 FlomHandle.getDiscoveryTimeout() = 750
 FlomHandle.getDiscoveryTtl() = 1
 FlomHandle.getDiscoveryTtl() = 2
+FlomHandle.getTlsCheckPeerId() = false
+FlomHandle.getTlsCheckPeerId() = false
+FlomHandle.getTlsCheckPeerId() = true
 HappyPath locked element is red
 FlomHandle.getSocketName() = '/tmp/flom-@USER@'
 FlomHandle.getSocketName() = '/tmp/flom_socket_name'
@@ -264,16 +285,17 @@ FlomHandle.getDiscoveryTimeout() = 500
 FlomHandle.getDiscoveryTimeout() = 750
 FlomHandle.getDiscoveryTtl() = 1
 FlomHandle.getDiscoveryTtl() = 2
+FlomHandle.getTlsCheckPeerId() = false
+FlomHandle.getTlsCheckPeerId() = false
+FlomHandle.getTlsCheckPeerId() = true
 HappyPath locked element is blue
 ]])
-AT_CHECK([if test "$JAVAAPI" = "no"; then exit 77; fi])
-AT_CHECK([pkill flom], [0], [ignore], [ignore])
-AT_CHECK([flom -d -1 -s /tmp/flom_socket_name -- true], [0], [ignore], [ignore])
 AT_CHECK([java -Djava.library.path=@abs_top_builddir@/src/java/.libs -cp @abs_top_builddir@/src/java/flom.jar:@abs_top_builddir@/tests/src case4002 $(iface_name.sh inet6 1)], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([PHP Happy path])
 AT_CHECK([if test "$PHPAPI" = "no"; then exit 77; fi])
+AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
 AT_CHECK([php -d extension=@abs_top_builddir@/src/php/.libs/flom-php-module.so $PHPPATH/case2000.php], [0], [ignore], [ignore])
 AT_CLEANUP

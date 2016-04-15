@@ -2,7 +2,7 @@
  * Copyright (c) 2013-2016, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
- * This file is part of FLoM.
+ * This file is part of FLoM, Free Lock Manager
  *
  * FLoM is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as published
@@ -232,37 +232,6 @@ void static_handle_happy_path(const char *nd_network_interface) {
         exit(1);
     }
     
-    /* get current network interface */
-    fprintf(stderr, "flom_handle_get_network_interface() = '%s'\n",
-           flom_handle_get_network_interface(&my_handle));
-    /* set a new network interface */
-    if (FLOM_RC_OK == flom_handle_set_network_interface(
-            &my_handle, nd_network_interface)) {
-        /* get new network interface */
-        fprintf(stderr, "flom_handle_get_network_interface() = '%s'\n",
-               flom_handle_get_network_interface(&my_handle));
-        /* check network interface */
-        if (strcmp(nd_network_interface,
-                   flom_handle_get_network_interface(&my_handle))) {
-            fprintf(stderr,
-                    "Unexpected result from flom_handle_set/"
-                    "get_network_interface\n");
-            exit(1);
-        }
-    } else {
-        fprintf(stderr, "'%s' is not a valid IPv6 network interface for "
-                "this system\n", nd_network_interface);
-        exit(1);
-    }
-    
-    /* set AF_UNIX/PF_LOCAL socket_name again */
-    if (FLOM_RC_OK != (ret_cod = flom_handle_set_socket_name(
-                           &my_handle, nd_socket_name))) {
-        fprintf(stderr, "flom_handle_set_socket_name() returned %d, '%s'\n",
-                ret_cod, flom_strerror(ret_cod));
-        exit(1);
-    }
-    
     /* get current value for unicast port */
     printf("flom_handle_get_unicast_port() = %d\n",
            flom_handle_get_unicast_port(&my_handle));
@@ -410,6 +379,37 @@ void static_handle_happy_path(const char *nd_network_interface) {
         fprintf(stderr,
                 "Unexpected result from flom_handle_set/"
 		"get_tls_check_peer_id\n");
+        exit(1);
+    }
+    
+    /* get current network interface */
+    fprintf(stderr, "flom_handle_get_network_interface() = '%s'\n",
+           flom_handle_get_network_interface(&my_handle));
+    /* set a new network interface */
+    if (FLOM_RC_OK == flom_handle_set_network_interface(
+            &my_handle, nd_network_interface)) {
+        /* get new network interface */
+        fprintf(stderr, "flom_handle_get_network_interface() = '%s'\n",
+               flom_handle_get_network_interface(&my_handle));
+        /* check network interface */
+        if (strcmp(nd_network_interface,
+                   flom_handle_get_network_interface(&my_handle))) {
+            fprintf(stderr,
+                    "Unexpected result from flom_handle_set/"
+                    "get_network_interface\n");
+            exit(1);
+        }
+    } else {
+        fprintf(stderr, "'%s' is not a valid IPv6 network interface for "
+                "this system\n", nd_network_interface);
+        exit(1);
+    }
+    
+    /* set AF_UNIX/PF_LOCAL socket_name again */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_socket_name(
+                           &my_handle, nd_socket_name))) {
+        fprintf(stderr, "flom_handle_set_socket_name() returned %d, '%s'\n",
+                ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
     

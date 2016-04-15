@@ -1,7 +1,6 @@
 Road map:
 
-implement case test for C++ TLS API
-TLS in client API
+TLS in client API: implement PHP and Python
 
 remove config property resource_wait; remove from man page too; update wiki site using --resource-timeout instead of --wait
 
