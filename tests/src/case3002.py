@@ -37,6 +37,10 @@ def happy_path() :
     nd_resource_name = "red.green.blue"
     nd_unicast_address = "127.0.0.1"
     nd_multicast_address = "224.0.0.1"
+    nd_tls_certificate = "CA1/peer1_CA1_cert.pem"
+    nd_tls_private_key = "CA1/peer1_CA1_key.pem"
+    nd_tls_ca_certificate = "CA1/cacert.pem"
+
     # handle allocation
     my_handle = flom_handle_t()
     ret_cod = FLOM_RC_OK
@@ -290,6 +294,76 @@ def happy_path() :
     if 2 != ret_cod:
         sys.stderr.write("Unexpected result from flom_handle_set/" +
                          "get_discovery_ttl\n")
+        sys.exit(1)
+
+    # get current value for TLS certificate
+    sys.stderr.write("flom_handle_get_tls_certificate() = '" +
+                     str(flom_handle_get_tls_certificate(my_handle)) + "'\n");
+    # set a new TLS certificate
+    ret_cod = flom_handle_set_tls_certificate(my_handle, nd_tls_certificate)
+    if FLOM_RC_OK != ret_cod:
+        sys.stderr.write(
+            "flom_handle_set_tls_certificate() returned " + str(ret_cod) +
+            ", '" + str(flom_strerror(ret_cod)) + "'\n")
+        sys.exit(1);
+
+    # get new TLS certificate
+    sys.stderr.write("flom_handle_get_tls_certificate() = '" +
+                     str(flom_handle_get_tls_certificate(my_handle)) + "'\n")
+
+    # get current value for TLS private key
+    sys.stderr.write("flom_handle_get_tls_private_key() = '" +
+                     str(flom_handle_get_tls_private_key(my_handle)) + "'\n")
+    # set a new TLS private key
+    ret_cod = flom_handle_set_tls_private_key(my_handle, nd_tls_private_key)
+    if FLOM_RC_OK != ret_cod:
+        sys.stderr.write(
+            "flom_handle_set_tls_private_key() returned " + str(ret_cod) +
+            ", '" + str(flom_strerror(ret_cod)) + "'\n")
+        sys.exit(1);
+    # get new TLS private key */
+    sys.stderr.write("flom_handle_get_tls_private_key() = '" +
+                     str(flom_handle_get_tls_private_key(my_handle)) + "'\n")
+
+    # get current value for TLS CA certificate */
+    sys.stderr.write("flom_handle_get_tls_ca_certificate() = '" +
+                     str(flom_handle_get_tls_ca_certificate(my_handle)) + 
+                     "'\n")
+    # set a new TLS CA certificate
+    ret_cod = flom_handle_set_tls_ca_certificate(
+        my_handle, nd_tls_ca_certificate)
+    if FLOM_RC_OK != ret_cod:
+        sys.stderr.write(
+            "flom_handle_set_tls_ca_certificate() returned "+ str(ret_cod) +
+            ", '" + str(flom_strerror(ret_cod)) + "'\n")
+        sys.exit(1);
+    # get new TLS CA certificate
+    sys.stderr.write("flom_handle_get_tls_ca_certificate() = '" +
+                     str(flom_handle_get_tls_ca_certificate(my_handle)) + 
+                     "'\n")
+
+    # get current value for TLS check peer ID property
+    sys.stdout.write("flom_handle_get_tls_check_peer_id() = " +
+           str(flom_handle_get_tls_check_peer_id(my_handle)) + "\n")
+    # set a new value for TLS check peer ID property
+    flom_handle_set_tls_check_peer_id(my_handle, FALSE)
+    # get new value for TLS check peer ID property
+    sys.stdout.write("flom_handle_get_tls_check_peer_id() = " +
+           str(flom_handle_get_tls_check_peer_id(my_handle)) + "\n")
+    # check TLS check peer ID 1/2
+    if flom_handle_get_tls_check_peer_id(my_handle):
+        sys.stderr.write("Unexpected result from flom_handle_set/" +
+                         "get_tls_check_peer_id\n")
+        sys.exit(1)
+    # set a new value for TLS check peer ID property
+    flom_handle_set_tls_check_peer_id(my_handle, TRUE)
+    # get new value for TLS check peer ID property
+    sys.stdout.write("flom_handle_get_tls_check_peer_id() = " +
+                     str(flom_handle_get_tls_check_peer_id(my_handle)) + "\n")
+    # check TLS check peer ID 2/2
+    if not flom_handle_get_tls_check_peer_id(my_handle):
+        sys.stderr.write("Unexpected result from flom_handle_set/" +
+                         "get_tls_check_peer_id\n")
         sys.exit(1)
     
     # lock acquisition

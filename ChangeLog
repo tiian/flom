@@ -1,5 +1,6 @@
 LOG:
-         - 1.2.0 IoGaCo, TLS API support
+         - 1.2.0 IoGaCo, TLS API support for all the supported languages:
+	C, C++, Java, PHP, Python
 	GPL only license
 
 20150330 - 1.1.2 IoGaCo, TLS support

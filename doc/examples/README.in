@@ -32,3 +32,11 @@ executing the compiled programs:
 	./basic_dynamic
 	./advanced_static
 	./advanced_dynamic
+
+More exhaustive examples related to setter and getter methods provided by the
+API are available in @abs_top_builddir@/tests/src dir:
+	case0002.c	for the C language
+	case1002.cc	for the C++ language
+	case2002.php	for the PHP language
+	case3002.py	for the Python language
+	case4002.jave	for the Java language

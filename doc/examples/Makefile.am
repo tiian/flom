@@ -28,6 +28,7 @@ example_makefile: example_makefile.in ../../config.status
 README:	README.in ../../config.status
 	sed \
 	-e 's|@libdir[@]|$(libdir)|g' \
+        -e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
 	$< >$@
 
 uninstall-hook:
