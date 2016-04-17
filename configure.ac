@@ -170,6 +170,12 @@ AC_ARG_ENABLE([cpp],
 	[CPPAPI="no"], [CPPAPI="yes"])
 #AM_PROG_CC_C_O
 # C++ stuff is conditional
+# disable C++ if a C++ compiler is not installed
+AC_CHECK_PROGS([HAVE_CXX], [$CXX], [no])
+if test "$HAVE_CXX" = "no"
+then
+	CPPAPI="no"
+fi
 AM_CONDITIONAL([COND_CPPAPI], [test "$CPPAPI" = "yes"])
 
 # Checking pkg-config is available

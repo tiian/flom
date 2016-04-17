@@ -34,7 +34,7 @@ AT_DATA([experr],
 [[Resource already locked, the lock cannot be obtained
 ]])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec4.sh 1 0 4 "-r red.green.blue" & flom_test_exec4.sh 2 1 4 "-r red.green.blue" & flom_test_exec4.sh 3 2 4 "-r red.green.blue" & flom_test_exec4.sh 4 3 1 "-w n -r red.green.blue" & flom_test_exec4.sh 5 4 3 "-r red.green.blue" >/dev/null], [0], [expout], [experr])
+AT_CHECK([unset FLOM_TRACE_MASK ; flom_test_exec4.sh 1 0 4 "-r red.green.blue" & flom_test_exec4.sh 2 1 4 "-r red.green.blue" & flom_test_exec4.sh 3 2 4 "-r red.green.blue" & flom_test_exec4.sh 4 3 1 "-w n -r red.green.blue" & flom_test_exec4.sh 5 4 3 "-r red.green.blue" >/dev/null], [0], [expout], [experr])
 AT_CLEANUP
 
 AT_SETUP([Use case 13 (2/2)])

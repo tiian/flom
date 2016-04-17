@@ -7,6 +7,8 @@ F     LLLLL  ooo  M   M
 FLoM (Free Lock Manager) is an open source and free lock manager designed to
 serialize and synchronize shell command execution and custom programs
 developed in C, C++, Java, PHP, Python.
+Both GitHub https://github.com/tiian/flom and 
+SourceForge https://sourceforge.net/projects/flom/ host FLoM source code.
 Basic usage examples are in doc/examples directory (default installation path 
 is /usr/local/share/doc/flom/examples/)
 API documentation is distributed in directory doc/html/ (default installation
@@ -128,10 +130,10 @@ Ubuntu	12.04	Java API	default-jdk (openjdk 6)
 Ubuntu	14.04	Java API	default-jdk (openjdk 7)
 CentOS		Basic		gcc glib2-devel dbus dbus-devel autoconf openssl-devel
 CentOS		C++ API		gcc-c++
-CentOS		PHP API		swig php-cli php-devel
+CentOS		PHP API		swig php-devel
 CentOS		Python API	swig python-devel
 CentOS	6.6	Java API	java-1.6.0-openjdk* or java-1.7.0-openjdk*
-CentOS	7.1	Java API	java-1.8.0-openjdk*
+CentOS	7.x	Java API	java-1.8.0-openjdk*
 
 Enjoy FLoM!
 Ch.F.

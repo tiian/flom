@@ -22,7 +22,7 @@ AT_DATA([expout],
 AT_DATA([experr],
 [[Resource already locked, the lock cannot be obtained
 ]])
-AT_CHECK([flom_test_exec3.sh 1 0 3 "-r foo[[2]] -q 2" & flom_test_exec3.sh 2 1 3 "-r foo[[2]] -q 2 -w n" ; flom_test_exec1.sh 4 0 1 >/dev/null], [0], [expout], [experr])
+AT_CHECK([unset FLOM_TRACE_MASK ; flom_test_exec3.sh 1 0 3 "-r foo[[2]] -q 2" & flom_test_exec3.sh 2 1 3 "-r foo[[2]] -q 2 -w n" ; flom_test_exec1.sh 4 0 1 >/dev/null], [0], [expout], [experr])
 AT_CLEANUP
 
 AT_SETUP([Use case 10 (3/3)])
@@ -37,7 +37,7 @@ AT_DATA([expout],
 AT_DATA([experr],
 [[Resource already locked, the lock cannot be obtained
 ]])
-AT_CHECK([flom_test_exec3.sh 1 0 3 "-r foo[[2]]" & flom_test_exec3.sh 2 1 3 "-r foo[[2]]" & flom_test_exec3.sh 3 2 2 "-r foo[[2]] -w n" ; flom_test_exec1.sh 4 0 5 >/dev/null], [0], [expout], [experr])
+AT_CHECK([unset FLOM_TRACE_MASK ; flom_test_exec3.sh 1 0 3 "-r foo[[2]]" & flom_test_exec3.sh 2 1 3 "-r foo[[2]]" & flom_test_exec3.sh 3 2 2 "-r foo[[2]] -w n" ; flom_test_exec1.sh 4 0 5 >/dev/null], [0], [expout], [experr])
 AT_CLEANUP
 
 AT_SETUP([Use case 11 (1/2)])
@@ -69,6 +69,6 @@ AT_DATA([expout],
 AT_DATA([experr],
 [[Resource already locked, the lock cannot be obtained
 ]])
-AT_CHECK([flom_test_exec3.sh 1 0 7 "-l PW" & flom_test_exec3.sh 2 1 3 "-l CR -- flom -r bar[[2]]" & flom_test_exec3.sh 3 2 3 "-l CR -- flom -r bar[[2]]" & flom_test_exec3.sh 4 3 2 "-l CR -- flom -r bar[[2]] -w n" ; flom_test_exec1.sh 5 0 1 >/dev/null], [0], [expout], [experr])
+AT_CHECK([unset FLOM_TRACE_MASK ; flom_test_exec3.sh 1 0 7 "-l PW" & flom_test_exec3.sh 2 1 3 "-l CR -- flom -r bar[[2]]" & flom_test_exec3.sh 3 2 3 "-l CR -- flom -r bar[[2]]" & flom_test_exec3.sh 4 3 2 "-l CR -- flom -r bar[[2]] -w n" ; flom_test_exec1.sh 5 0 1 >/dev/null], [0], [expout], [experr])
 AT_CLEANUP
 

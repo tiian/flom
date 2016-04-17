@@ -142,9 +142,11 @@ void flom_trace(const char *fmt, ...)
         broken_time.tm_mday, broken_time.tm_hour,
         broken_time.tm_min, broken_time.tm_sec, (int)tv.tv_usec,
         getpid(), g_thread_self());
-    if (nw1 < sizeof(buffer))
+    if (nw1 < sizeof(buffer)) {
         /* custom message */
         vsnprintf(buffer+nw1, sizeof(buffer)-nw1, fmt, args);
+        buffer[sizeof(buffer)-1] = '\0';
+    }
     fputs(buffer, trace_file);
     fflush(trace_file);
 #else
