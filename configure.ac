@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.2.0-rc], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [1.2.0-rc2], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -6,13 +6,26 @@ AM_PROG_LIBTOOL
 AC_CONFIG_MACRO_DIR(m4)
 
 # LT Version numbers, remember to change them just *before* a release.
-#   (Interfaces removed:    CURRENT++, AGE=0, REVISION=0)
-#   (Interfaces added:      CURRENT++, AGE++, REVISION=0)
-#   (No interfaces changed:                   REVISION++)
 #
-# libflom library version
-LT_CURRENT=0
-LT_AGE=0
+# From libtool manual:
+#
+# Here are a set of rules to help you update your library version information:
+# 1. Start with version information of ‘0:0:0’ for each libtool library.
+# 2. Update the version information only immediately before a public release 
+#    of your software. More frequent updates are unnecessary, and only 
+#    guarantee that the current interface number gets larger faster.
+# 3. If the library source code has changed at all since the last update, then
+#    increment revision (‘c :r :a ’ becomes ‘c :r + 1:a ’).
+# 4. If any interfaces have been added, removed, or changed since the last
+#    update, increment current, and set revision to 0.
+# 5. If any interfaces have been added since the last public release, then
+#    increment age.
+# 6. If any interfaces have been removed since the last public release, then
+#    set age to 0.
+#
+# libflom library version: LC_CURRENT -> c, LT_REVISION -> r, LT_AGE ->a
+LT_CURRENT=1
+LT_AGE=1
 LT_REVISION=0
 
 # hardwired configuration

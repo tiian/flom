@@ -149,8 +149,6 @@ int flom_msg_free(struct flom_msg_s *msg)
             case FLOM_MSG_VERB_NULL: /* nothing to release */
                 break;
             case FLOM_MSG_VERB_LOCK:
-                FLOM_TRACE(("flom_msg_free: peerid=%s\n",
-                            msg->body.lock_8.session.peerid));
                 switch (msg->header.pvs.step) {
                     case FLOM_MSG_STEP_INCR:
                         if (NULL != msg->body.lock_8.session.peerid) {
@@ -187,8 +185,6 @@ int flom_msg_free(struct flom_msg_s *msg)
                     default:
                         THROW(INVALID_STEP_LOCK);
                 }
-                FLOM_TRACE(("flom_msg_free: peerid=%s\n",
-                            msg->body.lock_8.session.peerid));
                 break;
             case FLOM_MSG_VERB_UNLOCK:
                 switch (msg->header.pvs.step) {
