@@ -84,7 +84,7 @@ public class FlomHandle {
 
     
     /**
-     * Delete the native flom_handle_t object
+     * Delete the native flom_handle_t object.
      * Called by free method
      */
     private native void deleteJNI();
@@ -897,7 +897,7 @@ public class FlomHandle {
      */
     private native String getTlsCertificateJNI();
     /**
-     * Get the TLS certificate file name
+     * Get the TLS certificate file name.
      * The current value can be altered using method
      *         setTlsCertificate.
      * @return the current value
@@ -919,7 +919,7 @@ public class FlomHandle {
      */
     private native int setTlsCertificateJNI(String value);
     /**
-     * Set the TLS certificate file name
+     * Set the TLS certificate file name.
      * The current value can be inspected using method
      * getTlsCertificate.
      * @param value (Input): the new value
@@ -940,7 +940,7 @@ public class FlomHandle {
      */
     private native String getTlsPrivateKeyJNI();
     /**
-     * Get the TLS private key file name
+     * Get the TLS private key file name.
      * The current value can be altered using method
      *         setTlsPrivateKey.
      * @return the current value
@@ -962,7 +962,7 @@ public class FlomHandle {
      */
     private native int setTlsPrivateKeyJNI(String value);
     /**
-     * Set the TLS CA private key file name
+     * Set the TLS CA private key file name.
      * The current value can be inspected using method
      * getTlsPrivateKey.
      * @param value (Input): the new value
@@ -983,7 +983,7 @@ public class FlomHandle {
      */
     private native String getTlsCaCertificateJNI();
     /**
-     * Get the TLS CA certificate file name
+     * Get the TLS CA certificate file name.
      * The current value can be altered using method
      *         setTlsCaCertificate.
      * @return the current value
@@ -1005,7 +1005,7 @@ public class FlomHandle {
      */
     private native int setTlsCaCertificateJNI(String value);
     /**
-     * Set the TLS CA certificate file name
+     * Set the TLS CA certificate file name.
      * The current value can be inspected using method
      * getTlsCaCertificate.
      * @param value (Input): the new value
@@ -1026,7 +1026,7 @@ public class FlomHandle {
      */
     private native boolean getTlsCheckPeerIdJNI();
     /**
-     * Get the TLS check peer ID flag value
+     * Get the TLS check peer ID flag value.
      * The current value can be altered using method setTlsCheckPeerId.
      * @return the current value
      * @throws FlomException if the underlying native C function returns

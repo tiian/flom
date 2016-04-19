@@ -39,4 +39,4 @@ API are available in @abs_top_builddir@/tests/src dir:
 	case1002.cc	for the C++ language
 	case2002.php	for the PHP language
 	case3002.py	for the Python language
-	case4002.jave	for the Java language
+	case4002.java	for the Java language

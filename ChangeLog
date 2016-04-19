@@ -1,9 +1,10 @@
 LOG:
-         - 1.2.0 IoGaCo, TLS API support for all the supported languages:
-	C, C++, Java, PHP, Python
-	GPL only license
+20160419 - 1.2.0 IoGaCo, TLS API support for all the supported languages:
+	C, C++, Java, PHP, Python. SSL/TLS support is now a completed feature.
+	GPL only license.
+	Added a new tested platform: CentOS 7.2 (64 bit, KVM).
 
-20150330 - 1.1.2 IoGaCo, TLS support
+20160330 - 1.1.2 IoGaCo, TLS support
 	New option --unique-id to retrieve the FLoM unique identificator
 	New options for TLS support: --tls-certificate,
 	--tls-private-key, --tls-ca-certificate, --tls-check-peer-id

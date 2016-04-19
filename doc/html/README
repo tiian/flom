@@ -1,0 +1,17 @@
+This directory contains the FLoM API documentation for C, C++ and Java.
+C and C++ documentation is produced using doxygen
+Java documentation is produced using javadoc
+
+This documentation is published ah this URLs too:
+http://flom.sourceforge.net/html/C/
+http://flom.sourceforge.net/html/C++/
+http://flom.sourceforge.net/html/java/
+
+Instructions to publish the documentation
+cd /usr/local/share/doc/flom/html
+ftp tiian@web.sourceforge.net
+cd /home/project-web/lixa/htdocs/html
+put C/* C
+put C++/* C++
+put java/* java
+
