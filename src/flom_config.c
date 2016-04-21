@@ -98,7 +98,6 @@ const gchar *FLOM_CONFIG_KEY_VERBOSE = _CONFIG_KEY_VERBOSE;
 const gchar *FLOM_CONFIG_GROUP_RESOURCE = _CONFIG_GROUP_RESOURCE;
 const gchar *FLOM_CONFIG_KEY_CREATE = _CONFIG_KEY_CREATE;
 const gchar *FLOM_CONFIG_KEY_NAME = _CONFIG_KEY_NAME;
-const gchar *FLOM_CONFIG_KEY_WAIT = _CONFIG_KEY_WAIT;
 const gchar *FLOM_CONFIG_KEY_TIMEOUT = _CONFIG_KEY_TIMEOUT;
 const gchar *FLOM_CONFIG_KEY_QUANTITY = _CONFIG_KEY_QUANTITY;
 const gchar *FLOM_CONFIG_KEY_LOCK_MODE = _CONFIG_KEY_LOCK_MODE;
@@ -162,7 +161,6 @@ void flom_config_reset(flom_config_t *config)
     config->append_trace_file = FALSE;
     config->verbose = FALSE;
     config->resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
-    config->resource_wait = TRUE;
     config->resource_create = TRUE;
     config->resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
     config->resource_quantity = 1;
@@ -315,8 +313,6 @@ void flom_config_print(flom_config_t *config)
             FLOM_CONFIG_KEY_NAME,
             NULL == flom_config_get_resource_name(config) ? FLOM_EMPTY_STRING :
             flom_config_get_resource_name(config));
-    g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
-            FLOM_CONFIG_KEY_WAIT, flom_config_get_resource_wait(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
             FLOM_CONFIG_KEY_TIMEOUT, flom_config_get_resource_timeout(config));
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_RESOURCE,
@@ -689,35 +685,6 @@ int flom_config_init_load(flom_config_t *config,
                 g_free(value);
                 value = NULL;
             }
-        }
-        /* pick-up resource wait from configuration */
-        if (NULL == (value = g_key_file_get_string(
-                         gkf, FLOM_CONFIG_GROUP_RESOURCE,
-                         FLOM_CONFIG_KEY_WAIT, &error))) {
-            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
-                        "(...,%s,%s,...): code=%d, message='%s'\n",
-                        FLOM_CONFIG_GROUP_RESOURCE,
-                        FLOM_CONFIG_KEY_WAIT,
-                        error->code,
-                        error->message));
-            g_error_free(error);
-            error = NULL;
-        } else {
-            int throw_error = FALSE;
-            flom_bool_value_t fbv;
-            FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
-                        FLOM_CONFIG_GROUP_RESOURCE,
-                        FLOM_CONFIG_KEY_WAIT, value));
-            if (FLOM_BOOL_INVALID == (
-                    fbv = flom_bool_value_retrieve(value))) {
-                print_file_name = TRUE;
-                throw_error = TRUE;
-            } else {
-                flom_config_set_resource_wait(config, fbv);
-            }
-            g_free(value);
-            value = NULL;
-            if (throw_error) THROW(CONFIG_SET_RESOURCE_WAIT_ERROR);
         }
         /* pick-up resource timeout from configuration */
         ivalue = g_key_file_get_integer(
@@ -1432,16 +1399,6 @@ int flom_config_set_resource_name(flom_config_t *config,
         ret_cod = FLOM_RC_OK;
     }
     return ret_cod;
-}
-
-
-
-void flom_config_set_resource_wait(flom_config_t *config, int value)
-{
-    if (NULL == config)
-        global_config.resource_wait = value;
-    else
-        config->resource_wait = value;
 }
 
 

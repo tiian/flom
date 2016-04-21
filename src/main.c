@@ -49,7 +49,6 @@ static gchar *socket_name = NULL;
 static gchar *resource_name = NULL;
 static gint resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
 static gint resource_quantity = 0;
-static gchar *resource_wait = NULL;
 static gchar *resource_create = NULL;
 static gint resource_idle_lifespan = 0;
 static gchar *lock_mode = NULL;
@@ -84,7 +83,6 @@ static GOptionEntry entries[] =
     { "verbose", 'V', 0, G_OPTION_ARG_NONE, &verbose, "Activate verbose messages", NULL },
     { "config-file", 'c', 0, G_OPTION_ARG_STRING, &config_file, "User configuration file name", NULL },
     { "resource-name", 'r', 0, G_OPTION_ARG_STRING, &resource_name, "Specify the name of the resource to be locked", NULL },
-    { "resource-wait", 'w', 0, G_OPTION_ARG_STRING, &resource_wait, "Specify if the command enques when the resource is already locked (accepted values 'yes', 'no')", NULL },
     { "resource-timeout", 'o', 0, G_OPTION_ARG_INT, &resource_timeout, "Specify maximum wait time (milliseconds) if a resource is already locked", NULL },
     { "resource-quantity", 'q', 0, G_OPTION_ARG_INT, &resource_quantity, "Specify how many numeric resources must be locked", NULL },
     { "resource-create", 'e', 0, G_OPTION_ARG_STRING, &resource_create, "Specify if the command can create the resource to lock (accepted values are 'yes', 'no')", NULL },
@@ -194,23 +192,8 @@ int main (int argc, char *argv[])
     else if (0 < resource_quantity)
         flom_config_set_resource_quantity(NULL, resource_quantity);
 
-    if (NULL != resource_wait) {
-        flom_bool_value_t fbv;
-        if (FLOM_BOOL_INVALID == (
-                fbv = flom_bool_value_retrieve(resource_wait))) {
-            g_printerr("resource-wait: '%s' is an invalid value\n",
-                       resource_wait);
-            exit(FLOM_ES_GENERIC_ERROR);
-        }
-        flom_config_set_resource_wait(NULL, fbv);
-    }
     if (FLOM_NETWORK_WAIT_TIMEOUT != resource_timeout) {
-        /* timeout is useless if no wait was specified */
-        if (FLOM_BOOL_NO == flom_config_get_resource_wait(NULL))
-            g_printerr("Timeout ignored because 'no wait' behavior was "
-                       "specified\n");
-        else
-            flom_config_set_resource_timeout(NULL, resource_timeout);
+        flom_config_set_resource_timeout(NULL, resource_timeout);
     }
     if (NULL != lock_mode) {
         flom_lock_mode_t flm;

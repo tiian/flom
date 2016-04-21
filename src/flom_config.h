@@ -159,10 +159,6 @@ extern const gchar *FLOM_CONFIG_KEY_CREATE;
  */
 extern const gchar *FLOM_CONFIG_KEY_NAME;
 /**
- * Label associated to "Wait" key inside config files
- */
-extern const gchar *FLOM_CONFIG_KEY_WAIT;
-/**
  * Label associated to "Timeout" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_TIMEOUT;
@@ -317,11 +313,6 @@ typedef struct flom_config_s {
      * Name of the resource that must be locked
      */
     gchar             *resource_name;
-    /**
-     * The requester enqueues if the lock can not be obtained
-     * (boolean value)
-     */
-    int                resource_wait;
     /**
      * The resource can be create if it was not previously created by another
      * requester
@@ -683,27 +674,6 @@ extern "C" {
 
 
 
-    /**
-     * Set "resource_wait" config parameter
-     * @param config IN/OUT configuration object, NULL for global config
-     * @param value IN new (boolean) value
-     */
-    void flom_config_set_resource_wait(flom_config_t *config, int value);
-
-
-
-    /**
-     * Get "resource_wait" config parameter
-     * @param config IN/OUT configuration object, NULL for global config
-     * @return a boolean value
-     */
-    static inline int flom_config_get_resource_wait(flom_config_t *config) {
-        return NULL == config ?
-            global_config.resource_wait : config->resource_wait;
-    }
-
-
-    
     /**
      * Set "resource_create" config parameter
      * @param config IN/OUT configuration object, NULL for global config

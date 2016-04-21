@@ -8,10 +8,5 @@ http://flom.sourceforge.net/html/C++/
 http://flom.sourceforge.net/html/java/
 
 Instructions to publish the documentation
-cd /usr/local/share/doc/flom/html
-ftp tiian@web.sourceforge.net
-cd /home/project-web/lixa/htdocs/html
-put C/* C
-put C++/* C++
-put java/* java
+scp -r /usr/local/share/doc/flom/html/ tiian@web.sourceforge.net:/home/project-web/flom/htdocs/
 

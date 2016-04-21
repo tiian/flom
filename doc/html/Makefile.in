@@ -303,7 +303,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @COND_JAVAAPI_TRUE@MAYBE_JAVADOC = java
 SUBDIRS = $(MAYBE_JAVADOC) C C++ .
-dist_noinst_DATA = doxygen_header.htm doxygen_footer.htm Makefile.am
+dist_noinst_DATA = doxygen_header.htm doxygen_footer.htm Makefile.am README
 all: all-recursive
 
 .SUFFIXES:

@@ -890,7 +890,8 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
                      g_strdup(flom_config_get_resource_name(config))))
             THROW(G_STRDUP_ERROR);
         msg.body.lock_8.resource.mode = flom_config_get_lock_mode(config);
-        msg.body.lock_8.resource.wait = flom_config_get_resource_wait(config);
+        msg.body.lock_8.resource.wait =
+            0 != flom_config_get_resource_timeout(config);
         msg.body.lock_8.resource.quantity =
             flom_config_get_resource_quantity(config);
         msg.body.lock_8.resource.create =

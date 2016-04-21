@@ -40,9 +40,6 @@ name of the resource used for enqueing (locking).
 \fBHierarchical resource\fP names are like \fBabsolute\fP path filenames using "@_DIR_FILE_SEPARATOR@" as the level delimiter (but a trailing delimiter is not allowed); examples: "@_DIR_FILE_SEPARATOR@apple", "@_DIR_FILE_SEPARATOR@apple@_DIR_FILE_SEPARATOR@pear" are valid names while "@_DIR_FILE_SEPARATOR@apple@_DIR_FILE_SEPARATOR@" and "@_DIR_FILE_SEPARATOR@apple@_DIR_FILE_SEPARATOR@pear@_DIR_FILE_SEPARATOR@" are \fBnot\fP valid names
 
 .TP
-.B -w, --resource-wait=\fIyes|no
-\fBdefault\fP (\fIyes\fP): the command will enqueue if the resource is already locked by someone else, otherwise (\fIno\fP) it will return immediately
-.TP
 .B -o, --resource-timeout=\fImilliseconds
 \fBdefault\fP (\fI-1\fP): maximum enqueue time if the resource is already locked by someone else; if the resource doesn't become free before \fItimeout milliseconds\fP the command will return. A negative value means "infinite timeout" and the command will wait until the resource will become free
 .TP
