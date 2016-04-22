@@ -21,11 +21,11 @@ AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n -r ABC[[1]] -A 224.0.0.1" & flom_test_e
 AT_CLEANUP
 
 AT_SETUP([Use case 16 (3/8)])
-AT_CHECK([flom_test_exec4.sh 1 0 1 "-e n -w n -r B.C.D -A 224.0.0.1"], [@_ES_REQUESTER_CANT_WAIT@], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 1 0 1 "-e n -o 0 -r B.C.D -A 224.0.0.1" ; echo $? | grep '@_ES_REQUESTER_CANT_WAIT@\|@_ES_RESOURCE_BUSY@'], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Use case 16 (4/8)])
-AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n -o 100 -r /CDE -A 224.0.0.1"], [98], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 1 "-e n -o 100 -r /CDE -A 224.0.0.1"], [@_ES_RESOURCE_BUSY@], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Use case 16 (5/8)])

@@ -31,8 +31,8 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	usecase-dist.at.in \
 	usecase-hier.at \
 	usecase-lt.at.in \
-	usecase-num.at \
-	usecase-set.at \
+	usecase-num.at.in \
+	usecase-set.at.in \
 	scripts/*.sh
 
 api.at: api.at.in
@@ -101,6 +101,16 @@ usecase.at: usecase.at.in
 	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
 	$< >$@
 
+usecase-num.at: usecase-num.at.in
+	sed \
+	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
+	$< >$@
+
+usecase-set.at: usecase-set.at.in
+	sed \
+	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
+	$< >$@
+
 usecase-dist.at: usecase-dist.at.in
 	sed \
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
@@ -144,4 +154,4 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 
 DISTCLEANFILES = atconfig
 CLEANFILES = api.at cmdopt.at incompopt.at tls.at usecase.at usecase-dist.at \
-	usecase-lt.at
+	usecase-lt.at usecase-num.at usecase-set.at

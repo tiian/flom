@@ -1,4 +1,12 @@
 LOG:
+
+	 - 1.3.0
+	Removed command line option "--resource-wait", "-w": it was redundant
+	and the same result can be obtained with the option
+	"--resource-timeout=0", "-o 0". The only difference can be in
+	scripting: now the exit code can be 96 or 98 depending from the
+	timining between the flom client and the flom daemon.
+
 20160419 - 1.2.0 IoGaCo, TLS API support for all the supported languages:
 	C, C++, Java, PHP, Python. SSL/TLS support is now a completed feature.
 	GPL only license.
