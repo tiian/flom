@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.3.0-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [1.3.0], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -30,7 +30,7 @@ LT_REVISION=0
 
 # hardwired configuration
 _FLOM_PREFIX="flom"
-_RELEASE_DATE="2016-04-19"
+_RELEASE_DATE="2016-04-25"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"
@@ -323,6 +323,10 @@ if test "$HAVE_DBUS_UUIDGEN" = "no"
 then
 	AC_MSG_ERROR([cannot find dbus-uuidgen utility])
 fi
+
+# find a valid network interface
+#m4_include(m4/ax_net_iface.m4)
+AX_NET_IFACE
 
 AC_DEFINE_UNQUOTED([_ES_GENERIC_ERROR], [$_ES_GENERIC_ERROR], [Exit status for generic error])
 

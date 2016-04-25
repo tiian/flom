@@ -1,3 +1,17 @@
+Release: 1.3.0
+Date:    2016-04-24
+Ubuntu 10.04 (OpenJDK 6) | x86    | virtual (KVM)
+Ubuntu 10.04 (OpenJDK 6) | x86_64 | virtual (KVM)
+Ubuntu 12.04 (OpenJDK 6) | x86_64 | virtual (KVM)
+Ubuntu 14.04 (OpenJDK 7) | x86_64 | virtual (KVM)
+Ubuntu 16.04 (OpenJDK 7) | x86_64 | virtual (KVM) *
+CentOS 6.6 (OpenJDK 7)   | x86    | virtual (KVM)
+CentOS 6.6 (OpenJDK 7)   | x86_64 | virtual (KVM)
+CentOS 7.1 (OpenJDK 8)   | x86_64 | virtual (KVM)
+CentOS 7.2 (OpenJDK 8)   | x86_64 | virtual (KVM)
+* ./configure --disable-php
+  see also https://github.com/tiian/flom/issues/5
+
 Release: 1.2.0
 Date:    2016-04-19
 Ubuntu 10.04 (OpenJDK 6) | x86    | virtual (KVM)

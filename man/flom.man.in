@@ -41,13 +41,13 @@ name of the resource used for enqueing (locking).
 
 .TP
 .B -o, --resource-timeout=\fImilliseconds
-\fBdefault\fP (\fI-1\fP): maximum enqueue time if the resource is already locked by someone else; if the resource doesn't become free before \fItimeout milliseconds\fP the command will return. A negative value means "infinite timeout" and the command will wait until the resource will become free
+\fBdefault\fP (\fI-1\fP): maximum enqueue time if the resource is already locked by someone else; if the resource doesn't become free before \fItimeout milliseconds\fP the command will return. A negative value means "infinite timeout" and the command will wait until the resource will become free. If the value equals zero, in case of locked resource, the command will not wait.
 .TP
 .B -q, --resource-quantity=\fInumber
 \fInumber\fP of numeric resources to lock; it's meaningless if the locked resource is not of type "numeric". \fInumber\fP must be an integer positive number. Note: only positive values are accepted
 .TP
 .B -e, --resource-create=\fIyes|no
-\fBdefault\fP (\fIyes\fP): the command will create the resource if it was not already created by another command, otherwise (\fIno\fP) it will wait for resource creation or will end immediately (see \fB-w, --resource-wait\fP option). \fBNote:\fP if used with a \fIhierarchical resource\fP, the behavior applies to the root level of the resource, not to the single leaf
+\fBdefault\fP (\fIyes\fP): the command will create the resource if it was not already created by another command, otherwise (\fIno\fP) it will wait for resource creation or will end immediately (see \fB-o, --resource-timeout\fP option). \fBNote:\fP if used with a \fIhierarchical resource\fP, the behavior applies to the root level of the resource, not to the single leaf
 .TP
 .B -i, --resource-idle-lifespan=\fImilliseconds
 how long a resource will be kept after last usage, default value is \fB0 milliseconds\fP; this option can be used to avoid a following job that specifies \fB-e n, --resource-create=no\fP will wait undefinitely just because the previous task termited earliest. \fBWarning:\fP too many long lasting resources can waste memory and threads inside \fIflom daemon\fP. \fBNote:\fP if used with a \fIhierarchical resource\fP, the behavior applies to the root level of the resource, not to the single leaf
@@ -135,7 +135,7 @@ if anything runs as expected, \fBflom\fP exit status is the same of the controll
 .P
 \fB@_ES_UNABLE_TO_EXECUTE_COMMAND@:\fP \fBflom\fP caught an error trying to exec (see \fIexecvp\fP man page) COMMAND
 .P
-\fB@_ES_RESOURCE_BUSY@:\fP the resource can \fBnot\fP be locked because it's already locked by someone else (have you used \fB--resource-wait=no\fP option?!)
+\fB@_ES_RESOURCE_BUSY@:\fP the resource can \fBnot\fP be locked because it's already locked by someone else (have you used \fB--resource-timeout=0\fP option?!)
 .P
 \fB@_ES_GENERIC_ERROR@:\fP \fBflom\fP caught some type of error and did not execute COMMAND
 .P

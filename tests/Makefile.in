@@ -38,9 +38,10 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/atlocal.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_jni_include_dir.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/ax_net_iface.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -159,6 +160,7 @@ LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
+NET_IFACE = @NET_IFACE@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -737,6 +739,7 @@ cmdopt.at: cmdopt.at.in
 	-e 's|@_CONFIG_KEY_TLS_PRIVATE_KEY[@]|$(_CONFIG_KEY_TLS_PRIVATE_KEY)|g' \
 	-e 's|@_CONFIG_KEY_TLS_CA_CERTIFICATE[@]|$(_CONFIG_KEY_TLS_CA_CERTIFICATE)|g' \
 	-e 's|@_CONFIG_KEY_TLS_CHECK_PEER_ID[@]|$(_CONFIG_KEY_TLS_CHECK_PEER_ID)|g' \
+	-e 's|@NET_IFACE[@]|$(NET_IFACE)|g' \
 	$< >$@
 
 incompopt.at: incompopt.at.in
@@ -780,6 +783,7 @@ usecase-lt.at: usecase-lt.at.in
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
 	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
 	-e 's|@_ES_REQUESTER_CANT_WAIT[@]|$(_ES_REQUESTER_CANT_WAIT)|g' \
+	-e 's|@NET_IFACE[@]|$(NET_IFACE)|g' \
 	$< >$@
 
 check-local: atconfig atlocal $(TESTSUITE)

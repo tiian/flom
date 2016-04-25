@@ -208,7 +208,7 @@ int flom_conn_recv(flom_conn_t *obj, void *buf, size_t len, size_t *received,
     
     FLOM_TRACE(("flom_conn_recv\n"));
     TRY {
-        if (timeout >= 0) {
+        if (timeout > 0) {
             struct pollfd fds[1];
             int rc;
             /* use poll to check the filedescriptor for a limited amount of
@@ -229,7 +229,7 @@ int flom_conn_recv(flom_conn_t *obj, void *buf, size_t len, size_t *received,
                 default: /* unexpected result, internal error! */
                     THROW(INTERNAL_ERROR);
             } /* switch (rc) */
-        } /* if (timeout >= 0) */
+        } /* if (timeout > 0) */
 
         
         if (NULL != obj->tls)

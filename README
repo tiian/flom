@@ -124,16 +124,21 @@ O.S.		Feature		Packages
 Ubuntu		Basic		make gcc libglib2.0-dev dbus libdbus-1-dev libssl-dev pkg-config automake
 Ubuntu		C++ API		g++
 Ubuntu		PHP API		swig php5-cli php5-dev
+Ubuntu	16.04	PHP API		swig php7.0-cli php7.0-dev *
 Ubuntu		Python API	swig python-dev
 Ubuntu	10.04	Java API	openjdk-6-jdk
 Ubuntu	12.04	Java API	default-jdk (openjdk 6)
 Ubuntu	14.04	Java API	default-jdk (openjdk 7)
+Ubuntu	16.04	Java API	default-jdk (openjdk 8)
 CentOS		Basic		gcc glib2-devel dbus dbus-devel autoconf openssl-devel
 CentOS		C++ API		gcc-c++
 CentOS		PHP API		swig php-devel
 CentOS		Python API	swig python-devel
 CentOS	6.6	Java API	java-1.6.0-openjdk* or java-1.7.0-openjdk*
 CentOS	7.x	Java API	java-1.8.0-openjdk*
+
+* Support not yet available for PHP 7.0, see also 
+  https://github.com/tiian/flom/issues/5
 
 Enjoy FLoM!
 Ch.F.
