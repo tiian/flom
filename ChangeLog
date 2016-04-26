@@ -1,5 +1,7 @@
 LOG:
 
+	 - 1.3.1 (Unique) sequence resource
+
 20160425 - 1.3.0
 	Removed command line option "--resource-wait", "-w": it was redundant
 	and the same result can be obtained with the option

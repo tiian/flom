@@ -639,6 +639,20 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                                       FLOM_MSG_PROP_LIFESPAN,
                                       msg->body.lock_8.resource.lifespan);
                 break;
+            case FLOM_RSRC_TYPE_SEQUENCE:
+                used_chars = snprintf(buffer + *offset, *free_chars,
+                                      "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\" "
+                                      "%s=\"%d\"/>",
+                                      FLOM_MSG_TAG_RESOURCE,
+                                      FLOM_MSG_PROP_NAME,
+                                      base64_resource_name,
+                                      FLOM_MSG_PROP_WAIT,
+                                      msg->body.lock_8.resource.wait,
+                                      FLOM_MSG_PROP_CREATE,
+                                      msg->body.lock_8.resource.create,
+                                      FLOM_MSG_PROP_LIFESPAN,
+                                      msg->body.lock_8.resource.lifespan);
+                break;
             default:
                 THROW(INVALID_RESOURCE_TYPE);
         } /* switch (frt) */

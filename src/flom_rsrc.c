@@ -34,6 +34,7 @@
 #include "flom_rsrc.h"
 #include "flom_resource_hier.h"
 #include "flom_resource_numeric.h"
+#include "flom_resource_sequence.h"
 #include "flom_resource_set.h"
 #include "flom_resource_simple.h"
 #include "flom_trace.h"
@@ -71,7 +72,8 @@ int global_res_name_preg_init()
             "^%s$|^([[:alpha:]][[:alpha:][:digit:]]*)$" ,
             "^([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$",
             "^([[:alpha:]][[:alpha:][:digit:]]*)(\\%s[[:alpha:]][[:alpha:][:digit:]]*)+$",
-            "^\\%s[^\\%s]+(\\%s[^\\%s]+)*$"
+            "^\\%s[^\\%s]+(\\%s[^\\%s]+)*$",
+            "^\\$([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$"
         };
 
         memset(global_res_name_preg, 0, sizeof(global_res_name_preg));
@@ -181,7 +183,8 @@ flom_rsrc_type_t flom_rsrc_get_type(const gchar *resource_name)
 
 
 
-int flom_rsrc_get_number(const gchar *resource_name, gint *number)
+int flom_rsrc_get_number(const gchar *resource_name, flom_rsrc_type_t type,
+                         gint *number)
 {
     enum Exception { REGEXEC_ERROR
                      , INVALID_RESOURCE_NAME
@@ -195,10 +198,10 @@ int flom_rsrc_get_number(const gchar *resource_name, gint *number)
         regmatch_t regmatch[3];
         for (i=0; i<sizeof(regmatch)/sizeof(regmatch_t); ++i)
             regmatch[i].rm_so = regmatch[i].rm_eo = -1;
-        reg_error = regexec(global_res_name_preg+FLOM_RSRC_TYPE_NUMERIC,
+        reg_error = regexec(global_res_name_preg+type,
                             resource_name, sizeof(regmatch)/sizeof(regmatch_t),
                             regmatch, 0);
-        regerror(reg_error, global_res_name_preg+FLOM_RSRC_TYPE_NUMERIC,
+        regerror(reg_error, global_res_name_preg+type,
                  reg_errbuf, sizeof(reg_errbuf));
         FLOM_TRACE(("flom_rsrc_get_number: regexec returned "
                     "%d ('%s') for string '%s'\n",
@@ -371,6 +374,13 @@ int flom_resource_init(flom_resource_t *resource,
                 resource->clean = flom_resource_hier_clean;
                 resource->free = flom_resource_hier_free;
                 resource->compare_name = flom_resource_hier_compare_name;
+                break;
+            case FLOM_RSRC_TYPE_SEQUENCE:
+                resource->init = flom_resource_sequence_init;
+                resource->inmsg = flom_resource_sequence_inmsg;
+                resource->clean = flom_resource_sequence_clean;
+                resource->free = flom_resource_sequence_free;
+                resource->compare_name = flom_resource_compare_name;
                 break;
             default:
                 THROW(UNKNOW_RESOURCE);

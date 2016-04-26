@@ -113,8 +113,8 @@ firewall allowing FLoM multicast packets.
 
 If you need some help (usage tricks, hints, etc...) please post a message in
 the forum: http://sourceforge.net/p/flom/discussion/
-If you think you have discovered a bug, please open a ticket here:
-http://sourceforge.net/p/flom/tickets/
+If you think you have discovered a bug, please open an issue here:
+https://github.com/tiian/flom/issues
 If you avoided to send me an e-mail I would be happy: forum posts and tickets
 can be seen by many people and I should not answer the same questions many
 times.

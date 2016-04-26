@@ -79,6 +79,10 @@ typedef enum flom_rsrc_type_e {
      */
     FLOM_RSRC_TYPE_HIER,
     /**
+     * Sequence resource type
+     */
+    FLOM_RSRC_TYPE_SEQUENCE,
+    /**
      * Number of managed resource types
      */
     FLOM_RSRC_TYPE_N
@@ -232,6 +236,30 @@ struct flom_rsrc_data_hier_s {
 
 
 
+/**
+ * Resource data for type "sequence" @ref FLOM_RSRC_TYPE_SEQUENCE
+ */
+struct flom_rsrc_data_sequence_s {
+    /**
+     * Total quantity for the resource
+     */
+    gint                    total_quantity;
+    /**
+     * Locked quantity for the resource
+     */
+    gint                    locked_quantity;
+    /**
+     * List of connections with an acquired lock
+     */
+    GSList                 *holders;
+    /**
+     * List of connections waiting for a lock
+     */
+    GQueue                 *waitings;
+};
+
+
+
 /* necessary to declare flom_resource_t used inside the struct ("class")
    definition */
 struct flom_resource_s;
@@ -259,6 +287,7 @@ struct flom_resource_s {
         struct flom_rsrc_data_numeric_s      numeric;
         struct flom_rsrc_data_set_s          set;
         struct flom_rsrc_data_hier_s         hier;
+        struct flom_rsrc_data_sequence_s     sequence;
     } data;
     /**
      * Method called to initialize a new resource
@@ -330,10 +359,12 @@ extern "C" {
     /**
      * Retrieve the quantity associated to a numeric resource
      * @param resource_name IN resource name
+     * @param type IN resource type
      * @param number OUT quantity
      * @return a reason code
      */
-    int flom_rsrc_get_number(const gchar *resource_name, gint *number);
+    int flom_rsrc_get_number(const gchar *resource_name, flom_rsrc_type_t type,
+                             gint *number);
 
 
 

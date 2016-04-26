@@ -124,29 +124,34 @@
 #define FLOM_TRACE_MOD_RESOURCE_HIER      0x00002000
 
 /**
+ * trace module for sequence resource functions
+ */
+#define FLOM_TRACE_MOD_RESOURCE_SEQUENCE  0x00004000
+
+/**
  * trace module for daemon management functions
  */
-#define FLOM_TRACE_MOD_DAEMON_MNGMNT      0x00004000
+#define FLOM_TRACE_MOD_DAEMON_MNGMNT      0x00040000
 
 /**
  * trace module for API (Application Programming Interface) client library
  */
-#define FLOM_TRACE_MOD_API                0x00008000
+#define FLOM_TRACE_MOD_API                0x00080000
 
 /**
  * trace module for debug features
  */
-#define FLOM_TRACE_MOD_DEBUG_FEATURES     0x00010000
+#define FLOM_TRACE_MOD_DEBUG_FEATURES     0x00100000
 
 /**
  * trace module for TLS/SSL functions
  */
-#define FLOM_TRACE_MOD_TLS                0x00020000
+#define FLOM_TRACE_MOD_TLS                0x00200000
 
 /**
  * trace module for TCP functions
  */
-#define FLOM_TRACE_MOD_TCP                0x00040000
+#define FLOM_TRACE_MOD_TCP                0x00400000
 
 
 
