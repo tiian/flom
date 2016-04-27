@@ -1,15 +1,13 @@
 Road map:
 
+check sequences with valgrind
+create sequences case tests
+
 fix PHP for Ubuntu 16.04, see https://github.com/tiian/flom/issues/5
 
 implement a loop for connect/bind if bind returns an error: this shuold help
 to reduce the race condition between a closing daemon and a starting client.
 See this thread: https://github.com/tiian/flom/issues/3
-
-transactional sequences (no holes sequences): use a regex like expression
-to describe the sequence; for example:
-[0-9](2)[A-Z](3)
-produces: 00AAA 00AAB 00AAC ... 01AAA 01AAB ... 01ABA 01ABB 01ABC ...
 
 unique timestamps (no two equal timestamps supplied): use a date like expression
 to describe the sequence; for example:

@@ -73,7 +73,7 @@ int global_res_name_preg_init()
             "^([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$",
             "^([[:alpha:]][[:alpha:][:digit:]]*)(\\%s[[:alpha:]][[:alpha:][:digit:]]*)+$",
             "^\\%s[^\\%s]+(\\%s[^\\%s]+)*$",
-            "^\\$([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$"
+            "^_[sS]_([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$"
         };
 
         memset(global_res_name_preg, 0, sizeof(global_res_name_preg));
@@ -325,6 +325,25 @@ void flom_rsrc_conn_lock_delete(struct flom_rsrc_conn_lock_s *frcl)
         g_free(frcl->name);
     g_free(frcl);
 }
+
+
+
+GSList *flom_rsrc_conn_find(GSList *holders, flom_conn_t *conn)
+{
+    GSList *p = holders;
+    
+    FLOM_TRACE(("flom_rsrc_conn_find\n"));
+
+    while (NULL != p) {
+        if (((struct flom_rsrc_conn_lock_s *)p->data)->conn == conn)
+            break;
+        else
+            p = p->next;
+    } /* while (NULL != p) */
+    FLOM_TRACE(("flom_rsrc_conn_find: returning %p\n", p));
+    return p;
+}
+
 
 
 

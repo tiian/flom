@@ -104,15 +104,24 @@ struct flom_rsrc_conn_lock_s {
          */
         flom_lock_mode_t            lock_mode;
         /**
-         * Resource quantity requested by the connection
+         * Resource quantity requested by the connection (numeric resources)
          */
         gint                        quantity;
+        /**
+         * Sequence value assigned to the lock holder (sequence resources)
+         */
+        guint                       sequence_value;
     } info;
     /**
      * Resource name is necessary of hierarchical resources only because
      * the a resource is a tree of names
      */
     gchar                      *name;
+    /**
+     * Rollback flag is necessary for transactional resources like
+     * sequence resource
+     */
+    int                         rollback;
     /**
      * Connection requesting the lock
      */
@@ -248,6 +257,15 @@ struct flom_rsrc_data_sequence_s {
      * Locked quantity for the resource
      */
     gint                    locked_quantity;
+    /**
+     * Next value that must be used for the sequence
+     */
+    guint                   next_value;
+    /**
+     * Sequence values that has been rolled back and must be re-used before
+     * producing new ones
+     */
+    GQueue                 *rolled_back;
     /**
      * List of connections with an acquired lock
      */
@@ -392,6 +410,16 @@ extern "C" {
      */
     void flom_rsrc_conn_lock_delete(struct flom_rsrc_conn_lock_s *frcl);
 
+
+
+    /**
+     * Find in holders list the element related to a connection
+     * @param holders IN the list with lock holder elements
+     * @param conn IN the connection that must be found
+     * @return the element related to the searched connection or NULL
+     */
+    GSList *flom_rsrc_conn_find(GSList *holders, flom_conn_t *conn);
+
     
 
     /**
@@ -449,7 +477,7 @@ extern "C" {
     }
 
     
-    
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

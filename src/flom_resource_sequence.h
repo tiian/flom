@@ -52,6 +52,14 @@ extern "C" {
     int flom_resource_sequence_can_lock(flom_resource_t *resource);
 
 
+
+    /**
+     * Return the next sequence value
+     * @param resource IN/OUT reference to resource object
+     * @return the next value from the sequence
+     */
+    guint flom_resource_sequence_get(flom_resource_t *resource);
+
         
     /**
      * Initialize a new resource of type sequence
