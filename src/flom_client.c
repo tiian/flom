@@ -1219,7 +1219,8 @@ int flom_client_wait_lock(flom_conn_t *conn,
 
 
 
-int flom_client_unlock(flom_config_t *config, flom_conn_t *conn)
+int flom_client_unlock(flom_config_t *config, flom_conn_t *conn,
+                       int rollback)
 {
     enum Exception { G_STRDUP_ERROR
                      , MSG_SERIALIZE_ERROR
@@ -1242,6 +1243,7 @@ int flom_client_unlock(flom_config_t *config, flom_conn_t *conn)
         if (NULL == (msg.body.unlock_8.resource.name =
                      g_strdup(flom_config_get_resource_name(config))))
             THROW(G_STRDUP_ERROR);
+        msg.body.unlock_8.resource.rollback = rollback;
 
         /* serialize the request message */
         if (FLOM_RC_OK != (ret_cod = flom_msg_serialize(

@@ -246,7 +246,7 @@ int flom_resource_sequence_inmsg(flom_resource_t *resource,
                     THROW(OBJ_CORRUPTED);
                 }
                 cl = (struct flom_rsrc_conn_lock_s *)p->data;
-                cl->rollback = FALSE;
+                cl->rollback = msg->body.unlock_8.resource.rollback;
                 /* clean lock */
                 if (FLOM_RC_OK != (ret_cod = flom_resource_sequence_clean(
                                        resource, conn)))
@@ -334,7 +334,7 @@ int flom_resource_sequence_clean(flom_resource_t *resource,
             FLOM_TRACE(("flom_resource_sequence_clean: cl=%p\n", cl));
             resource->data.sequence.holders = g_slist_remove(
                 resource->data.sequence.holders, cl);
-            resource->data.sequence.locked_quantity -= cl->info.quantity;
+            resource->data.sequence.locked_quantity--;
             /* free the now useless connection lock record */
             flom_rsrc_conn_lock_delete(cl);
             /* check if some other clients can get a lock now */

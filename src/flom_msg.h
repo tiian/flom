@@ -186,6 +186,10 @@ extern const gchar *FLOM_MSG_PROP_QUANTITY;
  */
 extern const gchar *FLOM_MSG_PROP_RC;
 /**
+ * Label used to specify "rollback" property
+ */
+extern const gchar *FLOM_MSG_PROP_ROLLBACK;
+/**
  * Label used to specify "step" property
  */
 extern const gchar *FLOM_MSG_PROP_STEP;
@@ -383,6 +387,10 @@ struct flom_msg_body_unlock_8_resource_s {
      * name of the resource to lock
      */
     gchar     *name;
+    /**
+     * boolean value: if TRUE, the value of the resource must be rolled back
+     */
+    int        rollback;
 };
 
     

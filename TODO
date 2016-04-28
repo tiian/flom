@@ -2,6 +2,7 @@ Road map:
 
 check sequences with valgrind
 create sequences case tests
+implement flom_handle_abort (rollback resource)
 
 fix PHP for Ubuntu 16.04, see https://github.com/tiian/flom/issues/5
 

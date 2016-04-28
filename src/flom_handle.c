@@ -376,7 +376,7 @@ int flom_handle_unlock(flom_handle_t *handle)
         if (FLOM_HANDLE_STATE_LOCKED == handle->state) {
             /* lock release */
             if (FLOM_RC_OK != (ret_cod = flom_client_unlock(
-                                   handle->config, conn)))
+                                   handle->config, conn, FALSE)))
                 THROW(CLIENT_UNLOCK_ERROR);
             /* state update */
             handle->state = FLOM_HANDLE_STATE_CONNECTED;

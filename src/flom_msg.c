@@ -63,6 +63,7 @@ const gchar *FLOM_MSG_PROP_PEERID         = (gchar *)"peerid";
 const gchar *FLOM_MSG_PROP_PORT           = (gchar *)"port";
 const gchar *FLOM_MSG_PROP_QUANTITY       = (gchar *)"quantity";
 const gchar *FLOM_MSG_PROP_RC             = (gchar *)"rc";
+const gchar *FLOM_MSG_PROP_ROLLBACK       = (gchar *)"rollback";
 const gchar *FLOM_MSG_PROP_STEP           = (gchar *)"step";
 const gchar *FLOM_MSG_PROP_VERB           = (gchar *)"verb"; 
 const gchar *FLOM_MSG_PROP_WAIT           = (gchar *)"wait";
@@ -891,10 +892,12 @@ int flom_msg_serialize_unlock_8(const struct flom_msg_s *msg,
             THROW(G_BASE64_ENCODE_ERROR);
         /* <resource> */
         used_chars = snprintf(buffer + *offset, *free_chars,
-                              "<%s %s=\"%s\"/>",
+                              "<%s %s=\"%s\" %s=\"%d\" />",
                               FLOM_MSG_TAG_RESOURCE,
                               FLOM_MSG_PROP_NAME,
-                              base64_resource_name);
+                              base64_resource_name,
+                              FLOM_MSG_PROP_ROLLBACK,
+                              msg->body.unlock_8.resource.rollback);
         if (used_chars >= *free_chars)
             THROW(BUFFER_TOO_SHORT);
         *free_chars -= used_chars;
@@ -1285,12 +1288,14 @@ int flom_msg_trace_unlock(const struct flom_msg_s *msg)
         switch (msg->header.pvs.step) {
             case FLOM_MSG_STEP_INCR:
                 FLOM_TRACE(("flom_msg_trace_unlock: body[%s["
-                            "%s='%s']]\n",
+                            "%s='%s', %s=%d]]\n",
                             FLOM_MSG_TAG_RESOURCE,
                             FLOM_MSG_PROP_NAME,
                             msg->body.unlock_8.resource.name != NULL ?
                             msg->body.unlock_8.resource.name :
-                            FLOM_NULL_STRING));
+                            FLOM_NULL_STRING,
+                            FLOM_MSG_PROP_ROLLBACK,
+                            msg->body.unlock_8.resource.rollback));
                 break;
             default:
                 THROW(INVALID_STEP);
@@ -1563,11 +1568,12 @@ void flom_msg_deserialize_start_element(
                      , INVALID_PROPERTY4
                      , INVALID_PROPERTY5
                      , INVALID_PROPERTY6
+                     , INVALID_PROPERTY7
                      , G_STRDUP_ERROR1
                      , G_STRDUP_ERROR2
-                     , INVALID_PROPERTY7
-                     , G_STRDUP_ERROR3
                      , INVALID_PROPERTY8
+                     , G_STRDUP_ERROR3
+                     , INVALID_PROPERTY9
                      , TAG_TYPE_ERROR
                      , NONE } excp;
     
@@ -1645,6 +1651,18 @@ void flom_msg_deserialize_start_element(
                                             *name_cursor, element_name));
                                 THROW(INVALID_PROPERTY1);
                             }
+                        } else if (!strcmp(*name_cursor,
+                                           FLOM_MSG_PROP_ROLLBACK)) {
+                            if (FLOM_MSG_VERB_UNLOCK == msg->header.pvs.verb)
+                                msg->body.unlock_8.resource.rollback =
+                                    strtol(*value_cursor, NULL, 10);
+                            else {
+                                FLOM_TRACE(("flom_msg_deserialize_start_"
+                                            "element: property '%s' is not "
+                                            "valid for verb '%s'\n",
+                                            *name_cursor, element_name));
+                                THROW(INVALID_PROPERTY2);
+                            }
                         } else if (!strcmp(*name_cursor, FLOM_MSG_PROP_WAIT)) {
                             if (FLOM_MSG_VERB_LOCK == msg->header.pvs.verb)
                                 msg->body.lock_8.resource.wait =
@@ -1654,7 +1672,7 @@ void flom_msg_deserialize_start_element(
                                             "element: property '%s' is not "
                                             "valid for verb '%s'\n",
                                             *name_cursor, element_name));
-                                THROW(INVALID_PROPERTY2);
+                                THROW(INVALID_PROPERTY3);
                             }
                         } else if (!strcmp(*name_cursor,
                                            FLOM_MSG_PROP_QUANTITY)) {
@@ -1666,7 +1684,7 @@ void flom_msg_deserialize_start_element(
                                             "element: property '%s' is not "
                                             "valid for verb '%s'\n",
                                             *name_cursor, element_name));
-                                THROW(INVALID_PROPERTY3);
+                                THROW(INVALID_PROPERTY4);
                             }
                         } else if (!strcmp(*name_cursor,
                                            FLOM_MSG_PROP_CREATE)) {
@@ -1678,7 +1696,7 @@ void flom_msg_deserialize_start_element(
                                             "element: property '%s' is not "
                                             "valid for verb '%s'\n",
                                             *name_cursor, element_name));
-                                THROW(INVALID_PROPERTY4);
+                                THROW(INVALID_PROPERTY5);
                             }
                         } else if (!strcmp(*name_cursor,
                                            FLOM_MSG_PROP_LIFESPAN)) {
@@ -1690,7 +1708,7 @@ void flom_msg_deserialize_start_element(
                                             "element: property '%s' is not "
                                             "valid for verb '%s'\n",
                                             *name_cursor, element_name));
-                                THROW(INVALID_PROPERTY5);
+                                THROW(INVALID_PROPERTY6);
                             }
                         }
                     }
@@ -1720,7 +1738,7 @@ void flom_msg_deserialize_start_element(
                                             "element: property '%s' is not "
                                             "valid for verb '%s'\n",
                                             *name_cursor, element_name));
-                                THROW(INVALID_PROPERTY6);
+                                THROW(INVALID_PROPERTY7);
                             }
                         } else if (!strcmp(*name_cursor,
                                            FLOM_MSG_PROP_ELEMENT)) {
@@ -1760,7 +1778,7 @@ void flom_msg_deserialize_start_element(
                                         "element: property '%s' is not "
                                         "valid for verb '%s'\n",
                                         *name_cursor, element_name));
-                            THROW(INVALID_PROPERTY7);
+                            THROW(INVALID_PROPERTY8);
                         }
                     }
                     break;
@@ -1808,7 +1826,7 @@ void flom_msg_deserialize_start_element(
                                         "element: property '%s' is not "
                                         "valid for verb '%s'\n",
                                         *name_cursor, element_name));
-                            THROW(INVALID_PROPERTY8);
+                            THROW(INVALID_PROPERTY9);
                         }
                     }
                     break;
@@ -1834,11 +1852,12 @@ void flom_msg_deserialize_start_element(
             case INVALID_PROPERTY4:
             case INVALID_PROPERTY5:
             case INVALID_PROPERTY6:
+            case INVALID_PROPERTY7:
             case G_STRDUP_ERROR1:
             case G_STRDUP_ERROR2:
-            case INVALID_PROPERTY7:
-            case G_STRDUP_ERROR3:
             case INVALID_PROPERTY8:
+            case G_STRDUP_ERROR3:
+            case INVALID_PROPERTY9:
             case TAG_TYPE_ERROR:
                 msg->state = FLOM_MSG_STATE_INVALID;
                 break;

@@ -425,7 +425,8 @@ int main (int argc, char *argv[])
     locked_element = NULL;
     
     /* sending unlock command */
-    if (FLOM_RC_OK != (ret_cod = flom_client_unlock(NULL, conn))) {
+    if (FLOM_RC_OK != (ret_cod = flom_client_unlock(
+                           NULL, conn, 0 != child_status))) {
         g_printerr("flom_client_unlock: ret_cod=%d (%s)\n",
                    ret_cod, flom_strerror(ret_cod));
         exit(FLOM_ES_GENERIC_ERROR);

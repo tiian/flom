@@ -157,9 +157,12 @@ extern "C" {
      * Send unlock command to the daemon
      * @param config IN configuration object
      * @param conn IN connection object
+     * @param rollback IN rollback resource value (it is useful only for
+     *        transactional resources, ignored for non transactional resources)
      * @return a reason code
      */
-    int flom_client_unlock(flom_config_t *config, flom_conn_t *conn);
+    int flom_client_unlock(flom_config_t *config, flom_conn_t *conn,
+                           int rollback);
 
 
 
