@@ -1,0 +1,71 @@
+AT_BANNER([Transactional sequence resources use case checks])
+
+AT_SETUP([Use case YY])
+AT_DATA([expout],
+[[ 1 locking for 3 seconds
+ 2 locking for 3 seconds
+ 3 locking for 3 seconds
+0
+ 1 ending
+1
+ 2 ending
+2
+ 3 ending
+]])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 1 0 3 "-r _s_a[[3]]" & flom_test_exec4.sh 2 1 3 "-r _s_a[[3]]" & flom_test_exec4.sh 3 2 3 "-r _s_a[[3]]"], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case YY (1/2)])
+AT_DATA([expout],
+[[ 1 locking for 4 seconds
+ 2 locking for 4 seconds
+ 3 locking for 4 seconds
+ 4 locking for 1 seconds
+ 4 ending
+0
+ 1 ending
+1
+ 2 ending
+2
+ 3 ending
+ 5 locking for 3 seconds
+3
+ 5 ending
+]])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 1 0 4 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 2 1 4 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 3 2 4 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 4 3 1 "-o 0 -r _s_a[[3]]" >>stdout], [@_ES_RESOURCE_BUSY@], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 5 4 3 "-r _s_a[[3]]" >>stdout], [0], [ignore], [ignore])
+AT_CHECK([cat stdout], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Use case YY (2/2)])
+AT_DATA([expout],
+[[ 1 locking for 6 seconds
+ 2 locking for 2 seconds
+ 3 locking for 5 seconds
+1
+ 2 ending
+ 4 locking for 1 seconds
+3
+ 4 ending
+0
+ 1 ending
+ 5 locking for 1 seconds
+2
+ 3 ending
+4
+ 5 ending
+]])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 1 0 6 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 2 1 2 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 3 2 5 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 4 4 1 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 5 7 1 "-r _s_a[[3]]" >>stdout], [0], [ignore], [ignore])
+AT_CHECK([cat stdout], [0], [expout], [ignore])
+AT_CLEANUP
+

@@ -450,6 +450,7 @@ int flom_resource_sequence_waitings(flom_resource_t *resource)
         struct flom_msg_s msg;
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
         size_t to_send;
+        gchar element[30]; /* it must contain a guint */
         
         /* check if there is any connection waiting for a lock */
         do {
@@ -468,12 +469,16 @@ int flom_resource_sequence_waitings(flom_resource_t *resource)
                 FLOM_TRACE(("flom_resource_sequence_waitings: asked lock "
                             "can be assigned to connection %p\n",
                             cl->conn));
+                cl->info.sequence_value = flom_resource_sequence_get(resource);
+                snprintf(element, sizeof(element), "%u",
+                         cl->info.sequence_value);
+                cl->rollback = TRUE;
                 /* send a message to the client that's waiting the lock */
                 flom_msg_init(&msg);
                 if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                        &msg, FLOM_MSG_VERB_LOCK,
                                        3*FLOM_MSG_STEP_INCR,
-                                       FLOM_RC_OK, NULL)))
+                                       FLOM_RC_OK, element)))
                     THROW(MSG_BUILD_ANSWER_ERROR);
                 if (FLOM_RC_OK != (
                         ret_cod = flom_msg_serialize(
@@ -489,7 +494,7 @@ int flom_resource_sequence_waitings(flom_resource_t *resource)
                 resource->data.sequence.holders = g_slist_prepend(
                     resource->data.sequence.holders,
                     (gpointer)cl);
-                resource->data.sequence.locked_quantity += cl->info.quantity;
+                resource->data.sequence.locked_quantity++;
                 cl = NULL;
             } else
                 ++i;
