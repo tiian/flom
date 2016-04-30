@@ -62,13 +62,21 @@ int flom_resource_sequence_can_lock(flom_resource_t *resource)
 guint flom_resource_sequence_get(flom_resource_t *resource)
 {
     gpointer pop;
+    guint ret_val;
     FLOM_TRACE(("flom_resource_sequence_get\n"));
     /* are there rolled back values? */
-    if (NULL == (pop = g_queue_pop_head(
-                     resource->data.sequence.rolled_back))) 
-        return resource->data.sequence.next_value++;
-    else
-        return GPOINTER_TO_UINT(pop);
+    if ((NULL == resource->data.sequence.rolled_back) ||
+        (NULL == (pop = g_queue_pop_head(
+                      resource->data.sequence.rolled_back)))) {
+        ret_val = resource->data.sequence.next_value++;
+        if (!ret_val) /* value 0 can not be stored in the g_queue */
+            ret_val = resource->data.sequence.next_value++;
+    } else
+        ret_val = GPOINTER_TO_UINT(pop);
+    FLOM_TRACE(("flom_resource_sequence_get: %u (rolled_back=%d, "
+                "pop=%p)\n", ret_val, resource->data.sequence.rolled_back,
+                pop));
+    return ret_val;
 }
 
 
@@ -95,9 +103,13 @@ int flom_resource_sequence_init(flom_resource_t *resource,
                                &(resource->data.sequence.total_quantity))))
                     THROW(RSRC_GET_NUMBER_ERROR);
         resource->data.sequence.locked_quantity = 0;
-        resource->data.sequence.next_value = 0;
-        if (NULL == (resource->data.sequence.rolled_back = g_queue_new()))
-            THROW(G_QUEUE_NEW_ERROR1);
+        resource->data.sequence.next_value = 1;
+        /* is this sequence transactional? */
+        if ((strlen(resource->name) > 2) && ('S' == resource->name[1])) {
+            if (NULL == (resource->data.sequence.rolled_back = g_queue_new()))
+                THROW(G_QUEUE_NEW_ERROR1);
+        } else
+            resource->data.sequence.rolled_back = NULL;
         resource->data.sequence.holders = NULL;
         if (NULL == (resource->data.sequence.waitings = g_queue_new()))
             THROW(G_QUEUE_NEW_ERROR2);
@@ -326,7 +338,8 @@ int flom_resource_sequence_clean(flom_resource_t *resource,
                         "a%s lock with sequence %u, removing it...\n",
                         cl->rollback ? "n uncommitted" : " commited",
                         cl->info.sequence_value));
-            if (cl->rollback) {
+            if ((NULL != resource->data.sequence.rolled_back) &&
+                cl->rollback) {
                 /* put the rolled back value in the queue */
                 g_queue_push_tail(resource->data.sequence.rolled_back,
                                   GUINT_TO_POINTER(cl->info.sequence_value));
@@ -418,9 +431,11 @@ void flom_resource_sequence_free(flom_resource_t *resource)
     }
     g_queue_free(resource->data.sequence.waitings);
     /* clean-up rolled back queue... */
-    FLOM_TRACE(("flom_resource_sequence_free: cleaning-up rolled back "
-                "queue...\n"));
-    g_queue_free(resource->data.sequence.rolled_back);
+    if (NULL != resource->data.sequence.rolled_back) {
+        FLOM_TRACE(("flom_resource_sequence_free: cleaning-up rolled back "
+                    "queue...\n"));
+        g_queue_free(resource->data.sequence.rolled_back);
+    }
     
     resource->data.sequence.waitings = NULL;
     resource->data.sequence.total_quantity =
