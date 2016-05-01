@@ -1,71 +1,154 @@
-AT_BANNER([Transactional sequence resources use case checks])
+AT_BANNER([Sequence resources use case checks])
 
-AT_SETUP([Use case YY])
+# Generate a basic sequence: 1, 2, 3!
+AT_SETUP([Use case 18 (1/6)])
 AT_DATA([expout],
-[[ 1 locking for 3 seconds
- 2 locking for 3 seconds
- 3 locking for 3 seconds
-0
- 1 ending
+[[ 1 locking for 0 seconds
 1
- 2 ending
-2
- 3 ending
-]])
-AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec4.sh 1 0 3 "-r _s_a[[3]]" & flom_test_exec4.sh 2 1 3 "-r _s_a[[3]]" & flom_test_exec4.sh 3 2 3 "-r _s_a[[3]]"], [0], [expout], [ignore])
-AT_CLEANUP
-
-AT_SETUP([Use case YY (1/2)])
-AT_DATA([expout],
-[[ 1 locking for 4 seconds
- 2 locking for 4 seconds
- 3 locking for 4 seconds
- 4 locking for 1 seconds
- 4 ending
-0
  1 ending
-1
- 2 ending
+ 2 locking for 0 seconds
 2
- 3 ending
- 5 locking for 3 seconds
+ 2 ending
+ 3 locking for 0 seconds
 3
- 5 ending
+ 3 ending
 ]])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec4.sh 1 0 4 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
-AT_CHECK([flom_test_exec4.sh 2 1 4 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
-AT_CHECK([flom_test_exec4.sh 3 2 4 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
-AT_CHECK([flom_test_exec4.sh 4 3 1 "-o 0 -r _s_a[[3]]" >>stdout], [@_ES_RESOURCE_BUSY@], [ignore], [ignore])
-AT_CHECK([flom_test_exec4.sh 5 4 3 "-r _s_a[[3]]" >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 1 0 0 "-i 1000 -r _s_a[[1]]" >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 2 0 0 "-i 1000 -r _s_a[[1]]" >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 3 0 0 "-i 1000 -r _s_a[[1]]" >>stdout], [0], [ignore], [ignore])
 AT_CHECK([cat stdout], [0], [expout], [ignore])
 AT_CLEANUP
 
-AT_SETUP([Use case YY (2/2)])
+# Lock on a basic sequence
+AT_SETUP([Use case 18 (2/6)])
 AT_DATA([expout],
-[[ 1 locking for 6 seconds
+[[ 1 locking for 2 seconds
  2 locking for 2 seconds
- 3 locking for 5 seconds
+ 3 locking for 1 seconds
 1
- 2 ending
- 4 locking for 1 seconds
-3
- 4 ending
-0
  1 ending
- 5 locking for 1 seconds
+ 4 locking for 0 seconds
 2
+ 2 ending
+3
  3 ending
 4
+ 4 ending
+]])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 1 0 2 "-i 1000 -r _s_a[[1]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 2 1 2 "-i 1000 -r _s_a[[1]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 3 2 1 "-i 1000 -r _s_a[[1]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec4.sh 4 3 0 "-i 1000 -r _s_a[[1]]" >>stdout], [0], [ignore], [ignore])
+AT_CHECK([cat stdout], [0], [expout], [ignore])
+AT_CLEANUP
+
+# Transactional behavior
+AT_SETUP([Use case 18 (3/6)])
+AT_DATA([expout],
+[[4
+7
+8
+9
+11
+]])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _S_a[[1]] -- true >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _S_a[[1]] -- true >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _S_a[[1]] -- true >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _S_a[[1]] -- echo >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _S_a[[1]] -- true >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _S_a[[1]] -- true >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _S_a[[1]] -- echo >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _S_a[[1]] -- false >>stdout], [1], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _S_a[[1]] -- echo >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _S_a[[1]] -- false >>stdout], [1], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _S_a[[1]] -- echo >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _S_a[[1]] -- true >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _S_a[[1]] -- echo >>stdout], [0], [ignore], [ignore])
+AT_CHECK([cat stdout], [0], [expout], [ignore])
+AT_CLEANUP
+
+# Non transactional behavior
+AT_SETUP([Use case 18 (4/6)])
+AT_DATA([expout],
+[[4
+7
+9
+11
+13
+]])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _s_a[[1]] -- true >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _s_a[[1]] -- true >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _s_a[[1]] -- true >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _s_a[[1]] -- echo >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _s_a[[1]] -- true >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _s_a[[1]] -- true >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _s_a[[1]] -- echo >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _s_a[[1]] -- false >>stdout], [1], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _s_a[[1]] -- echo >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _s_a[[1]] -- false >>stdout], [1], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _s_a[[1]] -- echo >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _s_a[[1]] -- true >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom -i 1000 -r _s_a[[1]] -- echo >>stdout], [0], [ignore], [ignore])
+AT_CHECK([cat stdout], [0], [expout], [ignore])
+AT_CLEANUP
+
+# Multiple (non transactional) sequence
+AT_SETUP([Use case 18 (5/6)])
+AT_DATA([expout],
+[[ 1 locking for 6 seconds
+ 2 locking for 3 seconds
+ 3 locking for 5 seconds
+ 4 locking for 1 seconds
+2
+ 2 ending
+4
+ 4 ending
+1
+ 1 ending
+3
+ 3 ending
+ 5 locking for 0 seconds
+5
  5 ending
 ]])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec4.sh 1 0 6 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
-AT_CHECK([flom_test_exec4.sh 2 1 2 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
-AT_CHECK([flom_test_exec4.sh 3 2 5 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
-AT_CHECK([flom_test_exec4.sh 4 4 1 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
-AT_CHECK([flom_test_exec4.sh 5 7 1 "-r _s_a[[3]]" >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 1 0 6 0 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 2 1 3 1 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 3 2 5 0 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 4 3 1 0 "-r _s_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 5 8 0 0 "-r _s_a[[3]]" >>stdout], [0], [ignore], [ignore])
+AT_CHECK([cat stdout], [0], [expout], [ignore])
+AT_CLEANUP
+
+# Multiple (non transactional) sequence
+AT_SETUP([Use case 18 (6/6)])
+AT_DATA([expout],
+[[ 1 locking for 6 seconds
+ 2 locking for 3 seconds
+ 3 locking for 5 seconds
+ 4 locking for 1 seconds
+2
+ 2 ending
+2
+ 4 ending
+1
+ 1 ending
+3
+ 3 ending
+ 5 locking for 0 seconds
+3
+ 5 ending
+]])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 1 0 6 0 "-r _S_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 2 1 3 1 "-r _S_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 3 2 5 1 "-r _S_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 4 3 1 0 "-r _S_a[[3]]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 5 8 0 0 "-r _S_a[[3]]" >>stdout], [0], [ignore], [ignore])
 AT_CHECK([cat stdout], [0], [expout], [ignore])
 AT_CLEANUP
 

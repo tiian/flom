@@ -18,6 +18,8 @@ AT_SETUP([TLS basic handshake])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
 AT_CHECK([flom --debug-feature=tls.server -a localhost --tls-certificate=CA1/peer1_CA1_cert.pem --tls-private-key=CA1/peer1_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem &], [0], [ignore], [ignore])
+# wait the server is ready to accept incoming requests...
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
 AT_CHECK([flom --debug-feature=tls.client -a localhost --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem], [0], [ignore], [ignore])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP

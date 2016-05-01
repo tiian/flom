@@ -38,6 +38,12 @@ This is a brief list of the available features:
   to use binding: C, C++, Java, PHP, Python.
 - TLS (Transport Layer Security) support to protect network communication and
   to supply peer to peer mutual authentication based on X.509 certificates
+- a large spectrum of different resources:
+  1. simple: basic locking using DLM semantic
+  2. hierarchical: HFS like semantic
+  3. numerical: pools of undifferentiated resources
+  4. set: sets of differentiated resources
+  5. sequence: arrays of transactional (or non transactional) sequences
 
 FLoM central documentation site is hosted by SourceForge Wiki: 
 	https://sourceforge.net/p/flom/wiki/Home/
