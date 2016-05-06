@@ -1,5 +1,6 @@
 Road map:
 
+fix case test Use case 18 (6/6)
 check sequences with valgrind
 create sequences case tests: rollbacks
 implement flom_handle_abort (rollback resource)
