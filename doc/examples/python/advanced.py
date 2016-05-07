@@ -44,7 +44,7 @@
 #
 # The program itself is not verbose, but you might activate tracing if you
 # were interested to understand what's happen:
-#     export FLOM_TRACE_MASK=0x8000
+#     export FLOM_TRACE_MASK=0x80000
 #     python advanced.php
 #
 

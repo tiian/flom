@@ -309,6 +309,10 @@ abstract class flom {
 		return flom_handle_unlock($handle);
 	}
 
+	static function flom_handle_unlock_rollback($handle) {
+		return flom_handle_unlock_rollback($handle);
+	}
+
 	static function flom_handle_get_locked_element($handle) {
 		return flom_handle_get_locked_element($handle);
 	}

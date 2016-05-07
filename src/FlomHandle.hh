@@ -118,6 +118,16 @@ namespace flom {
         int unlock() { return flom_handle_unlock(&handle); }
 
         /**
+         * Unlocks the (logical) resource linked to this handle and rollback
+         * the transactional resource state; the resource MUST be previously
+         * locked using method @ref lock . This method should be used only
+         * with transactional resources, for example: transactional unique
+         * sequences
+         * @return a reason code (see file @ref flom_errors.h)
+         */
+        int unlockRollback() { return flom_handle_unlock_rollback(&handle); }
+
+        /**
          * Get the name of the locked element if the resource is of
          * type set.<P>
          * Note 1: this method can be used only after @ref lock and before

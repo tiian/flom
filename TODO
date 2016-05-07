@@ -1,13 +1,12 @@
 Road map:
 
-fix case test Use case 18 (6/6)
+add examples of unlock rollback for Java, PHP, Python
+add test cases for flom_handle_unlock_rollback
 check sequences with valgrind
-create sequences case tests: rollbacks
-implement flom_handle_abort (rollback resource)
 
 fix PHP for Ubuntu 16.04, see https://github.com/tiian/flom/issues/5
 
-implement a loop for connect/bind if bind returns an error: this shuold help
+implement a loop for connect/bind if bind returns an error: this should help
 to reduce the race condition between a closing daemon and a starting client.
 See this thread: https://github.com/tiian/flom/issues/3
 

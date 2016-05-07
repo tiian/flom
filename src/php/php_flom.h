@@ -46,6 +46,7 @@ ZEND_NAMED_FUNCTION(_wrap_flom_handle_new);
 ZEND_NAMED_FUNCTION(_wrap_flom_handle_delete);
 ZEND_NAMED_FUNCTION(_wrap_flom_handle_lock);
 ZEND_NAMED_FUNCTION(_wrap_flom_handle_unlock);
+ZEND_NAMED_FUNCTION(_wrap_flom_handle_unlock_rollback);
 ZEND_NAMED_FUNCTION(_wrap_flom_handle_get_locked_element);
 ZEND_NAMED_FUNCTION(_wrap_flom_handle_get_discovery_attempts);
 ZEND_NAMED_FUNCTION(_wrap_flom_handle_set_discovery_attempts);

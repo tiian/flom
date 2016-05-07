@@ -60,8 +60,9 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	installcheck-recursive installdirs-recursive pdf-recursive \
 	ps-recursive uninstall-recursive
 am__dist_examples_DATA_DIST = README basic_static.c basic_dynamic.c \
-	advanced_static.c advanced_dynamic.c BasicStatic.cc \
-	BasicDynamic.cc AdvancedStatic.cc AdvancedDynamic.cc
+	advanced_static.c advanced_dynamic.c transactional.c \
+	BasicStatic.cc BasicDynamic.cc AdvancedStatic.cc \
+	AdvancedDynamic.cc Transactional.cc
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -336,11 +337,13 @@ top_srcdir = @top_srcdir@
 @COND_PYTHONAPI_TRUE@MAYBE_PYTHONAPI = python
 SUBDIRS = $(MAYBE_JAVAAPI) $(MAYBE_PHPAPI) $(MAYBE_PYTHONAPI) .
 examplesdir = $(docdir)/examples
-@COND_CPPAPI_TRUE@CPPSOURCE = BasicStatic.cc BasicDynamic.cc AdvancedStatic.cc AdvancedDynamic.cc
-@COND_CPPAPI_TRUE@CPPTARGET = BasicStatic BasicDynamic AdvancedStatic AdvancedDynamic
+@COND_CPPAPI_TRUE@CPPSOURCE = BasicStatic.cc BasicDynamic.cc AdvancedStatic.cc \
+@COND_CPPAPI_TRUE@	AdvancedDynamic.cc Transactional.cc
+
+@COND_CPPAPI_TRUE@CPPTARGET = BasicStatic BasicDynamic AdvancedStatic AdvancedDynamic Transactional
 dist_noinst_DATA = Makefile.am example_makefile.in README.in
 dist_examples_DATA = README basic_static.c basic_dynamic.c \
-	advanced_static.c advanced_dynamic.c $(CPPSOURCE)
+	advanced_static.c advanced_dynamic.c transactional.c $(CPPSOURCE)
 
 nodist_examples_DATA = example_makefile
 all: all-recursive

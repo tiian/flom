@@ -40,7 +40,7 @@
  *
  * You might activate tracing if you were interested to understand what's
  * happening:
- *     export FLOM_TRACE_MASK=0x8000
+ *     export FLOM_TRACE_MASK=0x80000
  *     java -Djava.library.path=@libdir@ -cp @datadir@/@PACKAGE@/java/flom.jar:. Basic
  */
 

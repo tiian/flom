@@ -340,7 +340,17 @@ int flom_handle_lock(flom_handle_t *handle)
 
 
 
-int flom_handle_unlock(flom_handle_t *handle)
+/**
+ * This is a private library function, not exposed in the interface, that's
+ * used both by @ref flom_handle_unlock and by
+ * @ref flom_handle_unlock_rollback .
+ * See above functions for more details.
+ * @param handle (Input/Output): a valid object handle
+ * @param rollback: a boolean value, TRUE means the state of the transactional
+ *        resource must be backed out
+ * @return a reason code
+ */
+int flom_handle_unlock_internal(flom_handle_t *handle, int rollback)
 {
     enum Exception { NULL_OBJECT
                      , API_INVALID_SEQUENCE
@@ -354,7 +364,7 @@ int flom_handle_unlock(flom_handle_t *handle)
     if (FLOM_RC_OK != (ret_cod = flom_init_check()))
         return ret_cod;
     
-    FLOM_TRACE(("flom_handle_unlock\n"));
+    FLOM_TRACE(("flom_handle_unlock_internal: rollback=%d\n", rollback));
     TRY {
         flom_conn_t *conn = NULL;
         /* check handle is not NULL */
@@ -365,7 +375,7 @@ int flom_handle_unlock(flom_handle_t *handle)
         /* check handle state */
         if (FLOM_HANDLE_STATE_LOCKED != handle->state &&
             FLOM_HANDLE_STATE_CONNECTED != handle->state) {
-            FLOM_TRACE(("flom_handle_unlock: handle->state=%d\n",
+            FLOM_TRACE(("flom_handle_unlock_internal: handle->state=%d\n",
                         handle->state));
             THROW(API_INVALID_SEQUENCE);
         }
@@ -376,13 +386,13 @@ int flom_handle_unlock(flom_handle_t *handle)
         if (FLOM_HANDLE_STATE_LOCKED == handle->state) {
             /* lock release */
             if (FLOM_RC_OK != (ret_cod = flom_client_unlock(
-                                   handle->config, conn, FALSE)))
+                                   handle->config, conn, rollback)))
                 THROW(CLIENT_UNLOCK_ERROR);
             /* state update */
             handle->state = FLOM_HANDLE_STATE_CONNECTED;
         } else {
-            FLOM_TRACE(("flom_handle_unlock: resource already unlocked (%d), "
-                        "skipping...\n", handle->state));
+            FLOM_TRACE(("flom_handle_unlock_internal: resource already "
+                        "unlocked (%d), skipping...\n", handle->state));
         }
         /* gracefully disconnect from daemon */
         if (FLOM_RC_OK != (ret_cod = flom_client_disconnect(conn)))
@@ -415,9 +425,23 @@ int flom_handle_unlock(flom_handle_t *handle)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    FLOM_TRACE(("flom_handle_unlock/excp=%d/"
+    FLOM_TRACE(("flom_handle_unlock_internal/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+int flom_handle_unlock(flom_handle_t *handle)
+{
+    return flom_handle_unlock_internal(handle, FALSE);
+}
+
+
+
+int flom_handle_unlock_rollback(flom_handle_t *handle)
+{
+    return flom_handle_unlock_internal(handle, TRUE);
 }
 
 

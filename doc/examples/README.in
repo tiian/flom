@@ -2,26 +2,30 @@ This directory contains the example programs: choose the programming language
 of your interest and pick-up the example you can use as a starting point to
 develop your own custom software that uses libflom API.
 
-C examples: basic_static.c basic_dynamic.c advanced_static.c advanced_dynamic.c
-How to compile:
-	make -f example_makefile basic_static
-	make -f example_makefile basic_dynamic
-	make -f example_makefile advanced_static
-	make -f example_makefile advanced_dynamic
-or
+C/C++ examples: basic_static.c basic_dynamic.c advanced_static.c 
+	advanced_dynamic.c transactional.c
+	BasicStatic.cc BasicDynamic.cc AdvancedStatic.cc AdvancedDynamic.cc
+	Transactional.cc
+How to compile a single program:
+	make -f example_makefile <program name>
+How to compile all the programs:
 	make -f example_makefile
 
-Before running "basic_static" or "basic_dynamic" you have to start a local 
-FLoM daemon listening default local socket:
+Before running:
+	basic_static, basic_dynamic, transactional,
+	BasicStatic, BasicDynamic, Transactional
+you have to start a local FLoM daemon listening default local socket:
 	flom -d -1 -- true
 
-Before running "advanced_static" or "advanced_dynamic" you have to start a
-local FLoM daemon listening a specific local socket:
+Before running:
+	advanced_static, advanced_dynamic
+	AdvancedStatic, AdvancedDynamic
+you have to start a local FLoM daemon listening a specific local socket:
 	flom -s /tmp/my_socket_name -d -1 -- true
 
 To trace FLoM API calls you have to set FLOM_TRACE_MASK environment variable
 (bash example):
-	export FLOM_TRACE_MASK=0x8000
+	export FLOM_TRACE_MASK=0x80000
 before program execution.
 
 The directory @libdir@ may be already in your standard library path; in
@@ -32,6 +36,14 @@ executing the compiled programs:
 	./basic_dynamic
 	./advanced_static
 	./advanced_dynamic
+	./transactional
+The same for C++ programs:
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:@libdir@
+	./BasicStatic
+	./BasicDynamic
+	./AdvancedStatic
+	./AdvancedDynamic
+	./Transactional
 
 More exhaustive examples related to setter and getter methods provided by the
 API are available in @abs_top_builddir@/tests/src dir:

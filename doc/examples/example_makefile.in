@@ -9,7 +9,7 @@ CC=@CC@
 CXX=@CXX@
 
 all:	basic_static basic_dynamic advanced_static advanced_dynamic \
-	@CPPTARGET@
+	transactional @CPPTARGET@
 
 basic_static:	basic_static.c
 	$(CC) basic_static.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
@@ -27,6 +27,10 @@ advanced_dynamic:	advanced_dynamic.c
 	$(CC) advanced_dynamic.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
 		-o advanced_dynamic
 
+transactional:	transactional.c
+	$(CC) transactional.c -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+		-o transactional
+
 BasicStatic:	BasicStatic.cc
 	$(CXX) BasicStatic.cc -l flom $(LDFLAGS) $(GLIB2_LIBS) \
 		-o BasicStatic
@@ -42,4 +46,8 @@ AdvancedStatic:	AdvancedStatic.cc
 AdvancedDynamic:	AdvancedDynamic.cc
 	$(CXX) AdvancedDynamic.cc -l flom $(LDFLAGS) $(GLIB2_LIBS) \
 		-o AdvancedDynamic
+
+Transactional:	Transactional.cc
+	$(CXX) Transactional.cc -l flom $(LDFLAGS) $(GLIB2_LIBS) \
+		-o Transactional 
 

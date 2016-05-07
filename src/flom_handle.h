@@ -159,6 +159,19 @@ extern "C" {
 
 
     /**
+     * Unlocks the (logical) resource linked to an handle and rollback the
+     * transactional resource state; the resource MUST be previously locked
+     * using function @ref flom_handle_lock . This method should be used only
+     * with transactional resources, for example: transactional unique
+     * sequences
+     * @param handle (Input/Output): a valid object handle
+     * @return a reason code (see file @ref flom_errors.h)
+     */
+    int flom_handle_unlock_rollback(flom_handle_t *handle);
+
+
+
+    /**
      * Return the name of the locked element if the resource is of type set.<P>
      * Note 1: this function can be used only after @ref flom_handle_lock
      *         and before @ref flom_handle_unlock<P>
