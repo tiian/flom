@@ -30,8 +30,9 @@
  * 1. declare a pointer for type flom_handle_t
  * 2. create (allocate and initialize) a new handle using function
  *    flom_handle_new()
- * 3. set a non default resource name (a name valid for a trasactional sequence
- *    resource)
+ * 3a. set a non default resource name (a name valid for a trasactional
+ *     sequence resource)
+ * 3b. set a non default resource idle lifespan
  * 4. acquire a lock using function flom_handle_lock()
  * 5. release the lock using function flom_handle_unlock_rollback()
  * 6. acquire a new lock using function flom_handle_lock() and verifying the
@@ -39,8 +40,9 @@
  * 7. release the lock using function flom_handle_unlock_rollback()
  * 8. acquire a new lock using function flom_handle_lock() and verifying the
  *    FLoM daemon returnes a different value
- * 9. release the lock using function flom_handle_unlock_rollback()
- * 10. delete (clean-up and deallocate) the handle using function
+ * 9. sleep 5 seconds to allow program killing
+ * 10. release the lock using function flom_handle_unlock_rollback()
+ * 11. delete (clean-up and deallocate) the handle using function
  *     flom_handle_delete()
  *
  * Compilation command:
@@ -70,11 +72,18 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
     
-    /* step 3: set a different (non default) resource name to lock */
+    /* step 3a: set a different (non default) resource name to lock */
     if (FLOM_RC_OK != (ret_cod = flom_handle_set_resource_name(
                            my_handle, "_S_transact[1]"))) {
         fprintf(stderr, "flom_handle_set_resource_name() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
+        exit(1);
+    }
+    /* step 3b: set a different (non default) resource idle lifespan */
+    if (FLOM_RC_OK != (ret_cod = flom_handle_set_resource_idle_lifespan(
+                           my_handle, 60000))) {
+        fprintf(stderr, "flom_handle_set_resource_idle_lifespan() returned "
+                "%d, '%s'\n", ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
     
@@ -121,15 +130,20 @@ int main(int argc, char *argv[]) {
         printf("flom_handle_get_locked_element(): '%s' (third lock)\n",
                flom_handle_get_locked_element(my_handle));
     } 
+
+    /* step 9: sleep 5 seconds to allow program killing */
+    printf("The program is waiting 5 seconds: kill it with the [control]+[c] "
+           "keystroke and restart it to verify resource rollback...\n");
+    sleep(5);
     
-    /* step 9: lock release */
+    /* step 10: lock release */
     if (FLOM_RC_OK != (ret_cod = flom_handle_unlock(my_handle))) {
         fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));
         exit(1);
     }
     
-    /* step 10: delete the handle */
+    /* step 11: delete the handle */
     flom_handle_delete(my_handle);
     
     /* exit */

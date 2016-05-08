@@ -183,6 +183,24 @@ flom_rsrc_type_t flom_rsrc_get_type(const gchar *resource_name)
 
 
 
+int flom_rsrc_get_transactional(const gchar *resource_name)
+{
+    flom_rsrc_type_t type;
+    int transactional = FALSE;
+
+    FLOM_TRACE(("flom_rsrc_get_transactional: resource_name='%s'\n",
+                STRORNULL(resource_name)));
+    type = flom_rsrc_get_type(resource_name);
+    if (FLOM_RSRC_TYPE_SEQUENCE == type)
+        if ('S' == resource_name[1])
+            transactional = TRUE;
+    FLOM_TRACE(("flom_rsrc_get_transactional: transactional=%d\n",
+                transactional));
+    return transactional;
+}
+
+
+
 int flom_rsrc_get_number(const gchar *resource_name, flom_rsrc_type_t type,
                          gint *number)
 {

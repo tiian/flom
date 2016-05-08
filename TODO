@@ -1,8 +1,8 @@
 Road map:
 
 add examples of unlock rollback for Java, PHP, Python
-add test cases for flom_handle_unlock_rollback
-check sequences with valgrind
+add test cases for flom_handle_unlock_rollback; check warning
+	FLOM_RC_RESOURCE_IS_NOT_TRANSACTIONAL
 
 fix PHP for Ubuntu 16.04, see https://github.com/tiian/flom/issues/5
 

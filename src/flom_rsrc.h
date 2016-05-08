@@ -375,6 +375,15 @@ extern "C" {
 
 
     /**
+     * Check if the resource is transactional from its name
+     * @param resource_name IN resource name
+     * @return a boolean value: TRUE, the resource supports transactions
+     */
+    int flom_rsrc_get_transactional(const gchar *resource_name);
+
+    
+
+    /**
      * Retrieve the quantity associated to a numeric resource
      * @param resource_name IN resource name
      * @param type IN resource type

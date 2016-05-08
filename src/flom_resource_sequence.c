@@ -105,7 +105,7 @@ int flom_resource_sequence_init(flom_resource_t *resource,
         resource->data.sequence.locked_quantity = 0;
         resource->data.sequence.next_value = 1;
         /* is this sequence transactional? */
-        if ((strlen(resource->name) > 2) && ('S' == resource->name[1])) {
+        if (flom_rsrc_get_transactional(resource->name)) {
             if (NULL == (resource->data.sequence.rolled_back = g_queue_new()))
                 THROW(G_QUEUE_NEW_ERROR1);
         } else

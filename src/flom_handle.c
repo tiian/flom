@@ -357,6 +357,7 @@ int flom_handle_unlock_internal(flom_handle_t *handle, int rollback)
                      , OBJ_CORRUPTED
                      , CLIENT_UNLOCK_ERROR
                      , CLIENT_DISCONNECT_ERROR
+                     , RESOURCE_IS_NOT_TRANSACTIONAL
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -367,6 +368,8 @@ int flom_handle_unlock_internal(flom_handle_t *handle, int rollback)
     FLOM_TRACE(("flom_handle_unlock_internal: rollback=%d\n", rollback));
     TRY {
         flom_conn_t *conn = NULL;
+        int ignored_rollback = FALSE;
+        
         /* check handle is not NULL */
         if (NULL == handle)
             THROW(NULL_OBJECT);
@@ -383,6 +386,21 @@ int flom_handle_unlock_internal(flom_handle_t *handle, int rollback)
            it's a valid pointer) */
         if (NULL == handle->conn)
             THROW(OBJ_CORRUPTED);
+        /* check transactionality */
+        if (rollback) {
+            int transactional = flom_rsrc_get_transactional(
+                flom_config_get_resource_name(handle->config));
+            if (!transactional) {
+                FLOM_TRACE(("flom_handle_unlock_internal: asked rollback for "
+                            "a non transactional resource ('%s'), "
+                            "ignoring...\n",
+                            STRORNULL(flom_config_get_resource_name(
+                                          handle->config))));
+                ignored_rollback = TRUE;
+                /* overwrite rollback parameter */
+                rollback = FALSE;
+            }
+        }
         if (FLOM_HANDLE_STATE_LOCKED == handle->state) {
             /* lock release */
             if (FLOM_RC_OK != (ret_cod = flom_client_unlock(
@@ -402,6 +420,9 @@ int flom_handle_unlock_internal(flom_handle_t *handle, int rollback)
         handle->locked_element = NULL;
         /* state update */
         handle->state = FLOM_HANDLE_STATE_DISCONNECTED;
+
+        if (ignored_rollback)
+            THROW(RESOURCE_IS_NOT_TRANSACTIONAL);
         
         THROW(NONE);
     } CATCH {
@@ -420,6 +441,9 @@ int flom_handle_unlock_internal(flom_handle_t *handle, int rollback)
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
+                break;
+            case RESOURCE_IS_NOT_TRANSACTIONAL:
+                ret_cod = FLOM_RC_RESOURCE_IS_NOT_TRANSACTIONAL;
                 break;
             default:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;

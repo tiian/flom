@@ -29,8 +29,9 @@ using namespace flom;
  * These are the steps:
  * 1. declare a pointer for type FlomHandle
  * 2. create a new handle
- * 3. set a non default resource name (a name valid for a trasactional sequence
- *    resource)
+ * 3a. set a non default resource name (a name valid for a trasactional
+ *     sequence resource)
+ * 3b. set a non default resource idle lifespan
  * 4. acquire a lock using method lock()
  * 5. release the lock using method unlock_rollback()
  * 6. acquire a new lock using method lock() and verifying the
@@ -38,8 +39,9 @@ using namespace flom;
  * 7. release the lock using method unlock()
  * 8. acquire a new lock using method lock() and verifying the
  *    FLoM daemon returnes a different value
- * 9. release the lock using method unlock()
- * 10. delete the handle
+ * 9. sleep 5 seconds to allow program killing
+ * 10. release the lock using method unlock()
+ * 11. delete the handle
  *
  * Compilation command:
  *     make -f example_makefile Transactional
@@ -68,10 +70,16 @@ int main(int argc, char *argv[]) {
         exit(1);
     }    
     
-    /* step 3: set a different (non default) resource name to lock */
+    /* step 3a: set a different (non default) resource name to lock */
     if (FLOM_RC_OK != (retCod = myHandle->setResourceName("_S_transact[1]"))) {
         cerr << "FlomHandle->setResourceName() returned " << retCod << " '" <<
             flom_strerror(retCod) << "'" << endl;
+        exit(1);
+    }
+    /* step 3b: set a different (non default) resource idle lifespan */
+    if (FLOM_RC_OK != (retCod = myHandle->setResourceIdleLifespan(60000))) {
+        cerr << "FlomHandle->setResourceIdleLifespan() returned " << retCod <<
+            " '" << flom_strerror(retCod) << "'" << endl;
         exit(1);
     }
     
@@ -119,14 +127,19 @@ int main(int argc, char *argv[]) {
             myHandle->getLockedElement() << "' (third lock)" << endl;
     }
     
-    /* step 9: lock release */
+    /* step 9: sleep 5 seconds to allow program killing */
+    cout << "The program is waiting 5 seconds: kill it with the [control]+[c] "
+        "keystroke and restart it to verify resource rollback..." << endl;
+    sleep(5);
+    
+    /* step 10: lock release */
     if (FLOM_RC_OK != (retCod = myHandle->unlock())) {
         cerr << "FlomHandle->unlock() returned " << retCod << " '" <<
             flom_strerror(retCod) << "'" << endl;
         exit(1);
     }
     
-    /* step 10: delete the handle */
+    /* step 11: delete the handle */
     delete myHandle;
     /* exit */
     return 0;

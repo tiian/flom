@@ -24,8 +24,8 @@ AC_CONFIG_MACRO_DIR(m4)
 #    set age to 0.
 #
 # libflom library version: LC_CURRENT -> c, LT_REVISION -> r, LT_AGE ->a
-LT_CURRENT=1
-LT_AGE=1
+LT_CURRENT=2
+LT_AGE=2
 LT_REVISION=0
 
 # hardwired configuration

@@ -161,6 +161,7 @@ void flom_config_reset(flom_config_t *config)
     config->append_trace_file = FALSE;
     config->verbose = FALSE;
     config->resource_name = g_strdup(DEFAULT_RESOURCE_NAME);
+    config->resource_transactional = FALSE;
     config->resource_create = TRUE;
     config->resource_timeout = FLOM_NETWORK_WAIT_TIMEOUT;
     config->resource_quantity = 1;
@@ -1371,6 +1372,7 @@ int flom_config_set_resource_name(flom_config_t *config,
 {
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int command_line = FALSE;
+    flom_rsrc_type_t resource_type;
     
     FLOM_TRACE(("flom_config_set_resource_name(%s)\n", resource_name));
     /* default config object */
@@ -1385,7 +1387,8 @@ int flom_config_set_resource_name(flom_config_t *config,
             g_print("ERROR: '%s' is a reserved resource name and can not be "
                     "set by user\n", resource_name);
         ret_cod = FLOM_RC_INVALID_RESOURCE_NAME;
-    } else if (FLOM_RSRC_TYPE_NULL == flom_rsrc_get_type(resource_name)) {
+    } else if (FLOM_RSRC_TYPE_NULL == (
+                   resource_type = flom_rsrc_get_type(resource_name))) {
         FLOM_TRACE(("flom_config_set_resource_name: invalid resource "
                     "name '%s'\n", resource_name));
         if (command_line)
@@ -1398,6 +1401,9 @@ int flom_config_set_resource_name(flom_config_t *config,
         config->resource_name = g_strdup(resource_name);
         ret_cod = FLOM_RC_OK;
     }
+    /* check if the resource can support transactions */
+    config->resource_transactional =
+        flom_rsrc_get_transactional(resource_name);
     return ret_cod;
 }
 

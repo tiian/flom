@@ -314,6 +314,12 @@ typedef struct flom_config_s {
      */
     gchar             *resource_name;
     /**
+     * The resource supports transactions, see @ref flom_handle_unlock_rollback
+     * (boolean value). This is a private field that's automatically computed
+     * when the resource name is set: the value can not be explicitly altered.
+     */
+    int                resource_transactional;
+    /**
      * The resource can be create if it was not previously created by another
      * requester
      * (boolean value)
@@ -674,6 +680,20 @@ extern "C" {
 
 
 
+    /**
+     * Get "resource_transactional" property
+     * @param config IN/OUT configuration object, NULL for global config
+     * @return a boolean value
+     */
+    static inline int flom_config_get_resource_transactional(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.resource_transactional :
+            config->resource_transactional;
+    }
+
+
+    
     /**
      * Set "resource_create" config parameter
      * @param config IN/OUT configuration object, NULL for global config
