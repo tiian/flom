@@ -10,5 +10,6 @@ ls -la /usr/local/lib/python*/dist-packages/*
 Read the comments inside
 	basic.py
 	advanced.py
+	transactional.py
 to understand how these Python programs can be executed.
 

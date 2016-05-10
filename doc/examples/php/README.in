@@ -10,6 +10,7 @@ ls -la @libdir@/flom-php-module.*
 Read the comments inside
 	basic.php
 	advanced.php
+	transactional.php
 to understand how these PHP programs can be executed.
 
 It may be you have to add @libdir@ directory to your LD_LIBRARY_PATH

@@ -10,6 +10,7 @@ ls -la @libdir@/libflom_java.*
 Read the comments inside
 	Basic.java
 	Advanced.java
+	Transactional.java
 to understand how these Java programs can be executed.
 
 FLoM Java package uses JNI to access libflom C API functions: libflom_java

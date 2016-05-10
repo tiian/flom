@@ -45,7 +45,7 @@
 # The program itself is not verbose, but you might activate tracing if you
 # were interested to understand what's happen:
 #     export FLOM_TRACE_MASK=0x80000
-#     python advanced.php
+#     python advanced.py
 #
 
 
@@ -81,7 +81,7 @@ if FLOM_RC_OK != ret_cod:
 # step 4: lock acquisition
 ret_cod = flom_handle_lock(my_handle)
 if FLOM_RC_OK != ret_cod:
-    sys.stderr.write("happy_path/flom_handle_lock() returned " + 
+    sys.stderr.write("flom_handle_lock() returned " + 
                      str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
     sys.exit(1)
 else:
@@ -95,7 +95,7 @@ else:
 # step 6: lock release
 ret_cod = flom_handle_unlock(my_handle)
 if FLOM_RC_OK != ret_cod:
-    sys.stderr.write("happy_path/flom_handle_unlock() returned " +
+    sys.stderr.write("flom_handle_unlock() returned " +
                      str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
     sys.exit(1)
 
@@ -103,7 +103,7 @@ if FLOM_RC_OK != ret_cod:
 # step 7: handle clean-up (memory release)
 ret_cod = flom_handle_clean(my_handle)
 if FLOM_RC_OK != ret_cod:
-    sys.stderr.write("happy_path/flom_handle_clean() returned " + 
+    sys.stderr.write("flom_handle_clean() returned " + 
                      str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
     sys.exit(1)
 

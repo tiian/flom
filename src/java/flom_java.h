@@ -41,6 +41,14 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_unlockJNI
 
 /*
  * Class:     org_tiian_flom_FlomHandle
+ * Method:    unlockRollbackJNI
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_unlockRollbackJNI
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     org_tiian_flom_FlomHandle
  * Method:    getLockedElementJNI
  * Signature: ()Ljava/lang/String;
  */

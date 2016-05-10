@@ -202,6 +202,23 @@ JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_unlockJNI
 
 
 
+JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_unlockRollbackJNI
+(JNIEnv *env, jobject this_obj)
+{
+    enum Exception { UNLOCK_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    if (FLOM_RC_OK != (ret_cod = flom_init_check()))
+        return ret_cod;
+    
+    FLOM_TRACE(("Java_org_tiian_flom_FlomHandle_unlockRollbackJNI\n"));
+    return flom_handle_unlock_rollback(
+        Java_org_tiian_flom_FlomHandle_getNativeHandle(env, this_obj));
+}
+
+
+
 JNIEXPORT jstring JNICALL Java_org_tiian_flom_FlomHandle_getLockedElementJNI
 (JNIEnv *env, jobject this_obj)
 {

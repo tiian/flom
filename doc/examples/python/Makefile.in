@@ -286,7 +286,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 examplesdir = $(docdir)/examples/python
-dist_examples_DATA = basic.py advanced.py README
+dist_examples_DATA = basic.py advanced.py transactional.py README
 all: all-am
 
 .SUFFIXES:

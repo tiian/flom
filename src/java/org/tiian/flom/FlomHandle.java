@@ -113,8 +113,10 @@ public class FlomHandle {
     private native int lockJNI();
     /**
      * Lock the (logical) resource linked to this handle; the resource
-     * MUST be unlocked using method unlock when the lock condition
-     * is no more necessary.
+     * MUST be unlocked using method
+     * {@link org.tiian.flom.FlomHandle#unlock unlock}
+     * (or {@link org.tiian.flom.FlomHandle#unlockRollback unlockRollback})
+     * when the lock condition is no more necessary.
      * @throws FlomException if the underlying native C function returns
      * an error condition
      */
@@ -134,7 +136,8 @@ public class FlomHandle {
     private native int unlockJNI();
     /**
      * Unlock the (logical) resource linked to this handle; the resource
-     * MUST be previously locked using method lock
+     * MUST be previously locked using method
+     * {@link org.tiian.flom.FlomHandle#lock lock}
      * @throws FlomException if the underlying native C function returns
      * an error condition
      */
@@ -142,6 +145,28 @@ public class FlomHandle {
         nullCheck();
         
         int ReturnCode = unlockJNI();
+        if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
+            throw new FlomException(ReturnCode);
+    }
+
+
+    
+    /**
+     * Native method for unlock rollback
+     */
+    private native int unlockRollbackJNI();
+    /**
+     * Unlock the (logical) resource linked to this handle and rollback the
+     * transactiona resource state; the resource MUST be previously locked
+     * using method
+     * {@link org.tiian.flom.FlomHandle#lock lock}
+     * @throws FlomException if the underlying native C function returns
+     * an error condition
+     */
+    public void unlockRollback() throws FlomException {
+        nullCheck();
+        
+        int ReturnCode = unlockRollbackJNI();
         if (FlomErrorCodes.FLOM_RC_OK != ReturnCode)
             throw new FlomException(ReturnCode);
     }

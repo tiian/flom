@@ -1,7 +1,8 @@
 examplesdir = $(docdir)/examples/java
-dist_noinst_DATA = Basic.java.in Advanced.java.in README.in
+dist_noinst_DATA = Basic.java.in Advanced.java.in Transactional.java.in \
+	README.in
 dist_examples_DATA = README
-nodist_examples_DATA = Basic.java Advanced.java
+nodist_examples_DATA = Basic.java Advanced.java Transactional.java
 
 Basic.java:	Basic.java.in
 	sed \
@@ -11,6 +12,13 @@ Basic.java:	Basic.java.in
 	$< >$@
 
 Advanced.java:	Advanced.java.in
+	sed \
+	-e 's|@datadir[@]|$(datadir)|g' \
+	-e 's|@libdir[@]|$(libdir)|g' \
+	-e 's|@PACKAGE[@]|$(PACKAGE)|g' \
+	$< >$@
+
+Transactional.java:	Transactional.java.in
 	sed \
 	-e 's|@datadir[@]|$(datadir)|g' \
 	-e 's|@libdir[@]|$(libdir)|g' \
