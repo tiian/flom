@@ -99,8 +99,28 @@ AT_CHECK([flom -r resource1 -- true], [0], [ignore], [ignore])
 AT_CHECK([flom -r resource2 -- true], [0], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([C sequence resource])
+AT_DATA([expout],
+[[locked element is 1
+locked element is 2
+locked element is 1
+locked element is 1
+locked element is 2
+]])
+AT_CHECK([case0004], [134], [expout], [ignore])
+AT_DATA([expout],
+[[locked element is 3
+locked element is 4
+locked element is 2
+locked element is 2
+locked element is 3
+]])
+AT_CHECK([case0004], [134], [expout], [ignore])
+AT_CLEANUP
+
 AT_SETUP([C++ Happy path (static and dynamic)])
 AT_CHECK([if test "$CPPAPI" = "no"; then exit 77; fi])
+AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
 AT_CHECK([case1000], [0], [ignore], [ignore])
 AT_CLEANUP
@@ -191,6 +211,27 @@ FlomHandle->getTlsCheckPeerId() = 1
 dynamicHandleHappyPath locked element is blue
 ]])
 AT_CHECK([case1002 $(iface_name.sh inet6 1)], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([C++ sequence resource])
+AT_CHECK([pkill flom], [0], [ignore], [ignore])
+AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[locked element is 1
+locked element is 2
+locked element is 1
+locked element is 1
+locked element is 2
+]])
+AT_CHECK([case1004], [134], [expout], [ignore])
+AT_DATA([expout],
+[[locked element is 3
+locked element is 4
+locked element is 2
+locked element is 2
+locked element is 3
+]])
+AT_CHECK([case1004], [134], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Java Happy path])
@@ -351,6 +392,27 @@ flom_handle_get_tls_check_peer_id() = 0
 happy_path locked element is red
 ]])
 AT_CHECK([php -d extension=@abs_top_builddir@/src/php/.libs/flom-php-module.so $PHPPATH/case2002.php], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([PHP sequence resource])
+AT_CHECK([pkill flom], [0], [ignore], [ignore])
+AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[locked element is 1
+locked element is 2
+locked element is 1
+locked element is 1
+locked element is 2
+]])
+AT_CHECK([php -d extension=@abs_top_builddir@/src/php/.libs/flom-php-module.so $PHPPATH/case2004.php], [0], [expout], [ignore])
+AT_DATA([expout],
+[[locked element is 3
+locked element is 4
+locked element is 2
+locked element is 2
+locked element is 3
+]])
+AT_CHECK([php -d extension=@abs_top_builddir@/src/php/.libs/flom-php-module.so $PHPPATH/case2004.php], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Python Happy path])

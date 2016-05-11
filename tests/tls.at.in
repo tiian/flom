@@ -2,6 +2,7 @@ AT_BANNER([TLS features check])
 
 AT_SETUP([TLS basic setup])
 AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Local socket basic setup])

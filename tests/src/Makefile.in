@@ -36,7 +36,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 noinst_PROGRAMS = case0000$(EXEEXT) case0001$(EXEEXT) \
-	case0002$(EXEEXT) case0003$(EXEEXT) $(am__EXEEXT_1)
+	case0002$(EXEEXT) case0003$(EXEEXT) case0004$(EXEEXT) \
+	$(am__EXEEXT_1)
 subdir = tests/src
 DIST_COMMON = README $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -53,7 +54,7 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @COND_CPPAPI_TRUE@am__EXEEXT_1 = case1000$(EXEEXT) case1001$(EXEEXT) \
-@COND_CPPAPI_TRUE@	case1002$(EXEEXT)
+@COND_CPPAPI_TRUE@	case1002$(EXEEXT) case1004$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_case0000_OBJECTS = case0000.$(OBJEXT)
 case0000_OBJECTS = $(am_case0000_OBJECTS)
@@ -71,6 +72,10 @@ am_case0003_OBJECTS = case0003.$(OBJEXT)
 case0003_OBJECTS = $(am_case0003_OBJECTS)
 case0003_LDADD = $(LDADD)
 case0003_DEPENDENCIES = ../../src/libflom.la
+am_case0004_OBJECTS = case0004.$(OBJEXT)
+case0004_OBJECTS = $(am_case0004_OBJECTS)
+case0004_LDADD = $(LDADD)
+case0004_DEPENDENCIES = ../../src/libflom.la
 am_case1000_OBJECTS = case1000.$(OBJEXT)
 case1000_OBJECTS = $(am_case1000_OBJECTS)
 case1000_LDADD = $(LDADD)
@@ -83,6 +88,10 @@ am_case1002_OBJECTS = case1002.$(OBJEXT)
 case1002_OBJECTS = $(am_case1002_OBJECTS)
 case1002_LDADD = $(LDADD)
 case1002_DEPENDENCIES = ../../src/libflom.la
+am_case1004_OBJECTS = case1004.$(OBJEXT)
+case1004_OBJECTS = $(am_case1004_OBJECTS)
+case1004_LDADD = $(LDADD)
+case1004_DEPENDENCIES = ../../src/libflom.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -106,11 +115,12 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) $(case0002_SOURCES) \
-	$(case0003_SOURCES) $(case1000_SOURCES) $(case1001_SOURCES) \
-	$(case1002_SOURCES)
+	$(case0003_SOURCES) $(case0004_SOURCES) $(case1000_SOURCES) \
+	$(case1001_SOURCES) $(case1002_SOURCES) $(case1004_SOURCES)
 DIST_SOURCES = $(case0000_SOURCES) $(case0001_SOURCES) \
-	$(case0002_SOURCES) $(case0003_SOURCES) $(case1000_SOURCES) \
-	$(case1001_SOURCES) $(case1002_SOURCES)
+	$(case0002_SOURCES) $(case0003_SOURCES) $(case0004_SOURCES) \
+	$(case1000_SOURCES) $(case1001_SOURCES) $(case1002_SOURCES) \
+	$(case1004_SOURCES)
 DATA = $(dist_noinst_DATA) $(noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -332,21 +342,25 @@ case0000_SOURCES = case0000.c
 case0001_SOURCES = case0001.c
 case0002_SOURCES = case0002.c
 case0003_SOURCES = case0003.c
+case0004_SOURCES = case0004.c
 # C++ language case tests
 case1000_SOURCES = case1000.cc
 case1001_SOURCES = case1001.cc
 case1002_SOURCES = case1002.cc
+case1004_SOURCES = case1004.cc
 # Java language case tests
 JAVA_SOURCE_FILES = case4000.java case4001.java case4002.java case4003.java
 # PHP language case tests
-PHP_SOURCE_FILES = case2000.php.in case2001.php.in case2002.php.in
+PHP_SOURCE_FILES = case2000.php.in case2001.php.in case2002.php.in \
+	case2004.php.in
+
 # Python language case tests
 PYTHON_SOURCE_FILES = case3000.py case3001.py case3002.py
 # C++ case tests executables are built conditionally (only if --disable-cppapi 
 # was not specified at configure time)
-@COND_CPPAPI_TRUE@MAYBE_CPPAPI = case1000 case1001 case1002
+@COND_CPPAPI_TRUE@MAYBE_CPPAPI = case1000 case1001 case1002 case1004
 @COND_JAVAAPI_TRUE@MAYBE_JAVAAPI = case4000.class case4001.class case4002.class case4003.class
-@COND_PHPAPI_TRUE@MAYBE_PHPAPI = case2000.php case2001.php case2002.php
+@COND_PHPAPI_TRUE@MAYBE_PHPAPI = case2000.php case2001.php case2002.php case2004.php
 @COND_PYTHONAPI_TRUE@MAYBE_PYTHONAPI = $(PYTHON_SOURCE_FILES)
 dist_noinst_DATA = $(JAVA_SOURCE_FILES) $(PHP_SOURCE_FILES) \
 	$(PYTHON_SOURCE_FILES)
@@ -408,6 +422,9 @@ case0002$(EXEEXT): $(case0002_OBJECTS) $(case0002_DEPENDENCIES)
 case0003$(EXEEXT): $(case0003_OBJECTS) $(case0003_DEPENDENCIES) 
 	@rm -f case0003$(EXEEXT)
 	$(LINK) $(case0003_OBJECTS) $(case0003_LDADD) $(LIBS)
+case0004$(EXEEXT): $(case0004_OBJECTS) $(case0004_DEPENDENCIES) 
+	@rm -f case0004$(EXEEXT)
+	$(LINK) $(case0004_OBJECTS) $(case0004_LDADD) $(LIBS)
 case1000$(EXEEXT): $(case1000_OBJECTS) $(case1000_DEPENDENCIES) 
 	@rm -f case1000$(EXEEXT)
 	$(CXXLINK) $(case1000_OBJECTS) $(case1000_LDADD) $(LIBS)
@@ -417,6 +434,9 @@ case1001$(EXEEXT): $(case1001_OBJECTS) $(case1001_DEPENDENCIES)
 case1002$(EXEEXT): $(case1002_OBJECTS) $(case1002_DEPENDENCIES) 
 	@rm -f case1002$(EXEEXT)
 	$(CXXLINK) $(case1002_OBJECTS) $(case1002_LDADD) $(LIBS)
+case1004$(EXEEXT): $(case1004_OBJECTS) $(case1004_DEPENDENCIES) 
+	@rm -f case1004$(EXEEXT)
+	$(CXXLINK) $(case1004_OBJECTS) $(case1004_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -428,9 +448,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0001.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0002.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0003.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case0004.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case1000.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case1001.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case1002.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/case1004.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -689,6 +711,11 @@ case2001.php:	case2001.php.in ../../config.status
 	$< >$@
 
 case2002.php:	case2002.php.in ../../config.status
+	sed \
+	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+	$< >$@
+
+case2004.php:	case2004.php.in ../../config.status
 	sed \
 	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
 	$< >$@
