@@ -214,6 +214,7 @@ AT_CHECK([case1002 $(iface_name.sh inet6 1)], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([C++ sequence resource])
+AT_CHECK([if test "$CPPAPI" = "no"; then exit 77; fi])
 AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
 AT_DATA([expout],
@@ -334,6 +335,28 @@ HappyPath locked element is blue
 AT_CHECK([java -Djava.library.path=@abs_top_builddir@/src/java/.libs -cp @abs_top_builddir@/src/java/flom.jar:@abs_top_builddir@/tests/src case4002 $(iface_name.sh inet6 1)], [0], [expout], [ignore])
 AT_CLEANUP
 
+AT_SETUP([Java sequence resource])
+AT_CHECK([if test "$JAVAAPI" = "no"; then exit 77; fi])
+AT_CHECK([pkill flom], [0], [ignore], [ignore])
+AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[locked element is 1
+locked element is 2
+locked element is 1
+locked element is 1
+locked element is 2
+]])
+AT_CHECK([java -Djava.library.path=@abs_top_builddir@/src/java/.libs -cp @abs_top_builddir@/src/java/flom.jar:@abs_top_builddir@/tests/src case4004], [0], [expout], [ignore])
+AT_DATA([expout],
+[[locked element is 3
+locked element is 4
+locked element is 2
+locked element is 2
+locked element is 3
+]])
+AT_CHECK([java -Djava.library.path=@abs_top_builddir@/src/java/.libs -cp @abs_top_builddir@/src/java/flom.jar:@abs_top_builddir@/tests/src case4004], [0], [expout], [ignore])
+AT_CLEANUP
+
 AT_SETUP([PHP Happy path])
 AT_CHECK([if test "$PHPAPI" = "no"; then exit 77; fi])
 AT_CHECK([pkill flom], [0], [ignore], [ignore])
@@ -395,6 +418,7 @@ AT_CHECK([php -d extension=@abs_top_builddir@/src/php/.libs/flom-php-module.so $
 AT_CLEANUP
 
 AT_SETUP([PHP sequence resource])
+AT_CHECK([if test "$PHPAPI" = "no"; then exit 77; fi])
 AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
 AT_DATA([expout],
@@ -474,6 +498,28 @@ flom_handle_get_tls_check_peer_id() = 1
 happy_path locked element is 'red'
 ]])
 AT_CHECK([python $PYTHONPATH/case3002.py], [0], [expout], [ignore])
-AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CLEANUP
+
+AT_SETUP([Python sequence resource])
+AT_CHECK([if test "$PYTHONAPI" = "no"; then exit 77; fi])
+AT_CHECK([pkill flom], [0], [ignore], [ignore])
+AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[locked element is 1
+locked element is 2
+locked element is 1
+locked element is 1
+locked element is 2
+]])
+AT_CHECK([python $PYTHONPATH/case3004.py], [134], [expout], [ignore])
+AT_DATA([expout],
+[[locked element is 3
+locked element is 4
+locked element is 2
+locked element is 2
+locked element is 3
+]])
+AT_CHECK([python $PYTHONPATH/case3004.py], [134], [expout], [ignore])
+AT_CLEANUP
+
 

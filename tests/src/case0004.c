@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
     /* the resource associated to my_handle1 is intentionally not unlocked
      * to check the behavior in case of abort */
 
-    /* Second step: non transactional resource */
+    /* Second step: transactional resource */
     /* create a new handle */
     if (NULL == (my_handle2 = flom_handle_new())) {
         fprintf(stderr, "flom_handle_init() returned %p\n", my_handle2);
@@ -96,8 +96,8 @@ int main(int argc, char *argv[]) {
         printf("locked element is %s\n",
                flom_handle_get_locked_element(my_handle2));
     } 
-    /* lock release & rollback: the resource is not transactional, the
-     * function must return a warning condition */
+    /* lock release & rollback: the resource is transactional, the
+     * function must NOT return a warning condition */
     if (FLOM_RC_OK != (ret_cod = flom_handle_unlock_rollback(my_handle2))) {
         fprintf(stderr, "flom_handle_unlock() returned %d, '%s'\n",
                 ret_cod, flom_strerror(ret_cod));

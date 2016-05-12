@@ -1,19 +1,16 @@
 Road map:
 
-add test cases (Java, Python) for flom_handle_unlock_rollback; check warning
-	FLOM_RC_RESOURCE_IS_NOT_TRANSACTIONAL
+unique timestamps (no two equal timestamps supplied): use a date like expression
+to describe the sequence; for example:
+%I%M%S
+produces: 213105 213106 213209 ... but not: 213105 213105 even if two clients
+ask for a unique timestamp during the same second (the second client will wait)
 
 fix PHP for Ubuntu 16.04, see https://github.com/tiian/flom/issues/5
 
 implement a loop for connect/bind if bind returns an error: this should help
 to reduce the race condition between a closing daemon and a starting client.
 See this thread: https://github.com/tiian/flom/issues/3
-
-unique timestamps (no two equal timestamps supplied): use a date like expression
-to describe the sequence; for example:
-%I%M%S
-produces: 213105 213106 213209 ... but not: 213105 213105 even if two clients
-ask for a unique timestamp during the same second (the second client will wait)
 
 "object" resources with a state, a memory area, managed by FLoM to transform it in a "state manager" other than a "lock manager"; for flom client, the object will be dumped/restored to/from file
 

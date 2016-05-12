@@ -12,19 +12,21 @@ case1001_SOURCES = case1001.cc
 case1002_SOURCES = case1002.cc
 case1004_SOURCES = case1004.cc
 # Java language case tests
-JAVA_SOURCE_FILES = case4000.java case4001.java case4002.java case4003.java
+JAVA_SOURCE_FILES = case4000.java case4001.java case4002.java case4003.java \
+	case4004.java
 # PHP language case tests
 PHP_SOURCE_FILES = case2000.php.in case2001.php.in case2002.php.in \
 	case2004.php.in
 # Python language case tests
-PYTHON_SOURCE_FILES = case3000.py case3001.py case3002.py
+PYTHON_SOURCE_FILES = case3000.py case3001.py case3002.py case3004.py
 # C++ case tests executables are built conditionally (only if --disable-cppapi 
 # was not specified at configure time)
 if COND_CPPAPI
   MAYBE_CPPAPI=case1000 case1001 case1002 case1004
 endif
 if COND_JAVAAPI
-  MAYBE_JAVAAPI=case4000.class case4001.class case4002.class case4003.class
+  MAYBE_JAVAAPI=case4000.class case4001.class case4002.class case4003.class \
+	case4004.class
 endif
 if COND_PHPAPI
   MAYBE_PHPAPI=case2000.php case2001.php case2002.php case2004.php
@@ -69,4 +71,7 @@ case4002.class:	case4002.java
 	javac -cp $(abs_top_builddir)/src/java/flom.jar $<
 
 case4003.class:	case4003.java
+	javac -cp $(abs_top_builddir)/src/java/flom.jar $<
+
+case4004.class:	case4004.java
 	javac -cp $(abs_top_builddir)/src/java/flom.jar $<

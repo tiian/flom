@@ -24,14 +24,6 @@ using namespace flom;
 
 
 
-/*
- * Happy path usage with a dynamic handle
- */
-void dynamicHandleHappyPath(void) {
-}
-
-
-
 int main(int argc, char *argv[]) {
     int retCod;
     FlomHandle *myHandle1 = NULL; /* used for non transactional resource */
@@ -77,7 +69,7 @@ int main(int argc, char *argv[]) {
     /* the resource associated to myHandle1 is intentionally not unlocked
      * to check the behavior in case of abort */
 
-    /* Second step: non transactional resource */
+    /* Second step: transactional resource */
     /* create a new handle */
     if (NULL == (myHandle2 = new FlomHandle())) {
         cerr << "FlomHandle() returned " << myHandle2 << endl;
@@ -99,8 +91,8 @@ int main(int argc, char *argv[]) {
     } else {
         cout << "locked element is " << myHandle2->getLockedElement() << endl;
     } 
-    /* lock release & rollback: the resource is not transactional, the
-     * function must return a warning condition */
+    /* lock release & rollback: the resource is transactional, the
+     * function must NOT return a warning condition */
     if  (FLOM_RC_OK != (retCod = myHandle2->unlockRollback())) {
         cerr << "FlomHandle.unlock() returned " << retCod
              << ", '" << flom_strerror(retCod) << "'" << endl;
