@@ -129,6 +129,11 @@
 #define FLOM_TRACE_MOD_RESOURCE_SEQUENCE  0x00004000
 
 /**
+ * trace module for timestamp resource functions
+ */
+#define FLOM_TRACE_MOD_RESOURCE_TIMESTAMP 0x00008000
+
+/**
  * trace module for daemon management functions
  */
 #define FLOM_TRACE_MOD_DAEMON_MNGMNT      0x00040000

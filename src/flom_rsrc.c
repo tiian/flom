@@ -37,6 +37,7 @@
 #include "flom_resource_sequence.h"
 #include "flom_resource_set.h"
 #include "flom_resource_simple.h"
+#include "flom_resource_timestamp.h"
 #include "flom_trace.h"
 
 
@@ -73,7 +74,8 @@ int global_res_name_preg_init()
             "^([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$",
             "^([[:alpha:]][[:alpha:][:digit:]]*)(\\%s[[:alpha:]][[:alpha:][:digit:]]*)+$",
             "^\\%s[^\\%s]+(\\%s[^\\%s]+)*$",
-            "^_[sS]_([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$"
+            "^_[sS]_([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$",
+            "^_[t]_([%[:alpha:]][%[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$"
         };
 
         memset(global_res_name_preg, 0, sizeof(global_res_name_preg));
@@ -262,6 +264,73 @@ int flom_rsrc_get_number(const gchar *resource_name, flom_rsrc_type_t type,
 
 
 
+int flom_rsrc_get_infix(const gchar *resource_name, flom_rsrc_type_t type,
+                        gchar **infix)
+{
+    enum Exception { REGEXEC_ERROR
+                     , INVALID_RESOURCE_NAME
+                     , G_STRDUP_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_rsrc_get_infix\n"));
+    *infix = NULL;
+    TRY {
+        int reg_error, i;
+        char reg_errbuf[200];
+        regmatch_t regmatch[3];
+        for (i=0; i<sizeof(regmatch)/sizeof(regmatch_t); ++i)
+            regmatch[i].rm_so = regmatch[i].rm_eo = -1;
+        reg_error = regexec(global_res_name_preg+type,
+                            resource_name, sizeof(regmatch)/sizeof(regmatch_t),
+                            regmatch, 0);
+        regerror(reg_error, global_res_name_preg+type,
+                 reg_errbuf, sizeof(reg_errbuf));
+        FLOM_TRACE(("flom_rsrc_get_infix: regexec returned "
+                    "%d ('%s') for string '%s'\n",
+                    reg_error, reg_errbuf, resource_name));
+        if (0 != reg_error)
+            THROW(REGEXEC_ERROR);
+        /* number must be in position 1 */
+        if (-1 == regmatch[1].rm_so) {
+            THROW(INVALID_RESOURCE_NAME);
+        } else {
+            char buffer[1000];
+            size_t delta = regmatch[1].rm_eo - regmatch[1].rm_so;
+            if (delta >= sizeof(buffer))
+                delta = sizeof(buffer)-1;
+            memcpy(buffer, resource_name+regmatch[1].rm_so, delta);
+            buffer[delta] = '\0';
+            /* value is always interpreted using decimal base */
+            if (NULL == (*infix = g_strdup(buffer)))
+                THROW(G_STRDUP_ERROR);
+            FLOM_TRACE(("flom_rsrc_get_infix: regmatch[1]='%s', "
+                        "infix='%s'\n", buffer, *infix));
+        }
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case REGEXEC_ERROR:
+                ret_cod = FLOM_RC_REGEXEC_ERROR;
+                break;
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_rsrc_get_infix/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int flom_rsrc_get_elements(const gchar *resource_name, GArray *elements)
 {
     enum Exception { G_STRSPLIT_ERROR
@@ -321,12 +390,11 @@ int flom_rsrc_get_elements(const gchar *resource_name, GArray *elements)
 struct flom_rsrc_conn_lock_s *flom_rsrc_conn_lock_new(void)
 {
     struct flom_rsrc_conn_lock_s *cl;
-    if (NULL == (cl = g_try_malloc(sizeof(struct flom_rsrc_conn_lock_s)))) {
+    if (NULL == (cl = g_try_malloc0(sizeof(struct flom_rsrc_conn_lock_s)))) {
         FLOM_TRACE(("flom_rsrc_conn_lock_new: unable to allocate a struct "
                     "of type 'flom_rsrc_conn_lock_s' with g_try_malloc\n"));
         return NULL;
     }
-    memset(cl, 0, sizeof(struct flom_rsrc_conn_lock_s));
     return cl;
 }
 
@@ -417,6 +485,13 @@ int flom_resource_init(flom_resource_t *resource,
                 resource->inmsg = flom_resource_sequence_inmsg;
                 resource->clean = flom_resource_sequence_clean;
                 resource->free = flom_resource_sequence_free;
+                resource->compare_name = flom_resource_compare_name;
+                break;
+            case FLOM_RSRC_TYPE_TIMESTAMP:
+                resource->init = flom_resource_timestamp_init;
+                resource->inmsg = flom_resource_timestamp_inmsg;
+                resource->clean = flom_resource_timestamp_clean;
+                resource->free = flom_resource_timestamp_free;
                 resource->compare_name = flom_resource_compare_name;
                 break;
             default:

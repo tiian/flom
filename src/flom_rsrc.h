@@ -83,6 +83,10 @@ typedef enum flom_rsrc_type_e {
      */
     FLOM_RSRC_TYPE_SEQUENCE,
     /**
+     * Timestamp resource type
+     */
+    FLOM_RSRC_TYPE_TIMESTAMP,
+    /**
      * Number of managed resource types
      */
     FLOM_RSRC_TYPE_N
@@ -111,6 +115,10 @@ struct flom_rsrc_conn_lock_s {
          * Sequence value assigned to the lock holder (sequence resources)
          */
         guint                       sequence_value;
+        /**
+         * Timestamp value assigned to the lock holder (timestamp resources)
+         */
+        guint                       timestamp_value;
     } info;
     /**
      * Resource name is necessary of hierarchical resources only because
@@ -278,6 +286,43 @@ struct flom_rsrc_data_sequence_s {
 
 
 
+/**
+ * Resource data for type "timestamp" @ref FLOM_RSRC_TYPE_TIMESTAMP
+ */
+struct flom_rsrc_data_timestamp_s {
+    /**
+     * Format for strftime function
+     */
+    gchar                  *format;
+    /**
+     * Total quantity for the resource
+     */
+    gint                    total_quantity;
+    /**
+     * Locked quantity for the resource
+     */
+    gint                    locked_quantity;
+    /**
+     * Next value that must be used for the timestamp
+     */
+    guint                   next_value;
+    /**
+     * Timestamp values that has been rolled back and must be re-used before
+     * producing new ones
+     */
+    GQueue                 *rolled_back;
+    /**
+     * List of connections with an acquired lock
+     */
+    GSList                 *holders;
+    /**
+     * List of connections waiting for a lock
+     */
+    GQueue                 *waitings;
+};
+
+
+
 /* necessary to declare flom_resource_t used inside the struct ("class")
    definition */
 struct flom_resource_s;
@@ -306,6 +351,7 @@ struct flom_resource_s {
         struct flom_rsrc_data_set_s          set;
         struct flom_rsrc_data_hier_s         hier;
         struct flom_rsrc_data_sequence_s     sequence;
+        struct flom_rsrc_data_timestamp_s    timestamp;
     } data;
     /**
      * Method called to initialize a new resource
@@ -392,6 +438,19 @@ extern "C" {
      */
     int flom_rsrc_get_number(const gchar *resource_name, flom_rsrc_type_t type,
                              gint *number);
+
+
+
+    /**
+     * Retrieve the infix part of a resource name
+     * @param resource_name IN resource name
+     * @param type IN resource type
+     * @param infix OUT a NULL value in case of error, or an allocated string
+     *        that MUST be released with g_free
+     * @return a reason code
+     */
+    int flom_rsrc_get_infix(const gchar *resource_name, flom_rsrc_type_t tpye,
+                            gchar **infix);
 
 
 

@@ -641,6 +641,7 @@ int flom_msg_serialize_lock_8(const struct flom_msg_s *msg,
                                       msg->body.lock_8.resource.lifespan);
                 break;
             case FLOM_RSRC_TYPE_SEQUENCE:
+            case FLOM_RSRC_TYPE_TIMESTAMP:
                 used_chars = snprintf(buffer + *offset, *free_chars,
                                       "<%s %s=\"%s\" %s=\"%d\" %s=\"%d\" "
                                       "%s=\"%d\"/>",
