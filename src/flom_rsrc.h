@@ -307,11 +307,6 @@ struct flom_rsrc_data_timestamp_s {
      */
     guint                   next_value;
     /**
-     * Timestamp values that has been rolled back and must be re-used before
-     * producing new ones
-     */
-    GQueue                 *rolled_back;
-    /**
      * List of connections with an acquired lock
      */
     GSList                 *holders;

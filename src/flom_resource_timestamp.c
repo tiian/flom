@@ -23,6 +23,12 @@
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#ifdef HAVE_TIME_H
+# include <time.h>
+#endif
 
 
 
@@ -59,24 +65,58 @@ int flom_resource_timestamp_can_lock(flom_resource_t *resource)
 
 
 
-guint flom_resource_timestamp_get(flom_resource_t *resource)
+int flom_resource_timestamp_get(flom_resource_t *resource,
+                                gchar *timestamp, size_t max)
 {
-    gpointer pop;
-    guint ret_val;
+    enum Exception { GETTIMEOFDAY_ERROR
+                     , LOCALTIME_R_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
     FLOM_TRACE(("flom_resource_timestamp_get\n"));
-    /* are there rolled back values? */
-    if ((NULL == resource->data.timestamp.rolled_back) ||
-        (NULL == (pop = g_queue_pop_head(
-                      resource->data.timestamp.rolled_back)))) {
-        ret_val = resource->data.timestamp.next_value++;
-        if (!ret_val) /* value 0 can not be stored in the g_queue */
-            ret_val = resource->data.timestamp.next_value++;
-    } else
-        ret_val = GPOINTER_TO_UINT(pop);
-    FLOM_TRACE(("flom_resource_timestamp_get: %u (rolled_back=%d, "
-                "pop=%p)\n", ret_val, resource->data.timestamp.rolled_back,
-                pop));
-    return ret_val;
+    TRY {
+        struct timeval tv;
+        struct tm broken_time;
+        
+        /* retrieve time from the system */
+        if (0 != gettimeofday(&tv, NULL))
+            THROW(GETTIMEOFDAY_ERROR);
+
+        /* look for second fraction formats (it's not provided by strftime)
+         * %f : tenths of a second
+         * %ff : hundredths of a second
+         * %fff : milliseconds
+         * %ffff : tenths of a millisecond
+         * %fffff : hundredths of a millisecond (tens of microseconds)
+         * %ffffff : microseconds
+         @@@ 
+         */
+        
+        /* break & serialize time using the format required by the user */
+        if (NULL == localtime_r(&tv.tv_sec, &broken_time))
+            THROW(LOCALTIME_R_ERROR);
+        strftime(timestamp, max, resource->data.timestamp.format, &broken_time);
+        FLOM_TRACE(("flom_resource_timestamp_get: '%s'\n", timestamp));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case GETTIMEOFDAY_ERROR:
+                ret_cod = FLOM_RC_GETTIMEOFDAY_ERROR;
+                break;
+            case LOCALTIME_R_ERROR:
+                ret_cod = FLOM_RC_LOCALTIME_R_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_resource_timestamp_get/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 
@@ -109,12 +149,6 @@ int flom_resource_timestamp_init(flom_resource_t *resource,
                     THROW(RSRC_GET_NUMBER_ERROR);
         resource->data.timestamp.locked_quantity = 0;
         resource->data.timestamp.next_value = 1;
-        /* is this timestamp transactional? */
-        if (flom_rsrc_get_transactional(resource->name)) {
-            if (NULL == (resource->data.timestamp.rolled_back = g_queue_new()))
-                THROW(G_QUEUE_NEW_ERROR1);
-        } else
-            resource->data.timestamp.rolled_back = NULL;
         resource->data.timestamp.holders = NULL;
         if (NULL == (resource->data.timestamp.waitings = g_queue_new()))
             THROW(G_QUEUE_NEW_ERROR2);
@@ -169,7 +203,7 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
         int can_lock = TRUE;
         int can_wait = TRUE;
         int impossible_lock = FALSE;
-        gchar element[30]; /* it must contain a guint */
+        gchar element[1000]; /* it must contain a guint */
         GSList *p;
         struct flom_rsrc_conn_lock_s *cl = NULL;
         
@@ -191,9 +225,8 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
                     if (NULL == (cl = flom_rsrc_conn_lock_new()))
                         THROW(G_TRY_MALLOC_ERROR1);
                     cl->info.timestamp_value =
-                        flom_resource_timestamp_get(resource);
-                    snprintf(element, sizeof(element), "%u",
-                             cl->info.timestamp_value);
+                        flom_resource_timestamp_get(
+                            resource, element, sizeof(element));
                     cl->rollback = TRUE;
                     cl->conn = conn;
                     resource->data.timestamp.holders = g_slist_prepend(
@@ -344,12 +377,6 @@ int flom_resource_timestamp_clean(flom_resource_t *resource,
                         "a%s lock with timestamp %u, removing it...\n",
                         cl->rollback ? "n uncommitted" : " commited",
                         cl->info.timestamp_value));
-            if ((NULL != resource->data.timestamp.rolled_back) &&
-                cl->rollback) {
-                /* put the rolled back value in the queue */
-                g_queue_push_tail(resource->data.timestamp.rolled_back,
-                                  GUINT_TO_POINTER(cl->info.timestamp_value));
-            } /* if (cl->rollback) */
             FLOM_TRACE(("flom_resource_timestamp_clean: cl=%p\n", cl));
             resource->data.timestamp.holders = g_slist_remove(
                 resource->data.timestamp.holders, cl);
@@ -439,12 +466,6 @@ void flom_resource_timestamp_free(flom_resource_t *resource)
         flom_rsrc_conn_lock_delete(cl);
     }
     g_queue_free(resource->data.timestamp.waitings);
-    /* clean-up rolled back queue... */
-    if (NULL != resource->data.timestamp.rolled_back) {
-        FLOM_TRACE(("flom_resource_timestamp_free: cleaning-up rolled back "
-                    "queue...\n"));
-        g_queue_free(resource->data.timestamp.rolled_back);
-    }
     
     resource->data.timestamp.waitings = NULL;
     resource->data.timestamp.total_quantity =
@@ -474,7 +495,7 @@ int flom_resource_timestamp_waitings(flom_resource_t *resource)
         struct flom_msg_s msg;
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
         size_t to_send;
-        gchar element[30]; /* it must contain a guint */
+        gchar element[1000]; /* it must contain a guint */
         
         /* check if there is any connection waiting for a lock */
         do {
@@ -493,9 +514,8 @@ int flom_resource_timestamp_waitings(flom_resource_t *resource)
                 FLOM_TRACE(("flom_resource_timestamp_waitings: asked lock "
                             "can be assigned to connection %p\n",
                             cl->conn));
-                cl->info.timestamp_value = flom_resource_timestamp_get(resource);
-                snprintf(element, sizeof(element), "%u",
-                         cl->info.timestamp_value);
+                cl->info.timestamp_value = flom_resource_timestamp_get(
+                    resource, element, sizeof(element));
                 cl->rollback = TRUE;
                 /* send a message to the client that's waiting the lock */
                 flom_msg_init(&msg);

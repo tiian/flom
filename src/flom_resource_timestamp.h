@@ -56,11 +56,15 @@ extern "C" {
     /**
      * Return the next timestamp value
      * @param resource IN/OUT reference to resource object
-     * @return the next value from the timestamp
+     * @param timestamp OUT the buffer necessary to store the timestamp
+     * @param max IN size of the buffer as required by function strftime
+     * @return a reason code
      */
-    guint flom_resource_timestamp_get(flom_resource_t *resource);
+    int flom_resource_timestamp_get(flom_resource_t *resource,
+                                    gchar *timestamp, size_t max);
 
-        
+
+    
     /**
      * Initialize a new resource of type timestamp
      * @param resource IN reference to resource object

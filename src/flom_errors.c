@@ -149,10 +149,14 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'getsockname' function returned an error condition";
         case FLOM_RC_GETSOCKOPT_ERROR:
             return "ERROR: 'getsockopt' function returned an error condition";
+        case FLOM_RC_GETTIMEOFDAY_ERROR:
+            return "ERROR: 'gettimeofday' function returned an error condition";
         case FLOM_RC_INET_NTOP_ERROR:
             return "ERROR: 'inet_ntop' function returned an error condition";
         case FLOM_RC_LISTEN_ERROR:
             return "ERROR: 'listen' function returned an error condition";
+        case FLOM_RC_LOCALTIME_R_ERROR:
+            return "ERROR: 'localtime_r' function returned an error condition";
         case FLOM_RC_MALLOC_ERROR:
             return "ERROR: 'malloc'/'g_malloc' function returned an error "
                 "condition";
