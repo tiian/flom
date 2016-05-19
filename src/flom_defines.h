@@ -105,6 +105,22 @@
 
 
 
+/**
+ * Format must be used in *printf family function to print a "uint64_t"
+ * value
+ */
+#if (SIZEOF_UINT64_T == SIZEOF_INT)
+# define UINT64_T_FORMAT "%u"
+#elif SIZEOF_UINT64_T == SIZEOF_LONG_INT
+# define UINT64_T_FORMAT "%lu"
+#elif SIZEOF_UINT64_T == SIZEOF_LONG_LONG_INT
+# define UINT64_T_FORMAT "%llu"
+#else
+# error Unable to determine sizeof(uint64_t)
+#endif
+
+
+
 #ifdef HAVE_PID_T
 # if SIZEOF_PID_T == SIZEOF_INT
 #  define PID_T_FORMAT "%d"
@@ -257,39 +273,24 @@
 
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-
-
 #ifndef HAVE_UINT8_T
-      /** 8 bit unsigned int */
-      typedef unsigned char uint8_t;
+# error "uint8_t is a necessary type"
 #endif /* HAVE_UINT8_T */
 #ifndef HAVE_UINT32_T
-# if (SIZEOF_INT == 4)
-      /** 32 bit unsigned int */
-      typedef unsigned int uint32_t;
-# else
-#  error "Please specify a 32 bit wide unsigned int type"
-# endif /* if (SIZEOF_INT == 4) */
+# error "uint32_t is a necessary type"
 #endif /* HAVE_UINT32_T */
+#ifndef HAVE_UINT64_T
+# error "uint64_t is a necessary type"
+#endif /* HAVE_UINT64_T */
 
 
       
-    /**
-     * A byte is the fundamental I/O unit
-     */
-    typedef uint8_t byte_t;
+/**
+ * A byte is the fundamental I/O unit
+ */
+typedef uint8_t byte_t;
     
   
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-
 
 #endif /* FLOM_DEFINES_H */
 

@@ -364,6 +364,7 @@ AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_TYPES(pid_t)
 AC_CHECK_TYPES(uint8_t)
 AC_CHECK_TYPES(uint32_t)
+AC_CHECK_TYPES(uint64_t)
 AC_CHECK_TYPES(uintptr_t)
 AC_CHECK_TYPES([struct sockaddr_un], [], [], [[#include <sys/un.h>]])
 

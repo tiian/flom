@@ -51,6 +51,10 @@
 
 
 
+const gchar MICRO_FORMAT[] = "#ffffff";
+
+
+
 int flom_resource_timestamp_can_lock(flom_resource_t *resource)
 {    
     FLOM_TRACE(("flom_resource_timestamp_can_lock: "
@@ -69,33 +73,63 @@ int flom_resource_timestamp_get(flom_resource_t *resource,
                                 gchar *timestamp, size_t max)
 {
     enum Exception { GETTIMEOFDAY_ERROR
+                     , G_STRDUP_ERROR
                      , LOCALTIME_R_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    gchar *tmp_format = NULL;
 
     FLOM_TRACE(("flom_resource_timestamp_get\n"));
     TRY {
         struct timeval tv;
         struct tm broken_time;
-        
+        gchar micro_format[sizeof(MICRO_FORMAT)];
+        gchar micro_seconds[7];
+        size_t digits;
+
+        strcpy(micro_format, MICRO_FORMAT);
         /* retrieve time from the system */
         if (0 != gettimeofday(&tv, NULL))
             THROW(GETTIMEOFDAY_ERROR);
-
+        resource->data.timestamp.last_timestamp = tv;
+        /* serialize microseconds to a string */
+        snprintf(micro_seconds, sizeof(micro_seconds), "%06d",
+                 (int)tv.tv_usec);
+        /* create a temporary format and substitute fraction of second
+         * formats with the current value: see below loop */
+        if (NULL == (tmp_format = g_strdup(resource->data.timestamp.format)))
+            THROW(G_STRDUP_ERROR);
+        
         /* look for second fraction formats (it's not provided by strftime)
-         * %f : tenths of a second
-         * %ff : hundredths of a second
-         * %fff : milliseconds
-         * %ffff : tenths of a millisecond
-         * %fffff : hundredths of a millisecond (tens of microseconds)
-         * %ffffff : microseconds
-         @@@ 
+         * #f : tenths of a second
+         * #ff : hundredths of a second
+         * #fff : milliseconds
+         * #ffff : tenths of a millisecond
+         * #fffff : hundredths of a millisecond (tens of microseconds)
+         * #ffffff : microseconds
          */
+        while (0 < (digits = strlen(micro_format)-1)) {
+            gchar *next_fraction = tmp_format;
+            /* @@@ remove me before or later
+            FLOM_TRACE(("flom_resource_timestamp_get: digits=%u, "
+                        "micro_format='%s', next_fraction='%s'\n",
+                        digits, micro_format, next_fraction));
+            */
+            /* search the fraction format inside the whole format */
+            while (NULL != (next_fraction = strstr(
+                                next_fraction, micro_format))) {
+                *next_fraction = '.';
+                strncpy(++next_fraction, micro_seconds, digits);
+                next_fraction += digits;
+            } /* while (NULL != (next_fraction = strstr( */
+            /* remove one digit */
+            micro_format[digits] = '\0';
+        } /* while (strlen(micro_format) > 1) */
         
         /* break & serialize time using the format required by the user */
         if (NULL == localtime_r(&tv.tv_sec, &broken_time))
             THROW(LOCALTIME_R_ERROR);
-        strftime(timestamp, max, resource->data.timestamp.format, &broken_time);
+        strftime(timestamp, max, tmp_format, &broken_time);
         FLOM_TRACE(("flom_resource_timestamp_get: '%s'\n", timestamp));
         
         THROW(NONE);
@@ -103,6 +137,9 @@ int flom_resource_timestamp_get(flom_resource_t *resource,
         switch (excp) {
             case GETTIMEOFDAY_ERROR:
                 ret_cod = FLOM_RC_GETTIMEOFDAY_ERROR;
+                break;
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
                 break;
             case LOCALTIME_R_ERROR:
                 ret_cod = FLOM_RC_LOCALTIME_R_ERROR;
@@ -114,6 +151,8 @@ int flom_resource_timestamp_get(flom_resource_t *resource,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    if (NULL != tmp_format)
+        g_free(tmp_format);
     FLOM_TRACE(("flom_resource_timestamp_get/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -122,7 +161,7 @@ int flom_resource_timestamp_get(flom_resource_t *resource,
 
 
 int flom_resource_timestamp_init(flom_resource_t *resource,
-                                const gchar *name)
+                                 const gchar *name)
 {
     enum Exception { G_STRDUP_ERROR
                      , RSRC_GET_INFIX_ERROR
@@ -134,6 +173,12 @@ int flom_resource_timestamp_init(flom_resource_t *resource,
     
     FLOM_TRACE(("flom_resource_timestamp_init\n"));
     TRY {
+        uint64_t microsec_resolution = 0;
+        uint64_t microsec = 1;
+        gchar micro_format[sizeof(MICRO_FORMAT)];
+        size_t digits;
+        
+        strcpy(micro_format, MICRO_FORMAT);
         if (NULL == (resource->name = g_strdup(name)))
             THROW(G_STRDUP_ERROR);
         FLOM_TRACE(("flom_resource_timestamp_init: initialized resource "
@@ -148,10 +193,34 @@ int flom_resource_timestamp_init(flom_resource_t *resource,
                                &(resource->data.timestamp.total_quantity))))
                     THROW(RSRC_GET_NUMBER_ERROR);
         resource->data.timestamp.locked_quantity = 0;
-        resource->data.timestamp.next_value = 1;
+        memset(&(resource->data.timestamp.last_timestamp), 0,
+               sizeof(struct timeval));
         resource->data.timestamp.holders = NULL;
         if (NULL == (resource->data.timestamp.waitings = g_queue_new()))
             THROW(G_QUEUE_NEW_ERROR2);
+        /* minimum interval of time from the format */
+        /* fraction of a second formats */
+        while (0 < (digits = strlen(micro_format)-1)) {
+            if (NULL != strstr(resource->data.timestamp.format,
+                               micro_format)) {
+                microsec_resolution = microsec;
+                break;
+            }
+            microsec *= 10;
+            micro_format[digits] = '\0';
+        } /* while (0 < (digits = strlen(micro_format)-1)) */
+        if (0 == microsec_resolution) {
+            /* one day */
+            if (NULL != strstr(resource->data.timestamp.format, "%a") ||
+                NULL != strstr(resource->data.timestamp.format, "%A")
+                )
+                microsec_resolution =
+                    (uint64_t)1000000*(uint64_t)3600*(uint64_t)24;
+            /* @@@ */
+        } /* if (0 == microsec_resolution) */
+
+        FLOM_TRACE(("flom_resource_timestamp_init: microsec_resolution="
+                    UINT64_T_FORMAT " micro seconds\n", microsec_resolution));
         
         THROW(NONE);
     } CATCH {

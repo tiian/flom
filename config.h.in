@@ -153,6 +153,9 @@
 /* Define to 1 if the system has the type `uint32_t'. */
 #undef HAVE_UINT32_T
 
+/* Define to 1 if the system has the type `uint64_t'. */
+#undef HAVE_UINT64_T
+
 /* Define to 1 if the system has the type `uint8_t'. */
 #undef HAVE_UINT8_T
 

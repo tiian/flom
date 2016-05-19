@@ -303,9 +303,9 @@ struct flom_rsrc_data_timestamp_s {
      */
     gint                    locked_quantity;
     /**
-     * Next value that must be used for the timestamp
+     * Last supplied timestamp
      */
-    guint                   next_value;
+    struct timeval          last_timestamp;
     /**
      * List of connections with an acquired lock
      */

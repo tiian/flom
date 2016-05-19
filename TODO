@@ -1,5 +1,7 @@
 Road map:
 
+go on with flom_resource_timestamp_init formats...
+
 unique timestamps (no two equal timestamps supplied): use a date like expression
 to describe the sequence; for example:
 %I%M%S

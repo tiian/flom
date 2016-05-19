@@ -75,7 +75,7 @@ int global_res_name_preg_init()
             "^([[:alpha:]][[:alpha:][:digit:]]*)(\\%s[[:alpha:]][[:alpha:][:digit:]]*)+$",
             "^\\%s[^\\%s]+(\\%s[^\\%s]+)*$",
             "^_[sS]_([[:alpha:]][[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$",
-            "^_[t]_([%[:alpha:]][%\\.\\:[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$"
+            "^_[t]_([%#[:alpha:]][%#\\.\\:[:alpha:][:digit:]]*)\\[([[:digit:]]+)\\]$"
         };
 
         memset(global_res_name_preg, 0, sizeof(global_res_name_preg));

@@ -17500,6 +17500,16 @@ _ACEOF
 
 fi
 
+ac_fn_c_check_type "$LINENO" "uint64_t" "ac_cv_type_uint64_t" "$ac_includes_default"
+if test "x$ac_cv_type_uint64_t" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_UINT64_T 1
+_ACEOF
+
+
+fi
+
 ac_fn_c_check_type "$LINENO" "uintptr_t" "ac_cv_type_uintptr_t" "$ac_includes_default"
 if test "x$ac_cv_type_uintptr_t" = x""yes; then :
 
