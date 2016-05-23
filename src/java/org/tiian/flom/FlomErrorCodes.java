@@ -47,6 +47,8 @@ public class FlomErrorCodes {
 	public final static int FLOM_RC_NO_CERTIFICATE = -22;
 	public final static int FLOM_RC_UNIQUE_ID_DOES_NOT_MATCH = -23;
 	public final static int FLOM_RC_NO_TLS_CONNECTION = -24;
+	public final static int FLOM_RC_INVALID_TIMESTAMP_FORMAT = -25;
+	public final static int FLOM_RC_RESOURCE_INIT_ERROR = -26;
 	public final static int FLOM_RC_ACCEPT_ERROR = -100;
 	public final static int FLOM_RC_BIND_ERROR = -101;
 	public final static int FLOM_RC_CHDIR_ERROR = -102;

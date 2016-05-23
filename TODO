@@ -8,6 +8,13 @@ to describe the sequence; for example:
 produces: 213105 213106 213209 ... but not: 213105 213105 even if two clients
 ask for a unique timestamp during the same second (the second client will wait)
 
+case tests for timestamp resources:
+- format invalid
+- format that does not change at least once per hour
+
+document supported format specifiers: flom_resource_timestamp_init
+
+
 fix PHP for Ubuntu 16.04, see https://github.com/tiian/flom/issues/5
 
 implement a loop for connect/bind if bind returns an error: this should help

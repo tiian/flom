@@ -241,6 +241,14 @@
  * The connection is not a TLS connection, but a TLS operation was requested
  */
 #define FLOM_RC_NO_TLS_CONNECTION                    -24
+/**
+ * The format for a timestamp resource is not valid
+ */
+#define FLOM_RC_INVALID_TIMESTAMP_FORMAT             -25
+/**
+ * The resource can't be initialized
+ */
+#define FLOM_RC_RESOURCE_INIT_ERROR                  -26
 
 
 

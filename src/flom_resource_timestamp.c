@@ -168,6 +168,7 @@ int flom_resource_timestamp_init(flom_resource_t *resource,
                      , RSRC_GET_NUMBER_ERROR
                      , G_QUEUE_NEW_ERROR1
                      , G_QUEUE_NEW_ERROR2
+                     , INVALID_TIMESTAMP_FORMAT
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
@@ -210,17 +211,33 @@ int flom_resource_timestamp_init(flom_resource_t *resource,
             micro_format[digits] = '\0';
         } /* while (0 < (digits = strlen(micro_format)-1)) */
         if (0 == microsec_resolution) {
-            /* one day */
-            if (NULL != strstr(resource->data.timestamp.format, "%a") ||
-                NULL != strstr(resource->data.timestamp.format, "%A")
-                )
-                microsec_resolution =
-                    (uint64_t)1000000*(uint64_t)3600*(uint64_t)24;
-            /* @@@ */
+            if (NULL != strstr(resource->data.timestamp.format, "%c") ||
+                NULL != strstr(resource->data.timestamp.format, "%r") ||
+                NULL != strstr(resource->data.timestamp.format, "%s") ||
+                NULL != strstr(resource->data.timestamp.format, "%S") ||
+                NULL != strstr(resource->data.timestamp.format, "%T") ||
+                NULL != strstr(resource->data.timestamp.format, "%X")) {
+                /* the above specifiers change once per second */
+                microsec_resolution = (uint64_t)1000000;
+            } else if (NULL != strstr(resource->data.timestamp.format, "%M") ||
+                       NULL != strstr(resource->data.timestamp.format, "%R")) {
+                /* the above specifiers change once per minute */
+                microsec_resolution = (uint64_t)1000000*(uint64_t)60;
+            } else if (NULL != strstr(resource->data.timestamp.format, "%H") ||
+                       NULL != strstr(resource->data.timestamp.format, "%I")) {
+                /* the above specifiers change once per hour */
+                microsec_resolution = (uint64_t)1000000*(uint64_t)3600;
+            }
         } /* if (0 == microsec_resolution) */
-
         FLOM_TRACE(("flom_resource_timestamp_init: microsec_resolution="
                     UINT64_T_FORMAT " micro seconds\n", microsec_resolution));
+        /* check that at least one specifier has been found */
+        if (0 == microsec_resolution) {
+            FLOM_TRACE(("flom_resource_timestamp_init: format '%s' does not "
+                        "contain a specifier that changes at least once per "
+                        "hour\n", resource->data.timestamp.format));
+            THROW(INVALID_TIMESTAMP_FORMAT);
+        }
         
         THROW(NONE);
     } CATCH {
@@ -234,6 +251,9 @@ int flom_resource_timestamp_init(flom_resource_t *resource,
             case G_QUEUE_NEW_ERROR1:
             case G_QUEUE_NEW_ERROR2:
                 ret_cod = FLOM_RC_G_QUEUE_NEW_ERROR;
+                break;
+            case INVALID_TIMESTAMP_FORMAT:
+                ret_cod = FLOM_RC_INVALID_TIMESTAMP_FORMAT;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

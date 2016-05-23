@@ -1485,6 +1485,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                      , CANT_WAIT_CONDITION
                      , ACCEPT_LOOP_REPLY_ERROR3
                      , PUT_INTO_INCUBATOR
+                     , RESOURCE_INIT_ERROR
                      , ACCEPT_LOOP_START_LOCKER_ERROR
                      , ACCEPT_LOOP_TRANSFER_CONN_ERROR1
                      , CONNS_GET_CD_ERROR2
@@ -1605,11 +1606,26 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                 } /* if (!msg->body.lock_8.resource.wait) */
             } else {
                 /* start a new locker */
-                if (FLOM_RC_OK != (ret_cod = flom_accept_loop_start_locker(
-                                       lockers, msg, flrt, &locker,
-                                       &locker_thread)))
+                ret_cod = flom_accept_loop_start_locker(
+                    lockers, msg, flrt, &locker, &locker_thread);
+                if (FLOM_RC_RESOURCE_INIT_ERROR == ret_cod) {
+                    FLOM_TRACE(("flom_accept_loop_transfer: client requested "
+                                "an invalid resource, starting connection "
+                                "termination for fd=%d\n",
+                                flom_tcp_get_sockfd(flom_conn_get_tcp(conn))));
+                    if (-1 == shutdown(flom_tcp_get_sockfd(
+                                           flom_conn_get_tcp(conn)), SHUT_WR))
+                        FLOM_TRACE(("flom_accept_loop_transfer/shutdown"
+                                    "(%d,SHUT_WR)=%d ('%s')\n",
+                                    flom_tcp_get_sockfd(
+                                        flom_conn_get_tcp(conn)), errno,
+                                    strerror(errno)));
+                    /* return to caller */
+                    THROW(RESOURCE_INIT_ERROR);
+                } else if (FLOM_RC_OK != ret_cod) {
                     THROW(ACCEPT_LOOP_START_LOCKER_ERROR);
-                locker_is_new = TRUE;
+                } else
+                    locker_is_new = TRUE;
             } /* if (!msg->body.lock_8.resource.create) */
         } else
             locker_thread = locker->thread;
@@ -1685,6 +1701,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
             case ACCEPT_LOOP_REPLY_ERROR3:
                 break;
             case PUT_INTO_INCUBATOR:
+            case RESOURCE_INIT_ERROR:
                 ret_cod = FLOM_RC_OK;
                 break;
             case ACCEPT_LOOP_START_LOCKER_ERROR:
@@ -1828,6 +1845,7 @@ int flom_accept_loop_start_locker(flom_locker_array_t *lockers,
     } CATCH {
         switch (excp) {
             case RESOURCE_INIT_ERROR:
+                ret_cod = FLOM_RC_RESOURCE_INIT_ERROR;
                 break;
             case PIPE_ERROR:
                 ret_cod = FLOM_RC_PIPE_ERROR;

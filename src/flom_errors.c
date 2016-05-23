@@ -122,6 +122,10 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_NO_TLS_CONNECTION:
             return "ERROR: the connection is not a TLS connection, but a TLS "
                 "operation was requested";
+        case FLOM_RC_INVALID_TIMESTAMP_FORMAT:
+            return "ERROR: format not valid for a timestamp resource";
+        case FLOM_RC_RESOURCE_INIT_ERROR:
+            return "ERROR: the resource can not be initialized";
             /* system function error */
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";
