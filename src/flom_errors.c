@@ -126,6 +126,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: format not valid for a timestamp resource";
         case FLOM_RC_RESOURCE_INIT_ERROR:
             return "ERROR: the resource can not be initialized";
+        case FLOM_RC_CONNECTION_CLOSED_BY_SERVER:
+            return "ERROR: the server has unilaterally closed the connection";
             /* system function error */
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";

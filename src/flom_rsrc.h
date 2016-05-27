@@ -295,6 +295,10 @@ struct flom_rsrc_data_timestamp_s {
      */
     gchar                  *format;
     /**
+     * Minimum interval between two consecutive timestamps
+     */
+    struct timeval          interval;
+    /**
      * Total quantity for the resource
      */
     gint                    total_quantity;

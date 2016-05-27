@@ -174,8 +174,7 @@ int flom_resource_timestamp_init(flom_resource_t *resource,
     
     FLOM_TRACE(("flom_resource_timestamp_init\n"));
     TRY {
-        uint64_t microsec_resolution = 0;
-        uint64_t microsec = 1;
+        unsigned int microsec = 1;
         gchar micro_format[sizeof(MICRO_FORMAT)];
         size_t digits;
         
@@ -188,14 +187,16 @@ int flom_resource_timestamp_init(flom_resource_t *resource,
         if (FLOM_RC_OK != (ret_cod = flom_rsrc_get_infix(
                                name, FLOM_RSRC_TYPE_TIMESTAMP,
                                &(resource->data.timestamp.format))))
-                    THROW(RSRC_GET_INFIX_ERROR);
+            THROW(RSRC_GET_INFIX_ERROR);
         if (FLOM_RC_OK != (ret_cod = flom_rsrc_get_number(
                                name, FLOM_RSRC_TYPE_TIMESTAMP,
                                &(resource->data.timestamp.total_quantity))))
-                    THROW(RSRC_GET_NUMBER_ERROR);
+            THROW(RSRC_GET_NUMBER_ERROR);
         resource->data.timestamp.locked_quantity = 0;
-        memset(&(resource->data.timestamp.last_timestamp), 0,
-               sizeof(struct timeval));
+        resource->data.timestamp.last_timestamp.tv_usec = 0;
+        resource->data.timestamp.last_timestamp.tv_sec = 0;
+        resource->data.timestamp.interval.tv_usec = 0;
+        resource->data.timestamp.interval.tv_sec = 0;
         resource->data.timestamp.holders = NULL;
         if (NULL == (resource->data.timestamp.waitings = g_queue_new()))
             THROW(G_QUEUE_NEW_ERROR2);
@@ -204,13 +205,13 @@ int flom_resource_timestamp_init(flom_resource_t *resource,
         while (0 < (digits = strlen(micro_format)-1)) {
             if (NULL != strstr(resource->data.timestamp.format,
                                micro_format)) {
-                microsec_resolution = microsec;
+                resource->data.timestamp.interval.tv_usec = microsec;
                 break;
             }
             microsec *= 10;
             micro_format[digits] = '\0';
         } /* while (0 < (digits = strlen(micro_format)-1)) */
-        if (0 == microsec_resolution) {
+        if (0 == resource->data.timestamp.interval.tv_usec) {
             if (NULL != strstr(resource->data.timestamp.format, "%c") ||
                 NULL != strstr(resource->data.timestamp.format, "%r") ||
                 NULL != strstr(resource->data.timestamp.format, "%s") ||
@@ -218,21 +219,24 @@ int flom_resource_timestamp_init(flom_resource_t *resource,
                 NULL != strstr(resource->data.timestamp.format, "%T") ||
                 NULL != strstr(resource->data.timestamp.format, "%X")) {
                 /* the above specifiers change once per second */
-                microsec_resolution = (uint64_t)1000000;
+                resource->data.timestamp.interval.tv_sec = 1;
             } else if (NULL != strstr(resource->data.timestamp.format, "%M") ||
                        NULL != strstr(resource->data.timestamp.format, "%R")) {
                 /* the above specifiers change once per minute */
-                microsec_resolution = (uint64_t)1000000*(uint64_t)60;
+                resource->data.timestamp.interval.tv_sec = 60;
             } else if (NULL != strstr(resource->data.timestamp.format, "%H") ||
                        NULL != strstr(resource->data.timestamp.format, "%I")) {
                 /* the above specifiers change once per hour */
-                microsec_resolution = (uint64_t)1000000*(uint64_t)3600;
+                resource->data.timestamp.interval.tv_sec = 3600;
             }
         } /* if (0 == microsec_resolution) */
-        FLOM_TRACE(("flom_resource_timestamp_init: microsec_resolution="
-                    UINT64_T_FORMAT " micro seconds\n", microsec_resolution));
+        FLOM_TRACE(("flom_resource_timestamp_init: interval.tv_sec=%d, "
+                    "interval.tv_usec=%d\n",
+                    resource->data.timestamp.interval.tv_sec,
+                    resource->data.timestamp.interval.tv_usec));
         /* check that at least one specifier has been found */
-        if (0 == microsec_resolution) {
+        if (0 == resource->data.timestamp.interval.tv_usec &&
+            0 == resource->data.timestamp.interval.tv_sec) {
             FLOM_TRACE(("flom_resource_timestamp_init: format '%s' does not "
                         "contain a specifier that changes at least once per "
                         "hour\n", resource->data.timestamp.format));

@@ -249,6 +249,10 @@
  * The resource can't be initialized
  */
 #define FLOM_RC_RESOURCE_INIT_ERROR                  -26
+/**
+ * The server has unilaterally closed the connection
+ */
+#define FLOM_RC_CONNECTION_CLOSED_BY_SERVER          -27
 
 
 

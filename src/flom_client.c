@@ -845,6 +845,7 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
                      , MSG_FREE_ERROR1
                      , NETWORK_TIMEOUT1
                      , MSG_RETRIEVE_ERROR
+                     , CONNECTION_CLOSED_BY_SERVER
                      , G_MARKUP_PARSE_CONTEXT_NEW_ERROR
                      , MSG_DESERIALIZE_ERROR1
                      , PROTOCOL_LEVEL_MISMATCH
@@ -927,6 +928,15 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
                 THROW(MSG_RETRIEVE_ERROR);
         } /* switch (ret_cod) */
 
+        /* an empty response is the result of connection closing on the
+           server side */
+        if (0 == to_read) {
+            FLOM_TRACE(("flom_client_lock: flom daemon has closed the "
+                        "connection, maybe a wrong request was sent...\n",
+                        to_read));
+            THROW(CONNECTION_CLOSED_BY_SERVER);
+        }
+        
         /* instantiate a new parser */
         if (NULL == (tmp_parser = g_markup_parse_context_new(
                          &flom_msg_parser, 0, (gpointer)&msg, NULL)))
@@ -1057,6 +1067,9 @@ int flom_client_lock(flom_config_t *config, flom_conn_t *conn,
             case MSG_FREE_ERROR1:
             case NETWORK_TIMEOUT1:
             case MSG_RETRIEVE_ERROR:
+                break;
+            case CONNECTION_CLOSED_BY_SERVER:
+                ret_cod = FLOM_RC_CONNECTION_CLOSED_BY_SERVER;
                 break;
             case G_MARKUP_PARSE_CONTEXT_NEW_ERROR:
                 ret_cod = FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR;
