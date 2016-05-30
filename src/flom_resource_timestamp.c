@@ -274,8 +274,9 @@ int flom_resource_timestamp_init(flom_resource_t *resource,
 
 
 int flom_resource_timestamp_inmsg(flom_resource_t *resource,
-                                 flom_conn_t *conn,
-                                 struct flom_msg_s *msg)
+                                  flom_conn_t *conn,
+                                  struct flom_msg_s *msg,
+                                  struct timeval *next_deadline)
 {
     enum Exception { MSG_FREE_ERROR1
                      , G_TRY_MALLOC_ERROR1
@@ -567,6 +568,31 @@ void flom_resource_timestamp_free(flom_resource_t *resource)
     if (NULL != resource->name)
         g_free(resource->name);
     resource->name = NULL;
+}
+
+
+
+int flom_resource_timestamp_timeout(flom_resource_t *resource)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_resource_timestamp_timeout\n"));
+    TRY {
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_resource_timestamp_timeout/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 

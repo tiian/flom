@@ -130,7 +130,8 @@ int flom_resource_set_init(flom_resource_t *resource,
 
 int flom_resource_set_inmsg(flom_resource_t *resource,
                             flom_conn_t *conn,
-                            struct flom_msg_s *msg)
+                            struct flom_msg_s *msg,
+                            struct timeval *next_deadline)
 {
     enum Exception { MSG_FREE_ERROR1
                      , MSG_BUILD_ANSWER_ERROR1

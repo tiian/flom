@@ -1,6 +1,6 @@
 Road map:
 
-go on with flom_resource_timestamp_init formats...
+implement the next_dealine set from resource_timestamp and resource_timestamp_timeout when a timeout expires...
 
 unique timestamps (no two equal timestamps supplied): use a date like expression
 to describe the sequence; for example:

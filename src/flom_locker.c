@@ -23,6 +23,9 @@
 #ifdef HAVE_REGEX_H
 # include <regex.h>
 #endif
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -113,6 +116,7 @@ gpointer flom_locker_loop(gpointer data)
                      , CONNS_GET_FDS_ERROR
                      , CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
+                     , RESOURCE_TIMEOUT_ERROR
                      , CONNS_CLOSE_ERROR1
                      , RESOURCE_CLEAN_ERROR1
                      , CONNS_CLOSE_ERROR2
@@ -130,7 +134,12 @@ gpointer flom_locker_loop(gpointer data)
         int loop = TRUE;
         struct flom_locker_s *locker = (struct flom_locker_s *)data;
         struct sockaddr_storage sa_storage;
+        struct timeval next_deadline;
 
+        /* set next deadline to one second in the past*/
+        gettimeofday(&next_deadline, NULL);
+        next_deadline.tv_sec--;
+        
         /* as a first action, it marks the identifier */
         locker->thread = g_thread_self();
         FLOM_TRACE(("flom_locker_loop: resource_name='%s', "
@@ -177,9 +186,13 @@ gpointer flom_locker_loop(gpointer data)
             if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(
                                    &conns, POLLIN)))
                 THROW(CONNS_SET_EVENTS_ERROR);
-            /* default time-out */
-            timeout = FLOM_LOCKER_POLL_TIMEOUT;
-            if (locker->idle_periods > FLOM_LOCKER_MAX_IDLE_PERIODS) {
+            /* compute time-out from next deadline as asked by the resource
+               (in case the resource asked for a deadline...) */
+            if (0 <= (timeout = flom_locker_loop_get_timeout(
+                          &next_deadline))) {
+                FLOM_TRACE(("flom_locker_loop: timeout was requested by the "
+                            "resource: %d milliseconds\n", timeout));
+            } else if (locker->idle_periods > FLOM_LOCKER_MAX_IDLE_PERIODS) {
                 /* the only possible event comes from main thread, using
                    a shorter time-out would be useless */
                 timeout = -1;
@@ -199,7 +212,11 @@ gpointer flom_locker_loop(gpointer data)
                 timeout = locker->idle_lifespan;
                 FLOM_TRACE(("flom_locker_loop: resource timeout asked by "
                             "caller (%d milliseconds)\n", timeout));
-            } 
+            } else {
+                timeout = FLOM_LOCKER_POLL_TIMEOUT;
+                FLOM_TRACE(("flom_locker_loop: setting default timeout: "
+                            "%d milliseconds\n", timeout));
+            }
             FLOM_TRACE(("flom_locker_loop: entering poll using %d "
                         "timeout milliseconds...\n", timeout));
             ready_fd = poll(fds, flom_conns_get_used(&conns), timeout);
@@ -211,6 +228,10 @@ gpointer flom_locker_loop(gpointer data)
             if (0 == ready_fd) {
                 FLOM_TRACE(("flom_locker_loop: idle time exceeded %d "
                             "milliseconds\n", timeout));
+                /* calling timeout resource callback */
+                if (FLOM_RC_OK != (ret_cod = locker->resource.timeout(
+                                       &locker->resource)))
+                    THROW(RESOURCE_TIMEOUT_ERROR);
                 if (1 == flom_conns_get_used(&conns)) {
                     locker->idle_periods++;
                     FLOM_TRACE(("flom_locker_loop: only control connection "
@@ -251,7 +272,7 @@ gpointer flom_locker_loop(gpointer data)
                 if (fds[i].revents & POLLIN) {
                     if (FLOM_RC_OK != (ret_cod = flom_locker_loop_pollin(
                                            locker, &conns, i,
-                                           &refresh_conns))) {
+                                           &refresh_conns, &next_deadline))) {
                         FLOM_TRACE(("flom_locker_loop: connection %u "
                                     "raised an exception, closing it...\n",
                                     i));
@@ -318,6 +339,7 @@ gpointer flom_locker_loop(gpointer data)
                 break;
             case CONNS_SET_EVENTS_ERROR:
             case POLL_ERROR:
+            case RESOURCE_TIMEOUT_ERROR:
             case CONNS_CLOSE_ERROR1:
             case RESOURCE_CLEAN_ERROR1:
             case CONNS_CLOSE_ERROR2:
@@ -349,7 +371,7 @@ gpointer flom_locker_loop(gpointer data)
 
 int flom_locker_loop_pollin(struct flom_locker_s *locker,
                             flom_conns_t *conns, guint id,
-                            int *refresh_conns)
+                            int *refresh_conns, struct timeval *next_deadline)
 {
     enum Exception { CONNS_GET_CD_ERROR
                      , READ_ERROR1
@@ -461,7 +483,8 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 /* process input message */
                 if (FLOM_RC_OK != (ret_cod = 
                                    locker->resource.inmsg(
-                                       &locker->resource, curr_conn, msg)))
+                                       &locker->resource, curr_conn, msg,
+                                       next_deadline)))
                     THROW(RESOURCE_INMSG_ERROR);
                 /* reply with output message */
                 if (FLOM_MSG_STATE_READY == msg->state) {
@@ -530,5 +553,23 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
     FLOM_TRACE(("flom_locker_loop_pollin/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
+}
+
+
+
+int flom_locker_loop_get_timeout(const struct timeval *next_deadline)
+{
+    struct timeval now;
+    int diff;
+
+    gettimeofday(&now, NULL);
+    diff = (next_deadline->tv_sec - now.tv_sec) * 1000 +
+        (next_deadline->tv_usec - now.tv_usec) / 1000;
+    FLOM_TRACE(("flom_locker_loop_get_timeout: "
+                "next_deadline->tv_sec=%d, next_deadline->tv_usec=%d, "
+                "now.tv_sec=%d, now.tv_usec=%d, diff=%d\n",
+                next_deadline->tv_sec, next_deadline->tv_usec,
+                now.tv_sec, now.tv_usec, diff));
+    return diff;
 }
 

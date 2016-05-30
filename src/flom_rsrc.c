@@ -457,6 +457,7 @@ int flom_resource_init(flom_resource_t *resource,
                 resource->inmsg = flom_resource_simple_inmsg;
                 resource->clean = flom_resource_simple_clean;
                 resource->free = flom_resource_simple_free;
+                resource->timeout = flom_resource_timeout;
                 resource->compare_name = flom_resource_compare_name;
                 break;
             case FLOM_RSRC_TYPE_NUMERIC:
@@ -464,6 +465,7 @@ int flom_resource_init(flom_resource_t *resource,
                 resource->inmsg = flom_resource_numeric_inmsg;
                 resource->clean = flom_resource_numeric_clean;
                 resource->free = flom_resource_numeric_free;
+                resource->timeout = flom_resource_timeout;
                 resource->compare_name = flom_resource_compare_name;
                 break;
             case FLOM_RSRC_TYPE_SET:
@@ -471,6 +473,7 @@ int flom_resource_init(flom_resource_t *resource,
                 resource->inmsg = flom_resource_set_inmsg;
                 resource->clean = flom_resource_set_clean;
                 resource->free = flom_resource_set_free;
+                resource->timeout = flom_resource_timeout;
                 resource->compare_name = flom_resource_compare_name;
                 break;
             case FLOM_RSRC_TYPE_HIER:
@@ -478,6 +481,7 @@ int flom_resource_init(flom_resource_t *resource,
                 resource->inmsg = flom_resource_hier_inmsg;
                 resource->clean = flom_resource_hier_clean;
                 resource->free = flom_resource_hier_free;
+                resource->timeout = flom_resource_timeout;
                 resource->compare_name = flom_resource_hier_compare_name;
                 break;
             case FLOM_RSRC_TYPE_SEQUENCE:
@@ -485,6 +489,7 @@ int flom_resource_init(flom_resource_t *resource,
                 resource->inmsg = flom_resource_sequence_inmsg;
                 resource->clean = flom_resource_sequence_clean;
                 resource->free = flom_resource_sequence_free;
+                resource->timeout = flom_resource_timeout;
                 resource->compare_name = flom_resource_compare_name;
                 break;
             case FLOM_RSRC_TYPE_TIMESTAMP:
@@ -492,6 +497,7 @@ int flom_resource_init(flom_resource_t *resource,
                 resource->inmsg = flom_resource_timestamp_inmsg;
                 resource->clean = flom_resource_timestamp_clean;
                 resource->free = flom_resource_timestamp_free;
+                resource->timeout = flom_resource_timestamp_timeout;
                 resource->compare_name = flom_resource_compare_name;
                 break;
             default:
@@ -547,4 +553,13 @@ int flom_resource_compare_name(const flom_resource_t *resource,
                 "name='%s'\n", resource->name,
                 NULL != name ? name : "null"));
     return g_strcmp0(resource->name, name);
+}
+
+
+
+int flom_resource_timeout(flom_resource_t *resource)
+{
+    /* default behavior: nothing to do */
+    FLOM_TRACE(("flom_resource_timeout\n"));
+    return FLOM_RC_OK;
 }

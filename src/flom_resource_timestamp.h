@@ -72,7 +72,7 @@ extern "C" {
      * @return a reason code
      */
     int flom_resource_timestamp_init(flom_resource_t *resource,
-                                    const gchar *name);
+                                     const gchar *name);
 
     
 
@@ -81,11 +81,14 @@ extern "C" {
      * @param resource IN/OUT reference to resource object
      * @param conn IN connection reference
      * @param msg IN reference to incoming message
+     * @param next_deadline OUT next deadline asked by the resource (the
+     *        resource is waiting a time-out)
      * @return a reason code
      */
     int flom_resource_timestamp_inmsg(flom_resource_t *resource,
-                                     flom_conn_t *conn,
-                                     struct flom_msg_s *msg);
+                                      flom_conn_t *conn,
+                                      struct flom_msg_s *msg,
+                                      struct timeval *next_deadline);
 
 
     
@@ -96,7 +99,7 @@ extern "C" {
      * @return a reason code
      */
     int flom_resource_timestamp_clean(flom_resource_t *resource,
-                                     flom_conn_t *conn);
+                                      flom_conn_t *conn);
 
 
 
@@ -107,6 +110,15 @@ extern "C" {
     void flom_resource_timestamp_free(flom_resource_t *resource);
 
 
+
+    /**
+     * Timeout expiration: a new timestamp can be generated
+     * @param resource IN/OUT reference to resource object
+     * @return a reason code
+     */
+    int flom_resource_timestamp_timeout(flom_resource_t *resource);
+
+    
     
     /**
      * Check if any of the lock waitings can get a lock

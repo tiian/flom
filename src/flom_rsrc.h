@@ -355,20 +355,25 @@ struct flom_resource_s {
     /**
      * Method called to initialize a new resource
      */
-    int   (*init)    (flom_resource_t *resource, const gchar *name);
+    int   (*init)      (flom_resource_t *resource, const gchar *name);
     /**
      * Method called to process incoming messages (it depends from resource
      * type)
      */
-    int   (*inmsg)   (flom_resource_t *, flom_conn_t *, struct flom_msg_s *);
+    int   (*inmsg)     (flom_resource_t *, flom_conn_t *, struct flom_msg_s *,
+                        struct timeval *next_deadline);
     /**
      * Method called to process a clean-up signal (client disconnected)
      */
-    int   (*clean)   (flom_resource_t *, flom_conn_t *);
+    int   (*clean)     (flom_resource_t *, flom_conn_t *);
     /**
      * Method called to clean-up the entire resource (it's the destructor)
      */
-    void  (*free)    (flom_resource_t *);
+    void  (*free)      (flom_resource_t *);
+    /**
+     * Method called when poll exits due to time-out
+     */
+    int   (*timeout)   (flom_resource_t *);
     /**
      * Method called to compare the name of the current managed resource with
      * an external supplied name
@@ -521,6 +526,15 @@ extern "C" {
 
 
 
+    /**
+     * Default timeout callback function: it does nothing
+     * @param resource IN reference to this resource object
+     * @return FLOM_RC_OK
+     */
+    int flom_resource_timeout(flom_resource_t *resource);
+
+    
+    
     /**
      * Get the name of a resource
      * @param resource IN referente to resource object

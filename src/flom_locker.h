@@ -253,14 +253,28 @@ extern "C" {
      * @param id IN connection id
      * @param refresh_conns OUT the conns object must be refreshed due to
      *        some deletion inside it
+     * @param next_deadline OUT next deadline asked by the resource (the
+     *        resource is waiting a time-out)
      * @return a reason code
      */
     int flom_locker_loop_pollin(struct flom_locker_s *locker,
                                 flom_conns_t *conns, guint id,
-                                int *refresh_conns);
+                                int *refresh_conns,
+                                struct timeval *next_deadline);
 
 
 
+    /**
+     * Compute the timeout for the poll loop from the current time and the
+     * deadline requested by the resource
+     * @param next_deadline IN point in time for the timeout requested by the
+     *        resource
+     * @return a timeout value or -1 if next_deadline is in the past
+     */
+    int flom_locker_loop_get_timeout(const struct timeval *next_deadline);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
