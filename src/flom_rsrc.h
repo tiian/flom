@@ -118,7 +118,7 @@ struct flom_rsrc_conn_lock_s {
         /**
          * Timestamp value assigned to the lock holder (timestamp resources)
          */
-        guint                       timestamp_value;
+        struct timeval              timestamp_value;
     } info;
     /**
      * Resource name is necessary of hierarchical resources only because

@@ -54,14 +54,17 @@ extern "C" {
 
 
     /**
-     * Return the next timestamp value
+     * Compute the next timestamp value
      * @param resource IN/OUT reference to resource object
-     * @param timestamp OUT the buffer necessary to store the timestamp
+     * @param timestamp OUT the timeval struct where the timestamp will be
+     *        saved 
+     * @param str_timestamp OUT the buffer necessary to store the timestamp
      * @param max IN size of the buffer as required by function strftime
      * @return a reason code
      */
     int flom_resource_timestamp_get(flom_resource_t *resource,
-                                    gchar *timestamp, size_t max);
+                                    struct timeval *timestamp,
+                                    gchar *str_timestamp, size_t max);
 
 
     

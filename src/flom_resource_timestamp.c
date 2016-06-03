@@ -70,7 +70,8 @@ int flom_resource_timestamp_can_lock(flom_resource_t *resource)
 
 
 int flom_resource_timestamp_get(flom_resource_t *resource,
-                                gchar *timestamp, size_t max)
+                                struct timeval *tv,
+                                gchar *str_timestamp, size_t max)
 {
     enum Exception { GETTIMEOFDAY_ERROR
                      , G_STRDUP_ERROR
@@ -110,11 +111,6 @@ int flom_resource_timestamp_get(flom_resource_t *resource,
          */
         while (0 < (digits = strlen(micro_format)-1)) {
             gchar *next_fraction = tmp_format;
-            /* @@@ remove me before or later
-            FLOM_TRACE(("flom_resource_timestamp_get: digits=%u, "
-                        "micro_format='%s', next_fraction='%s'\n",
-                        digits, micro_format, next_fraction));
-            */
             /* search the fraction format inside the whole format */
             while (NULL != (next_fraction = strstr(
                                 next_fraction, micro_format))) {
@@ -129,8 +125,8 @@ int flom_resource_timestamp_get(flom_resource_t *resource,
         /* break & serialize time using the format required by the user */
         if (NULL == localtime_r(&tv.tv_sec, &broken_time))
             THROW(LOCALTIME_R_ERROR);
-        strftime(timestamp, max, tmp_format, &broken_time);
-        FLOM_TRACE(("flom_resource_timestamp_get: '%s'\n", timestamp));
+        strftime(str_timestamp, max, tmp_format, &broken_time);
+        FLOM_TRACE(("flom_resource_timestamp_get: '%s'\n", str_timestamp));
         
         THROW(NONE);
     } CATCH {
@@ -280,6 +276,7 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
 {
     enum Exception { MSG_FREE_ERROR1
                      , G_TRY_MALLOC_ERROR1
+                     , RESOURCE_TIMESTAMP_GET_ERROR
                      , MSG_BUILD_ANSWER_ERROR1
                      , G_TRY_MALLOC_ERROR2
                      , MSG_BUILD_ANSWER_ERROR2
@@ -318,9 +315,10 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
                                 "%p\n", conn));
                     if (NULL == (cl = flom_rsrc_conn_lock_new()))
                         THROW(G_TRY_MALLOC_ERROR1);
-                    cl->info.timestamp_value =
-                        flom_resource_timestamp_get(
-                            resource, element, sizeof(element));
+                    if (FLOM_RC_OK != (ret_cod = flom_resource_timestamp_get(
+                                           resource, &cl->info.timestamp_value,
+                                           element, sizeof(element))))
+                        THROW(RESOURCE_TIMESTAMP_GET_ERROR);
                     cl->rollback = TRUE;
                     cl->conn = conn;
                     resource->data.timestamp.holders = g_slist_prepend(
@@ -412,6 +410,8 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
                 break;
             case G_TRY_MALLOC_ERROR1:
                 ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case RESOURCE_TIMESTAMP_GET_ERROR:
                 break;
             case MSG_BUILD_ANSWER_ERROR1:
                 break;
@@ -574,15 +574,25 @@ void flom_resource_timestamp_free(flom_resource_t *resource)
 
 int flom_resource_timestamp_timeout(flom_resource_t *resource)
 {
-    enum Exception { NONE } excp;
+    enum Exception { GETTIMEOFDAY_ERROR
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_resource_timestamp_timeout\n"));
     TRY {
+        struct timeval now;
+        
+        /* check if the timeout of this resource is really expired */
+        if (0 != gettimeofday(&now, NULL))
+            THROW(GETTIMEOFDAY_ERROR);
+        
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case GETTIMEOFDAY_ERROR:
+                ret_cod = FLOM_RC_GETTIMEOFDAY_ERROR;
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -600,6 +610,7 @@ int flom_resource_timestamp_timeout(flom_resource_t *resource)
 int flom_resource_timestamp_waitings(flom_resource_t *resource)
 {
     enum Exception { INTERNAL_ERROR
+                     , RESOURCE_TIMESTAMP_GET_ERROR
                      , MSG_BUILD_ANSWER_ERROR
                      , MSG_SERIALIZE_ERROR
                      , MSG_SEND_ERROR
@@ -633,8 +644,10 @@ int flom_resource_timestamp_waitings(flom_resource_t *resource)
                 FLOM_TRACE(("flom_resource_timestamp_waitings: asked lock "
                             "can be assigned to connection %p\n",
                             cl->conn));
-                cl->info.timestamp_value = flom_resource_timestamp_get(
-                    resource, element, sizeof(element));
+                if (FLOM_RC_OK != (ret_cod = flom_resource_timestamp_get(
+                                       resource, &cl->info.timestamp_value,
+                                       element, sizeof(element))))
+                    THROW(RESOURCE_TIMESTAMP_GET_ERROR);
                 cl->rollback = TRUE;
                 /* send a message to the client that's waiting the lock */
                 flom_msg_init(&msg);
@@ -669,6 +682,7 @@ int flom_resource_timestamp_waitings(flom_resource_t *resource)
             case INTERNAL_ERROR:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
                 break;
+            case RESOURCE_TIMESTAMP_GET_ERROR:
             case MSG_BUILD_ANSWER_ERROR:
             case MSG_SERIALIZE_ERROR:
             case MSG_SEND_ERROR:
