@@ -56,14 +56,60 @@ const gchar MICRO_FORMAT[] = "#ffffff";
 
 
 int flom_resource_timestamp_can_lock(flom_resource_t *resource)
-{    
+{
+    struct timeval tv;
     FLOM_TRACE(("flom_resource_timestamp_can_lock: "
                 "total_quantity=%d, locked_quantity=%d\n",
                 resource->data.timestamp.total_quantity,
                 resource->data.timestamp.locked_quantity));
+    /* all the avaialable slots are already used */
     if (resource->data.timestamp.total_quantity -
-        resource->data.timestamp.locked_quantity > 0)
-        return TRUE;
+        resource->data.timestamp.locked_quantity <= 0) {
+        FLOM_TRACE(("flom_resource_timestamp_can_lock: FALSE, no available "
+                    "slots\n"));
+        return FALSE;
+    }
+    /* check last released timestamp and current time */
+    gettimeofday(&tv, NULL);
+    FLOM_TRACE(("flom_resource_timestamp_can_lock: "
+                "tv.tv_sec=%d, last_timestamp.tv_sec=%d\n",
+                tv.tv_sec, resource->data.timestamp.last_timestamp.tv_sec));
+    FLOM_TRACE(("flom_resource_timestamp_can_lock: "
+                "tv.tv_usec=%d, last_timestamp.tv_usec=%d\n",
+                tv.tv_usec, resource->data.timestamp.last_timestamp.tv_usec));
+    /* check the minimum interval grain */
+    if (0 < resource->data.timestamp.interval.tv_sec) {
+        /* timestamp format contains at least 1 second */
+        if (tv.tv_sec/resource->data.timestamp.interval.tv_sec >
+            resource->data.timestamp.last_timestamp.tv_sec/
+            resource->data.timestamp.interval.tv_sec) {
+            FLOM_TRACE(("flom_resource_timestamp_can_lock: TRUE, enought time "
+                    "interval (seconds)\n"));
+            return TRUE;
+        } else if ((tv.tv_sec/resource->data.timestamp.interval.tv_sec ==
+                    resource->data.timestamp.last_timestamp.tv_sec/
+                    resource->data.timestamp.interval.tv_sec) &&
+                   (tv.tv_usec >
+                    resource->data.timestamp.last_timestamp.tv_usec +
+                    resource->data.timestamp.interval.tv_usec)) {
+            FLOM_TRACE(("flom_resource_timestamp_can_lock: TRUE, enought time "
+                        "interval (micro seconds)\n"));
+            return TRUE;
+        }
+        FLOM_TRACE(("flom_resource_timestamp_can_lock: FALSE, not enought "
+                    "time interval\n"));
+        return FALSE;
+    } else
+        /* timestamp format contains only microseconds */
+        if (tv.tv_usec >
+            resource->data.timestamp.last_timestamp.tv_usec +
+            resource->data.timestamp.interval.tv_usec) {
+            FLOM_TRACE(("flom_resource_timestamp_can_lock: TRUE, enought time "
+                        "interval (micro seconds)\n"));
+            return TRUE;
+        }
+    FLOM_TRACE(("flom_resource_timestamp_can_lock: FALSE, not enought "
+                "time interval\n"));
     return FALSE;
 }
 
@@ -295,7 +341,6 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
         int can_wait = TRUE;
         int impossible_lock = FALSE;
         gchar element[1000]; /* it must contain a guint */
-        GSList *p;
         struct flom_rsrc_conn_lock_s *cl = NULL;
         
         flom_msg_trace(msg);
@@ -311,15 +356,13 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
                     /* get the lock */
                     /* put this connection in holders list */
                     FLOM_TRACE(("flom_resource_timestamp_inmsg: asked lock "
-                                "can be assigned to connection "
-                                "%p\n", conn));
+                                "can be assigned to connection %p\n", conn));
                     if (NULL == (cl = flom_rsrc_conn_lock_new()))
                         THROW(G_TRY_MALLOC_ERROR1);
                     if (FLOM_RC_OK != (ret_cod = flom_resource_timestamp_get(
                                            resource, &cl->info.timestamp_value,
                                            element, sizeof(element))))
                         THROW(RESOURCE_TIMESTAMP_GET_ERROR);
-                    cl->rollback = TRUE;
                     cl->conn = conn;
                     resource->data.timestamp.holders = g_slist_prepend(
                         resource->data.timestamp.holders,
@@ -380,16 +423,6 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
                            flom_resource_get_name(resource));
                     THROW(INVALID_OPTION);
                 }
-                /* commit the timestamp to avoid re-use */
-                if (NULL == (p = flom_rsrc_conn_find(
-                                 resource->data.timestamp.holders, conn))) {
-                    FLOM_TRACE(("flom_resource_timestamp_inmsg: unable to "
-                                "find lock holder for connection %p\n",
-                                conn));
-                    THROW(OBJ_CORRUPTED);
-                }
-                cl = (struct flom_rsrc_conn_lock_s *)p->data;
-                cl->rollback = msg->body.unlock_8.resource.rollback;
                 /* clean lock */
                 if (FLOM_RC_OK != (ret_cod = flom_resource_timestamp_clean(
                                        resource, conn)))
@@ -468,8 +501,7 @@ int flom_resource_timestamp_clean(flom_resource_t *resource,
             struct flom_rsrc_conn_lock_s *cl =
                 (struct flom_rsrc_conn_lock_s *)p->data;
             FLOM_TRACE(("flom_resource_timestamp_clean: the client is holding "
-                        "a%s lock with timestamp %u, removing it...\n",
-                        cl->rollback ? "n uncommitted" : " commited",
+                        "a lock with timestamp %u, removing it...\n",
                         cl->info.timestamp_value));
             FLOM_TRACE(("flom_resource_timestamp_clean: cl=%p\n", cl));
             resource->data.timestamp.holders = g_slist_remove(
@@ -574,24 +606,23 @@ void flom_resource_timestamp_free(flom_resource_t *resource)
 
 int flom_resource_timestamp_timeout(flom_resource_t *resource)
 {
-    enum Exception { GETTIMEOFDAY_ERROR
+    enum Exception { TIMESTAMP_WAITINGS_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_resource_timestamp_timeout\n"));
     TRY {
-        struct timeval now;
-        
-        /* check if the timeout of this resource is really expired */
-        if (0 != gettimeofday(&now, NULL))
-            THROW(GETTIMEOFDAY_ERROR);
-        
+        if (flom_resource_timestamp_can_lock(resource)) {
+            /* check if some other clients can get a lock now */
+            if (FLOM_RC_OK != (ret_cod = flom_resource_timestamp_waitings(
+                                   resource)))
+                THROW(TIMESTAMP_WAITINGS_ERROR);
+        }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case GETTIMEOFDAY_ERROR:
-                ret_cod = FLOM_RC_GETTIMEOFDAY_ERROR;
+            case TIMESTAMP_WAITINGS_ERROR:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -648,7 +679,6 @@ int flom_resource_timestamp_waitings(flom_resource_t *resource)
                                        resource, &cl->info.timestamp_value,
                                        element, sizeof(element))))
                     THROW(RESOURCE_TIMESTAMP_GET_ERROR);
-                cl->rollback = TRUE;
                 /* send a message to the client that's waiting the lock */
                 flom_msg_init(&msg);
                 if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
