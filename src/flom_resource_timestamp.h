@@ -54,6 +54,17 @@ extern "C" {
 
 
     /**
+     * Compute the next deadline starting from last timestamp provided and the
+     * minimum timeval between two timestamps
+     * @param resource IN reference to resource object
+     * @return next deadline
+     */
+    struct timeval flom_resource_timestamp_next_deadline(
+        flom_resource_t *resource);
+
+ 
+
+    /**
      * Compute the next timestamp value
      * @param resource IN/OUT reference to resource object
      * @param timestamp OUT the timeval struct where the timestamp will be
@@ -117,9 +128,12 @@ extern "C" {
     /**
      * Timeout expiration: a new timestamp can be generated
      * @param resource IN/OUT reference to resource object
+     * @param next_deadline OUT next deadline asked by the resource (the
+     *        resource is waiting a time-out)
      * @return a reason code
      */
-    int flom_resource_timestamp_timeout(flom_resource_t *resource);
+    int flom_resource_timestamp_timeout(flom_resource_t *resource,
+                                        struct timeval *next_deadline);
 
     
     

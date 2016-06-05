@@ -557,7 +557,8 @@ int flom_resource_compare_name(const flom_resource_t *resource,
 
 
 
-int flom_resource_timeout(flom_resource_t *resource)
+int flom_resource_timeout(flom_resource_t *resource,
+                          struct timeval *next_deadline)
 {
     /* default behavior: nothing to do */
     FLOM_TRACE(("flom_resource_timeout\n"));

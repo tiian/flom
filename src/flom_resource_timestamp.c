@@ -62,6 +62,10 @@ int flom_resource_timestamp_can_lock(flom_resource_t *resource)
                 "total_quantity=%d, locked_quantity=%d\n",
                 resource->data.timestamp.total_quantity,
                 resource->data.timestamp.locked_quantity));
+    FLOM_TRACE(("flom_resource_timestamp_can_lock: "
+                "interval.tv_sec=%d, interval.tv_usec=%d\n",
+                resource->data.timestamp.interval.tv_sec,
+                resource->data.timestamp.interval.tv_usec));
     /* all the avaialable slots are already used */
     if (resource->data.timestamp.total_quantity -
         resource->data.timestamp.locked_quantity <= 0) {
@@ -72,12 +76,43 @@ int flom_resource_timestamp_can_lock(flom_resource_t *resource)
     /* check last released timestamp and current time */
     gettimeofday(&tv, NULL);
     FLOM_TRACE(("flom_resource_timestamp_can_lock: "
-                "tv.tv_sec=%d, last_timestamp.tv_sec=%d\n",
-                tv.tv_sec, resource->data.timestamp.last_timestamp.tv_sec));
+                "tv.tv_sec=%d, tv.tv_usec=%d\n", tv.tv_sec, tv.tv_usec));
     FLOM_TRACE(("flom_resource_timestamp_can_lock: "
-                "tv.tv_usec=%d, last_timestamp.tv_usec=%d\n",
-                tv.tv_usec, resource->data.timestamp.last_timestamp.tv_usec));
+                "last_timestamp.tv_sec=%d, last_timestamp.tv_usec=%d\n",
+                resource->data.timestamp.last_timestamp.tv_sec,
+                resource->data.timestamp.last_timestamp.tv_usec));
     /* check the minimum interval grain */
+    if (0 < resource->data.timestamp.interval.tv_usec) {
+        /* timestamp format contains fractions of second */
+        /* @@@ remove me
+        long secs = tv.tv_sec - resource->data.timestamp.last_timestamp.tv_sec;
+        long usecs = 1000000*secs +
+            tv.tv_usec - resource->data.timestamp.last_timestamp.tv_usec;
+        */
+        /* if seconds changed, return TRUE */
+        if (tv.tv_sec > resource->data.timestamp.last_timestamp.tv_sec) {
+            FLOM_TRACE(("flom_resource_timestamp_can_lock: TRUE, different "
+                        "second\n"));
+            return TRUE;
+        }
+        /* this point is reached ONLY if the current time is in the same
+           second of the last timestamp */
+        /* @@@ remove me
+        if (usecs/resource->data.timestamp.interval.tv_usec > 0) {
+        */
+        if (tv.tv_usec/resource->data.timestamp.interval.tv_usec >
+            resource->data.timestamp.last_timestamp.tv_usec/
+            resource->data.timestamp.interval.tv_usec) {
+            FLOM_TRACE(("flom_resource_timestamp_can_lock: TRUE, enought time "
+                        "interval (micro seconds)\n"));
+            return TRUE;
+        }
+        FLOM_TRACE(("flom_resource_timestamp_can_lock: FALSE, not enought "
+                    "time interval (micro seconds)\n"));
+        return FALSE;
+    }
+    /* this point is reached ONLY if the format does not contain fractions
+       of second */
     if (0 < resource->data.timestamp.interval.tv_sec) {
         /* timestamp format contains at least 1 second */
         if (tv.tv_sec/resource->data.timestamp.interval.tv_sec >
@@ -86,31 +121,46 @@ int flom_resource_timestamp_can_lock(flom_resource_t *resource)
             FLOM_TRACE(("flom_resource_timestamp_can_lock: TRUE, enought time "
                     "interval (seconds)\n"));
             return TRUE;
-        } else if ((tv.tv_sec/resource->data.timestamp.interval.tv_sec ==
-                    resource->data.timestamp.last_timestamp.tv_sec/
-                    resource->data.timestamp.interval.tv_sec) &&
-                   (tv.tv_usec >
-                    resource->data.timestamp.last_timestamp.tv_usec +
-                    resource->data.timestamp.interval.tv_usec)) {
-            FLOM_TRACE(("flom_resource_timestamp_can_lock: TRUE, enought time "
-                        "interval (micro seconds)\n"));
-            return TRUE;
         }
         FLOM_TRACE(("flom_resource_timestamp_can_lock: FALSE, not enought "
-                    "time interval\n"));
+                    "time interval (seconds)\n"));
         return FALSE;
-    } else
-        /* timestamp format contains only microseconds */
-        if (tv.tv_usec >
-            resource->data.timestamp.last_timestamp.tv_usec +
-            resource->data.timestamp.interval.tv_usec) {
-            FLOM_TRACE(("flom_resource_timestamp_can_lock: TRUE, enought time "
-                        "interval (micro seconds)\n"));
-            return TRUE;
-        }
-    FLOM_TRACE(("flom_resource_timestamp_can_lock: FALSE, not enought "
-                "time interval\n"));
+    }
+    FLOM_TRACE(("flom_resource_timestamp_can_lock: FALSE, "
+                "time interval is 0!\n"));
     return FALSE;
+}
+
+
+
+struct timeval flom_resource_timestamp_next_deadline(
+    flom_resource_t *resource)
+{
+    struct timeval ret;
+    
+    FLOM_TRACE(("flom_resource_timestamp_next_deadline: "
+                "last_timestamp.tv_sec=%d, last_timestamp.tv_usec=%d\n",
+                resource->data.timestamp.last_timestamp.tv_sec,
+                resource->data.timestamp.last_timestamp.tv_usec));
+    ret.tv_sec = 0;
+    ret.tv_usec = 0;
+    if (0 < resource->data.timestamp.interval.tv_sec)
+        ret.tv_sec = (resource->data.timestamp.last_timestamp.tv_sec /
+                      resource->data.timestamp.interval.tv_sec + 1) *
+            resource->data.timestamp.interval.tv_sec;
+    else
+        ret.tv_sec = resource->data.timestamp.last_timestamp.tv_sec;
+    if (0 < resource->data.timestamp.interval.tv_usec)
+        ret.tv_usec = (resource->data.timestamp.last_timestamp.tv_usec /
+                       resource->data.timestamp.interval.tv_usec + 1) *
+            resource->data.timestamp.interval.tv_usec;
+    if (999999 < ret.tv_usec) {
+        ret.tv_sec++;
+        ret.tv_usec -= 1000000;
+    }
+    FLOM_TRACE(("flom_resource_timestamp_next_deadline: "
+                "ret.tv_sec=%d, ret.tv_usec=%d\n", ret.tv_sec, ret.tv_usec));
+    return ret;
 }
 
 
@@ -377,6 +427,9 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
                 } else {
                     /* can't lock, enqueue */
                     if (can_wait) {
+                        /* compute next deadline */
+                        *next_deadline = flom_resource_timestamp_next_deadline(
+                            resource);
                         /* put this connection in waitings queue */
                         FLOM_TRACE(("flom_resource_timestamp_inmsg: "
                                     "lock can not be assigned to "
@@ -604,24 +657,36 @@ void flom_resource_timestamp_free(flom_resource_t *resource)
 
 
 
-int flom_resource_timestamp_timeout(flom_resource_t *resource)
+int flom_resource_timestamp_timeout(flom_resource_t *resource,
+                                    struct timeval *next_deadline)
 {
-    enum Exception { TIMESTAMP_WAITINGS_ERROR
+    enum Exception { QUEUE_IS_EMPTY
+                     , TIMESTAMP_WAITINGS_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_resource_timestamp_timeout\n"));
     TRY {
+        /* check if the queue is empty */
+        if (NULL == g_queue_peek_head(resource->data.timestamp.waitings)) {
+            FLOM_TRACE(("flom_resource_timestamp_timeout: waiting "
+                        "connection queue is empty, leaving...\n"));
+            THROW(QUEUE_IS_EMPTY);
+        }
         if (flom_resource_timestamp_can_lock(resource)) {
             /* check if some other clients can get a lock now */
             if (FLOM_RC_OK != (ret_cod = flom_resource_timestamp_waitings(
                                    resource)))
                 THROW(TIMESTAMP_WAITINGS_ERROR);
+            *next_deadline = flom_resource_timestamp_next_deadline(resource);
         }
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case QUEUE_IS_EMPTY:
+                ret_cod = FLOM_RC_OK;
+                break;
             case TIMESTAMP_WAITINGS_ERROR:
                 break;
             case NONE:

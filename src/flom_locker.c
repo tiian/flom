@@ -186,6 +186,9 @@ gpointer flom_locker_loop(gpointer data)
             if (FLOM_RC_OK != (ret_cod = flom_conns_set_events(
                                    &conns, POLLIN)))
                 THROW(CONNS_SET_EVENTS_ERROR);
+            FLOM_TRACE(("flom_locker_loop: "
+                        "next_deadline.tv_sec=%d, next_deadline.tv_usec=%d\n",
+                        next_deadline.tv_sec, next_deadline.tv_usec));
             /* compute time-out from next deadline as asked by the resource
                (in case the resource asked for a deadline...) */
             if (0 <= (timeout = flom_locker_loop_get_timeout(
@@ -230,7 +233,7 @@ gpointer flom_locker_loop(gpointer data)
                             "milliseconds\n", timeout));
                 /* calling timeout resource callback */
                 if (FLOM_RC_OK != (ret_cod = locker->resource.timeout(
-                                       &locker->resource)))
+                                       &locker->resource, &next_deadline)))
                     THROW(RESOURCE_TIMEOUT_ERROR);
                 if (1 == flom_conns_get_used(&conns)) {
                     locker->idle_periods++;
@@ -564,7 +567,7 @@ int flom_locker_loop_get_timeout(const struct timeval *next_deadline)
 
     gettimeofday(&now, NULL);
     diff = (next_deadline->tv_sec - now.tv_sec) * 1000 +
-        (next_deadline->tv_usec - now.tv_usec) / 1000;
+        (next_deadline->tv_usec - now.tv_usec) / 1000 + 1;
     FLOM_TRACE(("flom_locker_loop_get_timeout: "
                 "next_deadline->tv_sec=%d, next_deadline->tv_usec=%d, "
                 "now.tv_sec=%d, now.tv_usec=%d, diff=%d\n",

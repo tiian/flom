@@ -1,8 +1,7 @@
 Road map:
 
-flom_resource_timestamp_can_lock must be changed: it must take care of the
-number of current lockers and the last supplied timestamp to avoid duplication.
-
+check resource timestamp with parallel requests (2 or more clients): see how
+queing works
 
 unique timestamps (no two equal timestamps supplied): use a date like expression
 to describe the sequence; for example:

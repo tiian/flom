@@ -103,7 +103,7 @@ int flom_conn_init(flom_conn_t *obj, int domain, int sockfd, int type,
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
-    FLOM_TRACE(("\n"));
+    FLOM_TRACE(("flom_conn_init\n"));
     TRY {
         GMarkupParseContext *tmp_parser = NULL;
         if (NULL == obj)
