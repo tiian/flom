@@ -32,8 +32,9 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	usecase-hier.at \
 	usecase-lt.at.in \
 	usecase-num.at.in \
-	usecase-seq.at.in \
+	usecase-seq.at \
 	usecase-set.at.in \
+	usecase-tms.at \
 	scripts/*.sh
 
 api.at: api.at.in
@@ -108,11 +109,6 @@ usecase-num.at: usecase-num.at.in
 	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
 	$< >$@
 
-usecase-seq.at: usecase-seq.at.in
-	sed \
-	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
-	$< >$@
-
 usecase-set.at: usecase-set.at.in
 	sed \
 	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
@@ -157,7 +153,8 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/usecase-hier.at \
 	$(srcdir)/usecase-num.at \
 	$(srcdir)/usecase-seq.at \
-	$(srcdir)/usecase-set.at
+	$(srcdir)/usecase-set.at \
+	$(srcdir)/usecase-tms.at
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@
 

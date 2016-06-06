@@ -44,6 +44,7 @@ This is a brief list of the available features:
   3. numerical: pools of undifferentiated resources
   4. set: sets of differentiated resources
   5. sequence: arrays of transactional (or non transactional) sequences
+  6. timestamp: arrays of unique timestamp sequences
 
 FLoM central documentation site is hosted by SourceForge Wiki: 
 	https://sourceforge.net/p/flom/wiki/Home/
@@ -121,7 +122,7 @@ If you need some help (usage tricks, hints, etc...) please post a message in
 the forum: http://sourceforge.net/p/flom/discussion/
 If you think you have discovered a bug, please open an issue here:
 https://github.com/tiian/flom/issues
-If you avoided to send me an e-mail I would be happy: forum posts and tickets
+If you avoid to send me an e-mail I will be happy: forum posts and tickets
 can be seen by many people and I should not answer the same questions many
 times.
 

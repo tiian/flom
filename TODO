@@ -1,7 +1,9 @@
 Road map:
 
-check resource timestamp with parallel requests (2 or more clients): see how
-queing works
+Use case 19 (6/6) generates duplicates... :( 
+cat testsuite.dir/001/stdout | grep '^tmstmp'
+cat testsuite.dir/001/stdout | grep '^tmstmp' | sort -u
+cat testsuite.dir/001/stdout | grep '^tmstmp' | sort -u | wc -l
 
 unique timestamps (no two equal timestamps supplied): use a date like expression
 to describe the sequence; for example:
@@ -14,6 +16,7 @@ case tests for timestamp resources:
 - format that does not change at least once per hour
 
 document supported format specifiers: flom_resource_timestamp_init
+create a wiki page for the different resources: syntax and brief usage
 
 
 fix PHP for Ubuntu 16.04, see https://github.com/tiian/flom/issues/5
