@@ -6,13 +6,13 @@ AT_DATA([expout],
 [[5
 ]])
 AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom_test_exec5.sh 1 0 1 0 "-i 1000 -r _t_tmstmp%S#ff[3]" >>stdout &], [0], [ignore], [ignore])
-AT_CHECK([flom_test_exec5.sh 1 0 1 0 "-i 1000 -r _t_tmstmp%S#ff[3]" >>stdout &], [0], [ignore], [ignore])
-AT_CHECK([flom_test_exec5.sh 1 0 1 0 "-i 1000 -r _t_tmstmp%S#ff[3]" >>stdout &], [0], [ignore], [ignore])
-AT_CHECK([flom_test_exec5.sh 1 0 1 0 "-i 1000 -r _t_tmstmp%S#ff[3]" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 1 0 1 0 "-i 10000 -r _t_tmstmp%S#ff[3] -t /tmp/d1.trc -T c1.trc" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 1 0 1 0 "-i 10000 -r _t_tmstmp%S#ff[3] -t /tmp/d2.trc -T c2.trc" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 1 0 1 0 "-i 10000 -r _t_tmstmp%S#ff[3] -t /tmp/d3.trc -T c3.trc" >>stdout &], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 1 0 1 0 "-i 10000 -r _t_tmstmp%S#ff[3] -t /tmp/d4.trc -T c4.trc" >>stdout &], [0], [ignore], [ignore])
 # we must be sure, this flom command will be executed as the last one!
 AT_CHECK([sleep 1], [0], [ignore], [ignore])
-AT_CHECK([flom_test_exec5.sh 1 0 1 0 "-i 1000 -r _t_tmstmp%S#ff[3]" >>stdout], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec5.sh 1 0 1 0 "-i 10000 -r _t_tmstmp%S#ff[3] -t /tmp/d5.trc -T c5.trc" >>stdout], [0], [ignore], [ignore])
 AT_CHECK([cat stdout | grep '^tmstmp' | sort -u | wc -l], [0], [expout], [ignore])
 AT_CLEANUP
 

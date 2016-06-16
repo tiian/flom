@@ -14,7 +14,8 @@
 #
 # This section (configuration group) is related to tracing
 [@_CONFIG_GROUP_TRACE@]
-# Destination of trace messages produced by daemon (background) process
+# Destination of trace messages produced by daemon (background) process.
+# NOTE: it must an absolute path filename
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_DAEMONTRACEFILE@=/tmp/flom-daemon.trc
 # Destination of trace messages produced by command (foreground) process

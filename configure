@@ -17373,6 +17373,18 @@ fi
 
 done
 
+for ac_header in sys/file.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/file.h" "ac_cv_header_sys_file_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_file_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_FILE_H 1
+_ACEOF
+
+fi
+
+done
+
 for ac_header in sys/stat.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "sys/stat.h" "ac_cv_header_sys_stat_h" "$ac_includes_default"

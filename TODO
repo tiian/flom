@@ -1,9 +1,6 @@
 Road map:
 
-Use case 19 (6/6) generates duplicates... :( 
-cat testsuite.dir/001/stdout | grep '^tmstmp'
-cat testsuite.dir/001/stdout | grep '^tmstmp' | sort -u
-cat testsuite.dir/001/stdout | grep '^tmstmp' | sort -u | wc -l
+flom_listen_local : look at @@@ and clean the code with a dynamic file name!!!
 
 unique timestamps (no two equal timestamps supplied): use a date like expression
 to describe the sequence; for example:

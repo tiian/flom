@@ -143,6 +143,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'execvp' function returned an error condition";
         case FLOM_RC_FCNTL_ERROR:
             return "ERROR: 'fcntl' function returned an error condition";
+        case FLOM_RC_FLOCK_ERROR:
+            return "ERROR: 'flock' function returned an error condition";
         case FLOM_RC_FORK_ERROR:
             return "ERROR: 'fork' function returned an error condition";
         case FLOM_RC_GETADDRINFO_ERROR:
@@ -156,7 +158,8 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_GETSOCKOPT_ERROR:
             return "ERROR: 'getsockopt' function returned an error condition";
         case FLOM_RC_GETTIMEOFDAY_ERROR:
-            return "ERROR: 'gettimeofday' function returned an error condition";
+            return "ERROR: 'gettimeofday' function returned an error "
+                "condition";
         case FLOM_RC_INET_NTOP_ERROR:
             return "ERROR: 'inet_ntop' function returned an error condition";
         case FLOM_RC_LISTEN_ERROR:
@@ -166,6 +169,8 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_MALLOC_ERROR:
             return "ERROR: 'malloc'/'g_malloc' function returned an error "
                 "condition";
+        case FLOM_RC_OPEN_ERROR:
+            return "ERROR: 'open' function returned an error condition";
         case FLOM_RC_PIPE_ERROR:
             return "ERROR: 'pipe' function returned an error condition";
         case FLOM_RC_POLL_ERROR:

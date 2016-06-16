@@ -27,6 +27,9 @@
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 # include <netinet/in.h>
 #endif
@@ -41,6 +44,9 @@
 #endif
 #ifdef HAVE_SYSLOG_H
 # include <syslog.h>
+#endif
+#ifdef HAVE_SYS_FILE_H
+# include <sys/file.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 # include <sys/socket.h>
@@ -357,7 +363,9 @@ int flom_listen(flom_config_t *config, flom_conns_t *conns)
 
 int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
 {
-    enum Exception { SOCKET_ERROR
+    enum Exception { OPEN_ERROR
+                     , FLOCK_ERROR
+                     , SOCKET_ERROR
                      , UNLINK_ERROR
                      , BIND_ERROR
                      , LISTEN_ERROR
@@ -367,12 +375,22 @@ int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     int fd = 0;
+    int lock_fd; /* @@@ lock file descriptor */
     flom_conn_t *conn = NULL;
     
     FLOM_TRACE(("flom_listen_local\n"));
     TRY {
         struct sockaddr_un servaddr;
-            
+
+        /* @@@ */
+        /* exclusive lock must be obtained to a semaphore file */
+        if (-1 == (lock_fd = open("/tmp/flom-lock-file", O_CREAT,
+                                  S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |
+                                  S_IROTH | S_IWOTH)))
+            THROW(OPEN_ERROR);
+        if (-1 == flock(lock_fd, LOCK_EX | LOCK_NB))
+            THROW(FLOCK_ERROR);
+        
         if (-1 == (fd = socket(flom_conns_get_domain(conns), SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
         if (-1 == unlink(flom_config_get_socket_name(config)) &&
@@ -380,7 +398,8 @@ int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
             THROW(UNLINK_ERROR);
         memset(&servaddr, 0, sizeof(servaddr));
         servaddr.sun_family = flom_conns_get_domain(conns);
-        strcpy(servaddr.sun_path, flom_config_get_socket_name(config));
+        strncpy(servaddr.sun_path, flom_config_get_socket_name(config),
+                sizeof(servaddr.sun_path));
         if (-1 == bind(fd, (struct sockaddr *) &servaddr, sizeof(servaddr)))
             THROW(BIND_ERROR);
         if (-1 == listen(fd, LISTEN_BACKLOG))
@@ -407,6 +426,12 @@ int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OPEN_ERROR:
+                ret_cod = FLOM_RC_OPEN_ERROR;
+                break;
+            case FLOCK_ERROR:
+                ret_cod = FLOM_RC_FLOCK_ERROR;
+                break;
             case SOCKET_ERROR:
                 ret_cod = FLOM_RC_SOCKET_ERROR;
                 break;

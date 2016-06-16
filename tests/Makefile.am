@@ -160,4 +160,4 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 
 DISTCLEANFILES = atconfig
 CLEANFILES = api.at cmdopt.at incompopt.at tls.at usecase.at usecase-dist.at \
-	usecase-lt.at usecase-num.at usecase-seq.at usecase-set.at
+	usecase-lt.at usecase-num.at usecase-set.at

@@ -243,12 +243,21 @@ int flom_client_connect_local(flom_config_t *config,
                         FLOM_TRACE(("flom_client_connect_local: connection "
                                     "failed, activating a new daemon\n"));
                         /* daemon is not active, starting it... */
-                        if (FLOM_RC_OK != (
-                                ret_cod = flom_daemon(
-                                    config,
-                                    flom_tcp_get_sa_un(
-                                        flom_conn_get_tcp(conn))->sun_family)))
+                        ret_cod = flom_daemon(
+                            config, flom_tcp_get_sa_un(
+                                flom_conn_get_tcp(conn))->sun_family);
+                        /* if previous call returns FLOM_RC_FLOCK_ERROR
+                           there's probably another daemon that's starting */
+                        if (FLOM_RC_OK != ret_cod &&
+                            FLOM_RC_FLOCK_ERROR != ret_cod)
                             THROW(DAEMON_ERROR);
+                        if (FLOM_RC_FLOCK_ERROR == ret_cod) {
+                            FLOM_TRACE(("flom_client_connect_local: a new "
+                                        "daemon can not be started because "
+                                        "the synchronization file is already "
+                                        "locked, maybe another daemon is "
+                                        "starting..."));
+                        }
                         /* trying to connect again... */
                         if (-1 == connect(
                                 flom_tcp_get_sockfd(flom_conn_get_tcp(conn)),
