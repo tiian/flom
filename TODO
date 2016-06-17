@@ -1,12 +1,6 @@
 Road map:
 
-flom_listen_local : look at @@@ and clean the code with a dynamic file name!!!
-
-unique timestamps (no two equal timestamps supplied): use a date like expression
-to describe the sequence; for example:
-%I%M%S
-produces: 213105 213106 213209 ... but not: 213105 213105 even if two clients
-ask for a unique timestamp during the same second (the second client will wait)
+check multiple daemon bug with network socket (localhost)
 
 case tests for timestamp resources:
 - format invalid

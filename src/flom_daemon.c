@@ -363,7 +363,8 @@ int flom_listen(flom_config_t *config, flom_conns_t *conns)
 
 int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
 {
-    enum Exception { OPEN_ERROR
+    enum Exception { G_TRY_MALLOC_ERROR
+                     , OPEN_ERROR
                      , FLOCK_ERROR
                      , SOCKET_ERROR
                      , UNLINK_ERROR
@@ -375,21 +376,31 @@ int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     int fd = 0;
-    int lock_fd; /* @@@ lock file descriptor */
+    int lock_fd; /* lock file descriptor */
     flom_conn_t *conn = NULL;
+    gchar *lock_filename = NULL;
+    const char *lock_filename_suffix = ".lock";
     
     FLOM_TRACE(("flom_listen_local\n"));
     TRY {
         struct sockaddr_un servaddr;
 
-        /* @@@ */
+        if (NULL == (lock_filename = g_try_malloc0(
+                         strlen(flom_config_get_socket_name(config)) +
+                         strlen("lock_filename_suffix") + 1)))
+            THROW(G_TRY_MALLOC_ERROR);
+        strcpy(lock_filename, flom_config_get_socket_name(config));
+        strcat(lock_filename, lock_filename_suffix);
+        
         /* exclusive lock must be obtained to a semaphore file */
-        if (-1 == (lock_fd = open("/tmp/flom-lock-file", O_CREAT,
+        if (-1 == (lock_fd = open(lock_filename, O_CREAT,
                                   S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP |
                                   S_IROTH | S_IWOTH)))
             THROW(OPEN_ERROR);
         if (-1 == flock(lock_fd, LOCK_EX | LOCK_NB))
             THROW(FLOCK_ERROR);
+        /* lock file is never closed: daemon termination will close the file
+           and unlock it */
         
         if (-1 == (fd = socket(flom_conns_get_domain(conns), SOCK_STREAM, 0)))
             THROW(SOCKET_ERROR);
@@ -426,6 +437,9 @@ int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case G_TRY_MALLOC_ERROR:
+                ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
+                break;
             case OPEN_ERROR:
                 ret_cod = FLOM_RC_OPEN_ERROR;
                 break;
@@ -456,6 +470,9 @@ int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release lock filename */
+    if (NULL != lock_filename)
+        g_free(lock_filename);
     /* release conn if necessary */
     if (NULL != conn)
         flom_conn_delete(conn);
