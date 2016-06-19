@@ -1,10 +1,5 @@
 Road map:
 
-check multiple daemon bug with network socket (localhost)
-
-case tests for timestamp resources:
-- format invalid
-- format that does not change at least once per hour
 
 document supported format specifiers: flom_resource_timestamp_init
 create a wiki page for the different resources: syntax and brief usage

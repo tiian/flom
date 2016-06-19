@@ -321,7 +321,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	usecase-num.at.in \
 	usecase-seq.at \
 	usecase-set.at.in \
-	usecase-tms.at \
+	usecase-tms.at.in \
 	scripts/*.sh
 
 TESTSUITE = $(srcdir)/testsuite
@@ -329,7 +329,7 @@ AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 DISTCLEANFILES = atconfig
 CLEANFILES = api.at cmdopt.at incompopt.at tls.at usecase.at usecase-dist.at \
-	usecase-lt.at usecase-num.at usecase-set.at
+	usecase-lt.at usecase-num.at usecase-set.at usecase-tms.at
 
 all: all-recursive
 
@@ -786,6 +786,11 @@ usecase-lt.at: usecase-lt.at.in
 	-e 's|@_ES_RESOURCE_BUSY[@]|$(_ES_RESOURCE_BUSY)|g' \
 	-e 's|@_ES_REQUESTER_CANT_WAIT[@]|$(_ES_REQUESTER_CANT_WAIT)|g' \
 	-e 's|@NET_IFACE[@]|$(NET_IFACE)|g' \
+	$< >$@
+
+usecase-tms.at: usecase-tms.at.in
+	sed \
+	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
 	$< >$@
 
 check-local: atconfig atlocal $(TESTSUITE)

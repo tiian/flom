@@ -34,7 +34,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	usecase-num.at.in \
 	usecase-seq.at \
 	usecase-set.at.in \
-	usecase-tms.at \
+	usecase-tms.at.in \
 	scripts/*.sh
 
 api.at: api.at.in
@@ -127,6 +127,11 @@ usecase-lt.at: usecase-lt.at.in
 	-e 's|@NET_IFACE[@]|$(NET_IFACE)|g' \
 	$< >$@
 
+usecase-tms.at: usecase-tms.at.in
+	sed \
+	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
+	$< >$@
+
 TESTSUITE = $(srcdir)/testsuite
 
 check-local: atconfig atlocal $(TESTSUITE)
@@ -160,4 +165,4 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 
 DISTCLEANFILES = atconfig
 CLEANFILES = api.at cmdopt.at incompopt.at tls.at usecase.at usecase-dist.at \
-	usecase-lt.at usecase-num.at usecase-set.at
+	usecase-lt.at usecase-num.at usecase-set.at usecase-tms.at
