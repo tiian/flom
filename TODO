@@ -1,10 +1,5 @@
 Road map:
 
-
-document supported format specifiers: flom_resource_timestamp_init
-create a wiki page for the different resources: syntax and brief usage
-
-
 fix PHP for Ubuntu 16.04, see https://github.com/tiian/flom/issues/5
 
 implement a loop for connect/bind if bind returns an error: this should help
