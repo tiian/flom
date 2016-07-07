@@ -1,10 +1,12 @@
 Road map:
 
-fix PHP for Ubuntu 16.04, see https://github.com/tiian/flom/issues/5
-
 implement a loop for connect/bind if bind returns an error: this should help
 to reduce the race condition between a closing daemon and a starting client.
 See this thread: https://github.com/tiian/flom/issues/3
+
+fix PHP for Ubuntu 16.04, see https://github.com/tiian/flom/issues/5
+
+Other ideas.....
 
 "object" resources with a state, a memory area, managed by FLoM to transform it in a "state manager" other than a "lock manager"; for flom client, the object will be dumped/restored to/from file
 

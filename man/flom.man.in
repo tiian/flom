@@ -39,6 +39,12 @@ name of the resource used for enqueing (locking).
 
 \fBHierarchical resource\fP names are like \fBabsolute\fP path filenames using "@_DIR_FILE_SEPARATOR@" as the level delimiter (but a trailing delimiter is not allowed); examples: "@_DIR_FILE_SEPARATOR@apple", "@_DIR_FILE_SEPARATOR@apple@_DIR_FILE_SEPARATOR@pear" are valid names while "@_DIR_FILE_SEPARATOR@apple@_DIR_FILE_SEPARATOR@" and "@_DIR_FILE_SEPARATOR@apple@_DIR_FILE_SEPARATOR@pear@_DIR_FILE_SEPARATOR@" are \fBnot\fP valid names
 
+\fBSequence resource\fP names are composed by _s_ (non transactional) or _S_ (transactional) prefix and a simple resource name followed by an integer value enclosed in square brackets ("[ ]"); examples: "_s_foo[12]", "_S_bar[3]", "_s_RA123[23]". Numbers must be expressed using decimal base)
+
+\fBTimestamp resource\fP names are composed by the _t_ prefix followed by a timestamp format and by an integer value enclosed in square brackets ("[ ]"); examples: "_t_foo.%D.%T[4]", "_t_bar:%S#fff[1]". Numbers must be expressed using decimal base). 
+
+\fBAdditional information\fP can be retrieved from official wiki documentation: \fIhttp://sourceforge.net/p/flom/wiki/Home/\fP
+
 .TP
 .B -o, --resource-timeout=\fImilliseconds
 \fBdefault\fP (\fI-1\fP): maximum enqueue time if the resource is already locked by someone else; if the resource doesn't become free before \fItimeout milliseconds\fP the command will return. A negative value means "infinite timeout" and the command will wait until the resource will become free. If the value equals zero, in case of locked resource, the command will not wait.
