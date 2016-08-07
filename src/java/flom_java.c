@@ -37,6 +37,14 @@
 
 
 
+/*
+ * This is not an API and is not available in flom_handle.h; this definition
+ * has the only purpose to avoid a warning message
+ */
+int flom_init_check(void);
+
+
+
 /* Allocate a new FlomHandle (native struct) */
 JNIEXPORT jint JNICALL Java_org_tiian_flom_FlomHandle_newJNI(
     JNIEnv *env, jobject this_obj)

@@ -411,8 +411,11 @@ int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
         servaddr.sun_family = flom_conns_get_domain(conns);
         strncpy(servaddr.sun_path, flom_config_get_socket_name(config),
                 sizeof(servaddr.sun_path));
-        if (-1 == bind(fd, (struct sockaddr *) &servaddr, sizeof(servaddr)))
+        if (-1 == bind(fd, (struct sockaddr *) &servaddr, sizeof(servaddr))) {
+            syslog(LOG_ERR, FLOM_SYSLOG_FLM019E, errno, strerror(errno),
+                   "flom_listen_local");
             THROW(BIND_ERROR);
+        }
         if (-1 == listen(fd, LISTEN_BACKLOG))
             THROW(LISTEN_ERROR);
         
@@ -620,8 +623,11 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
         } /* switch (family) */
         FLOM_TRACE_SOCKADDR("flom_listen_tcp_automatic: binding address ",
                             sa, sa_len);
-        if (-1 == bind(fd, sa, sa_len))
+        if (-1 == bind(fd, sa, sa_len)) {
+            syslog(LOG_ERR, FLOM_SYSLOG_FLM019E, errno, strerror(errno),
+                   "flom_listen_tcp_automatic");
             THROW(BIND_ERROR);
+        }
         if (-1 ==listen(fd, 100))
             THROW(LISTEN_ERROR);
         /* retrieve address and port */

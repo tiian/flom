@@ -76,6 +76,7 @@ extern "C" {
 #define FLOM_SYSLOG_FLM016I "FLM016I the serving peer sent id '%s' for verb %d and step %d"
 #define FLOM_SYSLOG_FLM017E "FLM017E X.509 certificate error, SSL_get_verify_result returned %ld"
 #define FLOM_SYSLOG_FLM018E "FLM018E X.509 certificate error related to private key: %s"
+#define FLOM_SYSLOG_FLM019E "FLM019E 'bind' error %d ('%s') in function '%s'"
     
     
 
