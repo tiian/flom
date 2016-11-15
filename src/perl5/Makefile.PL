@@ -5,11 +5,6 @@
 #
 # Create a makefile for the Perl5 bindings.
 #
-# swig -perl5 -I.. flom.i
-# perl Makefile.PL
-# make
-# make install
-#
 # On Debian make sure these packages are installed:
 #
 #    pkg-config
