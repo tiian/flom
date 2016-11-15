@@ -160,6 +160,7 @@ AC_CONFIG_FILES([
   man/Makefile
   src/Makefile
   src/java/Makefile
+  src/perl5/Makefile
   src/php/Makefile
   src/python/Makefile
   tests/atlocal
