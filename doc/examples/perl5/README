@@ -1,0 +1,25 @@
+This directory contains Perl5 examples.
+
+After a complete installation procedure:
+
+    ./configure
+    make
+    sudo make install
+
+Check that the perl modules have been built and installed:
+
+    ls -la /usr/local/lib/perl/<version>/auto/Flom/*
+    ls -la /usr/local/lib/perl/<version>/Flom.pm
+
+Where <version> can be determined with this command:
+
+   perl -v
+
+Read the comments inside
+
+	basic.pl
+	advanced.pl
+	transactional.pl
+
+to understand how these perl programs can be executed.
+
