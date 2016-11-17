@@ -104,7 +104,7 @@ if (($rc = Flom::handle_lock($handle)) != Flom::RC_OK) {
 
 # step 9: sleep 5 seconds to allow program killing
 
-printf("The program is waiting 5 seconds: kill it with the [control]+[c] "
+printf("The program is waiting 5 seconds: kill it with the [control]+[c] " .
     "keystroke and restart it to verify resource rollback...\n");
 sleep(5);
 
