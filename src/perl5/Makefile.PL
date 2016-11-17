@@ -13,12 +13,13 @@
 
 use ExtUtils::MakeMaker;
 WriteMakefile(
-    'ABSTRACT' => 'Perl5 bindings for FLoM',
-    'AUTHOR'   => 'Kevin L. Esteb (kevin@kesteb.us)',
-    'VERSION'  => '1.3.4',
-    'LICENSE'  => 'GPL_2',
-    'NAME'     => 'Flom',
-    'LIBS'     => '-lglib-2.0 -lflom',
-    'OBJECT'   => 'flom_wrap.o'
+    'ABSTRACT'       => 'Perl5 bindings for FLoM',
+    'AUTHOR'         => 'Kevin L. Esteb (kevin@kesteb.us)',
+    'VERSION'        => '1.3.4',
+    'LICENSE'        => 'GPL_2',
+    'NAME'           => 'Flom',
+    'LIBS'           => '-lglib-2.0 -lflom',
+    'OBJECT'         => 'flom_wrap.o',
+    'FIRST_MAKEFILE' => 'builder'
 );
 

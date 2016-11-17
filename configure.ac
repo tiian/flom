@@ -148,6 +148,7 @@ AC_CONFIG_FILES([
   doc/Makefile
   doc/examples/Makefile
   doc/examples/java/Makefile
+  doc/examples/perl5/Makefile
   doc/examples/php/Makefile
   doc/examples/python/Makefile
   doc/html/Makefile
@@ -318,6 +319,25 @@ else
 	PYTHONAPI="no"
 fi
 AM_CONDITIONAL([COND_PYTHONAPI], [test "$PYTHONAPI" = "yes"])
+
+# Checking the availability of Perl5 tools
+AC_CHECK_PROG(HAVE_PERL, [perl], [yes], [no])
+AC_CHECK_PROG(HAVE_PERL_CONFIG, [perl-config], [yes], [no])
+# Build Perl wrapper?
+AC_ARG_ENABLE([perl],
+	AS_HELP_STRING([--disable-perl],
+		[do not prepare Perl binding API]),
+	[PERL="no"], [PERL="yes"])
+# Perl stuff is conditional
+if test "$HAVE_PERL" = "yes" -a "$HAVE_PERL_CONFIG" = "yes" -a "$PERL" = "yes" -a "$SWIG" != "noswig"
+then
+	PERLAPI="yes"
+	PERL_INCLUDES=$(perl-config --includes)
+else
+	PERLAPI="no"
+fi
+AM_CONDITIONAL([COND_PERLAPI], [test "$PERLAPI" = "yes"])
+
 
 AC_CHECK_PROG(HAVE_DBUS_UUIDGEN, [dbus-uuidgen], [yes], [no])
 if test "$HAVE_DBUS_UUIDGEN" = "no"
