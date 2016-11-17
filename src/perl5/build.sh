@@ -16,10 +16,10 @@ sed -i 's/sub FLOM_/sub /g' Flom.pm
 # let perl create the makefile
 #
 perl Makefile.PL
-make
-make test
+make -f builder
+make -f builder test
 #
 echo ""
-echo "switch to root and run \"make install\""
+echo "switch to root and run \"make -f builder install\""
 echo ""
 #
