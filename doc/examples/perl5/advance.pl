@@ -6,6 +6,11 @@
 #
 # a port of advance_dynamic.c
 #
+# usage:
+#    flom -s /tmp/my_socket_name -d -1 -- true
+#    export FLOM_TRACE_MASK=0x80000
+#    ./advance.pl
+#
 
 use strict;
 use warnings;

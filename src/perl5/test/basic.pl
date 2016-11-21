@@ -6,6 +6,11 @@
 #
 # a port of basic_dynamic.c
 #
+# usage:
+#    flom -d -1 -- true
+#    export FLOM_TRACE_MASK=0x80000
+#    ./basic.pl
+#
 
 use strict;
 use warnings;
