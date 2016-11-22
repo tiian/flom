@@ -1,15 +1,60 @@
 #!/usr/bin/perl
 #
-# File: transactional.pl
-# By  : Kevin L. Esteb
-# Date: 15-Nov-2016
+# Copyright (c) 2016, Kevin L. Esteb <kevin@kesteb.us>
+# All rights reserved.
 #
-# a port of transactional.c
+# This file is part of FLoM.
 #
-# usage:
-#    flom -d -1 -- true
-#    export FLOM_TRACE_MASK=0x80000
-#    ./transactional.pl
+# FLoM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as published
+# by the Free Software Foundation.
+#
+# FLoM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
+#
+# -----------------------------------------------------------------------
+#
+# This example program shows the usage of libflom API library from a
+# Python program; it uses a resource set instead of the default resource and
+# displays the name of the obtained element.
+#
+# These are the steps:
+# 1. create and allocate an object of type flom_handle_t
+# 2. initialize the allocated handle using function Flom::handle_init()
+# 3a. set a non default resource name (a name valid for a trasactional
+#     sequence resource)
+# 3b. set a non default resource idle lifespan
+# 4. acquire a lock using method Flom::handle_lock()
+# 5. release the lock using method Flom::handle_unlock_rollback()
+# 6. acquire a new lock using method Floma::handle_lock() and verifying the
+#    FLoM daemon returns the same value
+# 7. release the lock using method Flom::handle_unlock()
+# 8. acquire a new lock using method Flom::handle_lock() and verifying the
+#    FLoM daemon returnes a different value
+# 9. sleep 5 seconds to allow program killing
+# 10. release the lock using method Flom::handle_unlock()
+# 11. clean-up the allocated handle using function Flom::handle_clean()
+# 12. deallocate the handle object
+#
+# Execution command:
+#
+#     perl transactional.pl
+# 
+# Note: this program needs an already started FLoM daemon, for instance:
+#
+#     flom -d -1 -- true
+#     perl transactional.pl
+#
+# The program itself is not verbose, but you might activate tracing if you
+# were interested to understand what's happen:
+#
+#     export FLOM_TRACE_MASK=0x80000
+#     perl transactional.pl
 #
 
 use strict;

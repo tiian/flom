@@ -1,4 +1,4 @@
-#!perl -T
+#!perl
 use strict;
 use warnings FATAL => 'all';
 
@@ -15,6 +15,11 @@ unless ( $ENV{RELEASE_TESTING} ) {
 
 }
 
+# starting up flom - making some assumptions here
+
+system('pkill flom');
+system('flom -d -1 -- true');
+
 my $handle;
 
 ok( $handle = Flom::flom_handle_t->new );
@@ -24,4 +29,6 @@ ok( Flom::handle_init($handle) == Flom::RC_OK );
 ok( Flom::handle_lock($handle) == Flom::RC_OK );
 ok( Flom::handle_unlock($handle) == Flom::RC_OK );
 ok( Flom::handle_clean($handle) == Flom::RC_OK );
+
+system('pkill flom');
 
