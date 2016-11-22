@@ -343,6 +343,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
 all-am: Makefile all-local
 installdirs:
@@ -398,7 +399,7 @@ install-info: install-info-am
 
 install-man:
 
-installcheck-am:
+installcheck-am: installcheck-local
 
 maintainer-clean: maintainer-clean-am
 	-rm -f Makefile
@@ -420,31 +421,51 @@ uninstall-am: uninstall-info-am
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 
-.PHONY: all all-am all-local check check-am clean clean-generic \
-	clean-libtool clean-local distclean distclean-generic \
-	distclean-libtool distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-exec \
-	install-exec-am install-exec-hook install-info install-info-am \
-	install-man install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am uninstall uninstall-am uninstall-hook \
-	uninstall-info-am
+.PHONY: all all-am all-local check check-am check-local clean \
+	clean-generic clean-libtool clean-local distclean \
+	distclean-generic distclean-libtool distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am install-exec-hook \
+	install-info install-info-am install-man install-strip \
+	installcheck installcheck-am installcheck-local installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	uninstall uninstall-am uninstall-hook uninstall-info-am
 
 
-flom_wrap.c: flom.i ../flom_errors.h.in ../flom_types.h ../flom_handle.h
+flom_wrap.o: flom.i ../flom_errors.h.in ../flom_types.h ../flom_handle.h
 	$(SWIG) -perl5 -const -I.. flom.i
 	sed -i 's/*flom_/*/g' Flom.pm
 	sed -i 's/sub FLOM_/sub /g' Flom.pm    
 	perl Makefile.PL
 	make -f builder
 
-all-local: flom_wrap.c
+Makefile.PL: Makefile.PL.in ../../config.status
+	sed \
+	-e 's|@GLIB2_PYTHON[@]|$(GLIB2_PYTHON)|g' \
+	-e 's|@GTHREAD2_PYTHON[@]|$(GTHREAD2_PYTHON)|g' \
+	-e 's|@DBUS1_PYTHON[@]|$(DBUS1_PYTHON)|g' \
+	-e 's|@OPENSSL_PYTHON[@]|$(OPENSSL_PYTHON)|g' \
+	-e 's|@CRYPTO_PYTHON[@]|$(CRYPTO_PYTHON)|g' \
+	-e 's|@PACKAGE_BUGREPORT[@]|$(PACKAGE_BUGREPORT)|g' \
+	-e 's|@PACKAGE_NAME[@]|$(PACKAGE_NAME)|g' \
+	-e 's|@PACKAGE_STRING[@]|$(PACKAGE_STRING)|g' \
+	-e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
+	$< >$@
+
+all-local: Makefile.PL flom_wrap.o
+
+check-local:
+	make -f builder test
 
 clean-local:
 	make -f builder realclean
+	rm -f Makefile.PL
 	rm -f Flom.pm
 	rm -f flom_wrap.*
+
+installcheck-local:
+	make -f builder test
 
 install-exec-hook:
 	make -f builder install

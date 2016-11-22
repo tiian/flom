@@ -10,15 +10,28 @@
 #    pkg-config
 #    libgnome2-dev
 #
+#
+# retrieve values from configure
+#
+
+my $libs;
+my $version = '@PACKAGE_VERSION@';
+
+$libs  = ' -l@GLIB2_PYTHON@';
+$libs .= ' -l@GTHREAD2_PYTHON@';
+$libs .= ' -l@DBUS1_PYTHON@';
+$libs .= ' -l@OPENSSL_PYTHON@';
+$libs .= ' -l@CRYPTO_PYTHON@';
+$libs .= ' -lflom';
 
 use ExtUtils::MakeMaker;
 WriteMakefile(
     'ABSTRACT'       => 'Perl5 bindings for FLoM',
     'AUTHOR'         => 'Kevin L. Esteb (kevin@kesteb.us)',
-    'VERSION'        => '1.3.4',
+    'VERSION'        => $version,
     'LICENSE'        => 'GPL_2',
     'NAME'           => 'Flom',
-    'LIBS'           => '-lglib-2.0 -lflom',
+    'LIBS'           => $libs,
     'OBJECT'         => 'flom_wrap.o',
     'FIRST_MAKEFILE' => 'builder'
 );
