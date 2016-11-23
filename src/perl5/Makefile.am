@@ -2,9 +2,15 @@
 flom_wrap.o: flom.i ../flom_errors.h.in ../flom_types.h ../flom_handle.h
 	$(SWIG) -perl5 -const -I.. flom.i
 	sed -i 's/*flom_/*/g' Flom.pm
-	sed -i 's/sub FLOM_/sub /g' Flom.pm    
+	sed -i 's/sub FLOM_/sub /g' Flom.pm
+	mv Flom.pm lib/
 	perl Makefile.PL
 	make -f builder
+
+README: README.in ../../config.status
+	sed \
+	-e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
+	$< >$@
 
 Makefile.PL: Makefile.PL.in ../../config.status
 	sed \
@@ -19,7 +25,7 @@ Makefile.PL: Makefile.PL.in ../../config.status
 	-e 's|@PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g' \
 	$< >$@
 
-all-local: Makefile.PL flom_wrap.o
+all-local: Makefile.PL README flom_wrap.o 
 
 check-local:
 	make -f builder test
@@ -27,6 +33,7 @@ check-local:
 clean-local:
 	make -f builder realclean
 	rm -f Makefile.PL
+	rm -f README
 	rm -f Flom.pm
 	rm -f flom_wrap.*
 
@@ -35,6 +42,9 @@ installcheck-local:
 
 install-exec-hook:
 	make -f builder install
+
+dist:
+	make -f builder dist
 
 uninstall-hook:
 

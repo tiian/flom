@@ -1,0 +1,6 @@
+Revision history for Perl extenstion Flom.
+
+1.3.4-dev 22-Nov-2016 Kevin L. Esteb
+    - initial release of Perl bindings for FLoM
+      this packge is auto generated from the FLoM build system
+

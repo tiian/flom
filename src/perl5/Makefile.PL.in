@@ -1,5 +1,5 @@
 #
-# File: Makefile.PL
+# File: Makefile.PL.in
 # By  : Kevin L. Esteb (kevin@kesteb.us)
 # Date: 11-Nov-2016
 #
@@ -10,8 +10,7 @@
 #    pkg-config
 #    libgnome2-dev
 #
-#
-# retrieve values from configure
+# retrieve values from autoconf
 #
 
 my $libs;
@@ -24,15 +23,28 @@ $libs .= ' -l@OPENSSL_PYTHON@';
 $libs .= ' -l@CRYPTO_PYTHON@';
 $libs .= ' -lflom';
 
+# create the makefile
+
 use ExtUtils::MakeMaker;
 WriteMakefile(
-    'ABSTRACT'       => 'Perl5 bindings for FLoM',
-    'AUTHOR'         => 'Kevin L. Esteb (kevin@kesteb.us)',
-    'VERSION'        => $version,
-    'LICENSE'        => 'GPL_2',
-    'NAME'           => 'Flom',
-    'LIBS'           => $libs,
-    'OBJECT'         => 'flom_wrap.o',
-    'FIRST_MAKEFILE' => 'builder'
+    'ABSTRACT'         => 'Perl5 bindings for FLoM',
+    'AUTHOR'           => 'Kevin L. Esteb (kevin@kesteb.us)',
+    'VERSION'          => $version,
+    'LICENSE'          => 'GPL_2',
+    'NAME'             => 'Flom',
+    'LIBS'             => $libs,
+    'OBJECT'           => 'flom_wrap.o',
+    'FIRST_MAKEFILE'   => 'builder',
+    'MIN_PERL_VERSION' => '5.008008',
+    'META_MERGE' => {
+        'meta-spec' => { version => 2 },
+        'resources' => {
+            repostiory => {
+                type => 'git',
+                url  => 'https://github.com/tiian/flom',
+                web  => 'https://sourceforge.net/projects/flom/'
+            }
+        }
+    }
 );
 
