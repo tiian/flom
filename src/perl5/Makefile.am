@@ -34,7 +34,7 @@ clean-local:
 	make -f builder realclean
 	rm -f Makefile.PL
 	rm -f README
-	rm -f Flom.pm
+	rm -f lib/Flom.pm
 	rm -f flom_wrap.*
 
 installcheck-local:
