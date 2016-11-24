@@ -16,12 +16,12 @@
 my $libs;
 my $version = '@PACKAGE_VERSION@';
 
-$libs  = ' -l@GLIB2_PYTHON@';
-$libs .= ' -l@GTHREAD2_PYTHON@';
-$libs .= ' -l@DBUS1_PYTHON@';
-$libs .= ' -l@OPENSSL_PYTHON@';
-$libs .= ' -l@CRYPTO_PYTHON@';
-$libs .= ' -lflom';
+$libs  = ' -l@GLIB2_PERL@';
+$libs .= ' -l@GTHREAD2_PERL@';
+$libs .= ' -l@DBUS1_PERL@';
+$libs .= ' -l@OPENSSL_PERL@';
+$libs .= ' -l@CRYPTO_PERL@';
+$libs .= ' -l@_FLOM_PREFIX@';
 
 # create the makefile
 

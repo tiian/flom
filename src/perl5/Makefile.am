@@ -14,11 +14,12 @@ README: README.in ../../config.status
 
 Makefile.PL: Makefile.PL.in ../../config.status
 	sed \
-	-e 's|@GLIB2_PYTHON[@]|$(GLIB2_PYTHON)|g' \
-	-e 's|@GTHREAD2_PYTHON[@]|$(GTHREAD2_PYTHON)|g' \
-	-e 's|@DBUS1_PYTHON[@]|$(DBUS1_PYTHON)|g' \
-	-e 's|@OPENSSL_PYTHON[@]|$(OPENSSL_PYTHON)|g' \
-	-e 's|@CRYPTO_PYTHON[@]|$(CRYPTO_PYTHON)|g' \
+        -e 's|@_FLOM_PREFIX[@]|$(_FLOM_PREFIX)|g' \
+	-e 's|@GLIB2_PERL[@]|$(GLIB2_PERL)|g' \
+	-e 's|@GTHREAD2_PERL[@]|$(GTHREAD2_PERL)|g' \
+	-e 's|@DBUS1_PERL[@]|$(DBUS1_PERL)|g' \
+	-e 's|@OPENSSL_PERL[@]|$(OPENSSL_PERL)|g' \
+	-e 's|@CRYPTO_PERL[@]|$(CRYPTO_PERL)|g' \
 	-e 's|@PACKAGE_BUGREPORT[@]|$(PACKAGE_BUGREPORT)|g' \
 	-e 's|@PACKAGE_NAME[@]|$(PACKAGE_NAME)|g' \
 	-e 's|@PACKAGE_STRING[@]|$(PACKAGE_STRING)|g' \

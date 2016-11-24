@@ -205,16 +205,22 @@ fi
 # here: https://developer.gnome.org/glib/2.32/glib-compiling.html
 # Until glib 2.30, gthread must be specified as documented here:
 # https://developer.gnome.org/glib/2.30/glib-compiling.html
+GLIB2_PERL=""
+GTHREAD2_PERL=""
 GLIB2_PYTHON=""
 GTHREAD2_PYTHON=""
 pkg-config --atleast-version=2.32 glib-2.0
 if test $? -eq 0
 then
 	PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.32])
+	GLIB2_PERL="glib-2.0"
+	GTHREAD2_PERL="glib-2.0"
 	GLIB2_PYTHON="glib-2.0"
 	GTHREAD2_PYTHON="glib-2.0"
 else
 	PKG_CHECK_MODULES([GLIB2], [gthread-2.0 >= 2.22])
+	GLIB2_PERL="glib-2.0"
+	GTHREAD2_PERL="gthread-2.0"
 	GLIB2_PYTHON="glib-2.0"
 	GTHREAD2_PYTHON="gthread-2.0"
 fi
@@ -222,11 +228,13 @@ CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
 #GLIB2_LIBS automatically set by PKG_CHECK_MODULES macro
 
 # DBUS check
+DBUS1_PERL=""
 DBUS1_PYTHON=""
 pkg-config --atleast-version=1.2.16 dbus-1
 if test $? -eq 0
 then
 	PKG_CHECK_MODULES([DBUS1], [dbus-1 >= 1.2.16])
+	DBUS1_PERL="dbus-1"
 	DBUS1_PYTHON="dbus-1"
 	CPPFLAGS="$CPPFLAGS $DBUS1_CFLAGS"
 else
@@ -234,12 +242,16 @@ else
 fi
 
 # OpenSSL check
+OPENSSL_PERL=""
+CRYPTO_PERL=""
 OPENSSL_PYTHON=""
 CRYPTO_PYTHON=""
 pkg-config --atleast-version=0.9.8k openssl
 if test $? -eq 0
 then
 	PKG_CHECK_MODULES([OPENSSL], [openssl >= 0.9.8k])
+	OPENSSL_PERL="ssl"
+	CRYPTO_PERL="crypto"
 	OPENSSL_PYTHON="ssl"
 	CRYPTO_PYTHON="crypto"
 	CPPFLAGS="$CPPFLAGS $OPENSSL_CFLAGS"
@@ -282,6 +294,22 @@ else
 fi
 AM_CONDITIONAL([COND_JAVAAPI], [test "$JAVAAPI" = "yes"])
 
+# Checking the availability of Perl5 tools
+AC_CHECK_PROG(HAVE_PERL, [perl], [yes], [no])
+# Build Perl wrapper?
+AC_ARG_ENABLE([perl],
+	AS_HELP_STRING([--disable-perl],
+		[do not prepare Perl binding API]),
+	[PERL="no"], [PERL="yes"])
+# Perl stuff is conditional
+if test "$HAVE_PERL" = "yes" -a "$PERL" = "yes" -a "$SWIG" != "noswig"
+then
+	PERLAPI="yes"
+else
+	PERLAPI="no"
+fi
+AM_CONDITIONAL([COND_PERLAPI], [test "$PERLAPI" = "yes"])
+
 # Checking the availability of PHP tools
 AC_CHECK_PROG(HAVE_PHP, [php], [yes], [no])
 AC_CHECK_PROG(HAVE_PHP_CONFIG, [php-config], [yes], [no])
@@ -319,24 +347,6 @@ else
 	PYTHONAPI="no"
 fi
 AM_CONDITIONAL([COND_PYTHONAPI], [test "$PYTHONAPI" = "yes"])
-
-# Checking the availability of Perl5 tools
-AC_CHECK_PROG(HAVE_PERL, [perl], [yes], [no])
-AC_CHECK_PROG(HAVE_PERL_CONFIG, [perl-config], [yes], [no])
-# Build Perl wrapper?
-AC_ARG_ENABLE([perl],
-	AS_HELP_STRING([--disable-perl],
-		[do not prepare Perl binding API]),
-	[PERL="no"], [PERL="yes"])
-# Perl stuff is conditional
-if test "$HAVE_PERL" = "yes" -a "$HAVE_PERL_CONFIG" = "yes" -a "$PERL" = "yes" -a "$SWIG" != "noswig"
-then
-	PERLAPI="yes"
-	PERL_INCLUDES=$(perl-config --includes)
-else
-	PERLAPI="no"
-fi
-AM_CONDITIONAL([COND_PERLAPI], [test "$PERLAPI" = "yes"])
 
 
 AC_CHECK_PROG(HAVE_DBUS_UUIDGEN, [dbus-uuidgen], [yes], [no])
@@ -427,6 +437,11 @@ AC_SUBST(PHP_INCLUDES)
 AC_SUBST(PHP_INSTALL_PATH)
 AC_SUBST(PYTHONAPI)
 AC_SUBST(PYTHON_INCLUDES)
+AC_SUBST(GLIB2_PERL)
+AC_SUBST(GTHREAD2_PERL)
+AC_SUBST(DBUS1_PERL)
+AC_SUBST(OPENSSL_PERL)
+AC_SUBST(CRYPTO_PERL)
 AC_SUBST(GLIB2_PYTHON)
 AC_SUBST(GTHREAD2_PYTHON)
 AC_SUBST(DBUS1_PYTHON)

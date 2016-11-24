@@ -1,6 +1,9 @@
 if COND_JAVAAPI
   MAYBE_JAVAAPI = java
 endif
+if COND_PERLAPI
+  MAYBE_PERLAPI = perl5
+endif
 if COND_PHPAPI
   MAYBE_PHPAPI = php
 endif

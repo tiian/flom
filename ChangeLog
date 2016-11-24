@@ -1,5 +1,7 @@
 LOG:
 
+         - 1.3.4 Perl5 client API (Kevin L. Esteb contribution)
+
 20160707 - 1.3.3 (unique) timestamp resource
 	Implementation of timestamp resources:
 	_t_<format>[number] where format uses the same syntax used by format

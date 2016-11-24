@@ -809,6 +809,11 @@ OPENSSL_PYTHON
 DBUS1_PYTHON
 GTHREAD2_PYTHON
 GLIB2_PYTHON
+CRYPTO_PERL
+OPENSSL_PERL
+DBUS1_PERL
+GTHREAD2_PERL
+GLIB2_PERL
 PYTHON_INCLUDES
 PYTHONAPI
 PHP_INSTALL_PATH
@@ -820,10 +825,6 @@ USER
 GTHREAD2_LIBS
 NET_IFACE
 HAVE_DBUS_UUIDGEN
-COND_PERLAPI_FALSE
-COND_PERLAPI_TRUE
-HAVE_PERL_CONFIG
-HAVE_PERL
 COND_PYTHONAPI_FALSE
 COND_PYTHONAPI_TRUE
 HAVE_PYTHON_CONFIG
@@ -832,6 +833,9 @@ COND_PHPAPI_FALSE
 COND_PHPAPI_TRUE
 HAVE_PHP_CONFIG
 HAVE_PHP
+COND_PERLAPI_FALSE
+COND_PERLAPI_TRUE
+HAVE_PERL
 COND_JAVAAPI_FALSE
 COND_JAVAAPI_TRUE
 _ACJNI_JAVAC
@@ -977,9 +981,9 @@ enable_libtool_lock
 enable_trace
 enable_cpp
 enable_java
+enable_perl
 enable_php
 enable_python
-enable_perl
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1644,9 +1648,9 @@ Optional Packages:
   --disable-trace         disable trace feature (not suggested)
   --disable-cpp           do not prepare C++ API
   --disable-java          do not prepare Java binding API
+  --disable-perl          do not prepare Perl binding API
   --disable-php           do not prepare PHP binding API
   --disable-python        do not prepare Python binding API
-  --disable-perl          do not prepare Perl binding API
 
 Some influential environment variables:
   CC          C compiler command
@@ -4972,13 +4976,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4975: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4979: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4978: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4982: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4981: output\"" >&5)
+  (eval echo "\"\$as_me:4985: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6184,7 +6188,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6187 "configure"' > conftest.$ac_ext
+  echo '#line 6191 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7714,11 +7718,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7717: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7721: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7721: \$? = $ac_status" >&5
+   echo "$as_me:7725: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8053,11 +8057,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8056: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8060: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8060: \$? = $ac_status" >&5
+   echo "$as_me:8064: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8158,11 +8162,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8161: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8165: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8165: \$? = $ac_status" >&5
+   echo "$as_me:8169: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8213,11 +8217,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8216: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8220: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8220: \$? = $ac_status" >&5
+   echo "$as_me:8224: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10597,7 +10601,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10600 "configure"
+#line 10604 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10693,7 +10697,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10696 "configure"
+#line 10700 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14600,11 +14604,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14603: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14607: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14607: \$? = $ac_status" >&5
+   echo "$as_me:14611: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14699,11 +14703,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14702: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14706: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14706: \$? = $ac_status" >&5
+   echo "$as_me:14710: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14751,11 +14755,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14754: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14758: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14758: \$? = $ac_status" >&5
+   echo "$as_me:14762: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15839,6 +15843,8 @@ fi
 # here: https://developer.gnome.org/glib/2.32/glib-compiling.html
 # Until glib 2.30, gthread must be specified as documented here:
 # https://developer.gnome.org/glib/2.30/glib-compiling.html
+GLIB2_PERL=""
+GTHREAD2_PERL=""
 GLIB2_PYTHON=""
 GTHREAD2_PYTHON=""
 pkg-config --atleast-version=2.32 glib-2.0
@@ -16050,6 +16056,8 @@ else
 $as_echo "yes" >&6; }
 	:
 fi
+	GLIB2_PERL="glib-2.0"
+	GTHREAD2_PERL="glib-2.0"
 	GLIB2_PYTHON="glib-2.0"
 	GTHREAD2_PYTHON="glib-2.0"
 else
@@ -16143,6 +16151,8 @@ else
 $as_echo "yes" >&6; }
 	:
 fi
+	GLIB2_PERL="glib-2.0"
+	GTHREAD2_PERL="gthread-2.0"
 	GLIB2_PYTHON="glib-2.0"
 	GTHREAD2_PYTHON="gthread-2.0"
 fi
@@ -16150,6 +16160,7 @@ CPPFLAGS="$CPPFLAGS $GLIB2_CFLAGS"
 #GLIB2_LIBS automatically set by PKG_CHECK_MODULES macro
 
 # DBUS check
+DBUS1_PERL=""
 DBUS1_PYTHON=""
 pkg-config --atleast-version=1.2.16 dbus-1
 if test $? -eq 0
@@ -16244,6 +16255,7 @@ else
 $as_echo "yes" >&6; }
 	:
 fi
+	DBUS1_PERL="dbus-1"
 	DBUS1_PYTHON="dbus-1"
 	CPPFLAGS="$CPPFLAGS $DBUS1_CFLAGS"
 else
@@ -16251,6 +16263,8 @@ else
 fi
 
 # OpenSSL check
+OPENSSL_PERL=""
+CRYPTO_PERL=""
 OPENSSL_PYTHON=""
 CRYPTO_PYTHON=""
 pkg-config --atleast-version=0.9.8k openssl
@@ -16346,6 +16360,8 @@ else
 $as_echo "yes" >&6; }
 	:
 fi
+	OPENSSL_PERL="ssl"
+	CRYPTO_PERL="crypto"
 	OPENSSL_PYTHON="ssl"
 	CRYPTO_PYTHON="crypto"
 	CPPFLAGS="$CPPFLAGS $OPENSSL_CFLAGS"
@@ -16840,6 +16856,69 @@ else
 fi
 
 
+# Checking the availability of Perl5 tools
+# Extract the first word of "perl", so it can be a program name with args.
+set dummy perl; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_prog_HAVE_PERL+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$HAVE_PERL"; then
+  ac_cv_prog_HAVE_PERL="$HAVE_PERL" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_HAVE_PERL="yes"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_HAVE_PERL" && ac_cv_prog_HAVE_PERL="no"
+fi
+fi
+HAVE_PERL=$ac_cv_prog_HAVE_PERL
+if test -n "$HAVE_PERL"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HAVE_PERL" >&5
+$as_echo "$HAVE_PERL" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+# Build Perl wrapper?
+# Check whether --enable-perl was given.
+if test "${enable_perl+set}" = set; then :
+  enableval=$enable_perl; PERL="no"
+else
+  PERL="yes"
+fi
+
+# Perl stuff is conditional
+if test "$HAVE_PERL" = "yes" -a "$PERL" = "yes" -a "$SWIG" != "noswig"
+then
+	PERLAPI="yes"
+else
+	PERLAPI="no"
+fi
+ if test "$PERLAPI" = "yes"; then
+  COND_PERLAPI_TRUE=
+  COND_PERLAPI_FALSE='#'
+else
+  COND_PERLAPI_TRUE='#'
+  COND_PERLAPI_FALSE=
+fi
+
+
 # Checking the availability of PHP tools
 # Extract the first word of "php", so it can be a program name with args.
 set dummy php; ac_word=$2
@@ -17043,108 +17122,6 @@ fi
 else
   COND_PYTHONAPI_TRUE='#'
   COND_PYTHONAPI_FALSE=
-fi
-
-
-# Checking the availability of Perl5 tools
-# Extract the first word of "perl", so it can be a program name with args.
-set dummy perl; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_HAVE_PERL+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$HAVE_PERL"; then
-  ac_cv_prog_HAVE_PERL="$HAVE_PERL" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_HAVE_PERL="yes"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_HAVE_PERL" && ac_cv_prog_HAVE_PERL="no"
-fi
-fi
-HAVE_PERL=$ac_cv_prog_HAVE_PERL
-if test -n "$HAVE_PERL"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HAVE_PERL" >&5
-$as_echo "$HAVE_PERL" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-# Extract the first word of "perl-config", so it can be a program name with args.
-set dummy perl-config; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_prog_HAVE_PERL_CONFIG+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$HAVE_PERL_CONFIG"; then
-  ac_cv_prog_HAVE_PERL_CONFIG="$HAVE_PERL_CONFIG" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_HAVE_PERL_CONFIG="yes"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_HAVE_PERL_CONFIG" && ac_cv_prog_HAVE_PERL_CONFIG="no"
-fi
-fi
-HAVE_PERL_CONFIG=$ac_cv_prog_HAVE_PERL_CONFIG
-if test -n "$HAVE_PERL_CONFIG"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $HAVE_PERL_CONFIG" >&5
-$as_echo "$HAVE_PERL_CONFIG" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-# Build Perl wrapper?
-# Check whether --enable-perl was given.
-if test "${enable_perl+set}" = set; then :
-  enableval=$enable_perl; PERL="no"
-else
-  PERL="yes"
-fi
-
-# Perl stuff is conditional
-if test "$HAVE_PERL" = "yes" -a "$HAVE_PERL_CONFIG" = "yes" -a "$PERL" = "yes" -a "$SWIG" != "noswig"
-then
-	PERLAPI="yes"
-	PERL_INCLUDES=$(perl-config --includes)
-else
-	PERLAPI="no"
-fi
- if test "$PERLAPI" = "yes"; then
-  COND_PERLAPI_TRUE=
-  COND_PERLAPI_FALSE='#'
-else
-  COND_PERLAPI_TRUE='#'
-  COND_PERLAPI_FALSE=
 fi
 
 
@@ -18083,6 +18060,11 @@ done
 
 
 
+
+
+
+
+
 # substitution of LibTool values for library version
 
 
@@ -18277,16 +18259,16 @@ if test -z "${COND_JAVAAPI_TRUE}" && test -z "${COND_JAVAAPI_FALSE}"; then
   as_fn_error "conditional \"COND_JAVAAPI\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+if test -z "${COND_PERLAPI_TRUE}" && test -z "${COND_PERLAPI_FALSE}"; then
+  as_fn_error "conditional \"COND_PERLAPI\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${COND_PHPAPI_TRUE}" && test -z "${COND_PHPAPI_FALSE}"; then
   as_fn_error "conditional \"COND_PHPAPI\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COND_PYTHONAPI_TRUE}" && test -z "${COND_PYTHONAPI_FALSE}"; then
   as_fn_error "conditional \"COND_PYTHONAPI\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${COND_PERLAPI_TRUE}" && test -z "${COND_PERLAPI_FALSE}"; then
-  as_fn_error "conditional \"COND_PERLAPI\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

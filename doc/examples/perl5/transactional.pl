@@ -20,7 +20,7 @@
 # -----------------------------------------------------------------------
 #
 # This example program shows the usage of libflom API library from a
-# Python program; it uses a resource set instead of the default resource and
+# Perl5 program; it uses a resource set instead of the default resource and
 # displays the name of the obtained element.
 #
 # These are the steps:
