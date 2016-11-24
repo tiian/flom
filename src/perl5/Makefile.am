@@ -1,8 +1,11 @@
+dist_noinst_DATA = flom.i Makefile.PL.in README.in
 
+# Produce FLoM wrapper using SWIG
 flom_wrap.o: flom.i ../flom_errors.h.in ../flom_types.h ../flom_handle.h
 	$(SWIG) -perl5 -const -I.. flom.i
 	sed -i 's/*flom_/*/g' Flom.pm
 	sed -i 's/sub FLOM_/sub /g' Flom.pm
+	mkdir -p lib
 	mv Flom.pm lib/
 	perl Makefile.PL
 	make -f builder

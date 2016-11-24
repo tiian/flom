@@ -95,7 +95,7 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = java php python .
+DIST_SUBDIRS = java perl5 php python .
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -342,7 +342,7 @@ top_srcdir = @top_srcdir@
 @COND_PERLAPI_TRUE@MAYBE_PERLAPI = perl5
 @COND_PHPAPI_TRUE@MAYBE_PHPAPI = php
 @COND_PYTHONAPI_TRUE@MAYBE_PYTHONAPI = python
-SUBDIRS = $(MAYBE_JAVAAPI) $(MAYBE_PHPAPI) $(MAYBE_PYTHONAPI) .
+SUBDIRS = $(MAYBE_JAVAAPI) $(MAYBE_PERLAPI) $(MAYBE_PHPAPI) $(MAYBE_PYTHONAPI) .
 examplesdir = $(docdir)/examples
 @COND_CPPAPI_TRUE@CPPSOURCE = BasicStatic.cc BasicDynamic.cc AdvancedStatic.cc \
 @COND_CPPAPI_TRUE@	AdvancedDynamic.cc Transactional.cc

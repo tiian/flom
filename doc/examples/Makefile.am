@@ -10,7 +10,7 @@ endif
 if COND_PYTHONAPI
   MAYBE_PYTHONAPI = python
 endif
-SUBDIRS = $(MAYBE_JAVAAPI) $(MAYBE_PHPAPI) $(MAYBE_PYTHONAPI) .
+SUBDIRS = $(MAYBE_JAVAAPI) $(MAYBE_PERLAPI) $(MAYBE_PHPAPI) $(MAYBE_PYTHONAPI) .
 examplesdir = $(docdir)/examples
 if COND_CPPAPI
   CPPSOURCE=BasicStatic.cc BasicDynamic.cc AdvancedStatic.cc \

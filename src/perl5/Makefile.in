@@ -14,6 +14,7 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -34,7 +35,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = src/perl5
-DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = README $(dist_noinst_DATA) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_jni_include_dir.m4 \
 	$(top_srcdir)/m4/ax_net_iface.m4 $(top_srcdir)/m4/libtool.m4 \
@@ -49,6 +51,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
+DATA = $(dist_noinst_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -266,6 +269,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+dist_noinst_DATA = flom.i Makefile.PL.in README.in
 all: all-am
 
 .SUFFIXES:
@@ -345,7 +349,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
-all-am: Makefile all-local
+all-am: Makefile $(DATA) all-local
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -456,10 +460,12 @@ uninstall-am:
 	uninstall uninstall-am uninstall-hook
 
 
+# Produce FLoM wrapper using SWIG
 flom_wrap.o: flom.i ../flom_errors.h.in ../flom_types.h ../flom_handle.h
 	$(SWIG) -perl5 -const -I.. flom.i
 	sed -i 's/*flom_/*/g' Flom.pm
 	sed -i 's/sub FLOM_/sub /g' Flom.pm
+	mkdir -p lib
 	mv Flom.pm lib/
 	perl Makefile.PL
 	make -f builder
