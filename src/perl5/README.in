@@ -1,0 +1,19 @@
+Flom version @PACKAGE_VERSION@
+=======================
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make -f builder
+   make -f builder test
+   make -f builder install
+
+COPYRIGHT AND LICENSE
+
+Copyright (C) 2016 Kevin L. Esteb  All rights reserved.
+
+This library is free software; you can redistribute it
+and/or modify it under the same terms as FLoM itself.
+
