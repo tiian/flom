@@ -184,6 +184,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PERLAPI = @PERLAPI@
 PHPAPI = @PHPAPI@
 PHP_INCLUDES = @PHP_INCLUDES@
 PHP_INSTALL_PATH = @PHP_INSTALL_PATH@
@@ -315,6 +316,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	package.m4 \
 	testsuite.at \
 	api.at.in \
+	api_perl.at.in \
 	cmdopt.at.in \
 	shutdown.at \
 	incompopt.at.in \
@@ -334,8 +336,9 @@ TESTSUITE = $(srcdir)/testsuite
 AUTOM4TE = autom4te
 AUTOTEST = $(AUTOM4TE) --language=autotest
 DISTCLEANFILES = atconfig
-CLEANFILES = api.at cmdopt.at incompopt.at tls.at usecase.at usecase-dist.at \
-	usecase-lt.at usecase-num.at usecase-set.at usecase-tms.at
+CLEANFILES = api.at api_perl.at cmdopt.at incompopt.at tls.at usecase.at \
+	usecase-dist.at usecase-lt.at usecase-num.at usecase-set.at \
+	usecase-tms.at
 
 all: all-recursive
 
@@ -710,6 +713,12 @@ api.at: api.at.in
 	-e 's|@USER[@]|$(USER)|g' \
 	$< >$@
 
+api_perl.at: api_perl.at.in
+	sed \
+	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+	-e 's|@USER[@]|$(USER)|g' \
+	$< >$@
+
 cmdopt.at: cmdopt.at.in
 	sed \
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
@@ -809,6 +818,7 @@ clean-local:
 $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/testsuite.at \
 	$(srcdir)/api.at \
+	$(srcdir)/api_perl.at \
 	$(srcdir)/cmdopt.at \
 	$(srcdir)/shutdown.at \
 	$(srcdir)/incompopt.at \

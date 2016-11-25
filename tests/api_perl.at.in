@@ -1,0 +1,86 @@
+AT_BANNER([Perl API checks])
+
+AT_SETUP([Perl Happy path])
+AT_CHECK([if test "$PERLAPI" = "no"; then exit 77; fi])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
+AT_CHECK([perl $PERLPATH/case5000.pl], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Perl Missing calls])
+AT_CHECK([if test "$PERLAPI" = "no"; then exit 77; fi])
+AT_CHECK([perl $PERLPATH/case5001.pl], [0], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Perl Getter and setter methods])
+AT_CHECK([if test "$PERLAPI" = "no"; then exit 77; fi])
+# skip if the address is not available
+AT_CHECK([iface_ip_address.sh $(iface_name.sh inet6 1) 6], [0], [ignore], [ignore])
+# kill previous daemon
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+# create X.509 certificate(s)
+AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
+# restart the daemon
+AT_CHECK([flom -s /tmp/flom_socket_name --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes -d -1 -- true], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[flom_handle_get_socket_name() = '/tmp/flom-@USER@'
+flom_handle_get_socket_name() = '/tmp/flom_socket_name'
+flom_handle_get_trace_filename() = '/tmp/flom.trc'
+flom_handle_get_resource_name() = '_RESOURCE'
+flom_handle_get_resource_name() = 'red.green.blue'
+flom_handle_get_resource_create() = 1
+flom_handle_get_resource_create() = 0
+flom_handle_get_resource_create() = 1
+flom_handle_get_resource_timeout() = -1
+flom_handle_get_resource_timeout() = -1
+flom_handle_get_resource_quantity() = 1
+flom_handle_get_resource_quantity() = 3
+flom_handle_get_lock_mode() = 5
+flom_handle_get_lock_mode() = 4
+flom_handle_get_resource_idle_lifespan() = 0
+flom_handle_get_resource_idle_lifespan() = 10000
+flom_handle_get_unicast_address() = 'None'
+flom_handle_get_unicast_address() = '127.0.0.1'
+flom_handle_get_multicast_address() = 'None'
+flom_handle_get_multicast_address() = '224.0.0.1'
+flom_handle_get_unicast_port() = 28015
+flom_handle_get_unicast_port() = 7777
+flom_handle_get_multicast_port() = 28015
+flom_handle_get_multicast_port() = 8888
+flom_handle_get_discovery_attempts() = 2
+flom_handle_get_discovery_attempts() = 5
+flom_handle_get_discovery_timeout() = 500
+flom_handle_get_discovery_timeout() = 750
+flom_handle_get_discovery_ttl() = 1
+flom_handle_get_discovery_ttl() = 2
+flom_handle_get_tls_check_peer_id() = 0
+flom_handle_get_tls_check_peer_id() = 0
+flom_handle_get_tls_check_peer_id() = 1
+happy_path locked element is 'red'
+]])
+AT_CHECK([perl $PERLPATH/case5002.pl], [0], [expout], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Perl sequence resource])
+AT_CHECK([if test "$PERLAPI" = "no"; then exit 77; fi])
+AT_CHECK([pkill flom], [0], [ignore], [ignore])
+AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
+AT_DATA([expout],
+[[locked element is 1
+locked element is 2
+locked element is 1
+locked element is 1
+locked element is 2
+]])
+AT_CHECK([perl $PERLPATH/case5004.pl], [134], [expout], [ignore])
+AT_DATA([expout],
+[[locked element is 3
+locked element is 4
+locked element is 2
+locked element is 2
+locked element is 3
+]])
+AT_CHECK([perl $PERLPATH/case5004.pl], [134], [expout], [ignore])
+AT_CLEANUP
+
+

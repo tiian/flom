@@ -12,6 +12,10 @@ CPPAPI=@CPPAPI@
 export CPPAPI
 JAVAAPI=@JAVAAPI@
 export JAVAAPI
+PERLPATH=@abs_top_builddir@/tests/src
+export PERLPATH
+PERLAPI=@PERLAPI@
+export PERLAPI
 PHPPATH=@abs_top_builddir@/tests/src
 export PHPPATH
 PHPAPI=@PHPAPI@

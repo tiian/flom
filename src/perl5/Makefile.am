@@ -17,6 +17,7 @@ README: README.in ../../config.status
 
 Makefile.PL: Makefile.PL.in ../../config.status
 	sed \
+        -e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
         -e 's|@_FLOM_PREFIX[@]|$(_FLOM_PREFIX)|g' \
 	-e 's|@GLIB2_PERL[@]|$(GLIB2_PERL)|g' \
 	-e 's|@GTHREAD2_PERL[@]|$(GTHREAD2_PERL)|g' \

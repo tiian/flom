@@ -22,6 +22,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	package.m4 \
 	testsuite.at \
 	api.at.in \
+	api_perl.at.in \
 	cmdopt.at.in \
 	shutdown.at \
 	incompopt.at.in \
@@ -38,6 +39,12 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	scripts/*.sh
 
 api.at: api.at.in
+	sed \
+	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+	-e 's|@USER[@]|$(USER)|g' \
+	$< >$@
+
+api_perl.at: api_perl.at.in
 	sed \
 	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
 	-e 's|@USER[@]|$(USER)|g' \
@@ -147,6 +154,7 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/testsuite.at \
 	$(srcdir)/api.at \
+	$(srcdir)/api_perl.at \
 	$(srcdir)/cmdopt.at \
 	$(srcdir)/shutdown.at \
 	$(srcdir)/incompopt.at \
@@ -164,5 +172,6 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	mv $@.tmp $@
 
 DISTCLEANFILES = atconfig
-CLEANFILES = api.at cmdopt.at incompopt.at tls.at usecase.at usecase-dist.at \
-	usecase-lt.at usecase-num.at usecase-set.at usecase-tms.at
+CLEANFILES = api.at api_perl.at cmdopt.at incompopt.at tls.at usecase.at \
+	usecase-dist.at usecase-lt.at usecase-num.at usecase-set.at \
+	usecase-tms.at

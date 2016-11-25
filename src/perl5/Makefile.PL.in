@@ -16,11 +16,12 @@
 my $libs;
 my $version = '@PACKAGE_VERSION@';
 
-$libs  = ' -l@GLIB2_PERL@';
+$libs = ' -l@GLIB2_PERL@';
 $libs .= ' -l@GTHREAD2_PERL@';
 $libs .= ' -l@DBUS1_PERL@';
 $libs .= ' -l@OPENSSL_PERL@';
 $libs .= ' -l@CRYPTO_PERL@';
+#$libs .= '-L@abs_top_builddir@/src/.libs';
 $libs .= ' -l@_FLOM_PREFIX@';
 
 # create the makefile
@@ -33,6 +34,7 @@ WriteMakefile(
     'LICENSE'          => 'GPL_2',
     'NAME'             => 'Flom',
     'LIBS'             => $libs,
+    'INC'              => '-I..',
     'OBJECT'           => 'flom_wrap.o',
     'FIRST_MAKEFILE'   => 'builder',
     'MIN_PERL_VERSION' => '5.008008',
