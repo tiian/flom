@@ -464,6 +464,7 @@ flom_wrap.c: flom.i ../flom_errors.h.in ../flom_types.h ../flom_handle.h
 setup.py:	setup.py.i ../../config.status
 	sed \
 	-e 's|@libdir[@]|$(libdir)|g' \
+        -e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
 	-e 's|@_FLOM_PREFIX[@]|$(_FLOM_PREFIX)|g' \
 	-e 's|@GLIB2_PYTHON[@]|$(GLIB2_PYTHON)|g' \
 	-e 's|@GTHREAD2_PYTHON[@]|$(GTHREAD2_PYTHON)|g' \

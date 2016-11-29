@@ -9,7 +9,7 @@ from distutils.core import setup, Extension
 flom_module = Extension('_@_FLOM_PREFIX@',
 	include_dirs=['..'],
 	sources=['flom_wrap.c'],
-	library_dirs=['../.libs'],
+	library_dirs=['@abs_top_builddir@/src/.libs'],
 	runtime_library_dirs=['@libdir@'],
 	libraries=['@_FLOM_PREFIX@','@GTHREAD2_PYTHON@','@GLIB2_PYTHON@','@DBUS1_PYTHON@','@OPENSSL_PYTHON@','@CRYPTO_PYTHON@']
 	)
