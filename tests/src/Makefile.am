@@ -14,6 +14,8 @@ case1004_SOURCES = case1004.cc
 # Java language case tests
 JAVA_SOURCE_FILES = case4000.java case4001.java case4002.java case4003.java \
 	case4004.java
+# Perl5 language case tests
+PERL_SOURCE_FILES = case5000.pl
 # PHP language case tests
 PHP_SOURCE_FILES = case2000.php.in case2001.php.in case2002.php.in \
 	case2004.php.in
@@ -28,6 +30,9 @@ if COND_JAVAAPI
   MAYBE_JAVAAPI=case4000.class case4001.class case4002.class case4003.class \
 	case4004.class
 endif
+if COND_PERLAPI
+  MAYBE_PERLAPI=$(PERL_SOURCE_FILES)
+endif
 if COND_PHPAPI
   MAYBE_PHPAPI=case2000.php case2001.php case2002.php case2004.php
 endif
@@ -36,7 +41,7 @@ if COND_PYTHONAPI
 endif
 noinst_PROGRAMS = case0000 case0001 case0002 case0003 case0004 $(MAYBE_CPPAPI)
 dist_noinst_DATA = $(JAVA_SOURCE_FILES) $(PHP_SOURCE_FILES) \
-	$(PYTHON_SOURCE_FILES)
+	$(PYTHON_SOURCE_FILES) $(PERL_SOURCE_FILES)
 noinst_DATA = $(MAYBE_PHPAPI) $(MAYBE_JAVAAPI)
 
 LDADD = ../../src/libflom.la @GLIB2_LIBS@ @DBUS1_LIBS@ @OPENSSL_LIBS@

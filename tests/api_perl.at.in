@@ -23,39 +23,39 @@ AT_CHECK([tls_setup.sh], [0], [ignore], [ignore])
 # restart the daemon
 AT_CHECK([flom -s /tmp/flom_socket_name --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem --tls-ca-certificate=CA1/cacert.pem --tls-check-peer-id=yes -d -1 -- true], [0], [ignore], [ignore])
 AT_DATA([expout],
-[[flom_handle_get_socket_name() = '/tmp/flom-@USER@'
-flom_handle_get_socket_name() = '/tmp/flom_socket_name'
-flom_handle_get_trace_filename() = '/tmp/flom.trc'
-flom_handle_get_resource_name() = '_RESOURCE'
-flom_handle_get_resource_name() = 'red.green.blue'
-flom_handle_get_resource_create() = 1
-flom_handle_get_resource_create() = 0
-flom_handle_get_resource_create() = 1
-flom_handle_get_resource_timeout() = -1
-flom_handle_get_resource_timeout() = -1
-flom_handle_get_resource_quantity() = 1
-flom_handle_get_resource_quantity() = 3
-flom_handle_get_lock_mode() = 5
-flom_handle_get_lock_mode() = 4
-flom_handle_get_resource_idle_lifespan() = 0
-flom_handle_get_resource_idle_lifespan() = 10000
-flom_handle_get_unicast_address() = 'None'
-flom_handle_get_unicast_address() = '127.0.0.1'
-flom_handle_get_multicast_address() = 'None'
-flom_handle_get_multicast_address() = '224.0.0.1'
-flom_handle_get_unicast_port() = 28015
-flom_handle_get_unicast_port() = 7777
-flom_handle_get_multicast_port() = 28015
-flom_handle_get_multicast_port() = 8888
-flom_handle_get_discovery_attempts() = 2
-flom_handle_get_discovery_attempts() = 5
-flom_handle_get_discovery_timeout() = 500
-flom_handle_get_discovery_timeout() = 750
-flom_handle_get_discovery_ttl() = 1
-flom_handle_get_discovery_ttl() = 2
-flom_handle_get_tls_check_peer_id() = 0
-flom_handle_get_tls_check_peer_id() = 0
-flom_handle_get_tls_check_peer_id() = 1
+[[Flom::handle_get_socket_name() = '/tmp/flom-@USER@'
+Flom::handle_get_socket_name() = '/tmp/flom_socket_name'
+Flom::handle_get_trace_filename() = '/tmp/flom.trc'
+Flom::handle_get_resource_name() = '_RESOURCE'
+Flom::handle_get_resource_name() = 'red.green.blue'
+Flom::handle_get_resource_create() = 1
+Flom::handle_get_resource_create() = 0
+Flom::handle_get_resource_create() = 1
+Flom::handle_get_resource_timeout() = -1
+Flom::handle_get_resource_timeout() = -1
+Flom::handle_get_resource_quantity() = 1
+Flom::handle_get_resource_quantity() = 3
+Flom::handle_get_lock_mode() = 5
+Flom::handle_get_lock_mode() = 4
+Flom::handle_get_resource_idle_lifespan() = 0
+Flom::handle_get_resource_idle_lifespan() = 10000
+Flom::handle_get_unicast_address() = 'None'
+Flom::handle_get_unicast_address() = '127.0.0.1'
+Flom::handle_get_multicast_address() = 'None'
+Flom::handle_get_multicast_address() = '224.0.0.1'
+Flom::handle_get_unicast_port() = 28015
+Flom::handle_get_unicast_port() = 7777
+Flom::handle_get_multicast_port() = 28015
+Flom::handle_get_multicast_port() = 8888
+Flom::handle_get_discovery_attempts() = 2
+Flom::handle_get_discovery_attempts() = 5
+Flom::handle_get_discovery_timeout() = 500
+Flom::handle_get_discovery_timeout() = 750
+Flom::handle_get_discovery_ttl() = 1
+Flom::handle_get_discovery_ttl() = 2
+Flom::handle_get_tls_check_peer_id() = 0
+Flom::handle_get_tls_check_peer_id() = 0
+Flom::handle_get_tls_check_peer_id() = 1
 happy_path locked element is 'red'
 ]])
 AT_CHECK([perl $PERLPATH/case5002.pl], [0], [expout], [ignore])
