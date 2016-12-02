@@ -16,12 +16,13 @@
 my $libs;
 my $version = '@PACKAGE_VERSION@';
 
-$libs = ' -l@GLIB2_PERL@';
+$libs = ' -L@abs_top_builddir@/src/.libs -Wl,-R@libdir@ -l@_FLOM_PREFIX@';
 $libs .= ' -l@GTHREAD2_PERL@';
+$libs .= ' -l@GLIB2_PERL@';
 $libs .= ' -l@DBUS1_PERL@';
 $libs .= ' -l@OPENSSL_PERL@';
 $libs .= ' -l@CRYPTO_PERL@';
-$libs .= ' -L@abs_top_builddir@/src/.libs -Wl,-R@libdir@ -l@_FLOM_PREFIX@';
+
 
 # create the makefile
 
