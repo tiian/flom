@@ -6,7 +6,7 @@ F     LLLLL  ooo  M   M
 
 FLoM (Free Lock Manager) is an open source and free lock manager designed to
 serialize and synchronize shell command execution and custom programs
-developed in C, C++, Java, PHP, Python.
+developed in C, C++, Java, Perl, PHP, Python.
 Both GitHub https://github.com/tiian/flom and 
 SourceForge https://sourceforge.net/projects/flom/ host FLoM source code.
 Basic usage examples are in doc/examples directory (default installation path 
@@ -35,7 +35,7 @@ This is a brief list of the available features:
   the others node)
 - easy API (Application Programming Interface) to synchronize your own
   programs with shell executed flom commands. These languages have a ready
-  to use binding: C, C++, Java, PHP, Python.
+  to use binding: C, C++, Java, Perl, PHP, Python.
 - TLS (Transport Layer Security) support to protect network communication and
   to supply peer to peer mutual authentication based on X.509 certificates
 - a large spectrum of different resources:
@@ -97,6 +97,9 @@ NOTE: if you are not interested in C++ API library support, specify
 NOTE: if you are not interested in Java API library support, specify
       "--disable-java" at configure time; example:
       ./configure --disable-java
+NOTE: if you are not interested in Perl API library support, specify
+      "--disable-perl" at configure time; example:
+      ./configure --disable-php
 NOTE: if you are not interested in PHP API library support, specify
       "--disable-php" at configure time; example:
       ./configure --disable-php
@@ -139,6 +142,7 @@ Ubuntu	14.04	Java API	default-jdk (openjdk 7)
 Ubuntu	16.04	Java API	default-jdk (openjdk 8)
 CentOS		Basic		gcc glib2-devel dbus dbus-devel autoconf openssl-devel
 CentOS		C++ API		gcc-c++
+CentOS		Perl API	swig perl-devel
 CentOS		PHP API		swig php-devel
 CentOS		Python API	swig python-devel
 CentOS	6.6	Java API	java-1.6.0-openjdk* or java-1.7.0-openjdk*

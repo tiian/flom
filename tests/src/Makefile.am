@@ -15,7 +15,7 @@ case1004_SOURCES = case1004.cc
 JAVA_SOURCE_FILES = case4000.java case4001.java case4002.java case4003.java \
 	case4004.java
 # Perl5 language case tests
-PERL_SOURCE_FILES = case5000.pl
+PERL_SOURCE_FILES = case5000.pl case5001.pl case5002.pl case5004.pl
 # PHP language case tests
 PHP_SOURCE_FILES = case2000.php.in case2001.php.in case2002.php.in \
 	case2004.php.in

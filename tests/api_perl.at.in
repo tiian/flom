@@ -39,9 +39,9 @@ Flom::handle_get_lock_mode() = 5
 Flom::handle_get_lock_mode() = 4
 Flom::handle_get_resource_idle_lifespan() = 0
 Flom::handle_get_resource_idle_lifespan() = 10000
-Flom::handle_get_unicast_address() = 'None'
+Flom::handle_get_unicast_address() = ''
 Flom::handle_get_unicast_address() = '127.0.0.1'
-Flom::handle_get_multicast_address() = 'None'
+Flom::handle_get_multicast_address() = ''
 Flom::handle_get_multicast_address() = '224.0.0.1'
 Flom::handle_get_unicast_port() = 28015
 Flom::handle_get_unicast_port() = 7777
@@ -56,7 +56,7 @@ Flom::handle_get_discovery_ttl() = 2
 Flom::handle_get_tls_check_peer_id() = 0
 Flom::handle_get_tls_check_peer_id() = 0
 Flom::handle_get_tls_check_peer_id() = 1
-happy_path locked element is 'red'
+locked element is 'red'
 ]])
 AT_CHECK([perl $PERLPATH/case5002.pl], [0], [expout], [ignore])
 AT_CLEANUP
@@ -72,7 +72,7 @@ locked element is 1
 locked element is 1
 locked element is 2
 ]])
-AT_CHECK([perl $PERLPATH/case5004.pl], [134], [expout], [ignore])
+AT_CHECK([perl $PERLPATH/case5004.pl], [0], [expout], [ignore])
 AT_DATA([expout],
 [[locked element is 3
 locked element is 4
@@ -80,7 +80,7 @@ locked element is 2
 locked element is 2
 locked element is 3
 ]])
-AT_CHECK([perl $PERLPATH/case5004.pl], [134], [expout], [ignore])
+AT_CHECK([perl $PERLPATH/case5004.pl], [0], [expout], [ignore])
 AT_CLEANUP
 
 

@@ -57,7 +57,7 @@ if (Flom::RC_OK != ($ret_cod = Flom::handle_set_socket_name(
 printf(STDOUT "Flom::handle_get_socket_name() = '%s'\n",
        Flom::handle_get_socket_name($handle));
 # check socket name
-if ($nd_socket_name != Flom::handle_get_socket_name($handle)) {
+if ($nd_socket_name ne Flom::handle_get_socket_name($handle)) {
     printf(STDERR "Unexpected result from Flom::handle_set/get_socket_name\n");
     exit 1;
 }
@@ -67,10 +67,10 @@ if ($nd_socket_name != Flom::handle_get_socket_name($handle)) {
 # set a new trace filename
 Flom::handle_set_trace_filename($handle, $nd_trace_filename);
 # get new trace filename
-printf(STDOUT "Flom::handle_get_trace_filename() = 's'\n",
+printf(STDOUT "Flom::handle_get_trace_filename() = '%s'\n",
        Flom::handle_get_trace_filename($handle));
 # check trace filename
-if ($nd_trace_filename != Flom::handle_get_trace_filename($handle)) {
+if ($nd_trace_filename ne Flom::handle_get_trace_filename($handle)) {
     printf(STDERR "Unexpected result from Flom::handle_set/get_trace_filename\n");
     exit 1;
 }
@@ -93,7 +93,7 @@ printf(STDOUT "Flom::handle_get_resource_name() = '%s'\n",
 printf(STDOUT "Flom::handle_get_resource_create() = %d\n",
        Flom::handle_get_resource_create($handle));
 # set a new value for resource create property
-Flom::handle_set_resource_create($handle, FALSE);
+Flom::handle_set_resource_create($handle, Flom::FALSE);
 # get new value for resource create property
 printf(STDOUT "Flom::handle_get_resource_create() = %d\n",
        Flom::handle_get_resource_create($handle));
@@ -103,7 +103,7 @@ if (Flom::handle_get_resource_create($handle)) {
     exit 1;
 }
 # set a new value for resource create property
-Flom::handle_set_resource_create($handle, TRUE);
+Flom::handle_set_resource_create($handle, Flom::TRUE);
 # get new value for resource create property
 printf(STDOUT "Flom::handle_get_resource_create() = %d\n",
        Flom::handle_get_resource_create($handle));
@@ -178,8 +178,7 @@ Flom::handle_set_unicast_address($handle, $nd_unicast_address);
 printf(STDOUT "Flom::handle_get_unicast_address() = '%s'\n",
        Flom::handle_get_unicast_address($handle));
 # check unicast address
-if ($nd_unicast_address !=
-    Flom::handle_get_unicast_address($handle)) {
+if ($nd_unicast_address ne Flom::handle_get_unicast_address($handle)) {
     printf(STDERR "Unexpected result from Flom::handle_set/get_unicast_address\n");
     exit 1;
 }
@@ -193,8 +192,7 @@ Flom::handle_set_multicast_address($handle, $nd_multicast_address);
 printf(STDOUT "Flom::handle_get_multicast_address() = '%s'\n",
        Flom::handle_get_multicast_address($handle));
 # check multicast address
-if ($nd_multicast_address !=
-    Flom::handle_get_multicast_address($handle)) {
+if ($nd_multicast_address ne Flom::handle_get_multicast_address($handle)) {
     printf(STDERR "Unexpected result from Flom::handle_set/get_multicast_address\n");
     exit 1;
 }
@@ -296,88 +294,70 @@ printf(STDERR "Flom::handle_get_tls_certificate() = '%s'\n",
 printf(STDERR "Flom::handle_get_tls_private_key() = '%s'\n",
        Flom::handle_get_tls_private_key($handle));
 # set a new TLS private key
+if (Flom::RC_OK != ($ret_cod = Flom::handle_set_tls_private_key(
+			$handle, $nd_tls_private_key))) {
+    printf(STDERR "Flom::handle_set_tls_private_key() returned %d, %s\n",
+	   $ret_cod, Flom::strerror($ret_cod));
+    exit 1;
+}
+# get new TLS private key
+printf(STDERR "Flom::handle_get_tls_private_key() = '%s'\n",
+       Flom::handle_get_tls_private_key($handle));
 
-### @@@
+# get current value for TLS CA certificate
+printf(STDERR "Flom::handle_get_tls_ca_certificate() = '%s'\n",
+       Flom::handle_get_tls_ca_certificate($handle));
+# set a new TLS CA certificate
+if (Flom::RC_OK != ($ret_cod = Flom::handle_set_tls_ca_certificate(
+			$handle, $nd_tls_ca_certificate))) {
+    printf(STDERR "Flom::handle_set_tls_ca_certificate() returned %d, %s\n",
+	   $ret_cod, Flom::strerror($ret_cod));
+    exit 1;
+}
+# get new TLS CA certificate
+printf(STDERR "Flom::handle_get_tls_private_key() = '%s'\n",
+       Flom::handle_get_tls_private_key($handle));
 
-
-	if (Flom::RC_OK != ($ret_cod = Flom::handle_set_tls_private_key(
-		$handle, $nd_tls_private_key))) {
-		printf(STDERR "Flom::handle_set_tls_private_key() returned " .
-			$ret_cod . ", '" . Flom::strerror($ret_cod) . "'\n");
-		exit(1);
-	}
-	# get new TLS private key
-	printf(STDERR "Flom::handle_get_tls_private_key() = '" .
-		Flom::handle_get_tls_private_key($handle) . "'\n");
-
-	# get current value for TLS CA certificate
-	printf(STDERR "Flom::handle_get_tls_ca_certificate() = '" .
-		Flom::handle_get_tls_ca_certificate($handle) . "'\n");
-	# set a new TLS CA certificate
-	if (Flom::RC_OK != ($ret_cod = Flom::handle_set_tls_ca_certificate(
-		$handle, $nd_tls_ca_certificate))) {
-		printf(STDERR 
-		"Flom::handle_set_tls_ca_certificate() returned " .
-		$ret_cod . ", '" . Flom::strerror($ret_cod) . "'\n");
-		exit(1);
-	}
-	# get new TLS CA certificate
-	printf(STDERR "Flom::handle_get_tls_private_key() = '" .
-		Flom::handle_get_tls_private_key($handle) . "'\n");
-
-	# get current value for TLS check peer ID property
-	printf(STDOUT "Flom::handle_get_tls_check_peer_id() = " .
-		Flom::handle_get_tls_check_peer_id($handle) . "\n");
-	# set a new value for TLS check peer ID property
-	Flom::handle_set_tls_check_peer_id($handle, FALSE);
-	# get new value for TLS check peer ID property
-	printf(STDOUT "Flom::handle_get_tls_check_peer_id() = " .
-		Flom::handle_get_tls_check_peer_id($handle) . "\n");
-	# check TLS check peer ID 1/2
-	if (Flom::handle_get_tls_check_peer_id($handle)) {
-		printf(STDERR "Unexpected result from Flom::handle_set/" .
-                "get_tls_check_peer_id\n");
-		exit(1);
-	}
-	# set a new value for TLS check peer ID property
-	Flom::handle_set_tls_check_peer_id($handle, TRUE);
-	# get new value for TLS check peer ID property
-	fwrite("Flom::handle_get_tls_check_peer_id() = " .
-		Flom::handle_get_tls_check_peer_id($handle) . "\n");
-	# check TLS check peer ID 2/2
-	if (!Flom::handle_get_tls_check_peer_id($handle)) {
-		printf(STDERR "Unexpected result from Flom::handle_set/" .
-			"get_tls_check_peer_id\n");
-		exit(1);
-	}
-
-	# lock acquisition
-	if (Flom::RC_OK != ($ret_cod = Flom::handle_lock($handle))) {
-		printf(STDERR "happy_path/Flom::handle_lock() returned " . 
-		$ret_cod . " '" . Flom::strerror($ret_cod) . "'\n");
-	 	exit(1);
-	}
-	 # retrieve locked element
-	 printf(STDOUT "happy_path locked element is " .
-	 		Flom::handle_get_locked_element($handle) . "\n");
-	 # lock release
-	 if (Flom::RC_OK != ($ret_cod = Flom::handle_unlock($handle))) {
-	    	printf(STDERR "happy_path/Flom::handle_unlock() returned " . 
-		$ret_cod . " '" . Flom::strerror($ret_cod) . "'\n");
-		exit(1);
-	 }
-	 # handle clean-up (memory release)
-	 if (Flom::RC_OK != ($ret_cod = Flom::handle_clean($handle))) {
-	   	printf(STDERR "happy_path/Flom::handle_clean() returned " . 
-		$ret_cod . " '" . Flom::strerror($ret_cod) . "'\n");
-		exit(1);
-	 }
-	 # handle deallocation
-	 $handle = NULL;
+# get current value for TLS check peer ID property
+printf(STDOUT "Flom::handle_get_tls_check_peer_id() = %d\n",
+       Flom::handle_get_tls_check_peer_id($handle));
+# set a new value for TLS check peer ID property
+Flom::handle_set_tls_check_peer_id($handle, Flom::FALSE);
+# get new value for TLS check peer ID property
+printf(STDOUT "Flom::handle_get_tls_check_peer_id() = %d\n",
+       Flom::handle_get_tls_check_peer_id($handle));
+# check TLS check peer ID 1/2
+if (Flom::handle_get_tls_check_peer_id($handle)) {
+    printf(STDERR "Unexpected result from Flom::handle_set/get_tls_check_peer_id\n");
+    exit 1;
+}
+# set a new value for TLS check peer ID property
+Flom::handle_set_tls_check_peer_id($handle, Flom::TRUE);
+# get new value for TLS check peer ID property
+printf(STDOUT "Flom::handle_get_tls_check_peer_id() = %d\n",
+       Flom::handle_get_tls_check_peer_id($handle));
+# check TLS check peer ID 2/2
+if (!Flom::handle_get_tls_check_peer_id($handle)) {
+    printf(STDERR "Unexpected result from Flom::handle_set/get_tls_check_peer_id\n");
+    exit 1;
 }
 
-
-
-
+# lock acquisition
+if (Flom::RC_OK != ($ret_cod = Flom::handle_lock($handle))) {
+    printf(STDERR "Flom::handle_lock() returned %d, %s\n",
+	   $ret_cod, Flom::strerror($ret_cod));
+    exit 1;
+}
+# retrieve locked element
+printf(STDOUT "locked element is '%s'\n",
+       Flom::handle_get_locked_element($handle));
+# lock release
+if (Flom::RC_OK != ($ret_cod = Flom::handle_unlock($handle))) {
+    printf(STDERR "Flom::handle_unlock() returned %d, %s\n",
+	   $ret_cod, Flom::strerror($ret_cod));
+    exit 1;
+}
+# handle delete
+Flom::handle_delete($handle);
 
 exit 0;

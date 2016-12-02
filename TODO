@@ -2,6 +2,8 @@ Road map:
 
 fix PHP for Ubuntu 16.04, see https://github.com/tiian/flom/issues/5
 
+introduce a supplementary module build for Perl and Python to avoid installation before "make check" (verify other bindings like Java too...)
+
 implement a loop for connect/bind if bind returns an error: this should help
 to reduce the race condition between a closing daemon and a starting client.
 See this thread: https://github.com/tiian/flom/issues/3

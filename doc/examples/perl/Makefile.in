@@ -34,7 +34,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = doc/examples/perl5
+subdir = doc/examples/perl
 DIST_COMMON = README $(dist_examples_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -292,7 +292,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-examplesdir = $(docdir)/examples/perl5
+examplesdir = $(docdir)/examples/perl
 dist_examples_DATA = basic.pl advanced.pl transactional.pl README
 all: all-am
 
@@ -306,9 +306,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu doc/examples/perl5/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu doc/examples/perl/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu doc/examples/perl5/Makefile
+	  $(AUTOMAKE) --gnu doc/examples/perl/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -506,7 +506,7 @@ uninstall-am: uninstall-dist_examplesDATA
 
 
 uninstall-hook:
-	if test -d ${docdir}/examples/perl5; then rmdir ${docdir}/examples/perl5; fi
+	if test -d ${docdir}/examples/perl; then rmdir ${docdir}/examples/perl; fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.3.4-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [1.3.4-rc1], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -148,7 +148,7 @@ AC_CONFIG_FILES([
   doc/Makefile
   doc/examples/Makefile
   doc/examples/java/Makefile
-  doc/examples/perl5/Makefile
+  doc/examples/perl/Makefile
   doc/examples/php/Makefile
   doc/examples/python/Makefile
   doc/html/Makefile
@@ -161,7 +161,7 @@ AC_CONFIG_FILES([
   man/Makefile
   src/Makefile
   src/java/Makefile
-  src/perl5/Makefile
+  src/perl/Makefile
   src/php/Makefile
   src/python/Makefile
   tests/atlocal
