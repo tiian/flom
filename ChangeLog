@@ -1,6 +1,6 @@
 LOG:
 
-         - 1.3.4 Perl5 client API (Kevin L. Esteb contribution)
+20161202 - 1.3.4 Perl (Perl5) client API (Kevin L. Esteb contribution)
 
 20160707 - 1.3.3 (unique) timestamp resource
 	Implementation of timestamp resources:
