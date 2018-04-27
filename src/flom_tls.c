@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -99,8 +99,13 @@ flom_tls_t *flom_tls_new(int client)
     /* lock the mutex */
     g_static_mutex_lock(&flom_tls_mutex);
     if (!flom_tls_initialized) {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
         FLOM_TRACE(("flom_tls_init: calling SSL_library_init()...\n"));
         SSL_library_init();
+#else
+        FLOM_TRACE(("flom_tls_init: calling OPENSSL_init_ssl()...\n"));
+        OPENSSL_init_ssl(0, NULL);
+#endif
         FLOM_TRACE(("flom_tls_init: calling SSL_load_error_strings()...\n"));
         SSL_load_error_strings();
         FLOM_TRACE(("flom_tls_init: calling "

@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.3.4], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [1.3.5-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -255,8 +255,15 @@ then
 	OPENSSL_PYTHON="ssl"
 	CRYPTO_PYTHON="crypto"
 	CPPFLAGS="$CPPFLAGS $OPENSSL_CFLAGS"
+	TLS_INIT_FUNCTION="SSL_library_init"
 else
 	AC_MSG_ERROR([cannot find openssl package at level 0.9.8k or higher])
+fi
+# Newer versions of OpenSSL (1.1.x)
+pkg-config --atleast-version=1.1.0g openssl
+if test $? -eq 0
+then
+	TLS_INIT_FUNCTION="OPENSSL_init_ssl"
 fi
 
 # Checking the availability of some utility programs
@@ -408,7 +415,7 @@ AC_CHECK_SIZEOF([socklen_t])
 AC_CHECK_SIZEOF([ssize_t])
 
 AC_CHECK_LIB([dbus-1], [dbus_get_local_machine_id])
-AC_CHECK_LIB([ssl], [SSL_library_init])
+AC_CHECK_LIB([ssl], [$TLS_INIT_FUNCTION])
 
 AC_CHECK_FUNCS(freeifaddrs)
 AC_CHECK_FUNCS(getifaddrs)
