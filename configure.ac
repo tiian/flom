@@ -277,6 +277,7 @@ AC_CHECK_PROGS(SWIG, [swig], [noswig])
 AC_CHECK_PROG(HAVE_JAVA, [java], [yes], [no])
 # Checking the availability of JDK
 AC_CHECK_PROG(HAVE_JAVAC, [javac], [yes], [no])
+AC_CHECK_PROG(HAVE_JAVAH, [javah], [yes], [no])
 AC_CHECK_PROG(HAVE_JAR, [jar], [yes], [no])
 AC_CHECK_PROG(HAVE_JAVADOC, [javadoc], [yes], [no])
 # Build Java wrapper?

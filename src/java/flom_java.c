@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 
 
@@ -25,7 +25,8 @@
 #include "flom_defines.h"
 #include "flom_trace.h"
 #include "flom.h"
-#include "flom_java.h"
+#include "org_tiian_flom_FlomHandle.h"
+#include "org_tiian_flom_FlomErrorCodes.h"
  
 
 

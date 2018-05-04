@@ -1,5 +1,7 @@
 LOG:
 
+         - 1.4.0 Support for Java 10
+
 20161202 - 1.3.4 Perl (Perl5) client API (Kevin L. Esteb contribution)
 
 20160707 - 1.3.3 (unique) timestamp resource
