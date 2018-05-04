@@ -704,7 +704,7 @@ PACKAGE_TARNAME='flom'
 PACKAGE_VERSION='1.3.5-dev'
 PACKAGE_STRING='FLoM 1.3.5-dev'
 PACKAGE_BUGREPORT='tiian at users dot sourceforge dot net'
-PACKAGE_URL='http://sourceforge.net/projects/flom/'
+PACKAGE_URL='https://github.com/tiian/flom'
 
 # Factoring default headers for most tests.
 ac_includes_default="\
@@ -832,6 +832,8 @@ HAVE_PYTHON_CONFIG
 HAVE_PYTHON
 COND_PHPAPI_FALSE
 COND_PHPAPI_TRUE
+COND_PHP7_FALSE
+COND_PHP7_TRUE
 HAVE_PHP_CONFIG
 HAVE_PHP
 COND_PERLAPI_FALSE
@@ -842,6 +844,8 @@ COND_JAVAAPI_TRUE
 _ACJNI_JAVAC
 HAVE_JAVADOC
 HAVE_JAR
+COND_HAVE_JAVAH_FALSE
+COND_HAVE_JAVAH_TRUE
 HAVE_JAVAH
 HAVE_JAVAC
 HAVE_JAVA
@@ -1682,7 +1686,7 @@ Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to <tiian at users dot sourceforge dot net>.
-FLoM home page: <http://sourceforge.net/projects/flom/>.
+FLoM home page: <https://github.com/tiian/flom>.
 _ACEOF
 ac_status=$?
 fi
@@ -4978,13 +4982,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4981: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4985: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4984: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4988: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4987: output\"" >&5)
+  (eval echo "\"\$as_me:4991: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6190,7 +6194,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6193 "configure"' > conftest.$ac_ext
+  echo '#line 6197 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7720,11 +7724,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7723: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7727: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7727: \$? = $ac_status" >&5
+   echo "$as_me:7731: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8059,11 +8063,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8062: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8066: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8066: \$? = $ac_status" >&5
+   echo "$as_me:8070: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8164,11 +8168,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8167: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8171: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8171: \$? = $ac_status" >&5
+   echo "$as_me:8175: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8219,11 +8223,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8222: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8226: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8226: \$? = $ac_status" >&5
+   echo "$as_me:8230: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10603,7 +10607,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10606 "configure"
+#line 10610 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10699,7 +10703,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10702 "configure"
+#line 10706 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14606,11 +14610,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14609: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14613: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14613: \$? = $ac_status" >&5
+   echo "$as_me:14617: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14705,11 +14709,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14708: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14712: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14712: \$? = $ac_status" >&5
+   echo "$as_me:14716: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14757,11 +14761,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14760: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14764: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14764: \$? = $ac_status" >&5
+   echo "$as_me:14768: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16622,6 +16626,19 @@ $as_echo "no" >&6; }
 fi
 
 
+ if test "$HAVE_JAVAH" = "yes"; then
+  COND_HAVE_JAVAH_TRUE=
+  COND_HAVE_JAVAH_FALSE='#'
+else
+  COND_HAVE_JAVAH_TRUE='#'
+  COND_HAVE_JAVAH_FALSE=
+fi
+
+if test "$HAVE_JAVAH" = "no"
+then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: javah not found, assuming Java 9 or higher" >&5
+$as_echo "$as_me: javah not found, assuming Java 9 or higher" >&6;}
+fi
 # Extract the first word of "jar", so it can be a program name with args.
 set dummy jar; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -17042,6 +17059,28 @@ else
 $as_echo "no" >&6; }
 fi
 
+
+if test "$HAVE_PHP_CONFIG" = "yes"
+then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for PHP7" >&5
+$as_echo_n "checking for PHP7... " >&6; }
+	PHP_VERNUM=$(php-config --vernum)
+	if test $PHP_VERNUM -ge 70000
+	then
+        	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	else
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	fi
+fi
+ if test $PHP_VERNUM -ge 70000; then
+  COND_PHP7_TRUE=
+  COND_PHP7_FALSE='#'
+else
+  COND_PHP7_TRUE='#'
+  COND_PHP7_FALSE=
+fi
 
 # Build PHP wrapper?
 # Check whether --enable-php was given.
@@ -18306,12 +18345,20 @@ if test -z "${COND_CPPAPI_TRUE}" && test -z "${COND_CPPAPI_FALSE}"; then
   as_fn_error "conditional \"COND_CPPAPI\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+if test -z "${COND_HAVE_JAVAH_TRUE}" && test -z "${COND_HAVE_JAVAH_FALSE}"; then
+  as_fn_error "conditional \"COND_HAVE_JAVAH\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${COND_JAVAAPI_TRUE}" && test -z "${COND_JAVAAPI_FALSE}"; then
   as_fn_error "conditional \"COND_JAVAAPI\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COND_PERLAPI_TRUE}" && test -z "${COND_PERLAPI_FALSE}"; then
   as_fn_error "conditional \"COND_PERLAPI\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${COND_PHP7_TRUE}" && test -z "${COND_PHP7_FALSE}"; then
+  as_fn_error "conditional \"COND_PHP7\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COND_PHPAPI_TRUE}" && test -z "${COND_PHPAPI_FALSE}"; then
@@ -18791,7 +18838,7 @@ Configuration commands:
 $config_commands
 
 Report bugs to <tiian at users dot sourceforge dot net>.
-FLoM home page: <http://sourceforge.net/projects/flom/>."
+FLoM home page: <https://github.com/tiian/flom>."
 
 _ACEOF
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1

@@ -320,6 +320,9 @@ dist_noinst_DATA = flom.i
 # Unsure if it's better to use flom_php_module_la_LIBADD or 
 # flom_php_module_la_LDADD
 flom_php_module_la_LIBADD = @GLIB2_LIBS@ @DBUS1_LIBS@ @OPENSSL_LIBS@ ../libflom.la
+@COND_PHP7_FALSE@PHP_VERSION = -php
+# PHP version to use
+@COND_PHP7_TRUE@PHP_VERSION = -php7
 nodist_flom_php_module_la_SOURCES = flom_wrap.c
 lib_LTLIBRARIES = flom-php-module.la
 phpdir = $(datadir)/$(PACKAGE)/php
@@ -652,9 +655,8 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-phpDATA
 	tags uninstall uninstall-am uninstall-hook \
 	uninstall-libLTLIBRARIES uninstall-phpDATA
 
-
 flom_wrap.c: flom.i ../flom_errors.h.in ../flom_types.h ../flom_handle.h
-	$(SWIG) -php -I.. flom.i
+	$(SWIG) $(PHP_VERSION) -I.. flom.i
 
 install-exec-hook:
 	ln -sf $(DESTDIR)$(libdir)/flom-php-module.so \

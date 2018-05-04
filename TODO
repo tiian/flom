@@ -1,3 +1,6 @@
+javac -h . $(JAVA_PKGDIR)/FlomHandle.java
+create .class every time... Makefile must be restructured for Java 9 
+
 Road map:
 
 fix PHP for Ubuntu 16.04, see https://github.com/tiian/flom/issues/5

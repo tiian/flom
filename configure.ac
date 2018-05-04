@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.3.5-dev], [tiian at users dot sourceforge dot net], [], [http://sourceforge.net/projects/flom/])
+AC_INIT([FLoM], [1.3.5-dev], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -278,6 +278,11 @@ AC_CHECK_PROG(HAVE_JAVA, [java], [yes], [no])
 # Checking the availability of JDK
 AC_CHECK_PROG(HAVE_JAVAC, [javac], [yes], [no])
 AC_CHECK_PROG(HAVE_JAVAH, [javah], [yes], [no])
+AM_CONDITIONAL([COND_HAVE_JAVAH], [test "$HAVE_JAVAH" = "yes"])
+if test "$HAVE_JAVAH" = "no"
+then
+	AC_MSG_NOTICE([javah not found, assuming Java 9 or higher])
+fi
 AC_CHECK_PROG(HAVE_JAR, [jar], [yes], [no])
 AC_CHECK_PROG(HAVE_JAVADOC, [javadoc], [yes], [no])
 # Build Java wrapper?
@@ -321,6 +326,18 @@ AM_CONDITIONAL([COND_PERLAPI], [test "$PERLAPI" = "yes"])
 # Checking the availability of PHP tools
 AC_CHECK_PROG(HAVE_PHP, [php], [yes], [no])
 AC_CHECK_PROG(HAVE_PHP_CONFIG, [php-config], [yes], [no])
+if test "$HAVE_PHP_CONFIG" = "yes"
+then
+	AC_MSG_CHECKING([for PHP7])
+	PHP_VERNUM=$(php-config --vernum)
+	if test $PHP_VERNUM -ge 70000
+	then
+        	AC_MSG_RESULT([yes])
+	else
+		AC_MSG_RESULT([no])
+	fi
+fi
+AM_CONDITIONAL([COND_PHP7], [test $PHP_VERNUM -ge 70000])
 # Build PHP wrapper?
 AC_ARG_ENABLE([php],
 	AS_HELP_STRING([--disable-php],

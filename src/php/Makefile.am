@@ -5,9 +5,14 @@ dist_noinst_DATA = flom.i
 # Unsure if it's better to use flom_php_module_la_LIBADD or 
 # flom_php_module_la_LDADD
 flom_php_module_la_LIBADD = @GLIB2_LIBS@ @DBUS1_LIBS@ @OPENSSL_LIBS@ ../libflom.la
-
+# PHP version to use
+if COND_PHP7
+ PHP_VERSION=-php7
+else
+ PHP_VERSION=-php
+endif
 flom_wrap.c: flom.i ../flom_errors.h.in ../flom_types.h ../flom_handle.h
-	$(SWIG) -php -I.. flom.i
+	$(SWIG) $(PHP_VERSION) -I.. flom.i
 
 nodist_flom_php_module_la_SOURCES = flom_wrap.c
 
