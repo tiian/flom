@@ -23,11 +23,19 @@ $(JAVA_PKGDIR)/FlomLockModes.java:	FlomLockModes.awk ../flom_types.h
 $(JAVA_PKGDIR)/FlomLockModes.class:	$(JAVA_PKGDIR)/FlomLockModes.java
 	javac $<
 
-$(JAVA_PKGDIR)/FlomErrorCodes.class:	$(JAVA_PKGDIR)/FlomErrorCodes.java
+$(JAVA_PKGDIR)/FlomErrorCodes.class: $(JAVA_PKGDIR)/FlomErrorCodes.java
+if COND_HAVE_JAVAH
 	javac $<
+else
+	javac -h . $<
+endif
 
-$(JAVA_PKGDIR)/FlomHandle.class:	$(JAVA_PKGDIR)/FlomHandle.java
+$(JAVA_PKGDIR)/FlomHandle.class: $(JAVA_PKGDIR)/FlomHandle.java
+if COND_HAVE_JAVAH
 	javac $<
+else
+	javac -h . $<
+endif
 
 $(JAVA_PKGDIR)/FlomException.class:	$(JAVA_PKGDIR)/FlomException.java
 	javac $<
@@ -36,13 +44,13 @@ org_tiian_flom_FlomHandle.h:	flom.jar $(JAVA_PKGDIR)/FlomHandle.java
 if COND_HAVE_JAVAH
 	rm -f $@ ; javah -o $@ -classpath $< org.tiian.flom.FlomHandle
 else
-	javac -h . $(JAVA_PKGDIR)/FlomHandle.java
+	touch $@
 endif
 org_tiian_flom_FlomErrorCodes.h:	flom.jar $(JAVA_PKGDIR)/FlomErrorCodes.java
 if COND_HAVE_JAVAH
 	rm -f $@ ; javah -o $@ -classpath $< org.tiian.flom.FlomErrorCodes
 else
-	javac -h . $(JAVA_PKGDIR)/FlomErrorCodes.java
+	touch $@
 endif
 
 flom.jar:	$(JAVA_PKGDIR)/FlomErrorCodes.class $(JAVA_PKGDIR)/FlomLockModes.class $(JAVA_PKGDIR)/FlomHandle.class $(JAVA_PKGDIR)/FlomException.class

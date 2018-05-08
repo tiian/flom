@@ -1,5 +1,5 @@
-javac -h . $(JAVA_PKGDIR)/FlomHandle.java
-create .class every time... Makefile must be restructured for Java 9 
+116: C sequence resource    FAILED on Ubuntu 18.04
+Check if on Ubuntu 18.04 the best TLS protocol is used.
 
 Road map:
 
