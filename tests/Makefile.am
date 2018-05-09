@@ -42,6 +42,7 @@ api.at: api.at.in
 	sed \
 	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
 	-e 's|@USER[@]|$(USER)|g' \
+	-e 's|@STDBUF_O0[@]|$(STDBUF_O0)|g' \
 	$< >$@
 
 api_perl.at: api_perl.at.in

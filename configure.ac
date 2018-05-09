@@ -266,6 +266,13 @@ then
 	TLS_INIT_FUNCTION="OPENSSL_init_ssl"
 fi
 
+# Checking stdbuf is available
+AC_CHECK_PROGS(STDBUF, [stdbuf], [])
+if test "xxx$STDBUF" = "xxxstdbuf"
+then
+	STDBUF_O0="$STDBUF -o0"
+fi
+AC_MSG_NOTICE([STDBUF_O0=$STDBUF_O0])
 # Checking the availability of some utility programs
 AC_CHECK_PROGS(DOXYGEN, [doxygen], [true])
 AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
@@ -285,6 +292,20 @@ then
 fi
 AC_CHECK_PROG(HAVE_JAR, [jar], [yes], [no])
 AC_CHECK_PROG(HAVE_JAVADOC, [javadoc], [yes], [no])
+# checking if javadoc support HTML5
+if test "$HAVE_JAVADOC" = "yes"
+then
+	AC_MSG_CHECKING([if javadoc supports HTML5])
+	javadoc -help | grep html5 >/dev/null
+	JAVADOC_HTML5=$?
+	if test $JAVADOC_HTML5 -eq 0
+	then
+        	AC_MSG_RESULT([yes])
+	else
+		AC_MSG_RESULT([no])
+	fi
+fi
+AM_CONDITIONAL([COND_JAVADOC_HTML5], [test $JAVADOC_HTML5 -eq 0])
 # Build Java wrapper?
 AC_ARG_ENABLE([java],
 	AS_HELP_STRING([--disable-java],
@@ -450,6 +471,7 @@ AC_SUBST(GLIB2_LIBS)
 AC_SUBST(GTHREAD2_LIBS)
 AC_SUBST(DBUS1_LIBS)
 AC_SUBST(HAVE_DOT)
+AC_SUBST(STDBUF_O0)
 
 # substitution of the current logged user
 AC_SUBST(USER)

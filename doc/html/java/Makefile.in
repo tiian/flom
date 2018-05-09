@@ -220,6 +220,8 @@ RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+STDBUF = @STDBUF@
+STDBUF_O0 = @STDBUF_O0@
 STRIP = @STRIP@
 SWIG = @SWIG@
 USER = @USER@
@@ -337,6 +339,7 @@ SUBDIRS = resources org/tiian/flom .
 dist_noinst_DATA = Makefile.am
 #dist_html_DATA = *.html *.css *.png *.gif
 dist_html_DATA = package-list *.html *.css
+@COND_JAVADOC_HTML5_TRUE@MAYBE_HTML5 = -html5
 all: all-recursive
 
 .SUFFIXES:
@@ -710,7 +713,7 @@ uninstall-am: uninstall-dist_htmlDATA
 
 
 package-list:	$(top_srcdir)/src/java/org/tiian/flom/*.java
-	javadoc $^
+	javadoc $(MAYBE_HTML5) $^
 
 *.html:	$(top_srcdir)/src/java/org/tiian/flom/*.java
 	touch index.html

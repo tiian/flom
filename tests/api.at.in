@@ -107,7 +107,7 @@ locked element is 1
 locked element is 1
 locked element is 2
 ]])
-AT_CHECK([case0004], [134], [expout], [ignore])
+AT_CHECK([@STDBUF_O0@ case0004], [134], [expout], [ignore])
 AT_DATA([expout],
 [[locked element is 3
 locked element is 4
@@ -115,7 +115,7 @@ locked element is 2
 locked element is 2
 locked element is 3
 ]])
-AT_CHECK([case0004], [134], [expout], [ignore])
+AT_CHECK([@STDBUF_O0@ case0004], [134], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([C++ Happy path (static and dynamic)])
@@ -511,7 +511,7 @@ locked element is 1
 locked element is 1
 locked element is 2
 ]])
-AT_CHECK([python $PYTHONPATH/case3004.py], [134], [expout], [ignore])
+AT_CHECK([@STDBUF_O0@ python $PYTHONPATH/case3004.py], [134], [expout], [ignore])
 AT_DATA([expout],
 [[locked element is 3
 locked element is 4
@@ -519,7 +519,7 @@ locked element is 2
 locked element is 2
 locked element is 3
 ]])
-AT_CHECK([python $PYTHONPATH/case3004.py], [134], [expout], [ignore])
+AT_CHECK([@STDBUF_O0@ python $PYTHONPATH/case3004.py], [134], [expout], [ignore])
 AT_CLEANUP
 
 

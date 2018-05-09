@@ -3,9 +3,12 @@ htmldir = $(docdir)/html/java
 dist_noinst_DATA = Makefile.am
 #dist_html_DATA = *.html *.css *.png *.gif
 dist_html_DATA = package-list *.html *.css
+if COND_JAVADOC_HTML5
+  MAYBE_HTML5=-html5
+endif
 
 package-list:	$(top_srcdir)/src/java/org/tiian/flom/*.java
-	javadoc $^
+	javadoc $(MAYBE_HTML5) $^
 
 *.html:	$(top_srcdir)/src/java/org/tiian/flom/*.java
 	touch index.html

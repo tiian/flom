@@ -1,4 +1,5 @@
-116: C sequence resource    FAILED on Ubuntu 18.04
+216: Use case 18 (6/6)                               FAILED (usecase-seq.at:156)
+
 Check if on Ubuntu 18.04 the best TLS protocol is used.
 
 Road map:
