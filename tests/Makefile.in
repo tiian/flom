@@ -810,6 +810,7 @@ usecase-lt.at: usecase-lt.at.in
 usecase-tms.at: usecase-tms.at.in
 	sed \
 	-e 's|@_ES_GENERIC_ERROR[@]|$(_ES_GENERIC_ERROR)|g' \
+	-e 's|@STDBUF_O0[@]|$(STDBUF_O0)|g' \
 	$< >$@
 
 check-local: atconfig atlocal $(TESTSUITE)

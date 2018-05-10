@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <config.h>
+#include "config.h"
 
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
@@ -136,7 +136,7 @@ int main (int argc, char *argv[])
     g_option_context_free(option_context);
 
     if (print_version) {
-        g_print("FLoM: Free LOck Manager\n"
+        g_print("FLoM: Free Lock Manager\n"
                 "Copyright (c) 2013-2018, Christian Ferrari; "
                 "all rights reserved.\n"
                 "License: GPL (GNU Public License) version 2\n"

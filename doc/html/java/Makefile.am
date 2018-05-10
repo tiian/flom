@@ -9,6 +9,7 @@ endif
 
 package-list:	$(top_srcdir)/src/java/org/tiian/flom/*.java
 	javadoc $(MAYBE_HTML5) $^
+	touch $@
 
 *.html:	$(top_srcdir)/src/java/org/tiian/flom/*.java
 	touch index.html
