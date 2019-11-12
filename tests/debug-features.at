@@ -3,15 +3,19 @@ AT_BANNER([Debug features])
 AT_SETUP([IPv6 multicast])
 # skipping for some Linux distributions
 AT_CHECK([skip_ipv6_multicast_tests.sh], [0], [ignore], [ignore])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=ipv6.multicast.server -A ff01::1 >/tmp/out1 &], [0], [ignore], [ignore])
+AT_CHECK([flom --debug-feature=ipv6.multicast.client -A ff01::1 >/tmp/out2], [0], [ignore], [ignore])
 AT_DATA([expout],
 [[Arrived datagram is 'HELLO'
 Sent datagram is 'WELCOME'
-Sent datagram is 'HELLO'
+]])
+AT_CHECK([cat /tmp/out1], [0], [expout], [ignore])
+AT_DATA([expout],
+[[Sent datagram is 'HELLO'
 Arrived datagram is 'WELCOME'
 ]])
-AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
-AT_CHECK([flom --debug-feature=ipv6.multicast.server -A ff01::1 &], [0], [ignore], [ignore])
-AT_CHECK([flom --debug-feature=ipv6.multicast.client -A ff01::1], [0], [expout], [ignore])
+AT_CHECK([cat /tmp/out2], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([TLS basic handshake])

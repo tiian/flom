@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2013-2019, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of FLoM, Free Lock Manager
@@ -925,6 +925,8 @@ int flom_resource_hier_waitings(flom_resource_t *resource)
                     THROW(MSG_FREE_ERROR);                
             } else
                 ++i;
+            g_strfreev(splitted_name);
+            splitted_name = NULL;
         } while (TRUE);
         
         THROW(NONE);
