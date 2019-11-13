@@ -1,5 +1,6 @@
 Release: 1.4.1
-Date:	 2019-11-12
+Date:	 2019-11-13
+Ubuntu 10.04 (OpenJDK 6)  | x86    | virtual (KVM)
 Ubuntu 10.04 (OpenJDK 6)  | x86_64 | virtual (KVM)
 
 Release: 1.4.0

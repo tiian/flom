@@ -1,3 +1,7 @@
+A couple of bugs emerged during regression tests: 
+Ubuntu1204: 226: Use case 19 (8/10)                              FAILED (usecase-tms.at:171)
+flom_client_connect: ret_cod=-101 (ERROR: 'bind' function returned an error condition)
+
 Possible ideas for future developments, if useful:
 
 introduce a supplementary module build for Perl and Python to avoid installation before "make check" (verify other bindings like Java too...)
