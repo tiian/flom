@@ -230,6 +230,7 @@ AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
 AT_CHECK([flom -c flom.conf -a localhost -d -1 -- true], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 AT_CHECK([flom -c flom.conf -a localhost -X --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem], [0], [ignore], [ignore])
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 
@@ -256,6 +257,8 @@ AT_CHECK([flom -c flom.conf -a localhost -X --tls-certificate=CA2/peer2_CA2_cert
 AT_CHECK([pgrep flom], [0], [ignore], [ignore])
 # closing using a certificate signed by the same CA
 AT_CHECK([flom -c flom.conf -a localhost -X --tls-certificate=CA1/peer2_CA1_cert.pem --tls-private-key=CA1/peer2_CA1_key.pem], [0], [ignore], [ignore])
+# wait for shutdown
+AT_CHECK([sleep 1], [0], [ignore], [ignore])
 AT_CHECK([pgrep flom], [1], [ignore], [ignore])
 AT_CLEANUP
 

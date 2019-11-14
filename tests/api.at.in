@@ -412,6 +412,7 @@ flom_handle_get_discovery_ttl() = 1
 flom_handle_get_discovery_ttl() = 2
 flom_handle_get_tls_check_peer_id() = 0
 flom_handle_get_tls_check_peer_id() = 0
+flom_handle_get_tls_check_peer_id() = 1
 happy_path locked element is red
 ]])
 AT_CHECK([php -d extension=@abs_top_builddir@/src/php/.libs/flom-php-module.so $PHPPATH/case2002.php], [0], [expout], [ignore])

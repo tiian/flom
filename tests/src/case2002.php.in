@@ -356,7 +356,7 @@ function happy_path() {
 	/* set a new value for TLS check peer ID property */
 	flom_handle_set_tls_check_peer_id($my_handle, TRUE);
 	/* get new value for TLS check peer ID property */
-	fwrite("flom_handle_get_tls_check_peer_id() = " .
+	fwrite(STDOUT, "flom_handle_get_tls_check_peer_id() = " .
 		flom_handle_get_tls_check_peer_id($my_handle) . "\n");
 	/* check TLS check peer ID 2/2 */
 	if (!flom_handle_get_tls_check_peer_id($my_handle)) {
