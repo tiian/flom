@@ -324,10 +324,14 @@ int flom_tcp_recv(const flom_tcp_t *obj, void *buf, size_t len,
                   size_t *received,
                   struct sockaddr *src_addr, socklen_t *addrlen)
 {
-    enum Exception { INVALID_SOCKET_TYPE
-                     , RECV_ERROR
-                     , RECVFROM_ERROR
-                     , NONE } excp;
+    enum Exception {
+        INVALID_SOCKET_TYPE,
+        RECV_ERROR,
+        /*
+        RECV_MSG_ERROR,
+        */
+        RECVFROM_ERROR,
+        NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_tcp_recv\n"));
@@ -336,6 +340,11 @@ int flom_tcp_recv(const flom_tcp_t *obj, void *buf, size_t len,
             case SOCK_STREAM:
                 if (0 > (*received = recv(obj->sockfd, buf, len, 0)))
                     THROW(RECV_ERROR);
+                /*
+                if (FLOM_RC_OK != (ret_cod = flom_tcp_recv_msg(
+                                       obj, buf, len, received)))
+                    THROW(RECV_MSG_ERROR);
+                */
                 break;
             case SOCK_DGRAM:
                 if (0 > (*received = recvfrom(
@@ -361,6 +370,9 @@ int flom_tcp_recv(const flom_tcp_t *obj, void *buf, size_t len,
                 break;
             case RECV_ERROR:
                 ret_cod = FLOM_RC_RECV_ERROR;
+                /*
+            case RECV_MSG_ERROR:
+                */
                 break;
             case RECVFROM_ERROR:
                 ret_cod = FLOM_RC_RECVFROM_ERROR;
@@ -373,6 +385,83 @@ int flom_tcp_recv(const flom_tcp_t *obj, void *buf, size_t len,
         } /* switch (excp) */
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_tcp_recv/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_tcp_recv_msg(const flom_tcp_t *obj, char *buf, size_t len,
+                      size_t *received)
+{
+    enum Exception {
+        OUT_OF_RANGE,
+        RECV_ERROR,
+        BUFFER_OVERFLOW,
+        NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_tcp_recv_msg\n"));
+    TRY {
+        char closing_tag[20];
+        size_t retrieved = 0;
+        size_t closing_tag_len;
+        char closing_tag_last;
+        int found = FALSE;
+        
+        /* preparing the closing tag string */
+        snprintf(closing_tag, sizeof(closing_tag), "</%s>",
+                 FLOM_MSG_TAG_MSG);
+        closing_tag_len = strlen(closing_tag);
+        closing_tag_last = closing_tag[closing_tag_len-1];
+        FLOM_TRACE(("flom_tcp_recv_msg: closing_tag='%s', closing_tag_len="
+                    SIZE_T_FORMAT ", closing_tag_last='%c'\n",
+                    closing_tag, closing_tag_len, closing_tag_last));
+        if (len < closing_tag_len)
+            THROW(OUT_OF_RANGE);
+        /* loop until a complete message has been retrieved or an error
+           occurs */
+        while (!found) {
+            if (0 > recv(obj->sockfd, buf+retrieved, 1, 0))
+                THROW(RECV_ERROR);
+            /* put string terminator */
+            buf[++retrieved] = '\0';
+            /* too short, go on */
+            if (retrieved < closing_tag_len)
+                continue;
+            /* check last char */
+            if (buf[retrieved-1] == closing_tag_last) {
+                /* check last part */
+                if (0 == strcmp(closing_tag,
+                                buf + retrieved - closing_tag_len))
+                    found = TRUE;
+            } else if (retrieved == len)
+                THROW(BUFFER_OVERFLOW);
+        } /* while (TRUE) */
+        *received = retrieved-1;
+        FLOM_TRACE(("flom_tcp_recv_msg: received message is '%s' "
+                    "of " SIZE_T_FORMAT " chars\n", buf, *received));
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OUT_OF_RANGE:
+                ret_cod = FLOM_RC_OUT_OF_RANGE;
+                break;
+            case RECV_ERROR:
+                ret_cod = FLOM_RC_RECV_ERROR;
+                break;
+            case BUFFER_OVERFLOW:
+                ret_cod = FLOM_RC_BUFFER_OVERFLOW;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_tcp_recv_msg/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

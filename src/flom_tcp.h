@@ -296,7 +296,7 @@ extern "C" {
 
     
     /**
-     * Retrieve the first XML message from a TCP/IP socket (file descriptor)
+     * Retrieve the first XML message from a socket (file descriptor)
      * @param obj IN TCP communication object
      * @param buf OUT buffer will be used to store the XML message
      * @param len IN size of buf
@@ -313,6 +313,24 @@ extern "C" {
 
 
 
+    /**
+     * Return a single XML message from a TCP/IP socket; this helper functions
+     * avoid that more than one message are retrieved at the same time
+     * @param obj IN TCP communication object
+     * @param buf OUT buffer will be used to store the XML message
+     * @param len IN size of buf
+     * @param received OUT number of bytes read, XML message length
+     * @param src_addr OUT transparently passed to recvfrom if type is
+     *                 SOCK_DGRAM (see recvfrom man page)
+     * @param addrlen OUT transparently passed to recvfrom if type is
+     *                 SOCK_DGRAM (see recvfrom man page)
+     * @return a reason code
+     */     
+    int flom_tcp_recv_msg(const flom_tcp_t *obj, char *buf, size_t len,
+                          size_t *received);
+
+
+    
     /**
      * Send a message to a TCP/IP socket (file descriptor)
      * @param obj IN TCP communication object

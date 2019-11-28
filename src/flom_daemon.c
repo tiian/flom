@@ -1226,7 +1226,7 @@ int flom_accept_loop_pollin(flom_config_t *config,
             if (AF_INET == flom_conns_get_domain(conns)) {
                 int sock_opt = 1;
                 /* set TCP_NODELAY for socket */
-                if (0 != setsockopt(conn_fd, IPPROTO_TCP, TCP_NODELAY,
+                if (0 != setsockopt(conn_fd, SOL_TCP, TCP_NODELAY,
                                     (void *)(&sock_opt), sizeof(sock_opt)))
                     THROW(SETSOCKOPT_ERROR);
                 /* set SO_KEEPALIVE for socket */

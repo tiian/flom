@@ -150,9 +150,9 @@ extern "C" {
      */     
     int flom_client_wait_lock(flom_conn_t *conn,
                               struct flom_msg_s *msg, int timeout);
-    
 
-    
+
+
     /**
      * Send unlock command to the daemon
      * @param config IN configuration object

@@ -1,6 +1,12 @@
-A couple of bugs emerged during regression tests: 
-Ubuntu1204: 226: Use case 19 (8/10)                              FAILED (usecase-tms.at:171)
-flom_client_connect: ret_cod=-101 (ERROR: 'bind' function returned an error condition)
+Regarding to issue #13:
+- work on flom_tcp_recv and flom_tcp_recv_msg
+- repeat the same logic for flom_tls_recv and flom_tls_recv_msg
+- changed 
+                  if (0 != setsockopt(conn_fd, SOL_TCP, TCP_NODELAY,
+                                    (void *)(&sock_opt), sizeof(sock_opt)))
+  SOL_TCP instead of IPPROTO, but the behavior does not change;
+  find the suggested usage for TCP_NODELAY
+
 
 Possible ideas for future developments, if useful:
 
