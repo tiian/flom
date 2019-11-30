@@ -326,10 +326,7 @@ int flom_tcp_recv(const flom_tcp_t *obj, void *buf, size_t len,
 {
     enum Exception {
         INVALID_SOCKET_TYPE,
-        RECV_ERROR,
-        /*
         RECV_MSG_ERROR,
-        */
         RECVFROM_ERROR,
         NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -338,13 +335,9 @@ int flom_tcp_recv(const flom_tcp_t *obj, void *buf, size_t len,
     TRY {
         switch (obj->socket_type) {
             case SOCK_STREAM:
-                if (0 > (*received = recv(obj->sockfd, buf, len, 0)))
-                    THROW(RECV_ERROR);
-                /*
                 if (FLOM_RC_OK != (ret_cod = flom_tcp_recv_msg(
                                        obj, buf, len, received)))
                     THROW(RECV_MSG_ERROR);
-                */
                 break;
             case SOCK_DGRAM:
                 if (0 > (*received = recvfrom(
@@ -368,11 +361,7 @@ int flom_tcp_recv(const flom_tcp_t *obj, void *buf, size_t len,
             case INVALID_SOCKET_TYPE:
                 ret_cod = FLOM_RC_INVALID_OPTION;
                 break;
-            case RECV_ERROR:
-                ret_cod = FLOM_RC_RECV_ERROR;
-                /*
             case RECV_MSG_ERROR:
-                */
                 break;
             case RECVFROM_ERROR:
                 ret_cod = FLOM_RC_RECVFROM_ERROR;
@@ -438,7 +427,7 @@ int flom_tcp_recv_msg(const flom_tcp_t *obj, char *buf, size_t len,
             } else if (retrieved == len)
                 THROW(BUFFER_OVERFLOW);
         } /* while (TRUE) */
-        *received = retrieved-1;
+        *received = retrieved;
         FLOM_TRACE(("flom_tcp_recv_msg: received message is '%s' "
                     "of " SIZE_T_FORMAT " chars\n", buf, *received));
         
