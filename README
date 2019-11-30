@@ -146,9 +146,12 @@ CentOS		Basic		gcc glib2-devel dbus dbus-devel autoconf openssl-devel
 CentOS		C++ API		gcc-c++
 CentOS		Perl API	swig perl-devel
 CentOS		PHP API		swig php-devel
-CentOS		Python API	swig python-devel
-CentOS	6.6	Java API	java-1.6.0-openjdk* or java-1.7.0-openjdk*
+CentOS  6.x	Python API	swig python-devel
+CentOS  7.x	Python API	swig python-devel
+CentOS  8.x	Python API	swig python3-devel
+CentOS	6.x	Java API	java-1.6.0-openjdk* or java-1.7.0-openjdk*
 CentOS	7.x	Java API	java-1.8.0-openjdk*
+CentOS	8.x	Java API	java-11-openjdk*
 
 * Support not available for PHP 7.0 due to SWIG version, see also 
   https://github.com/tiian/flom/issues/5

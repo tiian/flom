@@ -233,7 +233,7 @@ int flom_conn_recv(flom_conn_t *obj, void *buf, size_t len, size_t *received,
 
         
         if (NULL != obj->tls)
-            ret_cod = flom_tls_recv(obj->tls, buf, len, received);
+            ret_cod = flom_tls_recv_msg(obj->tls, buf, len, received);
         else
             ret_cod = flom_tcp_recv(&obj->tcp, buf, len, received,
                                     src_addr, addrlen);

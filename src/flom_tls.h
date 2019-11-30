@@ -314,15 +314,15 @@ extern "C" {
     
 
     /**
-     * Receive a buffer using TLS over TCP/IP
+     * Receive an XML message using TLS over TCP/IP
      * @param obj IN/OUT TLS object
      * @param buf OUT buffer to send
      * @param len IN buffer lenght
      * @param received OUT number of read bytes
      * @return a reason code
      */
-    int flom_tls_recv(flom_tls_t *obj, void *buf, size_t len,
-                      size_t *received);
+    int flom_tls_recv_msg(flom_tls_t *obj, char *buf, size_t len,
+                          size_t *received);
 
 
     

@@ -568,36 +568,90 @@ int flom_tls_send(flom_tls_t *obj, const void *buf, size_t len)
 
 
 
-int flom_tls_recv(flom_tls_t *obj, void *buf, size_t len, size_t *received)
+int flom_tls_recv_msg(flom_tls_t *obj, char *buf, size_t len,
+                      size_t *received)
 {
-    enum Exception { SSL_READ_ERROR
-                     , NONE } excp;
+    enum Exception {
+        OUT_OF_RANGE,
+        SSL_READ_ERROR,
+        BUFFER_OVERFLOW,
+        NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
-    FLOM_TRACE(("flom_tls_recv\n"));
+    FLOM_TRACE(("flom_tls_recv_msg\n"));
     TRY {
-        int read_bytes, ssl_rc;
-
-        read_bytes = SSL_read(obj->ssl, buf, (int)len);
-        if (0 >= read_bytes) {
-            unsigned long err;
-            ssl_rc = SSL_get_error(obj->ssl, read_bytes);
-            FLOM_TRACE(("flom_tls_recv/SSL_read: SSL error=%d (%s)\n",
-                        ssl_rc, flom_tls_get_error_label(ssl_rc)));
-            err = ERR_get_error();
-            FLOM_TRACE_SSLERR("flom_tls_recv/SSL_read:", err);
-            THROW(SSL_READ_ERROR);
-        } else {
-            FLOM_TRACE(("flom_tls_recv: received %d of %d bytes\n",
-                        read_bytes, (int)len));
-            *received = (size_t)read_bytes;
-        } /* if (0 >= read_bytes) */
+        char closing_tag[FLOM_MSG_BUFFER_SIZE];
+        size_t retrieved = 0;
+        size_t closing_tag_len;
+        size_t to_be_read;
+        int read_bytes;
+        char closing_tag_last;
+        int found = FALSE;
+        int i, j;
+        
+        /* preparing the closing tag string */
+        snprintf(closing_tag, sizeof(closing_tag), "</%s>",
+                 FLOM_MSG_TAG_MSG);
+        closing_tag_len = strlen(closing_tag);
+        closing_tag_last = closing_tag[closing_tag_len-1];
+        FLOM_TRACE(("flom_tls_recv_msg: closing_tag='%s', closing_tag_len="
+                    SIZE_T_FORMAT ", closing_tag_last='%c'\n",
+                    closing_tag, closing_tag_len, closing_tag_last));
+        if (len < closing_tag_len)
+            THROW(OUT_OF_RANGE);
+        /* loop until a complete message has been retrieved or an error
+           occurs */
+        to_be_read = closing_tag_len;
+        while (!found) {
+            read_bytes = SSL_read(obj->ssl, buf+retrieved, (int)to_be_read);
+            FLOM_TRACE(("flom_tls_recv_msg: read_bytes=%d '%*.*s'\n",
+                        read_bytes, read_bytes, read_bytes, buf+retrieved));
+            if (0 >= read_bytes) {
+                unsigned long err;
+                int ssl_rc = SSL_get_error(obj->ssl, read_bytes);
+                FLOM_TRACE(("flom_tls_recv_msg/SSL_read: SSL error=%d (%s)\n",
+                            ssl_rc, flom_tls_get_error_label(ssl_rc)));
+                err = ERR_get_error();
+                FLOM_TRACE_SSLERR("flom_tls_recv_msg/SSL_read:", err);
+                THROW(SSL_READ_ERROR);
+            }
+            retrieved += read_bytes;
+            /* too few chars, go on */
+            if (retrieved < closing_tag_len)
+                continue;
+            /* looping on closing_tag */
+            j = 0;
+            for (i=0; i<closing_tag_len; ++i) {
+                if (buf[retrieved-j-1] == closing_tag[closing_tag_len-i-1])
+                    j++;
+                else
+                    j = 0;
+            } /* for (i=0; i<closing_tag_len; ++i) */
+            if (j == closing_tag_len)
+                found = TRUE;
+            else {
+                to_be_read = closing_tag_len - j;
+                if (retrieved + to_be_read >= len)
+                    THROW(BUFFER_OVERFLOW);
+            }
+        } /* while (TRUE) */
+        /* put string terminator */
+        buf[retrieved] = '\0';
+        *received = retrieved;
+        FLOM_TRACE(("flom_tls_recv_msg: received message is '%s' "
+                    "of " SIZE_T_FORMAT " chars\n", buf, *received));
         
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case OUT_OF_RANGE:
+                ret_cod = FLOM_RC_OUT_OF_RANGE;
+                break;
             case SSL_READ_ERROR:
                 ret_cod = FLOM_RC_SSL_READ_ERROR;
+                break;
+            case BUFFER_OVERFLOW:
+                ret_cod = FLOM_RC_BUFFER_OVERFLOW;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
@@ -606,7 +660,7 @@ int flom_tls_recv(flom_tls_t *obj, void *buf, size_t len, size_t *received)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    FLOM_TRACE(("flom_tls_recv/excp=%d/"
+    FLOM_TRACE(("flom_tls_recv_msg/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

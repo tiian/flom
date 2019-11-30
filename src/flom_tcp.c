@@ -392,11 +392,14 @@ int flom_tcp_recv_msg(const flom_tcp_t *obj, char *buf, size_t len,
     
     FLOM_TRACE(("flom_tcp_recv_msg\n"));
     TRY {
-        char closing_tag[20];
+        char closing_tag[FLOM_MSG_BUFFER_SIZE];
         size_t retrieved = 0;
         size_t closing_tag_len;
+        size_t to_be_read;
+        ssize_t read_bytes;
         char closing_tag_last;
         int found = FALSE;
+        int i, j;
         
         /* preparing the closing tag string */
         snprintf(closing_tag, sizeof(closing_tag), "</%s>",
@@ -410,23 +413,35 @@ int flom_tcp_recv_msg(const flom_tcp_t *obj, char *buf, size_t len,
             THROW(OUT_OF_RANGE);
         /* loop until a complete message has been retrieved or an error
            occurs */
+        to_be_read = closing_tag_len;
         while (!found) {
-            if (0 > recv(obj->sockfd, buf+retrieved, 1, 0))
+            read_bytes = recv(obj->sockfd, buf+retrieved, to_be_read, 0);
+            FLOM_TRACE(("flom_tcp_recv_msg: read_bytes=%d '%*.*s'\n",
+                        read_bytes, read_bytes, read_bytes, buf+retrieved));
+            if (0 >= read_bytes)
                 THROW(RECV_ERROR);
-            /* put string terminator */
-            buf[++retrieved] = '\0';
-            /* too short, go on */
+            retrieved += read_bytes;
+            /* too few chars, go on */
             if (retrieved < closing_tag_len)
                 continue;
-            /* check last char */
-            if (buf[retrieved-1] == closing_tag_last) {
-                /* check last part */
-                if (0 == strcmp(closing_tag,
-                                buf + retrieved - closing_tag_len))
-                    found = TRUE;
-            } else if (retrieved == len)
-                THROW(BUFFER_OVERFLOW);
+            /* looping on closing_tag */
+            j = 0;
+            for (i=0; i<closing_tag_len; ++i) {
+                if (buf[retrieved-j-1] == closing_tag[closing_tag_len-i-1])
+                    j++;
+                else
+                    j = 0;
+            } /* for (i=0; i<closing_tag_len; ++i) */
+            if (j == closing_tag_len)
+                found = TRUE;
+            else {
+                to_be_read = closing_tag_len - j;
+                if (retrieved + to_be_read >= len)
+                    THROW(BUFFER_OVERFLOW);
+            }
         } /* while (TRUE) */
+        /* put string terminator */
+        buf[retrieved] = '\0';
         *received = retrieved;
         FLOM_TRACE(("flom_tcp_recv_msg: received message is '%s' "
                     "of " SIZE_T_FORMAT " chars\n", buf, *received));

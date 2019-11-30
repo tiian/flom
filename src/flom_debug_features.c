@@ -583,20 +583,23 @@ int flom_debug_features_ipv6_multicast_client(void)
 
 int flom_debug_features_tls_server(void)
 {
-    enum Exception { NEW_OBJ1
-                     , NEW_OBJ2
-                     , TLS_CREATE_CONTEXT_ERROR
-                     , TLS_SET_CERT_ERROR
-                     , TCP_LISTEN_ERROR
-                     , ACCEPT_ERROR
-                     , TLS_ACCEPT_ERROR
-                     , CONN_RECV_ERROR
-                     , CONN_AUTHENTICATE_ERROR
-                     , NULL_OBJECT
-                     , CONN_SEND_ERROR
-                     , CONN_CLOSE_ERROR1
-                     , CONN_CLOSE_ERROR2
-                     , NONE } excp;
+    enum Exception {
+        NEW_OBJ1,
+        NEW_OBJ2,
+        TLS_CREATE_CONTEXT_ERROR,
+        TLS_SET_CERT_ERROR,
+        TCP_LISTEN_ERROR,
+        ACCEPT_ERROR,
+        TLS_ACCEPT_ERROR,
+        CONN_RECV_ERROR,
+        PROTOCOL_ERROR,
+        CONN_AUTHENTICATE_ERROR,
+        NULL_OBJECT,
+        CONN_SEND_ERROR1,
+        CONN_SEND_ERROR2,
+        CONN_CLOSE_ERROR1,
+        CONN_CLOSE_ERROR2,
+        NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     flom_conn_t *client_conn = NULL, *listen_conn;
@@ -605,7 +608,9 @@ int flom_debug_features_tls_server(void)
     
     FLOM_TRACE(("flom_debug_features_tls_server\n"));
     TRY {
-        char msg[100];
+        char msg[FLOM_MSG_BUFFER_SIZE];
+        char closing_tag[FLOM_MSG_BUFFER_SIZE];
+        char *pos_of_closing_tag = NULL;
         size_t received = 0;
         
         /* network data of the peer socket */
@@ -617,6 +622,10 @@ int flom_debug_features_tls_server(void)
             THROW(NEW_OBJ1);
         if (NULL == (client_conn = flom_conn_new(NULL)))
             THROW(NEW_OBJ2);
+
+        /* preparing closing tag */
+        snprintf(closing_tag, sizeof(closing_tag), "</%s>",
+                 FLOM_MSG_TAG_MSG);
         
         /* initialize TLS/SSL support */
         flom_conn_init_tls(client_conn, FALSE);
@@ -669,6 +678,10 @@ int flom_debug_features_tls_server(void)
             THROW(CONN_RECV_ERROR);
         FLOM_TRACE(("flom_debug_features_tls_server: received " SIZE_T_FORMAT
                     " bytes, '%*.*s'\n", received, received, received, msg));
+        if (NULL == (pos_of_closing_tag = strstr(msg, closing_tag)))
+            THROW(PROTOCOL_ERROR);
+        /* removing closing tag */
+        *pos_of_closing_tag = '\0';
 
         /* authenticate the connection */
         if (FLOM_RC_OK != (ret_cod = flom_conn_authenticate(
@@ -685,7 +698,13 @@ int flom_debug_features_tls_server(void)
                     " bytes, '%s'\n", strlen(unique_id), unique_id));
         if (FLOM_RC_OK != (ret_cod = flom_conn_send(
                                client_conn, unique_id, strlen(unique_id))))
-            THROW(CONN_SEND_ERROR);
+            THROW(CONN_SEND_ERROR1);
+        /* sending end of message */
+        FLOM_TRACE(("flom_debug_features_tls_server: sending " SIZE_T_FORMAT
+                    " bytes, '%s'\n", strlen(closing_tag), closing_tag));
+        if (FLOM_RC_OK != (ret_cod = flom_conn_send(
+                               client_conn, closing_tag, strlen(closing_tag))))
+            THROW(CONN_SEND_ERROR2);        
 
         /* closing client connection */
         if (FLOM_RC_OK != (ret_cod = flom_conn_close(client_conn)))
@@ -708,6 +727,9 @@ int flom_debug_features_tls_server(void)
             case ACCEPT_ERROR:
                 ret_cod = FLOM_RC_ACCEPT_ERROR;
                 break;
+            case PROTOCOL_ERROR:
+                ret_cod = FLOM_RC_PROTOCOL_ERROR;
+                break;
             case TLS_ACCEPT_ERROR:
             case CONN_RECV_ERROR:
             case CONN_AUTHENTICATE_ERROR:
@@ -715,7 +737,8 @@ int flom_debug_features_tls_server(void)
             case NULL_OBJECT:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
-            case CONN_SEND_ERROR:
+            case CONN_SEND_ERROR1:
+            case CONN_SEND_ERROR2:
             case CONN_CLOSE_ERROR1:
             case CONN_CLOSE_ERROR2:
                 break;
@@ -746,17 +769,20 @@ int flom_debug_features_tls_server(void)
 
 int flom_debug_features_tls_client(void)
 {
-    enum Exception { NEW_OBJ
-                     , TLS_CREATE_CONTEXT_ERROR
-                     , TLS_SET_CERT_ERROR
-                     , TCP_CONNECT_ERROR
-                     , TLS_CONNECT_ERROR
-                     , NULL_OBJECT
-                     , CONN_SEND_ERROR
-                     , CONN_RECV_ERROR
-                     , CONN_AUTHENTICATE_ERROR
-                     , CONN_CLOSE_ERROR
-                     , NONE } excp;
+    enum Exception {
+        NEW_OBJ,
+        TLS_CREATE_CONTEXT_ERROR,
+        TLS_SET_CERT_ERROR,
+        TCP_CONNECT_ERROR,
+        TLS_CONNECT_ERROR,
+        NULL_OBJECT,
+        CONN_SEND_ERROR1,
+        CONN_SEND_ERROR2,
+        CONN_RECV_ERROR,
+        PROTOCOL_ERROR,
+        CONN_AUTHENTICATE_ERROR,
+        CONN_CLOSE_ERROR,
+        NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     flom_conn_t *conn = NULL;
@@ -765,11 +791,18 @@ int flom_debug_features_tls_client(void)
         
     FLOM_TRACE(("flom_debug_features_tls_client\n"));
     TRY {
-        char msg[100];
+        char msg[FLOM_MSG_BUFFER_SIZE];
+        char closing_tag[FLOM_MSG_BUFFER_SIZE];
+        char *pos_of_closing_tag = NULL;
         size_t received = 0;
         
         if (NULL == (conn = flom_conn_new(NULL)))
             THROW(NEW_OBJ);
+        
+        /* preparing closing tag */
+        snprintf(closing_tag, sizeof(closing_tag), "</%s>",
+                 FLOM_MSG_TAG_MSG);
+        
         /* initialize TLS/SSL support */
         flom_conn_init_tls(conn, TRUE);
 
@@ -806,7 +839,13 @@ int flom_debug_features_tls_client(void)
                     " bytes, '%s'\n", strlen(unique_id), unique_id));
         if (FLOM_RC_OK != (ret_cod = flom_conn_send(
                                conn, unique_id, strlen(unique_id))))
-            THROW(CONN_SEND_ERROR);
+            THROW(CONN_SEND_ERROR1);
+        /* sending end of message */
+        FLOM_TRACE(("flom_debug_features_tls_client: sending " SIZE_T_FORMAT
+                    " bytes, '%s'\n", strlen(closing_tag), closing_tag));
+        if (FLOM_RC_OK != (ret_cod = flom_conn_send(
+                               conn, closing_tag, strlen(closing_tag))))
+            THROW(CONN_SEND_ERROR2);        
 
         /* waiting the response */
         memset(msg, 0, sizeof(msg));
@@ -816,6 +855,10 @@ int flom_debug_features_tls_client(void)
             THROW(CONN_RECV_ERROR);
         FLOM_TRACE(("flom_debug_features_tls_client: received " SIZE_T_FORMAT
                     " bytes, '%s'\n", received, msg));
+        if (NULL == (pos_of_closing_tag = strstr(msg, closing_tag)))
+            THROW(PROTOCOL_ERROR);
+        /* removing closing tag */
+        *pos_of_closing_tag = '\0';
 
         /* authenticate the connection */
         if (FLOM_RC_OK != (ret_cod = flom_conn_authenticate(
@@ -841,7 +884,11 @@ int flom_debug_features_tls_client(void)
             case NULL_OBJECT:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
-            case CONN_SEND_ERROR:
+            case PROTOCOL_ERROR:
+                ret_cod = FLOM_RC_PROTOCOL_ERROR;
+                break;
+            case CONN_SEND_ERROR1:
+            case CONN_SEND_ERROR2:
             case CONN_RECV_ERROR:
             case CONN_AUTHENTICATE_ERROR:
             case CONN_CLOSE_ERROR:
