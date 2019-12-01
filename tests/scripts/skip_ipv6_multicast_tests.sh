@@ -19,7 +19,7 @@
 #
 
 # These Linux distributions do not pass the IPv6 multicast tests
-grep '^CentOS release 6' /etc/centos-release
+grep '^CentOS Linux release 8\|^CentOS release 6' /etc/centos-release
 if test $? -eq 0
 then
 	exit 77

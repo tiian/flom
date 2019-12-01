@@ -838,9 +838,10 @@ int flom_config_init_load(flom_config_t *config,
                                    config, value))) {
                 print_file_name = TRUE;
                 THROW(CONFIG_SET_SOCKET_NAME_ERROR);
-            } else
+            } else {
                 g_free(value);
                 value = NULL;
+            }
         }
         /* pick-up daemon lifespan from configuration */
         ivalue = g_key_file_get_integer(

@@ -142,7 +142,7 @@ Ubuntu	12.04	Java API	default-jdk (openjdk 6)
 Ubuntu	14.04	Java API	default-jdk (openjdk 7)
 Ubuntu	16.04	Java API	default-jdk (openjdk 8)
 Ubuntu	18.04	Java API	default-jdk (openjdk 10)
-CentOS		Basic		gcc glib2-devel dbus dbus-devel autoconf openssl-devel
+CentOS		Basic		gcc glib2-devel dbus dbus-devel autoconf openssl-devel make
 CentOS		C++ API		gcc-c++
 CentOS		Perl API	swig perl-devel
 CentOS		PHP API		swig php-devel
