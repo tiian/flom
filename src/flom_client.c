@@ -1375,7 +1375,7 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
     FLOM_TRACE(("flom_client_shutdown\n"));
     TRY {
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
-        size_t to_send;
+        size_t to_send, received;
 
         /* creating a new connection object */
         if (NULL == (conn = flom_conn_new(config)))
@@ -1426,6 +1426,15 @@ int flom_client_shutdown(flom_config_t *config, int immediate)
         FLOM_TRACE(("flom_client_shutdown: shutdown message sent "
                     "to daemon...\n"));
 
+        /* wait 1000ms reply from the daemon, typically an error */
+        ret_cod = flom_conn_recv(conn, buffer, sizeof(buffer), &received,
+                                 1000, NULL, NULL);
+        FLOM_TRACE(("flom_client_shutdown/flom_conn_recv: ret_cod=%d "
+                    "'%s'\n", ret_cod, flom_strerror(ret_cod)));
+        if (FLOM_RC_RECV_ERROR != ret_cod)
+            syslog(LOG_NOTICE, FLOM_SYSLOG_FLM020N, ret_cod,
+                   flom_strerror(ret_cod));
+        
         /* gracefully disconnect from daemon */
         ret_cod = flom_client_disconnect(conn);
         switch (ret_cod) {

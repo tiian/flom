@@ -1,12 +1,14 @@
 Release: 1.4.2
 Date:	 2019-12-01
-Ubuntu 10.04 (OpenJDK 6)  | x86    | virtual (KVM)
+Redo Ubuntu 10.04 (OpenJDK 6)  | x86    | virtual (KVM)
 Ubuntu 10.04 (OpenJDK 6)  | x86_64 | virtual (KVM)
-Ubuntu 12.04 (OpenJDK 6)  | x86_64 | virtual (KVM)
-Ubuntu 14.04 (OpenJDK 7)  | x86_64 | virtual (KVM)
-CentOS 6.10 (OpenJDK 7)   | x86    | virtual (KVM) §
-CentOS 6.10 (OpenJDK 7)   | x86_64 | virtual (KVM) §
-CentOS 7.7 (OpenJDK 8)    | x86_64 | virtual (KVM) §§
+Redo Ubuntu 12.04 (OpenJDK 6)  | x86_64 | virtual (KVM)
+Redo Ubuntu 14.04 (OpenJDK 7)  | x86_64 | virtual (KVM)
+Redo Ubuntu 16.04 (OpenJDK 7)  | x86_64 | virtual (KVM) *
+Ubuntu 18.04 (OpenJDK 11) | x86_64 | virtual (KVM)
+Redo CentOS 6.10 (OpenJDK 7)   | x86    | virtual (KVM) §
+Redo CentOS 6.10 (OpenJDK 7)   | x86_64 | virtual (KVM) §
+Redo CentOS 7.7 (OpenJDK 8)    | x86_64 | virtual (KVM) §§
 * ./configure --disable-php
   see also https://github.com/tiian/flom/issues/5
 § centos-release-6-10.el6.centos.12.3.i686 (rpm --query centos-release)

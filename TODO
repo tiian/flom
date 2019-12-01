@@ -1,9 +1,3 @@
-Regression with Ubuntu 18.04, case test 154, error with TLS, probably this
-one: 
-19 X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN: self signed certificate in certificate chain
-
-    the certificate chain could be built up using the untrusted certificates but the root could not be found locally.
-
 Various timing regressions with Ubuntu 16.04 to solve.
 
 Port to CentOS 8: TLS set-up procedure must be fixed, it's out of date

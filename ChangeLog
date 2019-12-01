@@ -1,6 +1,8 @@
 LOG:
 
 	 - 1.4.2 Fix of https://github.com/tiian/flom/issues/12
+	Fixed a bug related to immediate shutdown (-X, --immediate-exit) when
+	TLS is used: FLoM daemon didn't terminate.
 
 20191114 - 1.4.1 Fix of https://github.com/tiian/flom/issues/10
 

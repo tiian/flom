@@ -33,10 +33,6 @@
 #endif /* HAVE_ERRNO_H */
 
 
-/*
-#include <flom_defines.h>
-*/
-
 
 /**
  * Exit status when FLOM is unable to immediately lock a resource (it could be

@@ -32,6 +32,7 @@ create_ca () {
 	mkdir certs crl newcerts private || exit $?
 	echo "01" > serial || exit $?
 	cp /dev/null index.txt || exit $?
+	echo "unique_subject = yes" > index.txt.attr || exit $?
 	# creating CA certificate
 	openssl req -new -x509 -keyout private/cakey.pem -out cacert.pem -days 365 -config flom_openssl.conf -subj "/C=IT/ST=TV/L=Mogliano Veneto/O=FLoM Software/OU=R and D/CN=FLoM $CA" -passout pass:flom$CA || exit $?
 }

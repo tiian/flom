@@ -77,6 +77,8 @@ extern "C" {
 #define FLOM_SYSLOG_FLM017E "FLM017E X.509 certificate error, SSL_get_verify_result returned %ld"
 #define FLOM_SYSLOG_FLM018E "FLM018E X.509 certificate error related to private key: %s"
 #define FLOM_SYSLOG_FLM019E "FLM019E 'bind' error %d ('%s') in function '%s'"
+#define FLOM_SYSLOG_FLM020N "FLM020N flom_conn_recv returned %d ('%s') " \
+    "instead of FLOM_RC_RECV_ERROR during flom_client_shutdown"
     
     
 
