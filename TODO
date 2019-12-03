@@ -1,6 +1,4 @@
-Various timing regressions with Ubuntu 16.04 to solve.
-
-Port to CentOS 8: TLS set-up procedure must be fixed, it's out of date
+Port to CentOS 8
 
 Re-arrange Java JNI build procedure as it is in LIXA project, without 
 javah dependency.
