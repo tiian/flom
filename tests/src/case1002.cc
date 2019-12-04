@@ -360,17 +360,23 @@ void staticHandleHappyPath(const string ndNetworkInterface) {
     }
     
     /* get current network interface */
-    cerr << "FlomHandle.getNetworkInterface() = '"
+    cout << "FlomHandle.getNetworkInterface() = '"
          << myHandle.getNetworkInterface() << "'" << endl;
+    /*
     myHandle.setNetworkInterface(ndNetworkInterface);
+    */
     /* set a new network interface */
     if (FLOM_RC_OK == myHandle.setNetworkInterface(ndNetworkInterface)) {
         /* get new network interface */
-        cerr << "FlomHandle.getNetworkInterface() = '"
+        /*
+        cout << "FlomHandle.getNetworkInterface() = '"
              << myHandle.getNetworkInterface() << "'" << endl;
+        */
         /* check network interface */
         if (ndNetworkInterface.compare(myHandle.getNetworkInterface())) {
-            cerr << "Unexpected result from FlomHandle/getNetworkInterface"
+            cerr << "Unexpected result from FlomHandle/getNetworkInterface: "
+                 << "expected was '" << ndNetworkInterface << "'"
+                 << "obtained is '" << myHandle.getNetworkInterface() << "'"
                  << endl;
             exit(1);
         }
@@ -735,16 +741,20 @@ void dynamicHandleHappyPath(const string ndNetworkInterface) {
     }
     
     /* get current network interface */
-    cerr << "FlomHandle->getNetworkInterface() = '"
+    cout << "FlomHandle->getNetworkInterface() = '"
          << myHandle->getNetworkInterface() << "'" << endl;
     /* set a new network interface */
     if (FLOM_RC_OK == myHandle->setNetworkInterface(ndNetworkInterface)) {
         /* get new network interface */
+        /*
         cerr << "FlomHandle->getNetworkInterface() = '" 
              << myHandle->getNetworkInterface() << "'" << endl;
+        */
         /* check network interface */
         if (ndNetworkInterface.compare(myHandle->getNetworkInterface())) {
-            cerr << "Unexpected result from FlomHandle/getNetworkInterface"
+            cerr << "Unexpected result from FlomHandle/getNetworkInterface: "
+                 << "expected was '" << ndNetworkInterface << "'"
+                 << "obtained is '" << myHandle->getNetworkInterface() << "'"
                  << endl;
             exit(1);
         }
