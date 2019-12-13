@@ -1543,7 +1543,7 @@ int flom_config_set_network_interface(flom_config_t *config,
             THROW(GETIFADDRS_ERROR);
         } else {
             FLOM_TRACE_IFADDRS("flom_config_set_network_interface/"
-                               "getifaddrs(): ", ifaddr);
+                               "getifaddrs():", ifaddr);
         }
         /* search interface for IPv6 networking */
         for (ifa=ifaddr; NULL!=ifa; ifa=ifa->ifa_next) {

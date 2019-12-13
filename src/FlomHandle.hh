@@ -361,7 +361,7 @@ namespace flom {
          * @return a reason code
          */
         int setNetworkInterface(const string &value) {
-            flom_handle_set_network_interface(&handle, value.c_str()); }
+            return flom_handle_set_network_interface(&handle, value.c_str()); }
 
         /**
          * Get "resource create" boolean property: it specifies if method
