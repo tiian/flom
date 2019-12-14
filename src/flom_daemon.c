@@ -99,24 +99,26 @@ static char FLOM_INADDR6_ANY_STRING[INET6_ADDRSTRLEN];
 
 int flom_daemon(flom_config_t *config, int family)
 {
-    enum Exception { INET_NTOP_ERROR1
-                     , INET_NTOP_ERROR2
-                     , PIPE_ERROR
-                     , FORK_ERROR
-                     , WAIT_ERROR
-                     , CHILD_PID_ERROR
-                     , READ_ERROR
-                     , DAEMON_NOT_OK
-                     , FORK_ERROR2
-                     , SETSID_ERROR
-                     , SIGNAL_ERROR
-                     , FORK_ERROR3
-                     , CHDIR_ERROR
-                     , FLOM_DAEMON_SIGNAL_ERROR
-                     , WRITE_ERROR
-                     , FLOM_LISTEN_ERROR
-                     , FLOM_ACCEPT_LOOP_ERROR
-                     , NONE } excp;
+    enum Exception {
+        INET_NTOP_ERROR1,
+        INET_NTOP_ERROR2,
+        PIPE_ERROR,
+        FORK_ERROR,
+        WAIT_ERROR,
+        CHILD_PID_ERROR,
+        READ_ERROR,
+        DAEMON_NOT_OK,
+        FORK_ERROR2,
+        SETSID_ERROR,
+        SIGNAL_ERROR1,
+        SIGNAL_ERROR2,
+        FORK_ERROR3,
+        CHDIR_ERROR,
+        FLOM_DAEMON_SIGNAL_ERROR,
+        WRITE_ERROR,
+        FLOM_LISTEN_ERROR,
+        FLOM_ACCEPT_LOOP_ERROR,
+        NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int pipefd[2];
     int daemon = FALSE;
@@ -194,9 +196,15 @@ int flom_daemon(flom_config_t *config, int family)
             FLOM_TRACE(("flom_daemon: daemonizing... setsid()\n"));
             if (-1 == setsid())
                 THROW(SETSID_ERROR);
-            FLOM_TRACE(("flom_daemon: daemonizing... signal()\n"));
+            FLOM_TRACE(("flom_daemon: daemonizing... "
+                        "signal(SIGHUP, SIG_IGN)\n"));
             if (SIG_ERR == signal(SIGHUP, SIG_IGN))
-                THROW(SIGNAL_ERROR);
+                THROW(SIGNAL_ERROR1);
+            /* ignore SIGPIPE to avoid server crash with TLS 1.3 */
+            FLOM_TRACE(("flom_daemon: daemonizing... "
+                        "signal(SIGPIPE, SIG_IGN)\n"));
+            if (SIG_ERR == signal(SIGPIPE, SIG_IGN))
+                THROW(SIGNAL_ERROR2);
             FLOM_TRACE(("flom_daemon: daemonizing... fork()\n"));
             if (-1 == (pid = fork())) {
                 THROW(FORK_ERROR3);
@@ -270,7 +278,8 @@ int flom_daemon(flom_config_t *config, int family)
             case SETSID_ERROR:
                 ret_cod = FLOM_RC_SETSID_ERROR;
                 break;
-            case SIGNAL_ERROR:
+            case SIGNAL_ERROR1:
+            case SIGNAL_ERROR2:
                 ret_cod = FLOM_RC_SIGNAL_ERROR;
                 break;
             case FORK_ERROR3:
