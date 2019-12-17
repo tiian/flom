@@ -256,7 +256,7 @@ int flom_client_connect_local(flom_config_t *config,
                                         "daemon can not be started because "
                                         "the synchronization file is already "
                                         "locked, maybe another daemon is "
-                                        "starting..."));
+                                        "starting...\n"));
                         }
                         /* trying to connect again... */
                         if (-1 == connect(
@@ -342,11 +342,13 @@ int flom_client_connect_tcp(flom_config_t *config,
                         FLOM_TRACE(("flom_client_connect_tcp: connection "
                                     "failed, activating a new daemon\n"));
                         /* daemon is not active, starting it... */
-                        if (FLOM_RC_OK != (
-                                ret_cod = flom_daemon(
-                                    config,
-                                    flom_tcp_get_domain(
-                                        flom_conn_get_tcp(conn)))))
+                        ret_cod = flom_daemon(config,
+                                              flom_tcp_get_domain(
+                                                  flom_conn_get_tcp(conn)));
+                        /* in the event of bind error, the daemon might have
+                           been activated by someone else */
+                        if (FLOM_RC_OK != ret_cod &&
+                            FLOM_RC_BIND_ERROR != ret_cod)
                             THROW(DAEMON_ERROR);
                         /* trying to connect again... */
                         if (FLOM_RC_OK != (ret_cod = flom_client_connect_tcp(

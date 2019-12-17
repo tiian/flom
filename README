@@ -64,16 +64,12 @@ and install FLoM using standard GNU build chain:
     cd flom-X.Y.Z
     ./configure
     make
-    make
     sudo make install
 if you are using a Red Hat derivative you will probably use
     su
     make install
     exit
 instead of "sudo make install".
-NOTE: sorry for the second make command, but there's a dependency related to
-      Java Native Interface (JNI) that dynamically create a file and
-      invalidates a dependency.
 
 Take a look to file INSTALL for more details.
 

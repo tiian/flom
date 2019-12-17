@@ -1,25 +1,3 @@
-Port to CentOS 8:
-There's a bug in this test case
-TLS shutdown different CAs                      FAILED (tls.at:259)
-
-Program received signal SIGSEGV, Segmentation fault.
-0x00007ffff65a3383 in _Unwind_Resume () from /lib64/libgcc_s.so.1
-Missing separate debuginfos, use: dnf debuginfo-install dbus-libs-1.12.8-7.el8.x86_64 glib2-2.56.4-1.el8.x86_64 libblkid-2.32.1-8.el8.x86_64 libcap-2.25-9.el8.x86_64 libgcc-8.2.1-3.5.el8.x86_64 libgcrypt-1.8.3-2.el8.x86_64 libgpg-error-1.31-1.el8.x86_64 libmount-2.32.1-8.el8.x86_64 libselinux-2.8-6.el8.x86_64 libstdc++-8.2.1-3.5.el8.x86_64 libuuid-2.32.1-8.el8.x86_64 lz4-libs-1.8.1.2-4.el8.x86_64 openssl-libs-1.1.1-8.el8.x86_64 pcre-8.42-4.el8.x86_64 pcre2-10.32-1.el8.x86_64 sssd-client-2.0.0-43.el8_0.3.x86_64 systemd-libs-239-13.el8_0.5.x86_64 xz-libs-5.2.4-3.el8.x86_64
-(gdb) bt
-#0  0x00007ffff65a3383 in _Unwind_Resume () from /lib64/libgcc_s.so.1
-#1  0x00000000004021c9 in flom::FlomHandle::~FlomHandle (this=<optimized out>, 
-    __in_chrg=<optimized out>) at ../../src/FlomHandle.hh:100
-#2  staticHandleHappyPath (ndNetworkInterface=...) at case1002.cc:46
-#3  0x0000000000402594 in main (argc=<optimized out>, argv=<optimized out>)
-    at /usr/include/c++/8/bits/char_traits.h:285
-(gdb) 
-
-
-Put api.at in the right sequence in testsuite.at
-
-Re-arrange Java JNI build procedure as it is in LIXA project, without 
-javah dependency.
-
 Possible ideas for future developments, if useful:
 
 introduce a supplementary module build for Perl and Python to avoid installation before "make check" (verify other bindings like Java too...)

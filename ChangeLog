@@ -1,10 +1,15 @@
 LOG:
 
-	 - 1.4.2 Fix of https://github.com/tiian/flom/issues/12
+20191217 - 1.4.2 Fix bug https://github.com/tiian/flom/issues/12
 	Fixed a bug related to immediate shutdown (-X, --immediate-exit) when
 	TLS is used: FLoM daemon didn't terminate.
 	Fixed a bug in method
 		int setNetworkInterface(const string &value)
+	Fixed a bug related to TLS 1.3 and SIGPIPE in SSL_do_handshake
+	Fixed the build procedure of the Java wrapper: it's no more necessary
+	to run make twice
+	Fixed a bug related to concurrent TCP daemon startup in the same system
+	Added support for CentOS 8 (see TestLog file)
 
 20191114 - 1.4.1 Fix of https://github.com/tiian/flom/issues/10
 

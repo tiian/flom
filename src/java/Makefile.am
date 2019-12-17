@@ -6,7 +6,7 @@ libflom_java_la_LIBADD = @GLIB2_LIBS@ @DBUS1_LIBS@ @OPENSSL_LIBS@ ../libflom.la
 
 #libflom_java_la_SOURCES = flom_java.c org_tiian_flom_FlomHandle.h org_tiian_flom_FlomErrorCodes.h
 libflom_java_la_SOURCES = flom_java.c
-dist_noinst_HEADERS = org_tiian_flom_FlomHandle.h org_tiian_flom_FlomErrorCodes.h
+dist_noinst_HEADERS = flom_java_FlomHandle.h flom_java_FlomErrorCodes.h
 dist_noinst_DATA = FlomErrorCodes.awk FlomLockModes.awk \
 	$(JAVA_PKGDIR)/FlomException.java $(JAVA_PKGDIR)/FlomHandle.java
 javadir = $(datadir)/$(PACKAGE)/java
@@ -25,36 +25,13 @@ $(JAVA_PKGDIR)/FlomLockModes.class:	$(JAVA_PKGDIR)/FlomLockModes.java
 	javac $<
 
 $(JAVA_PKGDIR)/FlomErrorCodes.class: $(JAVA_PKGDIR)/FlomErrorCodes.java
-if COND_HAVE_JAVAH
 	javac $<
-else
-	javac -h . $<
-endif
 
 $(JAVA_PKGDIR)/FlomHandle.class: $(JAVA_PKGDIR)/FlomHandle.java
-if COND_HAVE_JAVAH
 	javac $<
-else
-	javac -h . $<
-endif
 
 $(JAVA_PKGDIR)/FlomException.class:	$(JAVA_PKGDIR)/FlomException.java
 	javac $<
-
-if COND_HAVE_JAVAH
-org_tiian_flom_FlomHandle.h:	flom.jar $(JAVA_PKGDIR)/FlomHandle.java
-	rm -f $@ ; javah -o $@ -classpath $< org.tiian.flom.FlomHandle
-else
-org_tiian_flom_FlomHandle.h:	$(JAVA_PKGDIR)/FlomHandle.java
-	touch $@
-endif
-if COND_HAVE_JAVAH
-org_tiian_flom_FlomErrorCodes.h:	flom.jar $(JAVA_PKGDIR)/FlomErrorCodes.java
-	rm -f $@ ; javah -o $@ -classpath $< org.tiian.flom.FlomErrorCodes
-else
-org_tiian_flom_FlomErrorCodes.h:	$(JAVA_PKGDIR)/FlomErrorCodes.java
-	touch $@
-endif
 
 flom.jar:	$(JAVA_PKGDIR)/FlomErrorCodes.class $(JAVA_PKGDIR)/FlomLockModes.class $(JAVA_PKGDIR)/FlomHandle.class $(JAVA_PKGDIR)/FlomException.class
 	jar cf $@ $^

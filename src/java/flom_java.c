@@ -25,8 +25,8 @@
 #include "flom_defines.h"
 #include "flom_trace.h"
 #include "flom.h"
-#include "org_tiian_flom_FlomHandle.h"
-#include "org_tiian_flom_FlomErrorCodes.h"
+#include "flom_java_FlomHandle.h"
+#include "flom_java_FlomErrorCodes.h"
  
 
 
