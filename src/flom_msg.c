@@ -108,18 +108,18 @@ flom_lock_mode_t flom_lock_mode_retrieve(const gchar *text)
         FLOM_TRACE(("flom_lock_mode_retrieve: found 'Concurrent Write' mode "
                     "here: '%s'\n", p));
         return FLOM_LOCK_MODE_CW;
-    /* check if 'ProtectedRead', 'PR' - any case - is in the text */
-    } else if (NULL != (p = STRCASESTR(text, "ProtectedRead")) ||
-               NULL != (p = STRCASESTR(text, "PR"))) {
-        FLOM_TRACE(("flom_lock_mode_retrieve: found 'Protected Read' mode "
-                    "here: '%s'\n", p));
-        return FLOM_LOCK_MODE_PR;
     /* check if 'ProtectedWrite', 'PW' - any case - is in the text */
     } else if (NULL != (p = STRCASESTR(text, "ProtectedWrite")) ||
                NULL != (p = STRCASESTR(text, "PW"))) {
         FLOM_TRACE(("flom_lock_mode_retrieve: found 'Protected Write' mode "
                     "here: '%s'\n", p));
         return FLOM_LOCK_MODE_PW;
+    /* check if 'ProtectedRead', 'PR' - any case - is in the text */
+    } else if (NULL != (p = STRCASESTR(text, "ProtectedRead")) ||
+               NULL != (p = STRCASESTR(text, "PR"))) {
+        FLOM_TRACE(("flom_lock_mode_retrieve: found 'Protected Read' mode "
+                    "here: '%s'\n", p));
+        return FLOM_LOCK_MODE_PR;
     /* check if 'Exclusive', 'EX' - any case - is in the text */
     } else if (NULL != (p = STRCASESTR(text, "Exclusive")) ||
                NULL != (p = STRCASESTR(text, "EX"))) {
