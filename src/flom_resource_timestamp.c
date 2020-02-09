@@ -83,12 +83,6 @@ int flom_resource_timestamp_can_lock(flom_resource_t *resource)
                 resource->data.timestamp.last_timestamp.tv_usec));
     /* check the minimum interval grain */
     if (0 < resource->data.timestamp.interval.tv_usec) {
-        /* timestamp format contains fractions of second */
-        /* @@@ remove me
-        long secs = tv.tv_sec - resource->data.timestamp.last_timestamp.tv_sec;
-        long usecs = 1000000*secs +
-            tv.tv_usec - resource->data.timestamp.last_timestamp.tv_usec;
-        */
         /* if seconds changed, return TRUE */
         if (tv.tv_sec > resource->data.timestamp.last_timestamp.tv_sec) {
             FLOM_TRACE(("flom_resource_timestamp_can_lock: TRUE, different "
@@ -97,9 +91,6 @@ int flom_resource_timestamp_can_lock(flom_resource_t *resource)
         }
         /* this point is reached ONLY if the current time is in the same
            second of the last timestamp */
-        /* @@@ remove me
-        if (usecs/resource->data.timestamp.interval.tv_usec > 0) {
-        */
         if (tv.tv_usec/resource->data.timestamp.interval.tv_usec >
             resource->data.timestamp.last_timestamp.tv_usec/
             resource->data.timestamp.interval.tv_usec) {

@@ -28,6 +28,9 @@
 #ifdef HAVE_GLIB_H
 # include <glib.h>
 #endif
+#ifdef HAVE_SIGNAL_H
+# include <signal.h>
+#endif
 
 
 
@@ -54,13 +57,16 @@ extern "C" {
 
     /**
      * Exec the child process
-     * @param command_argv IN parsed argv as prepared by g_option_context_parse
-     * @param element IN locked element if any (resource set)
-     * @param child_status OUT child exit status
+     * @param[in] command_argv parsed argv as prepared by
+     *            g_option_context_parse
+     * @param[in] element locked if any (resource set)
+     * @param[out] child_status is the exit status of the child process
+     * @param[in] block_sigset is the mask with the signals that must be
+     *            blocked during child waiting
      * @return a reason code
      */
     int flom_exec(gchar **const command_argv, const char *element,
-                  int *child_status);
+                  int *child_status, sigset_t *block_sigset);
 
     
 

@@ -197,8 +197,14 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'setsockopt' function returned an error condition";
         case FLOM_RC_SIGACTION_ERROR:
             return "ERROR: 'sigaction' function returned an error condition";
+        case FLOM_RC_SIGADDSET_ERROR:
+            return "ERROR: 'sigaddset' function returned an error condition";
+        case FLOM_RC_SIGEMPTYSET_ERROR:
+            return "ERROR: 'sigemptyset' function returned an error condition";
         case FLOM_RC_SIGNAL_ERROR:
             return "ERROR: 'signal' function returned an error condition";
+        case FLOM_RC_SIGPROCMASK_ERROR:
+            return "ERROR: 'sigprocmask' function returned an error condition";
         case FLOM_RC_SOCKET_ERROR:
             return "ERROR: 'socket' function returned an error condition";
         case FLOM_RC_SNPRINTF_ERROR:

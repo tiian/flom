@@ -1,3 +1,11 @@
+Put command line option for "--signal-ignore="
+Put file config option for "signalignore...."
+Change man page
+Write test cases
+Document in the wiki for Jenkins integration
+... something else??? ...
+
+
 Possible ideas for future developments, if useful:
 
 introduce a supplementary module build for Perl and Python to avoid installation before "make check" (verify other bindings like Java too...)

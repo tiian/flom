@@ -385,29 +385,41 @@
  */
 #define FLOM_RC_SIGACTION_ERROR                     -132
 /**
+ * "sigaddset" function error
+ */
+#define FLOM_RC_SIGADDSET_ERROR                     -133
+/**
+ * "sigemptyset" function error
+ */
+#define FLOM_RC_SIGEMPTYSET_ERROR                   -134
+/**
  * "signal" function error
  */
-#define FLOM_RC_SIGNAL_ERROR                        -133
+#define FLOM_RC_SIGNAL_ERROR                        -135
+/**
+ * "sigprocmask" function error
+ */
+#define FLOM_RC_SIGPROCMASK_ERROR                   -136
 /**
  * "socket" function error
  */
-#define FLOM_RC_SOCKET_ERROR                        -134
+#define FLOM_RC_SOCKET_ERROR                        -137
 /**
  * "snprintf" function error (truncation)
  */
-#define FLOM_RC_SNPRINTF_ERROR                      -135
+#define FLOM_RC_SNPRINTF_ERROR                      -138
 /**
  * "unlink" function error
  */
-#define FLOM_RC_UNLINK_ERROR                        -136
+#define FLOM_RC_UNLINK_ERROR                        -139
 /**
  * "wait" function error
  */
-#define FLOM_RC_WAIT_ERROR                          -137
+#define FLOM_RC_WAIT_ERROR                          -140
 /**
  * "write" function error
  */
-#define FLOM_RC_WRITE_ERROR                         -138
+#define FLOM_RC_WRITE_ERROR                         -141
 
 /* GLIB related errors */
 

@@ -43,14 +43,18 @@
 
 
 int flom_exec(gchar **const command_argv, const char *element,
-              int *child_status)
+              int *child_status, sigset_t *block_sigset)
 {
-    enum Exception { COMMAND_ARGV_IS_NULL
-                     , FORK_ERROR
-                     , MALLOC_ERROR
-                     , EXECVP_ERROR
-                     , WAIT_ERROR
-                     , NONE } excp;
+    enum Exception {
+        COMMAND_ARGV_IS_NULL,
+        FORK_ERROR,
+        MALLOC_ERROR,
+        EXECVP_ERROR,
+        SIGEMPTYSET_ERROR,
+        SIGPROCMASK_ERROR1,
+        WAIT_ERROR,
+        SIGPROCMASK_ERROR2,
+        NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     pid_t pid = -1;
@@ -105,7 +109,13 @@ int flom_exec(gchar **const command_argv, const char *element,
         } else {
             int status;
             pid_t child_pid;
+            sigset_t current_sigset;
             
+            /* disable signals during father's waiting */
+            if (0 != sigemptyset(&current_sigset))
+                THROW(SIGEMPTYSET_ERROR);
+            if (0 != sigprocmask(SIG_BLOCK, block_sigset, &current_sigset))
+                THROW(SIGPROCMASK_ERROR1);
             /* father process */
             FLOM_TRACE(("flom_exec-father: child pid=" PID_T_FORMAT "\n",
                         pid));
@@ -116,6 +126,9 @@ int flom_exec(gchar **const command_argv, const char *element,
             *child_status = WEXITSTATUS(status);
             FLOM_TRACE(("flom_exec-father: child exit status is %d\n",
                         *child_status));
+            /* restore signals as they were before */
+            if (0 != sigprocmask(SIG_SETMASK, &current_sigset, NULL))
+                THROW(SIGPROCMASK_ERROR2);
         }
         
         THROW(NONE);
@@ -132,6 +145,13 @@ int flom_exec(gchar **const command_argv, const char *element,
                 break;
             case EXECVP_ERROR:
                 ret_cod = FLOM_RC_EXECVP_ERROR;
+                break;
+            case SIGEMPTYSET_ERROR:
+                ret_cod = FLOM_RC_SIGEMPTYSET_ERROR;
+                break;
+            case SIGPROCMASK_ERROR1:
+            case SIGPROCMASK_ERROR2:
+                ret_cod = FLOM_RC_SIGPROCMASK_ERROR;
                 break;
             case WAIT_ERROR:
                 ret_cod = FLOM_RC_WAIT_ERROR;

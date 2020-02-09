@@ -18,11 +18,16 @@
  */
 #include "config.h"
 
+
+
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
 #ifdef HAVE_GLIB_H
 # include <glib.h>
+#endif
+#ifdef HAVE_SIGNAL_H
+# include <signal.h>
 #endif
 
 
@@ -126,6 +131,7 @@ int main (int argc, char *argv[])
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     flom_conn_t *conn;
     char *locked_element = NULL;
+    sigset_t block_sigset;
 
     option_context = g_option_context_new("[-- command to execute]");
     g_option_context_add_main_entries(option_context, entries, NULL);
@@ -294,6 +300,18 @@ int main (int argc, char *argv[])
         }
         flom_config_set_tls_check_peer_id(NULL, fbv);
     }
+
+    /* @@@ rework it with a command line! */
+    if (TRUE) {
+        if (0 != sigemptyset(&block_sigset)) {
+            g_print("xxxx: sigemptyset, errno=%d\n", errno);
+            exit(FLOM_ES_GENERIC_ERROR);
+        }
+        if (0 != sigaddset(&block_sigset, SIGTERM)) {
+            g_print("xxxx: sigaddset, errno=%d\n", errno);
+            exit(FLOM_ES_GENERIC_ERROR);
+        }
+    }
     
     if (NULL != append_trace_file) {
         flom_bool_value_t fbv;
@@ -410,7 +428,7 @@ int main (int argc, char *argv[])
 
     /* execute the command */
     if (FLOM_RC_OK != (ret_cod = flom_exec(command_argv, locked_element,
-                                           &child_status))) {
+                                           &child_status, &block_sigset))) {
         guint i, num;
         g_printerr("Unable to execute command: '");
         num = g_strv_length(command_argv);
