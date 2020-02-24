@@ -410,6 +410,11 @@ typedef struct flom_config_s {
      * unique identifier
      */
     gint               tls_check_peer_id;
+    /**
+     * set of signals that must be ignored while waiting the monitored
+     * process (it applies to command line FLoM utility)
+     */
+    sigset_t           block_sigset;
 } flom_config_t;
 
 

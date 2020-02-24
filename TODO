@@ -1,3 +1,10 @@
+Create Command section in config file
+Create ignore-signal key in config file
+Introduce IGNORE_SIGNAL in flom_config.c
+	use g_key_file_get_string_list to get a gchar** from key value file
+	syntax for config file is here:
+		https://github.com/joehakimrahme/Agros/wiki/Parsing-the-conf-file-with-GLib
+
 Put command line option for "--signal-ignore="
 Put file config option for "signalignore...."
 Change man page

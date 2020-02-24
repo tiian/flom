@@ -185,6 +185,7 @@ void flom_config_reset(flom_config_t *config)
     config->tls_private_key = NULL;
     config->tls_ca_certificate = NULL;
     config->tls_check_peer_id = FALSE;
+    sigemptyset(&config->block_sigset);
 }
 
 
