@@ -109,6 +109,8 @@ const gchar *FLOM_CONFIG_KEY_UNICAST_ADDRESS = _CONFIG_KEY_UNICAST_ADDRESS;
 const gchar *FLOM_CONFIG_KEY_UNICAST_PORT = _CONFIG_KEY_UNICAST_PORT;
 const gchar *FLOM_CONFIG_KEY_MULTICAST_ADDRESS = _CONFIG_KEY_MULTICAST_ADDRESS;
 const gchar *FLOM_CONFIG_KEY_MULTICAST_PORT = _CONFIG_KEY_MULTICAST_PORT;
+const gchar *FLOM_CONFIG_GROUP_MONITOR = _CONFIG_GROUP_MONITOR;
+const gchar *FLOM_CONFIG_KEY_IGNORED_SIGNALS = _CONFIG_KEY_IGNORED_SIGNALS;
 const gchar *FLOM_CONFIG_GROUP_NETWORK = _CONFIG_GROUP_NETWORK;
 const gchar *FLOM_CONFIG_KEY_NETWORK_INTERFACE = _CONFIG_KEY_NETWORK_INTERFACE;
 const gchar *FLOM_CONFIG_KEY_DISCOVERY_ATTEMPTS = _CONFIG_KEY_DISCOVERY_ATTEMPTS;
@@ -185,7 +187,7 @@ void flom_config_reset(flom_config_t *config)
     config->tls_private_key = NULL;
     config->tls_ca_certificate = NULL;
     config->tls_check_peer_id = FALSE;
-    sigemptyset(&config->block_sigset);
+    sigemptyset(&config->ignored_signals);
 }
 
 
@@ -509,38 +511,41 @@ int flom_config_init(flom_config_t *config,
 int flom_config_init_load(flom_config_t *config,
                           const char *config_file_name)
 {
-    enum Exception { G_KEY_FILE_NEW_ERROR
-                     , G_KEY_FILE_LOAD_FROM_FILE_ERROR
-                     , CONFIG_SET_APPENDTRACEFILE_ERROR
-                     , CONFIG_SET_VERBOSE_ERROR
-                     , CONFIG_SET_RESOURCE_NAME_ERROR
-                     , CONFIG_SET_RESOURCE_WAIT_ERROR
-                     , CONFIG_SET_RESOURCE_TIMEOUT_ERROR
-                     , CONFIG_SET_RESOURCE_QUANTITY_ERROR
-                     , CONFIG_SET_RESOURCE_LOCK_MODE_ERROR
-                     , CONFIG_SET_RESOURCE_CREATE_ERROR
-                     , CONFIG_SET_RESOURCE_IDLE_LIFESPAN_ERROR
-                     , CONFIG_SET_SOCKET_NAME_ERROR
-                     , CONFIG_SET_DAEMON_LIFESPAN_ERROR
-                     , CONFIG_SET_DAEMON_UNICAST_PORT_ERROR
-                     , CONFIG_SET_DAEMON_MULTICAST_PORT_ERROR
-                     , CONFIG_SET_DAEMON_DISCOVERY_ATTEMPTS_ERROR
-                     , CONFIG_SET_DAEMON_DISCOVERY_TIMEOUT_ERROR
-                     , CONFIG_SET_DAEMON_DISCOVERY_TTL_ERROR
-                     , CONFIG_SET_NETWORK_TCP_KEEPALIVE_TIME_ERROR
-                     , CONFIG_SET_NETWORK_TCP_KEEPALIVE_INTVL_ERROR
-                     , CONFIG_SET_NETWORK_TCP_KEEPALIVE_PROBES_ERROR
-                     , CONFIG_SET_TLS_CERTIFICATE_ERROR
-                     , CONFIG_SET_TLS_PRIVATE_KEY_ERROR
-                     , CONFIG_SET_TLS_CA_CERTIFICATE_ERROR
-                     , CONFIG_SET_TLS_CHECK_PEER_ID_ERROR
-                     , NONE } excp;
+    enum Exception {
+        G_KEY_FILE_NEW_ERROR,
+        G_KEY_FILE_LOAD_FROM_FILE_ERROR,
+        CONFIG_SET_APPENDTRACEFILE_ERROR,
+        CONFIG_SET_VERBOSE_ERROR,
+        CONFIG_SET_RESOURCE_NAME_ERROR,
+        CONFIG_SET_RESOURCE_WAIT_ERROR,
+        CONFIG_SET_RESOURCE_TIMEOUT_ERROR,
+        CONFIG_SET_RESOURCE_QUANTITY_ERROR,
+        CONFIG_SET_RESOURCE_LOCK_MODE_ERROR,
+        CONFIG_SET_RESOURCE_CREATE_ERROR,
+        CONFIG_SET_RESOURCE_IDLE_LIFESPAN_ERROR,
+        CONFIG_SET_SOCKET_NAME_ERROR,
+        CONFIG_SET_DAEMON_LIFESPAN_ERROR,
+        CONFIG_SET_DAEMON_UNICAST_PORT_ERROR,
+        CONFIG_SET_DAEMON_MULTICAST_PORT_ERROR,
+        CONFIG_SET_DAEMON_DISCOVERY_ATTEMPTS_ERROR,
+        CONFIG_SET_DAEMON_DISCOVERY_TIMEOUT_ERROR,
+        CONFIG_SET_DAEMON_DISCOVERY_TTL_ERROR,
+        CONFIG_SET_MONITOR_IGNORED_SIGNALS_ERROR,
+        CONFIG_SET_NETWORK_TCP_KEEPALIVE_TIME_ERROR,
+        CONFIG_SET_NETWORK_TCP_KEEPALIVE_INTVL_ERROR,
+        CONFIG_SET_NETWORK_TCP_KEEPALIVE_PROBES_ERROR,
+        CONFIG_SET_TLS_CERTIFICATE_ERROR,
+        CONFIG_SET_TLS_PRIVATE_KEY_ERROR,
+        CONFIG_SET_TLS_CA_CERTIFICATE_ERROR,
+        CONFIG_SET_TLS_CHECK_PEER_ID_ERROR,
+        NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int print_file_name = FALSE;
 
     GKeyFile *gkf = NULL;
     GError *error = NULL;
     gchar *value = NULL;
+    gchar **list = NULL;
     gint ivalue = 0;
     
     FLOM_TRACE(("flom_config_init_load\n"));
@@ -957,6 +962,23 @@ int flom_config_init_load(flom_config_t *config,
                         FLOM_CONFIG_KEY_MULTICAST_PORT, ivalue));
             flom_config_set_multicast_port(config, ivalue);
         }
+        /* pick-up the signals that must be ignored by the monitor */
+        if (NULL == (list = g_key_file_get_string_list(
+                         gkf, FLOM_CONFIG_GROUP_MONITOR,
+                         FLOM_CONFIG_KEY_IGNORED_SIGNALS, NULL, &error))) {
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_MONITOR,
+                        FLOM_CONFIG_KEY_IGNORED_SIGNALS,
+                        error->code,
+                        error->message));
+            g_error_free(error);
+            error = NULL;
+        } else {
+            flom_config_set_ignored_signals(config, list);
+            g_strfreev(list);
+            list = NULL;
+        }
         /* pick-up network interface configuration */
         if (NULL == (value = g_key_file_get_string(
                          gkf, FLOM_CONFIG_GROUP_NETWORK,
@@ -1250,6 +1272,7 @@ int flom_config_init_load(flom_config_t *config,
             case CONFIG_SET_DAEMON_DISCOVERY_ATTEMPTS_ERROR:
             case CONFIG_SET_DAEMON_DISCOVERY_TIMEOUT_ERROR:
             case CONFIG_SET_DAEMON_DISCOVERY_TTL_ERROR:
+            case CONFIG_SET_MONITOR_IGNORED_SIGNALS_ERROR:
             case CONFIG_SET_NETWORK_TCP_KEEPALIVE_TIME_ERROR:
             case CONFIG_SET_NETWORK_TCP_KEEPALIVE_INTVL_ERROR:
             case CONFIG_SET_NETWORK_TCP_KEEPALIVE_PROBES_ERROR:
@@ -1274,6 +1297,8 @@ int flom_config_init_load(flom_config_t *config,
                 config_file_name);
     if (NULL != value)
         g_free(value);
+    if (NULL != list)
+        g_strfreev(list);
     if (NULL != gkf)
         g_key_file_free(gkf);
     FLOM_TRACE(("flom_config_init_load/excp=%d/"
@@ -1514,6 +1539,75 @@ void flom_config_set_multicast_port(flom_config_t *config, gint port)
         global_config.multicast_port = port;
     else
         config->multicast_port = port;
+}
+
+
+
+void flom_config_set_ignored_signals(flom_config_t *config, gchar **list)
+{
+    int i, j;
+    sigset_t *tmp;
+    static const gchar *signals[] = {
+        /*  0 */ "SIGNULL",
+        /*  1 */ "SIGHUP",
+        /*  2 */ "SIGQUIT",
+        /*  3 */ "SIGILL",
+        /*  4 */ "SIGTRAP",
+        /*  5 */ "SIGABRT",
+        /*  6 */ "SIGIOT",
+        /*  7 */ "SIGBUS",
+        /*  8 */ "SIGFPE",
+        /*  9 */ "SIGKILL",
+        /* 10 */ "SIGUSR1",
+        /* 11 */ "SIGSEGV",
+        /* 12 */ "SIGUSR2",
+        /* 13 */ "SIGPIPE",
+        /* 14 */ "SIGALRM",
+        /* 15 */ "SIGTERM",
+        /* 16 */ "SIGSTKFLT",
+        /* 17 */ "SIGCHLD",
+        /* 18 */ "SIGCONT",
+        /* 19 */ "SIGSTOP",
+        /* 20 */ "SIGTSTP",
+        /* 21 */ "SIGTTIN",
+        /* 22 */ "SIGTTOU",
+        /* 23 */ "SIGURG",
+        /* 24 */ "SIGXCPU",
+        /* 25 */ "SIGXFSZ",
+        /* 26 */ "SIGVTALRM",
+        /* 27 */ "SIGPROF",
+        /* 28 */ "SIGWINCH",
+        /* 29 */ "SIGPOLL",
+        /* 30 */ "SIGPWR",
+        /* 31 */ "SIGSYS"
+    };
+    
+    if (NULL == list) {
+        FLOM_TRACE(("flom_config_set_ignored_signals: list is NULL!\n"));
+        return;
+    }
+    if (NULL == config)
+        tmp = &global_config.ignored_signals;
+    else
+        tmp = &config->ignored_signals;
+    /* iterate the list of strings */
+    for (i=0; list[i]!=NULL; ++i) {
+        FLOM_TRACE(("flom_config_set_ignored_signals: list[%d]='%s'\n",
+                    i, list[i]));
+        /* find the corresponding signal value */
+        for (j=0; j<sizeof(signals)/sizeof(const gchar *); ++j) {
+            if (0 == strcmp(signals[j], list[i])) {
+                if (0 != sigaddset(tmp, j)) {
+                    FLOM_TRACE(("flom_config_set_ignored_signals/sigaddset: "
+                                "errno=%d ('%s')\n", errno, strerror(errno)));
+                } else {
+                    FLOM_TRACE(("flom_config_set_ignored_signals: added "
+                                "signal %d:%s to the exclusion list\n",
+                                j, signals[j]));
+                }
+            } /* if (0 == strcmp(signals[j], list[i])) */
+        } /* for (j=0; j<sizeof(signals)/sizeof(const gchar *); ++j) */
+    } /* for (i=0; list[i]!=NULL; ++i) */
 }
 
 

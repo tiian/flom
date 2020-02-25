@@ -97,6 +97,15 @@
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_MULTICAST_PORT@=@_DEFAULT_DAEMON_PORT@
 
+# This section (configuration group) is related to monitor parameters; the
+# monitor is the process started by "flom" command line to execute another
+# process only when the locking conditions are met
+[@_CONFIG_GROUP_MONITOR@]
+# List of signals that must be ignored by the monitor while it's monitoring
+# the execution of the synchronized process. Use a semicolon delimited list
+# of strings like for example:
+#@_CONFIG_KEY_IGNORED_SIGNALS@=SIGTERM;SIGQUIT
+
 # This section (configuration group) is related to network and communication
 # parameters 
 [@_CONFIG_GROUP_NETWORK@]

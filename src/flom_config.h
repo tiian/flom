@@ -203,6 +203,14 @@ extern const gchar *FLOM_CONFIG_KEY_MULTICAST_ADDRESS;
  */
 extern const gchar *FLOM_CONFIG_KEY_MULTICAST_PORT;
 /**
+ * Label associated to "Monitor" group inside config files
+ */
+extern const gchar *FLOM_CONFIG_GROUP_MONITOR;
+/**
+ * Label associated to "IgnoredSignals" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_IGNORED_SIGNALS;
+/**
  * Label associated to "Network" group inside config files
  */
 extern const gchar *FLOM_CONFIG_GROUP_NETWORK;
@@ -414,7 +422,7 @@ typedef struct flom_config_s {
      * set of signals that must be ignored while waiting the monitored
      * process (it applies to command line FLoM utility)
      */
-    sigset_t           block_sigset;
+    sigset_t           ignored_signals;
 } flom_config_t;
 
 
@@ -898,6 +906,15 @@ extern "C" {
     }
 
 
+
+    /**
+     * Set the signals that must be ignored by the monitor
+     * @param[in,out] config configuration object, NULL for global config
+     * @param[in] list of semicolon delimited signals (strings)
+     */
+    void flom_config_set_ignored_signals(flom_config_t *config, gchar **list);
+
+    
     
     /**
      * Set network_interface in config object

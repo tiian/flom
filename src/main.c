@@ -309,10 +309,6 @@ int main (int argc, char *argv[])
             g_print("xxxx: sigemptyset, errno=%d\n", errno);
             exit(FLOM_ES_GENERIC_ERROR);
         }
-        if (0 != sigaddset(&block_sigset, SIGTERM)) {
-            g_print("xxxx: sigaddset, errno=%d\n", errno);
-            exit(FLOM_ES_GENERIC_ERROR);
-        }
     }
     
     if (NULL != append_trace_file) {

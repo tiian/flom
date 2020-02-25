@@ -1,5 +1,5 @@
-Create Command section in config file
-Create ignore-signal key in config file
+Implement flom_config_get_ignored_signals
+flom_config_print: print ignored signals in human readable format
 Introduce IGNORE_SIGNAL in flom_config.c
 	use g_key_file_get_string_list to get a gchar** from key value file
 	syntax for config file is here:
