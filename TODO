@@ -1,12 +1,5 @@
-Implement flom_config_get_ignored_signals
-flom_config_print: print ignored signals in human readable format
-Introduce IGNORE_SIGNAL in flom_config.c
-	use g_key_file_get_string_list to get a gchar** from key value file
-	syntax for config file is here:
-		https://github.com/joehakimrahme/Agros/wiki/Parsing-the-conf-file-with-GLib
-
 Put command line option for "--signal-ignore="
-Put file config option for "signalignore...."
+Pass sigset_t to flom_exec via config!
 Change man page
 Write test cases
 Document in the wiki for Jenkins integration

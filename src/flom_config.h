@@ -915,6 +915,28 @@ extern "C" {
     void flom_config_set_ignored_signals(flom_config_t *config, gchar **list);
 
     
+
+    /**
+     * Return the set of all the signals that must be ignored by the monitor
+     * @param[in] config configurtaion object, NULL for global config
+     * @return a sigset
+     */
+    static inline const sigset_t *flom_config_get_ignored_signals(
+        const flom_config_t *config) {
+        return NULL == config ?
+            &global_config.ignored_signals : &config->ignored_signals;
+    }
+
+    
+    
+    /**
+     * Return a string with all the signals that must be ignored by the monitor
+     * @param[in] config configurtaion object, NULL for global config
+     * @return a string that must be deallocated with g_free()
+     */
+    gchar *flom_config_get_ignored_signals_str(const flom_config_t *config);
+
+
     
     /**
      * Set network_interface in config object

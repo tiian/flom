@@ -295,6 +295,8 @@ int flom_config_check(flom_config_t *config)
 
 void flom_config_print(flom_config_t *config)
 {
+    gchar *ignored_signals = NULL;
+    
     /* default config */
     if (NULL == config)
         config = &global_config;
@@ -351,6 +353,10 @@ void flom_config_print(flom_config_t *config)
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_MULTICAST_PORT,
             flom_config_get_multicast_port(config));
+    ignored_signals = flom_config_get_ignored_signals_str(config);
+    g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_MONITOR,
+            FLOM_CONFIG_KEY_IGNORED_SIGNALS, ignored_signals);
+    g_free(ignored_signals);
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_NETWORK,
             FLOM_CONFIG_KEY_NETWORK_INTERFACE,
             NULL == flom_config_get_network_interface(config) ?
@@ -1543,44 +1549,47 @@ void flom_config_set_multicast_port(flom_config_t *config, gint port)
 
 
 
+const gchar *SIGNAL_STRING_ARRAY[] = {
+    /*  0 */ "",
+    /*  1 */ "SIGHUP",
+    /*  2 */ "SIGQUIT",
+    /*  3 */ "SIGILL",
+    /*  4 */ "SIGTRAP",
+    /*  5 */ "SIGABRT",
+    /*  6 */ "SIGIOT",
+    /*  7 */ "SIGBUS",
+    /*  8 */ "SIGFPE",
+    /*  9 */ "SIGKILL",
+    /* 10 */ "SIGUSR1",
+    /* 11 */ "SIGSEGV",
+    /* 12 */ "SIGUSR2",
+    /* 13 */ "SIGPIPE",
+    /* 14 */ "SIGALRM",
+    /* 15 */ "SIGTERM",
+    /* 16 */ "SIGSTKFLT",
+    /* 17 */ "SIGCHLD",
+    /* 18 */ "SIGCONT",
+    /* 19 */ "SIGSTOP",
+    /* 20 */ "SIGTSTP",
+    /* 21 */ "SIGTTIN",
+    /* 22 */ "SIGTTOU",
+    /* 23 */ "SIGURG",
+    /* 24 */ "SIGXCPU",
+    /* 25 */ "SIGXFSZ",
+    /* 26 */ "SIGVTALRM",
+    /* 27 */ "SIGPROF",
+    /* 28 */ "SIGWINCH",
+    /* 29 */ "SIGPOLL",
+    /* 30 */ "SIGPWR",
+    /* 31 */ "SIGSYS"
+};
+
+
+
 void flom_config_set_ignored_signals(flom_config_t *config, gchar **list)
 {
     int i, j;
     sigset_t *tmp;
-    static const gchar *signals[] = {
-        /*  0 */ "SIGNULL",
-        /*  1 */ "SIGHUP",
-        /*  2 */ "SIGQUIT",
-        /*  3 */ "SIGILL",
-        /*  4 */ "SIGTRAP",
-        /*  5 */ "SIGABRT",
-        /*  6 */ "SIGIOT",
-        /*  7 */ "SIGBUS",
-        /*  8 */ "SIGFPE",
-        /*  9 */ "SIGKILL",
-        /* 10 */ "SIGUSR1",
-        /* 11 */ "SIGSEGV",
-        /* 12 */ "SIGUSR2",
-        /* 13 */ "SIGPIPE",
-        /* 14 */ "SIGALRM",
-        /* 15 */ "SIGTERM",
-        /* 16 */ "SIGSTKFLT",
-        /* 17 */ "SIGCHLD",
-        /* 18 */ "SIGCONT",
-        /* 19 */ "SIGSTOP",
-        /* 20 */ "SIGTSTP",
-        /* 21 */ "SIGTTIN",
-        /* 22 */ "SIGTTOU",
-        /* 23 */ "SIGURG",
-        /* 24 */ "SIGXCPU",
-        /* 25 */ "SIGXFSZ",
-        /* 26 */ "SIGVTALRM",
-        /* 27 */ "SIGPROF",
-        /* 28 */ "SIGWINCH",
-        /* 29 */ "SIGPOLL",
-        /* 30 */ "SIGPWR",
-        /* 31 */ "SIGSYS"
-    };
     
     if (NULL == list) {
         FLOM_TRACE(("flom_config_set_ignored_signals: list is NULL!\n"));
@@ -1595,19 +1604,47 @@ void flom_config_set_ignored_signals(flom_config_t *config, gchar **list)
         FLOM_TRACE(("flom_config_set_ignored_signals: list[%d]='%s'\n",
                     i, list[i]));
         /* find the corresponding signal value */
-        for (j=0; j<sizeof(signals)/sizeof(const gchar *); ++j) {
-            if (0 == strcmp(signals[j], list[i])) {
+        for (j=1; j<sizeof(SIGNAL_STRING_ARRAY)/sizeof(const gchar *); ++j) {
+            if (0 == strcmp(SIGNAL_STRING_ARRAY[j], list[i])) {
                 if (0 != sigaddset(tmp, j)) {
                     FLOM_TRACE(("flom_config_set_ignored_signals/sigaddset: "
                                 "errno=%d ('%s')\n", errno, strerror(errno)));
                 } else {
                     FLOM_TRACE(("flom_config_set_ignored_signals: added "
                                 "signal %d:%s to the exclusion list\n",
-                                j, signals[j]));
+                                j, SIGNAL_STRING_ARRAY[j]));
                 }
-            } /* if (0 == strcmp(signals[j], list[i])) */
-        } /* for (j=0; j<sizeof(signals)/sizeof(const gchar *); ++j) */
+            } /* if (0 == strcmp(SIGNAL_STRING_ARRAY[j], list[i])) */
+        } /* for (j=0; j<sizeof(SIGNAL_STRING_ARRAY)/sizeof(const gchar *); */
     } /* for (i=0; list[i]!=NULL; ++i) */
+}
+
+
+
+gchar *flom_config_get_ignored_signals_str(const flom_config_t *config)
+{
+    const sigset_t *sigset;
+    int j;
+    gchar *ret = NULL, *tmp = NULL;
+    int first = TRUE;
+    
+    if (NULL == config)
+        sigset = &global_config.ignored_signals;
+    else
+        sigset = &config->ignored_signals;
+    ret = g_strconcat("", NULL);
+    for (j=1; j<sizeof(SIGNAL_STRING_ARRAY)/sizeof(const gchar *); ++j) {
+        if (sigismember(sigset, j)) {
+            if (first) {
+                first = FALSE;
+                tmp = g_strconcat(ret, SIGNAL_STRING_ARRAY[j], NULL);
+            } else
+                tmp = g_strconcat(ret, ";", SIGNAL_STRING_ARRAY[j], NULL);
+            g_free(ret);
+            ret = tmp;
+        }
+    } /* for (j=1; j<sizeof(SIGNAL_STRING_ARRAY)/sizeof(const gchar *); ++j) */
+    return ret;
 }
 
 
