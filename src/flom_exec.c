@@ -32,6 +32,7 @@
 #include "flom_errors.h"
 #include "flom_exec.h"
 #include "flom_trace.h"
+#include "flom_config.h"
 
 
 
@@ -43,7 +44,7 @@
 
 
 int flom_exec(gchar **const command_argv, const char *element,
-              int *child_status, sigset_t *block_sigset)
+              int *child_status, const sigset_t *block_sigset)
 {
     enum Exception {
         COMMAND_ARGV_IS_NULL,
@@ -53,6 +54,8 @@ int flom_exec(gchar **const command_argv, const char *element,
         SIGEMPTYSET_ERROR,
         SIGPROCMASK_ERROR1,
         WAIT_ERROR,
+        SIGACTION_ERROR1,
+        SIGACTION_ERROR2,
         SIGPROCMASK_ERROR2,
         NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
@@ -107,7 +110,7 @@ int flom_exec(gchar **const command_argv, const char *element,
                 THROW(EXECVP_ERROR);
             }
         } else {
-            int status;
+            int status, j;
             pid_t child_pid;
             sigset_t current_sigset;
             
@@ -126,6 +129,31 @@ int flom_exec(gchar **const command_argv, const char *element,
             *child_status = WEXITSTATUS(status);
             FLOM_TRACE(("flom_exec-father: child exit status is %d\n",
                         *child_status));
+            /* before restoring original sigmask, the pending messages must
+               be cleaned */
+            for (j=1; j<SIGNAL_STRING_ARRAY_SIZE; ++j) {
+                if (sigismember(block_sigset, j)) {
+                    struct sigaction ign_sig, prev;
+                    ign_sig.sa_handler = SIG_IGN;
+                    ign_sig.sa_flags = 0;
+                    sigemptyset(&ign_sig.sa_mask);
+
+                    if (sigaction(j, &ign_sig, &prev) < 0) {
+                        FLOM_TRACE(("flom_exec-father: couldn't ignore "
+                                    "signal %d:%s\n", j,
+                                    SIGNAL_STRING_ARRAY[j]));
+                        THROW(SIGACTION_ERROR1);
+                    }
+                    /* Now, restore the default action for the signal */
+                    if (sigaction(j, &prev, NULL) < 0) {
+                        FLOM_TRACE(("flom_exec-father: couldn't restore "
+                                    "default %d:%s behavior\n", j,
+                                    SIGNAL_STRING_ARRAY[j]));
+                        THROW(SIGACTION_ERROR2);
+                    }
+                } /* if (sigismember(block_sigset, j)) */
+            } /* for (j=1; j<sizeof(SIGNAL_STRING_ARRAY)/sizeof */
+            
             /* restore signals as they were before */
             if (0 != sigprocmask(SIG_SETMASK, &current_sigset, NULL))
                 THROW(SIGPROCMASK_ERROR2);
@@ -152,6 +180,10 @@ int flom_exec(gchar **const command_argv, const char *element,
             case SIGPROCMASK_ERROR1:
             case SIGPROCMASK_ERROR2:
                 ret_cod = FLOM_RC_SIGPROCMASK_ERROR;
+                break;
+            case SIGACTION_ERROR1:
+            case SIGACTION_ERROR2:
+                ret_cod = FLOM_RC_SIGACTION_ERROR;
                 break;
             case WAIT_ERROR:
                 ret_cod = FLOM_RC_WAIT_ERROR;

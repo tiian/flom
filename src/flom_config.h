@@ -262,7 +262,14 @@ extern const gchar *FLOM_CONFIG_KEY_TLS_CA_CERTIFICATE;
  * Label associated to "TlsCheckPeerId" key inside config files
  */
 extern const gchar *FLOM_CONFIG_KEY_TLS_CHECK_PEER_ID;
-
+/**
+ * Array with the name of all the signals
+ */
+extern const gchar *SIGNAL_STRING_ARRAY[];
+/**
+ * Number of elements of @ref SIGNAL_STRING_ARRAY
+ */
+extern const size_t SIGNAL_STRING_ARRAY_SIZE;
 
 
 
@@ -908,7 +915,9 @@ extern "C" {
 
 
     /**
-     * Set the signals that must be ignored by the monitor
+     * Set the signals that must be ignored by the monitor.
+     * This is not part of the API because it's designed only for internal
+     * usage (FLoM command line).
      * @param[in,out] config configuration object, NULL for global config
      * @param[in] list of semicolon delimited signals (strings)
      */
@@ -918,6 +927,8 @@ extern "C" {
 
     /**
      * Return the set of all the signals that must be ignored by the monitor
+     * This is not part of the API because it's designed only for internal
+     * usage (FLoM command line).
      * @param[in] config configurtaion object, NULL for global config
      * @return a sigset
      */
@@ -931,6 +942,8 @@ extern "C" {
     
     /**
      * Return a string with all the signals that must be ignored by the monitor
+     * This is not part of the API because it's designed only for internal
+     * usage (FLoM command line).
      * @param[in] config configurtaion object, NULL for global config
      * @return a string that must be deallocated with g_free()
      */

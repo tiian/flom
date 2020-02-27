@@ -127,6 +127,45 @@ const gchar *FLOM_CONFIG_KEY_TLS_CHECK_PEER_ID = _CONFIG_KEY_TLS_CHECK_PEER_ID;
 
 
 
+const gchar *SIGNAL_STRING_ARRAY[] = {
+    /*  0 */ "",
+    /*  1 */ "SIGHUP",
+    /*  2 */ "SIGQUIT",
+    /*  3 */ "SIGILL",
+    /*  4 */ "SIGTRAP",
+    /*  5 */ "SIGABRT",
+    /*  6 */ "SIGIOT",
+    /*  7 */ "SIGBUS",
+    /*  8 */ "SIGFPE",
+    /*  9 */ "SIGKILL",
+    /* 10 */ "SIGUSR1",
+    /* 11 */ "SIGSEGV",
+    /* 12 */ "SIGUSR2",
+    /* 13 */ "SIGPIPE",
+    /* 14 */ "SIGALRM",
+    /* 15 */ "SIGTERM",
+    /* 16 */ "SIGSTKFLT",
+    /* 17 */ "SIGCHLD",
+    /* 18 */ "SIGCONT",
+    /* 19 */ "SIGSTOP",
+    /* 20 */ "SIGTSTP",
+    /* 21 */ "SIGTTIN",
+    /* 22 */ "SIGTTOU",
+    /* 23 */ "SIGURG",
+    /* 24 */ "SIGXCPU",
+    /* 25 */ "SIGXFSZ",
+    /* 26 */ "SIGVTALRM",
+    /* 27 */ "SIGPROF",
+    /* 28 */ "SIGWINCH",
+    /* 29 */ "SIGPOLL",
+    /* 30 */ "SIGPWR",
+    /* 31 */ "SIGSYS"
+};
+const size_t SIGNAL_STRING_ARRAY_SIZE =
+    sizeof(SIGNAL_STRING_ARRAY)/sizeof(const gchar *);
+
+
+
 flom_bool_value_t flom_bool_value_retrieve(const gchar *text)
 {
     /* parsing is case sensitive only on GNU systems */
@@ -1549,43 +1588,6 @@ void flom_config_set_multicast_port(flom_config_t *config, gint port)
 
 
 
-const gchar *SIGNAL_STRING_ARRAY[] = {
-    /*  0 */ "",
-    /*  1 */ "SIGHUP",
-    /*  2 */ "SIGQUIT",
-    /*  3 */ "SIGILL",
-    /*  4 */ "SIGTRAP",
-    /*  5 */ "SIGABRT",
-    /*  6 */ "SIGIOT",
-    /*  7 */ "SIGBUS",
-    /*  8 */ "SIGFPE",
-    /*  9 */ "SIGKILL",
-    /* 10 */ "SIGUSR1",
-    /* 11 */ "SIGSEGV",
-    /* 12 */ "SIGUSR2",
-    /* 13 */ "SIGPIPE",
-    /* 14 */ "SIGALRM",
-    /* 15 */ "SIGTERM",
-    /* 16 */ "SIGSTKFLT",
-    /* 17 */ "SIGCHLD",
-    /* 18 */ "SIGCONT",
-    /* 19 */ "SIGSTOP",
-    /* 20 */ "SIGTSTP",
-    /* 21 */ "SIGTTIN",
-    /* 22 */ "SIGTTOU",
-    /* 23 */ "SIGURG",
-    /* 24 */ "SIGXCPU",
-    /* 25 */ "SIGXFSZ",
-    /* 26 */ "SIGVTALRM",
-    /* 27 */ "SIGPROF",
-    /* 28 */ "SIGWINCH",
-    /* 29 */ "SIGPOLL",
-    /* 30 */ "SIGPWR",
-    /* 31 */ "SIGSYS"
-};
-
-
-
 void flom_config_set_ignored_signals(flom_config_t *config, gchar **list)
 {
     int i, j;
@@ -1599,6 +1601,8 @@ void flom_config_set_ignored_signals(flom_config_t *config, gchar **list)
         tmp = &global_config.ignored_signals;
     else
         tmp = &config->ignored_signals;
+    /* reset the signal set */
+    sigemptyset(tmp);
     /* iterate the list of strings */
     for (i=0; list[i]!=NULL; ++i) {
         FLOM_TRACE(("flom_config_set_ignored_signals: list[%d]='%s'\n",
@@ -1633,7 +1637,7 @@ gchar *flom_config_get_ignored_signals_str(const flom_config_t *config)
     else
         sigset = &config->ignored_signals;
     ret = g_strconcat("", NULL);
-    for (j=1; j<sizeof(SIGNAL_STRING_ARRAY)/sizeof(const gchar *); ++j) {
+    for (j=1; j<SIGNAL_STRING_ARRAY_SIZE; ++j) {
         if (sigismember(sigset, j)) {
             if (first) {
                 first = FALSE;

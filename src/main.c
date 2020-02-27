@@ -69,11 +69,11 @@ static gint discovery_ttl = _DEFAULT_DISCOVERY_TTL;
 static gint tcp_keepalive_time = _DEFAULT_TCP_KEEPALIVE_TIME;
 static gint tcp_keepalive_intvl = _DEFAULT_TCP_KEEPALIVE_INTVL;
 static gint tcp_keepalive_probes = _DEFAULT_TCP_KEEPALIVE_PROBES;
-static gchar* tls_certificate = NULL;
-static gchar* tls_private_key = NULL;
-static gchar* tls_ca_certificate = NULL;
-static gchar* tls_check_peer_id = NULL;
-static gchar *ignore_signal_array = NULL;
+static gchar *tls_certificate = NULL;
+static gchar *tls_private_key = NULL;
+static gchar *tls_ca_certificate = NULL;
+static gchar *tls_check_peer_id = NULL;
+static gchar **ignore_signal_array = NULL;
 static gint quiesce_exit = 0;
 static gint immediate_exit = 0;
 static gchar *command_trace_file = NULL;
@@ -133,7 +133,6 @@ int main (int argc, char *argv[])
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     flom_conn_t *conn;
     char *locked_element = NULL;
-    sigset_t block_sigset;
 
     option_context = g_option_context_new("[-- command to execute]");
     g_option_context_add_main_entries(option_context, entries, NULL);
@@ -268,6 +267,11 @@ int main (int argc, char *argv[])
     if (_DEFAULT_TCP_KEEPALIVE_PROBES != tcp_keepalive_probes) {
         flom_config_set_tcp_keepalive_probes(NULL, tcp_keepalive_probes);
     }
+    if (NULL != ignore_signal_array) {
+        flom_config_set_ignored_signals(NULL, ignore_signal_array);
+        g_strfreev(ignore_signal_array);
+        ignore_signal_array = NULL;
+    }
     if (NULL != tls_certificate) {
         if (FLOM_RC_OK != flom_config_set_tls_certificate(
                 NULL, tls_certificate)) {
@@ -303,14 +307,6 @@ int main (int argc, char *argv[])
         flom_config_set_tls_check_peer_id(NULL, fbv);
     }
 
-    /* @@@ rework it with a command line! */
-    if (TRUE) {
-        if (0 != sigemptyset(&block_sigset)) {
-            g_print("xxxx: sigemptyset, errno=%d\n", errno);
-            exit(FLOM_ES_GENERIC_ERROR);
-        }
-    }
-    
     if (NULL != append_trace_file) {
         flom_bool_value_t fbv;
         if (FLOM_BOOL_INVALID == (
@@ -425,8 +421,9 @@ int main (int argc, char *argv[])
     } /* switch (ret_cod) */
 
     /* execute the command */
-    if (FLOM_RC_OK != (ret_cod = flom_exec(command_argv, locked_element,
-                                           &child_status, &block_sigset))) {
+    if (FLOM_RC_OK != (ret_cod = flom_exec(
+                           command_argv, locked_element, &child_status,
+                           flom_config_get_ignored_signals(NULL)))) {
         guint i, num;
         g_printerr("Unable to execute command: '");
         num = g_strv_length(command_argv);
@@ -435,7 +432,11 @@ int main (int argc, char *argv[])
         g_print("'\n");
         exit(FLOM_ES_UNABLE_TO_EXECUTE_COMMAND);
     }
-
+    /* release vector of strings passed to flom_exec */
+    if (NULL != command_argv) {
+        g_strfreev(command_argv);
+        command_argv = NULL;
+    }
     /* releasing locked element memory */
     g_free(locked_element);
     locked_element = NULL;

@@ -1,5 +1,4 @@
-Put command line option for "--signal-ignore="
-Pass sigset_t to flom_exec via config!
+Check with Valgrind
 Change man page
 Write test cases
 Document in the wiki for Jenkins integration

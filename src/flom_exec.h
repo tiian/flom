@@ -66,7 +66,7 @@ extern "C" {
      * @return a reason code
      */
     int flom_exec(gchar **const command_argv, const char *element,
-                  int *child_status, sigset_t *block_sigset);
+                  int *child_status, const sigset_t *block_sigset);
 
     
 
