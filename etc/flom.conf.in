@@ -104,6 +104,7 @@
 # List of signals that must be ignored by the monitor while it's monitoring
 # the execution of the synchronized process. Use a semicolon delimited list
 # of strings like for example: SIGTERM;SIGQUIT
+# Alternatively, signal numbers can be used, like for example: 15;3
 #@_CONFIG_KEY_IGNORED_SIGNALS@=SIGTERM;SIGQUIT
 
 # This section (configuration group) is related to network and communication

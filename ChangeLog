@@ -1,5 +1,6 @@
 LOG:
-	 - 1.5.0 Added enhancement https://github.com/tiian/flom/issues/15
+	 - 1.5.0 Added enhancement https://github.com/tiian/flom/issues/15 :
+	new --ignore-signal command line option (IgnoredSignals in flom.conf)
 
 20200128 - 1.4.3 Fixed bug https://github.com/tiian/flom/issues/13
 

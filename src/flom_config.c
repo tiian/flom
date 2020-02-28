@@ -1605,21 +1605,31 @@ void flom_config_set_ignored_signals(flom_config_t *config, gchar **list)
     sigemptyset(tmp);
     /* iterate the list of strings */
     for (i=0; list[i]!=NULL; ++i) {
+        int signal_number;
         FLOM_TRACE(("flom_config_set_ignored_signals: list[%d]='%s'\n",
                     i, list[i]));
-        /* find the corresponding signal value */
-        for (j=1; j<sizeof(SIGNAL_STRING_ARRAY)/sizeof(const gchar *); ++j) {
-            if (0 == strcmp(SIGNAL_STRING_ARRAY[j], list[i])) {
-                if (0 != sigaddset(tmp, j)) {
-                    FLOM_TRACE(("flom_config_set_ignored_signals/sigaddset: "
-                                "errno=%d ('%s')\n", errno, strerror(errno)));
-                } else {
-                    FLOM_TRACE(("flom_config_set_ignored_signals: added "
-                                "signal %d:%s to the exclusion list\n",
-                                j, SIGNAL_STRING_ARRAY[j]));
-                }
-            } /* if (0 == strcmp(SIGNAL_STRING_ARRAY[j], list[i])) */
-        } /* for (j=0; j<sizeof(SIGNAL_STRING_ARRAY)/sizeof(const gchar *); */
+        /* check if it's a valid signal number */
+        signal_number = (int)strtol(list[i], NULL, 10);
+        if (signal_number<=0 || signal_number>=SIGNAL_STRING_ARRAY_SIZE)
+            /* check if it's a valid string */
+            for (j=1; j<SIGNAL_STRING_ARRAY_SIZE; ++j) {
+                if (0 == strcmp(SIGNAL_STRING_ARRAY[j], list[i])) {
+                    signal_number = j;
+                    break;
+                } /* if (0 == strcmp(SIGNAL_STRING_ARRAY[j], list[i])) */    
+            } /* for (j=0; j<sizeof(SIGNAL_STRING_ARRAY)/ */
+        if (signal_number>0 && signal_number<SIGNAL_STRING_ARRAY_SIZE) {
+            if (0 != sigaddset(tmp, signal_number)) {
+                FLOM_TRACE(("flom_config_set_ignored_signals/"
+                            "sigaddset: errno=%d ('%s')\n",
+                            errno, strerror(errno)));
+            } else {
+                FLOM_TRACE(("flom_config_set_ignored_signals: added "
+                            "signal %d:%s to the exclusion list\n",
+                            signal_number,
+                            SIGNAL_STRING_ARRAY[signal_number]));
+            }
+        }
     } /* for (i=0; list[i]!=NULL; ++i) */
 }
 
