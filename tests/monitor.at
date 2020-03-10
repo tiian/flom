@@ -1,0 +1,10 @@
+AT_BANNER([Monitor options check])
+
+AT_SETUP([Ignore SIGTERM])
+AT_CHECK([flom_test_exec2.sh SIGTERM], [1], [ignore], [ignore])
+AT_CLEANUP
+
+AT_SETUP([Do not ignore SIGTERM])
+AT_CHECK([flom_test_exec2.sh SIGXXXX], [0], [ignore], [ignore])
+AT_CLEANUP
+

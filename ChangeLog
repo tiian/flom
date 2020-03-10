@@ -1,6 +1,10 @@
 LOG:
-	 - 1.5.0 Added enhancement https://github.com/tiian/flom/issues/15 :
+20200310 - 1.5.19 This testing version starts at patch level 19 to remember
+	the effort of all the people engaged in fighting COVID-19.
+	Added enhancement https://github.com/tiian/flom/issues/15 :
 	new --ignore-signal command line option (IgnoredSignals in flom.conf)
+	Added new --signal-list command line option to facilitate the usage of
+	--ignore-signal command line.
 
 20200128 - 1.4.3 Fixed bug https://github.com/tiian/flom/issues/13
 

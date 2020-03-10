@@ -74,6 +74,7 @@ static gchar *tls_private_key = NULL;
 static gchar *tls_ca_certificate = NULL;
 static gchar *tls_check_peer_id = NULL;
 static gchar **ignore_signal_array = NULL;
+static gboolean signal_list = FALSE;
 static gint quiesce_exit = 0;
 static gint immediate_exit = 0;
 static gchar *command_trace_file = NULL;
@@ -112,6 +113,7 @@ static GOptionEntry entries[] =
     { "tls-ca-certificate", 0, 0, G_OPTION_ARG_STRING, &tls_ca_certificate, "Name of the file that contains the X.509 certificate of the certification authority that signed the certificate of this peer", NULL },
     { "tls-check-peer-id", 0, 0, G_OPTION_ARG_STRING, &tls_check_peer_id, "Check the unique id of the peer (accepted values are 'yes', 'no')", NULL },
     { "ignore-signal", 0, 0, G_OPTION_ARG_STRING_ARRAY, &ignore_signal_array, "Ignore a specific signal, can be repeated to specify more than one", NULL },
+    { "signal-list", 0, 0, G_OPTION_ARG_NONE, &signal_list, "Print the list of signals that can be ignored and exit" },
     { "daemon-trace-file", 't', 0, G_OPTION_ARG_STRING, &daemon_trace_file, "Specify daemon (background process) trace file name (absolute path required)", NULL },
     { "command-trace-file", 'T', 0, G_OPTION_ARG_STRING, &command_trace_file, "Specify command (foreground process) trace file name (absolute path required)", NULL },
     { "append-trace-file", 0, 0, G_OPTION_ARG_STRING, &append_trace_file, "Specify if the trace file(s) must be appended or truncated for every execution (accepted values 'yes', 'no')", NULL },
@@ -154,9 +156,14 @@ int main (int argc, char *argv[])
                 "Documentation is available at http://www.tiian.org/flom/\n",
                 FLOM_PACKAGE_NAME, FLOM_PACKAGE_VERSION, FLOM_PACKAGE_DATE,
                 flom_tls_get_protocol());
-        exit(FLOM_ES_OK);
     }
 
+    if (signal_list)
+        flom_config_print_signal_list();
+    
+    if (print_version || signal_list)
+        exit(FLOM_ES_OK);
+    
     if (unique_id) {
         char *unique_id = flom_tls_get_unique_id();
         g_print("%s\n", unique_id);

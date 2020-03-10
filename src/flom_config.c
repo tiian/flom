@@ -130,11 +130,11 @@ const gchar *FLOM_CONFIG_KEY_TLS_CHECK_PEER_ID = _CONFIG_KEY_TLS_CHECK_PEER_ID;
 const gchar *SIGNAL_STRING_ARRAY[] = {
     /*  0 */ "",
     /*  1 */ "SIGHUP",
-    /*  2 */ "SIGQUIT",
-    /*  3 */ "SIGILL",
-    /*  4 */ "SIGTRAP",
-    /*  5 */ "SIGABRT",
-    /*  6 */ "SIGIOT",
+    /*  2 */ "SIGINT",
+    /*  3 */ "SIGQUIT",
+    /*  4 */ "SIGILL",
+    /*  5 */ "SIGTRAP",
+    /*  6 */ "SIGABRT",
     /*  7 */ "SIGBUS",
     /*  8 */ "SIGFPE",
     /*  9 */ "SIGKILL",
@@ -157,7 +157,7 @@ const gchar *SIGNAL_STRING_ARRAY[] = {
     /* 26 */ "SIGVTALRM",
     /* 27 */ "SIGPROF",
     /* 28 */ "SIGWINCH",
-    /* 29 */ "SIGPOLL",
+    /* 29 */ "SIGIO",
     /* 30 */ "SIGPWR",
     /* 31 */ "SIGSYS"
 };
@@ -1659,6 +1659,19 @@ gchar *flom_config_get_ignored_signals_str(const flom_config_t *config)
         }
     } /* for (j=1; j<sizeof(SIGNAL_STRING_ARRAY)/sizeof(const gchar *); ++j) */
     return ret;
+}
+
+
+
+void flom_config_print_signal_list(void) 
+{
+    int i=0,j;
+    for (j=1; j<SIGNAL_STRING_ARRAY_SIZE; ++j) {
+        g_print("%d) %s\t", j, SIGNAL_STRING_ARRAY[j]);
+        if (++i%4 == 0)
+            g_print("\n");
+    }
+    g_print("\n");
 }
 
 

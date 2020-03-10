@@ -7,19 +7,20 @@
 FLoM (Free Lock Manager) is an open source and free lock manager designed to
 serialize and synchronize shell command execution and custom programs
 developed in C, C++, Java, Perl, PHP, Python.
+Official web site is http://www.tiian.org/flom/
 Both GitHub https://github.com/tiian/flom and 
 SourceForge https://sourceforge.net/projects/flom/ host FLoM source code.
 Basic usage examples are in doc/examples directory (default installation path 
 is /usr/local/share/doc/flom/examples/)
 API documentation is distributed in directory doc/html/ (default installation
-path is /usr/local/share/doc/flom/html/) and on the web at http://flom.sourceforge.net/
+path is /usr/local/share/doc/flom/html/) and on the web at http://www.tiian.org/flom/API/C/globals_func.html
 FLoM is implemented using state of the art reactive programming:
 independent non blocking threads reach unparalleled scalability and C language
 source code guarantee the best performance. The usage of mutexes is reduced to
 trifling functions: FLoM can be considered a "lock free lock manager".
 
 A list of implemented use cases is listed at this URL: 
-http://sourceforge.net/p/flom/wiki/FLOM%20by%20examples/
+http://www.tiian.org/flom/FLoM_by_examples/FLoM_by_examples.html
 This is a brief list of the available features:
 - synchronization of shell commands to avoid conflicts on files, directories,
   abstract resources
@@ -47,7 +48,7 @@ This is a brief list of the available features:
   6. timestamp: arrays of unique timestamp sequences
 
 FLoM central documentation site is hosted by SourceForge Wiki: 
-	https://sourceforge.net/p/flom/wiki/Home/
+	http://www.tiian.org/flom/
 
  * FLoM is free software: you can redistribute it and/or modify under the terms
  * of GNU General Public License version 2 as published by the Free Software
@@ -121,9 +122,6 @@ If you need some help (usage tricks, hints, etc...) please post a message in
 the forum: http://sourceforge.net/p/flom/discussion/
 If you think you have discovered a bug, please open an issue here:
 https://github.com/tiian/flom/issues
-If you avoid to send me an e-mail I will be happy: forum posts and tickets
-can be seen by many people and I should not answer the same questions many
-times.
 
 Dependencies report:
 O.S.		Feature		Packages

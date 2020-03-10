@@ -7,29 +7,29 @@ flom \- serialize command execution
 .B "flom"
 [\fIOPTION\fP] [-- [\fICOMMAND\fP [\fIARG\fP]...]]
 .SH DESCRIPTION
-Run COMMAND serializing it with other commands executed by flom.
+Run COMMAND serializing it with other commands executed under the supervision of \fBflom\fP or explicitly synchronizing using FLoM API (libflom).
 .SH OPTIONS
 .TP 4
 .B "-h, --help"
-show help options
+Show help options
 .TP
 .B -v, --version
-print flom version and exit
+Print flom version and exit
 .TP
 .B -x, --quiesce-exit
-stop the running daemon after current activity completion
+Stop the running daemon after current activity completion
 .TP
 .B -X, --immediate-exit
-stop the running daemon immediately without any quiesce time
+Stop the running daemon immediately without any quiesce time
 .TP
 .B -V, --verbose
-verbose mode execution
+Verbose mode execution
 .TP
 .B -c, --config-file=\fIFILENAME
-user configuration file name. Flom tries to read system default configuration file @sysconfdir@/@_SYSTEM_CONFIG_FILENAME@, user default configuration file ~/@_USER_CONFIG_FILENAME@ and finally this file if specified. Definitive configuration is obtained overloading hard wired build time defaults, system defaults, user defaults, user custom, command line options.
+User configuration file name. Flom tries to read system default configuration file @sysconfdir@/@_SYSTEM_CONFIG_FILENAME@, user default configuration file ~/@_USER_CONFIG_FILENAME@ and finally this file if specified. Definitive configuration is obtained overloading hard wired build time defaults, system defaults, user defaults, user custom, command line options
 .TP
 .B -r, --resource-name=\fIRESOURCE
-name of the resource used for enqueing (locking). 
+Name of the resource used for enqueing (locking)
  
 \fBSimple resource\fP names can be composed of "alpha" and "digit" characters, but the first character \fBmust be\fP of type "alpha" (example: "RA123" is \fBOK\fP, "123RA" is \fBnot\fP OK). Accepted resource names are described in function "global_res_name_preg_init": inspect source code for more details
  
@@ -41,28 +41,28 @@ name of the resource used for enqueing (locking).
 
 \fBSequence resource\fP names are composed by _s_ (non transactional) or _S_ (transactional) prefix and a simple resource name followed by an integer value enclosed in square brackets ("[ ]"); examples: "_s_foo[12]", "_S_bar[3]", "_s_RA123[23]". Numbers must be expressed using decimal base)
 
-\fBTimestamp resource\fP names are composed by the _t_ prefix followed by a timestamp format and by an integer value enclosed in square brackets ("[ ]"); examples: "_t_foo.%D.%T[4]", "_t_bar:%S#fff[1]". Numbers must be expressed using decimal base). 
+\fBTimestamp resource\fP names are composed by the _t_ prefix followed by a timestamp format and by an integer value enclosed in square brackets ("[ ]"); examples: "_t_foo.%D.%T[4]", "_t_bar:%S#fff[1]". Numbers must be expressed using decimal base)
 
 \fBAdditional information\fP can be retrieved from official wiki documentation: \fIhttp://sourceforge.net/p/flom/wiki/Home/\fP
 
 .TP
 .B -o, --resource-timeout=\fImilliseconds
-\fBdefault\fP (\fI-1\fP): maximum enqueue time if the resource is already locked by someone else; if the resource doesn't become free before \fItimeout milliseconds\fP the command will return. A negative value means "infinite timeout" and the command will wait until the resource will become free. If the value equals zero, in case of locked resource, the command will not wait.
+\fBDefault\fP (\fI-1\fP): maximum enqueue time if the resource is already locked by someone else; if the resource doesn't become free before \fItimeout milliseconds\fP the command will return. A negative value means "infinite timeout" and the command will wait until the resource will become free. If the value equals zero, in case of locked resource, the command will not wait
 .TP
 .B -q, --resource-quantity=\fInumber
-\fInumber\fP of numeric resources to lock; it's meaningless if the locked resource is not of type "numeric". \fInumber\fP must be an integer positive number. Note: only positive values are accepted
+\fINumber\fP of numeric resources to lock; it's meaningless if the locked resource is not of type "numeric". \fInumber\fP must be an integer positive number. Note: only positive values are accepted
 .TP
 .B -e, --resource-create=\fIyes|no
-\fBdefault\fP (\fIyes\fP): the command will create the resource if it was not already created by another command, otherwise (\fIno\fP) it will wait for resource creation or will end immediately (see \fB-o, --resource-timeout\fP option). \fBNote:\fP if used with a \fIhierarchical resource\fP, the behavior applies to the root level of the resource, not to the single leaf
+\fBDefault\fP (\fIyes\fP): the command will create the resource if it was not already created by another command, otherwise (\fIno\fP) it will wait for resource creation or will end immediately (see \fB-o, --resource-timeout\fP option). \fBNote:\fP if used with a \fIhierarchical resource\fP, the behavior applies to the root level of the resource, not to the single leaf
 .TP
 .B -i, --resource-idle-lifespan=\fImilliseconds
-how long a resource will be kept after last usage, default value is \fB0 milliseconds\fP; this option can be used to avoid a following job that specifies \fB-e n, --resource-create=no\fP will wait undefinitely just because the previous task terminated too early. \fBWarning:\fP too many long lasting resources can waste memory and threads inside \fIflom daemon\fP. \fBNote:\fP if used with a \fIhierarchical resource\fP, the behavior applies to the root level of the resource, not to the single leaf
+How long a resource will be kept after last usage, default value is \fB0 milliseconds\fP; this option can be used to avoid a following job that specifies \fB-e n, --resource-create=no\fP will wait undefinitely just because the previous task terminated too early. \fBWarning:\fP too many long lasting resources can waste memory and threads inside \fIflom daemon\fP. \fBNote:\fP if used with a \fIhierarchical resource\fP, the behavior applies to the root level of the resource, not to the single leaf
 .TP
 .B -l, --lock-mode=\fIMODE
-lock mode as defined by VMS DLM (Distributed Lock Manager). \fIMODE\fP can be: "NullLock", "ConcurrentRead", "ConcurrentWrite", "ProtectedRead", "ProtectedWrite", "Exclusive" (equivalent short forms are: "NL", "CR", "CW", "PR", "PW", "EX"). More information are available here \fIhttp://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes\fP
+Lock mode as defined by VMS DLM (Distributed Lock Manager). \fIMODE\fP can be: "NullLock", "ConcurrentRead", "ConcurrentWrite", "ProtectedRead", "ProtectedWrite", "Exclusive" (equivalent short forms are: "NL", "CR", "CW", "PR", "PW", "EX"). More information are available here \fIhttp://en.wikipedia.org/wiki/Distributed_lock_manager#Lock_modes\fP
 .TP
 .B -s, --socket-name=\fIFILENAME
-absolute \fIFILENAME\fP that must be used to create the UNIX socket used for local communication between \fBflom\fP command line and \fBflom daemon\fP; typical values are something like \fI/tmp/something\fP. This option is useful to share locks between different users (the default socket is per user and every user creates a different one)
+Absolute \fIFILENAME\fP that must be used to create the UNIX socket used for local communication between \fBflom\fP command line and \fBflom daemon\fP; typical values are something like \fI/tmp/something\fP. This option is useful to share locks between different users (the default socket is per user and every user creates a different one)
 .TP
 .B -a, --unicast-address=\fIIPaddress
 TCP/IP address that must be used to reach a running daemon; if the daemon must be started locally, \fIIPaddress\fP must be a valid IP address for this host. Both IPv4 and IPv6 addresses can be used
@@ -77,31 +77,34 @@ UDP/IP multicast address that must be used to discover the location of a running
 UDP/IP multicast port that must be used to discover the location of a running daemon; if the daemon must be started locally, \fIIPport\fP must be a port not used by another process on this host. If \fIIPaddress\fP (see \fB-A\fP, \fB--multicast-address\fP) is specified and \fIIPport\fP is not specified, the default value is @_DEFAULT_DAEMON_PORT@
 .TP
 .B --ignore-signal=\fISIGNAL
-Ignore \fISIGNAL\fP while waiting for the termination of the monitored program. \fISIGNAL\fP can be a string like for example "SIGTERM" or "SIGQUIT" or a number like for example "15" or "3". The option can be specified more than once to ignore two or more signals.
+Ignore \fISIGNAL\fP while waiting for the termination of the monitored program. \fISIGNAL\fP can be a string like for example "SIGTERM" or "SIGQUIT" or a number like for example "15" or "3". The option can be specified more than once to ignore two or more signals. Some signals can not be ignored: as explained in \fBSIGNAL(7)\fP man page, the signals SIGKILL and SIGSTOP cannot be caught, blocked, or ignored
+.TP
+.B --signal-list
+Print the list of signals that can be used with \fB--ignore-signal\fP and exit
 .TP
 .B -n, --network-interface=\fIinterface
-Network \fIinterface\fP that must be used to reach IPv6 \fIlink-local\fP addresses. It's the equivalent of the % notation that can be used for network addresses but can not be used for network aliases. Typical values are \fIeth0\fP, \fIeth1\fP and so on. If this option is specified, only IPv6 network adresses will be used.
+Network \fIinterface\fP that must be used to reach IPv6 \fIlink-local\fP addresses. It's the equivalent of the % notation that can be used for network addresses but can not be used for network aliases. Typical values are \fIeth0\fP, \fIeth1\fP and so on. If this option is specified, only IPv6 network adresses will be used
 .TP
 .B -d, --daemon-lifespan=\fImilliseconds
-lifespan of \fBflom\fP daemon if activated, expressed using milliseconds. The value of \fImilliseconds\fP can be and integer greater than 0, equal to 0 or less than 0: values greater than 0 are interpreted as minimum daemon lifetime (in milliseconds), the value 0 is interpreted as "don't start a daemon process" and values less than 0 are interpreted as "run forever" (or until a kill message is sent to \fBflom\fP daemon). If not specified, the default value is @_DEFAULT_DAEMON_LIFESPAN@ milliseconds
+Lifespan of \fBflom\fP daemon if activated, expressed using milliseconds. The value of \fImilliseconds\fP can be and integer greater than 0, equal to 0 or less than 0: values greater than 0 are interpreted as minimum daemon lifetime (in milliseconds), the value 0 is interpreted as "don't start a daemon process" and values less than 0 are interpreted as "run forever" (or until a kill message is sent to \fBflom\fP daemon). If not specified, the default value is @_DEFAULT_DAEMON_LIFESPAN@ milliseconds
 .TP
 .B -D, --discovery-attempts=\fIattempts
-number of attempts (UDP/IP multicast sent datagrams) performed to locate \fBflom\fP daemon; if the answer to UDP/IP multicast does not arrive, auto-discovery will fail. If not specified, the default value is @_DEFAULT_DISCOVERY_ATTEMPTS@
+Number of attempts (UDP/IP multicast sent datagrams) performed to locate \fBflom\fP daemon; if the answer to UDP/IP multicast does not arrive, auto-discovery will fail. If not specified, the default value is @_DEFAULT_DISCOVERY_ATTEMPTS@
 .TP
 .B -I, --discovery-timeout=\fImilliseconds
-timeout related to UDP/IP multicast auto-discovery feature: if the answer to UDP/IP multicast query does not arrive before this timeout, another datagram is sent (until \fIattempts\fP limit is reached). If not specified, the default value is @_DEFAULT_DISCOVERY_TIMEOUT@ milliseconds
+Timeout related to UDP/IP multicast auto-discovery feature: if the answer to UDP/IP multicast query does not arrive before this timeout, another datagram is sent (until \fIattempts\fP limit is reached). If not specified, the default value is @_DEFAULT_DISCOVERY_TIMEOUT@ milliseconds
 .TP
 .B --discovery-ttl=\fITTL
 IP hop limit for outgoing UDP/IP multicast datagrams (this option may be useful if your datagrams have to traverse some router). If not specified, the default value is @_DEFAULT_DISCOVERY_TTL@
 .TP
 .B --tcp-keepalive-time=\fIseconds
-\fBflom\fP daemon sets SO_KEEPALIVE attribute to every TCP/IP socket connected with a \fBflom\fP command; this parameter allows you to change after how many connection inactivity \fIseconds\fP the kernel will start to probe the TCP/IP connection. A good explanation of \fBtcp_keepalive_time\fP kernel parameter can be found at this URL: \fIhttp://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO\fP. If not specified, the default value set by \fBflom\fP daemon is @_DEFAULT_TCP_KEEPALIVE_TIME@ seconds
+\fBFLoM\fP daemon sets SO_KEEPALIVE attribute to every TCP/IP socket connected with a \fBflom\fP command; this parameter allows you to change after how many connection inactivity \fIseconds\fP the kernel will start to probe the TCP/IP connection. A good explanation of \fBtcp_keepalive_time\fP kernel parameter can be found at this URL: \fIhttp://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO\fP. If not specified, the default value set by \fBflom\fP daemon is @_DEFAULT_TCP_KEEPALIVE_TIME@ seconds
 .TP
 .B --tcp-keepalive-intvl=\fIseconds
-\fBflom\fP daemon sets SO_KEEPALIVE attribute to every TCP/IP socket connected with a \fBflom\fP command; this parameter allows you to change how many \fIseconds\fP the kernel will wait before a new probe of the TCP/IP connection (the \fIconnection inactivity condition\fP already triggered before successive probes are issued). A good explanation of \fBtcp_keepalive_intvl\fP kernel parameter can be found at this URL: \fIhttp://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO\fP. If not specified, the default value set by \fBflom\fP daemon is @_DEFAULT_TCP_KEEPALIVE_INTVL@ seconds
+\fBFLoM\fP daemon sets SO_KEEPALIVE attribute to every TCP/IP socket connected with a \fBflom\fP command; this parameter allows you to change how many \fIseconds\fP the kernel will wait before a new probe of the TCP/IP connection (the \fIconnection inactivity condition\fP already triggered before successive probes are issued). A good explanation of \fBtcp_keepalive_intvl\fP kernel parameter can be found at this URL: \fIhttp://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO\fP. If not specified, the default value set by \fBflom\fP daemon is @_DEFAULT_TCP_KEEPALIVE_INTVL@ seconds
 .TP
 .B --tcp-keepalive-probes=\fIprobes
-\fBflom\fP daemon sets SO_KEEPALIVE attribute to every TCP/IP socket connected with a \fBflom\fP command; this parameter allows you to change how many \fIprobes\fP for a suspicious connection will be tried by the kernel before the connection will be terminated. A good explanation of \fBtcp_keepalive_probes\fP kernel parameter can be found at this URL: \fIhttp://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO\fP. If not specified, the default value set by \fBflom\fP daemon is @_DEFAULT_TCP_KEEPALIVE_PROBES@ probes
+\fBFLoM\fP daemon sets SO_KEEPALIVE attribute to every TCP/IP socket connected with a \fBflom\fP command; this parameter allows you to change how many \fIprobes\fP for a suspicious connection will be tried by the kernel before the connection will be terminated. A good explanation of \fBtcp_keepalive_probes\fP kernel parameter can be found at this URL: \fIhttp://tldp.org/HOWTO/html_single/TCP-Keepalive-HOWTO\fP. If not specified, the default value set by \fBflom\fP daemon is @_DEFAULT_TCP_KEEPALIVE_PROBES@ probes
 .TP
 .B --tls-certificate=\fIFILENAME
 PEM file containing the X.509 certificate of the peer
@@ -113,34 +116,34 @@ PEM file containing the private key of the peer
 PEM file containing the X.509 certificate of the certification authority used to sign the peers' certificates
 .TP
 .B --tls-check-peer-id=\fIyes|no
-perform peer authentication comparing the unique ID sent by the peer (see \fB--unique-id\fP option) with the content of the CN field inside the certificate presented by the peer
+Perform peer authentication comparing the unique ID sent by the peer (see \fB--unique-id\fP option) with the content of the CN field inside the certificate presented by the peer
 .TP
 .B -T, --command-trace-file=\fIFILENAME
-file destination of the trace messages produced by the command (foreground) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module
+File destination of the trace messages produced by the command (foreground) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module
 .TP
 .B -t, --daemon-trace-file=\fIFILENAME
-file destination of the trace messages produced by the daemon (background) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module
+File destination of the trace messages produced by the daemon (background) process; \fIFILENAME\fP must be an absolute path. \fBFLOM_TRACE_MASK\fP environment variable must be set with an active bit for every desired module
 .TP
 .B --append-trace-file=\fIyes|no
-\fBdefault\fP (\fIno\fP): the command will truncate the trace file(s), otherwise (\fIyes\fP) it will append the trace file(s). The number and the name of the trace files depends on \fB-T, --command-trace-file\fP and \fB-t, --daemon-trace-file\fP options
+\fBDefault\fP (\fIno\fP): the command will truncate the trace file(s), otherwise (\fIyes\fP) it will append the trace file(s). The number and the name of the trace files depends on \fB-T, --command-trace-file\fP and \fB-t, --daemon-trace-file\fP options
 .TP
 .B --unique-id
-print flom unique ID and exit
+Print flom unique ID and exit
 .TP
 .B --debug-feature=\fPipv6.multicast.server
-activate an IPv6 multicast server (requester) for debugging purposes
+Activate an IPv6 multicast server (requester) for debugging purposes
 .TP
 .B --debug-feature=\fPipv6.multicast.client
-activate an IPv6 multicast client (replier) for debugging purposes
+Activate an IPv6 multicast client (replier) for debugging purposes
 .TP
 .B --debug-feature=\fPtls.server
-activate a TLS server for debugging purposes
+Activate a TLS server for debugging purposes
 .TP
 .B --debug-feature=\fPtls.client
-activate a TLS client for debugging purposes
+Activate a TLS client for debugging purposes
 .P
 .SH EXIT STATUS
-if anything runs as expected, \fBflom\fP exit status is the same of the controlled (serialized) command. Sometimes an error occurs and \fBflom\fP reports it using dedicated exit statuses you can check with \fI$?\fP environment variable:
+If anything runs as expected, \fBflom\fP exit status is the same of the controlled (serialized) command. Sometimes an error occurs and \fBflom\fP reports it using dedicated exit statuses you can check with \fI$?\fP environment variable:
 .P
 \fB@_ES_UNABLE_TO_EXECUTE_COMMAND@:\fP \fBflom\fP caught an error trying to exec (see \fIexecvp\fP man page) COMMAND
 .P
@@ -149,16 +152,16 @@ if anything runs as expected, \fBflom\fP exit status is the same of the controll
 \fB@_ES_GENERIC_ERROR@:\fP \fBflom\fP caught some type of error and did not execute COMMAND
 .P
 .SH ENVIRONMENT
-environment variable \fBFLOM_TRACE_MASK\fP can be used to activate internal detailed trace. The available flags are explained in file \fIflom_trace.h\fP; you can activate more than one module trace using OR operation between values
+Environment variable \fBFLOM_TRACE_MASK\fP can be used to activate internal detailed trace. The available flags are explained in file \fIflom_trace.h\fP; you can activate more than one module trace using OR operation between values
 .P
 .SH EXAMPLES
-A list of example use cases is avalaible at this web page \fIhttp://sourceforge.net/p/flom/wiki/FLOM%20by%20examples/\fP
+A list of example use cases is avalaible at this web page \fIhttp://www.tiian.org/flom/FLoM_by_examples/FLoM_by_examples.html\fP
 .P
 .SH CAVEATS
 .B flom -- flom --
 [COMMAND [ARG]...]
 .P
-hangs due to a deadlock: the inner flom instance waits the lock obtained by the first flom instance.
+Hangs due to a deadlock: the inner flom instance waits the lock obtained by the first flom instance.
 .SH AUTHOR
 Christian Ferrari (tiian@users.sourceforge.net)
 .SH REPORTING BUGS
@@ -168,9 +171,9 @@ Copyright (C) 2013-2020, Christian Ferrari. License GPL version 2 \fIhttp://www.
 .B NO WARRANTY
 , to the extent permitted by law.
 .SH SEE ALSO
-More documentation is available at project wiki page
+Official documentation is available at
 .P
-\fIhttp://sourceforge.net/p/flom/wiki/Home/\fP
+\fIhttp://www.tiian.org/flom/\fP
 .P
 A sample configuration file (\fI@_SYSTEM_CONFIG_FILENAME@\fP) is installed in dir \fI@docdir@\fP: you may copy it and customize as explained inside the sample itself.
 .P

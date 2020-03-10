@@ -950,6 +950,13 @@ extern "C" {
     gchar *flom_config_get_ignored_signals_str(const flom_config_t *config);
 
 
+
+    /**
+     * Print the list of the signals that can be ignored
+     */
+    void flom_config_print_signal_list(void);
+
+    
     
     /**
      * Set network_interface in config object
