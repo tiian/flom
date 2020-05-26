@@ -22,14 +22,14 @@ setup.py:	setup.py.i ../../config.status
 
 # Build Python module extension
 all-local:	flom_wrap.c setup.py
-	python setup.py build_ext --inplace
+	$(PYTHON) setup.py build_ext --inplace
 
 clean-local:
 	rm -f flom_wrap.c _flom.so flom.py setup.py
 
 # Install Python module extension
 install-exec-local:
-	python setup.py install --record installed_files.txt
+	$(PYTHON) setup.py install --record installed_files.txt
 
 # Uninstall Python module extension
 uninstall-local:

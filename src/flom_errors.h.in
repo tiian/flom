@@ -74,7 +74,7 @@
 /* WARNINGS */
 /**
  * A transactional operation has been requested for non transactional
- * resource. See also @ref flom_handle_unlock_rollback method
+ * resource
  */
 #define FLOM_RC_RESOURCE_IS_NOT_TRANSACTIONAL       +12
 /**

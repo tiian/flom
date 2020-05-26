@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.5.19], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
+AC_INIT([FLoM], [1.5.20-dev], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -30,7 +30,7 @@ LT_REVISION=0
 
 # hardwired configuration
 _FLOM_PREFIX="flom"
-_RELEASE_DATE="2020-03-10"
+_RELEASE_DATE="2020-05-26"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"
@@ -281,8 +281,13 @@ AC_MSG_NOTICE([STDBUF_O0=$STDBUF_O0])
 AC_CHECK_PROGS(DOXYGEN, [doxygen], [true])
 AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
 
+# @@@ old style, remove me
 # Checking the availability of SWIG (Simplified Wrapper and Interface Generator)
-AC_CHECK_PROGS(SWIG, [swig], [noswig])
+# AC_CHECK_PROGS(SWIG, [swig], [noswig])
+
+# Check SWIG availability
+m4_include(m4/ax_pkg_swig.m4)
+AX_PKG_SWIG([1.3.40])
 
 # Checking the availability of JRE
 AC_CHECK_PROG(HAVE_JAVA, [java], [yes], [no])
@@ -380,19 +385,28 @@ else
 fi
 AM_CONDITIONAL([COND_PHPAPI], [test "$PHPAPI" = "yes"])
 
+# @@@ old style, remove me
 # Checking the availability of Python tools
-AC_CHECK_PROG(HAVE_PYTHON, [python], [yes], [no])
-AC_CHECK_PROG(HAVE_PYTHON_CONFIG, [python-config], [yes], [no])
+# AC_CHECK_PROG(HAVE_PYTHON, [python], [yes], [no])
+#AC_CHECK_PROG(HAVE_PYTHON_CONFIG, [python-config], [yes], [no])
+
+# Check Python availability
+m4_include(m4/ax_python_devel.m4)
+AX_PYTHON_DEVEL([>= '2.6.5'])
+# Check SWIG support for Python
+m4_include(m4/ax_swig_python.m4)
+AX_SWIG_PYTHON
+
 # Build Python wrapper?
 AC_ARG_ENABLE([python],
 	AS_HELP_STRING([--disable-python],
 		[do not prepare Python binding API]),
-	[PYTHON="no"], [PYTHON="yes"])
+	[BUILD_PYTHON="no"], [BUILD_PYTHON="yes"])
 # Python stuff is conditional
-if test "$HAVE_PYTHON" = "yes" -a "$HAVE_PYTHON_CONFIG" = "yes" -a "$PYTHON" = "yes" -a "$SWIG" != "noswig"
+if test "z$PYTHON" != "z" -a "$BUILD_PYTHON" = "yes" -a "z$SWIG" != "z"
 then
 	PYTHONAPI="yes"
-	PYTHON_INCLUDES=$(python-config --includes)
+	PYTHON_INCLUDES=$PYTHON_CPPFLAGS
 else
 	PYTHONAPI="no"
 fi
