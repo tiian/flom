@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.5.20-dev], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
+AC_INIT([FLoM], [1.5.20], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -30,7 +30,7 @@ LT_REVISION=0
 
 # hardwired configuration
 _FLOM_PREFIX="flom"
-_RELEASE_DATE="2020-05-26"
+_RELEASE_DATE="2020-05-28"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"
@@ -501,6 +501,7 @@ AC_SUBST(PERLAPI)
 AC_SUBST(PHPAPI)
 AC_SUBST(PHP_INCLUDES)
 AC_SUBST(PHP_INSTALL_PATH)
+AC_SUBST(PYTHON)
 AC_SUBST(PYTHONAPI)
 AC_SUBST(PYTHON_INCLUDES)
 AC_SUBST(GLIB2_PERL)

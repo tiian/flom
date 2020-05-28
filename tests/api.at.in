@@ -446,12 +446,12 @@ AT_SETUP([Python Happy path])
 AT_CHECK([if test "$PYTHONAPI" = "no"; then exit 77; fi])
 AT_CHECK([pkill flom], [0], [ignore], [ignore])
 AT_CHECK([flom -d -1 -- true], [0], [ignore], [ignore])
-AT_CHECK([python $PYTHONPATH/case3000.py], [0], [ignore], [ignore])
+AT_CHECK([$PYTHON $PYTHONPATH/case3000.py], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Python Missing calls])
 AT_CHECK([if test "$PYTHONAPI" = "no"; then exit 77; fi])
-AT_CHECK([python $PYTHONPATH/case3001.py], [0], [ignore], [ignore])
+AT_CHECK([$PYTHON $PYTHONPATH/case3001.py], [0], [ignore], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Python Getter and setter methods])
@@ -500,7 +500,7 @@ flom_handle_get_tls_check_peer_id() = 0
 flom_handle_get_tls_check_peer_id() = 1
 happy_path locked element is 'red'
 ]])
-AT_CHECK([python $PYTHONPATH/case3002.py], [0], [expout], [ignore])
+AT_CHECK([$PYTHON $PYTHONPATH/case3002.py], [0], [expout], [ignore])
 AT_CLEANUP
 
 AT_SETUP([Python sequence resource])
@@ -514,7 +514,7 @@ locked element is 1
 locked element is 1
 locked element is 2
 ]])
-AT_CHECK([@STDBUF_O0@ python $PYTHONPATH/case3004.py], [134], [expout], [ignore])
+AT_CHECK([$PYTHON -u $PYTHONPATH/case3004.py], [134], [expout], [ignore])
 AT_DATA([expout],
 [[locked element is 3
 locked element is 4
@@ -522,7 +522,7 @@ locked element is 2
 locked element is 2
 locked element is 3
 ]])
-AT_CHECK([@STDBUF_O0@ python $PYTHONPATH/case3004.py], [134], [expout], [ignore])
+AT_CHECK([$PYTHON -u $PYTHONPATH/case3004.py], [134], [expout], [ignore])
 AT_CLEANUP
 
 

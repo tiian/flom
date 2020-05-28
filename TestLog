@@ -1,3 +1,12 @@
+Release: 1.5.20 (Tester: Tiian; Test purpose: Python 3 support for CentOS)
+Date:	 2020-05-28
+Ubuntu 10.04 (OpenJDK 6)  | x86_64 | virtual (KVM)
+CentOS 7.7 (Python 2)     | x86_64 | virtual (KVM) §
+CentOS 7.7 (Python 3)     | x86_64 | virtual (KVM) §
+CentOS 8.1 (Python 3)     | x86_64 | virtual (KVM) §§
+§ centos-release-7-8.2003.0.el7.centos.x86_64 (rpm --query centos-release)
+§§ centos-release-8.1-1.1911.0.9.el8.x86_64 (rpm --query centos-release)
+
 Release: 1.5.19
 Date:	 2020-01-28
 Ubuntu 10.04 (OpenJDK 6)  | x86_64 | virtual (KVM)

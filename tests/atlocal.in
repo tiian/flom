@@ -20,6 +20,8 @@ PHPPATH=@abs_top_builddir@/tests/src
 export PHPPATH
 PHPAPI=@PHPAPI@
 export PHPAPI
+PYTHON=@PYTHON@
+export PYTHON
 PYTHONPATH=@abs_top_builddir@/tests/src
 export PYTHONPATH
 PYTHONAPI=@PYTHONAPI@

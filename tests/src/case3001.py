@@ -35,29 +35,29 @@ def happy_path():
     ret_cod = flom_handle_init(handle)
     if FLOM_RC_OK != ret_cod:
         sys.stderr.write("happy_path/flom_handle_init() returned " + 
-		str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
+            str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
         sys.exit(1)
 
     # lock acquisition
     ret_cod = flom_handle_lock(handle)
     if FLOM_RC_OK != ret_cod:
         sys.stderr.write("happy_path/flom_handle_lock() returned " + 
-		str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1)
+            str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
+        sys.exit(1)
 
     # lock release
     ret_cod = flom_handle_unlock(handle)
     if FLOM_RC_OK != ret_cod:
         sys.stderr.write("happy_path/flom_handle_unlock() returned " + 
-		str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1)
+            str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
+        sys.exit(1)
 
     # handle clean-up (memory release)
     ret_cod = flom_handle_clean(handle)
     if FLOM_RC_OK != ret_cod:
         sys.stderr.write("happy_path/flom_handle_clean() returned " + 
-		str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1)
+            str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
+        sys.exit(1)
 	 
     # handle deallocation
     del handle
@@ -76,22 +76,22 @@ def missing_init():
     ret_cod = flom_handle_lock(handle)
     if FLOM_RC_API_INVALID_SEQUENCE != ret_cod:
         sys.stderr.write("happy_path/flom_handle_lock() returned " + 
-		str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1)
+            str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
+        sys.exit(1)
 
     # lock release
     ret_cod = flom_handle_unlock(handle)
     if FLOM_RC_API_INVALID_SEQUENCE != ret_cod:
         sys.stderr.write("happy_path/flom_handle_unlock() returned " + 
-		str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1)
+            str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
+        sys.exit(1)
 
     # handle clean-up (memory release)
     ret_cod = flom_handle_clean(handle)
     if FLOM_RC_API_INVALID_SEQUENCE != ret_cod:
         sys.stderr.write("happy_path/flom_handle_clean() returned " + 
-		str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1)
+            str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
+        sys.exit(1)
 	 
     # handle deallocation
     del handle
@@ -110,22 +110,22 @@ def missing_lock():
     ret_cod = flom_handle_init(handle)
     if FLOM_RC_OK != ret_cod:
         sys.stderr.write("happy_path/flom_handle_init() returned " + 
-		str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
+            str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
         sys.exit(1)
 
     # lock release
     ret_cod = flom_handle_unlock(handle)
     if FLOM_RC_API_INVALID_SEQUENCE != ret_cod:
         sys.stderr.write("happy_path/flom_handle_unlock() returned " + 
-		str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1)
+            str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
+        sys.exit(1)
 
     # handle clean-up (memory release)
     ret_cod = flom_handle_clean(handle)
     if FLOM_RC_OK != ret_cod:
         sys.stderr.write("happy_path/flom_handle_clean() returned " + 
-		str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1)
+            str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
+        sys.exit(1)
 	 
     # handle deallocation
     del handle
@@ -144,22 +144,22 @@ def missing_unlock():
     ret_cod = flom_handle_init(handle)
     if FLOM_RC_OK != ret_cod:
         sys.stderr.write("happy_path/flom_handle_init() returned " + 
-		str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
+            str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
         sys.exit(1)
 
     # lock acquisition
     ret_cod = flom_handle_lock(handle)
     if FLOM_RC_OK != ret_cod:
         sys.stderr.write("happy_path/flom_handle_lock() returned " + 
-		str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1)
+            str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
+        sys.exit(1)
 
     # handle clean-up (memory release)
     ret_cod = flom_handle_clean(handle)
     if FLOM_RC_OK != ret_cod:
         sys.stderr.write("happy_path/flom_handle_clean() returned " + 
-		str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
-	sys.exit(1)
+            str(ret_cod) + " '" + flom_strerror(ret_cod) + "'\n")
+        sys.exit(1)
 	 
     # handle deallocation
     del handle
