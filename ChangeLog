@@ -1,4 +1,8 @@
 LOG:
+
+20201021 - 1.5.21 Support for GitHub/CodeQL security scanner
+	Fix of two security bugs reported by GitHub/CodeQL
+
 20200528 - 1.5.20 Support for Python 3 as asked in
 	https://github.com/tiian/flom/issues/16
 

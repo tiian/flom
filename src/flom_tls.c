@@ -348,7 +348,8 @@ int flom_tls_prepare(flom_tls_t *obj, int sockfd)
         /* SSL struct must be NULL */
         if (NULL != obj->ssl) {
             FLOM_TRACE(("flom_tls_prepare: ssl struct is not NULL (%p), "
-                        "freeing it before allocating a new one!\n"));
+                        "freeing it before allocating a new one!\n",
+                        obj->ssl));
             SSL_free(obj->ssl);
             obj->ssl = NULL;
         }

@@ -1,3 +1,7 @@
+Release: 1.5.21 (Tester: Tiian; Test purpose: fix of 2 security bugs identified by GitHub/CodeQL)
+Date:	 2020-10-21
+Ubuntu 10.04 (OpenJDK 6)  | x86_64 | virtual (KVM)
+
 Release: 1.5.20 (Tester: Tiian; Test purpose: Python 3 support for CentOS)
 Date:	 2020-05-28
 Ubuntu 10.04 (OpenJDK 6)  | x86_64 | virtual (KVM)

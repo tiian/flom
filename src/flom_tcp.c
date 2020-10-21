@@ -289,7 +289,8 @@ int flom_tcp_connect(flom_tcp_t *obj)
         obj->addrlen = p->ai_addrlen;
         memcpy(&obj->sa_storage, p->ai_addr, obj->addrlen);
         FLOM_TRACE(("flom_tcp_connect: domain=%d, sockfd=%d, socket_type=%d, "
-                    "addrlen=%u\n", obj->domain, obj->sockfd, obj->addrlen));
+                    "addrlen=%u\n", obj->domain, obj->sockfd, obj->socket_type,
+                    obj->addrlen));
         FLOM_TRACE_SOCKADDR("flom_tcp_connect: ", &obj->sa, obj->addrlen);
         
         THROW(NONE);
