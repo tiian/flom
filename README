@@ -133,9 +133,10 @@ Dependencies report:
 O.S.		Feature		Packages
 Ubuntu		Basic		make gcc libglib2.0-dev dbus libdbus-1-dev libssl-dev pkg-config automake
 Ubuntu		C++ API		g++
+Ubuntu		Perl API	swig libperl-dev
 Ubuntu		PHP API		swig php5-cli php5-dev
-Ubuntu	16.04	PHP API		*
-Ubuntu  18.04   PHP API         swig php-cli
+Ubuntu	16.04	PHP API		swig php-cli php-dev
+Ubuntu  18.04   PHP API         swig php-cli php-dev
 Ubuntu		Python API	swig python-dev
 Ubuntu	10.04	Java API	openjdk-6-jdk
 Ubuntu	12.04	Java API	default-jdk (openjdk 6)
