@@ -31,25 +31,30 @@ then
         exit 1
 fi
 
-# redirect stderr for the shell itself
-exec 2> /tmp/stderr.txt
+kill_flom() {
+	echo "KKK>>> Killer function started and sleeping a little bit..."
+	# wait 1 second to be sure the monitor is up and running
+	sleep 1
+	# get PGID
+	PGID=$(ps j -A | grep 'sleep' | grep -v 'grep\|flom' | awk '{print $3}')
+	echo "KKK>>> Processes with PGID=$PGID"
+	ps j -A | grep "PGID\|$PGID" | grep -v 'grep'
+	# send SIGTERM to the group of processes
+	/bin/kill -SIGTERM -$PGID
+	echo "KKK>>> kill return code: " $?
+}
+
+# start the killer function in background
+kill_flom &
+
 # activate monitoring to start the child process in a group different than 
 # shell's one
 set -m
 # execute in background
-flom --ignore-signal=$1 -- sleep 1d &
+flom --ignore-signal=$1 -- sleep 1d
+RC=$?
+echo "flom return code: " $RC
 set +m
-# wait 1 second to be sure the monitor is up and running
-sleep 1
-# get PGID
-PGID=$(ps j -A | grep 'sleep' | grep -v 'grep\|flom' | awk '{print $3}')
-echo "Processes with PGID=$PGID"
-ps j -A | grep "PGID\|$PGID" | grep -v 'grep'
-# send SIGTERM to the group of processes
-/bin/kill -SIGTERM -$PGID
-# wait again for termination
-sleep 1
-# look for Terminated
-grep Terminated /tmp/stderr.txt
-# return grep exit code
-exit $?
+
+# returning FLoM RC
+exit $RC
