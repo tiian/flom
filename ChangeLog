@@ -1,5 +1,9 @@
 LOG:
 
+20201116 - 1.5.22 Support for Ubuntu 20.04
+	Update of TLS configuration for recent systems that do not accept
+	obsolete configurations
+
 20201021 - 1.5.21 Support for GitHub/CodeQL security scanner
 	Fix of two security bugs reported by GitHub/CodeQL
 

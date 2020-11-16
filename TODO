@@ -1,5 +1,7 @@
 Possible ideas for future developments, if useful:
 
+implement stack trace feature as implemented by LIXA project
+
 introduce a supplementary module build for Perl and Python to avoid installation before "make check" (verify other bindings like Java too...)
 
 implement a loop for connect/bind if bind returns an error: this should help
