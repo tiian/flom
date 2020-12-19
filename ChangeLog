@@ -1,6 +1,7 @@
 LOG:
 
-	 - 1.5.23 Fixing a build error when JDK is not installed
+	 - 1.5.23 Some build fixes
+	https://github.com/tiian/flom/issues/20
 
 20201116 - 1.5.22 Support for Ubuntu 20.04
 	Update of TLS configuration for recent systems that do not accept
