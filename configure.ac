@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.5.22], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
+AC_INIT([FLoM], [1.5.23-dev], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_PROG_LIBTOOL
@@ -30,7 +30,7 @@ LT_REVISION=0
 
 # hardwired configuration
 _FLOM_PREFIX="flom"
-_RELEASE_DATE="2020-11-16"
+_RELEASE_DATE="2020-12-19"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"
@@ -314,6 +314,8 @@ then
 		AC_MSG_RESULT([no])
 	fi
 	AM_CONDITIONAL([COND_JAVADOC_HTML5], [test $JAVADOC_HTML5 -eq 0])
+else
+	AM_CONDITIONAL([COND_JAVADOC_HTML5], [false])
 fi
 # Build Java wrapper?
 AC_ARG_ENABLE([java],
