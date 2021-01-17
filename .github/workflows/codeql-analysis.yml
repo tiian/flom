@@ -36,6 +36,8 @@ jobs:
       run: |
         sudo apt-get update && sudo apt-get upgrade
         sudo apt-get install dbus libdbus-1-dev php-dev php-cli swig
+        # PHP 8 seems not currently working with SWIG, trying PHP 7.4
+        sudo update-alternatives --set php /usr/bin/php7.4
         php -v
 
     # Initializes the CodeQL tools for scanning.
