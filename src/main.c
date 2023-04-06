@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, Christian Ferrari <tiian@users.sourceforge.net>
+ * Copyright (c) 2013-2023, Christian Ferrari <tiian@users.sourceforge.net>
  * All rights reserved.
  *
  * This file is part of FLoM, Free Lock Manager
@@ -146,7 +146,7 @@ int main (int argc, char *argv[])
 
     if (print_version) {
         g_print("FLoM: Free Lock Manager\n"
-                "Copyright (c) 2013-2021, Christian Ferrari; "
+                "Copyright (c) 2013-2023, Christian Ferrari; "
                 "all rights reserved.\n"
                 "License: GPL (GNU Public License) version 2\n"
                 "Package name: %s; package version: %s; release date: %s\n"
