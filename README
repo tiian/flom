@@ -154,7 +154,7 @@ CentOS  7.x	Python 2 API	swig python-devel
 CentOS  7.x	Python 3 API	swig python3-devel
 CentOS  8.x	Python 3 API	swig python3-devel
 CentOS	6.x	Java API	java-1.6.0-openjdk or java-1.7.0-openjdk
-CentOS	7.x	Java API	java-1.8.0-openjdk
+CentOS	7.x	Java API	java-1.8.0-openjdk-devel or java-11-openjdk-devel
 CentOS	8.x	Java API	java-11-openjdk
 
 * Support not available for PHP 7.0 due to SWIG version, see also 
