@@ -39,8 +39,13 @@ kill_flom() {
 	PGID=$(ps j -A | grep 'sleep' | grep -v 'grep\|flom' | awk '{print $3}')
 	echo "KKK>>> Processes with PGID=$PGID"
 	ps j -A | grep "PGID\|$PGID" | grep -v 'grep'
-	# send SIGTERM to the group of processes
-	/bin/kill -SIGTERM -$PGID
+        # get PIDLIST: with Ubuntu 22.04 sending the signal to the process
+        # group does not work and a signal to every process must be sent...
+        PIDLIST=$(ps j -A | grep "$PGID" | grep "flom\|sleep" | awk '{print $2}')
+	### send SIGTERM to the group of processes
+	### /bin/kill -SIGTERM -$PGID
+        # send SIGTERM to the list of processes
+        /bin/kill -SIGTERM $PIDLIST
 	echo "KKK>>> kill return code: " $?
 }
 

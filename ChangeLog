@@ -1,7 +1,11 @@
 LOG:
 
-	 - 1.5.23 Some build fixes
+20230422 - 1.6.0 Some build fixes, support for Ubuntu 22.04
 	https://github.com/tiian/flom/issues/20
+	https://github.com/tiian/flom/issues/26
+	Added support for Ubuntu 22.04
+	Removed support for Ubuntu 10.04
+	After so long time the version can be considered stable
 
 20201116 - 1.5.22 Support for Ubuntu 20.04
 	Update of TLS configuration for recent systems that do not accept
