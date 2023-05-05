@@ -1,6 +1,7 @@
-AC_INIT([FLoM], [1.6.0], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
+AC_INIT([FLoM], [1.6.1-dev], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
+AM_PROG_AR
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
 AC_CONFIG_MACRO_DIR(m4)
@@ -30,7 +31,7 @@ LT_REVISION=0
 
 # hardwired configuration
 _FLOM_PREFIX="flom"
-_RELEASE_DATE="2023-04-22"
+_RELEASE_DATE="2023-05-03"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"
@@ -421,9 +422,17 @@ then
 	AC_MSG_ERROR([cannot find dbus-uuidgen utility])
 fi
 
-# find a valid network interface
-#m4_include(m4/ax_net_iface.m4)
-AX_NET_IFACE
+# networktest
+AC_ARG_ENABLE([testcases],
+	AS_HELP_STRING([--disable-testcases],
+		[do not execute test cases that require network]),
+	[TESTCASES="no"], [TESTCASES="yes"])
+if test "z$TESTCASES" != "z" -a "$TESTCASES" = "yes"
+then
+	# find a valid network interface
+	m4_include(m4/ax_net_iface.m4)
+	AX_NET_IFACE
+fi
 
 AC_DEFINE_UNQUOTED([_ES_GENERIC_ERROR], [$_ES_GENERIC_ERROR], [Exit status for generic error])
 
@@ -516,6 +525,7 @@ AC_SUBST(GTHREAD2_PYTHON)
 AC_SUBST(DBUS1_PYTHON)
 AC_SUBST(OPENSSL_PYTHON)
 AC_SUBST(CRYPTO_PYTHON)
+AC_SUBST(TESTCASES)
 
 # substitution of LibTool values for library version
 AC_SUBST(LT_CURRENT)

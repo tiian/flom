@@ -94,6 +94,16 @@ NOTE: tests needs the system is NOT overloaded because they stick on timing
       and timing breaks if the system is overloaded.
 NOTE: FLoM must be installed with "sudo make install" before tests can 
       proceed (this is a library path issue...)
+
+NOTE: automatic tests require at least one properly configured network
+      interface; if you need to build FLoM in entirely offline systems, use
+      ./configure --disable-testcases
+      to disable all the test cases and to remove the need for a network
+      interface at build time.
+      If you switch from "./configure" to "./configure --disable-testcases" or
+      vice versa, you MUST clean th environment with "make clean" to force
+      a new generation of test files.
+
 NOTE: if you are not interested in C++ API library support, specify
       "--disable-cpp" at configure time; example:
       ./configure --disable-cpp

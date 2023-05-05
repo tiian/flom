@@ -2,11 +2,11 @@ AT_INIT
 AT_COPYRIGHT([Copyright (c) 2013-2023, Christian Ferrari <tiian@users.sourceforge.net>])
 AT_COLOR_TESTS
 
+# cmdopt.at MUST be the first one in the list because it checks if 
+# --disable-testcases was specified at configure time
 m4_include([cmdopt.at])
 m4_include([incompopt.at])
 m4_include([debug-features.at])
-m4_include([usecase-dist.at])
-m4_include([usecase-lt.at])
 m4_include([api.at])
 m4_include([api_perl.at])
 m4_include([tls.at])
@@ -18,4 +18,6 @@ m4_include([usecase-set.at])
 m4_include([usecase-hier.at])
 m4_include([usecase-seq.at])
 m4_include([usecase-tms.at])
+m4_include([usecase-dist.at])
+m4_include([usecase-lt.at])
 

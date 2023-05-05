@@ -92,6 +92,7 @@ cmdopt.at: cmdopt.at.in
 	-e 's|@_CONFIG_KEY_TLS_CA_CERTIFICATE[@]|$(_CONFIG_KEY_TLS_CA_CERTIFICATE)|g' \
 	-e 's|@_CONFIG_KEY_TLS_CHECK_PEER_ID[@]|$(_CONFIG_KEY_TLS_CHECK_PEER_ID)|g' \
 	-e 's|@NET_IFACE[@]|$(NET_IFACE)|g' \
+	-e 's|@TESTCASES[@]|$(TESTCASES)|g' \
 	$< >$@
 
 incompopt.at: incompopt.at.in

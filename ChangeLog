@@ -1,5 +1,9 @@
 LOG:
 
+	 - 1.6.1 Support of ./configure --disable-testcases
+	to disable all the test cases and to remove the need for a network
+	interface at build time
+
 20230422 - 1.6.0 Some build fixes, support for Ubuntu 22.04
 	https://github.com/tiian/flom/issues/20
 	https://github.com/tiian/flom/issues/26

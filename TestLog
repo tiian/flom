@@ -1,4 +1,18 @@
-Release: 1.5.23 (Tester: Tiian; Test purpose: Ubuntu 22.04 check)
+Release: 1.6.1 (Tester: Tiian; Test purpose: ./configure --disable-testcases)
+Date:	2023-05-05
+
+Operating System            Arch     Hypervisor      Config   Note
+Ubuntu 14.04 (OpenJDK 1.7)| x86_64 | virtual (KVM) |   [2]  | *
+
+Configurations:
+[2]	./configure
+        ./configure --disable-testcases
+
+* 3 vCPUs instead of 2 (default)
+
+--------------------------------------------------------------------------
+
+Release: 1.6.0 (Tester: Tiian; Test purpose: Ubuntu 22.04 check)
 Date:	2023-04-22
 
 Operating System            Arch     Hypervisor      Config   Note
