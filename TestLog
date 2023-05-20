@@ -1,10 +1,12 @@
 Release: 1.6.1 (Tester: Tiian; Test purpose: ./configure --disable-testcases)
-Date:	2023-05-05
+Date:	2023-05-20
 
 Operating System            Arch     Hypervisor      Config   Note
 Ubuntu 14.04 (OpenJDK 1.7)| x86_64 | virtual (KVM) |   [2]  | *
+Ubuntu 22.04 (OpenJDK 11) | x86_64 | virtual (KVM) |   [1]  |
 
 Configurations:
+[1]	PYTHON_VERSION=3 ./configure
 [2]	./configure
         ./configure --disable-testcases
 
