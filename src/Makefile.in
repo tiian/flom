@@ -308,6 +308,8 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FUSE_CFLAGS = @FUSE_CFLAGS@
+FUSE_LIBS = @FUSE_LIBS@
 GLIB2_CFLAGS = @GLIB2_CFLAGS@
 GLIB2_LIBS = @GLIB2_LIBS@
 GLIB2_PERL = @GLIB2_PERL@
@@ -514,7 +516,7 @@ AM_CPPFLAGS = -D_SYSCONFDIR='"@sysconfdir@"'
 AM_CFLAGS = -Wall
 lib_LTLIBRARIES = libflom.la
 libflom_la_LDFLAGS = -version-info @LT_CURRENT@:@LT_REVISION@:@LT_AGE@
-flom_LDADD = @GLIB2_LIBS@ @DBUS1_LIBS@ @OPENSSL_LIBS@ libflom.la
+flom_LDADD = @GLIB2_LIBS@ @DBUS1_LIBS@ @FUSE_LIBS@ @OPENSSL_LIBS@ libflom.la
 flom_LDFLAGS = -Wl,-rpath -Wl,$(libdir)
 EXTRA_DIST = flom_errors.h.in
 BUILT_SOURCES = flom_errors.h

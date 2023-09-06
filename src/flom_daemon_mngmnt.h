@@ -64,6 +64,16 @@ extern "C" {
     int flom_daemon_mngmnt_shutdown(flom_config_t *config,
                                     flom_conns_t *conns, guint id);
 
+
+
+    /**
+     * Activate the Virtual File Systems used for exchange information with
+     * the outside; this function must be executed as an independent thread
+     * because it does not return
+     * @return a reason code
+     */
+    int flom_daemon_mngmnt_activate_vfs();
+
     
 
 #ifdef __cplusplus

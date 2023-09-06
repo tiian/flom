@@ -1,5 +1,8 @@
 LOG:
 
+	 - 1.7.0 Observability by mean of virtual filesystem based on FUSE 
+	(EXPERIMENTAL)
+
 20230520 - 1.6.1 Support of ./configure --disable-testcases
 	to disable all the test cases and to remove the need for a network
 	interface at build time

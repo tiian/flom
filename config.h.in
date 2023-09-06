@@ -21,6 +21,12 @@
 /* Define to 1 if you have the `freeifaddrs' function. */
 #undef HAVE_FREEIFADDRS
 
+/* Define to 1 if you have the <fuse_lowlevel.h> header file. */
+#undef HAVE_FUSE_LOWLEVEL_H
+
+/* Define to 1 if you have the `fuse_lowlevel_new' function. */
+#undef HAVE_FUSE_LOWLEVEL_NEW
+
 /* Define to 1 if you have the `getifaddrs' function. */
 #undef HAVE_GETIFADDRS
 
@@ -41,6 +47,9 @@
 
 /* Define to 1 if you have the `dbus-1' library (-ldbus-1). */
 #undef HAVE_LIBDBUS_1
+
+/* Define to 1 if you have the `fuse' library (-lfuse). */
+#undef HAVE_LIBFUSE
 
 /* Define to 1 if you have the `ssl' library (-lssl). */
 #undef HAVE_LIBSSL

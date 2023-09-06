@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.6.1], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
+AC_INIT([FLoM], [1.7.0-dev], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AM_PROG_AR
@@ -271,6 +271,16 @@ then
 	TLS_INIT_FUNCTION="OPENSSL_init_ssl"
 fi
 
+# Checking libfuse is available
+pkg-config --atleast-version=2.9.2 fuse
+if test $? -eq 0
+then
+	PKG_CHECK_MODULES([FUSE], [fuse >= 2.9.2])
+	CPPFLAGS="$CPPFLAGS $FUSE_CFLAGS"
+else
+        AC_MSG_ERROR([cannot find fuse package at level 2.9.2 or higher])
+fi
+
 # Checking stdbuf is available
 AC_CHECK_PROGS(STDBUF, [stdbuf], [])
 if test "xxx$STDBUF" = "xxxstdbuf"
@@ -281,10 +291,6 @@ AC_MSG_NOTICE([STDBUF_O0=$STDBUF_O0])
 # Checking the availability of some utility programs
 AC_CHECK_PROGS(DOXYGEN, [doxygen], [true])
 AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
-
-# @@@ old style, remove me
-# Checking the availability of SWIG (Simplified Wrapper and Interface Generator)
-# AC_CHECK_PROGS(SWIG, [swig], [noswig])
 
 # Check SWIG availability
 m4_include(m4/ax_pkg_swig.m4)
@@ -388,11 +394,6 @@ else
 fi
 AM_CONDITIONAL([COND_PHPAPI], [test "$PHPAPI" = "yes"])
 
-# @@@ old style, remove me
-# Checking the availability of Python tools
-# AC_CHECK_PROG(HAVE_PYTHON, [python], [yes], [no])
-#AC_CHECK_PROG(HAVE_PYTHON_CONFIG, [python-config], [yes], [no])
-
 # Check Python availability
 m4_include(m4/ax_python_devel.m4)
 AX_PYTHON_DEVEL([>= '2.6.5'])
@@ -440,6 +441,7 @@ AC_CHECK_HEADERS(arpa/inet.h assert.h)
 AC_CHECK_HEADERS(dbus/dbus.h)
 AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
+AC_CHECK_HEADERS(fuse_lowlevel.h)
 AC_CHECK_HEADERS(glib.h)
 AC_CHECK_HEADERS(ifaddrs.h)
 AC_CHECK_HEADERS(limits.h)
@@ -483,9 +485,11 @@ AC_CHECK_SIZEOF([socklen_t])
 AC_CHECK_SIZEOF([ssize_t])
 
 AC_CHECK_LIB([dbus-1], [dbus_get_local_machine_id])
+AC_CHECK_LIB([fuse], [fuse_lowlevel_new])
 AC_CHECK_LIB([ssl], [$TLS_INIT_FUNCTION])
 
 AC_CHECK_FUNCS(freeifaddrs)
+AC_CHECK_FUNCS(fuse_lowlevel_new)
 AC_CHECK_FUNCS(getifaddrs)
 AC_CHECK_FUNCS(signal)
 AC_CHECK_FUNCS(snprintf)
@@ -499,6 +503,7 @@ AC_CHECK_FUNCS(TLS_method)
 AC_SUBST(GLIB2_LIBS)
 AC_SUBST(GTHREAD2_LIBS)
 AC_SUBST(DBUS1_LIBS)
+AC_SUBST(FUSE_LIBS)
 AC_SUBST(HAVE_DOT)
 AC_SUBST(STDBUF_O0)
 

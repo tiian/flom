@@ -151,3 +151,28 @@ int flom_daemon_mngmnt_shutdown(flom_config_t *config,
     return ret_cod;
 }
 
+
+
+int flom_daemon_mngmnt_activate_vfs()
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs\n"));
+    TRY {
+        
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}

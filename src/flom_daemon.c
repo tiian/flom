@@ -996,7 +996,8 @@ int flom_listen_clean(flom_config_t *config, flom_conns_t *conns)
 
 int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
 {
-    enum Exception { CONNS_CLEAN_ERROR
+    enum Exception { G_THREAD_NEW_ERROR
+                     , CONNS_CLEAN_ERROR
                      , CONNS_GET_FDS_ERROR
                      , CONNS_SET_EVENTS_ERROR
                      , POLL_ERROR
@@ -1017,8 +1018,15 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
     TRY {
         int loop = TRUE;
         int chklockers_again = FALSE;
+        GThread *vfs_thread;
 
         flom_locker_array_init(&lockers);
+
+        /* @@@ put a condition, activate only if needed */
+        if (NULL == (vfs_thread = g_thread_new("FUSE VFS",
+                                               flom_daemon_mngmnt_activate_vfs,
+                                               NULL)))
+            THROW(G_THREAD_NEW_ERROR);
         
         while (loop) {
             int ready_fd;
@@ -1132,6 +1140,9 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case G_THREAD_NEW_ERROR:
+                ret_cod = FLOM_RC_G_THREAD_CREATE_ERROR;
+                break;
             case CONNS_CLEAN_ERROR:
                 break;
             case CONNS_GET_FDS_ERROR:
