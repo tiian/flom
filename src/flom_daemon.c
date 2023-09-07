@@ -245,6 +245,7 @@ int flom_daemon(flom_config_t *config, int family)
             if (FLOM_RC_OK != (ret_cod = flom_accept_loop(config, &conns)))
                 THROW(FLOM_ACCEPT_LOOP_ERROR);
             syslog(LOG_NOTICE, FLOM_SYSLOG_FLM004N);
+
             flom_listen_clean(config, &conns);
         }
         THROW(NONE);
@@ -307,6 +308,12 @@ int flom_daemon(flom_config_t *config, int family)
     } /* TRY-CATCH */
     FLOM_TRACE(("flom_daemon/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    
+    /* @@@
+       unmounting FUSE, make this code less naive, please!!!
+    */
+    system("fusermount -u /tmp/prova");
+            
     /* the function must not return control if in daemonized state */
     if (daemon)
         exit(FLOM_ES_OK);

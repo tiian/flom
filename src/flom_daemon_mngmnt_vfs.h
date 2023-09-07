@@ -5,8 +5,8 @@
  * This file is part of FLoM, Free Lock Manager
  *
  * FLoM is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2.0 as
- * published by the Free Software Foundation.
+ * it under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
  *
  * FLoM is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef FLOM_DAEMON_MNGMNT_H
-# define FLOM_DAEMON_MNGMNT_H
+#ifndef FLOM_DAEMON_MNGMNT_VFS_H
+# define FLOM_DAEMON_MNGMNT_VFS_H
 
 
 
@@ -36,45 +36,38 @@
 
 
 
+/**
+ * Structure with the pointers to all the callback functions invoked by FUSE
+ */
+struct fuse_lowlevel_ops fuse_callback_functions;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 
 
-    /**
-     * Main daemon management function (entry point)
-     * @param config IN configuration object, NULL for global config
-     * @param conns IN/OUT connections object
-     * @param id IN connection id
-     * @return a reason code
-     */
-    int flom_daemon_mngmnt(flom_config_t *config,
-                           flom_conns_t *conns, guint id);
-
-    
-
-    /**
-     * Shutdown management function
-     * @param config IN configuration object, NULL for global config
-     * @param conns IN/OUT connections object
-     * @param id IN connection id
-     * @return a reason code
-     */
-    int flom_daemon_mngmnt_shutdown(flom_config_t *config,
-                                    flom_conns_t *conns, guint id);
+    void hello_ll_lookup(fuse_req_t req, fuse_ino_t parent, const char *name);
 
 
+    void hello_ll_getattr(fuse_req_t req, fuse_ino_t ino,
+                                 struct fuse_file_info *fi);
 
-    /**
-     * Activate the Virtual File Systems used for exchange information with
-     * the outside; this function must be executed as an independent thread
-     * because it does not return
-     * @return a reason code
-     */
-    gpointer flom_daemon_mngmnt_activate_vfs(gpointer data);
+    void hello_ll_getxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
+                              size_t size);
 
-    
+    void hello_ll_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
+                                 off_t off, struct fuse_file_info *fi);
+
+    void hello_ll_open(fuse_req_t req, fuse_ino_t ino,
+                              struct fuse_file_info *fi);
+
+    void hello_ll_read(fuse_req_t req, fuse_ino_t ino, size_t size,
+                              off_t off, struct fuse_file_info *fi);
+
+
 
 #ifdef __cplusplus
 }
@@ -91,4 +84,4 @@ extern "C" {
 
 
 
-#endif /* FLOM_DAEMON_MNGMNT_H */
+#endif /* FLOM_DAEMON_MNGMNT_VFS_H */
