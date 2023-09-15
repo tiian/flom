@@ -94,6 +94,11 @@ struct flom_conns_s {
      * flom_conn_t)
      */
     GPtrArray     *array;
+    /**
+     * Last Unique identifier: it can be used as a unique id for distinguishing
+     * any type of objects, for example the lockers
+     */
+    uint64_t       last_uid;
 };
     
 
@@ -186,8 +191,32 @@ extern "C" {
         return conns->array->len;
     }
 
-    
 
+
+    /**
+     * Return the last unique identifier; 0 is a special value when no
+     * unique identifier has been already created
+     * @param conns IN connections object
+     * @return last unique id
+     */
+    static inline uint64_t flom_conns_get_last_uid(
+        const flom_conns_t *conns) {
+        return conns->last_uid;
+    }
+
+
+
+    /**
+     * Generate a new unique id
+     * @param conns IN/OUT connections object
+     * @return last generated unique id
+     */
+    static inline uint64_t flom_conns_get_new_uid(flom_conns_t *conns) {
+        return ++(conns->last_uid);
+    }
+
+    
+    
     /**
      * Return the file descriptor associated to a connection
      * @param conns IN connections object

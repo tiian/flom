@@ -64,6 +64,10 @@ struct flom_locker_s {
      */
     GThread                 *thread;
     /**
+     * Unique identifier associated to the locker object
+     */
+    uint64_t                 uid;
+    /**
      * Pipe file descriptor: used by main thread (listener) to send commands
      */
     int                      write_pipe;
@@ -156,6 +160,7 @@ extern "C" {
      */
     static inline void flom_locker_init(struct flom_locker_s *locker) {
         locker->thread = NULL;
+        locker->uid = 0;
         locker->write_pipe = locker->read_pipe = FLOM_NULL_FD;
         locker->write_sequence = locker->read_sequence =
             locker->idle_periods = 0;

@@ -36,6 +36,15 @@
 
 
 
+/*
+  Virtual Filesystem Structure:
+
+  /status/lockers/<uid>/resource_name
+  /status/lockers/<uid>/resource_type
+
+*/
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

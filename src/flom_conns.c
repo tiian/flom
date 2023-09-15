@@ -74,6 +74,7 @@ void flom_conns_init(flom_conns_t *conns, int domain)
     conns->poll_array = NULL;
     conns->domain = domain;
     conns->array = g_ptr_array_new();
+    conns->last_uid = 0;
     FLOM_TRACE(("flom_conns_init: allocated array:%p\n", conns->array));
 }
 

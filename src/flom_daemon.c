@@ -1680,9 +1680,11 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                     THROW(PUT_INTO_INCUBATOR);
                 } /* if (!msg->body.lock_8.resource.wait) */
             } else {
+                /* generate a new unique id */
+                uint64_t uid = flom_conns_get_new_uid(conns);
                 /* start a new locker */
                 ret_cod = flom_accept_loop_start_locker(
-                    lockers, msg, flrt, &locker, &locker_thread);
+                    lockers, msg, flrt, uid, &locker, &locker_thread);
                 if (FLOM_RC_RESOURCE_INIT_ERROR == ret_cod) {
                     FLOM_TRACE(("flom_accept_loop_transfer: client requested "
                                 "an invalid resource, starting connection "
@@ -1866,6 +1868,7 @@ int flom_accept_loop_transfer_conn(flom_conns_t *conns, guint id,
 int flom_accept_loop_start_locker(flom_locker_array_t *lockers,
                                   struct flom_msg_s *msg,
                                   flom_rsrc_type_t flrt,
+                                  uint64_t uid,
                                   struct flom_locker_s **new_locker,
                                   GThread **new_thread)
 {
@@ -1883,8 +1886,8 @@ int flom_accept_loop_start_locker(flom_locker_array_t *lockers,
         int pipefd[2];
         GError *error_thread;
         FLOM_TRACE(("flom_accept_loop_start_locker: creating a new locker "
-                    "for resource '%s'...\n",
-                    msg->body.lock_8.resource.name));
+                    "for resource '%s' with uid=" UINT64_T_FORMAT "\n",
+                    msg->body.lock_8.resource.name, uid));
         flom_locker_init(locker);
         if (FLOM_RC_OK != (ret_cod = flom_resource_init(
                                &locker->resource, flrt,
@@ -1893,6 +1896,7 @@ int flom_accept_loop_start_locker(flom_locker_array_t *lockers,
         /* creating a communication pipe for the new thread */
         if (0 != pipe(pipefd))
             THROW(PIPE_ERROR);
+        locker->uid = uid;
         locker->read_pipe = pipefd[0];
         locker->write_pipe = pipefd[1];
         locker->idle_lifespan = msg->body.lock_8.resource.lifespan;
@@ -1971,10 +1975,11 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers, int *again)
                 if (fl->write_pipe != FLOM_NULL_FD) {
                     FLOM_TRACE(("flom_accept_loop_chklockers: starting "
                                 "termination for locker %u (thread=%p, "
-                                "write_pipe=%d, read_pipe=%d, "
+                                "uid=" UINT64_T_FORMAT
+                                ", write_pipe=%d, read_pipe=%d, "
                                 "resource_name='%s', "
                                 "write_sequence=%d, read_sequence=%d, "
-                                "idle_periods=%d\n", i, fl->thread,
+                                "idle_periods=%d\n", i, fl->thread, fl->uid,
                                 fl->write_pipe, fl->read_pipe,
                                 flom_resource_get_name(&fl->resource),
                                 fl->write_sequence,
@@ -1987,10 +1992,11 @@ int flom_accept_loop_chklockers(flom_locker_array_t *lockers, int *again)
                     gpointer thread_ret_cod;
                     FLOM_TRACE(("flom_accept_loop_chklockers: completing "
                                 "termination for locker %u (thread=%p, "
-                                "write_pipe=%d, read_pipe=%d, "
+                                "uid=" UINT64_T_FORMAT
+                                ", write_pipe=%d, read_pipe=%d, "
                                 "resource_name='%s', "
                                 "write_sequence=%d, read_sequence=%d, "
-                                "idle_periods=%d\n", i, fl->thread,
+                                "idle_periods=%d\n", i, fl->thread, fl->uid,
                                 fl->write_pipe, fl->read_pipe,
                                 flom_resource_get_name(&fl->resource),
                                 fl->write_sequence,
