@@ -38,7 +38,7 @@
 #include "flom_config.h"
 #include "flom_conns.h"
 #include "flom_daemon_mngmnt.h"
-#include "flom_daemon_mngmnt_vfs.h"
+#include "flom_vfs.h"
 #include "flom_errors.h"
 #include "flom_syslog.h"
 #include "flom_trace.h"

@@ -212,7 +212,7 @@ extern "C" {
     int flom_accept_loop_start_locker(flom_locker_array_t *lockers,
                                       struct flom_msg_s *msg,
                                       flom_rsrc_type_t flrt,
-                                      uint64_t uid,
+                                      flom_uid_t uid,
                                       struct flom_locker_s **new_locker,
                                       GThread **new_thread);
 

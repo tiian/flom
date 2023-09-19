@@ -133,12 +133,11 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libflom_la_LIBADD =
 am_libflom_la_OBJECTS = flom_client.lo flom_config.lo flom_conn.lo \
 	flom_conns.lo flom_daemon.lo flom_daemon_mngmnt.lo \
-	flom_daemon_mngmnt_vfs.lo flom_errors.lo flom_locker.lo \
-	flom_msg.lo flom_handle.lo flom_resource_hier.lo \
-	flom_resource_numeric.lo flom_resource_sequence.lo \
-	flom_resource_set.lo flom_resource_simple.lo \
-	flom_resource_timestamp.lo flom_rsrc.lo flom_tcp.lo \
-	flom_tls.lo flom_trace.lo
+	flom_errors.lo flom_locker.lo flom_msg.lo flom_handle.lo \
+	flom_resource_hier.lo flom_resource_numeric.lo \
+	flom_resource_sequence.lo flom_resource_set.lo \
+	flom_resource_simple.lo flom_resource_timestamp.lo \
+	flom_rsrc.lo flom_tcp.lo flom_tls.lo flom_trace.lo flom_vfs.lo
 libflom_la_OBJECTS = $(am_libflom_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -208,12 +207,12 @@ am__dist_include_HEADERS_DIST = flom.h flom_handle.h flom_types.h \
 	flom.hh FlomHandle.hh
 am__noinst_HEADERS_DIST = flom_client.h flom_config.h flom_conn.h \
 	flom_conns.h flom_debug_features.h flom_daemon.h \
-	flom_daemon_mngmnt.h flom_daemon_mngmnt_vfs.h flom_defines.h \
-	flom_exec.h flom_locker.h flom_msg.h flom_resource_hier.h \
-	flom_resource_numeric.h flom_resource_sequence.h \
-	flom_resource_set.h flom_resource_simple.h \
-	flom_resource_timestamp.h flom_rsrc.h flom_syslog.h flom_tcp.h \
-	flom_tls.h flom_trace.h flom.hh FlomHandle.hh
+	flom_daemon_mngmnt.h flom_defines.h flom_exec.h flom_locker.h \
+	flom_msg.h flom_resource_hier.h flom_resource_numeric.h \
+	flom_resource_sequence.h flom_resource_set.h \
+	flom_resource_simple.h flom_resource_timestamp.h flom_rsrc.h \
+	flom_syslog.h flom_tcp.h flom_tls.h flom_trace.h flom_vfs.h \
+	flom.hh FlomHandle.hh
 HEADERS = $(dist_include_HEADERS) $(nodist_include_HEADERS) \
 	$(noinst_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
@@ -530,19 +529,20 @@ dist_include_HEADERS = flom.h flom_handle.h flom_types.h \
 nodist_include_HEADERS = flom_errors.h
 noinst_HEADERS = flom_client.h flom_config.h flom_conn.h flom_conns.h \
 	flom_debug_features.h flom_daemon.h flom_daemon_mngmnt.h \
-	flom_daemon_mngmnt_vfs.h flom_defines.h flom_exec.h \
+	flom_defines.h flom_exec.h \
 	flom_locker.h flom_msg.h flom_resource_hier.h \
 	flom_resource_numeric.h flom_resource_sequence.h flom_resource_set.h \
 	flom_resource_simple.h flom_resource_timestamp.h flom_rsrc.h \
-	flom_syslog.h flom_tcp.h flom_tls.h flom_trace.h $(NOINST_CPPAPI)
+	flom_syslog.h flom_tcp.h flom_tls.h flom_trace.h flom_vfs.h \
+	$(NOINST_CPPAPI)
 
 libflom_la_SOURCES = flom_client.c flom_config.c flom_conn.c flom_conns.c \
-	flom_daemon.c flom_daemon_mngmnt.c flom_daemon_mngmnt_vfs.c \
+	flom_daemon.c flom_daemon_mngmnt.c \
 	flom_errors.c flom_locker.c \
 	flom_msg.c flom_handle.c \
 	flom_resource_hier.c flom_resource_numeric.c flom_resource_sequence.c \
 	flom_resource_set.c flom_resource_simple.c flom_resource_timestamp.c \
-	flom_rsrc.c flom_tcp.c flom_tls.c flom_trace.c
+	flom_rsrc.c flom_tcp.c flom_tls.c flom_trace.c flom_vfs.c
 
 flom_SOURCES = main.c flom_exec.c flom_debug_features.c
 all: $(BUILT_SOURCES)
@@ -684,7 +684,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_conns.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon_mngmnt.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_daemon_mngmnt_vfs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_debug_features.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_errors.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_exec.Po@am__quote@
@@ -701,6 +700,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_tcp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_tls.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_trace.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flom_vfs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 
 .c.o:

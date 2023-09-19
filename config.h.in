@@ -21,6 +21,9 @@
 /* Define to 1 if you have the `freeifaddrs' function. */
 #undef HAVE_FREEIFADDRS
 
+/* Define to 1 if the system has the type `fuse_ino_t'. */
+#undef HAVE_FUSE_INO_T
+
 /* Define to 1 if you have the <fuse_lowlevel.h> header file. */
 #undef HAVE_FUSE_LOWLEVEL_H
 
@@ -207,6 +210,9 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+
+/* The size of `fuse_ino_t', as computed by sizeof. */
+#undef SIZEOF_FUSE_INO_T
 
 /* The size of `int', as computed by sizeof. */
 #undef SIZEOF_INT

@@ -16,10 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <config.h>
+
+
+
 #ifndef FLOM_DEFINES_H
 # define FLOM_DEFINES_H
 
-#include <config.h>
 
 
 
@@ -38,6 +41,10 @@
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
+#ifdef HAVE_FUSE_LOWLEVEL_H
+# define FUSE_USE_VERSION 26
+# include <fuse_lowlevel.h>
+#endif
 
 
 
@@ -269,6 +276,39 @@
  * strings are checked case sensitive
  */
 # define STRCASESTR(haystack,needle) strstr(haystack,needle)
+#endif
+
+
+
+#ifdef HAVE_FUSE_INO_T
+typedef fuse_ino_t flom_uid_t;
+#else
+# warning fuse_ino_t is not available, using unsigned long
+typedef unsigned long flom_uid_t;
+#endif
+
+
+
+#ifdef SIZEOF_FUSE_INO_T
+# define SIZEOF_FLOM_UID_T SIZEOF_FUSE_INO_T
+#else
+# warning sizeof(fuse_ino_t) is not available, using sizeof(unsigned long)
+# define SIZEOF_FLOM_UID_T sizeof(flom_uid_t)
+#endif
+
+
+
+/**
+ * format for printing flom_uid_t
+ */
+#if SIZEOF_FLOM_UID_T == SIZEOF_INT
+# define FLOM_UID_T_FORMAT "%u"
+#elif SIZEOF_FLOM_UID_T == SIZEOF_LONG_INT
+# define FLOM_UID_T_FORMAT "%lu"
+#elif SIZEOF_FLOM_UID_T == SIZEOF_LONG_LONG_INT
+# define FLOM_UID_T_FORMAT "%llu"
+#else
+# error Unable to determine sizeof(flom_uid_t)
 #endif
 
 

@@ -98,7 +98,7 @@ struct flom_conns_s {
      * Last Unique identifier: it can be used as a unique id for distinguishing
      * any type of objects, for example the lockers
      */
-    uint64_t       last_uid;
+    flom_uid_t       last_uid;
 };
     
 
@@ -199,7 +199,7 @@ extern "C" {
      * @param conns IN connections object
      * @return last unique id
      */
-    static inline uint64_t flom_conns_get_last_uid(
+    static inline flom_uid_t flom_conns_get_last_uid(
         const flom_conns_t *conns) {
         return conns->last_uid;
     }
@@ -211,7 +211,7 @@ extern "C" {
      * @param conns IN/OUT connections object
      * @return last generated unique id
      */
-    static inline uint64_t flom_conns_get_new_uid(flom_conns_t *conns) {
+    static inline flom_uid_t flom_conns_get_new_uid(flom_conns_t *conns) {
         return ++(conns->last_uid);
     }
 

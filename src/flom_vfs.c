@@ -16,16 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define FUSE_USE_VERSION 26
-
-
 #include <config.h>
 
 
 
-#ifdef HAVE_FUSE_LOWLEVEL_H
-# include <fuse_lowlevel.h>
-#endif
 #ifdef HAVE_STDIO_H
 # include <stdio.h>
 #endif
@@ -50,7 +44,7 @@
 
 
 
-#include "flom_daemon_mngmnt_vfs.h"
+#include "flom_vfs.h"
 #include "flom_errors.h"
 #include "flom_trace.h"
 
@@ -69,6 +63,32 @@ struct fuse_lowlevel_ops fuse_callback_functions = {
 	.open		= hello_ll_open,
 	.read		= hello_ll_read,
 };
+
+
+
+void flom_vfs_inode_to_uid(fuse_ino_t ino,
+                           flom_vfs_inode_type_t *type,
+                           flom_uid_t *uid)
+{
+    FLOM_TRACE(("flom_vfs_inode_to_uid/ino=" FLOM_UID_T_FORMAT "\n", ino));
+    /* @@@ put code here */
+    FLOM_TRACE(("flom_vfs_inode_to_uid/type=%d/"
+                "uid=" FLOM_UID_T_FORMAT "\n", *type, *uid));
+}
+
+
+
+fuse_ino_t flom_vfs_uid_to_inode(flom_vfs_inode_type_t type,
+                                 flom_uid_t uid)
+{
+    fuse_ino_t ino = 0;
+    
+    FLOM_TRACE(("flom_vfs_uid_to_inode/type=%d/"
+                "uid=" FLOM_UID_T_FORMAT "\n", type, uid));
+    /* @@@ put code here */
+    FLOM_TRACE(("flom_vfs_uid_to_inode/ino=" FLOM_UID_T_FORMAT "\n", ino));
+    return ino;
+}
 
 
 

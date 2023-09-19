@@ -19666,6 +19666,17 @@ _ACEOF
 
 fi
 
+ac_fn_c_check_type "$LINENO" "fuse_ino_t" "ac_cv_type_fuse_ino_t" "#include <fuse/fuse_lowlevel.h>
+"
+if test "x$ac_cv_type_fuse_ino_t" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_FUSE_INO_T 1
+_ACEOF
+
+
+fi
+
 
 # The cast to long int works around a bug in the HP C Compiler
 # version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
@@ -19863,6 +19874,40 @@ $as_echo "$ac_cv_sizeof_ssize_t" >&6; }
 
 cat >>confdefs.h <<_ACEOF
 #define SIZEOF_SSIZE_T $ac_cv_sizeof_ssize_t
+_ACEOF
+
+
+# The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking size of fuse_ino_t" >&5
+$as_echo_n "checking size of fuse_ino_t... " >&6; }
+if ${ac_cv_sizeof_fuse_ino_t+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (fuse_ino_t))" "ac_cv_sizeof_fuse_ino_t"        "#include <fuse/fuse_lowlevel.h>
+"; then :
+
+else
+  if test "$ac_cv_type_fuse_ino_t" = yes; then
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (fuse_ino_t)
+See \`config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof_fuse_ino_t=0
+   fi
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_fuse_ino_t" >&5
+$as_echo "$ac_cv_sizeof_fuse_ino_t" >&6; }
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define SIZEOF_FUSE_INO_T $ac_cv_sizeof_fuse_ino_t
 _ACEOF
 
 

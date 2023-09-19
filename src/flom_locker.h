@@ -66,7 +66,7 @@ struct flom_locker_s {
     /**
      * Unique identifier associated to the locker object
      */
-    uint64_t                 uid;
+    flom_uid_t               uid;
     /**
      * Pipe file descriptor: used by main thread (listener) to send commands
      */
