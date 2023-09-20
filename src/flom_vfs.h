@@ -92,6 +92,25 @@ typedef enum flom_vfs_inode_type_e {
 
 
 /**
+ * Inode associated to root dir
+ */
+#define FLOM_VFS_INO_ROOT_DIR             (fuse_ino_t)0
+/**
+ * Inode associated to status dir
+ */
+#define FLOM_VFS_INO_STATUS_DIR           (fuse_ino_t)1
+/**
+ * Inode associated to lockers dir
+ */
+#define FLOM_VFS_INO_LOCKERS_DIR          (fuse_ino_t)2
+/**
+ * Last possible Inode
+ */
+#define FLOM_VFS_INO_LAST_POSSIBLE        (fuse_ino_t)-1
+
+
+
+/**
  * Structure with the pointers to all the callback functions invoked by FUSE
  */
 struct fuse_lowlevel_ops fuse_callback_functions;
@@ -124,6 +143,15 @@ extern "C" {
      */     
     fuse_ino_t flom_vfs_uid_to_inode(flom_vfs_inode_type_t type,
                                      flom_uid_t uid);
+
+
+
+    /**
+     * Check the system is able to manage the transformation between uid and
+     * inode; in case of error, it can be a bug or a compile mistake
+     * @return a reason code
+     */     
+    int flom_vfs_check_uid_inode_integrity(void);
 
     
 

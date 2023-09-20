@@ -1030,6 +1030,7 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
         flom_locker_array_init(&lockers);
 
         /* @@@ put a condition, activate only if needed */
+        FLOM_TRACE(("flom_accept_loop: activating VFS thread...\n"));
         if (NULL == (vfs_thread = g_thread_new("FUSE VFS",
                                                flom_daemon_mngmnt_activate_vfs,
                                                NULL)))

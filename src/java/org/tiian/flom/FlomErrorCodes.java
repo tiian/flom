@@ -50,6 +50,7 @@ public class FlomErrorCodes {
 	public final static int FLOM_RC_INVALID_TIMESTAMP_FORMAT = -25;
 	public final static int FLOM_RC_RESOURCE_INIT_ERROR = -26;
 	public final static int FLOM_RC_CONNECTION_CLOSED_BY_SERVER = -27;
+	public final static int FLOM_RC_VFS_CONSISTENCY_ERROR = -28;
 	public final static int FLOM_RC_ACCEPT_ERROR = -100;
 	public final static int FLOM_RC_BIND_ERROR = -101;
 	public final static int FLOM_RC_CHDIR_ERROR = -102;

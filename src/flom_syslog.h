@@ -79,6 +79,7 @@ extern "C" {
 #define FLOM_SYSLOG_FLM019E "FLM019E 'bind' error %d ('%s') in function '%s'"
 #define FLOM_SYSLOG_FLM020N "FLM020N flom_conn_recv returned %d ('%s') " \
     "instead of FLOM_RC_RECV_ERROR during flom_client_shutdown"
+#define FLOM_SYSLOG_FLM021E "FLM021E consistency error in VFS inode mapping, VFS can not be activated"
     
     
 
