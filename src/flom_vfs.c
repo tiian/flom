@@ -79,20 +79,41 @@ void flom_vfs_inode_to_uid(fuse_ino_t ino,
                            flom_vfs_inode_type_t *type,
                            flom_uid_t *uid)
 {
-    FLOM_TRACE(("flom_vfs_inode_to_uid/ino=" FLOM_UID_T_FORMAT "\n", ino));
+    FLOM_TRACE(("flom_vfs_inode_to_uid: ino=" FLOM_UID_T_FORMAT "\n", ino));
 
+    *uid = 0;
     if (FLOM_VFS_INO_ROOT_DIR == ino) {
         *type = FLOM_VFS_ROOT_DIR;
-        *uid = 0;
     } else if (FLOM_VFS_INO_STATUS_DIR == ino) {
         *type = FLOM_VFS_STATUS_DIR;
-        *uid = 0;
     } else if (FLOM_VFS_INO_LOCKERS_DIR == ino) {
         *type = FLOM_VFS_LOCKERS_DIR;
-        *uid = 0;
+    } else if (ino >= FLOM_VFS_LOCKERS_UID_FIRST_INO &&
+               ino <= FLOM_VFS_LOCKERS_UID_LAST_INO) {
+        fuse_ino_t base_ino = ino - FLOM_VFS_LOCKERS_UID_FIRST_INO;
+        switch (base_ino % (FLOM_VFS_LOCKERS_DIR_NOF+1)) {
+            case 0:
+                *type = FLOM_VFS_LOCKERS_UID_DIR;
+                *uid = (flom_uid_t)
+                    (base_ino/(FLOM_VFS_LOCKERS_DIR_NOF+1)+1);
+                break;
+            case 1:
+                *type = FLOM_VFS_LOCKERS_UID_RESOURCE_NAME_FILE;
+                *uid = (flom_uid_t)
+                    ((base_ino-1)/(FLOM_VFS_LOCKERS_DIR_NOF+1)+1);
+                break;
+            case 2:
+                *type = FLOM_VFS_LOCKERS_UID_RESOURCE_TYPE_FILE;
+                *uid = (flom_uid_t)
+                    ((base_ino-2)/(FLOM_VFS_LOCKERS_DIR_NOF+1)+1);
+                break;
+            default:
+                FLOM_TRACE(("flom_vfs_inode_to_uid: missing "
+                            "case statement!\n"));
+        }
     }
     /* @@@ put code here */
-    FLOM_TRACE(("flom_vfs_inode_to_uid/type=%d/"
+    FLOM_TRACE(("flom_vfs_inode_to_uid: type=%d, "
                 "uid=" FLOM_UID_T_FORMAT "\n", *type, *uid));
 }
 
@@ -103,7 +124,7 @@ fuse_ino_t flom_vfs_uid_to_inode(flom_vfs_inode_type_t type,
 {
     fuse_ino_t ino = 0;
     
-    FLOM_TRACE(("flom_vfs_uid_to_inode/type=%d/"
+    FLOM_TRACE(("flom_vfs_uid_to_inode: type=%d, "
                 "uid=" FLOM_UID_T_FORMAT "\n", type, uid));
 
     /* check for root dir */
@@ -113,9 +134,40 @@ fuse_ino_t flom_vfs_uid_to_inode(flom_vfs_inode_type_t type,
         ino = FLOM_VFS_INO_STATUS_DIR;
     } else if (FLOM_VFS_LOCKERS_DIR == type) {
         ino = FLOM_VFS_INO_LOCKERS_DIR;
+    } else if (FLOM_VFS_LOCKERS_UID_DIR == type) {
+        fuse_ino_t tmp_ino =
+            (fuse_ino_t)((uid-1) * ((FLOM_VFS_LOCKERS_DIR_NOF+1)) +
+                         FLOM_VFS_LOCKERS_UID_FIRST_INO);
+        if (tmp_ino <= FLOM_VFS_LOCKERS_UID_LAST_INO)
+            ino = tmp_ino;
+        else
+            FLOM_TRACE(("flom_vfs_uid_to_inode: tmp_ino is out of range: "
+                        FLOM_UID_T_FORMAT " > " FLOM_UID_T_FORMAT "\n",
+                        tmp_ino, FLOM_VFS_LOCKERS_UID_LAST_INO));
+    } else if (FLOM_VFS_LOCKERS_UID_RESOURCE_NAME_FILE == type) {
+        fuse_ino_t tmp_ino =
+            (fuse_ino_t)((uid-1) * ((FLOM_VFS_LOCKERS_DIR_NOF+1)) +
+                         FLOM_VFS_LOCKERS_UID_FIRST_INO) + 1;
+        if (tmp_ino <= FLOM_VFS_LOCKERS_UID_LAST_INO)
+            ino = tmp_ino;
+        else
+            FLOM_TRACE(("flom_vfs_uid_to_inode: tmp_ino is out of range: "
+                        FLOM_UID_T_FORMAT " > " FLOM_UID_T_FORMAT "\n",
+                        tmp_ino, FLOM_VFS_LOCKERS_UID_LAST_INO));
+    } else if (FLOM_VFS_LOCKERS_UID_RESOURCE_TYPE_FILE == type) {
+        fuse_ino_t tmp_ino =
+            (fuse_ino_t)((uid-1) * ((FLOM_VFS_LOCKERS_DIR_NOF+1)) +
+                         FLOM_VFS_LOCKERS_UID_FIRST_INO) + 2;
+        if (tmp_ino <= FLOM_VFS_LOCKERS_UID_LAST_INO)
+            ino = tmp_ino;
+        else
+            FLOM_TRACE(("flom_vfs_uid_to_inode: tmp_ino is out of range: "
+                        FLOM_UID_T_FORMAT " > " FLOM_UID_T_FORMAT "\n",
+                        tmp_ino, FLOM_VFS_LOCKERS_UID_LAST_INO));
     }
-    /* @@@ put code here */
-    FLOM_TRACE(("flom_vfs_uid_to_inode/ino=" FLOM_UID_T_FORMAT "\n", ino));
+
+/* @@@ put code here */
+    FLOM_TRACE(("flom_vfs_uid_to_inode: ino=" FLOM_UID_T_FORMAT "\n", ino));
     return ino;
 }
 
@@ -126,14 +178,23 @@ int flom_vfs_check_uid_inode_integrity(void)
     enum Exception { ROOT_DIR_ERROR
                      , STATUS_DIR_ERROR
                      , LOCKERS_DIR_ERROR
+                     , LOCKERS_UID_DIR_ERROR
+                     , LOCKERS_UID_RESOURCE_NAME_FILE_ERROR
+                     , LOCKERS_UID_RESOURCE_TYPE_FILE_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     
     FLOM_TRACE(("flom_vfs_check_uid_inode_integrity\n"));
     TRY {
-        flom_vfs_inode_type_t type;
-        flom_uid_t uid;
-        fuse_ino_t ino;
+        flom_vfs_inode_type_t type, tmp_type;
+        flom_uid_t uid, tmp_uid;
+        fuse_ino_t ino, tmp_ino;
+        static const flom_uid_t uids[] =
+            {1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597,
+             2584, 4181, 6765, 10946, 17711, 28657, 46368, 75025, 121393,
+             196418, 317811, 514229, 832040, 1346269, 2178309, 3524578,
+             5702887, 9227465, 14930352, 24157817, 39088169, 63245986};
+        int i;
         
         /* Check root dir */
         ino = FLOM_VFS_INO_ROOT_DIR;
@@ -150,6 +211,30 @@ int flom_vfs_check_uid_inode_integrity(void)
         flom_vfs_inode_to_uid(ino, &type, &uid);
         if (ino != flom_vfs_uid_to_inode(type, uid))
             THROW(LOCKERS_DIR_ERROR);
+        /* Check lockers uid dir and files */
+        for (i=0; i<(sizeof(uids)/sizeof(flom_uid_t)); ++i) {
+            uid = uids[i];
+            FLOM_TRACE(("flom_vfs_check_uid_inode_integrity: uid="
+                        FLOM_UID_T_FORMAT "\n", uid));
+            /* check lockers uid dir */
+            type = FLOM_VFS_LOCKERS_UID_DIR;
+            tmp_ino = flom_vfs_uid_to_inode(type, uid);
+            flom_vfs_inode_to_uid(tmp_ino, &tmp_type, &tmp_uid);
+            if (tmp_type != type || tmp_uid != uid)
+                THROW(LOCKERS_UID_DIR_ERROR);
+            /* check lockers uid resource name file */
+            type = FLOM_VFS_LOCKERS_UID_RESOURCE_NAME_FILE;
+            tmp_ino = flom_vfs_uid_to_inode(type, uid);
+            flom_vfs_inode_to_uid(tmp_ino, &tmp_type, &tmp_uid);
+            if (tmp_type != type || tmp_uid != uid)
+                THROW(LOCKERS_UID_RESOURCE_NAME_FILE_ERROR);
+            /* check lockers uid resource type file */
+            type = FLOM_VFS_LOCKERS_UID_RESOURCE_TYPE_FILE;
+            tmp_ino = flom_vfs_uid_to_inode(type, uid);
+            flom_vfs_inode_to_uid(tmp_ino, &tmp_type, &tmp_uid);
+            if (tmp_type != type || tmp_uid != uid)
+                THROW(LOCKERS_UID_RESOURCE_TYPE_FILE_ERROR);
+        };
         
         THROW(NONE);
     } CATCH {
@@ -157,6 +242,9 @@ int flom_vfs_check_uid_inode_integrity(void)
             case ROOT_DIR_ERROR:
             case STATUS_DIR_ERROR:
             case LOCKERS_DIR_ERROR:
+            case LOCKERS_UID_DIR_ERROR:
+            case LOCKERS_UID_RESOURCE_NAME_FILE_ERROR:
+            case LOCKERS_UID_RESOURCE_TYPE_FILE_ERROR:
                 ret_cod = FLOM_RC_VFS_CONSISTENCY_ERROR;
                 break;
             case NONE:

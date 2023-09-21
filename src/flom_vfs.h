@@ -59,6 +59,13 @@
 
 
 /**
+ * Number of files inside a lockers dir:
+ */ 
+#define FLOM_VFS_LOCKERS_DIR_NOF          2
+
+
+
+/**
  * Type of inode in the Virtual File System: every inode type has its own
  + value
 */
@@ -92,6 +99,10 @@ typedef enum flom_vfs_inode_type_e {
 
 
 /**
+ * Last possible Inode
+ */
+#define FLOM_VFS_INO_LAST_POSSIBLE        (fuse_ino_t)-1
+/**
  * Inode associated to root dir
  */
 #define FLOM_VFS_INO_ROOT_DIR             (fuse_ino_t)0
@@ -104,9 +115,14 @@ typedef enum flom_vfs_inode_type_e {
  */
 #define FLOM_VFS_INO_LOCKERS_DIR          (fuse_ino_t)2
 /**
- * Last possible Inode
+ * First Inode used for locker dir and files
  */
-#define FLOM_VFS_INO_LAST_POSSIBLE        (fuse_ino_t)-1
+#define FLOM_VFS_LOCKERS_UID_FIRST_INO    (FLOM_VFS_INO_LOCKERS_DIR + 1)
+/**
+ * Last Inode that can be used for locker dir and files
+ */
+#define FLOM_VFS_LOCKERS_UID_LAST_INO     (FLOM_VFS_INO_LAST_POSSIBLE)
+
 
 
 
