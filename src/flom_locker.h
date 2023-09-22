@@ -107,10 +107,10 @@ struct flom_locker_s {
  * A pool of lockers
  */
 struct flom_locker_array_s {
-    /**
-     * Number of available lockers
-     */
-    guint       n;
+    /*
+      @@@ add a mutex to serialize the object and allows VFS to read
+      consistent data
+    */
     /**
      * Array of lockers
      */
@@ -221,7 +221,7 @@ extern "C" {
      */
     static inline guint flom_locker_array_count(
         const flom_locker_array_t *lockers) {
-        return lockers->n;
+        return lockers->array->len;
     }
 
 
@@ -234,7 +234,7 @@ extern "C" {
      */
     static inline struct flom_locker_s *flom_locker_array_get(
         flom_locker_array_t *lockers, guint i) {
-        if (i < 0 || i >= lockers->n)
+        if (i < 0 || i >= lockers->array->len)
             return NULL;
         else
             return g_ptr_array_index(lockers->array, i);

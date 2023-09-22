@@ -179,6 +179,11 @@ gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
         /* checking consistency before starting VFS */
         if (FLOM_RC_OK != (ret_cod = flom_vfs_check_uid_inode_integrity()))
             THROW(VFS_CHECK_UID_INODE_INTEGRITY);
+
+        /* setting common values */
+        flom_vfs_common_values.uid = getuid();
+        flom_vfs_common_values.gid = getgid();
+        flom_vfs_common_values.time = time(NULL);
         
         if (fuse_parse_cmdline(&args, &mountpoint, NULL, NULL) != -1 &&
             (ch = fuse_mount(mountpoint, &args)) != NULL) {

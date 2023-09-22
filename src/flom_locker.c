@@ -68,7 +68,6 @@ void flom_locker_destroy(struct flom_locker_s *locker)
 
 void flom_locker_array_init(flom_locker_array_t *lockers)
 {
-    lockers->n = 0;
     lockers->array = g_ptr_array_new_with_free_func(
         (GDestroyNotify)flom_locker_destroy);
 }
@@ -79,7 +78,6 @@ void flom_locker_array_free(flom_locker_array_t *lockers)
 {
     g_ptr_array_free(lockers->array, TRUE);
     lockers->array = NULL;
-    lockers->n = 0;
 }
 
 
@@ -88,7 +86,6 @@ void flom_locker_array_add(flom_locker_array_t *lockers,
                            struct flom_locker_s *locker)
 {
     g_ptr_array_add(lockers->array, (gpointer)locker);
-    lockers->n++;
 }
 
 
@@ -99,7 +96,6 @@ void flom_locker_array_del(flom_locker_array_t *lockers,
     if (g_ptr_array_remove(lockers->array, locker)) {
         FLOM_TRACE(("flom_locker_array_del: removed locker %p from array\n",
                     locker));
-        lockers->n--;
     } else {
         FLOM_TRACE(("flom_locker_array_del: locker %p not found in array\n",
                     locker));

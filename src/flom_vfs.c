@@ -59,19 +59,33 @@
 
 
 
+/*
+	How to umount VFS in case of issues:
+	fusermount -u   mountpoint
+	sudo umount -l  mountpoint
+*/
+
+flom_vfs_common_values_t flom_vfs_common_values;
+
+
+
 static const char *hello_str = "Hello World!\n";
-static const char *hello_name = "hello";
 
 
 
 struct fuse_lowlevel_ops fuse_callback_functions = {
-	.lookup		= hello_ll_lookup,
+	.lookup		= flom_vfs_lookup,
 	.getattr	= hello_ll_getattr,
 	.getxattr	= hello_ll_getxattr,
-	.readdir	= hello_ll_readdir,
+	.readdir	= flom_vfs_readdir,
 	.open		= hello_ll_open,
 	.read		= hello_ll_read,
 };
+
+
+
+const char *flom_vfs_status_dir = "status";
+const char *flom_vfs_lockers_dir = "lockers";
 
 
 
@@ -264,22 +278,37 @@ int flom_vfs_check_uid_inode_integrity(void)
 
 
 
-int hello_stat(fuse_ino_t ino, struct stat *stbuf)
+int flom_vfs_stat(fuse_ino_t ino, struct stat *stbuf)
 {
-	stbuf->st_ino = ino;
-	switch (ino) {
-	case 1:
-		stbuf->st_mode = S_IFDIR | 0755;
-		stbuf->st_nlink = 2;
-		stbuf->st_uid = getuid();
-		stbuf->st_gid = getgid();
-		stbuf->st_atime = 
-		stbuf->st_ctime = 
-		stbuf->st_mtime = time( NULL );
-		break;
+    flom_vfs_inode_type_t type;
+    flom_uid_t uid;
+    
+    FLOM_TRACE(("flom_vfs_stat: ino=" FLOM_UID_T_FORMAT "\n", ino));
 
+    /* retrieve the type associated to the inode and the FLoM unique id */
+    flom_vfs_inode_to_uid(ino, &type, &uid);
+    
+	stbuf->st_ino = ino;
+
+    switch (type) {
+        case FLOM_VFS_ROOT_DIR:
+        case FLOM_VFS_STATUS_DIR:
+        case FLOM_VFS_LOCKERS_DIR:
+            stbuf->st_mode = S_IFDIR | 0550;
+            stbuf->st_nlink = 2;
+            stbuf->st_uid = flom_vfs_common_values.uid;
+            stbuf->st_gid = flom_vfs_common_values.gid;
+            stbuf->st_atime = stbuf->st_ctime = stbuf->st_mtime =
+                flom_vfs_common_values.time;
+            break;
+        default:
+            FLOM_TRACE(("flom_vfs_stat: error for type=%d\n", type));
+            return -1;
+    } /* switch (type) */
+    
+/*
 	case 2:
-		stbuf->st_mode = S_IFREG | 0644;
+		stbuf->st_mode = S_IFREG | 0440;
 		stbuf->st_nlink = 1;
 		stbuf->st_uid = getuid();
 		stbuf->st_gid = getgid();
@@ -288,10 +317,7 @@ int hello_stat(fuse_ino_t ino, struct stat *stbuf)
 		stbuf->st_mtime = time( NULL );
 		stbuf->st_size = strlen(hello_str);
 		break;
-
-	default:
-		return -1;
-	}
+*/
 	return 0;
 }
 
@@ -303,7 +329,7 @@ void hello_ll_getattr(fuse_req_t req, fuse_ino_t ino,
 	(void) fi;
 
 	memset(&stbuf, 0, sizeof(stbuf));
-	if (hello_stat(ino, &stbuf) == -1)
+	if (flom_vfs_stat(ino, &stbuf) == -1)
 		fuse_reply_err(req, ENOENT);
 	else
 		fuse_reply_attr(req, &stbuf, 1.0);
@@ -335,21 +361,36 @@ void hello_ll_getxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
 
 
 
-void hello_ll_lookup(fuse_req_t req, fuse_ino_t parent, const char *name)
+void flom_vfs_lookup(fuse_req_t req, fuse_ino_t parent, const char *name)
 {
 	struct fuse_entry_param e;
 
-	if (parent != 1 || strcmp(name, hello_name) != 0)
-		fuse_reply_err(req, ENOENT);
-	else {
+    FLOM_TRACE(("flom_vfs_lookup: ino=" FLOM_UID_T_FORMAT ", name='%s'\n",
+                parent, name));
+
+    if (FLOM_VFS_INO_ROOT_DIR == parent &&
+        0 == strcmp(name, flom_vfs_status_dir)) {
+        /* status dir */
 		memset(&e, 0, sizeof(e));
-		e.ino = 2;
+		e.ino = FLOM_VFS_INO_STATUS_DIR;
 		e.attr_timeout = 1.0;
 		e.entry_timeout = 1.0;
-		hello_stat(e.ino, &e.attr);
+		flom_vfs_stat(e.ino, &e.attr);
 
 		fuse_reply_entry(req, &e);
-	}
+    } else if (FLOM_VFS_INO_STATUS_DIR == parent &&
+               0 == strcmp(name, flom_vfs_lockers_dir)) {
+        /* lockers dir */
+		memset(&e, 0, sizeof(e));
+		e.ino = FLOM_VFS_INO_LOCKERS_DIR;
+		e.attr_timeout = 1.0;
+		e.entry_timeout = 1.0;
+		flom_vfs_stat(e.ino, &e.attr);
+
+		fuse_reply_entry(req, &e);
+    } else {
+		fuse_reply_err(req, ENOENT);
+    }
 }
 
 struct dirbuf {
@@ -382,20 +423,50 @@ static int reply_buf_limited(fuse_req_t req, const char *buf, size_t bufsize,
 		return fuse_reply_buf(req, NULL, 0);
 }
 
-void hello_ll_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
-			     off_t off, struct fuse_file_info *fi)
+void flom_vfs_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
+                      off_t off, struct fuse_file_info *fi)
 {
 	(void) fi;
+    flom_vfs_inode_type_t type;
+    flom_uid_t uid;
 
-	if (ino != 1)
+    FLOM_TRACE(("flom_vfs_readdir: ino=" FLOM_UID_T_FORMAT "\n", ino));
+
+    /* retrieve the type associated to the inode and the FLoM unique id */
+    flom_vfs_inode_to_uid(ino, &type, &uid);
+
+    if (FLOM_VFS_ROOT_DIR != type &&
+        FLOM_VFS_STATUS_DIR != type &&
+        FLOM_VFS_LOCKERS_DIR != type &&
+        FLOM_VFS_LOCKERS_UID_DIR != type) {
+
+        FLOM_TRACE(("flom_vfs_readdir: type=%d is not a dir\n", type));
+        
 		fuse_reply_err(req, ENOTDIR);
-	else {
+    } else {
 		struct dirbuf b;
 
 		memset(&b, 0, sizeof(b));
-		dirbuf_add(req, &b, ".", 1);
-		dirbuf_add(req, &b, "..", 1);
-		dirbuf_add(req, &b, hello_name, 2);
+        
+        switch (type) {
+            case FLOM_VFS_ROOT_DIR:
+                dirbuf_add(req, &b, ".", FLOM_VFS_INO_ROOT_DIR);
+                dirbuf_add(req, &b, "..", FLOM_VFS_INO_ROOT_DIR);
+                dirbuf_add(req, &b, flom_vfs_status_dir,
+                           FLOM_VFS_INO_STATUS_DIR);
+                break;
+            case FLOM_VFS_STATUS_DIR:
+                dirbuf_add(req, &b, ".", FLOM_VFS_INO_STATUS_DIR);
+                dirbuf_add(req, &b, "..", FLOM_VFS_INO_ROOT_DIR);
+                dirbuf_add(req, &b, flom_vfs_lockers_dir,
+                           FLOM_VFS_INO_LOCKERS_DIR);
+                break;
+            default:
+                FLOM_TRACE(("flom_vfs_readdir: type=%d is not implemented!\n",
+                            type));
+                break;
+        } /* switch (type) */
+        
 		reply_buf_limited(req, b.p, b.size, off, size);
 		free(b.p);
 	}

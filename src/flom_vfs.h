@@ -105,15 +105,15 @@ typedef enum flom_vfs_inode_type_e {
 /**
  * Inode associated to root dir
  */
-#define FLOM_VFS_INO_ROOT_DIR             (fuse_ino_t)0
+#define FLOM_VFS_INO_ROOT_DIR             (fuse_ino_t)1
 /**
  * Inode associated to status dir
  */
-#define FLOM_VFS_INO_STATUS_DIR           (fuse_ino_t)1
+#define FLOM_VFS_INO_STATUS_DIR           (fuse_ino_t)2
 /**
  * Inode associated to lockers dir
  */
-#define FLOM_VFS_INO_LOCKERS_DIR          (fuse_ino_t)2
+#define FLOM_VFS_INO_LOCKERS_DIR          (fuse_ino_t)3
 /**
  * First Inode used for locker dir and files
  */
@@ -125,13 +125,33 @@ typedef enum flom_vfs_inode_type_e {
 
 
 
-
 /**
  * Structure with the pointers to all the callback functions invoked by FUSE
  */
 struct fuse_lowlevel_ops fuse_callback_functions;
 
 
+
+/**
+ * Structure used to store common values that does not require to be
+ * retrieved by system call every time they are needed
+ */
+typedef struct {
+    /**
+     * user id that will be associated to all dirs and files
+     */
+    uid_t     uid;
+    /**
+     * group id that will be associated to all dirs and files
+     */
+    gid_t     gid;
+    /**
+     * VFS activation time, it will be used as the default time
+     */
+    time_t    time;
+} flom_vfs_common_values_t;
+
+flom_vfs_common_values_t flom_vfs_common_values;
 
 #ifdef __cplusplus
 extern "C" {
@@ -171,7 +191,7 @@ extern "C" {
 
     
 
-    void hello_ll_lookup(fuse_req_t req, fuse_ino_t parent, const char *name);
+    void flom_vfs_lookup(fuse_req_t req, fuse_ino_t parent, const char *name);
 
 
     void hello_ll_getattr(fuse_req_t req, fuse_ino_t ino,
@@ -180,7 +200,7 @@ extern "C" {
     void hello_ll_getxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
                               size_t size);
 
-    void hello_ll_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
+    void flom_vfs_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
                                  off_t off, struct fuse_file_info *fi);
 
     void hello_ll_open(fuse_req_t req, fuse_ino_t ino,
