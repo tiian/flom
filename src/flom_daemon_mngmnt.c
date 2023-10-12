@@ -162,8 +162,7 @@ int flom_daemon_mngmnt_shutdown(flom_config_t *config,
 
 gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
 {
-    enum Exception { VFS_CHECK_UID_INODE_INTEGRITY
-                     , NONE } excp;
+    enum Exception { NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     int argc = 2;
@@ -175,10 +174,6 @@ gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
         struct fuse_chan *ch;
         char *mountpoint;
         int err = -1;
-
-        /* checking consistency before starting VFS */
-        if (FLOM_RC_OK != (ret_cod = flom_vfs_check_uid_inode_integrity()))
-            THROW(VFS_CHECK_UID_INODE_INTEGRITY);
 
         /* setting common values */
         flom_vfs_common_values.uid = getuid();
@@ -207,8 +202,6 @@ gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
         THROW(NONE);
     } CATCH {
         switch (excp) {
-            case VFS_CHECK_UID_INODE_INTEGRITY:
-                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;

@@ -66,11 +66,6 @@
  */
 typedef struct {
     /**
-     * Number of the inode in the VFS representation
-     * @@@ MAYBE USELESS: use the N-ary pointer instead
-     */
-    fuse_ino_t       ino;
-    /**
      * Boolean value, TRUE if the RAM node is related to a directory, FALSE
      * if the RAM node is related to a regular file
      */
@@ -132,14 +127,13 @@ extern "C" {
 
     /**
      * Create a new node for a file or a directory
-     * @param ino IN id of the inode
      * @param name IN name associated to the inode
      * @param is_dir IN the name is associated to a directory (if FALSE, it's
      *        associated to a regular file)
      * @return a valid pointer or NULL in case of error
      */
     flom_vfs_ram_node_t *flom_vfs_ram_node_create(
-        fuse_ino_t ino, const char *name, int is_dir);
+        const char *name, int is_dir);
 
 
 
@@ -360,38 +354,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-
-    /**
-     * Conversion from a FUSE inode to a FLoM uid
-     * @param ino IN inode in the FUSE filesystem
-     * @param type OUT associated to the inode in the FLoM internal structure
-     * @param uid OUT of the object represented by the inode
-     */
-    void flom_vfs_inode_to_uid(fuse_ino_t ino,
-                               flom_vfs_inode_type_t *type,
-                               flom_uid_t *uid);
-
-
-
-    /**
-     * Conversion from a FLoM uid to a FUSE inode
-     * @param type IN associated to the inode in the FLoM internal structure
-     * @param uid IN of the object represented by the inode
-     * @return inode in the FUSE filesystem
-     */     
-    fuse_ino_t flom_vfs_uid_to_inode(flom_vfs_inode_type_t type,
-                                     flom_uid_t uid);
-
-
-
-    /**
-     * Check the system is able to manage the transformation between uid and
-     * inode; in case of error, it can be a bug or a compile mistake
-     * @return a reason code
-     */     
-    int flom_vfs_check_uid_inode_integrity(void);
-
-    
 
     void flom_vfs_lookup(fuse_req_t req, fuse_ino_t parent, const char *name);
 

@@ -90,195 +90,6 @@ const char *FLOM_VFS_LOCKERS_DIR_NAME = "lockers";
 
 
 
-void flom_vfs_inode_to_uid(fuse_ino_t ino,
-                           flom_vfs_inode_type_t *type,
-                           flom_uid_t *uid)
-{
-    FLOM_TRACE(("flom_vfs_inode_to_uid: ino=" FLOM_UID_T_FORMAT "\n", ino));
-
-    *uid = 0;
-    if (FLOM_VFS_INO_ROOT_DIR == ino) {
-        *type = FLOM_VFS_ROOT_DIR;
-    } else if (FLOM_VFS_INO_STATUS_DIR == ino) {
-        *type = FLOM_VFS_STATUS_DIR;
-    } else if (FLOM_VFS_INO_LOCKERS_DIR == ino) {
-        *type = FLOM_VFS_LOCKERS_DIR;
-    } else if (ino >= FLOM_VFS_LOCKERS_UID_FIRST_INO &&
-               ino <= FLOM_VFS_LOCKERS_UID_LAST_INO) {
-        fuse_ino_t base_ino = ino - FLOM_VFS_LOCKERS_UID_FIRST_INO;
-        switch (base_ino % (FLOM_VFS_LOCKERS_DIR_NOF+1)) {
-            case 0:
-                *type = FLOM_VFS_LOCKERS_UID_DIR;
-                *uid = (flom_uid_t)
-                    (base_ino/(FLOM_VFS_LOCKERS_DIR_NOF+1)+1);
-                break;
-            case 1:
-                *type = FLOM_VFS_LOCKERS_UID_RESOURCE_NAME_FILE;
-                *uid = (flom_uid_t)
-                    ((base_ino-1)/(FLOM_VFS_LOCKERS_DIR_NOF+1)+1);
-                break;
-            case 2:
-                *type = FLOM_VFS_LOCKERS_UID_RESOURCE_TYPE_FILE;
-                *uid = (flom_uid_t)
-                    ((base_ino-2)/(FLOM_VFS_LOCKERS_DIR_NOF+1)+1);
-                break;
-            default:
-                FLOM_TRACE(("flom_vfs_inode_to_uid: missing "
-                            "case statement!\n"));
-        }
-    }
-    /* @@@ put code here */
-    FLOM_TRACE(("flom_vfs_inode_to_uid: type=%d, "
-                "uid=" FLOM_UID_T_FORMAT "\n", *type, *uid));
-}
-
-
-
-fuse_ino_t flom_vfs_uid_to_inode(flom_vfs_inode_type_t type,
-                                 flom_uid_t uid)
-{
-    fuse_ino_t ino = 0;
-    
-    FLOM_TRACE(("flom_vfs_uid_to_inode: type=%d, "
-                "uid=" FLOM_UID_T_FORMAT "\n", type, uid));
-
-    /* check for root dir */
-    if (FLOM_VFS_ROOT_DIR == type) {
-        ino = FLOM_VFS_INO_ROOT_DIR;
-    } else if (FLOM_VFS_STATUS_DIR == type) {
-        ino = FLOM_VFS_INO_STATUS_DIR;
-    } else if (FLOM_VFS_LOCKERS_DIR == type) {
-        ino = FLOM_VFS_INO_LOCKERS_DIR;
-    } else if (FLOM_VFS_LOCKERS_UID_DIR == type) {
-        fuse_ino_t tmp_ino =
-            (fuse_ino_t)((uid-1) * ((FLOM_VFS_LOCKERS_DIR_NOF+1)) +
-                         FLOM_VFS_LOCKERS_UID_FIRST_INO);
-        if (tmp_ino <= FLOM_VFS_LOCKERS_UID_LAST_INO)
-            ino = tmp_ino;
-        else
-            FLOM_TRACE(("flom_vfs_uid_to_inode: tmp_ino is out of range: "
-                        FLOM_UID_T_FORMAT " > " FLOM_UID_T_FORMAT "\n",
-                        tmp_ino, FLOM_VFS_LOCKERS_UID_LAST_INO));
-    } else if (FLOM_VFS_LOCKERS_UID_RESOURCE_NAME_FILE == type) {
-        fuse_ino_t tmp_ino =
-            (fuse_ino_t)((uid-1) * ((FLOM_VFS_LOCKERS_DIR_NOF+1)) +
-                         FLOM_VFS_LOCKERS_UID_FIRST_INO) + 1;
-        if (tmp_ino <= FLOM_VFS_LOCKERS_UID_LAST_INO)
-            ino = tmp_ino;
-        else
-            FLOM_TRACE(("flom_vfs_uid_to_inode: tmp_ino is out of range: "
-                        FLOM_UID_T_FORMAT " > " FLOM_UID_T_FORMAT "\n",
-                        tmp_ino, FLOM_VFS_LOCKERS_UID_LAST_INO));
-    } else if (FLOM_VFS_LOCKERS_UID_RESOURCE_TYPE_FILE == type) {
-        fuse_ino_t tmp_ino =
-            (fuse_ino_t)((uid-1) * ((FLOM_VFS_LOCKERS_DIR_NOF+1)) +
-                         FLOM_VFS_LOCKERS_UID_FIRST_INO) + 2;
-        if (tmp_ino <= FLOM_VFS_LOCKERS_UID_LAST_INO)
-            ino = tmp_ino;
-        else
-            FLOM_TRACE(("flom_vfs_uid_to_inode: tmp_ino is out of range: "
-                        FLOM_UID_T_FORMAT " > " FLOM_UID_T_FORMAT "\n",
-                        tmp_ino, FLOM_VFS_LOCKERS_UID_LAST_INO));
-    }
-
-/* @@@ put code here */
-    FLOM_TRACE(("flom_vfs_uid_to_inode: ino=" FLOM_UID_T_FORMAT "\n", ino));
-    return ino;
-}
-
-
-
-int flom_vfs_check_uid_inode_integrity(void)
-{
-    enum Exception { ROOT_DIR_ERROR
-                     , STATUS_DIR_ERROR
-                     , LOCKERS_DIR_ERROR
-                     , LOCKERS_UID_DIR_ERROR
-                     , LOCKERS_UID_RESOURCE_NAME_FILE_ERROR
-                     , LOCKERS_UID_RESOURCE_TYPE_FILE_ERROR
-                     , NONE } excp;
-    int ret_cod = FLOM_RC_INTERNAL_ERROR;
-    
-    FLOM_TRACE(("flom_vfs_check_uid_inode_integrity\n"));
-    TRY {
-        flom_vfs_inode_type_t type, tmp_type;
-        flom_uid_t uid, tmp_uid;
-        fuse_ino_t ino, tmp_ino;
-        static const flom_uid_t uids[] =
-            {1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597,
-             2584, 4181, 6765, 10946, 17711, 28657, 46368, 75025, 121393,
-             196418, 317811, 514229, 832040, 1346269, 2178309, 3524578,
-             5702887, 9227465, 14930352, 24157817, 39088169, 63245986};
-        int i;
-        
-        /* Check root dir */
-        ino = FLOM_VFS_INO_ROOT_DIR;
-        flom_vfs_inode_to_uid(ino, &type, &uid);
-        if (ino != flom_vfs_uid_to_inode(type, uid))
-            THROW(ROOT_DIR_ERROR);
-        /* Check status dir */
-        ino = FLOM_VFS_INO_STATUS_DIR;
-        flom_vfs_inode_to_uid(ino, &type, &uid);
-        if (ino != flom_vfs_uid_to_inode(type, uid))
-            THROW(STATUS_DIR_ERROR);
-        /* Check lockers dir */
-        ino = FLOM_VFS_INO_LOCKERS_DIR;
-        flom_vfs_inode_to_uid(ino, &type, &uid);
-        if (ino != flom_vfs_uid_to_inode(type, uid))
-            THROW(LOCKERS_DIR_ERROR);
-        /* Check lockers uid dir and files */
-        for (i=0; i<(sizeof(uids)/sizeof(flom_uid_t)); ++i) {
-            uid = uids[i];
-            FLOM_TRACE(("flom_vfs_check_uid_inode_integrity: uid="
-                        FLOM_UID_T_FORMAT "\n", uid));
-            /* check lockers uid dir */
-            type = FLOM_VFS_LOCKERS_UID_DIR;
-            tmp_ino = flom_vfs_uid_to_inode(type, uid);
-            flom_vfs_inode_to_uid(tmp_ino, &tmp_type, &tmp_uid);
-            if (tmp_type != type || tmp_uid != uid)
-                THROW(LOCKERS_UID_DIR_ERROR);
-            /* check lockers uid resource name file */
-            type = FLOM_VFS_LOCKERS_UID_RESOURCE_NAME_FILE;
-            tmp_ino = flom_vfs_uid_to_inode(type, uid);
-            flom_vfs_inode_to_uid(tmp_ino, &tmp_type, &tmp_uid);
-            if (tmp_type != type || tmp_uid != uid)
-                THROW(LOCKERS_UID_RESOURCE_NAME_FILE_ERROR);
-            /* check lockers uid resource type file */
-            type = FLOM_VFS_LOCKERS_UID_RESOURCE_TYPE_FILE;
-            tmp_ino = flom_vfs_uid_to_inode(type, uid);
-            flom_vfs_inode_to_uid(tmp_ino, &tmp_type, &tmp_uid);
-            if (tmp_type != type || tmp_uid != uid)
-                THROW(LOCKERS_UID_RESOURCE_TYPE_FILE_ERROR);
-        };
-        
-        THROW(NONE);
-    } CATCH {
-        switch (excp) {
-            case ROOT_DIR_ERROR:
-            case STATUS_DIR_ERROR:
-            case LOCKERS_DIR_ERROR:
-            case LOCKERS_UID_DIR_ERROR:
-            case LOCKERS_UID_RESOURCE_NAME_FILE_ERROR:
-            case LOCKERS_UID_RESOURCE_TYPE_FILE_ERROR:
-                ret_cod = FLOM_RC_VFS_CONSISTENCY_ERROR;
-                break;
-            case NONE:
-                ret_cod = FLOM_RC_OK;
-                break;
-            default:
-                ret_cod = FLOM_RC_INTERNAL_ERROR;
-        } /* switch (excp) */
-    } /* TRY-CATCH */
-    if (FLOM_RC_VFS_CONSISTENCY_ERROR == ret_cod)
-        syslog(LOG_ERR, FLOM_SYSLOG_FLM021E);
-    FLOM_TRACE(("flom_vfs_check_uid_inode_integrity/excp=%d/"
-                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
-    return ret_cod;
-}
-
-
-
-
 int flom_vfs_stat(fuse_ino_t ino, struct stat *stbuf)
 {
     GNode *node_in_ram;
@@ -649,8 +460,7 @@ flom_vfs_ram_tree_t flom_vfs_ram_tree;
 
 
 
-flom_vfs_ram_node_t *flom_vfs_ram_node_create(
-    fuse_ino_t ino, const char *name, int is_dir)
+flom_vfs_ram_node_t *flom_vfs_ram_node_create(const char *name, int is_dir)
 {
     enum Exception { G_TRY_MALLOC_ERROR
                      , G_STRDUP_ERROR
@@ -658,13 +468,11 @@ flom_vfs_ram_node_t *flom_vfs_ram_node_create(
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     flom_vfs_ram_node_t *tmp = NULL;
     
-    FLOM_TRACE(("flom_vfs_ram_node_create: ino=" FUSE_INO_T_FORMAT
-                ", name='%s'\n", ino, name));
+    FLOM_TRACE(("flom_vfs_ram_node_create: name='%s'\n", name));
     TRY {
         /* allocate the node object */
         if (NULL == (tmp = g_try_malloc(sizeof(flom_vfs_ram_node_t))))
             THROW(G_TRY_MALLOC_ERROR);
-        tmp->ino = ino;
         tmp->is_dir = is_dir;
         /* duplicate the string for the name */
         if (NULL == (tmp->name = g_strdup(name)))
@@ -702,7 +510,7 @@ void flom_vfs_ram_node_destroy(flom_vfs_ram_node_t *node)
 {
     if (NULL != node) {
         FLOM_TRACE(("flom_vfs_ram_node_destroy: ino=" FUSE_INO_T_FORMAT "\n",
-                    node->ino));
+                    (fuse_ino_t *)node));
         if (NULL != node->name) {
             FLOM_TRACE(("flom_vfs_ram_node_destroy: name='%s'\n",
                         node->name));
@@ -742,6 +550,8 @@ int flom_vfs_ram_tree_init()
     flom_vfs_ram_node_t *tmp_root_node = NULL;
     flom_vfs_ram_node_t *tmp_status_node = NULL;
     flom_vfs_ram_node_t *tmp_lockers_node = NULL;
+    flom_vfs_ram_node_t *tmp_locker1_node = NULL;
+    flom_vfs_ram_node_t *tmp_locker2_node = NULL;
     
     FLOM_TRACE(("flom_vfs_ram_tree_init\n"));
     TRY {
@@ -754,7 +564,6 @@ int flom_vfs_ram_tree_init()
         
         /* create the data block for the first node, root dir */
         if (NULL == (tmp_root_node = flom_vfs_ram_node_create(
-                         FLOM_VFS_INO_ROOT_DIR,
                          FLOM_VFS_ROOT_DIR_NAME, TRUE)))
             THROW(NODE_CREATE_ERROR1);
         
@@ -764,7 +573,6 @@ int flom_vfs_ram_tree_init()
 
         /* create the data block for the second node, status dir */
         if (NULL == (tmp_status_node = flom_vfs_ram_node_create(
-                         FLOM_VFS_INO_STATUS_DIR,
                          FLOM_VFS_STATUS_DIR_NAME, TRUE)))
             THROW(NODE_CREATE_ERROR2);
         
@@ -775,14 +583,18 @@ int flom_vfs_ram_tree_init()
         
         /* create the data block for the third node, lockers dir */
         if (NULL == (tmp_lockers_node = flom_vfs_ram_node_create(
-                         FLOM_VFS_INO_LOCKERS_DIR,
                          FLOM_VFS_LOCKERS_DIR_NAME, TRUE)))
             THROW(NODE_CREATE_ERROR3);
         /* append the node to the tree, create a child */
         if (NULL == (tmp = g_node_prepend_data(
                          tmp, tmp_lockers_node)))
             THROW(G_NODE_PREPEND_DATA3);
-
+        
+        tmp_locker1_node = flom_vfs_ram_node_create("349", TRUE);
+        g_node_prepend_data(tmp, tmp_locker1_node);
+        tmp_locker2_node = flom_vfs_ram_node_create("500", TRUE);
+        g_node_prepend_data(tmp, tmp_locker2_node);
+        
         /* @@@ just for debug, remove me */
         g_node_traverse(flom_vfs_ram_tree.root, G_PRE_ORDER, G_TRAVERSE_ALL,
                         -1, iter, NULL);
