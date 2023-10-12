@@ -73,6 +73,7 @@
 #include "flom_locker.h"
 #include "flom_msg.h"
 #include "flom_tcp.h"
+#include "flom_vfs.h"
 #include "flom_syslog.h"
 
 
@@ -1003,7 +1004,8 @@ int flom_listen_clean(flom_config_t *config, flom_conns_t *conns)
 
 int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
 {
-    enum Exception { G_THREAD_NEW_ERROR
+    enum Exception { VFS_RAM_TREE_INIT_ERROR
+                     , G_THREAD_NEW_ERROR
                      , CONNS_CLEAN_ERROR
                      , CONNS_GET_FDS_ERROR
                      , CONNS_SET_EVENTS_ERROR
@@ -1029,6 +1031,10 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
 
         flom_locker_array_init(&lockers);
 
+        /* initialize the RAM representation of the VFS */
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_init()))
+            THROW(VFS_RAM_TREE_INIT_ERROR);
+        
         /* @@@ put a condition, activate only if needed */
         FLOM_TRACE(("flom_accept_loop: activating VFS thread...\n"));
         if (NULL == (vfs_thread = g_thread_new("FUSE VFS",
@@ -1148,6 +1154,8 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case VFS_RAM_TREE_INIT_ERROR:
+                break;
             case G_THREAD_NEW_ERROR:
                 ret_cod = FLOM_RC_G_THREAD_CREATE_ERROR;
                 break;
@@ -1188,6 +1196,7 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    flom_vfs_ram_tree_cleanup();
     flom_locker_array_free(&lockers);
     FLOM_TRACE(("flom_accept_loop/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));

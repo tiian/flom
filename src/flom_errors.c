@@ -130,6 +130,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: the server has unilaterally closed the connection";
         case FLOM_RC_VFS_CONSISTENCY_ERROR:
             return "ERROR: consistency error in the VFS component";
+        case FLOM_RC_OBJ_NOT_FOUND_ERROR:
+            return "ERROR: object not found";
             /* system function error */
         case FLOM_RC_ACCEPT_ERROR:
             return "ERROR: 'accept' function returned an error condition";
@@ -232,6 +234,12 @@ const char *flom_strerror(int ret_cod)
                 "an error condition";
         case FLOM_RC_G_KEY_FILE_NEW_ERROR:
             return "ERROR: 'g_key_file_new' function returned "
+                "an error condition";
+        case FLOM_RC_G_NODE_NEW_ERROR:
+            return "ERROR: 'g_node_new' function returned "
+                "an error condition";
+        case FLOM_RC_G_NODE_PREPEND_DATA_ERROR:
+            return "ERROR: 'g_node_prepend_data' function returned "
                 "an error condition";
         case FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR:
             return "ERROR: 'g_markup_parse_context_new' function returned "

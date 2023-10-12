@@ -84,8 +84,9 @@ struct fuse_lowlevel_ops fuse_callback_functions = {
 
 
 
-const char *flom_vfs_status_dir = "status";
-const char *flom_vfs_lockers_dir = "lockers";
+const char *FLOM_VFS_ROOT_DIR_NAME = "/";
+const char *FLOM_VFS_STATUS_DIR_NAME = "status";
+const char *FLOM_VFS_LOCKERS_DIR_NAME = "lockers";
 
 
 
@@ -280,12 +281,36 @@ int flom_vfs_check_uid_inode_integrity(void)
 
 int flom_vfs_stat(fuse_ino_t ino, struct stat *stbuf)
 {
-    flom_vfs_inode_type_t type;
-    flom_uid_t uid;
+    GNode *node_in_ram;
     
     FLOM_TRACE(("flom_vfs_stat: ino=" FLOM_UID_T_FORMAT "\n", ino));
-
+    
+    /* ino is mapped to the pointer of the node in RAM, but
+       root dir is special case, ino==1 every time */
+    if (NULL == (node_in_ram = flom_vfs_ram_tree_find(
+                     FLOM_VFS_INO_ROOT_DIR == ino ?
+                     NULL : (gpointer)ino))) {
+        FLOM_TRACE(("flom_vfs_stat: ino=" FLOM_UID_T_FORMAT
+                    ", not found\n", ino));
+    } else {
+        flom_vfs_ram_node_t *data = (flom_vfs_ram_node_t *)node_in_ram->data;
+        if (flom_vfs_ram_node_is_dir(data)) {
+            stbuf->st_ino = ino;
+            stbuf->st_mode = S_IFDIR | 0550;
+            stbuf->st_nlink = 2;
+            stbuf->st_uid = flom_vfs_common_values.uid;
+            stbuf->st_gid = flom_vfs_common_values.gid;
+            stbuf->st_atime = stbuf->st_ctime = stbuf->st_mtime =
+                flom_vfs_common_values.time;
+        } else {
+            /* @@@ implement me for regular files */
+        }
+    }
+    
     /* retrieve the type associated to the inode and the FLoM unique id */
+    /* @@@ remove me
+    flom_vfs_inode_type_t type;
+    flom_uid_t uid;
     flom_vfs_inode_to_uid(ino, &type, &uid);
     
 	stbuf->st_ino = ino;
@@ -304,7 +329,7 @@ int flom_vfs_stat(fuse_ino_t ino, struct stat *stbuf)
         default:
             FLOM_TRACE(("flom_vfs_stat: error for type=%d\n", type));
             return -1;
-    } /* switch (type) */
+            } *//* switch (type) */
     
 /*
 	case 2:
@@ -329,6 +354,7 @@ void hello_ll_getattr(fuse_req_t req, fuse_ino_t ino,
 	(void) fi;
 
 	memset(&stbuf, 0, sizeof(stbuf));
+    stbuf.st_ino = ino;
 	if (flom_vfs_stat(ino, &stbuf) == -1)
 		fuse_reply_err(req, ENOENT);
 	else
@@ -364,13 +390,45 @@ void hello_ll_getxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
 void flom_vfs_lookup(fuse_req_t req, fuse_ino_t parent, const char *name)
 {
 	struct fuse_entry_param e;
+    GNode *parent_node = NULL;
+    GNode *child_node = NULL;
 
-    FLOM_TRACE(("flom_vfs_lookup: ino=" FLOM_UID_T_FORMAT ", name='%s'\n",
+    FLOM_TRACE(("flom_vfs_lookup: parent=" FLOM_UID_T_FORMAT ", name='%s'\n",
                 parent, name));
 
+    /* ino is mapped to the pointer of the node in RAM, but
+       root dir is special case, ino==1 every time */
+    parent_node = flom_vfs_ram_tree_find(FLOM_VFS_INO_ROOT_DIR == parent ?
+                                         NULL : (gpointer)parent);
+    if (NULL == parent_node) {
+        FLOM_TRACE(("flom_vfs_lookup: parent=" FLOM_UID_T_FORMAT
+                    ", not found\n", parent));
+		fuse_reply_err(req, ENOENT);
+    } else {
+        /* search what node below parent has name "name" */
+        if (NULL == (child_node =
+                     flom_vfs_ram_tree_find_child_by_name(
+                         parent_node, name))) {
+            FLOM_TRACE(("flom_vfs_lookup: child with name '%s' not found\n",
+                        name));
+            fuse_reply_err(req, ENOENT);
+        } else {
+            flom_vfs_ram_node_t *child_in_ram =
+                (flom_vfs_ram_node_t *)child_node->data;
+            memset(&e, 0, sizeof(e));
+            e.ino = (fuse_ino_t)child_in_ram;
+            e.attr_timeout = 1.0;
+            e.entry_timeout = 1.0;
+            flom_vfs_stat(e.ino, &e.attr);
+            
+            fuse_reply_entry(req, &e);
+        }
+    }
+    
+    /*
     if (FLOM_VFS_INO_ROOT_DIR == parent &&
-        0 == strcmp(name, flom_vfs_status_dir)) {
-        /* status dir */
+        0 == strcmp(name, FLOM_VFS_STATUS_DIR_NAME)) {
+        // status dir
 		memset(&e, 0, sizeof(e));
 		e.ino = FLOM_VFS_INO_STATUS_DIR;
 		e.attr_timeout = 1.0;
@@ -379,8 +437,8 @@ void flom_vfs_lookup(fuse_req_t req, fuse_ino_t parent, const char *name)
 
 		fuse_reply_entry(req, &e);
     } else if (FLOM_VFS_INO_STATUS_DIR == parent &&
-               0 == strcmp(name, flom_vfs_lockers_dir)) {
-        /* lockers dir */
+               0 == strcmp(name, FLOM_VFS_LOCKERS_DIR_NAME)) {
+        // lockers dir
 		memset(&e, 0, sizeof(e));
 		e.ino = FLOM_VFS_INO_LOCKERS_DIR;
 		e.attr_timeout = 1.0;
@@ -391,6 +449,7 @@ void flom_vfs_lookup(fuse_req_t req, fuse_ino_t parent, const char *name)
     } else {
 		fuse_reply_err(req, ENOENT);
     }
+    */
 }
 
 struct dirbuf {
@@ -426,13 +485,65 @@ static int reply_buf_limited(fuse_req_t req, const char *buf, size_t bufsize,
 void flom_vfs_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
                       off_t off, struct fuse_file_info *fi)
 {
+    GNode *node, *parent;
+    flom_vfs_ram_node_t *node_in_ram;
+    GArray *children = NULL;
+    FLOM_TRACE(("flom_vfs_readdir: ino=" FUSE_INO_T_FORMAT "\n", ino));
+
+    /* ino is mapped to the pointer of the node in RAM, but
+       root dir is special case, ino==1 every time */
+    node = flom_vfs_ram_tree_find(FLOM_VFS_INO_ROOT_DIR == ino ?
+                                  NULL : (gpointer)ino);
+    parent = flom_vfs_ram_tree_find_parent(node);
+    if (NULL == node) {
+        /* the inode does not exists! */
+		fuse_reply_err(req, ENOENT);        
+    } else {
+        node_in_ram = (flom_vfs_ram_node_t *)node->data;
+        if (!flom_vfs_ram_node_is_dir(node_in_ram)) {
+            FLOM_TRACE(("flom_vfs_readdir: inode=" FUSE_INO_T_FORMAT
+                        " is not a dir\n", ino));
+            fuse_reply_err(req, ENOTDIR); 
+        } else {
+            /* it's a dir, retrieve all the children */
+            guint i;
+            struct dirbuf b;
+
+            memset(&b, 0, sizeof(b));
+            children = flom_vfs_ram_tree_retrieve_children(
+                FLOM_VFS_INO_ROOT_DIR == ino ?
+                NULL : (gpointer)ino);
+            dirbuf_add(req, &b, ".", ino);
+            dirbuf_add(req, &b, "..",
+                       (fuse_ino_t)((flom_vfs_ram_node_t *)parent->data));
+            for (i=0; i<children->len; ++i) {
+                struct flom_vfs_ino_name_pair_s *element;
+                element = &g_array_index(
+                    children,
+                    struct flom_vfs_ino_name_pair_s, i);
+                dirbuf_add(req, &b, element->name,
+                           element->ino);
+                FLOM_TRACE(("flom_vfs_readdir: name='%s', ino="
+                            FUSE_INO_T_FORMAT "\n",
+                            element->name, element->ino));
+            }
+            reply_buf_limited(req, b.p, b.size, off, size);
+            free(b.p);
+        }
+        /* clean-up the array */
+        if (NULL != children)
+            g_array_free(children, TRUE);
+    }
+    
+    /* search the node in the tree */
+
+    /*
 	(void) fi;
     flom_vfs_inode_type_t type;
     flom_uid_t uid;
 
-    FLOM_TRACE(("flom_vfs_readdir: ino=" FLOM_UID_T_FORMAT "\n", ino));
 
-    /* retrieve the type associated to the inode and the FLoM unique id */
+    // retrieve the type associated to the inode and the FLoM unique id
     flom_vfs_inode_to_uid(ino, &type, &uid);
 
     if (FLOM_VFS_ROOT_DIR != type &&
@@ -452,24 +563,25 @@ void flom_vfs_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
             case FLOM_VFS_ROOT_DIR:
                 dirbuf_add(req, &b, ".", FLOM_VFS_INO_ROOT_DIR);
                 dirbuf_add(req, &b, "..", FLOM_VFS_INO_ROOT_DIR);
-                dirbuf_add(req, &b, flom_vfs_status_dir,
+                dirbuf_add(req, &b, FLOM_VFS_STATUS_DIR_NAME,
                            FLOM_VFS_INO_STATUS_DIR);
                 break;
             case FLOM_VFS_STATUS_DIR:
                 dirbuf_add(req, &b, ".", FLOM_VFS_INO_STATUS_DIR);
                 dirbuf_add(req, &b, "..", FLOM_VFS_INO_ROOT_DIR);
-                dirbuf_add(req, &b, flom_vfs_lockers_dir,
+                dirbuf_add(req, &b, FLOM_VFS_LOCKERS_DIR_NAME,
                            FLOM_VFS_INO_LOCKERS_DIR);
                 break;
             default:
                 FLOM_TRACE(("flom_vfs_readdir: type=%d is not implemented!\n",
                             type));
                 break;
-        } /* switch (type) */
+        } // switch (type) 
         
 		reply_buf_limited(req, b.p, b.size, off, size);
 		free(b.p);
 	}
+    */
 }
 
 void hello_ll_open(fuse_req_t req, fuse_ino_t ino,
@@ -524,3 +636,526 @@ int main(int argc, char *argv[])
 	return err ? 1 : 0;
 }
 */
+
+
+/*
+ * Experimental stuff: use GLIB N-ary Tree to create the VFS in memory.
+ * Move this types to a more convenient file if necessary to avoid strange
+ * dependencies in the includes
+ */
+
+
+flom_vfs_ram_tree_t flom_vfs_ram_tree;
+
+
+
+flom_vfs_ram_node_t *flom_vfs_ram_node_create(
+    fuse_ino_t ino, const char *name, int is_dir)
+{
+    enum Exception { G_TRY_MALLOC_ERROR
+                     , G_STRDUP_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    flom_vfs_ram_node_t *tmp = NULL;
+    
+    FLOM_TRACE(("flom_vfs_ram_node_create: ino=" FUSE_INO_T_FORMAT
+                ", name='%s'\n", ino, name));
+    TRY {
+        /* allocate the node object */
+        if (NULL == (tmp = g_try_malloc(sizeof(flom_vfs_ram_node_t))))
+            THROW(G_TRY_MALLOC_ERROR);
+        tmp->ino = ino;
+        tmp->is_dir = is_dir;
+        /* duplicate the string for the name */
+        if (NULL == (tmp->name = g_strdup(name)))
+            THROW(G_STRDUP_ERROR);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_TRY_MALLOC_ERROR:
+                ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
+                break;
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* memory recovery in case of failure */
+        if (excp < NONE && excp > G_TRY_MALLOC_ERROR) {
+            g_free(tmp);
+            tmp = NULL;
+        }
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_vfs_ram_node_create/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return tmp;
+}
+
+
+
+void flom_vfs_ram_node_destroy(flom_vfs_ram_node_t *node)
+{
+    if (NULL != node) {
+        FLOM_TRACE(("flom_vfs_ram_node_destroy: ino=" FUSE_INO_T_FORMAT "\n",
+                    node->ino));
+        if (NULL != node->name) {
+            FLOM_TRACE(("flom_vfs_ram_node_destroy: name='%s'\n",
+                        node->name));
+            g_free(node->name);
+            node->name = NULL;
+        }
+        g_free(node);
+    } else {
+        FLOM_TRACE(("flom_vfs_ram_node_destroy: node == NULL!\n"));
+    }
+}
+
+
+/* @@@ just for debug, remove me!!! */
+gboolean iter(GNode *n, gpointer data) {
+    /*
+    FLOM_TRACE(("ITER *** data=%p\n", data));
+    */
+    FLOM_TRACE(("ITER *** name='%s'\n",
+                ((flom_vfs_ram_node_t *)n->data)->name));
+    return FALSE;
+}
+
+
+
+int flom_vfs_ram_tree_init()
+{
+    enum Exception { NODE_CREATE_ERROR1
+                     , G_NODE_NEW_ERROR1
+                     , NODE_CREATE_ERROR2
+                     , G_NODE_PREPEND_DATA2
+                     , NODE_CREATE_ERROR3
+                     , G_NODE_PREPEND_DATA3
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+
+    flom_vfs_ram_node_t *tmp_root_node = NULL;
+    flom_vfs_ram_node_t *tmp_status_node = NULL;
+    flom_vfs_ram_node_t *tmp_lockers_node = NULL;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_init\n"));
+    TRY {
+        GNode *tmp;
+        
+        /* initialize the global semaphore */
+        g_mutex_init(&flom_vfs_ram_tree.mutex);
+        /* lock it immediately! */
+        g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        
+        /* create the data block for the first node, root dir */
+        if (NULL == (tmp_root_node = flom_vfs_ram_node_create(
+                         FLOM_VFS_INO_ROOT_DIR,
+                         FLOM_VFS_ROOT_DIR_NAME, TRUE)))
+            THROW(NODE_CREATE_ERROR1);
+        
+        /* create the node as the root node in the tree */
+        if (NULL == (flom_vfs_ram_tree.root = g_node_new(tmp_root_node)))
+            THROW(G_NODE_NEW_ERROR1);
+
+        /* create the data block for the second node, status dir */
+        if (NULL == (tmp_status_node = flom_vfs_ram_node_create(
+                         FLOM_VFS_INO_STATUS_DIR,
+                         FLOM_VFS_STATUS_DIR_NAME, TRUE)))
+            THROW(NODE_CREATE_ERROR2);
+        
+        /* append the node to the tree, create a child */
+        if (NULL == (tmp = g_node_prepend_data(
+                         flom_vfs_ram_tree.root, tmp_status_node)))
+            THROW(G_NODE_PREPEND_DATA2);
+        
+        /* create the data block for the third node, lockers dir */
+        if (NULL == (tmp_lockers_node = flom_vfs_ram_node_create(
+                         FLOM_VFS_INO_LOCKERS_DIR,
+                         FLOM_VFS_LOCKERS_DIR_NAME, TRUE)))
+            THROW(NODE_CREATE_ERROR3);
+        /* append the node to the tree, create a child */
+        if (NULL == (tmp = g_node_prepend_data(
+                         tmp, tmp_lockers_node)))
+            THROW(G_NODE_PREPEND_DATA3);
+
+        /* @@@ just for debug, remove me */
+        g_node_traverse(flom_vfs_ram_tree.root, G_PRE_ORDER, G_TRAVERSE_ALL,
+                        -1, iter, NULL);
+        tmp = g_node_find(flom_vfs_ram_tree.root, G_LEVEL_ORDER,
+                          G_TRAVERSE_ALL, tmp_status_node);
+        FLOM_TRACE(("flom_vfs_ram_tree_init: *** '%s'\n",
+                    ((flom_vfs_ram_node_t *)tmp->data)->name));
+        tmp = g_node_find(flom_vfs_ram_tree.root, G_LEVEL_ORDER,
+                          G_TRAVERSE_ALL, tmp_lockers_node);
+        FLOM_TRACE(("flom_vfs_ram_tree_init: *** '%s'\n",
+                    ((flom_vfs_ram_node_t *)tmp->data)->name));
+        /* ### implement now the real logic of FUSE travelling the tree */
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NODE_CREATE_ERROR1:
+            case NODE_CREATE_ERROR2:
+            case NODE_CREATE_ERROR3:
+                ret_cod = FLOM_RC_NEW_OBJ;
+                break;
+            case G_NODE_NEW_ERROR1:
+                ret_cod = FLOM_RC_G_NODE_NEW_ERROR;
+                break;
+            case G_NODE_PREPEND_DATA2:
+            case G_NODE_PREPEND_DATA3:
+                ret_cod = FLOM_RC_G_NODE_PREPEND_DATA_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        /* recovery memory */
+        if (excp > NODE_CREATE_ERROR1 && excp <= G_NODE_NEW_ERROR1)
+            flom_vfs_ram_node_destroy(tmp_root_node);
+        if (excp > NODE_CREATE_ERROR2 && excp <= G_NODE_PREPEND_DATA2)
+            flom_vfs_ram_node_destroy(tmp_status_node);
+        if (excp > NODE_CREATE_ERROR3 && excp <= G_NODE_PREPEND_DATA3)
+            flom_vfs_ram_node_destroy(tmp_lockers_node);
+        /* unlock the semaphore to leave access to the object to others */
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+        
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_vfs_ram_tree_init/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+
+gboolean flom_vfs_ram_tree_cleanup_iter(GNode *n, gpointer data) {
+    FLOM_TRACE(("flom_vfs_ram_tree_cleanup_iter: removing data %p\n", data));
+    flom_vfs_ram_node_destroy((flom_vfs_ram_node_t *)n->data);
+    return FALSE;
+}
+
+
+
+void flom_vfs_ram_tree_cleanup()
+{
+    FLOM_TRACE(("flom_vfs_ram_tree_cleanup\n"));
+    /* lock it immediately! */
+    g_mutex_lock(&flom_vfs_ram_tree.mutex);
+    /* traverse the tree to remove data */
+    g_node_traverse(flom_vfs_ram_tree.root, G_PRE_ORDER, G_TRAVERSE_ALL,
+                    -1, flom_vfs_ram_tree_cleanup_iter, NULL);
+    /* destroy the tree */
+    g_node_destroy(flom_vfs_ram_tree.root);
+    flom_vfs_ram_tree.root = NULL;
+    /* unlock the semaphore to leave access to the object to others */
+    g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    g_mutex_clear(&flom_vfs_ram_tree.mutex);
+}
+
+
+
+GNode *flom_vfs_ram_tree_find(gpointer data)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    GNode *result = NULL;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_find: data=%p\n", data));
+    TRY {
+        GNode *tmp = NULL;
+        
+        /* lock the tree to avoid conflicts */
+        g_mutex_lock(&flom_vfs_ram_tree.mutex);
+
+        /* if data == NULL, the caller wants the root of the tree */
+        if (NULL == data) {
+            tmp = flom_vfs_ram_tree.root;
+            FLOM_TRACE(("flom_vfs_ram_tree_find: %p is for root in "
+                        "ram tree, tmp->data=%p, tmp->data->name='%s'\n",
+                        data, tmp->data,
+                        ((flom_vfs_ram_node_t *)tmp->data)->name));
+        } else if (NULL == (tmp = g_node_find(flom_vfs_ram_tree.root,
+                                            G_PRE_ORDER,
+                                            G_TRAVERSE_ALL, data))) {
+            /* search the data */
+            FLOM_TRACE(("flom_vfs_ram_tree_find: %p was not found in "
+                        "ram tree\n", data));
+        } else {
+            FLOM_TRACE(("flom_vfs_ram_tree_find: %p was found in "
+                        "ram tree, tmp->data=%p, tmp->data->name='%s'\n",
+                        data, tmp->data,
+                        ((flom_vfs_ram_node_t *)tmp->data)->name));
+        }
+        result = tmp;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* unlock the tree to avoid conflicts */
+    g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    FLOM_TRACE(("flom_vfs_ram_tree_find/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return result;
+}
+
+
+
+gboolean flom_vfs_ram_tree_find_parent_iter(
+    GNode *node, gpointer data) {
+    
+    struct flom_vfs_ram_tree_parent_child_s *parent_child =
+        (struct flom_vfs_ram_tree_parent_child_s *)data;
+    GNode *tmp;
+
+    FLOM_TRACE(("flom_vfs_ram_tree_find_parent_iter: "
+                "child->name='%s', node->name='%s'\n",
+                ((flom_vfs_ram_node_t *)parent_child->child->data)->name,
+                ((flom_vfs_ram_node_t *)node->data)->name));
+    /* check if one of the child matches node, if yes we got the parent */
+    tmp = g_node_find_child(node, G_TRAVERSE_ALL,
+                            parent_child->child->data);
+    if (NULL != tmp) {
+        FLOM_TRACE(("flom_vfs_ram_tree_find_parent_iter: '%s' is the "
+                    "parent of '%s'\n", 
+                    ((flom_vfs_ram_node_t *)node->data)->name,
+                    ((flom_vfs_ram_node_t *)parent_child->child->data)->name));
+        parent_child->parent = node;
+        return TRUE;
+    }
+    else
+        return FALSE;
+}
+
+
+
+GNode *flom_vfs_ram_tree_find_parent(GNode *node)
+{
+    enum Exception { NULL_OBJECT
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    GNode *result = NULL;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_find_parent: node=%p\n", node));
+    TRY {
+        if (NULL == node || NULL == node->data)
+            THROW(NULL_OBJECT);
+        FLOM_TRACE(("flom_vfs_ram_tree_find_parent: node=%p, name='%s'\n",
+                    node, ((flom_vfs_ram_node_t *)node->data)->name));
+        
+        /* lock the tree to avoid conflicts */
+        g_mutex_lock(&flom_vfs_ram_tree.mutex);
+    
+        /* if node is root, no parent */
+        if (G_NODE_IS_ROOT(node)) {
+            FLOM_TRACE(("flom_vfs_ram_tree_find_parent: root node does not "
+                        "have a parent\n"));
+            /* return root itself */
+            result = node;
+        } else {
+            struct flom_vfs_ram_tree_parent_child_s parent_child;
+            parent_child.child = node;
+            parent_child.parent = NULL;
+            /* traverse the three to find where node is a child */
+            g_node_traverse(flom_vfs_ram_tree.root, G_IN_ORDER,
+                            G_TRAVERSE_NON_LEAVES, -1,
+                            flom_vfs_ram_tree_find_parent_iter, &parent_child);
+            result = parent_child.parent;
+        }
+        FLOM_TRACE(("flom_vfs_ram_tree_find_parent: result=%p, name='%s'\n",
+                    result, ((flom_vfs_ram_node_t *)result->data)->name));
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* unlock the tree to avoid conflicts */
+    g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    FLOM_TRACE(("flom_vfs_ram_tree_find_parent/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return result;
+}
+
+
+
+void flom_vfs_ino_name_pair_destroy_notify(gpointer data)
+{
+    struct flom_vfs_ino_name_pair_s *tmp = data;
+    if (NULL != tmp && NULL != tmp->name) {
+        FLOM_TRACE(("flom_vfs_ino_name_pair_destroy_notify: tmp=%p, "
+                    "tmp->name='%s'\n", tmp, tmp->name));
+        g_free(tmp->name);
+        tmp->name = NULL;
+    }
+}
+
+
+
+GNode *flom_vfs_ram_tree_find_child_by_name(GNode *root, const char *name)
+{
+    enum Exception { NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    GNode *result = NULL;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_find_child_by_name\n"));
+    TRY {
+        guint i=0, n=0;
+        GNode *node;
+        
+        /* lock the tree to avoid conflicts */
+        g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        /* traverse all the children of the node */
+        n = g_node_n_children(root);
+        for (i=0; i<n; i++) {
+            node = g_node_nth_child(root, i);
+            if (NULL == node)
+                break;
+            FLOM_TRACE(("flom_vfs_ram_tree_find_child_by_name: "
+                        "name='%s'\n",
+                        ((flom_vfs_ram_node_t *)node->data)->name));
+            
+            if (!strcmp(((flom_vfs_ram_node_t *)node->data)->name, name)) {
+                result = node;
+                break;
+            }
+        } /* for (i=0; i<n; i++) */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* unlock the tree to avoid conflicts */
+    g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    FLOM_TRACE(("flom_vfs_ram_tree_find_child_by_name/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return result;
+}
+
+
+
+GArray *flom_vfs_ram_tree_retrieve_children(gpointer data)
+{
+    enum Exception { G_ARRAY_NEW_ERROR
+                     , NODE_NOT_FOUND
+                     , G_STRDUP_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    GArray *result = NULL;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_retrieve_children: data=%p\n", data));
+    TRY {
+        GNode *node = NULL;
+        guint i, n;
+        
+        /* lock the tree to avoid conflicts */
+        g_mutex_lock(&flom_vfs_ram_tree.mutex);
+
+        /* allocate the array for the result */
+        if (NULL == (result = g_array_new(
+                         FALSE, FALSE, sizeof(
+                             struct flom_vfs_ino_name_pair_s))))
+            THROW(G_ARRAY_NEW_ERROR);
+        /* associate the destroyer */
+        g_array_set_clear_func(result, flom_vfs_ino_name_pair_destroy_notify);
+        
+        /* if data == NULL, the caller wants the root of the tree */
+        if (NULL == data) {
+            node = flom_vfs_ram_tree.root;
+            FLOM_TRACE(("flom_vfs_ram_tree_retrieve_children: %p is for root "
+                        "in ram tree, node->data=%p, node->data->name='%s'\n",
+                        data, node->data,
+                        ((flom_vfs_ram_node_t *)node->data)->name));
+        } else if (NULL == (node = g_node_find(flom_vfs_ram_tree.root,
+                                            G_PRE_ORDER,
+                                            G_TRAVERSE_ALL, data))) {
+            /* search the data */
+            FLOM_TRACE(("flom_vfs_ram_tree_retrieve_children: %p was not "
+                        "found in ram tree\n", data));
+        } else {
+            FLOM_TRACE(("flom_vfs_ram_tree_retrieve_children: %p was found in "
+                        "ram tree, node->data=%p, node->data->name='%s'\n",
+                        data, node->data,
+                        ((flom_vfs_ram_node_t *)node->data)->name));
+        }
+        if (NULL == node)
+            THROW(NODE_NOT_FOUND);
+        /* scan all the children of the node */
+        n = g_node_n_children(node);
+        for (i=0; i<n; i++) {
+            GNode *child = g_node_nth_child(node, i);
+            flom_vfs_ram_node_t *node_in_ram;
+            struct flom_vfs_ino_name_pair_s pair;
+            if (NULL == child)
+                break;
+            node_in_ram = (flom_vfs_ram_node_t *)child->data;
+            pair.ino = (fuse_ino_t)node_in_ram;
+            if (NULL == (pair.name = g_strdup(node_in_ram->name)))
+                THROW(G_STRDUP_ERROR);
+            g_array_append_val(result, pair);
+            FLOM_TRACE(("flom_vfs_ram_tree_retrieve_children: appended ("
+                        FUSE_INO_T_FORMAT ",'%s')\n", pair.ino, pair.name));
+        } /* for (i=0; i<n; i++) */
+
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case G_ARRAY_NEW_ERROR:
+                ret_cod = FLOM_RC_G_ARRAY_NEW_ERROR;
+                break;
+            case NODE_NOT_FOUND:
+                ret_cod = FLOM_RC_OBJ_NOT_FOUND_ERROR;
+                break;
+            case G_STRDUP_ERROR:
+                ret_cod = FLOM_RC_G_STRDUP_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* unlock the tree to avoid conflicts */
+    g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    FLOM_TRACE(("flom_vfs_ram_tree_retrieve_children/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return result;
+}
+
+
+
+/*
+ * END OF:
+ * Experimental stuff: use GLIB N-ary Tree to create the VFS in memory.
+ * Move this types to a more convenient file if necessary to avoid strange
+ * dependencies in the includes
+ */

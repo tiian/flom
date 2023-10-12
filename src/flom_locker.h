@@ -59,6 +59,20 @@
  * Data structure used for a locker thread
  */
 struct flom_locker_s {
+    /*
+      @@@
+      DON'T ADD A MUTEX HERE!
+      There's maybe a more robust way, look at the N-ary tree structure
+      experiment before going on with it!
+
+      add a mutex here, rename all members to be sure they are accessed
+      only according to the mutex
+      the "resource" field contains a lot of dynamic information that might
+      change on the fly without serialization
+      Understand if a mutex dedicated to the "resource" field makes sense, but
+      it should not be necessary because 1 locker owns 1 resource; it mainly
+      depends on how the code of the locker is written. Check it.
+    */
     /**
      * Identifier of the thread running the locker
      */
@@ -104,25 +118,25 @@ struct flom_locker_s {
 
 
 /**
- * A pool of lockers
+ * An object to manage pool of lockers
  */
-struct flom_locker_array_s {
+typedef struct flom_locker_array_s {
+    /**
+     * The access to the object must be serialized by mean of this mutex;
+     * the mutex became necessary with the support of the VFS (Virtual File
+     * System) dedicated thread that requires to inspect the data structure
+     * in parallel
+     */
     /*
-      @@@ add a mutex to serialize the object and allows VFS to read
-      consistent data
-    */
+     * @@@ This is probably something to remove if the n-ary tree structure
+     * experiment will pay off
+     */
+    GMutex     mutex;
     /**
      * Array of lockers
      */
-    GPtrArray *array;
-};
-
-
-
-/**
- * A shorthand to avoid "struct" verb
- */
-typedef struct flom_locker_array_s flom_locker_array_t;
+    GPtrArray *locker_array;
+} flom_locker_array_t;
 
 
 
@@ -219,9 +233,12 @@ extern "C" {
      * @param lockers IN/OUT array of lockers
      * @return how many lockers are managed by the object
      */
-    static inline guint flom_locker_array_count(
-        const flom_locker_array_t *lockers) {
-        return lockers->array->len;
+    static inline guint flom_locker_array_count(flom_locker_array_t *lockers) {
+        guint len = 0;
+        g_mutex_lock(&lockers->mutex);
+        len = lockers->locker_array->len;
+        g_mutex_unlock(&lockers->mutex);
+        return len;
     }
 
 
@@ -234,10 +251,14 @@ extern "C" {
      */
     static inline struct flom_locker_s *flom_locker_array_get(
         flom_locker_array_t *lockers, guint i) {
-        if (i < 0 || i >= lockers->array->len)
-            return NULL;
+        struct flom_locker_s *res = NULL;
+        g_mutex_lock(&lockers->mutex);
+        if (i < 0 || i >= lockers->locker_array->len)
+            res = NULL;
         else
-            return g_ptr_array_index(lockers->array, i);
+            res = g_ptr_array_index(lockers->locker_array, i);
+        g_mutex_unlock(&lockers->mutex);
+        return res;
     }
 
 

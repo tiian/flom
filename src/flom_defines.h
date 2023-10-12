@@ -293,7 +293,7 @@ typedef unsigned long flom_uid_t;
 # define SIZEOF_FLOM_UID_T SIZEOF_FUSE_INO_T
 #else
 # warning sizeof(fuse_ino_t) is not available, using sizeof(unsigned long)
-# define SIZEOF_FLOM_UID_T sizeof(flom_uid_t)
+# define SIZEOF_FLOM_UID_T SIZEOF_UNSIGNED_LONG
 #endif
 
 
@@ -310,7 +310,16 @@ typedef unsigned long flom_uid_t;
 #else
 # error Unable to determine sizeof(flom_uid_t)
 #endif
+#define FUSE_INO_T_FORMAT FLOM_UID_T_FORMAT
 
+
+
+/*
+ * Check size compatibility
+ */
+#if SIZEOF_FUSE_INO_T != SIZEOF_VOID_P
+# error Type fuse_ino_t can not be mapped to pointer void *
+#endif
 
 
 #ifndef HAVE_UINT8_T
