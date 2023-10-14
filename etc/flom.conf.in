@@ -96,6 +96,11 @@
 # UDP/IP multicast port used to discover flom daemon unicast address & port
 # (Uncomment below row if necessary)
 #@_CONFIG_KEY_MULTICAST_PORT@=@_DEFAULT_DAEMON_PORT@
+# Activation of a Virtual File System (VFS) to exchange info with the daemon
+# using an approach similar to /proc; to activate it, a valid mount point for
+# the VFS must be specified
+# (Uncomment below row if necessary)
+#@_CONFIG_KEY_MOUNT_POINT_VFS@=/tmp/flom-vfs
 
 # This section (configuration group) is related to monitor parameters; the
 # monitor is the process started by "flom" command line to execute another

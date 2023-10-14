@@ -9,6 +9,9 @@
 /* Define to 1 if you have the <dbus/dbus.h> header file. */
 #undef HAVE_DBUS_DBUS_H
 
+/* Define to 1 if you have the <dirent.h> header file. */
+#undef HAVE_DIRENT_H
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
@@ -71,6 +74,9 @@
 
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #undef HAVE_NETINET_TCP_H
+
+/* Define to 1 if you have the `opendir' function. */
+#undef HAVE_OPENDIR
 
 /* Define to 1 if you have the <openssl/err.h> header file. */
 #undef HAVE_OPENSSL_ERR_H
@@ -294,6 +300,9 @@
 
 /* Label of "LockMode" key inside config files */
 #undef _CONFIG_KEY_LOCK_MODE
+
+/* Label of "MountPointVFS" key inside config files */
+#undef _CONFIG_KEY_MOUNT_POINT_VFS
 
 /* Label of "MulticastAddress" key inside config files */
 #undef _CONFIG_KEY_MULTICAST_ADDRESS

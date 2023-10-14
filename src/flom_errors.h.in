@@ -73,20 +73,24 @@
 
 /* WARNINGS */
 /**
+ * A feature is inactive and a piece of code was skipped
+ */
+#define FLOM_RC_INACTIVE_FEATURE                     +13
+/**
  * A transactional operation has been requested for non transactional
  * resource
  */
-#define FLOM_RC_RESOURCE_IS_NOT_TRANSACTIONAL       +12
+#define FLOM_RC_RESOURCE_IS_NOT_TRANSACTIONAL        +12
 /**
  * The handle can not be changed at this time (probably, some API was called
  * using an invalid sequence)
  */
-#define FLOM_RC_API_IMMUTABLE_HANDLE                +11
+#define FLOM_RC_API_IMMUTABLE_HANDLE                 +11
 /**
  * The name of the element is not available (probably, the resource is not of
  * type "set")
  */
-#define FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE          +10
+#define FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE           +10
 /**
  * A network operation timed out
  */
@@ -249,6 +253,10 @@
  * The server has unilaterally closed the connection
  */
 #define FLOM_RC_CONNECTION_CLOSED_BY_SERVER          -27
+/**
+ * The object was not found
+ */
+#define FLOM_RC_OBJ_NOT_FOUND_ERROR                  -28
 
 
 
@@ -269,157 +277,165 @@
  */
 #define FLOM_RC_CLOSE_ERROR                         -103
 /**
+ * "closedir" function error
+ */
+#define FLOM_RC_CLOSEDIR_ERROR                      -104
+/**
  * "connect" function error
  */
-#define FLOM_RC_CONNECT_ERROR                       -104
+#define FLOM_RC_CONNECT_ERROR                       -105
 /**
  * "execvp" function error
  */
-#define FLOM_RC_EXECVP_ERROR                        -105
+#define FLOM_RC_EXECVP_ERROR                        -106
 /**
  * "fcntl" function error
  */
-#define FLOM_RC_FCNTL_ERROR                         -106
+#define FLOM_RC_FCNTL_ERROR                         -107
 /**
  * "flock" function error
  */
-#define FLOM_RC_FLOCK_ERROR                         -107
+#define FLOM_RC_FLOCK_ERROR                         -108
 /**
  * "fork" function error
  */
-#define FLOM_RC_FORK_ERROR                          -108
+#define FLOM_RC_FORK_ERROR                          -109
 /**
  * "getaddrinfo" function error
  */
-#define FLOM_RC_GETADDRINFO_ERROR                   -109
+#define FLOM_RC_GETADDRINFO_ERROR                   -110
 /**
  * "getifaddrs" function error
  */
-#define FLOM_RC_GETIFADDRS_ERROR                    -110
+#define FLOM_RC_GETIFADDRS_ERROR                    -111
 /**
  * "getnameinfo" function error
  */
-#define FLOM_RC_GETNAMEINFO_ERROR                   -111
+#define FLOM_RC_GETNAMEINFO_ERROR                   -112
 /**
  * "getsockname" function error
  */
-#define FLOM_RC_GETSOCKNAME_ERROR                   -112
+#define FLOM_RC_GETSOCKNAME_ERROR                   -113
 /**
  * "getsockopt" function error
  */
-#define FLOM_RC_GETSOCKOPT_ERROR                    -113
+#define FLOM_RC_GETSOCKOPT_ERROR                    -114
 /**
  * "gettimeofday" function error
  */
-#define FLOM_RC_GETTIMEOFDAY_ERROR                  -114
+#define FLOM_RC_GETTIMEOFDAY_ERROR                  -115
 /**
  * "inet_ntop" function error
  */
-#define FLOM_RC_INET_NTOP_ERROR                     -115
+#define FLOM_RC_INET_NTOP_ERROR                     -116
 /**
  * "listen" function error
  */
-#define FLOM_RC_LISTEN_ERROR                        -116
+#define FLOM_RC_LISTEN_ERROR                        -117
 /**
  * "localtime_r" function error
  */
-#define FLOM_RC_LOCALTIME_R_ERROR                   -117
+#define FLOM_RC_LOCALTIME_R_ERROR                   -118
 /**
  * "malloc"/"g_malloc" function error
  */
-#define FLOM_RC_MALLOC_ERROR                        -118
+#define FLOM_RC_MALLOC_ERROR                        -119
 /**
  * "open" function error
  */
-#define FLOM_RC_OPEN_ERROR                          -119
+#define FLOM_RC_OPEN_ERROR                          -120
+/**
+ * "opendir" function error
+ */
+#define FLOM_RC_OPENDIR_ERROR                       -121
 /**
  * "pipe" function error
  */
-#define FLOM_RC_PIPE_ERROR                          -120
+#define FLOM_RC_PIPE_ERROR                          -122
 /**
  * "poll" function error
  */
-#define FLOM_RC_POLL_ERROR                          -121
+#define FLOM_RC_POLL_ERROR                          -123
 /**
  * "read" function error
  */
-#define FLOM_RC_READ_ERROR                          -122
+#define FLOM_RC_READ_ERROR                          -124
 /**
  * "realpath" function error
  */
-#define FLOM_RC_REALPATH_ERROR                      -123
+#define FLOM_RC_REALPATH_ERROR                      -125
 /**
  * "recv" function error
  */
-#define FLOM_RC_RECV_ERROR                          -124
+#define FLOM_RC_RECV_ERROR                          -126
 /**
  * "recvfrom" function error
  */
-#define FLOM_RC_RECVFROM_ERROR                      -125
+#define FLOM_RC_RECVFROM_ERROR                      -127
 /**
  * "regcomp" function error
  */
-#define FLOM_RC_REGCOMP_ERROR                       -126
+#define FLOM_RC_REGCOMP_ERROR                       -128
 /**
  * "regexec" function error
  */
-#define FLOM_RC_REGEXEC_ERROR                       -127
+#define FLOM_RC_REGEXEC_ERROR                       -129
 /**
  * "send" function error
  */
-#define FLOM_RC_SEND_ERROR                          -128
+#define FLOM_RC_SEND_ERROR                          -130
 /**
  * "sendto" function error
  */
-#define FLOM_RC_SENDTO_ERROR                        -129
+#define FLOM_RC_SENDTO_ERROR                        -131
 /**
  * "setsid" function error
  */
-#define FLOM_RC_SETSID_ERROR                        -130
+#define FLOM_RC_SETSID_ERROR                        -132
 /**
  * "setsockopt" function error
  */
-#define FLOM_RC_SETSOCKOPT_ERROR                    -131
+#define FLOM_RC_SETSOCKOPT_ERROR                    -133
 /**
  * "sigaction" function error
  */
-#define FLOM_RC_SIGACTION_ERROR                     -132
+#define FLOM_RC_SIGACTION_ERROR                     -134
 /**
  * "sigaddset" function error
  */
-#define FLOM_RC_SIGADDSET_ERROR                     -133
+#define FLOM_RC_SIGADDSET_ERROR                     -135
 /**
  * "sigemptyset" function error
  */
-#define FLOM_RC_SIGEMPTYSET_ERROR                   -134
+#define FLOM_RC_SIGEMPTYSET_ERROR                   -136
 /**
  * "signal" function error
  */
-#define FLOM_RC_SIGNAL_ERROR                        -135
+#define FLOM_RC_SIGNAL_ERROR                        -137
 /**
  * "sigprocmask" function error
  */
-#define FLOM_RC_SIGPROCMASK_ERROR                   -136
+#define FLOM_RC_SIGPROCMASK_ERROR                   -138
 /**
  * "socket" function error
  */
-#define FLOM_RC_SOCKET_ERROR                        -137
+#define FLOM_RC_SOCKET_ERROR                        -139
 /**
  * "snprintf" function error (truncation)
  */
-#define FLOM_RC_SNPRINTF_ERROR                      -138
+#define FLOM_RC_SNPRINTF_ERROR                      -140
 /**
  * "unlink" function error
  */
-#define FLOM_RC_UNLINK_ERROR                        -139
+#define FLOM_RC_UNLINK_ERROR                        -141
 /**
  * "wait" function error
  */
-#define FLOM_RC_WAIT_ERROR                          -140
+#define FLOM_RC_WAIT_ERROR                          -142
 /**
  * "write" function error
  */
-#define FLOM_RC_WRITE_ERROR                         -141
+#define FLOM_RC_WRITE_ERROR                         -143
 
 /* GLIB related errors */
 
@@ -452,37 +468,45 @@
  */
 #define FLOM_RC_G_MARKUP_PARSE_CONTEXT_PARSE_ERROR  -206
 /**
+ * "g_node_new" function error
+ */
+#define FLOM_RC_G_NODE_NEW_ERROR                    -207
+/**
+ * "g_node_prepend_data" function error
+ */
+#define FLOM_RC_G_NODE_PREPEND_DATA_ERROR           -208
+/**
  * "g_ptr_array_remove_index_fast" function error
  */
-#define FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR -207
+#define FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR -209
 /**
  * "g_queue_new" function error
  */
-#define FLOM_RC_G_QUEUE_NEW_ERROR                   -208
+#define FLOM_RC_G_QUEUE_NEW_ERROR                   -210
 /**
  * "g_strdup" function error
  */
-#define FLOM_RC_G_STRDUP_ERROR                      -209
+#define FLOM_RC_G_STRDUP_ERROR                      -211
 /**
  * "g_strndup" function error
  */
-#define FLOM_RC_G_STRNDUP_ERROR                     -210
+#define FLOM_RC_G_STRNDUP_ERROR                     -212
 /**
  * "g_strsplit" function error
  */
-#define FLOM_RC_G_STRSPLIT_ERROR                    -211
+#define FLOM_RC_G_STRSPLIT_ERROR                    -213
 /**
  * "g_thread_create" function error
  */
-#define FLOM_RC_G_THREAD_CREATE_ERROR               -212
+#define FLOM_RC_G_THREAD_CREATE_ERROR               -214
 /**
  * "g_try_malloc"/"g_try_malloc0" function error
  */
-#define FLOM_RC_G_TRY_MALLOC_ERROR                  -213
+#define FLOM_RC_G_TRY_MALLOC_ERROR                  -215
 /**
  * "g_try_realloc" function error
  */
-#define FLOM_RC_G_TRY_REALLOC_ERROR                 -214
+#define FLOM_RC_G_TRY_REALLOC_ERROR                 -216
 
 /* JNI related errors */
 

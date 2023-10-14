@@ -313,7 +313,8 @@ int flom_daemon(flom_config_t *config, int family)
     /* @@@
        unmounting FUSE, make this code less naive, please!!!
     */
-    system("fusermount -u /tmp/prova");
+    if (NULL != flom_config_get_mount_point_vfs(config))
+        system("fusermount -u /tmp/prova");
             
     /* the function must not return control if in daemonized state */
     if (daemon)
@@ -1028,19 +1029,24 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
         int loop = TRUE;
         int chklockers_again = FALSE;
         GThread *vfs_thread;
+        int activate_vfs = flom_config_get_mount_point_vfs(config) != NULL;
 
         flom_locker_array_init(&lockers);
 
         /* initialize the RAM representation of the VFS */
-        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_init()))
+        ret_cod = flom_vfs_ram_tree_init(activate_vfs);
+        if ((activate_vfs && FLOM_RC_OK != ret_cod) ||
+            (!activate_vfs && FLOM_RC_INACTIVE_FEATURE != ret_cod))
             THROW(VFS_RAM_TREE_INIT_ERROR);
         
-        /* @@@ put a condition, activate only if needed */
-        FLOM_TRACE(("flom_accept_loop: activating VFS thread...\n"));
-        if (NULL == (vfs_thread = g_thread_new("FUSE VFS",
-                                               flom_daemon_mngmnt_activate_vfs,
-                                               NULL)))
-            THROW(G_THREAD_NEW_ERROR);
+        /* activate the thread only if VFS is required */
+        if (activate_vfs) {
+            FLOM_TRACE(("flom_accept_loop: activating VFS thread...\n"));
+            if (NULL == (vfs_thread = g_thread_new(
+                             "FUSE VFS", flom_daemon_mngmnt_activate_vfs,
+                             NULL)))
+                THROW(G_THREAD_NEW_ERROR);
+        }
         
         while (loop) {
             int ready_fd;

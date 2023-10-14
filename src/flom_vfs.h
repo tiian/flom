@@ -106,6 +106,13 @@ struct flom_vfs_ram_tree_parent_child_s {
  */
 typedef struct {
     /**
+     * The ram tree is active: if FALSE, no operation must be done on the
+     * object because the VFS feature is disabled. The field is not protected
+     * by mutex because it's set only once by @ref flom_vfs_ram_tree_init and
+     * read by all other functions
+     */
+    int              active;
+    /**
      * This mutex serializes all and every access to the n-ary tree
      */
     GMutex           mutex;
@@ -159,9 +166,12 @@ extern "C" {
     /**
      * Initialize the VFS RAM n-ary tree. No parameters are necessary because
      * there's only one static object of this type, shared by all the threads
+     * @param activate IN is a boolean value TRUE if the VFS must be activated,
+     *        FALSE if the VFS must not be activated and the ram tree must
+     *        stay empty
      * @return a reason code
      */
-    int flom_vfs_ram_tree_init();
+    int flom_vfs_ram_tree_init(int activate);
 
 
 

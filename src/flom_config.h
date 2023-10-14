@@ -203,6 +203,10 @@ extern const gchar *FLOM_CONFIG_KEY_MULTICAST_ADDRESS;
  */
 extern const gchar *FLOM_CONFIG_KEY_MULTICAST_PORT;
 /**
+ * Label associated to "MountPointVFS" key inside config files
+ */
+extern const gchar *FLOM_CONFIG_KEY_MOUNT_POINT_VFS;
+/**
  * Label associated to "Monitor" group inside config files
  */
 extern const gchar *FLOM_CONFIG_GROUP_MONITOR;
@@ -374,6 +378,10 @@ typedef struct flom_config_s {
      * Daemon UDP/IP multicast port
      */
     gint               multicast_port;
+    /**
+     * Mount point for the VFS used by the daemon to communicate
+     */
+    gchar             *mount_point_vfs;
     /**
      * Network interface that must be used to reach IPv6 link local addresses
      */
@@ -914,6 +922,31 @@ extern "C" {
 
 
 
+    /**
+     * Set daemon_mount_point_vfs
+     * @param config IN/OUT configuration object, NULL for global config
+     * @param mount_point_vfs IN set the new value for mount_point_vfs
+     *        property
+     * @return a reason code
+     */
+    int flom_config_set_mount_point_vfs(flom_config_t *config,
+                                        const gchar *mount_point_vfs);
+
+
+
+    /**
+     * Retrieve the mount_point_vfs specified for daemon process
+     * @param config IN/OUT configuration object, NULL for global config
+     * @return mount_point_vfs
+     */
+    static inline const gchar *flom_config_get_mount_point_vfs(
+        flom_config_t *config) {
+        return NULL == config ?
+            global_config.mount_point_vfs : config->mount_point_vfs;
+    }
+
+
+    
     /**
      * Set the signals that must be ignored by the monitor.
      * This is not part of the API because it's designed only for internal

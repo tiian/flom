@@ -668,6 +668,7 @@ _CONFIG_KEY_NETWORK_INTERFACE
 _CONFIG_GROUP_NETWORK
 _CONFIG_KEY_IGNORED_SIGNALS
 _CONFIG_GROUP_MONITOR
+_CONFIG_KEY_MOUNT_POINT_VFS
 _CONFIG_KEY_MULTICAST_PORT
 _CONFIG_KEY_MULTICAST_ADDRESS
 _CONFIG_KEY_UNICAST_PORT
@@ -12239,6 +12240,7 @@ _CONFIG_KEY_UNICAST_ADDRESS="UnicastAddress"
 _CONFIG_KEY_UNICAST_PORT="UnicastPort"
 _CONFIG_KEY_MULTICAST_ADDRESS="MulticastAddress"
 _CONFIG_KEY_MULTICAST_PORT="MulticastPort"
+_CONFIG_KEY_MOUNT_POINT_VFS="MountPointVFS"
 _CONFIG_GROUP_MONITOR="Monitor"
 _CONFIG_KEY_IGNORED_SIGNALS="IgnoredSignals"
 _CONFIG_GROUP_NETWORK="Network"
@@ -12426,6 +12428,11 @@ _ACEOF
 
 cat >>confdefs.h <<_ACEOF
 #define _CONFIG_KEY_MULTICAST_PORT "$_CONFIG_KEY_MULTICAST_PORT"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define _CONFIG_KEY_MOUNT_POINT_VFS "$_CONFIG_KEY_MOUNT_POINT_VFS"
 _ACEOF
 
 
@@ -19243,6 +19250,18 @@ fi
 
 done
 
+for ac_header in dirent.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "dirent.h" "ac_cv_header_dirent_h" "$ac_includes_default"
+if test "x$ac_cv_header_dirent_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DIRENT_H 1
+_ACEOF
+
+fi
+
+done
+
 for ac_header in errno.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "errno.h" "ac_cv_header_errno_h" "$ac_includes_default"
@@ -20149,6 +20168,17 @@ _ACEOF
 fi
 done
 
+for ac_func in opendir
+do :
+  ac_fn_c_check_func "$LINENO" "opendir" "ac_cv_func_opendir"
+if test "x$ac_cv_func_opendir" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_OPENDIR 1
+_ACEOF
+
+fi
+done
+
 for ac_func in signal
 do :
   ac_fn_c_check_func "$LINENO" "signal" "ac_cv_func_signal"
@@ -20276,6 +20306,7 @@ done
 
 
 # substitution inside *.in for hardwired configuration
+
 
 
 

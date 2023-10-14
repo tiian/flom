@@ -536,9 +536,10 @@ gboolean iter(GNode *n, gpointer data) {
 
 
 
-int flom_vfs_ram_tree_init()
+int flom_vfs_ram_tree_init(int activate)
 {
-    enum Exception { NODE_CREATE_ERROR1
+    enum Exception { BYPASS_ACTIVATION
+                     , NODE_CREATE_ERROR1
                      , G_NODE_NEW_ERROR1
                      , NODE_CREATE_ERROR2
                      , G_NODE_PREPEND_DATA2
@@ -553,9 +554,16 @@ int flom_vfs_ram_tree_init()
     flom_vfs_ram_node_t *tmp_locker1_node = NULL;
     flom_vfs_ram_node_t *tmp_locker2_node = NULL;
     
-    FLOM_TRACE(("flom_vfs_ram_tree_init\n"));
+    FLOM_TRACE(("flom_vfs_ram_tree_init(activate=%d)\n", activate));
     TRY {
         GNode *tmp;
+
+        if (!activate) {
+            /* VFS feature must not be activated, ram tree must stay empty */
+            flom_vfs_ram_tree.active = FALSE;
+            flom_vfs_ram_tree.root = NULL;
+            THROW(BYPASS_ACTIVATION);
+        }
         
         /* initialize the global semaphore */
         g_mutex_init(&flom_vfs_ram_tree.mutex);
@@ -570,6 +578,9 @@ int flom_vfs_ram_tree_init()
         /* create the node as the root node in the tree */
         if (NULL == (flom_vfs_ram_tree.root = g_node_new(tmp_root_node)))
             THROW(G_NODE_NEW_ERROR1);
+
+        /* now the ram tree can be considered active */
+        flom_vfs_ram_tree.active = TRUE;
 
         /* create the data block for the second node, status dir */
         if (NULL == (tmp_status_node = flom_vfs_ram_node_create(
@@ -611,6 +622,9 @@ int flom_vfs_ram_tree_init()
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case BYPASS_ACTIVATION:
+                ret_cod = FLOM_RC_INACTIVE_FEATURE;
+                break;
             case NODE_CREATE_ERROR1:
             case NODE_CREATE_ERROR2:
             case NODE_CREATE_ERROR3:
@@ -659,30 +673,38 @@ gboolean flom_vfs_ram_tree_cleanup_iter(GNode *n, gpointer data) {
 void flom_vfs_ram_tree_cleanup()
 {
     FLOM_TRACE(("flom_vfs_ram_tree_cleanup\n"));
-    /* lock it immediately! */
-    g_mutex_lock(&flom_vfs_ram_tree.mutex);
-    /* traverse the tree to remove data */
-    g_node_traverse(flom_vfs_ram_tree.root, G_PRE_ORDER, G_TRAVERSE_ALL,
-                    -1, flom_vfs_ram_tree_cleanup_iter, NULL);
-    /* destroy the tree */
-    g_node_destroy(flom_vfs_ram_tree.root);
-    flom_vfs_ram_tree.root = NULL;
-    /* unlock the semaphore to leave access to the object to others */
-    g_mutex_unlock(&flom_vfs_ram_tree.mutex);
-    g_mutex_clear(&flom_vfs_ram_tree.mutex);
+    if (flom_vfs_ram_tree.active) {
+        /* lock it immediately! */
+        g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        /* traverse the tree to remove data */
+        g_node_traverse(flom_vfs_ram_tree.root, G_PRE_ORDER, G_TRAVERSE_ALL,
+                        -1, flom_vfs_ram_tree_cleanup_iter, NULL);
+        /* destroy the tree */
+        g_node_destroy(flom_vfs_ram_tree.root);
+        flom_vfs_ram_tree.root = NULL;
+        /* unlock the semaphore to leave access to the object to others */
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+        g_mutex_clear(&flom_vfs_ram_tree.mutex);
+        /* deactivate it! */
+        flom_vfs_ram_tree.active = FALSE;
+    }
 }
 
 
 
 GNode *flom_vfs_ram_tree_find(gpointer data)
 {
-    enum Exception { NONE } excp;
+    enum Exception { NOT_ACTIVE
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     GNode *result = NULL;
     
     FLOM_TRACE(("flom_vfs_ram_tree_find: data=%p\n", data));
     TRY {
         GNode *tmp = NULL;
+
+        if (!flom_vfs_ram_tree.active)
+            THROW(NOT_ACTIVE);
         
         /* lock the tree to avoid conflicts */
         g_mutex_lock(&flom_vfs_ram_tree.mutex);
@@ -711,6 +733,9 @@ GNode *flom_vfs_ram_tree_find(gpointer data)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case NOT_ACTIVE:
+                ret_cod = FLOM_RC_INACTIVE_FEATURE;
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -757,13 +782,17 @@ gboolean flom_vfs_ram_tree_find_parent_iter(
 
 GNode *flom_vfs_ram_tree_find_parent(GNode *node)
 {
-    enum Exception { NULL_OBJECT
+    enum Exception { INACTIVE_FEATURE
+                     , NULL_OBJECT
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     GNode *result = NULL;
     
     FLOM_TRACE(("flom_vfs_ram_tree_find_parent: node=%p\n", node));
     TRY {
+        if (!flom_vfs_ram_tree.active)
+            THROW(INACTIVE_FEATURE);
+        
         if (NULL == node || NULL == node->data)
             THROW(NULL_OBJECT);
         FLOM_TRACE(("flom_vfs_ram_tree_find_parent: node=%p, name='%s'\n",
@@ -794,6 +823,9 @@ GNode *flom_vfs_ram_tree_find_parent(GNode *node)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INACTIVE_FEATURE:
+                ret_cod = FLOM_RC_INACTIVE_FEATURE;
+                break;
             case NULL_OBJECT:
                 ret_cod = FLOM_RC_NULL_OBJECT;
                 break;
@@ -828,7 +860,8 @@ void flom_vfs_ino_name_pair_destroy_notify(gpointer data)
 
 GNode *flom_vfs_ram_tree_find_child_by_name(GNode *root, const char *name)
 {
-    enum Exception { NONE } excp;
+    enum Exception { INACTIVE_FEATURE
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     GNode *result = NULL;
     
@@ -836,6 +869,9 @@ GNode *flom_vfs_ram_tree_find_child_by_name(GNode *root, const char *name)
     TRY {
         guint i=0, n=0;
         GNode *node;
+
+        if (!flom_vfs_ram_tree.active)
+            THROW(INACTIVE_FEATURE);
         
         /* lock the tree to avoid conflicts */
         g_mutex_lock(&flom_vfs_ram_tree.mutex);
@@ -858,6 +894,9 @@ GNode *flom_vfs_ram_tree_find_child_by_name(GNode *root, const char *name)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INACTIVE_FEATURE:
+                ret_cod = FLOM_RC_INACTIVE_FEATURE;
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -876,7 +915,8 @@ GNode *flom_vfs_ram_tree_find_child_by_name(GNode *root, const char *name)
 
 GArray *flom_vfs_ram_tree_retrieve_children(gpointer data)
 {
-    enum Exception { G_ARRAY_NEW_ERROR
+    enum Exception { INACTIVE_FEATURE
+                     , G_ARRAY_NEW_ERROR
                      , NODE_NOT_FOUND
                      , G_STRDUP_ERROR
                      , NONE } excp;
@@ -887,6 +927,9 @@ GArray *flom_vfs_ram_tree_retrieve_children(gpointer data)
     TRY {
         GNode *node = NULL;
         guint i, n;
+
+        if (!flom_vfs_ram_tree.active)
+            THROW(INACTIVE_FEATURE);
         
         /* lock the tree to avoid conflicts */
         g_mutex_lock(&flom_vfs_ram_tree.mutex);
@@ -940,6 +983,9 @@ GArray *flom_vfs_ram_tree_retrieve_children(gpointer data)
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INACTIVE_FEATURE:
+                ret_cod = FLOM_RC_INACTIVE_FEATURE;
+                break;
             case G_ARRAY_NEW_ERROR:
                 ret_cod = FLOM_RC_G_ARRAY_NEW_ERROR;
                 break;

@@ -28,6 +28,9 @@
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 #endif
+#ifdef HAVE_DIRENT_H
+# include <dirent.h>
+#endif
 #ifdef HAVE_IFADDRS_H
 # include <ifaddrs.h>
 #endif
@@ -109,6 +112,7 @@ const gchar *FLOM_CONFIG_KEY_UNICAST_ADDRESS = _CONFIG_KEY_UNICAST_ADDRESS;
 const gchar *FLOM_CONFIG_KEY_UNICAST_PORT = _CONFIG_KEY_UNICAST_PORT;
 const gchar *FLOM_CONFIG_KEY_MULTICAST_ADDRESS = _CONFIG_KEY_MULTICAST_ADDRESS;
 const gchar *FLOM_CONFIG_KEY_MULTICAST_PORT = _CONFIG_KEY_MULTICAST_PORT;
+const gchar *FLOM_CONFIG_KEY_MOUNT_POINT_VFS = _CONFIG_KEY_MOUNT_POINT_VFS;
 const gchar *FLOM_CONFIG_GROUP_MONITOR = _CONFIG_GROUP_MONITOR;
 const gchar *FLOM_CONFIG_KEY_IGNORED_SIGNALS = _CONFIG_KEY_IGNORED_SIGNALS;
 const gchar *FLOM_CONFIG_GROUP_NETWORK = _CONFIG_GROUP_NETWORK;
@@ -214,6 +218,7 @@ void flom_config_reset(flom_config_t *config)
     config->unicast_port = _DEFAULT_DAEMON_PORT;
     config->multicast_address = NULL;
     config->multicast_port = _DEFAULT_DAEMON_PORT;
+    config->mount_point_vfs = NULL;
     config->network_interface = NULL;
     config->sin6_scope_id = 0;
     config->discovery_attempts = _DEFAULT_DISCOVERY_ATTEMPTS;
@@ -392,6 +397,11 @@ void flom_config_print(flom_config_t *config)
     g_print("[%s]/%s=%d\n", FLOM_CONFIG_GROUP_DAEMON,
             FLOM_CONFIG_KEY_MULTICAST_PORT,
             flom_config_get_multicast_port(config));
+    g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_DAEMON,
+            FLOM_CONFIG_KEY_MOUNT_POINT_VFS,
+            NULL == flom_config_get_mount_point_vfs(config) ?
+            FLOM_EMPTY_STRING : 
+            flom_config_get_mount_point_vfs(config));
     ignored_signals = flom_config_get_ignored_signals_str(config);
     g_print("[%s]/%s='%s'\n", FLOM_CONFIG_GROUP_MONITOR,
             FLOM_CONFIG_KEY_IGNORED_SIGNALS, ignored_signals);
@@ -458,6 +468,8 @@ void flom_config_free(flom_config_t *config)
     config->unicast_address = NULL;
     g_free(config->multicast_address);
     config->multicast_address = NULL;    
+    g_free(config->mount_point_vfs);
+    config->mount_point_vfs = NULL;
     g_free(config->network_interface);
     config->network_interface = NULL;
     g_free(config->tls_certificate);
@@ -572,6 +584,7 @@ int flom_config_init_load(flom_config_t *config,
         CONFIG_SET_DAEMON_LIFESPAN_ERROR,
         CONFIG_SET_DAEMON_UNICAST_PORT_ERROR,
         CONFIG_SET_DAEMON_MULTICAST_PORT_ERROR,
+        CONFIG_SET_MOUNT_POINT_VFS_ERROR,
         CONFIG_SET_DAEMON_DISCOVERY_ATTEMPTS_ERROR,
         CONFIG_SET_DAEMON_DISCOVERY_TIMEOUT_ERROR,
         CONFIG_SET_DAEMON_DISCOVERY_TTL_ERROR,
@@ -1007,6 +1020,31 @@ int flom_config_init_load(flom_config_t *config,
                         FLOM_CONFIG_KEY_MULTICAST_PORT, ivalue));
             flom_config_set_multicast_port(config, ivalue);
         }
+        /* pick-up mount point VFS configuration */
+        if (NULL == (value = g_key_file_get_string(
+                         gkf, FLOM_CONFIG_GROUP_DAEMON,
+                         FLOM_CONFIG_KEY_MOUNT_POINT_VFS, &error))) {
+            FLOM_TRACE(("flom_config_init_load/g_key_file_get_string"
+                        "(...,%s,%s,...): code=%d, message='%s'\n",
+                        FLOM_CONFIG_GROUP_DAEMON,
+                        FLOM_CONFIG_KEY_MOUNT_POINT_VFS, 
+                        error->code,
+                        error->message));
+            g_error_free(error);
+            error = NULL;
+        } else {
+            FLOM_TRACE(("flom_config_init_load: %s[%s]='%s'\n",
+                        FLOM_CONFIG_GROUP_DAEMON,
+                        FLOM_CONFIG_KEY_MOUNT_POINT_VFS, value));
+            if (FLOM_RC_OK != (ret_cod = flom_config_set_mount_point_vfs(
+                                   config, value))) {
+                print_file_name = TRUE;
+                THROW(CONFIG_SET_MOUNT_POINT_VFS_ERROR);
+            } else {
+                g_free(value);
+                value = NULL;
+            }
+        }
         /* pick-up the signals that must be ignored by the monitor */
         if (NULL == (list = g_key_file_get_string_list(
                          gkf, FLOM_CONFIG_GROUP_MONITOR,
@@ -1314,6 +1352,7 @@ int flom_config_init_load(flom_config_t *config,
             case CONFIG_SET_SOCKET_NAME_ERROR:
             case CONFIG_SET_DAEMON_LIFESPAN_ERROR:
             case CONFIG_SET_DAEMON_UNICAST_PORT_ERROR:
+            case CONFIG_SET_MOUNT_POINT_VFS_ERROR:
             case CONFIG_SET_DAEMON_DISCOVERY_ATTEMPTS_ERROR:
             case CONFIG_SET_DAEMON_DISCOVERY_TIMEOUT_ERROR:
             case CONFIG_SET_DAEMON_DISCOVERY_TTL_ERROR:
@@ -1374,6 +1413,7 @@ int flom_config_clone(flom_config_t *config)
         config->socket_name = g_strdup(global_config.socket_name);
         config->unicast_address = g_strdup(global_config.unicast_address);
         config->multicast_address = g_strdup(global_config.multicast_address);
+        config->mount_point_vfs = g_strdup(global_config.mount_point_vfs);
         config->network_interface = g_strdup(global_config.network_interface);
         
         THROW(NONE);
@@ -1584,6 +1624,54 @@ void flom_config_set_multicast_port(flom_config_t *config, gint port)
         global_config.multicast_port = port;
     else
         config->multicast_port = port;
+}
+
+
+
+int flom_config_set_mount_point_vfs(flom_config_t *config,
+                                    const gchar *mount_point_vfs)
+{
+    enum Exception { OPENDIR_ERROR
+                     , CLOSEDIR_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_config_set_mount_point_vfs(%s)\n", mount_point_vfs));
+    TRY {
+        DIR *dir;
+        /* check the name is a valid directory */
+        if (NULL == (dir = opendir(mount_point_vfs))) {
+            FLOM_TRACE(("flom_config_set_mount_point_vfs: '%s' is not a "
+                        "valid directory\n", mount_point_vfs));
+            THROW(OPENDIR_ERROR);
+        }
+        if (0 != closedir(dir))
+            THROW(CLOSEDIR_ERROR);
+        /* default config object */
+        if (NULL == config)
+            config = &global_config;
+        g_free(config->mount_point_vfs);
+        config->mount_point_vfs = g_strdup(mount_point_vfs);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case OPENDIR_ERROR:
+                ret_cod = FLOM_RC_OPENDIR_ERROR;
+                break;
+            case CLOSEDIR_ERROR:
+                ret_cod = FLOM_RC_CLOSEDIR_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
 }
 
 

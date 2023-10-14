@@ -28,6 +28,9 @@ const char *flom_strerror(int ret_cod)
 {
     switch (ret_cod) {
         /* WARNINGS */
+        case FLOM_RC_INACTIVE_FEATURE:
+            return "WARNING: a feature is inactive and a piece of code was "
+                "skipped";
         case FLOM_RC_RESOURCE_IS_NOT_TRANSACTIONAL:
             return "WARNING: a transactional operations has been requested "
                 "for a non transactional resource";
@@ -128,8 +131,6 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: the resource can not be initialized";
         case FLOM_RC_CONNECTION_CLOSED_BY_SERVER:
             return "ERROR: the server has unilaterally closed the connection";
-        case FLOM_RC_VFS_CONSISTENCY_ERROR:
-            return "ERROR: consistency error in the VFS component";
         case FLOM_RC_OBJ_NOT_FOUND_ERROR:
             return "ERROR: object not found";
             /* system function error */
