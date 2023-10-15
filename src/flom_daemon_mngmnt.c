@@ -166,7 +166,7 @@ gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     int argc = 2;
-    char *argv[] = { "flom", "/tmp/prova" };
+    char *argv[] = { "flom", (char *)data };
     
     FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs\n"));
     TRY {
@@ -183,7 +183,7 @@ gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
         if (fuse_parse_cmdline(&args, &mountpoint, NULL, NULL) != -1 &&
             (ch = fuse_mount(mountpoint, &args)) != NULL) {
             struct fuse_session *se;
-
+            syslog(LOG_INFO, FLOM_SYSLOG_FLM022I, (char *)data);
             se = fuse_lowlevel_new(&args, &fuse_callback_functions,
                                    sizeof(fuse_callback_functions), NULL);
             if (se != NULL) {

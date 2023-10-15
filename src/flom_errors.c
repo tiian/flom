@@ -142,6 +142,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'chdir' function returned an error condition";
         case FLOM_RC_CLOSE_ERROR:
             return "ERROR: 'close' function returned an error condition";
+        case FLOM_RC_CLOSEDIR_ERROR:
+            return "ERROR: 'closedir' function returned an error condition";
         case FLOM_RC_CONNECT_ERROR:
             return "ERROR: 'connect' function returned an error condition";
         case FLOM_RC_EXECVP_ERROR:
@@ -176,6 +178,8 @@ const char *flom_strerror(int ret_cod)
                 "condition";
         case FLOM_RC_OPEN_ERROR:
             return "ERROR: 'open' function returned an error condition";
+        case FLOM_RC_OPENDIR_ERROR:
+            return "ERROR: 'opendir' function returned an error condition";
         case FLOM_RC_PIPE_ERROR:
             return "ERROR: 'pipe' function returned an error condition";
         case FLOM_RC_POLL_ERROR:

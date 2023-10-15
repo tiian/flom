@@ -119,6 +119,7 @@ int flom_daemon(flom_config_t *config, int family)
         WRITE_ERROR,
         FLOM_LISTEN_ERROR,
         FLOM_ACCEPT_LOOP_ERROR,
+        MALLOC_ERROR,
         NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int pipefd[2];
@@ -247,6 +248,30 @@ int flom_daemon(flom_config_t *config, int family)
                 THROW(FLOM_ACCEPT_LOOP_ERROR);
             syslog(LOG_NOTICE, FLOM_SYSLOG_FLM004N);
 
+            /* unmounting FUSE filesystem */
+            if (NULL != flom_config_get_mount_point_vfs(config)) {
+                size_t size;
+                char *system_command = NULL;
+                int exitstatus;
+                
+                FLOM_TRACE(("flom_daemon: unmounting VFS file system '%s'\n",
+                            flom_config_get_mount_point_vfs(config)));
+                size = 20 + strlen(flom_config_get_mount_point_vfs(config));
+                if (NULL == (system_command = malloc(size))) {
+                    FLOM_TRACE(("flom_daemon: unable to malloc "
+                                "system_command\n"));
+                    THROW(MALLOC_ERROR);
+                }
+                snprintf(system_command, size, "fusermount -u %s",
+                         flom_config_get_mount_point_vfs(config));
+                syslog(LOG_INFO, FLOM_SYSLOG_FLM023I, system_command);
+                exitstatus = WEXITSTATUS(system(system_command));
+                if (exitstatus != 0)
+                    syslog(LOG_NOTICE, FLOM_SYSLOG_FLM024N, system_command,
+                           exitstatus);
+                free(system_command);
+            }
+            
             flom_listen_clean(config, &conns);
         }
         THROW(NONE);
@@ -300,6 +325,9 @@ int flom_daemon(flom_config_t *config, int family)
                 break;
             case FLOM_ACCEPT_LOOP_ERROR:
                 break;
+            case MALLOC_ERROR:
+                ret_cod = FLOM_RC_MALLOC_ERROR;
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -310,12 +338,6 @@ int flom_daemon(flom_config_t *config, int family)
     FLOM_TRACE(("flom_daemon/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     
-    /* @@@
-       unmounting FUSE, make this code less naive, please!!!
-    */
-    if (NULL != flom_config_get_mount_point_vfs(config))
-        system("fusermount -u /tmp/prova");
-            
     /* the function must not return control if in daemonized state */
     if (daemon)
         exit(FLOM_ES_OK);
@@ -1044,7 +1066,8 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
             FLOM_TRACE(("flom_accept_loop: activating VFS thread...\n"));
             if (NULL == (vfs_thread = g_thread_new(
                              "FUSE VFS", flom_daemon_mngmnt_activate_vfs,
-                             NULL)))
+                             (gpointer)flom_config_get_mount_point_vfs(
+                                 config))))
                 THROW(G_THREAD_NEW_ERROR);
         }
         

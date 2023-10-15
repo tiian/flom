@@ -80,6 +80,9 @@ extern "C" {
 #define FLOM_SYSLOG_FLM020N "FLM020N flom_conn_recv returned %d ('%s') " \
     "instead of FLOM_RC_RECV_ERROR during flom_client_shutdown"
 #define FLOM_SYSLOG_FLM021E "FLM021E consistency error in VFS inode mapping, VFS can not be activated"
+#define FLOM_SYSLOG_FLM022I "FLM022I mounting FUSE file system '%s'"
+#define FLOM_SYSLOG_FLM023I "FLM023I unmounting FUSE file system with command '%s'"
+#define FLOM_SYSLOG_FLM024N "FLM024N command '%s' exited with status %d"
     
     
 
