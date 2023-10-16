@@ -449,21 +449,18 @@ int main(int argc, char *argv[])
 */
 
 
-/*
- * Experimental stuff: use GLIB N-ary Tree to create the VFS in memory.
- * Move this types to a more convenient file if necessary to avoid strange
- * dependencies in the includes
- */
 
 
 flom_vfs_ram_tree_t flom_vfs_ram_tree;
 
 
 
-flom_vfs_ram_node_t *flom_vfs_ram_node_create(const char *name, int is_dir)
+flom_vfs_ram_node_t *flom_vfs_ram_node_create(const char *name,
+                                              const char *content)
 {
     enum Exception { G_TRY_MALLOC_ERROR
-                     , G_STRDUP_ERROR
+                     , G_STRDUP_ERROR1
+                     , G_STRDUP_ERROR2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     flom_vfs_ram_node_t *tmp = NULL;
@@ -473,10 +470,14 @@ flom_vfs_ram_node_t *flom_vfs_ram_node_create(const char *name, int is_dir)
         /* allocate the node object */
         if (NULL == (tmp = g_try_malloc(sizeof(flom_vfs_ram_node_t))))
             THROW(G_TRY_MALLOC_ERROR);
-        tmp->is_dir = is_dir;
         /* duplicate the string for the name */
         if (NULL == (tmp->name = g_strdup(name)))
-            THROW(G_STRDUP_ERROR);
+            THROW(G_STRDUP_ERROR1);
+        /* duplicate the string for the content */
+        if (NULL == content) {
+            tmp->content = NULL;
+        } else if (NULL == (tmp->content = g_strdup(content)))
+            THROW(G_STRDUP_ERROR2);
         
         THROW(NONE);
     } CATCH {
@@ -484,7 +485,8 @@ flom_vfs_ram_node_t *flom_vfs_ram_node_create(const char *name, int is_dir)
             case G_TRY_MALLOC_ERROR:
                 ret_cod = FLOM_RC_G_TRY_MALLOC_ERROR;
                 break;
-            case G_STRDUP_ERROR:
+            case G_STRDUP_ERROR1:
+            case G_STRDUP_ERROR2:
                 ret_cod = FLOM_RC_G_STRDUP_ERROR;
                 break;
             case NONE:
@@ -493,9 +495,14 @@ flom_vfs_ram_node_t *flom_vfs_ram_node_create(const char *name, int is_dir)
             default:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
-        /* memory recovery in case of failure */
+        /* in case of failure, the object must be cleaned up */
         if (excp < NONE && excp > G_TRY_MALLOC_ERROR) {
-            g_free(tmp);
+            if (NULL != tmp->content)
+                g_free(tmp->content); /* should never happen */
+            if (NULL != tmp->name)
+                g_free(tmp->name);
+            if (NULL != tmp)
+                g_free(tmp);
             tmp = NULL;
         }
     } /* TRY-CATCH */
@@ -516,6 +523,12 @@ void flom_vfs_ram_node_destroy(flom_vfs_ram_node_t *node)
                         node->name));
             g_free(node->name);
             node->name = NULL;
+        }
+        if (NULL != node->content) {
+            FLOM_TRACE(("flom_vfs_ram_node_destroy: content='%s'\n",
+                        node->content));
+            g_free(node->content);
+            node->content = NULL;
         }
         g_free(node);
     } else {
@@ -551,8 +564,6 @@ int flom_vfs_ram_tree_init(int activate)
     flom_vfs_ram_node_t *tmp_root_node = NULL;
     flom_vfs_ram_node_t *tmp_status_node = NULL;
     flom_vfs_ram_node_t *tmp_lockers_node = NULL;
-    flom_vfs_ram_node_t *tmp_locker1_node = NULL;
-    flom_vfs_ram_node_t *tmp_locker2_node = NULL;
     
     FLOM_TRACE(("flom_vfs_ram_tree_init(activate=%d)\n", activate));
     TRY {
@@ -572,7 +583,7 @@ int flom_vfs_ram_tree_init(int activate)
         
         /* create the data block for the first node, root dir */
         if (NULL == (tmp_root_node = flom_vfs_ram_node_create(
-                         FLOM_VFS_ROOT_DIR_NAME, TRUE)))
+                         FLOM_VFS_ROOT_DIR_NAME, NULL)))
             THROW(NODE_CREATE_ERROR1);
         
         /* create the node as the root node in the tree */
@@ -584,7 +595,7 @@ int flom_vfs_ram_tree_init(int activate)
 
         /* create the data block for the second node, status dir */
         if (NULL == (tmp_status_node = flom_vfs_ram_node_create(
-                         FLOM_VFS_STATUS_DIR_NAME, TRUE)))
+                         FLOM_VFS_STATUS_DIR_NAME, NULL)))
             THROW(NODE_CREATE_ERROR2);
         
         /* append the node to the tree, create a child */
@@ -594,17 +605,12 @@ int flom_vfs_ram_tree_init(int activate)
         
         /* create the data block for the third node, lockers dir */
         if (NULL == (tmp_lockers_node = flom_vfs_ram_node_create(
-                         FLOM_VFS_LOCKERS_DIR_NAME, TRUE)))
+                         FLOM_VFS_LOCKERS_DIR_NAME, NULL)))
             THROW(NODE_CREATE_ERROR3);
         /* append the node to the tree, create a child */
         if (NULL == (tmp = g_node_prepend_data(
                          tmp, tmp_lockers_node)))
             THROW(G_NODE_PREPEND_DATA3);
-        
-        tmp_locker1_node = flom_vfs_ram_node_create("349", TRUE);
-        g_node_prepend_data(tmp, tmp_locker1_node);
-        tmp_locker2_node = flom_vfs_ram_node_create("500", TRUE);
-        g_node_prepend_data(tmp, tmp_locker2_node);
         
         /* @@@ just for debug, remove me */
         g_node_traverse(flom_vfs_ram_tree.root, G_PRE_ORDER, G_TRAVERSE_ALL,
@@ -913,6 +919,94 @@ GNode *flom_vfs_ram_tree_find_child_by_name(GNode *root, const char *name)
 
 
 
+struct flom_vfs_ram_tree_find_node_by_name_s {
+    const char *name;
+    GNode *node;
+};
+
+
+
+gboolean flom_vfs_ram_tree_find_node_by_name_iter(
+    GNode *node, gpointer data) {
+    
+    struct flom_vfs_ram_tree_find_node_by_name_s *name_and_node =
+        (struct flom_vfs_ram_tree_find_node_by_name_s *)data;
+
+    FLOM_TRACE(("flom_vfs_ram_tree_find_node_by_name_iter: "
+                "node->name='%s', name='%s'\n",
+                ((flom_vfs_ram_node_t *)node->data)->name,
+                name_and_node->name));
+    /* check if the two names match */
+    if (!strcmp(((flom_vfs_ram_node_t *)node->data)->name,
+                name_and_node->name)) {
+        FLOM_TRACE(("flom_vfs_ram_tree_find_node_by_name_iter: node "
+                    "found!\n"));
+        name_and_node->node = node;
+        return TRUE;
+    } else
+        return FALSE;
+}
+
+
+
+int flom_vfs_ram_tree_find_node_by_name(GNode *start, const char *name,
+                                        int locked, GNode **result)
+{
+    enum Exception { INACTIVE_FEATURE
+                     , OBJ_NOT_FOUND_ERROR
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_find_node_by_name(name='%s')\n", name));
+    TRY {
+        struct flom_vfs_ram_tree_find_node_by_name_s name_and_node;
+        
+        if (!flom_vfs_ram_tree.active)
+            THROW(INACTIVE_FEATURE);
+
+        /* lock the tree to avoid conflicts */
+        if (!locked)
+            g_mutex_lock(&flom_vfs_ram_tree.mutex);
+
+        name_and_node.name = name;
+        name_and_node.node = NULL;
+        g_node_traverse(start, G_PRE_ORDER, G_TRAVERSE_ALL, -1, 
+                        flom_vfs_ram_tree_find_node_by_name_iter,
+                        (gpointer)(&name_and_node));
+        if (NULL == name_and_node.node) {
+            *result = NULL;
+            THROW(OBJ_NOT_FOUND_ERROR);
+        } else
+            *result = name_and_node.node;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INACTIVE_FEATURE:
+                ret_cod = FLOM_RC_INACTIVE_FEATURE;
+                break;
+            case OBJ_NOT_FOUND_ERROR:
+                ret_cod = FLOM_RC_OBJ_NOT_FOUND_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* unlock the tree to avoid conflicts */
+    if (!locked)
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    FLOM_TRACE(("flom_vfs_ram_tree_find_node_by_name/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+
+
 GArray *flom_vfs_ram_tree_retrieve_children(gpointer data)
 {
     enum Exception { INACTIVE_FEATURE
@@ -1011,9 +1105,70 @@ GArray *flom_vfs_ram_tree_retrieve_children(gpointer data)
 
 
 
-/*
- * END OF:
- * Experimental stuff: use GLIB N-ary Tree to create the VFS in memory.
- * Move this types to a more convenient file if necessary to avoid strange
- * dependencies in the includes
- */
+int flom_vfs_ram_tree_add_locker(flom_uid_t uid, const char *resource_name,
+                                 const char *resource_type)
+{
+    enum Exception { INACTIVE_FEATURE
+                     , FIND_NODE_BY_NAME
+                     , NODE_CREATE_ERROR
+                     , G_NODE_APPEND_DATA
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_add_locker(uid=" FLOM_UID_T_FORMAT
+                ", resource_name='%s', resource_type='%s')\n",
+                uid, resource_name, resource_type));
+    TRY {
+        GNode *lockers_node, *tmp_node;
+        flom_vfs_ram_node_t *tmp_locker_node = NULL;
+        char uid_buffer[SIZEOF_FLOM_UID_T * 3];
+        
+        if (!flom_vfs_ram_tree.active)
+            THROW(INACTIVE_FEATURE);        
+        /* lock the tree to avoid conflicts */
+        g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        /* locate the directory with lockers */
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
+                               flom_vfs_ram_tree.root,
+                               FLOM_VFS_LOCKERS_DIR_NAME,
+                               TRUE, &lockers_node)))
+            THROW(FIND_NODE_BY_NAME);
+        /* create the data block for the locker node */
+        sprintf(uid_buffer, FLOM_UID_T_FORMAT, uid);
+        if (NULL == (tmp_locker_node = flom_vfs_ram_node_create(
+                         uid_buffer, NULL)))
+            THROW(NODE_CREATE_ERROR);
+        /* append the node to the tree, create a child */
+        if (NULL == (tmp_node = g_node_append_data(
+                         lockers_node, tmp_locker_node)))
+            THROW(G_NODE_APPEND_DATA);
+        /* @@@ check me!!! */
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INACTIVE_FEATURE:
+                ret_cod = FLOM_RC_INACTIVE_FEATURE;
+                break;
+            case FIND_NODE_BY_NAME:
+                break;
+            case NODE_CREATE_ERROR:
+                ret_cod = FLOM_RC_NEW_OBJ;
+                break;
+            case G_NODE_APPEND_DATA:
+                ret_cod = FLOM_RC_G_NODE_APPEND_DATA_ERROR;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* unlock the tree to avoid conflicts */
+    g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    FLOM_TRACE(("flom_vfs_ram_tree_add_locker/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

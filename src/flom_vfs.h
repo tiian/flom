@@ -66,14 +66,13 @@
  */
 typedef struct {
     /**
-     * Boolean value, TRUE if the RAM node is related to a directory, FALSE
-     * if the RAM node is related to a regular file
-     */
-    int              is_dir;
-    /**
-     * Name associated to the inode
+     * Name associated to the inode (filename / dirname)
      */
     char            *name;
+    /**
+     * Content of the file; in case of a dir, content == NULL
+     */
+    char            *content;
 } flom_vfs_ram_node_t;
  
 
@@ -135,12 +134,12 @@ extern "C" {
     /**
      * Create a new node for a file or a directory
      * @param name IN name associated to the inode
-     * @param is_dir IN the name is associated to a directory (if FALSE, it's
-     *        associated to a regular file)
+     * @param content IN of the file when the node is associated to a file;
+     *        use NULL when the node is used to create a dir
      * @return a valid pointer or NULL in case of error
      */
     flom_vfs_ram_node_t *flom_vfs_ram_node_create(
-        const char *name, int is_dir);
+        const char *name, const char *content);
 
 
 
@@ -150,7 +149,7 @@ extern "C" {
      */
     static inline int flom_vfs_ram_node_is_dir(
         const flom_vfs_ram_node_t *node) {
-        return node->is_dir;
+        return node->content == NULL;
     }
     
 
@@ -228,10 +227,44 @@ extern "C" {
 
 
     /**
+     * Localize a node in the tree searching for it for the name; in case of
+     * duplicated names, the first occurrence will be localized
+     * @param start IN node in the tree where the search must start
+     * @param name IN of the file (or dir) in the node
+     * @param locked IN TRUE if the global mutex is already locked by the
+     *        caller, FALSE if the global mutex is not already locked and it
+     *        must be locked/unlocked by this function
+     * @param result OUT the pointer to the node if it exists or NULL if it
+     *        does not exists
+     * @return a reason code
+     */     
+    int flom_vfs_ram_tree_find_node_by_name(GNode *start, const char *name,
+                                            int locked, GNode **result);
+
+    
+
+    /**
      * Retrieve all the children of a node to build the list of the directory
      * The allocated array, in not NULL, must be freed with usage
+     * @param data IN associated to a node in the tree
+     * @return an array of structs, one for every children
      */
     GArray *flom_vfs_ram_tree_retrieve_children(gpointer data);
+
+
+
+    /**
+     * Add in the ram tree a node associated to a locker
+     * @param uid IN unique identified of the locker, it will the name of the
+     *        directory in the VFS
+     * @param resource_name IN the name of the resource managed by the locker
+     * @param resource_type IN the type (human readable) of the resource
+     *        managed by the locker
+     * @return a reason code
+     */
+    int flom_vfs_ram_tree_add_locker(flom_uid_t uid,
+                                     const char *resource_name,
+                                     const char *resource_type);
 
 
     
@@ -268,66 +301,9 @@ extern "C" {
 
 
 /**
- * Type of inode in the Virtual File System: every inode type has its own
- + value
-*/
-typedef enum flom_vfs_inode_type_e {
-    /**
-     * Root directory /
-     */
-    FLOM_VFS_ROOT_DIR,
-    /**
-     * Status directory /status
-     */
-    FLOM_VFS_STATUS_DIR,
-    /**
-     * Lockers directory /status/lockers
-     */
-    FLOM_VFS_LOCKERS_DIR,
-    /**
-     * Locker specific directory /status/lockers/<uid>
-     */
-    FLOM_VFS_LOCKERS_UID_DIR,
-    /**
-     * Locker resource name file /status/lockers/<uid>/resource_name
-     */
-    FLOM_VFS_LOCKERS_UID_RESOURCE_NAME_FILE,
-    /**
-     * Locker resource name file /status/lockers/<uid>/resource_type
-     */
-    FLOM_VFS_LOCKERS_UID_RESOURCE_TYPE_FILE,
-} flom_vfs_inode_type_t;
-
-
-
-/**
- * Last possible Inode
- */
-#define FLOM_VFS_INO_LAST_POSSIBLE        (fuse_ino_t)-1
-/**
  * Inode associated to root dir
  */
 #define FLOM_VFS_INO_ROOT_DIR             (fuse_ino_t)1
-/**
- * Inode associated to status dir
- */
-#define FLOM_VFS_INO_STATUS_DIR           (fuse_ino_t)2
-/**
- * Inode associated to lockers dir
- */
-#define FLOM_VFS_INO_LOCKERS_DIR          (fuse_ino_t)3
-/**
- * First Inode used for locker dir and files
- */
-#define FLOM_VFS_LOCKERS_UID_FIRST_INO    (FLOM_VFS_INO_LOCKERS_DIR + 1)
-/**
- * Last Inode that can be used for locker dir and files
- */
-#define FLOM_VFS_LOCKERS_UID_LAST_INO     (FLOM_VFS_INO_LAST_POSSIBLE)
-
-
-const char *FLOM_VFS_NAME_ROOT_DIR;
-
 
 
 
@@ -358,6 +334,8 @@ typedef struct {
 } flom_vfs_common_values_t;
 
 flom_vfs_common_values_t flom_vfs_common_values;
+
+
 
 #ifdef __cplusplus
 extern "C" {

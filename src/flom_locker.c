@@ -41,6 +41,7 @@
 #include "flom_rsrc.h"
 #include "flom_tcp.h"
 #include "flom_trace.h"
+#include "flom_vfs.h"
 
 
 
@@ -68,7 +69,6 @@ void flom_locker_destroy(struct flom_locker_s *locker)
 
 void flom_locker_array_init(flom_locker_array_t *lockers)
 {
-    g_mutex_init(&lockers->mutex);
     lockers->locker_array = g_ptr_array_new_with_free_func(
         (GDestroyNotify)flom_locker_destroy);
 }
@@ -79,7 +79,6 @@ void flom_locker_array_free(flom_locker_array_t *lockers)
 {
     g_ptr_array_free(lockers->locker_array, TRUE);
     lockers->locker_array = NULL;
-    g_mutex_clear(&lockers->mutex);
 }
 
 
@@ -87,9 +86,11 @@ void flom_locker_array_free(flom_locker_array_t *lockers)
 void flom_locker_array_add(flom_locker_array_t *lockers,
                            struct flom_locker_s *locker)
 {
-    g_mutex_lock(&lockers->mutex);
     g_ptr_array_add(lockers->locker_array, (gpointer)locker);
-    g_mutex_unlock(&lockers->mutex);
+    /* @@@ add controls */
+    flom_vfs_ram_tree_add_locker(locker->uid, locker->resource.name,
+                                 flom_rsrc_get_type_human_readable(
+                                     locker->resource.type));
 }
 
 
@@ -97,7 +98,6 @@ void flom_locker_array_add(flom_locker_array_t *lockers,
 void flom_locker_array_del(flom_locker_array_t *lockers,
                            struct flom_locker_s *locker)
 {
-    g_mutex_lock(&lockers->mutex);    
     if (g_ptr_array_remove(lockers->locker_array, locker)) {
         FLOM_TRACE(("flom_locker_array_del: removed locker %p from array\n",
                     locker));
@@ -105,7 +105,6 @@ void flom_locker_array_del(flom_locker_array_t *lockers,
         FLOM_TRACE(("flom_locker_array_del: locker %p not found in array\n",
                     locker));
     }
-    g_mutex_unlock(&lockers->mutex);
 }
 
 

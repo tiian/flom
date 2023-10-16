@@ -185,6 +185,29 @@ flom_rsrc_type_t flom_rsrc_get_type(const gchar *resource_name)
 
 
 
+const gchar *flom_rsrc_get_type_human_readable(flom_rsrc_type_t res_type)
+{
+    switch (res_type) {
+        case FLOM_RSRC_TYPE_NULL:
+            return "null";
+        case FLOM_RSRC_TYPE_SIMPLE:
+            return "simple";
+        case FLOM_RSRC_TYPE_NUMERIC:
+            return "numeric";
+        case FLOM_RSRC_TYPE_SET:
+            return "set";
+        case FLOM_RSRC_TYPE_HIER:
+            return "hierarchical";
+        case FLOM_RSRC_TYPE_SEQUENCE:
+            return "sequence";
+        case FLOM_RSRC_TYPE_TIMESTAMP:
+            return "timestamp";
+        default:
+            return "unknown error";
+    } /* switch (res_type) */
+}
+
+
 int flom_rsrc_get_transactional(const gchar *resource_name)
 {
     flom_rsrc_type_t type;

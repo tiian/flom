@@ -240,6 +240,9 @@ const char *flom_strerror(int ret_cod)
         case FLOM_RC_G_KEY_FILE_NEW_ERROR:
             return "ERROR: 'g_key_file_new' function returned "
                 "an error condition";
+        case FLOM_RC_G_NODE_APPEND_DATA_ERROR:
+            return "ERROR: 'g_node_append_data' function returned "
+                "an error condition";
         case FLOM_RC_G_NODE_NEW_ERROR:
             return "ERROR: 'g_node_new' function returned "
                 "an error condition";

@@ -425,6 +425,16 @@ extern "C" {
 
 
     /**
+     * Retrieve a human readable representation for a resource type (a
+     * string)
+     * @param res_type IN resource type
+     * @return a string
+     */
+    const gchar *flom_rsrc_get_type_human_readable(flom_rsrc_type_t res_type);
+
+    
+    
+    /**
      * Check if the resource is transactional from its name
      * @param resource_name IN resource name
      * @return a boolean value: TRUE, the resource supports transactions

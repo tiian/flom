@@ -468,45 +468,49 @@
  */
 #define FLOM_RC_G_MARKUP_PARSE_CONTEXT_PARSE_ERROR  -206
 /**
+ * "g_node_append_data" function error
+ */
+#define FLOM_RC_G_NODE_APPEND_DATA_ERROR            -207
+/**
  * "g_node_new" function error
  */
-#define FLOM_RC_G_NODE_NEW_ERROR                    -207
+#define FLOM_RC_G_NODE_NEW_ERROR                    -208
 /**
  * "g_node_prepend_data" function error
  */
-#define FLOM_RC_G_NODE_PREPEND_DATA_ERROR           -208
+#define FLOM_RC_G_NODE_PREPEND_DATA_ERROR           -209
 /**
  * "g_ptr_array_remove_index_fast" function error
  */
-#define FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR -209
+#define FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR -210
 /**
  * "g_queue_new" function error
  */
-#define FLOM_RC_G_QUEUE_NEW_ERROR                   -210
+#define FLOM_RC_G_QUEUE_NEW_ERROR                   -211
 /**
  * "g_strdup" function error
  */
-#define FLOM_RC_G_STRDUP_ERROR                      -211
+#define FLOM_RC_G_STRDUP_ERROR                      -212
 /**
  * "g_strndup" function error
  */
-#define FLOM_RC_G_STRNDUP_ERROR                     -212
+#define FLOM_RC_G_STRNDUP_ERROR                     -213
 /**
  * "g_strsplit" function error
  */
-#define FLOM_RC_G_STRSPLIT_ERROR                    -213
+#define FLOM_RC_G_STRSPLIT_ERROR                    -214
 /**
  * "g_thread_create" function error
  */
-#define FLOM_RC_G_THREAD_CREATE_ERROR               -214
+#define FLOM_RC_G_THREAD_CREATE_ERROR               -215
 /**
  * "g_try_malloc"/"g_try_malloc0" function error
  */
-#define FLOM_RC_G_TRY_MALLOC_ERROR                  -215
+#define FLOM_RC_G_TRY_MALLOC_ERROR                  -216
 /**
  * "g_try_realloc" function error
  */
-#define FLOM_RC_G_TRY_REALLOC_ERROR                 -216
+#define FLOM_RC_G_TRY_REALLOC_ERROR                 -217
 
 /* JNI related errors */
 
