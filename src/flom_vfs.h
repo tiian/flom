@@ -61,6 +61,14 @@
 
 
 /**
+ * Buffer size used for standard purposes, like for examples adding a \n
+ * at the end of strings when necessary
+ */
+#define FLOM_VFS_STD_BUFFER_SIZE 1024
+
+
+
+/**
  * Type used to create an in RAM representation of the information that
  * are exposed by the VFS for every file and directory (node)
  */
@@ -155,6 +163,17 @@ extern "C" {
 
 
     /**
+     * @return the content associated to a regular file; in case of dir an
+     *         empty string is returned
+     */
+    static inline const char *flom_vfs_ram_node_get_content(
+        const flom_vfs_ram_node_t *node) {
+        return node->content != NULL ? node->content : "";
+    }
+    
+
+
+    /**
      * Destroy a node for a file or a directory
      * @param node OUT pointer to the node to be destroyed
      */
@@ -176,8 +195,12 @@ extern "C" {
 
     /**
      * Cleanup all the memory used by the VFS RAM n-ary tree
+     * @param node IN to start cleanup: if NULL, root will be used
+     * @param locked IN TRUE if the global mutex is already locked by the
+     *        caller, FALSE if the global mutex is not already locked and it
+     *        must be locked/unlocked by this function
      */
-    void flom_vfs_ram_tree_cleanup();
+    void flom_vfs_ram_tree_cleanup(GNode *node, int locked);
 
 
 
@@ -265,6 +288,16 @@ extern "C" {
     int flom_vfs_ram_tree_add_locker(flom_uid_t uid,
                                      const char *resource_name,
                                      const char *resource_type);
+
+
+
+    /**
+     * Delete from the ram tree the node associated to a locker
+     * @param uid IN unique identified of the locker, it is the name of the
+     *        directory in the VFS
+     * @return a reason code
+     */     
+    int flom_vfs_ram_tree_del_locker(flom_uid_t uid);
 
 
     
@@ -355,11 +388,11 @@ extern "C" {
     void flom_vfs_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
                                  off_t off, struct fuse_file_info *fi);
 
-    void hello_ll_open(fuse_req_t req, fuse_ino_t ino,
-                              struct fuse_file_info *fi);
+    void flom_vfs_open(fuse_req_t req, fuse_ino_t ino,
+                       struct fuse_file_info *fi);
 
-    void hello_ll_read(fuse_req_t req, fuse_ino_t ino, size_t size,
-                              off_t off, struct fuse_file_info *fi);
+    void flom_vfs_read(fuse_req_t req, fuse_ino_t ino, size_t size,
+                       off_t off, struct fuse_file_info *fi);
 
 
 

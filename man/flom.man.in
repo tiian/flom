@@ -43,7 +43,7 @@ Name of the resource used for enqueing (locking)
 
 \fBTimestamp resource\fP names are composed by the _t_ prefix followed by a timestamp format and by an integer value enclosed in square brackets ("[ ]"); examples: "_t_foo.%D.%T[4]", "_t_bar:%S#fff[1]". Numbers must be expressed using decimal base)
 
-\fBAdditional information\fP can be retrieved from official wiki documentation: \fIhttp://sourceforge.net/p/flom/wiki/Home/\fP
+\fBAdditional information\fP can be retrieved from official documentation: \fIhttps://www.tiian.org/flom/\fP
 
 .TP
 .B -o, --resource-timeout=\fImilliseconds

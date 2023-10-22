@@ -87,7 +87,6 @@ void flom_locker_array_add(flom_locker_array_t *lockers,
                            struct flom_locker_s *locker)
 {
     g_ptr_array_add(lockers->locker_array, (gpointer)locker);
-    /* @@@ add controls */
     flom_vfs_ram_tree_add_locker(locker->uid, locker->resource.name,
                                  flom_rsrc_get_type_human_readable(
                                      locker->resource.type));
@@ -98,6 +97,7 @@ void flom_locker_array_add(flom_locker_array_t *lockers,
 void flom_locker_array_del(flom_locker_array_t *lockers,
                            struct flom_locker_s *locker)
 {
+    flom_vfs_ram_tree_del_locker(locker->uid);
     if (g_ptr_array_remove(lockers->locker_array, locker)) {
         FLOM_TRACE(("flom_locker_array_del: removed locker %p from array\n",
                     locker));

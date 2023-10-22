@@ -1225,7 +1225,7 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
-    flom_vfs_ram_tree_cleanup();
+    flom_vfs_ram_tree_cleanup(NULL, FALSE);
     flom_locker_array_free(&lockers);
     FLOM_TRACE(("flom_accept_loop/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
