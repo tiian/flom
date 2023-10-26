@@ -1,3 +1,12 @@
+Implement ctime, mtime in the ram tree
+
+Remove all warnings for Ubuntu 14.04; more recent ones can happen
+
+Clean-up code of VFS, remove all garbage, use FLoM style everywhere
+
+
+
+
 Possible ideas for future developments, if useful: 
 
 implement stack trace feature as implemented by LIXA project

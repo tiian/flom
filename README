@@ -142,6 +142,7 @@ https://github.com/tiian/flom/issues
 Dependencies report:
 O.S.		Feature		Packages
 Ubuntu		Basic		make gcc libglib2.0-dev dbus libdbus-1-dev libssl-dev pkg-config automake
+Ubuntu	14.04	FUSE		fuse libfuse-dev
 Ubuntu		C++ API		g++
 Ubuntu		Perl API	swig libperl-dev
 Ubuntu		PHP API		swig php5-cli php5-dev
@@ -157,6 +158,7 @@ Ubuntu	16.04	Java API	default-jdk (openjdk 8)
 Ubuntu	18.04	Java API	default-jdk (openjdk 10)
 Ubuntu	20.04	Java API	default-jdk (openjdk 11)
 Ubuntu	22.04	Java API	default-jdk (openjdk 11)
+Ubuntu  22.04	FUSE		fuse3 libfuse3-dev
 CentOS		Basic		gcc glib2-devel dbus dbus-devel autoconf openssl-devel make
 CentOS		C++ API		gcc-c++
 CentOS		Perl API	swig perl-devel

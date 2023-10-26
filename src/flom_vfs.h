@@ -36,13 +36,6 @@
 
 
 
-#ifdef HAVE_FUSE_LOWLEVEL_H
-# define FUSE_USE_VERSION 26
-# include <fuse_lowlevel.h>
-#endif
-
-
-
 #include "flom_defines.h"
 #include "flom_types.h"
 
@@ -131,7 +124,9 @@ typedef struct {
 
 
 
-flom_vfs_ram_tree_t flom_vfs_ram_tree;
+extern flom_vfs_ram_tree_t flom_vfs_ram_tree;
+
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -343,7 +338,7 @@ extern "C" {
 /**
  * Structure with the pointers to all the callback functions invoked by FUSE
  */
-struct fuse_lowlevel_ops fuse_callback_functions;
+extern struct fuse_lowlevel_ops fuse_callback_functions;
 
 
 
@@ -366,7 +361,7 @@ typedef struct {
     time_t    time;
 } flom_vfs_common_values_t;
 
-flom_vfs_common_values_t flom_vfs_common_values;
+extern flom_vfs_common_values_t flom_vfs_common_values;
 
 
 

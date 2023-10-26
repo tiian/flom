@@ -715,6 +715,7 @@ PHPAPI
 PERLAPI
 JAVAAPI
 CPPAPI
+FUSE_VERSION
 USER
 STDBUF_O0
 GTHREAD2_LIBS
@@ -17543,10 +17544,111 @@ then
 	TLS_INIT_FUNCTION="OPENSSL_init_ssl"
 fi
 
-# Checking libfuse is available
-pkg-config --atleast-version=2.9.2 fuse
+# First check for availability of FUSE3, then for availability of FUSE2
+# Checking libfuse3 is available
+pkg-config --atleast-version=3.9.0 fuse3
 if test $? -eq 0
 then
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for FUSE" >&5
+$as_echo_n "checking for FUSE... " >&6; }
+
+if test -n "$FUSE_CFLAGS"; then
+    pkg_cv_FUSE_CFLAGS="$FUSE_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"fuse3 >= 3.9.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "fuse3 >= 3.9.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_FUSE_CFLAGS=`$PKG_CONFIG --cflags "fuse3 >= 3.9.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$FUSE_LIBS"; then
+    pkg_cv_FUSE_LIBS="$FUSE_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"fuse3 >= 3.9.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "fuse3 >= 3.9.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_FUSE_LIBS=`$PKG_CONFIG --libs "fuse3 >= 3.9.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        FUSE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "fuse3 >= 3.9.0" 2>&1`
+        else
+	        FUSE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "fuse3 >= 3.9.0" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$FUSE_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (fuse3 >= 3.9.0) were not met:
+
+$FUSE_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables FUSE_CFLAGS
+and FUSE_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables FUSE_CFLAGS
+and FUSE_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	FUSE_CFLAGS=$pkg_cv_FUSE_CFLAGS
+	FUSE_LIBS=$pkg_cv_FUSE_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+	CPPFLAGS="$CPPFLAGS $FUSE_CFLAGS"
+	FUSE_VERSION=3
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: FUSE version 3 will be used" >&5
+$as_echo "$as_me: FUSE version 3 will be used" >&6;}
+else
+	# Checking libfuse is available
+	pkg-config --atleast-version=2.9.2 fuse
+	if test $? -eq 0
+	then
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for FUSE" >&5
@@ -17638,9 +17740,13 @@ else
 $as_echo "yes" >&6; }
 
 fi
-	CPPFLAGS="$CPPFLAGS $FUSE_CFLAGS"
-else
-        as_fn_error $? "cannot find fuse package at level 2.9.2 or higher" "$LINENO" 5
+		CPPFLAGS="$CPPFLAGS $FUSE_CFLAGS"
+		FUSE_VERSION=2
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: FUSE version 2 will be used" >&5
+$as_echo "$as_me: FUSE version 2 will be used" >&6;}
+	else
+        	as_fn_error $? "cannot find neither fuse3 package at level 3.9.0 or higher nor fuse2 package at level 2.9.2 or higher" "$LINENO" 5
+	fi
 fi
 
 # Checking stdbuf is available
@@ -19288,7 +19394,9 @@ done
 
 for ac_header in fuse_lowlevel.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "fuse_lowlevel.h" "ac_cv_header_fuse_lowlevel_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "fuse_lowlevel.h" "ac_cv_header_fuse_lowlevel_h" "#define FUSE_USE_VERSION 30
+
+"
 if test "x$ac_cv_header_fuse_lowlevel_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_FUSE_LOWLEVEL_H 1
@@ -19685,7 +19793,9 @@ _ACEOF
 
 fi
 
-ac_fn_c_check_type "$LINENO" "fuse_ino_t" "ac_cv_type_fuse_ino_t" "#include <fuse/fuse_lowlevel.h>
+ac_fn_c_check_type "$LINENO" "fuse_ino_t" "ac_cv_type_fuse_ino_t" "#define FUSE_USE_VERSION 30
+#include <fuse_lowlevel.h>
+
 "
 if test "x$ac_cv_type_fuse_ino_t" = xyes; then :
 
@@ -19695,7 +19805,6 @@ _ACEOF
 
 
 fi
-
 
 # The cast to long int works around a bug in the HP C Compiler
 # version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
@@ -19971,7 +20080,9 @@ $as_echo_n "checking size of fuse_ino_t... " >&6; }
 if ${ac_cv_sizeof_fuse_ino_t+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (fuse_ino_t))" "ac_cv_sizeof_fuse_ino_t"        "#include <fuse/fuse_lowlevel.h>
+  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (fuse_ino_t))" "ac_cv_sizeof_fuse_ino_t"        "#define FUSE_USE_VERSION 30
+#include <fuse_lowlevel.h>
+
 "; then :
 
 else
@@ -20042,9 +20153,57 @@ _ACEOF
 
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for fuse_lowlevel_new in -lfuse" >&5
-$as_echo_n "checking for fuse_lowlevel_new in -lfuse... " >&6; }
-if ${ac_cv_lib_fuse_fuse_lowlevel_new+:} false; then :
+if test "$FUSE_VERSION" = "3"
+then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for fuse_parse_cmdline in -lfuse3" >&5
+$as_echo_n "checking for fuse_parse_cmdline in -lfuse3... " >&6; }
+if ${ac_cv_lib_fuse3_fuse_parse_cmdline+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lfuse3  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char fuse_parse_cmdline ();
+int
+main ()
+{
+return fuse_parse_cmdline ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_fuse3_fuse_parse_cmdline=yes
+else
+  ac_cv_lib_fuse3_fuse_parse_cmdline=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_fuse3_fuse_parse_cmdline" >&5
+$as_echo "$ac_cv_lib_fuse3_fuse_parse_cmdline" >&6; }
+if test "x$ac_cv_lib_fuse3_fuse_parse_cmdline" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBFUSE3 1
+_ACEOF
+
+  LIBS="-lfuse3 $LIBS"
+
+fi
+
+else
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for fuse_parse_cmdline in -lfuse" >&5
+$as_echo_n "checking for fuse_parse_cmdline in -lfuse... " >&6; }
+if ${ac_cv_lib_fuse_fuse_parse_cmdline+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -20058,27 +20217,27 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char fuse_lowlevel_new ();
+char fuse_parse_cmdline ();
 int
 main ()
 {
-return fuse_lowlevel_new ();
+return fuse_parse_cmdline ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_fuse_fuse_lowlevel_new=yes
+  ac_cv_lib_fuse_fuse_parse_cmdline=yes
 else
-  ac_cv_lib_fuse_fuse_lowlevel_new=no
+  ac_cv_lib_fuse_fuse_parse_cmdline=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_fuse_fuse_lowlevel_new" >&5
-$as_echo "$ac_cv_lib_fuse_fuse_lowlevel_new" >&6; }
-if test "x$ac_cv_lib_fuse_fuse_lowlevel_new" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_fuse_fuse_parse_cmdline" >&5
+$as_echo "$ac_cv_lib_fuse_fuse_parse_cmdline" >&6; }
+if test "x$ac_cv_lib_fuse_fuse_parse_cmdline" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_LIBFUSE 1
 _ACEOF
@@ -20087,6 +20246,7 @@ _ACEOF
 
 fi
 
+fi
 as_ac_Lib=`$as_echo "ac_cv_lib_ssl_$TLS_INIT_FUNCTION" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $TLS_INIT_FUNCTION in -lssl" >&5
 $as_echo_n "checking for $TLS_INIT_FUNCTION in -lssl... " >&6; }
@@ -20146,12 +20306,12 @@ _ACEOF
 fi
 done
 
-for ac_func in fuse_lowlevel_new
+for ac_func in fuse_parse_cmdline
 do :
-  ac_fn_c_check_func "$LINENO" "fuse_lowlevel_new" "ac_cv_func_fuse_lowlevel_new"
-if test "x$ac_cv_func_fuse_lowlevel_new" = xyes; then :
+  ac_fn_c_check_func "$LINENO" "fuse_parse_cmdline" "ac_cv_func_fuse_parse_cmdline"
+if test "x$ac_cv_func_fuse_parse_cmdline" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_FUSE_LOWLEVEL_NEW 1
+#define HAVE_FUSE_PARSE_CMDLINE 1
 _ACEOF
 
 fi
@@ -20276,6 +20436,9 @@ done
 
 
 # substitution of the current logged user
+
+
+# substitution of FUSE version
 
 
 # substitution of optional (--disable) features

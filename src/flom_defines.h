@@ -42,7 +42,13 @@
 # include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 #ifdef HAVE_FUSE_LOWLEVEL_H
-# define FUSE_USE_VERSION 26
+# ifdef HAVE_LIBFUSE3
+#  define FUSE_USE_VERSION 30
+# elif HAVE_LIBFUSE
+#  define FUSE_USE_VERSION 26
+# else
+#  error No HAVE_LIBFUSEx defined!
+# endif
 # include <fuse_lowlevel.h>
 #endif
 

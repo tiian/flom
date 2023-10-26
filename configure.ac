@@ -273,14 +273,27 @@ then
 	TLS_INIT_FUNCTION="OPENSSL_init_ssl"
 fi
 
-# Checking libfuse is available
-pkg-config --atleast-version=2.9.2 fuse
+# First check for availability of FUSE3, then for availability of FUSE2
+# Checking libfuse3 is available
+pkg-config --atleast-version=3.9.0 fuse3
 if test $? -eq 0
 then
-	PKG_CHECK_MODULES([FUSE], [fuse >= 2.9.2])
+	PKG_CHECK_MODULES([FUSE], [fuse3 >= 3.9.0])
 	CPPFLAGS="$CPPFLAGS $FUSE_CFLAGS"
+	FUSE_VERSION=3
+	AC_MSG_NOTICE([FUSE version 3 will be used])
 else
-        AC_MSG_ERROR([cannot find fuse package at level 2.9.2 or higher])
+	# Checking libfuse is available
+	pkg-config --atleast-version=2.9.2 fuse
+	if test $? -eq 0
+	then
+		PKG_CHECK_MODULES([FUSE], [fuse >= 2.9.2])
+		CPPFLAGS="$CPPFLAGS $FUSE_CFLAGS"
+		FUSE_VERSION=2
+		AC_MSG_NOTICE([FUSE version 2 will be used])
+	else
+        	AC_MSG_ERROR([cannot find neither fuse3 package at level 3.9.0 or higher nor fuse2 package at level 2.9.2 or higher])
+	fi
 fi
 
 # Checking stdbuf is available
@@ -444,7 +457,9 @@ AC_CHECK_HEADERS(dbus/dbus.h)
 AC_CHECK_HEADERS(dirent.h)
 AC_CHECK_HEADERS(errno.h)
 AC_CHECK_HEADERS(fcntl.h)
-AC_CHECK_HEADERS(fuse_lowlevel.h)
+AC_CHECK_HEADERS([fuse_lowlevel.h], [], [],
+[#define FUSE_USE_VERSION 30
+])
 AC_CHECK_HEADERS(glib.h)
 AC_CHECK_HEADERS(ifaddrs.h)
 AC_CHECK_HEADERS(limits.h)
@@ -479,8 +494,10 @@ AC_CHECK_TYPES(uint32_t)
 AC_CHECK_TYPES(uint64_t)
 AC_CHECK_TYPES(uintptr_t)
 AC_CHECK_TYPES([struct sockaddr_un], [], [], [[#include <sys/un.h>]])
-AC_CHECK_TYPES([fuse_ino_t], [], [], [[#include <fuse/fuse_lowlevel.h>]])
-
+AC_CHECK_TYPES([fuse_ino_t], [], [],
+[#define FUSE_USE_VERSION 30
+#include <fuse_lowlevel.h>
+])
 AC_CHECK_SIZEOF([void *])
 AC_CHECK_SIZEOF([int])
 AC_CHECK_SIZEOF([long int])
@@ -489,14 +506,22 @@ AC_CHECK_SIZEOF([pid_t], [], [[#include <sys/types.h>]])
 AC_CHECK_SIZEOF([size_t])
 AC_CHECK_SIZEOF([socklen_t])
 AC_CHECK_SIZEOF([ssize_t])
-AC_CHECK_SIZEOF([fuse_ino_t], [], [[#include <fuse/fuse_lowlevel.h>]])
+AC_CHECK_SIZEOF([fuse_ino_t], [],
+[#define FUSE_USE_VERSION 30
+#include <fuse_lowlevel.h>
+])
 
 AC_CHECK_LIB([dbus-1], [dbus_get_local_machine_id])
-AC_CHECK_LIB([fuse], [fuse_lowlevel_new])
+if test "$FUSE_VERSION" = "3"
+then
+	AC_CHECK_LIB([fuse3], [fuse_parse_cmdline])
+else
+	AC_CHECK_LIB([fuse], [fuse_parse_cmdline])
+fi
 AC_CHECK_LIB([ssl], [$TLS_INIT_FUNCTION])
 
 AC_CHECK_FUNCS(freeifaddrs)
-AC_CHECK_FUNCS(fuse_lowlevel_new)
+AC_CHECK_FUNCS(fuse_parse_cmdline)
 AC_CHECK_FUNCS(getifaddrs)
 AC_CHECK_FUNCS(opendir)
 AC_CHECK_FUNCS(signal)
@@ -517,6 +542,9 @@ AC_SUBST(STDBUF_O0)
 
 # substitution of the current logged user
 AC_SUBST(USER)
+
+# substitution of FUSE version
+AC_SUBST(FUSE_VERSION)
 
 # substitution of optional (--disable) features 
 AC_SUBST(CPPAPI)
