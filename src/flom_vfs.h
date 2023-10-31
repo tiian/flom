@@ -74,6 +74,14 @@ typedef struct {
      * Content of the file; in case of a dir, content == NULL
      */
     char            *content;
+    /**
+     * Creation time of the ram node (of the virtual file)
+     */
+    time_t           ctime;
+    /**
+     * Modification time of the ram node (of the virtual file)
+     */
+    time_t           mtime;
 } flom_vfs_ram_node_t;
  
 
@@ -168,6 +176,26 @@ extern "C" {
     
 
 
+    /**
+     * @return creation time of the ram node / virtual file
+     */
+    static inline time_t flom_vfs_ram_node_get_ctime(
+        const flom_vfs_ram_node_t *node) {
+        return node->ctime;
+    }
+
+
+    
+    /**
+     * @return modifcation time of the ram node / virtual file
+     */
+    static inline time_t flom_vfs_ram_node_get_mtime(
+        const flom_vfs_ram_node_t *node) {
+        return node->mtime;
+    }
+
+
+    
     /**
      * Destroy a node for a file or a directory
      * @param node OUT pointer to the node to be destroyed
@@ -355,10 +383,6 @@ typedef struct {
      * group id that will be associated to all dirs and files
      */
     gid_t     gid;
-    /**
-     * VFS activation time, it will be used as the default time
-     */
-    time_t    time;
 } flom_vfs_common_values_t;
 
 extern flom_vfs_common_values_t flom_vfs_common_values;

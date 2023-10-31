@@ -162,47 +162,72 @@ int flom_daemon_mngmnt_shutdown(flom_config_t *config,
 /* Version for FUSE 2 */
 gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
 {
-    enum Exception { NONE } excp;
+    enum Exception { FUSE_PARSE_CMDLINE
+                     , FUSE_MOUNT
+                     , FUSE_LOWLEVEL_NEW
+                     , FUSE_SET_SIGNAL_HANDLERS
+                     , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     int argc = 2;
     char *argv[] = { "flom", (char *)data };
+    struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
+    struct fuse_chan *ch;
+    struct fuse_session *se;
+    char *mountpoint = NULL;
     
     FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs[FUSE2]\n"));
     TRY {
-        struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
-        struct fuse_chan *ch;
-        char *mountpoint;
         int ret = -1;
 
         /* setting common values */
         flom_vfs_common_values.uid = getuid();
         flom_vfs_common_values.gid = getgid();
-        flom_vfs_common_values.time = time(NULL);
+        
+        FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs[FUSE2]/fuse_parse_cmdline\n"));
+        if (fuse_parse_cmdline(&args, &mountpoint, NULL, NULL) != 0)
+            THROW(FUSE_PARSE_CMDLINE);
 
-        if (fuse_parse_cmdline(&args, &mountpoint, NULL, NULL) != -1 &&
-            (ch = fuse_mount(mountpoint, &args)) != NULL) {
-            struct fuse_session *se;
-            syslog(LOG_INFO, FLOM_SYSLOG_FLM022I, (char *)data);
-            se = fuse_lowlevel_new(&args, &fuse_callback_functions,
-                                   sizeof(fuse_callback_functions), NULL);
-            if (se != NULL) {
-                if (fuse_set_signal_handlers(se) != -1) {
-                    fuse_session_add_chan(se, ch);
-                    ret = fuse_session_loop(se);
-                    FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs[FUSE2]: "
-                                "fuse_session_loop return code is %d", ret));
-                    fuse_remove_signal_handlers(se);
-                    fuse_session_remove_chan(ch);
-                }
-                fuse_session_destroy(se);
-            }
-            fuse_unmount(mountpoint, ch);
-        };
-        fuse_opt_free_args(&args);
+        if ((ch = fuse_mount(mountpoint, &args)) == NULL)
+            THROW(FUSE_MOUNT);
+
+        syslog(LOG_INFO, FLOM_SYSLOG_FLM022I, (char *)data);
+
+
+        if (NULL == (se = fuse_lowlevel_new(
+                         &args, &fuse_callback_functions,
+                         sizeof(fuse_callback_functions), NULL)))
+            THROW(FUSE_LOWLEVEL_NEW);
+
+        if (fuse_set_signal_handlers(se) != 0)
+            THROW(FUSE_SET_SIGNAL_HANDLERS);
+
+        fuse_session_add_chan(se, ch);
+        ret = fuse_session_loop(se);
+        FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs[FUSE2]: "
+                    "fuse_session_loop return code is %d\n", ret));
+        fuse_remove_signal_handlers(se);
+        fuse_session_remove_chan(ch);
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case FUSE_PARSE_CMDLINE:
+                FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs[FUSE2]: "
+                            "fuse_parse_cmdline() error\n"));
+                break;
+            case FUSE_MOUNT:
+                FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs[FUSE2]: "
+                            "fuse_mount() error\n"));
+                break;
+            case FUSE_LOWLEVEL_NEW:
+                FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs[FUSE2]: "
+                            "fuse_lowlevel_new() error\n"));
+                break;
+            case FUSE_SET_SIGNAL_HANDLERS:
+                FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs[FUSE2]: "
+                            "fuse_set_signal_handlers() error\n"));
+                break;                
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
@@ -210,6 +235,17 @@ gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* recovery allocated memory */
+
+    if (excp >= FUSE_LOWLEVEL_NEW)
+        fuse_session_destroy(se);
+    if (excp >= FUSE_MOUNT)
+        fuse_unmount(mountpoint, ch);
+    if (excp > FUSE_PARSE_CMDLINE) {
+        free(mountpoint);
+        fuse_opt_free_args(&args);
+    }
+
     FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs[FUSE2]/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return NULL;

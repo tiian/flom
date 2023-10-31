@@ -109,16 +109,16 @@ int flom_vfs_stat(fuse_ino_t ino, struct stat *stbuf)
             stbuf->st_nlink = 2;
             stbuf->st_uid = flom_vfs_common_values.uid;
             stbuf->st_gid = flom_vfs_common_values.gid;
-            stbuf->st_atime = stbuf->st_ctime = stbuf->st_mtime =
-                flom_vfs_common_values.time;
+            stbuf->st_ctime = flom_vfs_ram_node_get_ctime(data);
+            stbuf->st_mtime = flom_vfs_ram_node_get_mtime(data);
         } else {
             stbuf->st_ino = ino;
             stbuf->st_mode = S_IFREG | 0440;
             stbuf->st_nlink = 1;
             stbuf->st_uid = flom_vfs_common_values.uid;
             stbuf->st_gid = flom_vfs_common_values.gid;
-            stbuf->st_atime = stbuf->st_ctime = stbuf->st_mtime =
-                flom_vfs_common_values.time;
+            stbuf->st_ctime = flom_vfs_ram_node_get_ctime(data);
+            stbuf->st_mtime = flom_vfs_ram_node_get_mtime(data);
             stbuf->st_size = strlen(flom_vfs_ram_node_get_content(data));
         }
     }
@@ -540,6 +540,7 @@ flom_vfs_ram_node_t *flom_vfs_ram_node_create(const char *name,
             tmp->content = NULL;
         } else if (NULL == (tmp->content = g_strdup(content)))
             THROW(G_STRDUP_ERROR2);
+        tmp->ctime = tmp->mtime = time(NULL);
         
         THROW(NONE);
     } CATCH {

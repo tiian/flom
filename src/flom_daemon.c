@@ -248,30 +248,6 @@ int flom_daemon(flom_config_t *config, int family)
                 THROW(FLOM_ACCEPT_LOOP_ERROR);
             syslog(LOG_NOTICE, FLOM_SYSLOG_FLM004N);
 
-            /* unmounting FUSE filesystem */
-            if (NULL != flom_config_get_mount_point_vfs(config)) {
-                size_t size;
-                char *system_command = NULL;
-                int exitstatus;
-                
-                FLOM_TRACE(("flom_daemon: unmounting VFS file system '%s'\n",
-                            flom_config_get_mount_point_vfs(config)));
-                size = 20 + strlen(flom_config_get_mount_point_vfs(config));
-                if (NULL == (system_command = malloc(size))) {
-                    FLOM_TRACE(("flom_daemon: unable to malloc "
-                                "system_command\n"));
-                    THROW(MALLOC_ERROR);
-                }
-                snprintf(system_command, size, "fusermount -u %s",
-                         flom_config_get_mount_point_vfs(config));
-                syslog(LOG_INFO, FLOM_SYSLOG_FLM023I, system_command);
-                exitstatus = WEXITSTATUS(system(system_command));
-                if (exitstatus != 0)
-                    syslog(LOG_NOTICE, FLOM_SYSLOG_FLM024N, system_command,
-                           exitstatus);
-                free(system_command);
-            }
-            
             flom_listen_clean(config, &conns);
         }
         THROW(NONE);
@@ -1045,14 +1021,14 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     flom_locker_array_t lockers;
+    int activate_vfs = flom_config_get_mount_point_vfs(config) != NULL;
+    GThread *vfs_thread = NULL;
     
     FLOM_TRACE(("flom_accept_loop\n"));
     TRY {
         int loop = TRUE;
         int chklockers_again = FALSE;
-        GThread *vfs_thread;
-        int activate_vfs = flom_config_get_mount_point_vfs(config) != NULL;
-
+    
         flom_locker_array_init(&lockers);
 
         /* initialize the RAM representation of the VFS */
@@ -1225,6 +1201,39 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+
+    /* terminate the thread started for VFS even if an error happened */
+
+    if (excp > G_THREAD_NEW_ERROR && activate_vfs) {
+        size_t size;
+        char *system_command = NULL;
+        int exitstatus;
+                
+        /* unmounting FUSE filesystem */
+        FLOM_TRACE(("flom_accept_loop: unmounting VFS file system '%s'\n",
+                    flom_config_get_mount_point_vfs(config)));
+        size = 20 + strlen(flom_config_get_mount_point_vfs(config));
+        if (NULL == (system_command = malloc(size))) {
+            FLOM_TRACE(("flom_accept_loop: unable to malloc "
+                        "system_command\n"));
+            syslog(LOG_ERR, FLOM_SYSLOG_FLM025E, size,
+                   flom_config_get_mount_point_vfs(config));
+        } else {
+            snprintf(system_command, size, "fusermount -u %s",
+                     flom_config_get_mount_point_vfs(config));
+            syslog(LOG_INFO, FLOM_SYSLOG_FLM023I, system_command);
+            exitstatus = WEXITSTATUS(system(system_command));
+            if (exitstatus != 0)
+                syslog(LOG_WARNING, FLOM_SYSLOG_FLM024W, system_command,
+                       exitstatus, flom_config_get_mount_point_vfs(config));
+            free(system_command);
+            FLOM_TRACE(("flom_accept_loop: calling g_thread_join(%p) to wait "
+                        "VFS thread termination...\n", vfs_thread));
+            g_thread_join(vfs_thread);
+            FLOM_TRACE(("flom_accept_loop: VFS thread terminated\n"));
+        }
+    }
+    
     flom_vfs_ram_tree_cleanup(NULL, FALSE);
     flom_locker_array_free(&lockers);
     FLOM_TRACE(("flom_accept_loop/excp=%d/"
