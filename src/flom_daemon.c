@@ -442,7 +442,7 @@ int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
                     "(%p)\n", conn));
         /* initialize the connection */
         if (FLOM_RC_OK != (ret_cod = flom_conn_init(
-                               conn,
+                               conn, flom_conns_get_new_uid(conns),
                                flom_conns_get_domain(conns),
                                fd, SOCK_STREAM, sizeof(servaddr),
                                (struct sockaddr *)&servaddr, TRUE)))
@@ -545,7 +545,7 @@ int flom_listen_tcp_configured(flom_config_t *config, flom_conns_t *conns)
                     "(%p)\n", conn));
         /* initialize the connection */
         if (FLOM_RC_OK != (ret_cod = flom_conn_init(
-                               conn,
+                               conn, flom_conns_get_new_uid(conns),
                                flom_conns_get_domain(conns),
                                flom_tcp_get_sockfd(&tcp),
                                SOCK_STREAM, flom_tcp_get_addrlen(&tcp),
@@ -684,7 +684,7 @@ int flom_listen_tcp_automatic(flom_config_t *config, flom_conns_t *conns)
                     "(%p)\n", conn));
         /* initialize the connection */
         if (FLOM_RC_OK != (ret_cod = flom_conn_init(
-                               conn,
+                               conn, flom_conns_get_new_uid(conns),
                                flom_conns_get_domain(conns),
                                fd, SOCK_STREAM, addrlen,
                                (struct sockaddr *)&addr, TRUE)))
@@ -915,7 +915,8 @@ int flom_listen_udp(flom_config_t *config, flom_conns_t *conns)
                     conn));
         /* initialize the connection */
         if (FLOM_RC_OK != (ret_cod = flom_conn_init(
-                               conn, family, fd, SOCK_DGRAM, gai->ai_addrlen,
+                               conn, flom_conns_get_new_uid(conns),
+                               family, fd, SOCK_DGRAM, gai->ai_addrlen,
                                gai->ai_addr, TRUE)))
             THROW(CONN_INIT_ERROR);
         
@@ -1316,7 +1317,7 @@ int flom_accept_loop_pollin(flom_config_t *config,
                         "(%p)\n", conn));
             /* initialize the connection */
             if (FLOM_RC_OK != (ret_cod = flom_conn_init(
-                                   conn,
+                                   conn, flom_conns_get_new_uid(conns),
                                    flom_conns_get_domain(conns),
                                    conn_fd, SOCK_STREAM, clilen,
                                    (struct sockaddr *)&cliaddr, TRUE)))
@@ -1728,7 +1729,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                     THROW(PUT_INTO_INCUBATOR);
                 } /* if (!msg->body.lock_8.resource.wait) */
             } else {
-                /* generate a new unique id */
+                /* generate a new unique id for the locker */
                 uint64_t uid = flom_conns_get_new_uid(conns);
                 /* start a new locker */
                 ret_cod = flom_accept_loop_start_locker(

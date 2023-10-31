@@ -92,6 +92,10 @@ typedef enum flom_conn_state_e {
  */
 typedef struct {
     /**
+     * Unique identifier associated to the connection object
+     */
+    flom_uid_t            uid;
+    /**
      * Connection state
      */
     flom_conn_state_t     state;
@@ -151,6 +155,7 @@ extern "C" {
     /**
      * Initialize a connection object with network parameters
      * @param obj IN connection object
+     * @param uid IN unique identifier associated to the connection
      * @param domain IN communication domain (AF_UNIX/AF_LOCAL, AF_INET,
      *                  AF_INET6)
      * @param sockfd IN TCP socket file descriptor
@@ -162,11 +167,34 @@ extern "C" {
      *                       (child/locker)
      * @return a reason code
      */
-    int flom_conn_init(flom_conn_t *obj, int domain, int sockfd, int type,
+    int flom_conn_init(flom_conn_t *obj, flom_uid_t uid, int domain,
+                       int sockfd, int type,
                        socklen_t addrlen, const struct sockaddr *sa,
                        int main_thread);
 
+
     
+    /**
+     * Getter method for uid property
+     * @param obj IN connection object
+     * @return uid
+     */
+    static inline flom_uid_t flom_conn_get_uid(const flom_conn_t *obj) {
+        return obj->uid;
+    }
+    
+    
+    
+    /**
+     * Setter method for uid property
+     * @param obj IN/OUT connection object
+     * @param value IN new value for uid
+     */
+    static inline void flom_conn_set_uid(flom_conn_t *obj, flom_uid_t value) {
+        obj->uid = value;
+    }
+
+
     
     /**
      * Getter method for state property

@@ -157,7 +157,8 @@ gpointer flom_locker_loop(gpointer data)
         /* initialize the connection */
         memset(&sa_storage, 0, sizeof(sa_storage));
         if (FLOM_RC_OK != (ret_cod = flom_conn_init(
-                               conn, flom_conns_get_domain(&conns),
+                               conn, 0,
+                               flom_conns_get_domain(&conns),
                                locker->read_pipe, SOCK_STREAM,
                                sizeof(struct sockaddr_storage),
                                (struct sockaddr *)&sa_storage,

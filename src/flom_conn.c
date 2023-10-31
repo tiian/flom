@@ -93,7 +93,8 @@ void flom_conn_delete(flom_conn_t *obj)
 
 
 
-int flom_conn_init(flom_conn_t *obj, int domain, int sockfd, int type,
+int flom_conn_init(flom_conn_t *obj, flom_uid_t uid, int domain, int sockfd,
+                   int type,
                    socklen_t addrlen, const struct sockaddr *sa,
                    int main_thread)
 {
@@ -108,7 +109,8 @@ int flom_conn_init(flom_conn_t *obj, int domain, int sockfd, int type,
         GMarkupParseContext *tmp_parser = NULL;
         if (NULL == obj)
             THROW(NULL_OBJECT);
-        
+
+        obj->uid = uid;
         flom_tcp_init(&obj->tcp, NULL);
         flom_tcp_set_domain(&obj->tcp, domain);
         /* set address */
@@ -312,8 +314,10 @@ void flom_conn_trace(const flom_conn_t *conn)
 {
     FLOM_TRACE(("flom_conn_trace: object=%p\n", conn));
     FLOM_TRACE(("flom_conn_trace: "
-                "fd=%d, type=%d, state=%d, wait=%d, msg=%p, parser=%p, "
+                "uid= " FLOM_UID_T_FORMAT ", fd=%d, type=%d, state=%d, "
+                "wait=%d, msg=%p, parser=%p, "
                 "addr_len=%d\n",
+                flom_conn_get_uid(conn),
                 flom_tcp_get_sockfd(&conn->tcp),
                 flom_tcp_get_socket_type(&conn->tcp),
                 conn->state, conn->wait, conn->msg, conn->parser,

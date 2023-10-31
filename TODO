@@ -1,4 +1,4 @@
-Go on with VFS implementation...
+Go on with VFS implementation: create content in directories "holders" and "waitings"
 
 Remove all warnings for Ubuntu 14.04; more recent ones can happen
 
