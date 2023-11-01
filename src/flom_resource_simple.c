@@ -33,6 +33,7 @@
 #include "flom_resource_simple.h"
 #include "flom_tcp.h"
 #include "flom_trace.h"
+#include "flom_vfs.h"
 #include "flom_syslog.h"
 
 
@@ -123,6 +124,7 @@ int flom_resource_simple_init(flom_resource_t *resource,
 
 
 int flom_resource_simple_inmsg(flom_resource_t *resource,
+                               flom_uid_t locker_uid,
                                flom_conn_t *conn,
                                struct flom_msg_s *msg,
                                struct timeval *next_deadline)
@@ -170,6 +172,14 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                     resource->data.simple.holders = g_slist_prepend(
                         resource->data.simple.holders,
                         (gpointer)cl);
+                    /* propagate the info to the VFS ram tree */
+                    if (FLOM_RC_OK != (
+                            ret_cod = flom_vfs_ram_tree_add_locker_holder(
+                                locker_uid, conn->uid))) {
+                        FLOM_TRACE(("flom_resource_simple_inmsg: unable to "
+                                    "update the info in VFS for this "
+                                    "connection\n"));
+                    }                  
                     if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                            msg, FLOM_MSG_VERB_LOCK,
                                            flom_conn_get_last_step(conn) +

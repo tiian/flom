@@ -316,11 +316,22 @@ extern "C" {
 
     /**
      * Delete from the ram tree the node associated to a locker
-     * @param uid IN unique identified of the locker, it is the name of the
+     * @param uid IN unique identifier of the locker, it is the name of the
      *        directory in the VFS
      * @return a reason code
      */     
     int flom_vfs_ram_tree_del_locker(flom_uid_t uid);
+
+
+
+    /**
+     * Add in the ram tree a node associated to a connection holder
+     * @param locker_uid IN unique identifier of the locker
+     * @param conn_uid IN unique identifier of the conn (connection)
+     * @return a reason code
+     */
+    int flom_vfs_ram_tree_add_locker_holder(flom_uid_t locker_uid,
+                                            flom_uid_t conn_uid);
 
 
     

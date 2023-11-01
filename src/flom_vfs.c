@@ -629,6 +629,7 @@ int flom_vfs_ram_tree_init(int activate)
     flom_vfs_ram_node_t *tmp_root_node = NULL;
     flom_vfs_ram_node_t *tmp_status_node = NULL;
     flom_vfs_ram_node_t *tmp_lockers_node = NULL;
+    int locked = FALSE;
     
     FLOM_TRACE(("flom_vfs_ram_tree_init(activate=%d)\n", activate));
     TRY {
@@ -645,6 +646,7 @@ int flom_vfs_ram_tree_init(int activate)
         g_mutex_init(&flom_vfs_ram_tree.mutex);
         /* lock it immediately! */
         g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        locked = TRUE;
         
         /* create the data block for the first node, root dir */
         if (NULL == (tmp_root_node = flom_vfs_ram_node_create(
@@ -721,10 +723,10 @@ int flom_vfs_ram_tree_init(int activate)
             flom_vfs_ram_node_destroy(tmp_status_node);
         if (excp > NODE_CREATE_ERROR3 && excp <= G_NODE_PREPEND_DATA3)
             flom_vfs_ram_node_destroy(tmp_lockers_node);
-        /* unlock the semaphore to leave access to the object to others */
-        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
-        
     } /* TRY-CATCH */
+    /* unlock the semaphore to leave access to the object to others */
+    if (locked)
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
     FLOM_TRACE(("flom_vfs_ram_tree_init/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -778,6 +780,7 @@ GNode *flom_vfs_ram_tree_find(gpointer data)
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     GNode *result = NULL;
+    int locked = FALSE;
     
     FLOM_TRACE(("flom_vfs_ram_tree_find: data=%p\n", data));
     TRY {
@@ -788,6 +791,7 @@ GNode *flom_vfs_ram_tree_find(gpointer data)
         
         /* lock the tree to avoid conflicts */
         g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        locked = TRUE;
 
         /* if data == NULL, the caller wants the root of the tree */
         if (NULL == data) {
@@ -824,7 +828,8 @@ GNode *flom_vfs_ram_tree_find(gpointer data)
         } /* switch (excp) */
     } /* TRY-CATCH */
     /* unlock the tree to avoid conflicts */
-    g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    if (locked)
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
     FLOM_TRACE(("flom_vfs_ram_tree_find/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return result;
@@ -867,6 +872,7 @@ GNode *flom_vfs_ram_tree_find_parent(GNode *node)
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     GNode *result = NULL;
+    int locked = FALSE;
     
     FLOM_TRACE(("flom_vfs_ram_tree_find_parent: node=%p\n", node));
     TRY {
@@ -880,6 +886,7 @@ GNode *flom_vfs_ram_tree_find_parent(GNode *node)
         
         /* lock the tree to avoid conflicts */
         g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        locked = TRUE;
     
         /* if node is root, no parent */
         if (G_NODE_IS_ROOT(node)) {
@@ -917,7 +924,8 @@ GNode *flom_vfs_ram_tree_find_parent(GNode *node)
         } /* switch (excp) */
     } /* TRY-CATCH */
     /* unlock the tree to avoid conflicts */
-    g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    if (locked)
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
     FLOM_TRACE(("flom_vfs_ram_tree_find_parent/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return result;
@@ -944,6 +952,7 @@ GNode *flom_vfs_ram_tree_find_child_by_name(GNode *root, const char *name)
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     GNode *result = NULL;
+    int locked = FALSE;
     
     FLOM_TRACE(("flom_vfs_ram_tree_find_child_by_name\n"));
     TRY {
@@ -955,6 +964,7 @@ GNode *flom_vfs_ram_tree_find_child_by_name(GNode *root, const char *name)
         
         /* lock the tree to avoid conflicts */
         g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        locked = TRUE;
         /* traverse all the children of the node */
         n = g_node_n_children(root);
         for (i=0; i<n; i++) {
@@ -985,7 +995,8 @@ GNode *flom_vfs_ram_tree_find_child_by_name(GNode *root, const char *name)
         } /* switch (excp) */
     } /* TRY-CATCH */
     /* unlock the tree to avoid conflicts */
-    g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    if (locked)
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
     FLOM_TRACE(("flom_vfs_ram_tree_find_child_by_name/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return result;
@@ -1090,6 +1101,7 @@ GArray *flom_vfs_ram_tree_retrieve_children(gpointer data)
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     GArray *result = NULL;
+    int locked = FALSE;
     
     FLOM_TRACE(("flom_vfs_ram_tree_retrieve_children: data=%p\n", data));
     TRY {
@@ -1101,6 +1113,7 @@ GArray *flom_vfs_ram_tree_retrieve_children(gpointer data)
         
         /* lock the tree to avoid conflicts */
         g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        locked = TRUE;
 
         /* allocate the array for the result */
         if (NULL == (result = g_array_new(
@@ -1171,7 +1184,8 @@ GArray *flom_vfs_ram_tree_retrieve_children(gpointer data)
         } /* switch (excp) */
     } /* TRY-CATCH */
     /* unlock the tree to avoid conflicts */
-    g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    if (locked)
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
     FLOM_TRACE(("flom_vfs_ram_tree_retrieve_children/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return result;
@@ -1201,6 +1215,7 @@ int flom_vfs_ram_tree_add_locker(flom_uid_t uid, const char *resource_name,
     flom_vfs_ram_node_t *tmp_ram_node_resource_type_file = NULL;
     flom_vfs_ram_node_t *tmp_ram_node_holders_dir = NULL;
     flom_vfs_ram_node_t *tmp_ram_node_waitings_dir = NULL;
+    int locked = FALSE;
     
     FLOM_TRACE(("flom_vfs_ram_tree_add_locker(uid=" FLOM_UID_T_FORMAT
                 ", resource_name='%s', resource_type='%s')\n",
@@ -1220,6 +1235,7 @@ int flom_vfs_ram_tree_add_locker(flom_uid_t uid, const char *resource_name,
             THROW(INACTIVE_FEATURE);        
         /* lock the tree to avoid conflicts */
         g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        locked = TRUE;
         /* locate the directory with lockers */
         if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
                                flom_vfs_ram_tree.root,
@@ -1320,7 +1336,8 @@ int flom_vfs_ram_tree_add_locker(flom_uid_t uid, const char *resource_name,
         } /* if (excp != NONE) */
     } /* TRY-CATCH */
     /* unlock the tree to avoid conflicts */
-    g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    if (locked)
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
     FLOM_TRACE(("flom_vfs_ram_tree_add_locker/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
@@ -1335,6 +1352,7 @@ int flom_vfs_ram_tree_del_locker(flom_uid_t uid)
                      , FIND_NODE_BY_NAME2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    int locked = FALSE;
     
     FLOM_TRACE(("flom_vfs_ram_tree_del_locker\n"));
     TRY {
@@ -1346,6 +1364,7 @@ int flom_vfs_ram_tree_del_locker(flom_uid_t uid)
             THROW(INACTIVE_FEATURE);        
         /* lock the tree to avoid conflicts */
         g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        locked = TRUE;
         /* locate the directory with lockers */
         if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
                                flom_vfs_ram_tree.root,
@@ -1377,8 +1396,48 @@ int flom_vfs_ram_tree_del_locker(flom_uid_t uid)
         } /* switch (excp) */
     } /* TRY-CATCH */
     /* unlock the tree to avoid conflicts */
-    g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    if (locked)
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
     FLOM_TRACE(("flom_vfs_ram_tree_del_locker/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
+int flom_vfs_ram_tree_add_locker_holder(flom_uid_t locker_uid,
+                                        flom_uid_t conn_uid)
+{
+    enum Exception { INACTIVE_FEATURE
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    int locked = FALSE;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_add_locker_holder(locker_uid="
+                FLOM_UID_T_FORMAT ", conn_uid=" FLOM_UID_T_FORMAT ")\n",
+                locker_uid, conn_uid));
+    TRY {
+        if (!flom_vfs_ram_tree.active)
+            THROW(INACTIVE_FEATURE);        
+        /* lock the tree to avoid conflicts */
+        g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        locked = TRUE;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* unlock the tree to avoid conflicts */
+    if (locked)
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    FLOM_TRACE(("flom_vfs_ram_tree_add_locker_holder/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+

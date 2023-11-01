@@ -319,6 +319,7 @@ int flom_resource_hier_init(flom_resource_t *resource,
 
 
 int flom_resource_hier_inmsg(flom_resource_t *resource,
+                             flom_uid_t locker_uid,
                              flom_conn_t *conn,
                              struct flom_msg_s *msg,
                              struct timeval *next_deadline)

@@ -360,8 +360,8 @@ struct flom_resource_s {
      * Method called to process incoming messages (it depends from resource
      * type)
      */
-    int   (*inmsg)     (flom_resource_t *, flom_conn_t *, struct flom_msg_s *,
-                        struct timeval *next_deadline);
+    int   (*inmsg)     (flom_resource_t *, flom_uid_t, flom_conn_t *,
+                        struct flom_msg_s *, struct timeval *next_deadline);
     /**
      * Method called to process a clean-up signal (client disconnected)
      */

@@ -488,8 +488,8 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 /* process input message */
                 if (FLOM_RC_OK != (ret_cod = 
                                    locker->resource.inmsg(
-                                       &locker->resource, curr_conn, msg,
-                                       next_deadline)))
+                                       &locker->resource, locker->uid,
+                                       curr_conn, msg, next_deadline)))
                     THROW(RESOURCE_INMSG_ERROR);
                 /* reply with output message */
                 if (FLOM_MSG_STATE_READY == msg->state) {
