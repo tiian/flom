@@ -87,7 +87,7 @@ const char *FLOM_VFS_LOCKERS_RESNAME_FILE_NAME = "resource_name";
 const char *FLOM_VFS_LOCKERS_RESTYPE_FILE_NAME = "resource_type";
 const char *FLOM_VFS_LOCKERS_HOLDERS_DIR_NAME = "holders";
 const char *FLOM_VFS_LOCKERS_WAITINGS_DIR_NAME = "waitings";
-const char *FLOM_VFS_LOCKERS_HOLDERS_PEERNAME_FILE_NAME = "peer_name";
+const char *FLOM_VFS_LOCKERS_PEERNAME_FILE_NAME = "peer_name";
 
 
 
@@ -313,7 +313,7 @@ void flom_vfs_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
        root dir is special case, ino==1 every time */
     node = flom_vfs_ram_tree_find(FLOM_VFS_INO_ROOT_DIR == ino ?
                                   NULL : (gpointer)ino);
-    parent = flom_vfs_ram_tree_find_parent(node);
+    parent = flom_vfs_ram_tree_find_parent(node, FALSE);
     if (NULL == node) {
         /* the inode does not exists! */
 		fuse_reply_err(req, ENOENT);        
@@ -866,14 +866,14 @@ gboolean flom_vfs_ram_tree_find_parent_iter(
 
 
 
-GNode *flom_vfs_ram_tree_find_parent(GNode *node)
+GNode *flom_vfs_ram_tree_find_parent(GNode *node, int locked)
 {
     enum Exception { INACTIVE_FEATURE
                      , NULL_OBJECT
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     GNode *result = NULL;
-    int locked = FALSE;
+    int must_unlock = FALSE;
     
     FLOM_TRACE(("flom_vfs_ram_tree_find_parent: node=%p\n", node));
     TRY {
@@ -886,8 +886,10 @@ GNode *flom_vfs_ram_tree_find_parent(GNode *node)
                     node, ((flom_vfs_ram_node_t *)node->data)->name));
         
         /* lock the tree to avoid conflicts */
-        g_mutex_lock(&flom_vfs_ram_tree.mutex);
-        locked = TRUE;
+        if (!locked) {
+            g_mutex_lock(&flom_vfs_ram_tree.mutex);
+            must_unlock = TRUE;
+        }
     
         /* if node is root, no parent */
         if (G_NODE_IS_ROOT(node)) {
@@ -925,7 +927,7 @@ GNode *flom_vfs_ram_tree_find_parent(GNode *node)
         } /* switch (excp) */
     } /* TRY-CATCH */
     /* unlock the tree to avoid conflicts */
-    if (locked)
+    if (must_unlock)
         g_mutex_unlock(&flom_vfs_ram_tree.mutex);
     FLOM_TRACE(("flom_vfs_ram_tree_find_parent/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
@@ -1091,8 +1093,6 @@ int flom_vfs_ram_tree_find_node_by_name(GNode *start, const char *name,
 
 
 
-
-
 GArray *flom_vfs_ram_tree_retrieve_children(gpointer data)
 {
     enum Exception { INACTIVE_FEATURE
@@ -1194,6 +1194,49 @@ GArray *flom_vfs_ram_tree_retrieve_children(gpointer data)
 
 
 
+int flom_vfs_ram_tree_update_mtime(GNode *node)
+{
+    enum Exception { INACTIVE_FEATURE
+                     , NULL_OBJECT
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_update_mtime(node=%p)\n", node));
+    TRY {
+        flom_vfs_ram_node_t *node_data;
+        
+        if (!flom_vfs_ram_tree.active)
+            THROW(INACTIVE_FEATURE);
+        
+        if (NULL == node)
+            THROW(NULL_OBJECT);
+
+        node_data = (flom_vfs_ram_node_t *)node->data;
+        node_data->mtime = time(NULL);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INACTIVE_FEATURE:
+                ret_cod = FLOM_RC_INACTIVE_FEATURE;
+                break;
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_vfs_ram_tree_update_mtime/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
 int flom_vfs_ram_tree_add_locker(flom_uid_t uid, const char *resource_name,
                                  const char *resource_type)
 {
@@ -1201,6 +1244,7 @@ int flom_vfs_ram_tree_add_locker(flom_uid_t uid, const char *resource_name,
                      , FIND_NODE_BY_NAME
                      , RAM_NODE_UID_DIR_ERROR
                      , G_NODE_UID_DIR_APPEND_DATA
+                     , RAM_TREE_UPDATE_MTIME
                      , RAM_NODE_RESOUCE_NAME_FILE_ERROR
                      , G_NODE_RESOUCE_NAME_FILE_APPEND_DATA
                      , RAM_NODE_RESOURCE_TYPE_FILE_ERROR
@@ -1253,6 +1297,10 @@ int flom_vfs_ram_tree_add_locker(flom_uid_t uid, const char *resource_name,
                          lockers_node, tmp_ram_node_uid_dir)))
             THROW(G_NODE_UID_DIR_APPEND_DATA);
         tmp_ram_node_uid_dir = NULL;
+        /* update modification time for the parent dir */
+        if (FLOM_RC_OK != (ret_cod =
+                           flom_vfs_ram_tree_update_mtime(lockers_node)))
+            THROW(RAM_TREE_UPDATE_MTIME);
         /* create the data block for the resource_name file node */
         snprintf(string_buffer, sizeof(string_buffer), "%s\n", resource_name);
         if (NULL == (
@@ -1311,6 +1359,8 @@ int flom_vfs_ram_tree_add_locker(flom_uid_t uid, const char *resource_name,
             case RAM_NODE_WAITINGS_DIR_ERROR:
                 ret_cod = FLOM_RC_NEW_OBJ;
                 break;
+            case RAM_TREE_UPDATE_MTIME:
+                break;
             case G_NODE_UID_DIR_APPEND_DATA:
             case G_NODE_RESOUCE_NAME_FILE_APPEND_DATA:
             case G_NODE_RESOURCE_TYPE_FILE_APPEND_DATA:
@@ -1355,7 +1405,8 @@ int flom_vfs_ram_tree_del_locker(flom_uid_t uid)
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int locked = FALSE;
     
-    FLOM_TRACE(("flom_vfs_ram_tree_del_locker\n"));
+    FLOM_TRACE(("flom_vfs_ram_tree_del_locker(uid=" FLOM_UID_T_FORMAT "\n",
+                uid));
     TRY {
         char uid_buffer[SIZEOF_FLOM_UID_T * 3];
         GNode *lockers_node = NULL;
@@ -1374,6 +1425,7 @@ int flom_vfs_ram_tree_del_locker(flom_uid_t uid)
             THROW(FIND_NODE_BY_NAME1);
         /* create the nome of the subdir */
         sprintf(uid_buffer, FLOM_UID_T_FORMAT, uid);
+        /* locate the specific locker subdir */
         if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
                                lockers_node, uid_buffer, TRUE,
                                &locker_dir_node)))
@@ -1406,9 +1458,10 @@ int flom_vfs_ram_tree_del_locker(flom_uid_t uid)
 
 
 
-int flom_vfs_ram_tree_add_locker_holder(flom_uid_t locker_uid,
-                                        flom_uid_t conn_uid,
-                                        const char *peer_name)
+int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
+                                      flom_uid_t conn_uid,
+                                      int is_holder,
+                                      const char *peer_name)
 {
     enum Exception { INACTIVE_FEATURE
                      , FIND_NODE_BY_NAME1
@@ -1416,6 +1469,7 @@ int flom_vfs_ram_tree_add_locker_holder(flom_uid_t locker_uid,
                      , FIND_NODE_BY_NAME3
                      , RAM_NODE_CONN_UID_DIR_ERROR
                      , G_NODE_UID_CONN_DIR_APPEND_DATA
+                     , RAM_TREE_UPDATE_MTIME
                      , RAM_NODE_RESOURCE_TYPE_FILE_ERROR
                      , G_NODE_PEER_NAME_FILE_APPEND_DATA
                      , NONE } excp;
@@ -1424,13 +1478,14 @@ int flom_vfs_ram_tree_add_locker_holder(flom_uid_t locker_uid,
     flom_vfs_ram_node_t *tmp_ram_node_conn_uid_dir = NULL;
     flom_vfs_ram_node_t *tmp_ram_node_conn_peer_name_file = NULL;
     
-    FLOM_TRACE(("flom_vfs_ram_tree_add_locker_holder(locker_uid="
-                FLOM_UID_T_FORMAT ", conn_uid=" FLOM_UID_T_FORMAT ")\n",
-                locker_uid, conn_uid));
+    FLOM_TRACE(("flom_vfs_ram_tree_add_locker_conn(locker_uid="
+                FLOM_UID_T_FORMAT ", conn_uid=" FLOM_UID_T_FORMAT
+                ", is_holder=%d, peer_name='%s')\n",
+                locker_uid, conn_uid, is_holder, peer_name));
     TRY {
         GNode *lockers_node = NULL;
         GNode *specific_locker_node = NULL;
-        GNode *holders_node = NULL;
+        GNode *children_node = NULL;
         GNode *tmp_node_conn_uid_dir = NULL;
         GNode *tmp_node_peer_name_file = NULL;
         char uid_buffer[SIZEOF_FLOM_UID_T * 3];
@@ -1454,11 +1509,12 @@ int flom_vfs_ram_tree_add_locker_holder(flom_uid_t locker_uid,
                                lockers_node, uid_buffer,
                                TRUE, &specific_locker_node)))
             THROW(FIND_NODE_BY_NAME2);
-        /* locate the holders directory */
+        /* locate the holders/waitings directory */
         if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
                                specific_locker_node,
-                               FLOM_VFS_LOCKERS_HOLDERS_DIR_NAME,
-                               TRUE, &holders_node)))
+                               is_holder ? FLOM_VFS_LOCKERS_HOLDERS_DIR_NAME :
+                               FLOM_VFS_LOCKERS_WAITINGS_DIR_NAME,
+                               TRUE, &children_node)))
             THROW(FIND_NODE_BY_NAME3);
         /* create the data block for the conn node */
         sprintf(uid_buffer, FLOM_UID_T_FORMAT, conn_uid);
@@ -1467,14 +1523,18 @@ int flom_vfs_ram_tree_add_locker_holder(flom_uid_t locker_uid,
             THROW(RAM_NODE_CONN_UID_DIR_ERROR);
         /* append the node to the tree, create a child */
         if (NULL == (tmp_node_conn_uid_dir = g_node_append_data(
-                         holders_node, tmp_ram_node_conn_uid_dir)))
+                         children_node, tmp_ram_node_conn_uid_dir)))
             THROW(G_NODE_UID_CONN_DIR_APPEND_DATA);
-        tmp_ram_node_conn_uid_dir = NULL;        
+        tmp_ram_node_conn_uid_dir = NULL;
+        /* update modification time for the parent dir */
+        if (FLOM_RC_OK != (ret_cod =
+                           flom_vfs_ram_tree_update_mtime(children_node)))
+            THROW(RAM_TREE_UPDATE_MTIME);
         /* create the data block for the peer_name file node */
         snprintf(string_buffer, sizeof(string_buffer), "%s\n", peer_name);
         if (NULL == (
                 tmp_ram_node_conn_peer_name_file = flom_vfs_ram_node_create(
-                    FLOM_VFS_LOCKERS_HOLDERS_PEERNAME_FILE_NAME,
+                    FLOM_VFS_LOCKERS_PEERNAME_FILE_NAME,
                     string_buffer)))
             THROW(RAM_NODE_RESOURCE_TYPE_FILE_ERROR);
         /* append the node to the tree, create a child */
@@ -1487,12 +1547,17 @@ int flom_vfs_ram_tree_add_locker_holder(flom_uid_t locker_uid,
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case INACTIVE_FEATURE:
+                ret_cod = FLOM_RC_INACTIVE_FEATURE;
+                break;
             case FIND_NODE_BY_NAME1:
             case FIND_NODE_BY_NAME2:
             case FIND_NODE_BY_NAME3:
                 break;
             case RAM_NODE_CONN_UID_DIR_ERROR:
             case RAM_NODE_RESOURCE_TYPE_FILE_ERROR:
+                break;
+            case RAM_TREE_UPDATE_MTIME:
                 break;
             case G_NODE_UID_CONN_DIR_APPEND_DATA:
             case G_NODE_PEER_NAME_FILE_APPEND_DATA:
@@ -1513,7 +1578,206 @@ int flom_vfs_ram_tree_add_locker_holder(flom_uid_t locker_uid,
     /* unlock the tree to avoid conflicts */
     if (locked)
         g_mutex_unlock(&flom_vfs_ram_tree.mutex);
-    FLOM_TRACE(("flom_vfs_ram_tree_add_locker_holder/excp=%d/"
+    FLOM_TRACE(("flom_vfs_ram_tree_add_locker_conn/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_vfs_ram_tree_del_locker_conn(flom_uid_t conn_uid)
+{
+    enum Exception { INACTIVE_FEATURE
+                     , FIND_NODE_BY_NAME1
+                     , FIND_NODE_BY_NAME2
+                     , FIND_PARENT
+                     , RAM_TREE_UPDATE_MTIME
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    int locked = FALSE;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_del_locker_conn(conn_uid="
+                FLOM_UID_T_FORMAT ")\n", conn_uid));
+    TRY {
+        GNode *lockers_node = NULL;
+        GNode *specific_conn_node = NULL;
+        GNode *parent_node = NULL;
+        char uid_buffer[SIZEOF_FLOM_UID_T * 3];
+        
+        if (!flom_vfs_ram_tree.active)
+            THROW(INACTIVE_FEATURE);        
+        /* lock the tree to avoid conflicts */
+        g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        locked = TRUE;
+        
+        /* locate the directory with lockers */
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
+                               flom_vfs_ram_tree.root,
+                               FLOM_VFS_LOCKERS_DIR_NAME,
+                               TRUE, &lockers_node)))
+            THROW(FIND_NODE_BY_NAME1);
+        /* locate the directory of the specific connection */
+        sprintf(uid_buffer, FLOM_UID_T_FORMAT, conn_uid);
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
+                               lockers_node, uid_buffer,
+                               TRUE, &specific_conn_node)))
+            THROW(FIND_NODE_BY_NAME2);
+        /* retrieve the father of the node that will be deleted; it can be
+           either "holders" or "waitings" dir */
+        if (NULL == (parent_node = flom_vfs_ram_tree_find_parent(
+                         specific_conn_node, TRUE)))
+            THROW(FIND_PARENT);
+        /* update modification time for the parent dir */
+        if (FLOM_RC_OK != (ret_cod =
+                           flom_vfs_ram_tree_update_mtime(parent_node)))
+            THROW(RAM_TREE_UPDATE_MTIME);
+        /* remove the node/dir associated to the connection */
+        flom_vfs_ram_tree_cleanup(specific_conn_node, TRUE);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INACTIVE_FEATURE:
+                ret_cod = FLOM_RC_INACTIVE_FEATURE;
+                break;
+            case FIND_NODE_BY_NAME1:
+            case FIND_NODE_BY_NAME2:
+                break;
+            case FIND_PARENT:
+                ret_cod = FLOM_RC_OBJ_NOT_FOUND_ERROR;
+                break;
+            case RAM_TREE_UPDATE_MTIME:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* unlock the tree to avoid conflicts */
+    if (locked)
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    FLOM_TRACE(("flom_vfs_ram_tree_del_locker_conn/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_vfs_ram_tree_move_locker_conn(flom_uid_t conn_uid)
+{
+    enum Exception { INACTIVE_FEATURE
+                     , FIND_NODE_BY_NAME1
+                     , FIND_NODE_BY_NAME2
+                     , FIND_PARENT
+                     , OBJ_CORRUPTED
+                     , FIND_GRANDPARENT
+                     , FIND_NODE_BY_NAME3
+                     , RAM_TREE_UPDATE_MTIME1
+                     , RAM_TREE_UPDATE_MTIME2
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    int locked = FALSE;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_move_locker_conn(conn_uid="
+                FLOM_UID_T_FORMAT ")\n"));
+    TRY {
+        GNode *lockers_node = NULL;
+        GNode *specific_conn_node = NULL;
+        GNode *parent_node = NULL;
+        GNode *grandparent_node = NULL;
+        GNode *holders_node = NULL;
+        char uid_buffer[SIZEOF_FLOM_UID_T * 3];
+        flom_vfs_ram_node_t *parent_node_data;
+        
+        if (!flom_vfs_ram_tree.active)
+            THROW(INACTIVE_FEATURE);        
+        /* lock the tree to avoid conflicts */
+        g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        locked = TRUE;
+        /* locate the directory with lockers */
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
+                               flom_vfs_ram_tree.root,
+                               FLOM_VFS_LOCKERS_DIR_NAME,
+                               TRUE, &lockers_node)))
+            THROW(FIND_NODE_BY_NAME1);
+        /* locate the directory of the specific connection */
+        sprintf(uid_buffer, FLOM_UID_T_FORMAT, conn_uid);
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
+                               lockers_node, uid_buffer,
+                               TRUE, &specific_conn_node)))
+            THROW(FIND_NODE_BY_NAME2);
+        /* locate the father of the node that will be moved; it must be
+           the "waitings" dir, otherwise the situation is not consistent */
+        if (NULL == (parent_node = flom_vfs_ram_tree_find_parent(
+                         specific_conn_node, TRUE)))
+            THROW(FIND_PARENT);
+        /* check the parent is "waitings" */
+        parent_node_data = (flom_vfs_ram_node_t *)parent_node->data;
+        if (0 != strcmp(parent_node_data->name,
+                        FLOM_VFS_LOCKERS_WAITINGS_DIR_NAME)) {
+            FLOM_TRACE(("flom_vfs_ram_tree_move_locker_conn: parent node name "
+                        "should be '%s', but it is '%s'! The RAM tree is no "
+                        "more consistent\n",
+                        FLOM_VFS_LOCKERS_WAITINGS_DIR_NAME,
+                        parent_node_data->name));
+            THROW(OBJ_CORRUPTED);
+        }
+        /* locate the grandfather of the node that will be moved */
+        if (NULL == (grandparent_node = flom_vfs_ram_tree_find_parent(
+                         parent_node, TRUE)))
+            THROW(FIND_GRANDPARENT);
+        /* locate the holders node in the same locker */
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
+                               grandparent_node,
+                               FLOM_VFS_LOCKERS_HOLDERS_DIR_NAME,
+                               TRUE, &holders_node)))
+            THROW(FIND_NODE_BY_NAME3);
+        /* unlink the node from "waitings" */
+        g_node_unlink(specific_conn_node);
+        /* update modification time for the OLD parent (waitings) dir */
+        if (FLOM_RC_OK != (ret_cod =
+                           flom_vfs_ram_tree_update_mtime(parent_node)))
+            THROW(RAM_TREE_UPDATE_MTIME1);
+        /* append the node to the holders */
+        g_node_append(holders_node, specific_conn_node);
+        /* update modification time for the NEW parent (holders) dir */
+        if (FLOM_RC_OK != (ret_cod =
+                           flom_vfs_ram_tree_update_mtime(holders_node)))
+            THROW(RAM_TREE_UPDATE_MTIME2);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INACTIVE_FEATURE:
+                ret_cod = FLOM_RC_INACTIVE_FEATURE;
+                break;
+            case FIND_NODE_BY_NAME1:
+            case FIND_NODE_BY_NAME2:
+            case FIND_NODE_BY_NAME3:
+                break;
+            case FIND_PARENT:
+            case FIND_GRANDPARENT:
+                ret_cod = FLOM_RC_OBJ_NOT_FOUND_ERROR;
+                break;
+            case OBJ_CORRUPTED:
+                ret_cod = FLOM_RC_OBJ_CORRUPTED;
+                break;
+            case RAM_TREE_UPDATE_MTIME1:
+            case RAM_TREE_UPDATE_MTIME2:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+    } /* TRY-CATCH */
+    /* unlock the tree to avoid conflicts */
+    if (locked)
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    FLOM_TRACE(("flom_vfs_ram_tree_move_locker_conn/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }

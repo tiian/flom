@@ -1,8 +1,6 @@
 Go on with VFS implementation: create content in directories "holders" and "waitings"
 
-	implement mtime when a child is added to the dir
-	implement conn enters waitings
-	implement conn is moved from waitings to holders
+	implement conn is moved from nursery to active
 
 Remove all warnings for Ubuntu 14.04; more recent ones can happen
 

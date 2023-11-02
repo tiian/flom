@@ -416,12 +416,12 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
                     peer_name = flom_tcp_retrieve_peer_name(&conn->tcp);
                     /* propagate the info to the VFS ram tree */
                     if (FLOM_RC_OK != (
-                            ret_cod = flom_vfs_ram_tree_add_locker_holder(
-                                locker_uid, conn->uid,
+                            ret_cod = flom_vfs_ram_tree_add_locker_conn(
+                                locker_uid, conn->uid, TRUE,
                                 peer_name == NULL ? "" : peer_name))) {
                         FLOM_TRACE(("flom_resource_timestamp_inmsg: unable to "
                                     "update the info in VFS for this "
-                                    "connection\n"));
+                                    "holder connection\n"));
                     }                  
                     if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                            msg, FLOM_MSG_VERB_LOCK,
@@ -445,6 +445,18 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
                         g_queue_push_tail(
                             resource->data.timestamp.waitings,
                             (gpointer)cl);
+                        /* retrieve the name of the peer (IP address) */
+                        peer_name = flom_tcp_retrieve_peer_name(&conn->tcp);
+                        /* propagate the info to the VFS ram tree */
+                        if (FLOM_RC_OK != (
+                                ret_cod = flom_vfs_ram_tree_add_locker_conn(
+                                    locker_uid, conn->uid, FALSE,
+                                    peer_name == NULL ? "" : peer_name))) {
+                            FLOM_TRACE(("flom_resource_timestamp_inmsg: "
+                                        "unable to "
+                                        "update the info in VFS for this "
+                                        "waiting connection\n"));
+                        }                  
                         if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                                msg, FLOM_MSG_VERB_LOCK,
                                                flom_conn_get_last_step(conn) +
@@ -601,7 +613,14 @@ int flom_resource_timestamp_clean(flom_resource_t *resource,
                     ++i;
             } while (TRUE);
         } /* if (NULL != p) */
-                
+        /* propagate the info to the VFS ram tree */
+        if (FLOM_RC_OK != (
+                ret_cod = flom_vfs_ram_tree_del_locker_conn(conn->uid))) {
+            FLOM_TRACE(("flom_resource_timestamp_clean: unable to "
+                        "delete the info from VFS for this "
+                        "holder connection\n"));
+        }                  
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
@@ -774,6 +793,15 @@ int flom_resource_timestamp_waitings(flom_resource_t *resource)
                     resource->data.timestamp.holders,
                     (gpointer)cl);
                 resource->data.timestamp.locked_quantity++;
+                /* propagate the info to the VFS ram tree */
+                if (FLOM_RC_OK != (
+                        ret_cod = flom_vfs_ram_tree_move_locker_conn(
+                            cl->conn->uid))) {
+                    FLOM_TRACE(("flom_resource_timestamp_waitings: unable to "
+                                "move connection node (uid="
+                                FLOM_UID_T_FORMAT ") in the VFS\n",
+                                cl->conn->uid));
+                }
                 cl = NULL;
             } else
                 ++i;

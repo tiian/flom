@@ -252,10 +252,13 @@ extern "C" {
     /**
      * Find a parent of a node in the ram tree
      * @param node IN is a pointer to a node in the tree
+     * @param locked IN TRUE if the global mutex is already locked by the
+     *        caller, FALSE if the global mutex is not already locked and it
+     *        must be locked/unlocked by this function
      * @param the parent of the node if it exists; for root node, root itself
      *        is returned
      */
-    GNode *flom_vfs_ram_tree_find_parent(GNode *node);
+    GNode *flom_vfs_ram_tree_find_parent(GNode *node, int locked);
     
 
     
@@ -300,6 +303,16 @@ extern "C" {
 
 
     /**
+     * Update the modification time of a node in the ram tree
+     * @param node IN is the node with the modification time that must be
+     *        updated
+     * @return a reason code
+     */
+    int flom_vfs_ram_tree_update_mtime(GNode *node);
+
+
+    
+    /**
      * Add in the ram tree a node associated to a locker
      * @param uid IN unique identified of the locker, it will the name of the
      *        directory in the VFS
@@ -325,18 +338,44 @@ extern "C" {
 
 
     /**
-     * Add in the ram tree a node associated to a connection holder
+     * Add in the ram tree a node associated to a connection below a specific
+     * locker; connection can be added to the list of "holders" or to the list
+     * of "waitings"
      * @param locker_uid IN unique identifier of the locker
      * @param conn_uid IN unique identifier of the conn (connection)
+     * @param is_holder IN boolean value, if TRUE the connection will be added
+     *        in the "holders" list, otherwise in the "waitings" list
      * @param peer_name IN IP address and port in human readable format
      * @return a reason code
      */
-    int flom_vfs_ram_tree_add_locker_holder(flom_uid_t locker_uid,
-                                            flom_uid_t conn_uid,
-                                            const char *peer_name);
+    int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
+                                          flom_uid_t conn_uid,
+                                          int is_holder,
+                                          const char *peer_name);
 
+
+
+    /**
+     * Delete from the ram tree the node associated to a connection below a
+     * locker; connection can be removed from the list of "holders"
+     * or from the list of "waitings"
+     * @param conn_uid IN unique identifier of the conn (connection)
+     * @return a reason code
+     */     
+    int flom_vfs_ram_tree_del_locker_conn(flom_uid_t conn_uid);
+
+
+
+    /**
+     * Move a connection in the ram tree from the waitings list to the holders
+     * list
+     * @param conn_uid IN unique identifier of the conn (connection)
+     * @return a reason code
+     */
+    int flom_vfs_ram_tree_move_locker_conn(flom_uid_t conn_uid);
 
     
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
