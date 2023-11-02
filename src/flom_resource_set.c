@@ -33,6 +33,7 @@
 #include "flom_resource_set.h"
 #include "flom_tcp.h"
 #include "flom_trace.h"
+#include "flom_vfs.h"
 #include "flom_syslog.h"
 
 
@@ -145,6 +146,7 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
                      , PROTOCOL_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    gchar *peer_name = NULL;
 
     FLOM_TRACE(("flom_resource_set_inmsg\n"));
     TRY {
@@ -175,6 +177,17 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
                     /* move to next element for next locker (round robin) */
                     resource->data.set.index = (resource->data.set.index + 1) %
                         resource->data.set.elements->len;
+                    /* retrieve the name of the peer (IP address) */
+                    peer_name = flom_tcp_retrieve_peer_name(&conn->tcp);
+                    /* propagate the info to the VFS ram tree */
+                    if (FLOM_RC_OK != (
+                            ret_cod = flom_vfs_ram_tree_add_locker_holder(
+                                locker_uid, conn->uid,
+                                peer_name == NULL ? "" : peer_name))) {
+                        FLOM_TRACE(("flom_resource_set_inmsg: unable to "
+                                    "update the info in VFS for this "
+                                    "connection\n"));
+                    }                  
                     if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                            msg, FLOM_MSG_VERB_LOCK,
                                            flom_conn_get_last_step(conn) +
@@ -271,6 +284,9 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* free allocated memory */
+    if (NULL != peer_name)
+        g_free(peer_name);
     FLOM_TRACE(("flom_resource_set_inmsg/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

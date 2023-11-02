@@ -328,10 +328,12 @@ extern "C" {
      * Add in the ram tree a node associated to a connection holder
      * @param locker_uid IN unique identifier of the locker
      * @param conn_uid IN unique identifier of the conn (connection)
+     * @param peer_name IN IP address and port in human readable format
      * @return a reason code
      */
     int flom_vfs_ram_tree_add_locker_holder(flom_uid_t locker_uid,
-                                            flom_uid_t conn_uid);
+                                            flom_uid_t conn_uid,
+                                            const char *peer_name);
 
 
     

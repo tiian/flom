@@ -87,6 +87,7 @@ const char *FLOM_VFS_LOCKERS_RESNAME_FILE_NAME = "resource_name";
 const char *FLOM_VFS_LOCKERS_RESTYPE_FILE_NAME = "resource_type";
 const char *FLOM_VFS_LOCKERS_HOLDERS_DIR_NAME = "holders";
 const char *FLOM_VFS_LOCKERS_WAITINGS_DIR_NAME = "waitings";
+const char *FLOM_VFS_LOCKERS_HOLDERS_PEERNAME_FILE_NAME = "peer_name";
 
 
 
@@ -1406,32 +1407,108 @@ int flom_vfs_ram_tree_del_locker(flom_uid_t uid)
 
 
 int flom_vfs_ram_tree_add_locker_holder(flom_uid_t locker_uid,
-                                        flom_uid_t conn_uid)
+                                        flom_uid_t conn_uid,
+                                        const char *peer_name)
 {
     enum Exception { INACTIVE_FEATURE
+                     , FIND_NODE_BY_NAME1
+                     , FIND_NODE_BY_NAME2
+                     , FIND_NODE_BY_NAME3
+                     , RAM_NODE_CONN_UID_DIR_ERROR
+                     , G_NODE_UID_CONN_DIR_APPEND_DATA
+                     , RAM_NODE_RESOURCE_TYPE_FILE_ERROR
+                     , G_NODE_PEER_NAME_FILE_APPEND_DATA
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int locked = FALSE;
+    flom_vfs_ram_node_t *tmp_ram_node_conn_uid_dir = NULL;
+    flom_vfs_ram_node_t *tmp_ram_node_conn_peer_name_file = NULL;
     
     FLOM_TRACE(("flom_vfs_ram_tree_add_locker_holder(locker_uid="
                 FLOM_UID_T_FORMAT ", conn_uid=" FLOM_UID_T_FORMAT ")\n",
                 locker_uid, conn_uid));
     TRY {
+        GNode *lockers_node = NULL;
+        GNode *specific_locker_node = NULL;
+        GNode *holders_node = NULL;
+        GNode *tmp_node_conn_uid_dir = NULL;
+        GNode *tmp_node_peer_name_file = NULL;
+        char uid_buffer[SIZEOF_FLOM_UID_T * 3];
+        char string_buffer[FLOM_VFS_STD_BUFFER_SIZE];
+
         if (!flom_vfs_ram_tree.active)
             THROW(INACTIVE_FEATURE);        
         /* lock the tree to avoid conflicts */
         g_mutex_lock(&flom_vfs_ram_tree.mutex);
         locked = TRUE;
         
+        /* locate the directory with lockers */
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
+                               flom_vfs_ram_tree.root,
+                               FLOM_VFS_LOCKERS_DIR_NAME,
+                               TRUE, &lockers_node)))
+            THROW(FIND_NODE_BY_NAME1);
+        /* locate the directory of the specific locker */
+        sprintf(uid_buffer, FLOM_UID_T_FORMAT, locker_uid);
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
+                               lockers_node, uid_buffer,
+                               TRUE, &specific_locker_node)))
+            THROW(FIND_NODE_BY_NAME2);
+        /* locate the holders directory */
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
+                               specific_locker_node,
+                               FLOM_VFS_LOCKERS_HOLDERS_DIR_NAME,
+                               TRUE, &holders_node)))
+            THROW(FIND_NODE_BY_NAME3);
+        /* create the data block for the conn node */
+        sprintf(uid_buffer, FLOM_UID_T_FORMAT, conn_uid);
+        if (NULL == (tmp_ram_node_conn_uid_dir = flom_vfs_ram_node_create(
+                         uid_buffer, NULL)))
+            THROW(RAM_NODE_CONN_UID_DIR_ERROR);
+        /* append the node to the tree, create a child */
+        if (NULL == (tmp_node_conn_uid_dir = g_node_append_data(
+                         holders_node, tmp_ram_node_conn_uid_dir)))
+            THROW(G_NODE_UID_CONN_DIR_APPEND_DATA);
+        tmp_ram_node_conn_uid_dir = NULL;        
+        /* create the data block for the peer_name file node */
+        snprintf(string_buffer, sizeof(string_buffer), "%s\n", peer_name);
+        if (NULL == (
+                tmp_ram_node_conn_peer_name_file = flom_vfs_ram_node_create(
+                    FLOM_VFS_LOCKERS_HOLDERS_PEERNAME_FILE_NAME,
+                    string_buffer)))
+            THROW(RAM_NODE_RESOURCE_TYPE_FILE_ERROR);
+        /* append the node to the tree, create a child */
+        if (NULL == (tmp_node_peer_name_file = g_node_append_data(
+                         tmp_node_conn_uid_dir,
+                         tmp_ram_node_conn_peer_name_file)))
+            THROW(G_NODE_PEER_NAME_FILE_APPEND_DATA);
+        tmp_ram_node_conn_peer_name_file = NULL;
+        
         THROW(NONE);
     } CATCH {
         switch (excp) {
+            case FIND_NODE_BY_NAME1:
+            case FIND_NODE_BY_NAME2:
+            case FIND_NODE_BY_NAME3:
+                break;
+            case RAM_NODE_CONN_UID_DIR_ERROR:
+            case RAM_NODE_RESOURCE_TYPE_FILE_ERROR:
+                break;
+            case G_NODE_UID_CONN_DIR_APPEND_DATA:
+            case G_NODE_PEER_NAME_FILE_APPEND_DATA:
+                break;
             case NONE:
                 ret_cod = FLOM_RC_OK;
                 break;
             default:
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
+        if (excp != NONE) {
+            if (NULL != tmp_ram_node_conn_uid_dir)
+                flom_vfs_ram_node_destroy(tmp_ram_node_conn_uid_dir);
+            else if (NULL != tmp_ram_node_conn_peer_name_file)
+                flom_vfs_ram_node_destroy(tmp_ram_node_conn_peer_name_file);
+        } /* if (excp != NONE) */
     } /* TRY-CATCH */
     /* unlock the tree to avoid conflicts */
     if (locked)

@@ -141,6 +141,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                      , PROTOCOL_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    gchar *peer_name = NULL;
 
     FLOM_TRACE(("flom_resource_simple_inmsg\n"));
     TRY {
@@ -172,10 +173,13 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                     resource->data.simple.holders = g_slist_prepend(
                         resource->data.simple.holders,
                         (gpointer)cl);
+                    /* retrieve the name of the peer (IP address) */
+                    peer_name = flom_tcp_retrieve_peer_name(&conn->tcp);
                     /* propagate the info to the VFS ram tree */
                     if (FLOM_RC_OK != (
                             ret_cod = flom_vfs_ram_tree_add_locker_holder(
-                                locker_uid, conn->uid))) {
+                                locker_uid, conn->uid,
+                                peer_name == NULL ? "" : peer_name))) {
                         FLOM_TRACE(("flom_resource_simple_inmsg: unable to "
                                     "update the info in VFS for this "
                                     "connection\n"));
@@ -280,6 +284,9 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* release memory */
+    if (NULL != peer_name)
+        g_free(peer_name);
     FLOM_TRACE(("flom_resource_simple_inmsg/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
