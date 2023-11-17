@@ -1,6 +1,8 @@
-Go on with VFS implementation: create content in directories "holders" and "waitings"
+Go on with VFS implementation: create content in directories "holders" and "waitings"; after lock_mode, go on with other connection info
 
 	implement conn is moved from nursery to active
+
+If a process is inside the dir mounted by FUSE, the umount does not work and the flom daemon does not end...
 
 Remove all warnings for Ubuntu 14.04; more recent ones can happen
 

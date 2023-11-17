@@ -203,7 +203,8 @@ int flom_resource_sequence_inmsg(flom_resource_t *resource,
                     if (FLOM_RC_OK != (
                             ret_cod = flom_vfs_ram_tree_add_locker_conn(
                                 locker_uid, conn->uid, TRUE,
-                                peer_name == NULL ? "" : peer_name))) {
+                                peer_name == NULL ? "" : peer_name,
+                                FLOM_LOCK_MODE_INVALID))) {
                         FLOM_TRACE(("flom_resource_sequence_inmsg: unable to "
                                     "update the info in VFS for this "
                                     "holder connection\n"));
@@ -234,7 +235,8 @@ int flom_resource_sequence_inmsg(flom_resource_t *resource,
                         if (FLOM_RC_OK != (
                                 ret_cod = flom_vfs_ram_tree_add_locker_conn(
                                     locker_uid, conn->uid, FALSE,
-                                    peer_name == NULL ? "" : peer_name))) {
+                                    peer_name == NULL ? "" : peer_name,
+                                    FLOM_LOCK_MODE_INVALID))) {
                             FLOM_TRACE(("flom_resource_sequence_inmsg: unable "
                                         "to "
                                         "update the info in VFS for this "

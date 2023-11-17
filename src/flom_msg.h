@@ -229,6 +229,57 @@ extern const gchar *FLOM_MSG_TAG_SHUTDOWN;
 
 
 /**
+ * Short string for Null Lock mode
+ */
+extern const char *FLOM_LOCK_MODE_NL_SHORT_STRING;
+/**
+ * Long string for Null Lock mode
+ */
+extern const char *FLOM_LOCK_MODE_NL_LONG_STRING;
+/**
+ * Short string for Concurrent Read mode
+ */
+extern const char *FLOM_LOCK_MODE_CR_SHORT_STRING;
+/**
+ * Long string for Concurrent Read mode
+ */
+extern const char *FLOM_LOCK_MODE_CR_LONG_STRING;
+/**
+ * Short string for Concurrent Write mode
+ */
+extern const char *FLOM_LOCK_MODE_CW_SHORT_STRING;
+/**
+ * Long string for Concurrent Write mode
+ */
+extern const char *FLOM_LOCK_MODE_CW_LONG_STRING;
+/**
+ * Short string for Protected Read mode
+ */
+extern const char *FLOM_LOCK_MODE_PR_SHORT_STRING;
+/**
+ * Long string for Protected Read mode
+ */
+extern const char *FLOM_LOCK_MODE_PR_LONG_STRING;
+/**
+ * Short string for Protected Write mode
+ */
+extern const char *FLOM_LOCK_MODE_PW_SHORT_STRING;
+/**
+ * Long string for Protected Write mode
+ */
+extern const char *FLOM_LOCK_MODE_PW_LONG_STRING;
+/**
+ * Short string for Exclusive mode
+ */
+extern const char *FLOM_LOCK_MODE_EX_SHORT_STRING;
+/**
+ * Long string for Exclusive mode
+ */
+extern const char *FLOM_LOCK_MODE_EX_LONG_STRING;
+
+
+
+/**
  * A static object used by g_markup functions
  */
 extern GMarkupParser flom_msg_parser;
@@ -573,8 +624,26 @@ extern "C" {
      * @return a lock mode
      */
     flom_lock_mode_t flom_lock_mode_retrieve(const gchar *text);
-    
 
+
+
+    /**
+     * Retrieve the short string associated to a lock mode
+     * @param lock_mode IN lock mode
+     * @return a string or NULL in case of invalid lock mode
+     */
+    const char *flom_lock_mode_short_string(flom_lock_mode_t lock_mode);
+
+
+
+    /**
+     * Retrieve the short string associated to a lock mode
+     * @param lock_mode IN lock mode
+     * @return a string or NULL in case of invalid lock mode
+     */
+    const char *flom_lock_mode_long_string(flom_lock_mode_t);
+
+    
 
     /**
      * Initialize an empty message

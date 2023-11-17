@@ -76,6 +76,21 @@ const gchar *FLOM_MSG_TAG_SHUTDOWN        = (gchar *)"shutdown";
 
 
 
+const char *FLOM_LOCK_MODE_NL_SHORT_STRING = "NL";
+const char *FLOM_LOCK_MODE_NL_LONG_STRING = "NullLock";
+const char *FLOM_LOCK_MODE_CR_SHORT_STRING = "CR";
+const char *FLOM_LOCK_MODE_CR_LONG_STRING = "ConcurrentRead";
+const char *FLOM_LOCK_MODE_CW_SHORT_STRING = "CW";
+const char *FLOM_LOCK_MODE_CW_LONG_STRING = "ConcurrentWrite";
+const char *FLOM_LOCK_MODE_PR_SHORT_STRING = "PR";
+const char *FLOM_LOCK_MODE_PR_LONG_STRING = "ProtectedRead";
+const char *FLOM_LOCK_MODE_PW_SHORT_STRING = "PW";
+const char *FLOM_LOCK_MODE_PW_LONG_STRING = "ProtectedWrite";
+const char *FLOM_LOCK_MODE_EX_SHORT_STRING = "EX";
+const char *FLOM_LOCK_MODE_EX_LONG_STRING = "Exclusive";
+
+
+
 GMarkupParser flom_msg_parser = {
     flom_msg_deserialize_start_element,
     flom_msg_deserialize_end_element,
@@ -91,43 +106,104 @@ flom_lock_mode_t flom_lock_mode_retrieve(const gchar *text)
     
     FLOM_TRACE(("flom_lock_mode_retrieve: '%s'\n", text));
     /* check if 'NullLock', 'NL' - any case - is in the text */
-    if (NULL != (p = STRCASESTR(text, "NullLock")) ||
-        NULL != (p = STRCASESTR(text, "NL"))) {
+    if (NULL != (p = STRCASESTR(text, FLOM_LOCK_MODE_NL_LONG_STRING)) ||
+        NULL != (p = STRCASESTR(text, FLOM_LOCK_MODE_NL_SHORT_STRING))) {
         FLOM_TRACE(("flom_lock_mode_retrieve: found 'Null Lock' mode "
                     "here: '%s'\n", p));
         return FLOM_LOCK_MODE_NL;
     /* check if 'ConcurrentRead', 'CR' - any case - is in the text */
-    } else if (NULL != (p = STRCASESTR(text, "ConcurrentRead")) ||
-               NULL != (p = STRCASESTR(text, "CR"))) {
+    } else if (NULL != (p = STRCASESTR(text, FLOM_LOCK_MODE_CR_LONG_STRING)) ||
+               NULL != (p = STRCASESTR(text,
+                                       FLOM_LOCK_MODE_CR_SHORT_STRING))) {
         FLOM_TRACE(("flom_lock_mode_retrieve: found 'Concurrent Read' mode "
                     "here: '%s'\n", p));
         return FLOM_LOCK_MODE_CR;
     /* check if 'ConcurrentWrite', 'CW' - any case - is in the text */
-    } else if (NULL != (p = STRCASESTR(text, "ConcurrentWrite")) ||
-               NULL != (p = STRCASESTR(text, "CW"))) {
+    } else if (NULL != (p = STRCASESTR(text, FLOM_LOCK_MODE_CW_LONG_STRING)) ||
+               NULL != (p = STRCASESTR(text,
+                                       FLOM_LOCK_MODE_CW_SHORT_STRING))) {
         FLOM_TRACE(("flom_lock_mode_retrieve: found 'Concurrent Write' mode "
                     "here: '%s'\n", p));
         return FLOM_LOCK_MODE_CW;
     /* check if 'ProtectedWrite', 'PW' - any case - is in the text */
-    } else if (NULL != (p = STRCASESTR(text, "ProtectedWrite")) ||
-               NULL != (p = STRCASESTR(text, "PW"))) {
+    } else if (NULL != (p = STRCASESTR(text, FLOM_LOCK_MODE_PW_LONG_STRING)) ||
+               NULL != (p = STRCASESTR(text,
+                                       FLOM_LOCK_MODE_PW_SHORT_STRING))) {
         FLOM_TRACE(("flom_lock_mode_retrieve: found 'Protected Write' mode "
                     "here: '%s'\n", p));
         return FLOM_LOCK_MODE_PW;
     /* check if 'ProtectedRead', 'PR' - any case - is in the text */
-    } else if (NULL != (p = STRCASESTR(text, "ProtectedRead")) ||
-               NULL != (p = STRCASESTR(text, "PR"))) {
+    } else if (NULL != (p = STRCASESTR(text, FLOM_LOCK_MODE_PR_LONG_STRING)) ||
+               NULL != (p = STRCASESTR(text,
+                                       FLOM_LOCK_MODE_PR_SHORT_STRING))) {
         FLOM_TRACE(("flom_lock_mode_retrieve: found 'Protected Read' mode "
                     "here: '%s'\n", p));
         return FLOM_LOCK_MODE_PR;
     /* check if 'Exclusive', 'EX' - any case - is in the text */
-    } else if (NULL != (p = STRCASESTR(text, "Exclusive")) ||
-               NULL != (p = STRCASESTR(text, "EX"))) {
+    } else if (NULL != (p = STRCASESTR(text, FLOM_LOCK_MODE_EX_LONG_STRING)) ||
+               NULL != (p = STRCASESTR(text,
+                                       FLOM_LOCK_MODE_EX_SHORT_STRING))) {
         FLOM_TRACE(("flom_lock_mode_retrieve: found 'Exclusive' mode "
                     "here: '%s'\n", p));
         return FLOM_LOCK_MODE_EX;
     }
     return FLOM_LOCK_MODE_INVALID;
+}
+
+
+
+const char *flom_lock_mode_short_string(flom_lock_mode_t lock_mode)
+{
+    switch (lock_mode) {
+        case FLOM_LOCK_MODE_NL:
+            return FLOM_LOCK_MODE_NL_SHORT_STRING;
+            break;
+        case FLOM_LOCK_MODE_CR:
+            return FLOM_LOCK_MODE_CR_SHORT_STRING;
+            break;
+        case FLOM_LOCK_MODE_CW:
+            return FLOM_LOCK_MODE_CW_SHORT_STRING;
+            break;
+        case FLOM_LOCK_MODE_PR:
+            return FLOM_LOCK_MODE_PR_SHORT_STRING;
+            break;
+        case FLOM_LOCK_MODE_PW:
+            return FLOM_LOCK_MODE_PW_SHORT_STRING;
+            break;
+        case FLOM_LOCK_MODE_EX:
+            return FLOM_LOCK_MODE_EX_SHORT_STRING;
+            break;
+        default:
+            return NULL;
+    }
+}
+
+
+
+const char *flom_lock_mode_long_string(flom_lock_mode_t lock_mode)
+{
+    switch (lock_mode) {
+        case FLOM_LOCK_MODE_NL:
+            return FLOM_LOCK_MODE_NL_LONG_STRING;
+            break;
+        case FLOM_LOCK_MODE_CR:
+            return FLOM_LOCK_MODE_CR_LONG_STRING;
+            break;
+        case FLOM_LOCK_MODE_CW:
+            return FLOM_LOCK_MODE_CW_LONG_STRING;
+            break;
+        case FLOM_LOCK_MODE_PR:
+            return FLOM_LOCK_MODE_PR_LONG_STRING;
+            break;
+        case FLOM_LOCK_MODE_PW:
+            return FLOM_LOCK_MODE_PW_LONG_STRING;
+            break;
+        case FLOM_LOCK_MODE_EX:
+            return FLOM_LOCK_MODE_EX_LONG_STRING;
+            break;
+        default:
+            return NULL;
+    }
 }
 
 
