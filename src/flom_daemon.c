@@ -1224,14 +1224,20 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
                      flom_config_get_mount_point_vfs(config));
             syslog(LOG_INFO, FLOM_SYSLOG_FLM023I, system_command);
             exitstatus = WEXITSTATUS(system(system_command));
-            if (exitstatus != 0)
+            if (exitstatus != 0) {
                 syslog(LOG_WARNING, FLOM_SYSLOG_FLM024W, system_command,
-                       exitstatus, flom_config_get_mount_point_vfs(config));
+                       exitstatus, flom_config_get_mount_point_vfs(config),
+                       flom_config_get_mount_point_vfs(config));
+                FLOM_TRACE(("flom_accept_loop: cannot call g_thread_join(%p) "
+                            "to wait VFS thread termination because the "
+                            "filesystem can be busy\n", vfs_thread));
+            } else {
+                FLOM_TRACE(("flom_accept_loop: calling g_thread_join(%p) to "
+                            "wait VFS thread termination...\n", vfs_thread));
+                g_thread_join(vfs_thread);
+                FLOM_TRACE(("flom_accept_loop: VFS thread terminated\n"));
+            }
             free(system_command);
-            FLOM_TRACE(("flom_accept_loop: calling g_thread_join(%p) to wait "
-                        "VFS thread termination...\n", vfs_thread));
-            g_thread_join(vfs_thread);
-            FLOM_TRACE(("flom_accept_loop: VFS thread terminated\n"));
         }
     }
     

@@ -82,7 +82,7 @@ extern "C" {
 #define FLOM_SYSLOG_FLM021E "FLM021E consistency error in VFS inode mapping, VFS can not be activated"
 #define FLOM_SYSLOG_FLM022I "FLM022I mounting FUSE file system '%s'"
 #define FLOM_SYSLOG_FLM023I "FLM023I unmounting FUSE file system with command '%s'"
-#define FLOM_SYSLOG_FLM024W "FLM024W command '%s' exited with status %d: try to unmount '%s' manually"
+#define FLOM_SYSLOG_FLM024W "FLM024W command '%s' exited with status %d: try to unmount it manually with 'fusermount -u %s' or with 'sudo umount -l %s'"
 #define FLOM_SYSLOG_FLM025E "FLM025E unable to allocate " SIZE_T_FORMAT " bytes to unmount FUSE filesystem: '%s' must be unmounted manually"
     
     

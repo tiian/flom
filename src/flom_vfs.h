@@ -347,13 +347,19 @@ extern "C" {
      *        in the "holders" list, otherwise in the "waitings" list
      * @param peer_name IN IP address and port in human readable format
      * @param lock_mode IN asked by the client
+     * @param quantity IN requested quantity, when applicable (otherwise NULL
+     *        is passed)
+     * @param sequence_value IN assigned to the requester, when applicable
+     *        (otherwise NULL is passed)
      * @return a reason code
      */
     int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
                                           flom_uid_t conn_uid,
                                           int is_holder,
                                           const char *peer_name,
-                                          flom_lock_mode_t lock_mode);
+                                          flom_lock_mode_t lock_mode,
+                                          const gint *quantity,
+                                          const guint *sequence_value);
 
 
 
