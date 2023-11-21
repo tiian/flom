@@ -478,7 +478,7 @@ int flom_resource_hier_inmsg(flom_resource_t *resource,
                     THROW(RESOURCE_HIER_CHANGE_NAME_ERROR);
                 /* clean lock */
                 if (FLOM_RC_OK != (ret_cod = flom_resource_hier_clean(
-                                       resource, conn)))
+                                       resource, locker_uid, conn)))
                     THROW(RESOURCE_HIER_CLEAN_ERROR);
                 /* free the input message */
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(msg)))
@@ -586,6 +586,7 @@ void flom_resource_hier_gc(
 
     
 int flom_resource_hier_clean(flom_resource_t *resource,
+                             flom_uid_t locker_uid,
                              flom_conn_t *conn)
 {
     enum Exception { NULL_OBJECT

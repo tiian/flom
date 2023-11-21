@@ -1599,7 +1599,7 @@ int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
         }
         
         if (NULL != sequence_value) {
-            /* create the data block for the quantity file node */
+            /* create the data block for the sequence_value file node */
             snprintf(string_buffer, sizeof(string_buffer), "%u\n",
                      *sequence_value);
             if (NULL == (
@@ -1658,6 +1658,108 @@ int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
     if (locked)
         g_mutex_unlock(&flom_vfs_ram_tree.mutex);
     FLOM_TRACE(("flom_vfs_ram_tree_add_locker_conn/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_vfs_ram_tree_add_locker_conn_file(flom_uid_t locker_uid,
+                                           flom_uid_t conn_uid,
+                                           int already_locked,
+                                           const char *file_name,
+                                           const char *file_content)
+{
+    enum Exception { INACTIVE_FEATURE
+                     , NULL_OBJECT
+                     , FIND_NODE_BY_NAME1
+                     , FIND_NODE_BY_NAME2
+                     , FIND_NODE_BY_NAME3
+                     , RAM_NODE_FILE_ERROR
+                     , G_NODE_FILE_APPEND_DATA
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    int locked = FALSE;
+    flom_vfs_ram_node_t *tmp_ram_node_conn_file = NULL;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_add_locker_conn_file\n"));
+    TRY {
+        GNode *lockers_node = NULL;
+        GNode *specific_locker_node = NULL;
+        GNode *specific_conn_node = NULL;
+        GNode *tmp_node_file = NULL;
+        char uid_buffer[SIZEOF_FLOM_UID_T * 3];
+        
+        if (!flom_vfs_ram_tree.active)
+            THROW(INACTIVE_FEATURE);
+        if (NULL == file_name || NULL == file_content)
+            THROW(NULL_OBJECT);
+        if (!already_locked) {
+            /* lock the tree to avoid conflicts */
+            g_mutex_lock(&flom_vfs_ram_tree.mutex);
+            locked = TRUE;
+        }
+        
+        /* locate the directory with lockers */
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
+                               flom_vfs_ram_tree.root,
+                               FLOM_VFS_LOCKERS_DIR_NAME,
+                               TRUE, &lockers_node)))
+            THROW(FIND_NODE_BY_NAME1);
+        /* locate the directory of the specific locker */
+        sprintf(uid_buffer, FLOM_UID_T_FORMAT, locker_uid);
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
+                               lockers_node, uid_buffer,
+                               TRUE, &specific_locker_node)))
+            THROW(FIND_NODE_BY_NAME2);
+        /* locate the directory of the specific connection */
+        sprintf(uid_buffer, FLOM_UID_T_FORMAT, conn_uid);
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
+                               specific_locker_node, uid_buffer,
+                               TRUE, &specific_conn_node)))
+            THROW(FIND_NODE_BY_NAME3);
+        /* create the data block for the sequence_value file node */
+        if (NULL == (
+                tmp_ram_node_conn_file =
+                flom_vfs_ram_node_create(file_name, file_content)))
+            THROW(RAM_NODE_FILE_ERROR);
+        /* append the node to the tree, create a child */
+        if (NULL == (tmp_node_file = g_node_append_data(
+                         specific_conn_node,
+                         tmp_ram_node_conn_file)))
+            THROW(G_NODE_FILE_APPEND_DATA);
+        tmp_ram_node_conn_file = NULL;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INACTIVE_FEATURE:
+                ret_cod = FLOM_RC_INACTIVE_FEATURE;
+                break;
+            case NULL_OBJECT:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case FIND_NODE_BY_NAME1:
+            case FIND_NODE_BY_NAME2:
+            case FIND_NODE_BY_NAME3:
+            case RAM_NODE_FILE_ERROR:
+            case G_NODE_FILE_APPEND_DATA:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        if (excp != NONE) {
+            if (NULL != tmp_ram_node_conn_file)
+                flom_vfs_ram_node_destroy(tmp_ram_node_conn_file);
+        } /* if (excp != NONE) */
+    } /* TRY-CATCH */
+    /* unlock the tree to avoid conflicts */
+    if (locked)
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    FLOM_TRACE(("flom_vfs_ram_tree_add_locker_conn_file/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
@@ -1866,4 +1968,7 @@ int flom_vfs_ram_tree_move_locker_conn(flom_uid_t conn_uid)
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;
 }
+
+
+
 

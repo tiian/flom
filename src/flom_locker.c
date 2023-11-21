@@ -267,8 +267,9 @@ gpointer flom_locker_loop(gpointer data)
                     /* clean locks and/or queued locks */
                     if (FLOM_RC_OK != (ret_cod =
                                        locker->resource.clean(
-                                           &locker->resource,
-                                           flom_conns_get_conn(&conns, i))))
+                                           &locker->resource, locker->uid,
+                                           flom_conns_get_conn(
+                                               &conns, i))))
                         THROW(RESOURCE_CLEAN_ERROR1);
                     /* conns is no more consistent, break the loop and poll
                        again */
@@ -287,7 +288,7 @@ gpointer flom_locker_loop(gpointer data)
                         /* clean locks and/or queued locks */
                         if (FLOM_RC_OK != (ret_cod =
                                            locker->resource.clean(
-                                               &locker->resource,
+                                               &locker->resource, locker->uid,
                                                flom_conns_get_conn(
                                                    &conns, i))))
                             THROW(RESOURCE_CLEAN_ERROR2);
@@ -312,6 +313,7 @@ gpointer flom_locker_loop(gpointer data)
                         if (FLOM_RC_OK != (ret_cod =
                                            locker->resource.clean(
                                                &locker->resource,
+                                               locker->uid,
                                                flom_conns_get_conn(
                                                    &conns, i))))
                             THROW(RESOURCE_CLEAN_ERROR3);
@@ -455,7 +457,8 @@ int flom_locker_loop_pollin(struct flom_locker_s *locker,
                 /* clean lock state if any lock was acquired... */
                 if (FLOM_RC_OK != (ret_cod = 
                                    locker->resource.clean(
-                                       &locker->resource, curr_conn)))
+                                       &locker->resource, locker->uid,
+                                       curr_conn)))
                     THROW(RESOURCE_CLEAN_ERROR);
             } else {
                 /* data arrived */

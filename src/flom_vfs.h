@@ -136,6 +136,53 @@ extern flom_vfs_ram_tree_t flom_vfs_ram_tree;
 
 
 
+/**
+ * Filename of root dir
+ */
+extern const char *FLOM_VFS_ROOT_DIR_NAME;
+/**
+ * Filename of status dir
+ */
+extern const char *FLOM_VFS_STATUS_DIR_NAME;
+/**
+ * Filename of lockers dir
+ */
+extern const char *FLOM_VFS_LOCKERS_DIR_NAME;
+/**
+ * Filename of resource_name file
+ */
+extern const char *FLOM_VFS_LOCKERS_RESNAME_FILE_NAME;
+/**
+ * Filename of resource_type file
+ */
+extern const char *FLOM_VFS_LOCKERS_RESTYPE_FILE_NAME;
+/**
+ * Filename of holders dir
+ */
+extern const char *FLOM_VFS_LOCKERS_HOLDERS_DIR_NAME;
+/**
+ * Filename of waitings dir
+ */
+extern const char *FLOM_VFS_LOCKERS_WAITINGS_DIR_NAME;
+/**
+ * Filename of peer_name file
+ */
+extern const char *FLOM_VFS_LOCKERS_PEERNAME_FILE_NAME;
+/**
+ * Filename of lock_mode file
+ */
+extern const char *FLOM_VFS_LOCKERS_LOCKMODE_FILE_NAME;
+/**
+ * Filename of quantity file
+ */
+extern const char *FLOM_VFS_LOCKERS_QUANTITY_FILE_NAME;
+/**
+ * Filename of sequence_value file
+ */
+extern const char *FLOM_VFS_LOCKERS_SEQUENCE_VALUE_FILE_NAME;
+
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -363,6 +410,25 @@ extern "C" {
 
 
 
+    /**
+     * Add a file inside the directory assigned to a connection
+     * @param locker_uid IN unique identifier of the locker
+     * @param conn_uid IN unique identifier of the conn (connection)
+     * @param already_locked IN TRUE if the global mutex is already locked by
+     *        the caller, FALSE if the global mutex is not already locked and
+     *        it must be locked/unlocked by this function
+     * @param file_name IN name of the file to be added
+     * @param file_content IN content of the file to be added
+     * @return a reason code
+     */
+    int flom_vfs_ram_tree_add_locker_conn_file(flom_uid_t locker_uid,
+                                               flom_uid_t conn_uid,
+                                               int already_locked,
+                                               const char *file_name,
+                                               const char *file_content);
+
+
+    
     /**
      * Delete from the ram tree the node associated to a connection below a
      * locker; connection can be removed from the list of "holders"

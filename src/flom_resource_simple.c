@@ -255,7 +255,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
                 }
                 /* clean lock */
                 if (FLOM_RC_OK != (ret_cod = flom_resource_simple_clean(
-                                       resource, conn)))
+                                       resource, locker_uid, conn)))
                     THROW(RESOURCE_SIMPLE_CLEAN_ERROR);
                 /* free the input message */
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(msg)))
@@ -309,6 +309,7 @@ int flom_resource_simple_inmsg(flom_resource_t *resource,
 
 
 int flom_resource_simple_clean(flom_resource_t *resource,
+                               flom_uid_t locker_uid,
                                flom_conn_t *conn)
 {
     enum Exception { NULL_OBJECT

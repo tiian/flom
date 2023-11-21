@@ -112,10 +112,13 @@ extern "C" {
     /**
      * Manage an clean-up signal for a "timestamp" resource
      * @param resource IN/OUT reference to resource object
+     * @param locker_uid IN unique identifier or the locker that's managing
+     *        the resource
      * @param conn IN connection reference
      * @return a reason code
      */
     int flom_resource_timestamp_clean(flom_resource_t *resource,
+                                      flom_uid_t locker_uid,
                                       flom_conn_t *conn);
 
 

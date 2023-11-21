@@ -1,4 +1,4 @@
-when sequence is obtained after queueing, the sequence_value must be added
+check memory leak for sequence_value, when the file is created after the locker was obtained
 
 Go on with VFS implementation: create content in directories "holders" and "waitings";
 

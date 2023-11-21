@@ -291,7 +291,7 @@ int flom_resource_sequence_inmsg(flom_resource_t *resource,
                 cl->rollback = msg->body.unlock_8.resource.rollback;
                 /* clean lock */
                 if (FLOM_RC_OK != (ret_cod = flom_resource_sequence_clean(
-                                       resource, conn)))
+                                       resource, locker_uid, conn)))
                     THROW(RESOURCE_SEQUENCE_CLEAN_ERROR);
                 /* free the input message */
                 if (FLOM_RC_OK != (ret_cod = flom_msg_free(msg)))
@@ -348,6 +348,7 @@ int flom_resource_sequence_inmsg(flom_resource_t *resource,
 
 
 int flom_resource_sequence_clean(flom_resource_t *resource,
+                                 flom_uid_t locker_uid,
                                  flom_conn_t *conn)
 {
     enum Exception { NULL_OBJECT
@@ -385,7 +386,7 @@ int flom_resource_sequence_clean(flom_resource_t *resource,
             flom_rsrc_conn_lock_delete(cl);
             /* check if some other clients can get a lock now */
             if (FLOM_RC_OK != (ret_cod = flom_resource_sequence_waitings(
-                                   resource)))
+                                   resource, locker_uid)))
                 THROW(SEQUENCE_WAITINGS_ERROR);
         } else {
             guint i = 0;
@@ -488,7 +489,8 @@ void flom_resource_sequence_free(flom_resource_t *resource)
 
 
 
-int flom_resource_sequence_waitings(flom_resource_t *resource)
+int flom_resource_sequence_waitings(flom_resource_t *resource,
+                                    flom_uid_t locker_uid)
 {
     enum Exception { INTERNAL_ERROR
                      , MSG_BUILD_ANSWER_ERROR
@@ -505,7 +507,7 @@ int flom_resource_sequence_waitings(flom_resource_t *resource)
         struct flom_msg_s msg;
         char buffer[FLOM_NETWORK_BUFFER_SIZE];
         size_t to_send;
-        gchar element[30]; /* it must contain a guint */
+        gchar element[40]; /* it must contain a guint */
         
         /* check if there is any connection waiting for a lock */
         do {
@@ -551,6 +553,18 @@ int flom_resource_sequence_waitings(flom_resource_t *resource)
                     (gpointer)cl);
                 resource->data.sequence.locked_quantity++;
                 /* propagate the info to the VFS ram tree */
+                strcat(element, "\n");
+                if (FLOM_RC_OK != (
+                        ret_cod = flom_vfs_ram_tree_add_locker_conn_file(
+                            locker_uid, cl->conn->uid, FALSE,
+                            FLOM_VFS_LOCKERS_SEQUENCE_VALUE_FILE_NAME,
+                            element))) {
+                    FLOM_TRACE(("flom_resource_sequence_waitings: unable to "
+                                "add file '%s' to connection node (uid="
+                                FLOM_UID_T_FORMAT ") in the VFS\n",
+                                FLOM_VFS_LOCKERS_SEQUENCE_VALUE_FILE_NAME,
+                                cl->conn->uid));
+                }
                 if (FLOM_RC_OK != (
                         ret_cod = flom_vfs_ram_tree_move_locker_conn(
                             cl->conn->uid))) {

@@ -94,10 +94,13 @@ extern "C" {
     /**
      * Manage an clean-up signal for a "sequence" resource
      * @param resource IN/OUT reference to resource object
+     * @param locker_uid IN unique identifier or the locker that's managing
+     *        the resource
      * @param conn IN connection reference
      * @return a reason code
      */
     int flom_resource_sequence_clean(flom_resource_t *resource,
+                                     flom_uid_t locker_uid,
                                      flom_conn_t *conn);
 
 
@@ -113,9 +116,12 @@ extern "C" {
     /**
      * Check if any of the lock waitings can get a lock
      * @param resource IN/OUT reference to resource object
+     * @param locker_uid IN unique identifier or the locker that's managing
+     *        the resource
      * @return a reason code
      */
-    int flom_resource_sequence_waitings(flom_resource_t *resource);
+    int flom_resource_sequence_waitings(flom_resource_t *resource,
+                                        flom_uid_t locker_uid);
 
 
 
