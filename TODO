@@ -1,8 +1,6 @@
-flom_vfs.c: use the add file function instead of the old way in the body of flom_vfs_ram_tree_add_locker_conn
+Manage "incubator" for connections that have not yet been transferred to a locker. Create an incubator directory at the same level of the lockers; put inside the connections that are waiting for a locker to be created, manage the aspect that when they are transferred to a locker, "inmsg" creates the files again... To be avoided in this case, just move the dir from a place to the other if possible.
 
 Go on with VFS implementation: create content in directories "holders" and "waitings";
-
-implement conn is moved from nursery to active
 
 If a process is inside the dir mounted by FUSE, the umount does not work and the flom daemon does not end...
 
