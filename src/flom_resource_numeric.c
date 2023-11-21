@@ -174,7 +174,7 @@ int flom_resource_numeric_inmsg(flom_resource_t *resource,
                                 locker_uid, conn->uid, TRUE,
                                 peer_name == NULL ? "" : peer_name,
                                 FLOM_LOCK_MODE_INVALID,
-                                &(cl->info.quantity), NULL))) {
+                                &(cl->info.quantity), NULL, NULL))) {
                         FLOM_TRACE(("flom_resource_numeric_inmsg: unable to "
                                     "update the info in VFS for this "
                                     "holder connection\n"));
@@ -210,7 +210,7 @@ int flom_resource_numeric_inmsg(flom_resource_t *resource,
                                     locker_uid, conn->uid, FALSE,
                                     peer_name == NULL ? "" : peer_name,
                                     FLOM_LOCK_MODE_INVALID,
-                                    &(cl->info.quantity), NULL))) {
+                                    &(cl->info.quantity), NULL, NULL))) {
                             FLOM_TRACE(("flom_resource_numeric_inmsg: unable "
                                         "to "
                                         "update the info in VFS for this "

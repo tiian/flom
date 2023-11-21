@@ -581,6 +581,7 @@ int flom_resource_compare_name(const flom_resource_t *resource,
 
 
 int flom_resource_timeout(flom_resource_t *resource,
+                          flom_uid_t locker_uid,
                           struct timeval *next_deadline)
 {
     /* default behavior: nothing to do */

@@ -1,4 +1,4 @@
-check memory leak for sequence_value, when the file is created after the locker was obtained
+flom_vfs.c: use the add file function instead of the old way in the body of flom_vfs_ram_tree_add_locker_conn
 
 Go on with VFS implementation: create content in directories "holders" and "waitings";
 

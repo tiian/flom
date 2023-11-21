@@ -134,11 +134,14 @@ extern "C" {
     /**
      * Timeout expiration: a new timestamp can be generated
      * @param resource IN/OUT reference to resource object
+     * @param locker_uid IN unique identifier or the locker that's managing
+     *        the resource
      * @param next_deadline OUT next deadline asked by the resource (the
      *        resource is waiting a time-out)
      * @return a reason code
      */
     int flom_resource_timestamp_timeout(flom_resource_t *resource,
+                                        flom_uid_t locker_uid,
                                         struct timeval *next_deadline);
 
     
@@ -146,9 +149,12 @@ extern "C" {
     /**
      * Check if any of the lock waitings can get a lock
      * @param resource IN/OUT reference to resource object
+     * @param locker_uid IN unique identifier or the locker that's managing
+     *        the resource
      * @return a reason code
      */
-    int flom_resource_timestamp_waitings(flom_resource_t *resource);
+    int flom_resource_timestamp_waitings(flom_resource_t *resource,
+                                         flom_uid_t locker_uid);
 
 
 

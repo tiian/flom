@@ -384,7 +384,7 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
         int can_lock = TRUE;
         int can_wait = TRUE;
         int impossible_lock = FALSE;
-        gchar element[1000]; /* it must contain a guint */
+        gchar element[1000]; /* it must contain a timestamp */
         struct flom_rsrc_conn_lock_s *cl = NULL;
         
         flom_msg_trace(msg);
@@ -414,22 +414,24 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
                     resource->data.timestamp.locked_quantity++;
                     /* retrieve the name of the peer (IP address) */
                     peer_name = flom_tcp_retrieve_peer_name(&conn->tcp);
-                    /* propagate the info to the VFS ram tree */
-                    if (FLOM_RC_OK != (
-                            ret_cod = flom_vfs_ram_tree_add_locker_conn(
-                                locker_uid, conn->uid, TRUE,
-                                peer_name == NULL ? "" : peer_name,
-                                FLOM_LOCK_MODE_INVALID, NULL, NULL))) {
-                        FLOM_TRACE(("flom_resource_timestamp_inmsg: unable to "
-                                    "update the info in VFS for this "
-                                    "holder connection\n"));
-                    }                  
                     if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                            msg, FLOM_MSG_VERB_LOCK,
                                            flom_conn_get_last_step(conn) +
                                            FLOM_MSG_STEP_INCR,
                                            FLOM_RC_OK, element)))
                         THROW(MSG_BUILD_ANSWER_ERROR1);
+                    /* propagate the info to the VFS ram tree */
+                    strcat(element, "\n");
+                    if (FLOM_RC_OK != (
+                            ret_cod = flom_vfs_ram_tree_add_locker_conn(
+                                locker_uid, conn->uid, TRUE,
+                                peer_name == NULL ? "" : peer_name,
+                                FLOM_LOCK_MODE_INVALID, NULL, NULL,
+                                element))) {
+                        FLOM_TRACE(("flom_resource_timestamp_inmsg: unable to "
+                                    "update the info in VFS for this "
+                                    "holder connection\n"));
+                    }                  
                 } else {
                     /* can't lock, enqueue */
                     if (can_wait) {
@@ -453,7 +455,8 @@ int flom_resource_timestamp_inmsg(flom_resource_t *resource,
                                 ret_cod = flom_vfs_ram_tree_add_locker_conn(
                                     locker_uid, conn->uid, FALSE,
                                     peer_name == NULL ? "" : peer_name,
-                                    FLOM_LOCK_MODE_INVALID, NULL, NULL))) {
+                                    FLOM_LOCK_MODE_INVALID, NULL, NULL,
+                                    NULL))) {
                             FLOM_TRACE(("flom_resource_timestamp_inmsg: "
                                         "unable to "
                                         "update the info in VFS for this "
@@ -587,7 +590,7 @@ int flom_resource_timestamp_clean(flom_resource_t *resource,
             flom_rsrc_conn_lock_delete(cl);
             /* check if some other clients can get a lock now */
             if (FLOM_RC_OK != (ret_cod = flom_resource_timestamp_waitings(
-                                   resource)))
+                                   resource, locker_uid)))
                 THROW(TIMESTAMP_WAITINGS_ERROR);
         } else {
             guint i = 0;
@@ -688,6 +691,7 @@ void flom_resource_timestamp_free(flom_resource_t *resource)
 
 
 int flom_resource_timestamp_timeout(flom_resource_t *resource,
+                                    flom_uid_t locker_uid,
                                     struct timeval *next_deadline)
 {
     enum Exception { QUEUE_IS_EMPTY
@@ -706,7 +710,7 @@ int flom_resource_timestamp_timeout(flom_resource_t *resource,
         if (flom_resource_timestamp_can_lock(resource)) {
             /* check if some other clients can get a lock now */
             if (FLOM_RC_OK != (ret_cod = flom_resource_timestamp_waitings(
-                                   resource)))
+                                   resource, locker_uid)))
                 THROW(TIMESTAMP_WAITINGS_ERROR);
             *next_deadline = flom_resource_timestamp_next_deadline(resource);
         }
@@ -733,7 +737,8 @@ int flom_resource_timestamp_timeout(flom_resource_t *resource,
 
 
 
-int flom_resource_timestamp_waitings(flom_resource_t *resource)
+int flom_resource_timestamp_waitings(flom_resource_t *resource,
+                                     flom_uid_t locker_uid)
 {
     enum Exception { INTERNAL_ERROR
                      , RESOURCE_TIMESTAMP_GET_ERROR
@@ -797,6 +802,18 @@ int flom_resource_timestamp_waitings(flom_resource_t *resource)
                     (gpointer)cl);
                 resource->data.timestamp.locked_quantity++;
                 /* propagate the info to the VFS ram tree */
+                strcat(element, "\n");
+                if (FLOM_RC_OK != (
+                        ret_cod = flom_vfs_ram_tree_add_locker_conn_file(
+                            locker_uid, cl->conn->uid, FALSE,
+                            FLOM_VFS_LOCKERS_TIMESTAMP_VALUE_FILE_NAME,
+                            element))) {
+                    FLOM_TRACE(("flom_resource_sequence_waitings: unable to "
+                                "add file '%s' to connection node (uid="
+                                FLOM_UID_T_FORMAT ") in the VFS\n",
+                                FLOM_VFS_LOCKERS_TIMESTAMP_VALUE_FILE_NAME,
+                                cl->conn->uid));
+                }
                 if (FLOM_RC_OK != (
                         ret_cod = flom_vfs_ram_tree_move_locker_conn(
                             cl->conn->uid))) {

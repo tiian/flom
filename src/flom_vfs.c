@@ -92,6 +92,7 @@ const char *FLOM_VFS_LOCKERS_PEERNAME_FILE_NAME = "peer_name";
 const char *FLOM_VFS_LOCKERS_LOCKMODE_FILE_NAME = "lock_mode";
 const char *FLOM_VFS_LOCKERS_QUANTITY_FILE_NAME = "quantity";
 const char *FLOM_VFS_LOCKERS_SEQUENCE_VALUE_FILE_NAME = "sequence_value";
+const char *FLOM_VFS_LOCKERS_TIMESTAMP_VALUE_FILE_NAME = "timestamp_value";
 
 
 
@@ -1468,7 +1469,8 @@ int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
                                       const char *peer_name,
                                       flom_lock_mode_t lock_mode,
                                       const gint *quantity,
-                                      const guint *sequence_value)
+                                      const gchar *sequence_value,
+                                      const gchar *timestamp_value)
 {
     enum Exception { INACTIVE_FEATURE
                      , FIND_NODE_BY_NAME1
@@ -1483,8 +1485,8 @@ int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
                      , G_NODE_LOCK_MODE_FILE_APPEND_DATA
                      , RAM_NODE_QUANTITY_FILE_ERROR
                      , G_NODE_QUANTITY_FILE_APPEND_DATA
-                     , RAM_NODE_SEQUENCE_VALUE_FILE_ERROR
-                     , G_NODE_SEQUENCE_VALUE_FILE_APPEND_DATA
+                     , ADD_LOCKER_CONN_FILE1
+                     , ADD_LOCKER_CONN_FILE2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
     int locked = FALSE;
@@ -1492,7 +1494,6 @@ int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
     flom_vfs_ram_node_t *tmp_ram_node_conn_peer_name_file = NULL;
     flom_vfs_ram_node_t *tmp_ram_node_conn_lock_mode_file = NULL;
     flom_vfs_ram_node_t *tmp_ram_node_conn_quantity_file = NULL;
-    flom_vfs_ram_node_t *tmp_ram_node_conn_sequence_value_file = NULL;
     
     FLOM_TRACE(("flom_vfs_ram_tree_add_locker_conn(locker_uid="
                 FLOM_UID_T_FORMAT ", conn_uid=" FLOM_UID_T_FORMAT
@@ -1506,7 +1507,6 @@ int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
         GNode *tmp_node_peer_name_file = NULL;
         GNode *tmp_node_lock_mode_file = NULL;
         GNode *tmp_node_quantity_file = NULL;
-        GNode *tmp_node_sequence_value_file = NULL;
         char uid_buffer[SIZEOF_FLOM_UID_T * 3];
         char string_buffer[FLOM_VFS_STD_BUFFER_SIZE];
 
@@ -1599,21 +1599,19 @@ int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
         }
         
         if (NULL != sequence_value) {
-            /* create the data block for the sequence_value file node */
-            snprintf(string_buffer, sizeof(string_buffer), "%u\n",
-                     *sequence_value);
-            if (NULL == (
-                    tmp_ram_node_conn_sequence_value_file =
-                    flom_vfs_ram_node_create(
-                        FLOM_VFS_LOCKERS_SEQUENCE_VALUE_FILE_NAME,
-                        string_buffer)))
-                THROW(RAM_NODE_SEQUENCE_VALUE_FILE_ERROR);
-            /* append the node to the tree, create a child */
-            if (NULL == (tmp_node_sequence_value_file = g_node_append_data(
-                             tmp_node_conn_uid_dir,
-                             tmp_ram_node_conn_sequence_value_file)))
-                THROW(G_NODE_SEQUENCE_VALUE_FILE_APPEND_DATA);
-            tmp_ram_node_conn_sequence_value_file = NULL;
+            if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_add_locker_conn_file(
+                                   locker_uid, conn_uid, TRUE,
+                                   FLOM_VFS_LOCKERS_SEQUENCE_VALUE_FILE_NAME,
+                                   sequence_value)))
+                THROW(ADD_LOCKER_CONN_FILE2);
+        }
+
+        if (NULL != timestamp_value) {
+            if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_add_locker_conn_file(
+                                   locker_uid, conn_uid, TRUE,
+                                   FLOM_VFS_LOCKERS_TIMESTAMP_VALUE_FILE_NAME,
+                                   timestamp_value)))
+                THROW(ADD_LOCKER_CONN_FILE2);
         }
         
         THROW(NONE);
@@ -1634,8 +1632,8 @@ int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
             case G_NODE_LOCK_MODE_FILE_APPEND_DATA:
             case RAM_NODE_QUANTITY_FILE_ERROR:
             case G_NODE_QUANTITY_FILE_APPEND_DATA:
-            case RAM_NODE_SEQUENCE_VALUE_FILE_ERROR:
-            case G_NODE_SEQUENCE_VALUE_FILE_APPEND_DATA:
+            case ADD_LOCKER_CONN_FILE1:
+            case ADD_LOCKER_CONN_FILE2:
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

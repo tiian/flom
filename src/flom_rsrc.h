@@ -373,7 +373,7 @@ struct flom_resource_s {
     /**
      * Method called when poll exits due to time-out
      */
-    int   (*timeout)   (flom_resource_t *, struct timeval *next_deadline);
+    int   (*timeout)   (flom_resource_t *, flom_uid_t, struct timeval *next_deadline);
     /**
      * Method called to compare the name of the current managed resource with
      * an external supplied name
@@ -539,11 +539,14 @@ extern "C" {
     /**
      * Default timeout callback function: it does nothing
      * @param resource IN reference to this resource object
+     * @param locker_uid IN unique identifier or the locker that's managing
+     *        the resource
      * @param next_deadline OUT next deadline for the first timestamp that can
      *        be generated
      * @return FLOM_RC_OK
      */
     int flom_resource_timeout(flom_resource_t *resource,
+                              flom_uid_t locker_uid,
                               struct timeval *next_deadline);
 
     

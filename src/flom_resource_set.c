@@ -184,7 +184,7 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
                             ret_cod = flom_vfs_ram_tree_add_locker_conn(
                                 locker_uid, conn->uid, TRUE,
                                 peer_name == NULL ? "" : peer_name,
-                                FLOM_LOCK_MODE_INVALID, NULL, NULL))) {
+                                FLOM_LOCK_MODE_INVALID, NULL, NULL, NULL))) {
                         FLOM_TRACE(("flom_resource_set_inmsg: unable to "
                                     "update the info in VFS for this "
                                     "holder connection\n"));
@@ -216,7 +216,8 @@ int flom_resource_set_inmsg(flom_resource_t *resource,
                                 ret_cod = flom_vfs_ram_tree_add_locker_conn(
                                     locker_uid, conn->uid, FALSE,
                                     peer_name == NULL ? "" : peer_name,
-                                    FLOM_LOCK_MODE_INVALID, NULL, NULL))) {
+                                    FLOM_LOCK_MODE_INVALID, NULL, NULL,
+                                    NULL))) {
                             FLOM_TRACE(("flom_resource_set_inmsg: unable to "
                                         "update the info in VFS for this "
                                         "waiting connection\n"));

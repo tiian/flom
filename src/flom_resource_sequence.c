@@ -167,7 +167,7 @@ int flom_resource_sequence_inmsg(flom_resource_t *resource,
         int can_lock = TRUE;
         int can_wait = TRUE;
         int impossible_lock = FALSE;
-        gchar element[30]; /* it must contain a guint */
+        gchar element[50]; /* it must contain a guint */
         GSList *p;
         struct flom_rsrc_conn_lock_s *cl = NULL;
         
@@ -197,19 +197,6 @@ int flom_resource_sequence_inmsg(flom_resource_t *resource,
                     resource->data.sequence.holders = g_slist_prepend(
                         resource->data.sequence.holders,
                         (gpointer)cl);
-                    /* retrieve the name of the peer (IP address) */
-                    peer_name = flom_tcp_retrieve_peer_name(&conn->tcp);
-                    /* propagate the info to the VFS ram tree */
-                    if (FLOM_RC_OK != (
-                            ret_cod = flom_vfs_ram_tree_add_locker_conn(
-                                locker_uid, conn->uid, TRUE,
-                                peer_name == NULL ? "" : peer_name,
-                                FLOM_LOCK_MODE_INVALID, NULL,
-                                &(cl->info.sequence_value)))) {
-                        FLOM_TRACE(("flom_resource_sequence_inmsg: unable to "
-                                    "update the info in VFS for this "
-                                    "holder connection\n"));
-                    }                  
                     resource->data.sequence.locked_quantity++;
                     if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                            msg, FLOM_MSG_VERB_LOCK,
@@ -217,6 +204,20 @@ int flom_resource_sequence_inmsg(flom_resource_t *resource,
                                            FLOM_MSG_STEP_INCR,
                                            FLOM_RC_OK, element)))
                         THROW(MSG_BUILD_ANSWER_ERROR1);
+                    /* retrieve the name of the peer (IP address) */
+                    peer_name = flom_tcp_retrieve_peer_name(&conn->tcp);
+                    /* propagate the info to the VFS ram tree */
+                    strcat(element, "\n");
+                    if (FLOM_RC_OK != (
+                            ret_cod = flom_vfs_ram_tree_add_locker_conn(
+                                locker_uid, conn->uid, TRUE,
+                                peer_name == NULL ? "" : peer_name,
+                                FLOM_LOCK_MODE_INVALID, NULL, element,
+                                NULL))) {
+                        FLOM_TRACE(("flom_resource_sequence_inmsg: unable to "
+                                    "update the info in VFS for this "
+                                    "holder connection\n"));
+                    }                  
                 } else {
                     /* can't lock, enqueue */
                     if (can_wait) {
@@ -232,23 +233,24 @@ int flom_resource_sequence_inmsg(flom_resource_t *resource,
                             (gpointer)cl);
                         /* retrieve the name of the peer (IP address) */
                         peer_name = flom_tcp_retrieve_peer_name(&conn->tcp);
-                        /* propagate the info to the VFS ram tree */
-                        if (FLOM_RC_OK != (
-                                ret_cod = flom_vfs_ram_tree_add_locker_conn(
-                                    locker_uid, conn->uid, FALSE,
-                                    peer_name == NULL ? "" : peer_name,
-                                    FLOM_LOCK_MODE_INVALID, NULL, NULL))) {
-                            FLOM_TRACE(("flom_resource_sequence_inmsg: unable "
-                                        "to "
-                                        "update the info in VFS for this "
-                                        "waiting connection\n"));
-                        }                  
                         if (FLOM_RC_OK != (ret_cod = flom_msg_build_answer(
                                                msg, FLOM_MSG_VERB_LOCK,
                                                flom_conn_get_last_step(conn) +
                                                FLOM_MSG_STEP_INCR,
                                                FLOM_RC_LOCK_ENQUEUED, NULL)))
                             THROW(MSG_BUILD_ANSWER_ERROR2);
+                        /* propagate the info to the VFS ram tree */
+                        if (FLOM_RC_OK != (
+                                ret_cod = flom_vfs_ram_tree_add_locker_conn(
+                                    locker_uid, conn->uid, FALSE,
+                                    peer_name == NULL ? "" : peer_name,
+                                    FLOM_LOCK_MODE_INVALID, NULL, NULL,
+                                    NULL))) {
+                            FLOM_TRACE(("flom_resource_sequence_inmsg: unable "
+                                        "to "
+                                        "update the info in VFS for this "
+                                        "waiting connection\n"));
+                        }                  
                     } else {
                         FLOM_TRACE(("flom_resource_sequence_inmsg: asked "
                                     "lock can not be assigned to "

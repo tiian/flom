@@ -235,7 +235,8 @@ gpointer flom_locker_loop(gpointer data)
                             "milliseconds\n", timeout));
                 /* calling timeout resource callback */
                 if (FLOM_RC_OK != (ret_cod = locker->resource.timeout(
-                                       &locker->resource, &next_deadline)))
+                                       &locker->resource, locker->uid,
+                                       &next_deadline)))
                     THROW(RESOURCE_TIMEOUT_ERROR);
                 if (1 == flom_conns_get_used(&conns)) {
                     locker->idle_periods++;

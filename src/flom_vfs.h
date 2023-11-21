@@ -180,6 +180,10 @@ extern const char *FLOM_VFS_LOCKERS_QUANTITY_FILE_NAME;
  * Filename of sequence_value file
  */
 extern const char *FLOM_VFS_LOCKERS_SEQUENCE_VALUE_FILE_NAME;
+/**
+ * Filename of timestamp_value file
+ */
+extern const char *FLOM_VFS_LOCKERS_TIMESTAMP_VALUE_FILE_NAME;
 
 
 
@@ -398,6 +402,8 @@ extern "C" {
      *        is passed)
      * @param sequence_value IN assigned to the requester, when applicable
      *        (otherwise NULL is passed)
+     * @param timestamp_value IN assigned to the requester, when applicable
+     *        (otherwise NULL is passed)
      * @return a reason code
      */
     int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
@@ -406,7 +412,8 @@ extern "C" {
                                           const char *peer_name,
                                           flom_lock_mode_t lock_mode,
                                           const gint *quantity,
-                                          const guint *sequence_value);
+                                          const gchar *sequence_value,
+                                          const gchar *timestamp_value);
 
 
 
