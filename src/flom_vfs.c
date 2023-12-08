@@ -83,6 +83,7 @@ struct fuse_lowlevel_ops fuse_callback_functions = {
 
 const char *FLOM_VFS_ROOT_DIR_NAME = "/";
 const char *FLOM_VFS_STATUS_DIR_NAME = "status";
+const char *FLOM_VFS_INCUBATOR_DIR_NAME = "incubator";
 const char *FLOM_VFS_LOCKERS_DIR_NAME = "lockers";
 const char *FLOM_VFS_LOCKERS_RESNAME_FILE_NAME = "resource_name";
 const char *FLOM_VFS_LOCKERS_RESTYPE_FILE_NAME = "resource_type";
@@ -629,17 +630,20 @@ int flom_vfs_ram_tree_init(int activate)
                      , G_NODE_PREPEND_DATA2
                      , NODE_CREATE_ERROR3
                      , G_NODE_PREPEND_DATA3
+                     , NODE_CREATE_ERROR4
+                     , G_NODE_PREPEND_DATA4
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
     flom_vfs_ram_node_t *tmp_root_node = NULL;
     flom_vfs_ram_node_t *tmp_status_node = NULL;
     flom_vfs_ram_node_t *tmp_lockers_node = NULL;
+    flom_vfs_ram_node_t *tmp_incubator_node = NULL;
     int locked = FALSE;
     
     FLOM_TRACE(("flom_vfs_ram_tree_init(activate=%d)\n", activate));
     TRY {
-        GNode *tmp;
+        GNode *tmp, *tmp_status;
 
         if (!activate) {
             /* VFS feature must not be activated, ram tree must stay empty */
@@ -670,11 +674,11 @@ int flom_vfs_ram_tree_init(int activate)
         if (NULL == (tmp_status_node = flom_vfs_ram_node_create(
                          FLOM_VFS_STATUS_DIR_NAME, NULL)))
             THROW(NODE_CREATE_ERROR2);
-        
         /* append the node to the tree, create a child */
         if (NULL == (tmp = g_node_prepend_data(
                          flom_vfs_ram_tree.root, tmp_status_node)))
             THROW(G_NODE_PREPEND_DATA2);
+        tmp_status = tmp;   /* save it to attach incubator dir later on */
         
         /* create the data block for the third node, lockers dir */
         if (NULL == (tmp_lockers_node = flom_vfs_ram_node_create(
@@ -684,6 +688,15 @@ int flom_vfs_ram_tree_init(int activate)
         if (NULL == (tmp = g_node_prepend_data(
                          tmp, tmp_lockers_node)))
             THROW(G_NODE_PREPEND_DATA3);
+        
+        /* create the data block for the fourth node, incubator dir */
+        if (NULL == (tmp_incubator_node = flom_vfs_ram_node_create(
+                         FLOM_VFS_INCUBATOR_DIR_NAME, NULL)))
+            THROW(NODE_CREATE_ERROR4);
+        /* append the node to the tree, create a child */
+        if (NULL == (tmp = g_node_prepend_data(
+                         tmp_status, tmp_incubator_node)))
+            THROW(G_NODE_PREPEND_DATA4);
         
         /* @@@ just for debug, remove me */
         g_node_traverse(flom_vfs_ram_tree.root, G_PRE_ORDER, G_TRAVERSE_ALL,
@@ -707,6 +720,7 @@ int flom_vfs_ram_tree_init(int activate)
             case NODE_CREATE_ERROR1:
             case NODE_CREATE_ERROR2:
             case NODE_CREATE_ERROR3:
+            case NODE_CREATE_ERROR4:
                 ret_cod = FLOM_RC_NEW_OBJ;
                 break;
             case G_NODE_NEW_ERROR1:
@@ -714,6 +728,7 @@ int flom_vfs_ram_tree_init(int activate)
                 break;
             case G_NODE_PREPEND_DATA2:
             case G_NODE_PREPEND_DATA3:
+            case G_NODE_PREPEND_DATA4:
                 ret_cod = FLOM_RC_G_NODE_PREPEND_DATA_ERROR;
                 break;
             case NONE:
@@ -729,6 +744,8 @@ int flom_vfs_ram_tree_init(int activate)
             flom_vfs_ram_node_destroy(tmp_status_node);
         if (excp > NODE_CREATE_ERROR3 && excp <= G_NODE_PREPEND_DATA3)
             flom_vfs_ram_node_destroy(tmp_lockers_node);
+        if (excp > NODE_CREATE_ERROR4 && excp <= G_NODE_PREPEND_DATA4)
+            flom_vfs_ram_node_destroy(tmp_incubator_node);
     } /* TRY-CATCH */
     /* unlock the semaphore to leave access to the object to others */
     if (locked)

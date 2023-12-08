@@ -1,6 +1,9 @@
-Manage "incubator" for connections that have not yet been transferred to a locker. Create an incubator directory at the same level of the lockers; put inside the connections that are waiting for a locker to be created, manage the aspect that when they are transferred to a locker, "inmsg" creates the files again... To be avoided in this case, just move the dir from a place to the other if possible.
-
-Go on with VFS implementation: create content in directories "holders" and "waitings";
+How to manage incubating connections:
+1. when they are put in the "incubator" (flom_accept_loop_transfer L1733 flom_conn_set_wait(conn, TRUE)
+2. create a folder with the UID of the connection under dir "incubator"
+3. inside the folder put 3 files: peer_name, resource_name, resource_type
+4. when they exit from the "incubator" (flom_accept_loop_transfer L1797, moved to the locker with flom_accept_loop_transfer_conn)
+5. get rid of the folder created below "incubator", it will be re-created inside "waitings" and then moved to "holders"
 
 If a process is inside the dir mounted by FUSE, the umount does not work and the flom daemon does not end...
 

@@ -145,6 +145,10 @@ extern const char *FLOM_VFS_ROOT_DIR_NAME;
  */
 extern const char *FLOM_VFS_STATUS_DIR_NAME;
 /**
+ * Filename of incubator dir
+ */
+extern const char *FLOM_VFS_INCUBATOR_DIR_NAME;
+/**
  * Filename of lockers dir
  */
 extern const char *FLOM_VFS_LOCKERS_DIR_NAME;
