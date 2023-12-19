@@ -1701,7 +1701,7 @@ int flom_vfs_ram_tree_add_locker_conn_file(flom_uid_t locker_uid,
                                specific_locker_node, uid_buffer,
                                TRUE, &specific_conn_node)))
             THROW(FIND_NODE_BY_NAME3);
-        /* create the data block for the sequence_value file node */
+        /* create the data block for the file node */
         if (NULL == (
                 tmp_ram_node_conn_file =
                 flom_vfs_ram_node_create(file_name, file_content)))
@@ -1954,4 +1954,179 @@ int flom_vfs_ram_tree_move_locker_conn(flom_uid_t conn_uid)
 
 
 
+int flom_vfs_ram_tree_add_incubator_conn(flom_uid_t conn_uid,
+                                         const char *peer_name,
+                                         const char *resource_name,
+                                         const char *resource_type)
+{
+    enum Exception { INACTIVE_FEATURE
+                     , FIND_NODE_BY_NAME
+                     , RAM_NODE_UID_DIR_ERROR
+                     , G_NODE_UID_DIR_APPEND_DATA
+                     , RAM_TREE_UPDATE_MTIME
+                     , VFS_RAM_TREE_ADD_FILE1
+                     , VFS_RAM_TREE_ADD_FILE2
+                     , VFS_RAM_TREE_ADD_FILE3
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    int locked = FALSE;
+    flom_vfs_ram_node_t *tmp_ram_node_uid_dir = NULL;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_add_incubator_conn("
+                "conn_uid=" FLOM_UID_T_FORMAT ", "
+                "peer_name='%s', "
+                "resource_name='%s', "
+                "resource_type='%s')\n",
+                conn_uid, peer_name, resource_name, resource_type));
+    TRY {
+        GNode *incubator_node = NULL;
+        GNode *tmp_node_uid_dir = NULL;
+        char uid_buffer[SIZEOF_FLOM_UID_T * 3];
+        char string_buffer[FLOM_VFS_STD_BUFFER_SIZE];
+        
+        if (!flom_vfs_ram_tree.active)
+            THROW(INACTIVE_FEATURE);        
+        /* lock the tree to avoid conflicts */
+        g_mutex_lock(&flom_vfs_ram_tree.mutex);
+        locked = TRUE;
+
+        /* locate the directory of the incubator */
+        if (FLOM_RC_OK != (ret_cod = flom_vfs_ram_tree_find_node_by_name(
+                               flom_vfs_ram_tree.root,
+                               FLOM_VFS_INCUBATOR_DIR_NAME,
+                               TRUE, &incubator_node)))
+            THROW(FIND_NODE_BY_NAME);
+        /* create the data block for the incubator node */
+        sprintf(uid_buffer, FLOM_UID_T_FORMAT, conn_uid);
+        if (NULL == (tmp_ram_node_uid_dir = flom_vfs_ram_node_create(
+                         uid_buffer, NULL)))
+            THROW(RAM_NODE_UID_DIR_ERROR);
+        /* append the node to the tree, create a child */
+        if (NULL == (tmp_node_uid_dir = g_node_append_data(
+                         incubator_node, tmp_ram_node_uid_dir)))
+            THROW(G_NODE_UID_DIR_APPEND_DATA);
+        tmp_ram_node_uid_dir = NULL;
+        /* update modification time for the parent dir */
+        if (FLOM_RC_OK != (ret_cod =
+                           flom_vfs_ram_tree_update_mtime(incubator_node)))
+            THROW(RAM_TREE_UPDATE_MTIME);
+        /* create the file for peer_name */
+        snprintf(string_buffer, sizeof(string_buffer), "%s\n", peer_name);
+        if (FLOM_RC_OK != (ret_cod =
+                           flom_vfs_ram_tree_add_file(
+                               tmp_node_uid_dir,
+                               FLOM_VFS_LOCKERS_PEERNAME_FILE_NAME,
+                               string_buffer)))
+            THROW(VFS_RAM_TREE_ADD_FILE1);
+        /* create the file for resource_name */
+        snprintf(string_buffer, sizeof(string_buffer), "%s\n", resource_name);
+        if (FLOM_RC_OK != (ret_cod =
+                           flom_vfs_ram_tree_add_file(
+                               tmp_node_uid_dir,
+                               FLOM_VFS_LOCKERS_RESNAME_FILE_NAME,
+                               string_buffer)))
+            THROW(VFS_RAM_TREE_ADD_FILE2);
+        /* create the file for resource_type */
+        snprintf(string_buffer, sizeof(string_buffer), "%s\n", resource_type);
+        if (FLOM_RC_OK != (ret_cod =
+                           flom_vfs_ram_tree_add_file(
+                               tmp_node_uid_dir,
+                               FLOM_VFS_LOCKERS_RESTYPE_FILE_NAME,
+                               string_buffer)))
+            THROW(VFS_RAM_TREE_ADD_FILE3);
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case INACTIVE_FEATURE:
+                ret_cod = FLOM_RC_INACTIVE_FEATURE;
+                break;
+            case FIND_NODE_BY_NAME:
+            case RAM_NODE_UID_DIR_ERROR:
+            case G_NODE_UID_DIR_APPEND_DATA:
+            case RAM_TREE_UPDATE_MTIME:
+            case VFS_RAM_TREE_ADD_FILE1:
+            case VFS_RAM_TREE_ADD_FILE2:
+            case VFS_RAM_TREE_ADD_FILE3:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        if (excp != NONE) {
+            if (NULL != tmp_ram_node_uid_dir)
+                flom_vfs_ram_node_destroy(tmp_ram_node_uid_dir);
+        }
+    } /* TRY-CATCH */
+    /* unlock the tree to avoid conflicts */
+    if (locked)
+        g_mutex_unlock(&flom_vfs_ram_tree.mutex);
+    FLOM_TRACE(("flom_vfs_ram_tree_add_incubator_conn/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
+
+
+
+int flom_vfs_ram_tree_add_file(GNode *dir,
+                               const char *file_name,
+                               const char *file_content)
+{
+    enum Exception { NULL_OBJECT1
+                     , NULL_OBJECT2
+                     , RAM_NODE_FILE_ERROR
+                     , G_NODE_FILE_APPEND_DATA
+                     , NONE } excp;
+    int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    flom_vfs_ram_node_t *tmp_ram_node_file = NULL;
+    
+    FLOM_TRACE(("flom_vfs_ram_tree_add_file("
+                "dir=%p, file_name='%s', file_content='%s'\n",
+                dir, file_name, file_content));
+    TRY {
+        GNode *tmp_node_file = NULL;
+        
+        if (NULL == dir)
+            THROW(NULL_OBJECT1);
+        if (NULL == file_name || NULL == file_content)
+            THROW(NULL_OBJECT2);
+        
+        /* create the data block for the file node */
+        if (NULL == (
+                tmp_ram_node_file =
+                flom_vfs_ram_node_create(file_name, file_content)))
+            THROW(RAM_NODE_FILE_ERROR);
+        /* append the node to the tree, create a child */
+        if (NULL == (tmp_node_file = g_node_append_data(
+                         dir, tmp_ram_node_file)))
+            THROW(G_NODE_FILE_APPEND_DATA);
+        tmp_ram_node_file = NULL;
+        
+        THROW(NONE);
+    } CATCH {
+        switch (excp) {
+            case NULL_OBJECT1:
+            case NULL_OBJECT2:
+                ret_cod = FLOM_RC_NULL_OBJECT;
+                break;
+            case RAM_NODE_FILE_ERROR:
+            case G_NODE_FILE_APPEND_DATA:
+                break;
+            case NONE:
+                ret_cod = FLOM_RC_OK;
+                break;
+            default:
+                ret_cod = FLOM_RC_INTERNAL_ERROR;
+        } /* switch (excp) */
+        if (excp != NONE) {
+            if (NULL != tmp_ram_node_file)
+                flom_vfs_ram_node_destroy(tmp_ram_node_file);
+        } /* if (excp != NONE) */
+    } /* TRY-CATCH */
+    FLOM_TRACE(("flom_vfs_ram_tree_add_file/excp=%d/"
+                "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
+    return ret_cod;
+}
 

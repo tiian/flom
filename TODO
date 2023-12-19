@@ -1,8 +1,10 @@
+Go on with step 4.
+
 How to manage incubating connections:
 1. when they are put in the "incubator" (flom_accept_loop_transfer L1733 flom_conn_set_wait(conn, TRUE)
 2. create a folder with the UID of the connection under dir "incubator"
 3. inside the folder put 3 files: peer_name, resource_name, resource_type
-4. when they exit from the "incubator" (flom_accept_loop_transfer L1797, moved to the locker with flom_accept_loop_transfer_conn)
+4. when they exit from the "incubator" (flom_accept_loop_transfer L1810, moved to the locker with flom_accept_loop_transfer_conn)
 5. get rid of the folder created below "incubator", it will be re-created inside "waitings" and then moved to "holders"
 
 If a process is inside the dir mounted by FUSE, the umount does not work and the flom daemon does not end...

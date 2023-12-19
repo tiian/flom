@@ -461,6 +461,40 @@ extern "C" {
 
     
 
+    /**
+     * Add a folder and the files inside it for a new connection entered in
+     * the incubator
+     * @param conn_uid IN unique identifier of the conn (connection)
+     * @param peer_name IN IP address and port in human readable format
+     * @param resource_name IN the name of the resource managed by the locker
+     * @param resource_type IN the type (human readable) of the resource
+     *        managed by the locker
+     * @return a reason code
+     */
+    int flom_vfs_ram_tree_add_incubator_conn(flom_uid_t conn_uid,
+                                             const char *peer_name,
+                                             const char *resource_name,
+                                             const char *resource_type);
+
+
+    
+    /**
+     * Add a file inside a directory in the VFS ram tree.
+     * Note: this function can be called only by a function that already
+     *       locked the VFS ram tree and that guarantees the reference to dir
+     *       is valid (the lock of the VFS ram tree is the condition that
+     *       proof the constraint)
+     * @param dir IN/OUT reference to the directory in the VFS ram tree
+     * @param file_name IN name of the file to be added
+     * @param file_content IN content of the file to be added
+     * @return a reason code
+     */
+    int flom_vfs_ram_tree_add_file(GNode *dir,
+                                   const char *file_name,
+                                   const char *file_content);
+
+
+    
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

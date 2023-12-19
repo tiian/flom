@@ -1724,6 +1724,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                     /* return to caller */
                     THROW(CANT_WAIT_CONDITION);
                 } else {
+                    gchar *peer_name = flom_tcp_retrieve_peer_name(&conn->tcp);
                     FLOM_TRACE(("flom_accept_loop_transfer: client can't "
                                 "create a new resource but can wait, "
                                 "putting it inside 'incubator'\n"));
@@ -1731,6 +1732,17 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                                            conn, FLOM_RC_LOCK_WAIT_RESOURCE)))
                         THROW(ACCEPT_LOOP_REPLY_ERROR3);
                     flom_conn_set_wait(conn, TRUE);
+                    /* create the observability dir and files in VFS */
+                    if (FLOM_RC_OK != (
+                            ret_cod = flom_vfs_ram_tree_add_incubator_conn(
+                                conn->uid, STROREMPTY(peer_name),
+                                msg->body.lock_8.resource.name,
+                                flom_rsrc_get_type_human_readable(flrt)))) {
+                        FLOM_TRACE(("flom_accept_loop_transfer/"
+                                    "flom_vfs_ram_tree_add_incubator_conn/"
+                                    "ret_cod=%d\n", ret_cod));
+                    }
+                                       
                     /* return to caller */
                     THROW(PUT_INTO_INCUBATOR);
                 } /* if (!msg->body.lock_8.resource.wait) */
