@@ -1622,6 +1622,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                      , ACCEPT_LOOP_TRANSFER_CONN_ERROR2
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
+    gchar *peer_name = NULL;
 
     FLOM_TRACE(("flom_accept_loop_transfer\n"));
     TRY {
@@ -1724,7 +1725,6 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                     /* return to caller */
                     THROW(CANT_WAIT_CONDITION);
                 } else {
-                    gchar *peer_name = flom_tcp_retrieve_peer_name(&conn->tcp);
                     FLOM_TRACE(("flom_accept_loop_transfer: client can't "
                                 "create a new resource but can wait, "
                                 "putting it inside 'incubator'\n"));
@@ -1733,6 +1733,7 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                         THROW(ACCEPT_LOOP_REPLY_ERROR3);
                     flom_conn_set_wait(conn, TRUE);
                     /* create the observability dir and files in VFS */
+                    peer_name = flom_tcp_retrieve_peer_name(&conn->tcp);
                     if (FLOM_RC_OK != (
                             ret_cod = flom_vfs_ram_tree_add_incubator_conn(
                                 conn->uid, STROREMPTY(peer_name),
@@ -1810,6 +1811,15 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                                        flom_accept_loop_transfer_conn(
                                            conns, i, locker, loop_conn)))
                         THROW(ACCEPT_LOOP_TRANSFER_CONN_ERROR2);
+                    /* remove the connection from the incubator in the VFS
+                       ram tree */
+                    if (FLOM_RC_OK != (
+                            ret_cod = flom_vfs_ram_tree_del_conn(
+                                loop_conn->uid, TRUE))) {
+                        FLOM_TRACE(("flom_accept_loop_transfer: unable to "
+                                    "delete the info from VFS for this "
+                                    "holder connection\n"));
+                    }                  
                 } else
                     i++;
             } /* while (i < flom_conns_get_used(conns))) */
@@ -1864,6 +1874,9 @@ int flom_accept_loop_transfer(flom_conns_t *conns, guint id,
                 ret_cod = FLOM_RC_INTERNAL_ERROR;
         } /* switch (excp) */
     } /* TRY-CATCH */
+    /* free allocated memory */
+    if (NULL != peer_name)
+        g_free(peer_name);
     FLOM_TRACE(("flom_accept_loop_transfer/excp=%d/"
                 "ret_cod=%d/errno=%d\n", excp, ret_cod, errno));
     return ret_cod;

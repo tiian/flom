@@ -155,11 +155,11 @@ extern const char *FLOM_VFS_LOCKERS_DIR_NAME;
 /**
  * Filename of resource_name file
  */
-extern const char *FLOM_VFS_LOCKERS_RESNAME_FILE_NAME;
+extern const char *FLOM_VFS_RESNAME_FILE_NAME;
 /**
  * Filename of resource_type file
  */
-extern const char *FLOM_VFS_LOCKERS_RESTYPE_FILE_NAME;
+extern const char *FLOM_VFS_RESTYPE_FILE_NAME;
 /**
  * Filename of holders dir
  */
@@ -171,7 +171,7 @@ extern const char *FLOM_VFS_LOCKERS_WAITINGS_DIR_NAME;
 /**
  * Filename of peer_name file
  */
-extern const char *FLOM_VFS_LOCKERS_PEERNAME_FILE_NAME;
+extern const char *FLOM_VFS_PEERNAME_FILE_NAME;
 /**
  * Filename of lock_mode file
  */
@@ -445,9 +445,13 @@ extern "C" {
      * locker; connection can be removed from the list of "holders"
      * or from the list of "waitings"
      * @param conn_uid IN unique identifier of the conn (connection)
+     * @param incubating IN TRUE if the connection is still incubating and the
+     *        connection must be removed from the incubator; FALSE if the
+     *        connection is associated to a locker
      * @return a reason code
      */     
-    int flom_vfs_ram_tree_del_locker_conn(flom_uid_t conn_uid);
+    int flom_vfs_ram_tree_del_conn(flom_uid_t conn_uid,
+                                   int incubating);
 
 
 

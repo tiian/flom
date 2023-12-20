@@ -74,7 +74,8 @@ int flom_resource_numeric_init(flom_resource_t *resource,
     TRY {
         if (NULL == (resource->name = g_strdup(name)))
             THROW(G_STRDUP_ERROR);
-        FLOM_TRACE(("flom_resource_numeric_init: initialized resource ('%s')\n",
+        FLOM_TRACE(("flom_resource_numeric_init: initialized "
+                    "resource ('%s')\n",
                     resource->name));
 
         if (FLOM_RC_OK != (ret_cod = flom_rsrc_get_number(
@@ -382,7 +383,8 @@ int flom_resource_numeric_clean(flom_resource_t *resource,
         } /* if (NULL != p) */
         /* propagate the info to the VFS ram tree */
         if (FLOM_RC_OK != (
-                ret_cod = flom_vfs_ram_tree_del_locker_conn(conn->uid))) {
+                ret_cod = flom_vfs_ram_tree_del_conn(
+                    conn->uid, FALSE))) {
             FLOM_TRACE(("flom_resource_numeric_clean: unable to "
                         "delete the info from VFS for this "
                         "holder connection\n"));
@@ -427,7 +429,8 @@ void flom_resource_numeric_free(flom_resource_t *resource)
     }
     resource->data.numeric.holders = NULL;
     /* clean-up waitings queue... */
-    FLOM_TRACE(("flom_resource_numeric_free: cleaning-up waitings queue...\n"));
+    FLOM_TRACE(("flom_resource_numeric_free: cleaning-up waitings "
+                "queue...\n"));
     while (!g_queue_is_empty(resource->data.numeric.waitings)) {
         struct flom_rsrc_conn_lock_s *cl =
             (struct flom_rsrc_conn_lock_s *)g_queue_pop_head(

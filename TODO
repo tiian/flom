@@ -1,11 +1,19 @@
-Go on with step 4.
+Put in every
+flom_resource_*.c
+a new callback function that returns a piece of RAM VFS with the specific
+info of the resource.
+For numeric, for example, it will be: 
+total_quantity
+locked_quantity
 
-How to manage incubating connections:
-1. when they are put in the "incubator" (flom_accept_loop_transfer L1733 flom_conn_set_wait(conn, TRUE)
-2. create a folder with the UID of the connection under dir "incubator"
-3. inside the folder put 3 files: peer_name, resource_name, resource_type
-4. when they exit from the "incubator" (flom_accept_loop_transfer L1810, moved to the locker with flom_accept_loop_transfer_conn)
-5. get rid of the folder created below "incubator", it will be re-created inside "waitings" and then moved to "holders"
+The main idea is:
+in flom_locker.c line 90, inside flom_vfs_ram_tree_add_locker the callback
+function on the specific resource will be called and it will give back a list
+of files/dirs to put inside the status/lockers/UID dir; brothers and sisters
+of "resource_name" and "resource_type". In theory, even them should be part of
+the retrieved list of files/dirs.
+If the resource must create a dir with files inside it, that will be definitively become more and more complicated...
+
 
 If a process is inside the dir mounted by FUSE, the umount does not work and the flom daemon does not end...
 

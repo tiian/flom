@@ -375,7 +375,8 @@ int flom_resource_set_clean(flom_resource_t *resource,
         } /* if (NULL != p) */
         /* propagate the info to the VFS ram tree */
         if (FLOM_RC_OK != (
-                ret_cod = flom_vfs_ram_tree_del_locker_conn(conn->uid))) {
+                ret_cod = flom_vfs_ram_tree_del_conn(
+                    conn->uid, FALSE))) {
             FLOM_TRACE(("flom_resource_set_clean: unable to "
                         "delete the info from VFS for this "
                         "holder connection\n"));
