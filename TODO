@@ -1,12 +1,7 @@
 
-If a process is inside the dir mounted by FUSE, the umount does not work and the flom daemon does not end...
-
-Clean-up code of VFS, remove all garbage, use FLoM style everywhere
-
 Text cases for VFS
 
-Clean all @@@
-
+Full tests on all supported Linux versions
 
 
 To improve the quantity of data available in the VFS it's required to perform

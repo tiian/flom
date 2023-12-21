@@ -16,6 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+
+
+/*
+ * CREDITS:
+ * some excerpts of source code are copies or adaptations of pieces of code
+ * available in
+ * libfuse/example/hello_ll.c
+ * Both "FLoM" and "libfuse" are distributed under the terms of GPLv2, so
+ * there's no license infringement
+ */
+
+
+
 #ifndef FLOM_VFS_H
 # define FLOM_VFS_H
 
@@ -39,12 +53,6 @@
 #include "flom_defines.h"
 #include "flom_types.h"
 
-
-/*
- * Experimental stuff: use GLIB N-ary Tree to create the VFS in memory.
- * Move this types to a more convenient file if necessary to avoid strange
- * dependencies in the includes
- */
 
 
 #ifdef HAVE_GLIB_H
@@ -132,6 +140,10 @@ typedef struct {
 
 
 
+/**
+ * In memory mapping of the Virtual File System that FUSE makes accessible
+ * to the user
+ */
 extern flom_vfs_ram_tree_t flom_vfs_ram_tree;
 
 
@@ -504,25 +516,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-/*
- * END OF:
- * Experimental stuff: use GLIB N-ary Tree to create the VFS in memory.
- * Move this types to a more convenient file if necessary to avoid strange
- * dependencies in the includes
- */
-
-
-
-
-/*
-  Virtual Filesystem Structure:
-
-  /status/lockers/<uid>/resource_name
-  /status/lockers/<uid>/resource_type
-
-*/
-
-
 
 /**
  * Number of files inside a lockers dir:
@@ -542,57 +535,6 @@ extern "C" {
  * Structure with the pointers to all the callback functions invoked by FUSE
  */
 extern struct fuse_lowlevel_ops fuse_callback_functions;
-
-
-
-/**
- * Structure used to store common values that does not require to be
- * retrieved by system call every time they are needed
- */
-typedef struct {
-    /**
-     * user id that will be associated to all dirs and files
-     */
-    uid_t     uid;
-    /**
-     * group id that will be associated to all dirs and files
-     */
-    gid_t     gid;
-} flom_vfs_common_values_t;
-
-extern flom_vfs_common_values_t flom_vfs_common_values;
-
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-
-
-    void flom_vfs_lookup(fuse_req_t req, fuse_ino_t parent, const char *name);
-
-
-    void hello_ll_getattr(fuse_req_t req, fuse_ino_t ino,
-                                 struct fuse_file_info *fi);
-
-    void hello_ll_getxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
-                              size_t size);
-
-    void flom_vfs_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
-                                 off_t off, struct fuse_file_info *fi);
-
-    void flom_vfs_open(fuse_req_t req, fuse_ino_t ino,
-                       struct fuse_file_info *fi);
-
-    void flom_vfs_read(fuse_req_t req, fuse_ino_t ino, size_t size,
-                       off_t off, struct fuse_file_info *fi);
-
-
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 
 

@@ -40,7 +40,7 @@ dist_include_HEADERS = flom.h flom_handle.h flom_types.h \
 nodist_include_HEADERS = flom_errors.h
 noinst_HEADERS = flom_client.h flom_config.h flom_conn.h flom_conns.h \
 	flom_debug_features.h flom_daemon.h flom_daemon_mngmnt.h \
-	flom_defines.h flom_exec.h \
+	flom_defines.h flom_exec.h flom_fuse.h \
 	flom_locker.h flom_msg.h flom_resource_hier.h \
 	flom_resource_numeric.h flom_resource_sequence.h flom_resource_set.h \
 	flom_resource_simple.h flom_resource_timestamp.h flom_rsrc.h \
@@ -49,7 +49,7 @@ noinst_HEADERS = flom_client.h flom_config.h flom_conn.h flom_conns.h \
 
 libflom_la_SOURCES = flom_client.c flom_config.c flom_conn.c flom_conns.c \
 	flom_daemon.c flom_daemon_mngmnt.c \
-	flom_errors.c flom_locker.c \
+	flom_errors.c flom_fuse.c flom_locker.c \
 	flom_msg.c flom_handle.c \
 	flom_resource_hier.c flom_resource_numeric.c flom_resource_sequence.c \
 	flom_resource_set.c flom_resource_simple.c flom_resource_timestamp.c \

@@ -36,6 +36,7 @@
 #include "flom_config.h"
 #include "flom_conns.h"
 #include "flom_daemon_mngmnt.h"
+#include "flom_fuse.h"
 #include "flom_vfs.h"
 #include "flom_errors.h"
 #include "flom_syslog.h"
@@ -181,8 +182,8 @@ gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
         int ret = -1;
 
         /* setting common values */
-        flom_vfs_common_values.uid = getuid();
-        flom_vfs_common_values.gid = getgid();
+        flom_fuse_common_values.uid = getuid();
+        flom_fuse_common_values.gid = getgid();
         
         FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs[FUSE2]/fuse_parse_cmdline\n"));
         if (fuse_parse_cmdline(&args, &mountpoint, NULL, NULL) != 0)
