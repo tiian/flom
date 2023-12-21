@@ -111,7 +111,7 @@ public class FlomErrorCodes {
 	public final static int FLOM_RC_G_STRDUP_ERROR = -212;
 	public final static int FLOM_RC_G_STRNDUP_ERROR = -213;
 	public final static int FLOM_RC_G_STRSPLIT_ERROR = -214;
-	public final static int FLOM_RC_G_THREAD_CREATE_ERROR = -215;
+	public final static int FLOM_RC_G_THREAD_NEW_ERROR = -215;
 	public final static int FLOM_RC_G_TRY_MALLOC_ERROR = -216;
 	public final static int FLOM_RC_G_TRY_REALLOC_ERROR = -217;
 	public final static int FLOM_RC_GET_FIELD_ID_ERROR = -300;

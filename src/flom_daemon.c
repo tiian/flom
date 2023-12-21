@@ -1163,7 +1163,7 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
             case VFS_RAM_TREE_INIT_ERROR:
                 break;
             case G_THREAD_NEW_ERROR:
-                ret_cod = FLOM_RC_G_THREAD_CREATE_ERROR;
+                ret_cod = FLOM_RC_G_THREAD_NEW_ERROR;
                 break;
             case CONNS_CLEAN_ERROR:
                 break;
@@ -1954,7 +1954,7 @@ int flom_accept_loop_start_locker(flom_locker_array_t *lockers,
 {
     enum Exception { RESOURCE_INIT_ERROR
                      , PIPE_ERROR
-                     , G_THREAD_CREATE_ERROR
+                     , G_THREAD_NEW_ERROR
                      , NONE } excp;
     int ret_cod = FLOM_RC_INTERNAL_ERROR;
 
@@ -1964,7 +1964,8 @@ int flom_accept_loop_start_locker(flom_locker_array_t *lockers,
     TRY {
         locker = g_malloc0(sizeof(struct flom_locker_s));
         int pipefd[2];
-        GError *error_thread;
+        gchar thread_name[10+SIZEOF_FLOM_UID_T*3];
+        
         FLOM_TRACE(("flom_accept_loop_start_locker: creating a new locker "
                     "for resource '%s' with uid=" UINT64_T_FORMAT "\n",
                     msg->body.lock_8.resource.name, uid));
@@ -1980,15 +1981,11 @@ int flom_accept_loop_start_locker(flom_locker_array_t *lockers,
         locker->read_pipe = pipefd[0];
         locker->write_pipe = pipefd[1];
         locker->idle_lifespan = msg->body.lock_8.resource.lifespan;
-        *new_thread = g_thread_create(flom_locker_loop, (gpointer)locker,
-                                      TRUE, &error_thread);
-        if (NULL == *new_thread) {
-            FLOM_TRACE(("flom_accept_loop_start_locker: "
-                        "error_thread->code=%d, "
-                        "error_thread->message='%s'\n",
-                        error_thread->code, error_thread->message));
-            g_free(error_thread);
-            THROW(G_THREAD_CREATE_ERROR);
+        snprintf(thread_name, sizeof(thread_name),
+                 "Locker " FLOM_UID_T_FORMAT, uid);
+        if (NULL == (*new_thread = g_thread_new(
+                         thread_name, flom_locker_loop, (gpointer)locker))) {
+            THROW(G_THREAD_NEW_ERROR);
         } else {
             locker->thread = *new_thread;
             FLOM_TRACE(("flom_accept_loop_start_locker: created thread %p\n",
@@ -2009,8 +2006,8 @@ int flom_accept_loop_start_locker(flom_locker_array_t *lockers,
             case PIPE_ERROR:
                 ret_cod = FLOM_RC_PIPE_ERROR;
                 break;
-            case G_THREAD_CREATE_ERROR:
-                ret_cod = FLOM_RC_G_THREAD_CREATE_ERROR;
+            case G_THREAD_NEW_ERROR:
+                ret_cod = FLOM_RC_G_THREAD_NEW_ERROR;
                 break;
             case NONE:
                 ret_cod = FLOM_RC_OK;

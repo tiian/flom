@@ -68,7 +68,7 @@ FILE *trace_file = NULL;
 /**
  * This mutex is used to avoid contention (bad output) on trace file
  */
-GStaticMutex flom_trace_mutex = G_STATIC_MUTEX_INIT;
+static GMutex flom_trace_mutex;
 
 
 
@@ -77,11 +77,8 @@ GStaticMutex flom_trace_mutex = G_STATIC_MUTEX_INIT;
  */
 void flom_trace_init(void)
 {
-    /* initialize thread system if necessary */
-    if (!g_thread_supported ()) g_thread_init(NULL);
-
     /* lock the mutex */
-    g_static_mutex_lock(&flom_trace_mutex);
+    g_mutex_lock(&flom_trace_mutex);
     if (!flom_trace_initialized) {
         /* retrieve environemnt variable */
         if (getenv(FLOM_TRACE_MASK_ENV_VAR) != NULL)
@@ -93,7 +90,7 @@ void flom_trace_init(void)
         flom_trace_initialized = TRUE;
     }
     /* remove the lock from mutex */
-    g_static_mutex_unlock(&flom_trace_mutex);
+    g_mutex_unlock(&flom_trace_mutex);
 }
 
 
@@ -168,7 +165,7 @@ void flom_trace_hex_data(const char *prefix, const byte_t *data, size_t size)
         return;
     
     /* lock the mutex */
-    g_static_mutex_lock(&flom_trace_mutex);
+    g_mutex_lock(&flom_trace_mutex);
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
     /* default header */
@@ -187,7 +184,7 @@ void flom_trace_hex_data(const char *prefix, const byte_t *data, size_t size)
     fprintf(trace_file, "\n");
     fflush(trace_file);
     /* remove the lock from mutex */
-    g_static_mutex_unlock(&flom_trace_mutex);
+    g_mutex_unlock(&flom_trace_mutex);
 }
 
 
@@ -203,7 +200,7 @@ void flom_trace_text_data(const char *prefix, const byte_t *data, size_t size)
         return;
     
     /* lock the mutex */
-    g_static_mutex_lock(&flom_trace_mutex);
+    g_mutex_lock(&flom_trace_mutex);
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
     /* default header */
@@ -225,7 +222,7 @@ void flom_trace_text_data(const char *prefix, const byte_t *data, size_t size)
     fprintf(trace_file, "\n");
     fflush(trace_file);
     /* remove the lock from mutex */
-    g_static_mutex_unlock(&flom_trace_mutex);
+    g_mutex_unlock(&flom_trace_mutex);
 }
 
 
@@ -239,7 +236,7 @@ void flom_trace_addrinfo(const char *prefix, const struct addrinfo *p)
     if (NULL == trace_file)
         return;    
     /* lock the mutex */
-    g_static_mutex_lock(&flom_trace_mutex);
+    g_mutex_lock(&flom_trace_mutex);
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
     /* default header */
@@ -262,7 +259,7 @@ void flom_trace_addrinfo(const char *prefix, const struct addrinfo *p)
     /* close trace record */
     fprintf(trace_file, "\n");
     /* remove the lock from mutex */
-    g_static_mutex_unlock(&flom_trace_mutex);
+    g_mutex_unlock(&flom_trace_mutex);
 }
 
 
@@ -322,7 +319,7 @@ void flom_trace_sockaddr(const char *prefix, const struct sockaddr *addr,
     if (NULL == trace_file)
         return;    
     /* lock the mutex */
-    g_static_mutex_lock(&flom_trace_mutex);
+    g_mutex_lock(&flom_trace_mutex);
     gettimeofday(&tv, NULL);
     localtime_r(&tv.tv_sec, &broken_time);
     /* default header */
@@ -387,7 +384,7 @@ void flom_trace_sockaddr(const char *prefix, const struct sockaddr *addr,
     /* close trace record */
     fprintf(trace_file, "\n");
     /* remove the lock from mutex */
-    g_static_mutex_unlock(&flom_trace_mutex);
+    g_mutex_unlock(&flom_trace_mutex);
     /* hex dump if necessary */
     if (trace_hex)
         flom_trace_hex_data(prefix, (byte_t *)addr, addrlen);
@@ -404,7 +401,7 @@ void flom_trace_sslerr(const char *prefix, unsigned long err)
     if (NULL == trace_file)
         return;    
     /* lock the mutex */
-    g_static_mutex_lock(&flom_trace_mutex);
+    g_mutex_lock(&flom_trace_mutex);
     /* loop on errors */
     if (SSL_ERROR_NONE != err) {
         gettimeofday(&tv, NULL);
@@ -422,5 +419,5 @@ void flom_trace_sslerr(const char *prefix, unsigned long err)
         fprintf(trace_file, " %s\n", buf);
     } /* if (SSL_ERROR_NONE != err) */
     /* remove the lock from mutex */
-    g_static_mutex_unlock(&flom_trace_mutex);
+    g_mutex_unlock(&flom_trace_mutex);
 }

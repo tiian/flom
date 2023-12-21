@@ -1,3 +1,17 @@
+
+If a process is inside the dir mounted by FUSE, the umount does not work and the flom daemon does not end...
+
+Clean-up code of VFS, remove all garbage, use FLoM style everywhere
+
+Text cases for VFS
+
+Clean all @@@
+
+
+
+To improve the quantity of data available in the VFS it's required to perform
+several changes that might be taken into consideration in the future if real
+interest will emerge.
 Put in every
 flom_resource_*.c
 a new callback function that returns a piece of RAM VFS with the specific
@@ -5,7 +19,6 @@ info of the resource.
 For numeric, for example, it will be: 
 total_quantity
 locked_quantity
-
 The main idea is:
 in flom_locker.c line 90, inside flom_vfs_ram_tree_add_locker the callback
 function on the specific resource will be called and it will give back a list
@@ -14,12 +27,6 @@ of "resource_name" and "resource_type". In theory, even them should be part of
 the retrieved list of files/dirs.
 If the resource must create a dir with files inside it, that will be definitively become more and more complicated...
 
-
-If a process is inside the dir mounted by FUSE, the umount does not work and the flom daemon does not end...
-
-Remove all warnings for Ubuntu 14.04; more recent ones can happen
-
-Clean-up code of VFS, remove all garbage, use FLoM style everywhere
 
 
 

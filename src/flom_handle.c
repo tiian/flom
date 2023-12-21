@@ -40,8 +40,10 @@
 
 /**
  * Mutex used to access flom initialization flag
+ * According to GLib documentation, when placed in static storage it's
+ * automatically initialized
  */
-GStaticMutex flom_init_mutex = G_STATIC_MUTEX_INIT;
+static GMutex flom_init_mutex;
 /**
  * Flom library is initialized
  */
@@ -1134,7 +1136,7 @@ int flom_init_check(void)
     if (!flom_init_flag) {
         /* this is a synchronization hole... see below */
         /* synchronize this critical section */
-        g_static_mutex_lock(&flom_init_mutex);
+        g_mutex_lock(&flom_init_mutex);
         mutex_locked = TRUE;
         /* dummy loop, necessary because I need break instruction ;) */
         while (TRUE) {
@@ -1169,6 +1171,6 @@ int flom_init_check(void)
     } /* if (!flom_init_flag) */
     
     if (mutex_locked)
-        g_static_mutex_unlock(&flom_init_mutex);
+        g_mutex_unlock(&flom_init_mutex);
     return ret_cod;
 }

@@ -199,7 +199,11 @@ gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
                          sizeof(fuse_callback_functions), NULL)))
             THROW(FUSE_LOWLEVEL_NEW);
 
-        /* @@@ tried to remove id on 2023-11-17, hoping it will work anyway
+        /*
+         * This function might conflict with FLoM signal management that's not
+         * the default one; FUSE usage is introduced by version 1.7.0 as
+         * experimental, but this function is not called, hoping it's not
+         * a mandatory step (2023-11-17)
         if (fuse_set_signal_handlers(se) != 0)
             THROW(FUSE_SET_SIGNAL_HANDLERS);
         */
@@ -208,7 +212,11 @@ gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
         ret = fuse_session_loop(se);
         FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs[FUSE2]: "
                     "fuse_session_loop return code is %d\n", ret));
-        /* @@@ tried to remove id on 2023-11-17, hoping it will work anyway
+        /* 
+         * This function might conflict with FLoM signal management that's not
+         * the default one; FUSE usage is introduced by version 1.7.0 as
+         * experimental, but this function is not called, hoping it's not
+         * a mandatory step (2023-11-17)
         fuse_remove_signal_handlers(se);
         */
         fuse_session_remove_chan(ch);
@@ -290,17 +298,17 @@ gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
         if (se == NULL)
             THROW(FUSE_SESSION_NEW);
 
-        /* @@@ tried to remove id on 2023-11-17, hoping it will work anyway
+        /*
+         * This function might conflict with FLoM signal management that's not
+         * the default one; FUSE usage is introduced by version 1.7.0 as
+         * experimental, but this function is not called, hoping it's not
+         * a mandatory step (2023-11-17)
         if (fuse_set_signal_handlers(se) != 0)
             THROW(FUSE_SET_SIGNAL_HANDLERS);
         */
 
         if (fuse_session_mount(se, opts.mountpoint) != 0)
             THROW(FUSE_SESSION_MOUNT);
-
-        /*
-        fuse_daemonize(opts.foreground);
-        */
 
         ret = fuse_session_loop(se);
         FLOM_TRACE(("flom_daemon_mngmnt_activate_vfs[FUSE3]: "
@@ -338,10 +346,14 @@ gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
     if (excp >= FUSE_SESSION_MOUNT) {
         fuse_remove_signal_handlers(se);
     }
-        /* @@@ tried to remove id on 2023-11-17, hoping it will work anyway
-    if (excp >= FUSE_SET_SIGNAL_HANDLERS) {
-        fuse_session_destroy(se);
-    }
+        /* 
+         * This function might conflict with FLoM signal management that's not
+         * the default one; FUSE usage is introduced by version 1.7.0 as
+         * experimental, but this function is not called, hoping it's not
+         * a mandatory step (2023-11-17)
+         if (excp >= FUSE_SET_SIGNAL_HANDLERS) {
+         fuse_session_destroy(se);
+         }
         */
     if (excp > FUSE_PARSE_CMDLINE) {
         free(opts.mountpoint);

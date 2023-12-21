@@ -266,8 +266,8 @@ const char *flom_strerror(int ret_cod)
             return "ERROR: 'g_strndup' function returned an error condition";
         case FLOM_RC_G_STRSPLIT_ERROR:
             return "ERROR: 'g_strsplit' function returned an error condition";
-        case FLOM_RC_G_THREAD_CREATE_ERROR:
-            return "ERROR: 'g_thread_create' function returned an error "
+        case FLOM_RC_G_THREAD_NEW_ERROR:
+            return "ERROR: 'g_thread_new' function returned an error "
                 "condition";
         case FLOM_RC_G_TRY_MALLOC_ERROR:
             return "ERROR: 'g_try_malloc'/'g_try_malloc0' function returned "

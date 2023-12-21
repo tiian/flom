@@ -48,8 +48,10 @@ int flom_tls_initialized = FALSE;
 
 /**
  * This mutex is used to double initialization of the OpenSSL library
+ * According to GLib documentation, when placed in static storage it's
+ * automatically initialized
  */
-GStaticMutex flom_tls_mutex = G_STATIC_MUTEX_INIT;
+static GMutex flom_tls_mutex;
 
 
 
@@ -97,7 +99,7 @@ flom_tls_t *flom_tls_new(int client)
     
     /* initialize OpenSSL library if necessary */
     /* lock the mutex */
-    g_static_mutex_lock(&flom_tls_mutex);
+    g_mutex_lock(&flom_tls_mutex);
     if (!flom_tls_initialized) {
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
         FLOM_TRACE(("flom_tls_init: calling SSL_library_init()...\n"));
@@ -114,7 +116,7 @@ flom_tls_t *flom_tls_new(int client)
         flom_tls_initialized = TRUE;
     }
     /* remove the lock from the mutex */
-    g_static_mutex_unlock(&flom_tls_mutex);
+    g_mutex_unlock(&flom_tls_mutex);
 
     /* allocate a new object */
     tmp = g_try_malloc0(sizeof(flom_tls_t));
@@ -160,7 +162,7 @@ int flom_tls_context(flom_tls_t *obj)
     
     FLOM_TRACE(("flom_tls_context\n"));
     TRY {
-        SSL_METHOD *method = NULL;
+        const SSL_METHOD *method = NULL;
         const char *side = obj->client ? "client" : "server";
         int mode;
 
