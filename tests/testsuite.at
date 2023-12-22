@@ -5,6 +5,7 @@ AT_COLOR_TESTS
 # cmdopt.at MUST be the first one in the list because it checks if 
 # --disable-testcases was specified at configure time
 m4_include([cmdopt.at])
+m4_include([vfs.at])
 m4_include([incompopt.at])
 m4_include([debug-features.at])
 m4_include([api.at])

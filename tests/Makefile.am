@@ -37,6 +37,7 @@ EXTRA_DIST = $(TESTSUITE) atlocal.in \
 	usecase-seq.at \
 	usecase-set.at.in \
 	usecase-tms.at.in \
+	vfs.at.in \
 	scripts/*.sh
 
 api.at: api.at.in
@@ -76,6 +77,7 @@ cmdopt.at: cmdopt.at.in
 	-e 's|@_CONFIG_KEY_UNICAST_PORT[@]|$(_CONFIG_KEY_UNICAST_PORT)|g' \
 	-e 's|@_CONFIG_KEY_MULTICAST_ADDRESS[@]|$(_CONFIG_KEY_MULTICAST_ADDRESS)|g' \
 	-e 's|@_CONFIG_KEY_MULTICAST_PORT[@]|$(_CONFIG_KEY_MULTICAST_PORT)|g' \
+	-e 's|@_CONFIG_KEY_MOUNT_POINT_VFS[@]|$(_CONFIG_KEY_MOUNT_POINT_VFS)|g' \
 	-e 's|@_CONFIG_GROUP_MONITOR[@]|$(_CONFIG_GROUP_MONITOR)|g' \
 	-e 's|@_CONFIG_KEY_IGNORED_SIGNALS[@]|$(_CONFIG_KEY_IGNORED_SIGNALS)|g' \
 	-e 's|@_CONFIG_GROUP_NETWORK[@]|$(_CONFIG_GROUP_NETWORK)|g' \
@@ -145,6 +147,12 @@ usecase-tms.at: usecase-tms.at.in
 	-e 's|@STDBUF_O0[@]|$(STDBUF_O0)|g' \
 	$< >$@
 
+vfs.at: vfs.at.in
+	sed \
+	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+	-e 's|@USER[@]|$(USER)|g' \
+	$< >$@
+
 TESTSUITE = $(srcdir)/testsuite
 
 check-local: atconfig atlocal $(TESTSUITE)
@@ -174,11 +182,12 @@ $(TESTSUITE): $(srcdir)/package.m4 \
 	$(srcdir)/usecase-num.at \
 	$(srcdir)/usecase-seq.at \
 	$(srcdir)/usecase-set.at \
-	$(srcdir)/usecase-tms.at
+	$(srcdir)/usecase-tms.at \
+	$(srcdir)/vfs.at
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
 	mv $@.tmp $@
 
 DISTCLEANFILES = atconfig
 CLEANFILES = api.at api_perl.at cmdopt.at incompopt.at tls.at usecase.at \
 	usecase-dist.at usecase-lt.at usecase-num.at usecase-set.at \
-	usecase-tms.at
+	usecase-tms.at vfs.at

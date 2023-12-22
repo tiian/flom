@@ -1,0 +1,21 @@
+AT_BANNER([VFS features check])
+
+AT_SETUP([VFS dirs and files])
+AT_CHECK([pkill flom], [ignore], [ignore], [ignore])
+AT_CHECK([rmdir /tmp/flom-test-vfs ; mkdir /tmp/flom-test-vfs], [0], [ignore], [ignore])
+AT_CHECK([flom_test_exec3.sh 1 0 3 "-d 1 -m /tmp/flom-test-vfs -r foo[[2]]" & sleep 1 ; find /tmp/flom-test-vfs >>stdout], [0], [ignore], [ignore])
+AT_CHECK([cat stdout], [0], [ignore], [ignore])
+# Checking there's incubator folder
+AT_CHECK([grep incubator stdout], [0], [ignore], [ignore])
+# Checking there's lockers folder
+AT_CHECK([grep lockers stdout], [0], [ignore], [ignore])
+# Checking there's holders folder
+AT_CHECK([grep holders stdout], [0], [ignore], [ignore])
+# Checking there's waitings folder
+AT_CHECK([grep waitings stdout], [0], [ignore], [ignore])
+# Checking there's resource_name file
+AT_CHECK([grep resource_name stdout], [0], [ignore], [ignore])
+# Checking there's resource_type file
+AT_CHECK([grep resource_type stdout], [0], [ignore], [ignore])
+AT_CHECK([sleep 3 && flom -x && sleep 1 && rmdir /tmp/flom-test-vfs], [0], [ignore], [ignore])
+AT_CLEANUP

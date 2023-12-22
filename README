@@ -142,7 +142,10 @@ https://github.com/tiian/flom/issues
 Dependencies report:
 O.S.		Feature		Packages
 Ubuntu		Basic		make gcc libglib2.0-dev dbus libdbus-1-dev libssl-dev pkg-config automake
-Ubuntu		FUSE		fuse libfuse-dev    <-- use either FUSE or FUSE3
+Ubuntu	14.04	FUSE		fuse libfuse-dev
+Ubuntu	16.04	FUSE		fuse libfuse-dev
+Ubuntu	18.04	FUSE		fuse libfuse-dev
+Ubuntu	20.04	FUSE		fuse libfuse-dev
 Ubuntu  	FUSE3		fuse3 libfuse3-dev  <-- use either FUSE or FUSE3
 Ubuntu		C++ API		g++
 Ubuntu		Perl API	swig libperl-dev

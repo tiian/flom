@@ -359,6 +359,16 @@ AT_DATA([flom.conf],
 AT_CHECK([flom -V -c flom.conf -- ls | grep @_CONFIG_KEY_MULTICAST_PORT@], [0], [expout], [ignore])
 AT_CLEANUP
 
+AT_SETUP([VFS mount point: -m, --mount-point-vfs])
+AT_DATA([expout],
+[[[@_CONFIG_GROUP_DAEMON@]/@_CONFIG_KEY_MOUNT_POINT_VFS@='/tmp/flom-test-vfs'
+]])
+AT_CHECK([rmdir /tmp/flom-test-vfs ; mkdir /tmp/flom-test-vfs], [0], [ignore], [ignore])
+AT_CHECK([flom --verbose -m /tmp/flom-test-vfs -- ls | grep @_CONFIG_KEY_MOUNT_POINT_VFS@], [0], [expout], [ignore])
+AT_CHECK([flom --verbose --mount-point-vfs=/tmp/flom-test-vfs -- ls | grep @_CONFIG_KEY_MOUNT_POINT_VFS@], [0], [expout], [ignore])
+AT_CHECK([rmdir /tmp/flom-test-vfs], [0], [ignore], [ignore])
+AT_CLEANUP
+
 AT_SETUP([Ignore signal: --ignore-signal])
 AT_DATA([expout],
 [[[@_CONFIG_GROUP_MONITOR@]/@_CONFIG_KEY_IGNORED_SIGNALS@='SIGQUIT;SIGTERM'

@@ -1,3 +1,21 @@
+Release: 1.7.0 (Tester: Tiian; Test purpose: FUSE VFS feature -m, --mount-point-vfs)
+Date:	2023-12-22
+
+Operating System            Arch     Hypervisor      Config   Note
+Ubuntu 14.04 (OpenJDK 1.7)| x86_64 | virtual (KVM) |   [2]  | *
+Ubuntu 16.04 (OpenJDK 1.8)| x86_64 | virtual (KVM) |   [3]  |
+Ubuntu 18.04 (OpenJDK 11) | x86_64 | virtual (KVM) |   [2]  |
+Ubuntu 20.04 (OpenJDK 11) | x86_64 | virtual (KVM) |[1],[2] |
+
+Configurations:
+[1]	PYTHON_VERSION=3 ./configure
+[2]	./configure
+[3]	./configure --disable-php
+
+* 3 vCPUs instead of 2 (default)
+
+--------------------------------------------------------------------------
+
 Release: 1.6.1 (Tester: Tiian; Test purpose: ./configure --disable-testcases)
 Date:	2023-05-20
 
