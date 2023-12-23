@@ -425,8 +425,15 @@ int flom_listen_local(flom_config_t *config, flom_conns_t *conns)
             THROW(UNLINK_ERROR);
         memset(&servaddr, 0, sizeof(servaddr));
         servaddr.sun_family = flom_conns_get_domain(conns);
+        /* @@@ remove me, it generated compile warning
+
+           warning: '__builtin_strncpy' specified bound 108 equals destination size
+           
         strncpy(servaddr.sun_path, flom_config_get_socket_name(config),
                 sizeof(servaddr.sun_path));
+        */
+        memcpy(servaddr.sun_path, flom_config_get_socket_name(config),
+               sizeof(servaddr.sun_path));
         if (-1 == bind(fd, (struct sockaddr *) &servaddr, sizeof(servaddr))) {
             syslog(LOG_ERR, FLOM_SYSLOG_FLM019E, errno, strerror(errno),
                    "flom_listen_local");
@@ -1220,7 +1227,7 @@ int flom_accept_loop(flom_config_t *config, flom_conns_t *conns)
             syslog(LOG_ERR, FLOM_SYSLOG_FLM025E, size,
                    flom_config_get_mount_point_vfs(config));
         } else {
-            snprintf(system_command, size, "fusermount -u %s",
+            snprintf(system_command, size, FUSERMOUNT " -u %s",
                      flom_config_get_mount_point_vfs(config));
             syslog(LOG_INFO, FLOM_SYSLOG_FLM023I, system_command);
             exitstatus = WEXITSTATUS(system(system_command));

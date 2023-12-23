@@ -1,11 +1,12 @@
 LOG:
 
-	 - 1.7.0 New observability feature implemented with a virtual filesystem
-	based on FUSE (EXPERIMENTAL). The feature can be activated with
+20231223 - 1.7.0 New observability feature implemented with a virtual filesystem
+	based on FUSE (EXPERIMENTAL FEATURE). The feature can be activated with
 	command line option "-m" / "--mount-point-vfs"
 	https://github.com/tiian/flom/issues/29
 	Removed support for Ubuntu versions before 14.04; cleaned up compile
 	warnings in Ubuntu 14.04 related to deprecated functions
+	Removed support for CentOS 6 because ssh support is too old
 
 20230520 - 1.6.1 Support of ./configure --disable-testcases
 	to disable all the test cases and to remove the need for a network

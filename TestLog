@@ -1,11 +1,14 @@
 Release: 1.7.0 (Tester: Tiian; Test purpose: FUSE VFS feature -m, --mount-point-vfs)
-Date:	2023-12-22
+Date:	2023-12-23
 
 Operating System            Arch     Hypervisor      Config   Note
 Ubuntu 14.04 (OpenJDK 1.7)| x86_64 | virtual (KVM) |   [2]  | *
 Ubuntu 16.04 (OpenJDK 1.8)| x86_64 | virtual (KVM) |   [3]  |
 Ubuntu 18.04 (OpenJDK 11) | x86_64 | virtual (KVM) |   [2]  |
 Ubuntu 20.04 (OpenJDK 11) | x86_64 | virtual (KVM) |[1],[2] |
+Ubuntu 22.04 (OpenJDK 11) | x86_64 | virtual (KVM) |   [1]  |
+CentOS 7.9   (OpenJDK 1.8)| x86_64 | virtual (KVM) |   [2]  | §§
+CentOS 8.5   (OpenJDK 1.8)| x86_64 | virtual (KVM) |   [1]  | §
 
 Configurations:
 [1]	PYTHON_VERSION=3 ./configure
@@ -13,6 +16,8 @@ Configurations:
 [3]	./configure --disable-php
 
 * 3 vCPUs instead of 2 (default)
+§ centos-linux-release-8.5-1.2111.el8.noarch (rpm -q centos-linux-release)
+§§ centos-release-7-9.2009.1.el7.centos.x86_64 (rpm --query centos-release)
 
 --------------------------------------------------------------------------
 

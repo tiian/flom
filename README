@@ -134,6 +134,18 @@ If you cannot disable the firewall and you want to use FLoM autodiscovery
 feature (IP multicast based), you will have to configure the internal
 firewall allowing FLoM multicast packets.
 
+Issues related to FUSE Virtual File System activated with command option "-m"
+or "--mount-point-vfs":
+FLoM daemon umount by itself the FUSE VFS, but under some conditions the
+daemon is not able to umount it, for example if the FUSE filesystem is used by
+some users.
+In that case the daemon will generate a syslog message FLM024W to warn about
+the need of manual unmount with one of the following commands:
+fusermount -u <mountpoint>
+sudo umount -l <mountpoint>
+Note: if you are using FUSE3, there's the chance you have to use the command
+"fusermount3" instead of "fusermount".
+
 If you need some help (usage tricks, hints, etc...) please post a message in
 the forum: http://sourceforge.net/p/flom/discussion/
 If you think you have discovered a bug, please open an issue here:
@@ -146,7 +158,7 @@ Ubuntu	14.04	FUSE		fuse libfuse-dev
 Ubuntu	16.04	FUSE		fuse libfuse-dev
 Ubuntu	18.04	FUSE		fuse libfuse-dev
 Ubuntu	20.04	FUSE		fuse libfuse-dev
-Ubuntu  	FUSE3		fuse3 libfuse3-dev  <-- use either FUSE or FUSE3
+Ubuntu 	22.04 	FUSE3		fuse3 libfuse3-dev  <-- use either FUSE or FUSE3
 Ubuntu		C++ API		g++
 Ubuntu		Perl API	swig libperl-dev
 Ubuntu		PHP API		swig php5-cli php5-dev
@@ -163,6 +175,8 @@ Ubuntu	18.04	Java API	default-jdk (openjdk 10)
 Ubuntu	20.04	Java API	default-jdk (openjdk 11)
 Ubuntu	22.04	Java API	default-jdk (openjdk 11)
 CentOS		Basic		gcc glib2-devel dbus dbus-devel autoconf openssl-devel make
+CentOS	7.x	FUSE		fuse fuse-devel
+CentOS	8.x	FUSE3		fuse3 fuse3-devel
 CentOS		C++ API		gcc-c++
 CentOS		Perl API	swig perl-devel
 CentOS		PHP API		swig php-devel

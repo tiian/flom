@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.7.0-dev], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
+AC_INIT([FLoM], [1.7.0], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AM_PROG_AR
@@ -31,7 +31,7 @@ LT_REVISION=0
 
 # hardwired configuration
 _FLOM_PREFIX="flom"
-_RELEASE_DATE="2023-12-22"
+_RELEASE_DATE="2023-12-23"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"
@@ -275,10 +275,10 @@ fi
 
 # First check for availability of FUSE3, then for availability of FUSE2
 # Checking libfuse3 is available
-pkg-config --atleast-version=3.9.0 fuse3
+pkg-config --atleast-version=3.2.1 fuse3
 if test $? -eq 0
 then
-	PKG_CHECK_MODULES([FUSE], [fuse3 >= 3.9.0])
+	PKG_CHECK_MODULES([FUSE], [fuse3 >= 3.2.1])
 	CPPFLAGS="$CPPFLAGS $FUSE_CFLAGS"
 	FUSE_VERSION=3
 	AC_MSG_NOTICE([FUSE version 3 will be used])
@@ -289,12 +289,14 @@ else
 	then
 		PKG_CHECK_MODULES([FUSE], [fuse >= 2.9.2])
 		CPPFLAGS="$CPPFLAGS $FUSE_CFLAGS"
-		FUSE_VERSION=2
 		AC_MSG_NOTICE([FUSE version 2 will be used])
 	else
-        	AC_MSG_ERROR([cannot find neither fuse3 package at level 3.9.0 or higher nor fuse2 package at level 2.9.2 or higher])
+        	AC_MSG_ERROR([cannot find neither fuse3 package at level 3.2.1 or higher nor fuse2 package at level 2.9.2 or higher])
 	fi
 fi
+AC_CHECK_PROGS([FUSERMOUNT], [fusermount3 fusermount])
+AC_DEFINE_UNQUOTED([FUSERMOUNT], ["$ac_cv_prog_FUSERMOUNT"], [Command used to umount a FUSE filesystem])
+
 
 # Checking stdbuf is available
 AC_CHECK_PROGS(STDBUF, [stdbuf], [])

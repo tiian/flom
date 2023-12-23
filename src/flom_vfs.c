@@ -1113,7 +1113,7 @@ int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
                                flom_vfs_ram_tree_add_locker_conn_file(
                                    locker_uid, conn_uid, TRUE,
                                    FLOM_VFS_LOCKERS_LOCKMODE_FILE_NAME,
-                                   flom_lock_mode_long_string(lock_mode))));
+                                   flom_lock_mode_long_string(lock_mode))))
                 THROW(ADD_LOCKER_CONN_FILE2);
         }
 

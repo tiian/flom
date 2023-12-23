@@ -286,9 +286,8 @@ gpointer flom_daemon_mngmnt_activate_vfs(gpointer data)
         int ret = -1;
 
         /* setting common values */
-        flom_vfs_common_values.uid = getuid();
-        flom_vfs_common_values.gid = getgid();
-        flom_vfs_common_values.time = time(NULL);
+        flom_fuse_common_values.uid = getuid();
+        flom_fuse_common_values.gid = getgid();
 
         if (fuse_parse_cmdline(&args, &opts) != 0)
             THROW(FUSE_PARSE_CMDLINE);
