@@ -164,8 +164,7 @@ void flom_fuse_getxattr(fuse_req_t req, fuse_ino_t ino, const char *name,
     FLOM_TRACE(("flom_fuse_getxattr: ino=" FLOM_UID_T_FORMAT ", "
                 "name='%s', size=" SIZE_T_FORMAT "\n",
                 ino, name, size));
-    
-	fuse_reply_buf(req, NULL, 0);
+    fuse_reply_err(req, ENOTSUP);
 }
 
 
