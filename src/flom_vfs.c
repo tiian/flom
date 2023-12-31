@@ -1099,12 +1099,13 @@ int flom_vfs_ram_tree_add_locker_conn(flom_uid_t locker_uid,
                            flom_vfs_ram_tree_update_mtime(children_node)))
             THROW(RAM_TREE_UPDATE_MTIME);
 
+        snprintf(string_buffer, sizeof(string_buffer), "%s\n", peer_name);
         if (NULL != peer_name) {
             if (FLOM_RC_OK != (ret_cod =
                                flom_vfs_ram_tree_add_locker_conn_file(
                                    locker_uid, conn_uid, TRUE,
                                    FLOM_VFS_PEERNAME_FILE_NAME,
-                                   peer_name)))
+                                   string_buffer)))
                 THROW(ADD_LOCKER_CONN_FILE1);
         }
         

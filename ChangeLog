@@ -1,5 +1,8 @@
 LOG:
 
+	 - 1.7.1 Fixes
+	https://github.com/tiian/flom/issues/30
+
 20231223 - 1.7.0 New observability feature implemented with a virtual filesystem
 	based on FUSE (EXPERIMENTAL FEATURE). The feature can be activated with
 	command line option "-m" / "--mount-point-vfs"

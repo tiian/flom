@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.7.0], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
+AC_INIT([FLoM], [1.7.1-dev], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AM_PROG_AR
@@ -31,7 +31,7 @@ LT_REVISION=0
 
 # hardwired configuration
 _FLOM_PREFIX="flom"
-_RELEASE_DATE="2023-12-23"
+_RELEASE_DATE="2023-12-31"
 _SYSTEM_CONFIG_FILENAME="flom.conf"
 _USER_CONFIG_FILENAME=".flom"
 _DIR_FILE_SEPARATOR="/"
