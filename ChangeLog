@@ -1,8 +1,7 @@
 LOG:
 
-	 - 1.7.1 Fixes
-	https://github.com/tiian/flom/issues/30
-	Copyright update
+20240101 - 1.7.1 Fixes for https://github.com/tiian/flom/issues/30
+	Copyright update for year 2024
 
 20231223 - 1.7.0 New observability feature implemented with a virtual filesystem
 	based on FUSE (EXPERIMENTAL FEATURE). The feature can be activated with

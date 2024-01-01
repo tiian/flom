@@ -1,3 +1,17 @@
+Release: 1.7.1 (Tester: Tiian; Test purpose: fixes for https://github.com/tiian/flom/issues/30)
+Date:	2024-01-01
+
+Operating System            Arch     Hypervisor      Config   Note
+Ubuntu 14.04 (OpenJDK 1.7)| x86_64 | virtual (KVM) |   [2]  | *
+Ubuntu 22.04 (OpenJDK 11) | x86_64 | virtual (KVM) |   [1]  |
+
+Configurations:
+[1]	PYTHON_VERSION=3 ./configure
+[2]	./configure
+
+* 3 vCPUs instead of 2 (default)
+
+--------------------------------------------------------------------------
 Release: 1.7.0 (Tester: Tiian; Test purpose: FUSE VFS feature -m, --mount-point-vfs)
 Date:	2023-12-23
 
