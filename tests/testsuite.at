@@ -1,5 +1,5 @@
 AT_INIT
-AT_COPYRIGHT([Copyright (c) 2013-2023, Christian Ferrari <tiian@users.sourceforge.net>])
+AT_COPYRIGHT([Copyright (c) 2013-2024, Christian Ferrari <tiian@users.sourceforge.net>])
 AT_COLOR_TESTS
 
 # cmdopt.at MUST be the first one in the list because it checks if 
