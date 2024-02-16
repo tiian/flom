@@ -382,6 +382,7 @@ AM_CONDITIONAL([COND_PERLAPI], [test "$PERLAPI" = "yes"])
 # Checking the availability of PHP tools
 AC_CHECK_PROG(HAVE_PHP, [php], [yes], [no])
 AC_CHECK_PROG(HAVE_PHP_CONFIG, [php-config], [yes], [no])
+PHP_VERNUM=00000
 if test "$HAVE_PHP_CONFIG" = "yes"
 then
 	AC_MSG_CHECKING([for PHP7])

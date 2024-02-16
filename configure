@@ -18698,6 +18698,7 @@ $as_echo "no" >&6; }
 fi
 
 
+PHP_VERNUM=00000
 if test "$HAVE_PHP_CONFIG" = "yes"
 then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for PHP7" >&5
