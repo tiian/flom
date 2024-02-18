@@ -1,4 +1,4 @@
-AC_INIT([FLoM], [1.7.1], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
+AC_INIT([FLoM], [1.7.2-dev], [tiian at users dot sourceforge dot net], [], [https://github.com/tiian/flom])
 AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AM_PROG_AR
@@ -412,13 +412,6 @@ else
 fi
 AM_CONDITIONAL([COND_PHPAPI], [test "$PHPAPI" = "yes"])
 
-# Check Python availability
-m4_include(m4/ax_python_devel.m4)
-AX_PYTHON_DEVEL([>= '2.6.5'])
-# Check SWIG support for Python
-m4_include(m4/ax_swig_python.m4)
-AX_SWIG_PYTHON
-
 # Build Python wrapper?
 AC_ARG_ENABLE([python],
 	AS_HELP_STRING([--disable-python],
@@ -427,6 +420,13 @@ AC_ARG_ENABLE([python],
 # Python stuff is conditional
 if test "z$PYTHON" != "z" -a "$BUILD_PYTHON" = "yes" -a "z$SWIG" != "z"
 then
+	# Check Python availability
+	m4_include(m4/ax_python_devel.m4)
+	AX_PYTHON_DEVEL([>= '2.6.5'])
+	# Check SWIG support for Python
+	m4_include(m4/ax_swig_python.m4)
+	AX_SWIG_PYTHON
+
 	PYTHONAPI="yes"
 	PYTHON_INCLUDES=$PYTHON_CPPFLAGS
 else
