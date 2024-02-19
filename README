@@ -187,6 +187,14 @@ CentOS  8.x	Python 3 API	swig python3-devel
 CentOS	6.x	Java API	java-1.6.0-openjdk or java-1.7.0-openjdk
 CentOS	7.x	Java API	java-1.8.0-openjdk-devel or java-11-openjdk-devel
 CentOS	8.x	Java API	java-11-openjdk
+Debian	12	Basic		make gcc libglib2.0-dev dbus libdbus-1-dev libssl-dev pkg-config automake
+Debian 	12 	FUSE3		fuse3 libfuse3-dev  <-- use either FUSE or FUSE3
+Debian	12	c++ API		g++
+Debian	12	Perl API	swig libperl-dev
+Debian  12	PHP API         swig php-cli php-dev
+Debian 	12	Python API	swig python3-dev
+Debian	12	Java API	default-jdk (openjdk 11)
+
 
 * Support not available for PHP 7.0 due to SWIG version, see also 
   https://github.com/tiian/flom/issues/5
