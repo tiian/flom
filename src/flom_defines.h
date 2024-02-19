@@ -307,12 +307,12 @@ typedef unsigned long flom_uid_t;
 /**
  * format for printing flom_uid_t
  */
-#if SIZEOF_FLOM_UID_T == SIZEOF_INT
-# define FLOM_UID_T_FORMAT "%u"
+#if SIZEOF_FLOM_UID_T == SIZEOF_LONG_LONG_INT
+# define FLOM_UID_T_FORMAT "%llu"
 #elif SIZEOF_FLOM_UID_T == SIZEOF_LONG_INT
 # define FLOM_UID_T_FORMAT "%lu"
-#elif SIZEOF_FLOM_UID_T == SIZEOF_LONG_LONG_INT
-# define FLOM_UID_T_FORMAT "%llu"
+#elif SIZEOF_FLOM_UID_T == SIZEOF_INT
+# define FLOM_UID_T_FORMAT "%u"
 #else
 # error Unable to determine sizeof(flom_uid_t)
 #endif
