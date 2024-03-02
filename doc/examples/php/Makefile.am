@@ -5,23 +5,17 @@ nodist_examples_DATA = basic.php advanced.php transactional.php
 
 basic.php: basic.php.in ../../../config.status
 	sed \
-	-e 's|@datadir[@]|$(datadir)|g' \
-	-e 's|@libdir[@]|$(libdir)|g' \
-	-e 's|@PACKAGE[@]|$(PACKAGE)|g' \
+	-e 's|@PHP_HEADER[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 advanced.php: advanced.php.in ../../../config.status
 	sed \
-	-e 's|@datadir[@]|$(datadir)|g' \
-	-e 's|@libdir[@]|$(libdir)|g' \
-	-e 's|@PACKAGE[@]|$(PACKAGE)|g' \
+	-e 's|@PHP_HEADER[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 transactional.php: transactional.php.in ../../../config.status
 	sed \
-	-e 's|@datadir[@]|$(datadir)|g' \
-	-e 's|@libdir[@]|$(libdir)|g' \
-	-e 's|@PACKAGE[@]|$(PACKAGE)|g' \
+	-e 's|@PHP_HEADER[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 README: README.in ../../../config.status

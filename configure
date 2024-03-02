@@ -711,6 +711,8 @@ PYTHON_INCLUDES
 PYTHONAPI
 PHP_INSTALL_PATH
 PHP_INCLUDES
+PHP_HEADER_TEST
+PHP_HEADER
 PHPAPI
 PERLAPI
 JAVAAPI
@@ -17969,6 +17971,8 @@ fi
 #   Copyright (c) 2008 Rafael Laboissiere <rafael@laboissiere.net>
 #   Copyright (c) 2008 Andrew Collier
 #   Copyright (c) 2011 Murray Cumming <murrayc@openismus.com>
+#   Copyright (c) 2018 Reini Urban <rurban@cpan.org>
+#   Copyright (c) 2021 Vincent Danjean <Vincent.Danjean@ens-lyon.org>
 #
 #   This program is free software; you can redistribute it and/or modify it
 #   under the terms of the GNU General Public License as published by the
@@ -17996,10 +18000,138 @@ fi
 #   modified version of the Autoconf Macro, you may extend this special
 #   exception to the GPL to apply to your modified version as well.
 
-#serial 13
+#serial 15
 
 
 
+# first of all, check for SWIG 4.1.0, because it requires different PHP
+# source codes
+PHP_NEED_INCLUDE_FILE="yes"
+
+        # Find path to the "swig" executable.
+        for ac_prog in swig swig3.0 swig2.0
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_SWIG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $SWIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_SWIG="$SWIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_SWIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+SWIG=$ac_cv_path_SWIG
+if test -n "$SWIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $SWIG" >&5
+$as_echo "$SWIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$SWIG" && break
+done
+
+        if test -z "$SWIG" ; then
+                { $as_echo "$as_me:${as_lineno-$LINENO}: SWIG 4.1.0 or upper not found, search for an older version..." >&5
+$as_echo "$as_me: SWIG 4.1.0 or upper not found, search for an older version..." >&6;}
+        elif test -z "4.1.0" ; then
+                PHP_NEED_INCLUDE_FILE="no"
+	else
+                { $as_echo "$as_me:${as_lineno-$LINENO}: checking SWIG version" >&5
+$as_echo_n "checking SWIG version... " >&6; }
+                swig_version=`$SWIG -version 2>&1 | grep 'SWIG Version' | sed 's/.*\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/g'`
+                { $as_echo "$as_me:${as_lineno-$LINENO}: result: $swig_version" >&5
+$as_echo "$swig_version" >&6; }
+                if test -n "$swig_version" ; then
+                        # Calculate the required version number components
+                        required=4.1.0
+                        required_major=`echo $required | sed 's/[^0-9].*//'`
+                        if test -z "$required_major" ; then
+                                required_major=0
+                        fi
+                        required=`echo $required. | sed 's/[0-9]*[^0-9]//'`
+                        required_minor=`echo $required | sed 's/[^0-9].*//'`
+                        if test -z "$required_minor" ; then
+                                required_minor=0
+                        fi
+                        required=`echo $required. | sed 's/[0-9]*[^0-9]//'`
+                        required_patch=`echo $required | sed 's/[^0-9].*//'`
+                        if test -z "$required_patch" ; then
+                                required_patch=0
+                        fi
+                        # Calculate the available version number components
+                        available=$swig_version
+                        available_major=`echo $available | sed 's/[^0-9].*//'`
+                        if test -z "$available_major" ; then
+                                available_major=0
+                        fi
+                        available=`echo $available | sed 's/[0-9]*[^0-9]//'`
+                        available_minor=`echo $available | sed 's/[^0-9].*//'`
+                        if test -z "$available_minor" ; then
+                                available_minor=0
+                        fi
+                        available=`echo $available | sed 's/[0-9]*[^0-9]//'`
+                        available_patch=`echo $available | sed 's/[^0-9].*//'`
+                        if test -z "$available_patch" ; then
+                                available_patch=0
+                        fi
+                        # Convert the version tuple into a single number for easier comparison.
+                        # Using base 100 should be safe since SWIG internally uses BCD values
+                        # to encode its version number.
+                        required_swig_vernum=`expr $required_major \* 10000 \
+                            \+ $required_minor \* 100 \+ $required_patch`
+                        available_swig_vernum=`expr $available_major \* 10000 \
+                            \+ $available_minor \* 100 \+ $available_patch`
+
+                        if test $available_swig_vernum -lt $required_swig_vernum; then
+                                { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: SWIG version >= 4.1.0 is required.  You have $swig_version." >&5
+$as_echo "$as_me: WARNING: SWIG version >= 4.1.0 is required.  You have $swig_version." >&2;}
+                                SWIG=''
+                                { $as_echo "$as_me:${as_lineno-$LINENO}: SWIG 4.1.0 or upper not found, search for an older version..." >&5
+$as_echo "$as_me: SWIG 4.1.0 or upper not found, search for an older version..." >&6;}
+                        else
+                                { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SWIG library" >&5
+$as_echo_n "checking for SWIG library... " >&6; }
+                                SWIG_LIB=`$SWIG -swiglib | tr '\r\n' '  '`
+                                { $as_echo "$as_me:${as_lineno-$LINENO}: result: $SWIG_LIB" >&5
+$as_echo "$SWIG_LIB" >&6; }
+                                PHP_NEED_INCLUDE_FILE="no"
+                        fi
+                else
+                        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: cannot determine SWIG version" >&5
+$as_echo "$as_me: WARNING: cannot determine SWIG version" >&2;}
+                        SWIG=''
+                        { $as_echo "$as_me:${as_lineno-$LINENO}: SWIG 4.1.0 or upper not found, search for an older version..." >&5
+$as_echo "$as_me: SWIG 4.1.0 or upper not found, search for an older version..." >&6;}
+                fi
+        fi
+
+
+if test "$PHP_NEED_INCLUDE_FILE" = "yes"
+then
 
         # Find path to the "swig" executable.
         for ac_prog in swig swig3.0 swig2.0
@@ -18049,7 +18181,9 @@ done
 
         if test -z "$SWIG" ; then
                 :
-        elif test -n "1.3.40" ; then
+        elif test -z "1.3.40" ; then
+                :
+	else
                 { $as_echo "$as_me:${as_lineno-$LINENO}: checking SWIG version" >&5
 $as_echo_n "checking SWIG version... " >&6; }
                 swig_version=`$SWIG -version 2>&1 | grep 'SWIG Version' | sed 's/.*\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/g'`
@@ -18062,12 +18196,12 @@ $as_echo "$swig_version" >&6; }
                         if test -z "$required_major" ; then
                                 required_major=0
                         fi
-                        required=`echo $required | sed 's/[0-9]*[^0-9]//'`
+                        required=`echo $required. | sed 's/[0-9]*[^0-9]//'`
                         required_minor=`echo $required | sed 's/[^0-9].*//'`
                         if test -z "$required_minor" ; then
                                 required_minor=0
                         fi
-                        required=`echo $required | sed 's/[0-9]*[^0-9]//'`
+                        required=`echo $required. | sed 's/[0-9]*[^0-9]//'`
                         required_patch=`echo $required | sed 's/[^0-9].*//'`
                         if test -z "$required_patch" ; then
                                 required_patch=0
@@ -18104,7 +18238,7 @@ $as_echo "$as_me: WARNING: SWIG version >= 1.3.40 is required.  You have $swig_v
                         else
                                 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SWIG library" >&5
 $as_echo_n "checking for SWIG library... " >&6; }
-                                SWIG_LIB=`$SWIG -swiglib`
+                                SWIG_LIB=`$SWIG -swiglib | tr '\r\n' '  '`
                                 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $SWIG_LIB" >&5
 $as_echo "$SWIG_LIB" >&6; }
 
@@ -18118,6 +18252,12 @@ $as_echo "$as_me: WARNING: cannot determine SWIG version" >&2;}
         fi
 
 
+	PHP_HEADER="include(\"$datadir/$PACKAGE/php/flom.php\");"
+	PHP_HEADER_TEST="include(\"$abs_top_builddir/src/php/flom.php\");"
+else
+	PHP_HEADER=""
+	PHP_HEADER_TEST=""
+fi
 
 # Checking the availability of JRE
 # Extract the first word of "java", so it can be a program name with args.
@@ -18758,7 +18898,7 @@ else
 fi
 
 # Python stuff is conditional
-if test "z$PYTHON" != "z" -a "$BUILD_PYTHON" = "yes" -a "z$SWIG" != "z"
+if test "$BUILD_PYTHON" = "yes" -a "z$SWIG" != "z"
 then
 	# Check Python availability
 	# ===========================================================================
@@ -20691,6 +20831,8 @@ done
 
 
 # substitution of optional (--disable) features
+
+
 
 
 

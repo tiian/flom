@@ -251,6 +251,8 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PERLAPI = @PERLAPI@
 PHPAPI = @PHPAPI@
+PHP_HEADER = @PHP_HEADER@
+PHP_HEADER_TEST = @PHP_HEADER_TEST@
 PHP_INCLUDES = @PHP_INCLUDES@
 PHP_INSTALL_PATH = @PHP_INSTALL_PATH@
 PKG_CONFIG = @PKG_CONFIG@
@@ -637,23 +639,17 @@ uninstall-am: uninstall-dist_examplesDATA \
 
 basic.php: basic.php.in ../../../config.status
 	sed \
-	-e 's|@datadir[@]|$(datadir)|g' \
-	-e 's|@libdir[@]|$(libdir)|g' \
-	-e 's|@PACKAGE[@]|$(PACKAGE)|g' \
+	-e 's|@PHP_HEADER[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 advanced.php: advanced.php.in ../../../config.status
 	sed \
-	-e 's|@datadir[@]|$(datadir)|g' \
-	-e 's|@libdir[@]|$(libdir)|g' \
-	-e 's|@PACKAGE[@]|$(PACKAGE)|g' \
+	-e 's|@PHP_HEADER[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 transactional.php: transactional.php.in ../../../config.status
 	sed \
-	-e 's|@datadir[@]|$(datadir)|g' \
-	-e 's|@libdir[@]|$(libdir)|g' \
-	-e 's|@PACKAGE[@]|$(PACKAGE)|g' \
+	-e 's|@PHP_HEADER[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 README: README.in ../../../config.status

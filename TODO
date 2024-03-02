@@ -1,23 +1,5 @@
-Fix these errors:
-
-(no newline)
-tiian@ubuntu1404-64:~$ cat /tmp/flom-vfs/status/lockers/4/holders/3/peer_name 
-192.168.123.154/58218tiian@ubuntu1404-64:~$
-
-(Input/output error) in ls -la
-tiian@ubuntu1404-64:~$ ls -la /tmp/flom-vfs/status/incubator/2/
-ls: /tmp/flom-vfs/status/incubator/2/: Input/output error
-ls: /tmp/flom-vfs/status/incubator/2/.: Input/output error
-ls: /tmp/flom-vfs/status/incubator/2/..: Input/output error
-ls: /tmp/flom-vfs/status/incubator/2/peer_name: Input/output error
-ls: /tmp/flom-vfs/status/incubator/2/resource_name: Input/output error
-ls: /tmp/flom-vfs/status/incubator/2/resource_type: Input/output error
-total 0
-dr-xr-x--- 2 tiian tiian  0 dic 31 15:17 .
-dr-xr-x--- 2 tiian tiian  0 dic 31 15:17 ..
--r--r----- 1 tiian tiian 21 dic 31 15:17 peer_name
--r--r----- 1 tiian tiian  7 dic 31 15:17 resource_name
--r--r----- 1 tiian tiian  8 dic 31 15:17 resource_type
+PHP wrapper for Debian 12
+Support for Rocky 9
 
 
 To improve the quantity of data available in the VFS it's required to perform

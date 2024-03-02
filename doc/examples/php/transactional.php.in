@@ -18,8 +18,8 @@
  * along with FLoM.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* include FLoM header */
-include("@datadir@/@PACKAGE@/php/flom.php");
+/* include FLoM header only if SWIG < 4.1.0 */
+@PHP_HEADER@
 
 
 

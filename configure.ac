@@ -311,7 +311,19 @@ AC_CHECK_PROG(HAVE_DOT, [dot], [YES], [NO])
 
 # Check SWIG availability
 m4_include(m4/ax_pkg_swig.m4)
-AX_PKG_SWIG([1.3.40])
+# first of all, check for SWIG 4.1.0, because it requires different PHP
+# source codes
+PHP_NEED_INCLUDE_FILE="yes"
+AX_PKG_SWIG([4.1.0], [PHP_NEED_INCLUDE_FILE="no"], [AC_MSG_NOTICE([SWIG 4.1.0 or upper not found, search for an older version...])])
+if test "$PHP_NEED_INCLUDE_FILE" = "yes"
+then
+	AX_PKG_SWIG([1.3.40])
+	PHP_HEADER="include(\"$datadir/$PACKAGE/php/flom.php\");"
+	PHP_HEADER_TEST="include(\"$abs_top_builddir/src/php/flom.php\");"
+else
+	PHP_HEADER=""
+	PHP_HEADER_TEST=""
+fi
 
 # Checking the availability of JRE
 AC_CHECK_PROG(HAVE_JAVA, [java], [yes], [no])
@@ -418,7 +430,7 @@ AC_ARG_ENABLE([python],
 		[do not prepare Python binding API]),
 	[BUILD_PYTHON="no"], [BUILD_PYTHON="yes"])
 # Python stuff is conditional
-if test "z$PYTHON" != "z" -a "$BUILD_PYTHON" = "yes" -a "z$SWIG" != "z"
+if test "$BUILD_PYTHON" = "yes" -a "z$SWIG" != "z"
 then
 	# Check Python availability
 	m4_include(m4/ax_python_devel.m4)
@@ -554,6 +566,8 @@ AC_SUBST(CPPAPI)
 AC_SUBST(JAVAAPI)
 AC_SUBST(PERLAPI)
 AC_SUBST(PHPAPI)
+AC_SUBST(PHP_HEADER)
+AC_SUBST(PHP_HEADER_TEST)
 AC_SUBST(PHP_INCLUDES)
 AC_SUBST(PHP_INSTALL_PATH)
 AC_SUBST(PYTHON)

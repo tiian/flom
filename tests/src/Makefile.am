@@ -48,22 +48,22 @@ LDADD = ../../src/libflom.la @GLIB2_LIBS@ @DBUS1_LIBS@ @OPENSSL_LIBS@
 
 case2000.php:	case2000.php.in ../../config.status
 	sed \
-	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+        -e 's|@PHP_HEADER_TEST[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 case2001.php:	case2001.php.in ../../config.status
 	sed \
-	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+        -e 's|@PHP_HEADER_TEST[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 case2002.php:	case2002.php.in ../../config.status
 	sed \
-	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+        -e 's|@PHP_HEADER_TEST[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 case2004.php:	case2004.php.in ../../config.status
 	sed \
-	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+        -e 's|@PHP_HEADER_TEST[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 case4000.class:	case4000.java

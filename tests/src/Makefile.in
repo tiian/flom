@@ -331,6 +331,8 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PERLAPI = @PERLAPI@
 PHPAPI = @PHPAPI@
+PHP_HEADER = @PHP_HEADER@
+PHP_HEADER_TEST = @PHP_HEADER_TEST@
 PHP_INCLUDES = @PHP_INCLUDES@
 PHP_INSTALL_PATH = @PHP_INSTALL_PATH@
 PKG_CONFIG = @PKG_CONFIG@
@@ -859,22 +861,22 @@ uninstall-am:
 
 case2000.php:	case2000.php.in ../../config.status
 	sed \
-	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+        -e 's|@PHP_HEADER_TEST[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 case2001.php:	case2001.php.in ../../config.status
 	sed \
-	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+        -e 's|@PHP_HEADER_TEST[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 case2002.php:	case2002.php.in ../../config.status
 	sed \
-	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+        -e 's|@PHP_HEADER_TEST[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 case2004.php:	case2004.php.in ../../config.status
 	sed \
-	-e 's|@abs_top_builddir[@]|$(abs_top_builddir)|g' \
+        -e 's|@PHP_HEADER_TEST[@]|$(PHP_HEADER)|g' \
 	$< >$@
 
 case4000.class:	case4000.java
