@@ -4,8 +4,8 @@ LOG:
 	Fix for https://github.com/tiian/flom/issues/32
 	Fix of Python related bug in configure.ac
 	Support for PHP 8 and SWIG 4.1.0 (Debian 12)
-	Support for Debian 12 - 32 bit... to be done
-	Support for Rocky 9 ... to be done
+	Support for Debian 12 - 32 bit
+	Support for Rocky 9
 
 20240101 - 1.7.1 Fixes for https://github.com/tiian/flom/issues/30
 	Copyright update for year 2024
