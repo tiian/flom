@@ -27,6 +27,9 @@ import java.nio.ByteBuffer;
 
 
 
+/**
+ * Main class to manage a connection to FLoM
+ */
 public class FlomHandle {
     static {
         System.loadLibrary("flom_java");

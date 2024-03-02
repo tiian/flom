@@ -5,131 +5,257 @@ package  org.tiian.flom;
  * methods.
  */
 public class FlomErrorCodes {
+	/** Constant for error code 96 */
 	public final static int FLOM_ES_REQUESTER_CANT_WAIT = 96;
+	/** Constant for error code 97 */
 	public final static int FLOM_ES_UNABLE_TO_EXECUTE_COMMAND = 97;
+	/** Constant for error code 98 */
 	public final static int FLOM_ES_RESOURCE_BUSY = 98;
+	/** Constant for error code 99 */
 	public final static int FLOM_ES_GENERIC_ERROR = 99;
+	/** Constant for error code 0 */
 	public final static int FLOM_ES_OK = 0;
+	/** Constant for error code +13 */
 	public final static int FLOM_RC_INACTIVE_FEATURE = +13;
+	/** Constant for error code +12 */
 	public final static int FLOM_RC_RESOURCE_IS_NOT_TRANSACTIONAL = +12;
+	/** Constant for error code +11 */
 	public final static int FLOM_RC_API_IMMUTABLE_HANDLE = +11;
+	/** Constant for error code +10 */
 	public final static int FLOM_RC_ELEMENT_NAME_NOT_AVAILABLE = +10;
+	/** Constant for error code +9 */
 	public final static int FLOM_RC_NETWORK_TIMEOUT = +9;
+	/** Constant for error code +8 */
 	public final static int FLOM_RC_CONNECTION_CLOSED = +8;
+	/** Constant for error code +7 */
 	public final static int FLOM_RC_CONNECTION_REFUSED = +7;
+	/** Constant for error code +6 */
 	public final static int FLOM_RC_LOCK_IMPOSSIBLE = +6;
+	/** Constant for error code +5 */
 	public final static int FLOM_RC_LOCK_CANT_WAIT = +5;
+	/** Constant for error code +4 */
 	public final static int FLOM_RC_LOCK_BUSY = +4;
+	/** Constant for error code +3 */
 	public final static int FLOM_RC_LOCK_CANT_LOCK = +3;
+	/** Constant for error code +2 */
 	public final static int FLOM_RC_LOCK_WAIT_RESOURCE = +2;
+	/** Constant for error code +1 */
 	public final static int FLOM_RC_LOCK_ENQUEUED = +1;
+	/** Constant for error code 0 */
 	public final static int FLOM_RC_OK = 0;
+	/** Constant for error code -1 */
 	public final static int FLOM_RC_INTERNAL_ERROR = -1;
+	/** Constant for error code -2 */
 	public final static int FLOM_RC_DAEMON_NOT_STARTED = -2;
+	/** Constant for error code -3 */
 	public final static int FLOM_RC_NETWORK_EVENT_ERROR = -3;
+	/** Constant for error code -4 */
 	public final static int FLOM_RC_NULL_OBJECT = -4;
+	/** Constant for error code -5 */
 	public final static int FLOM_RC_INVALID_OPTION = -5;
+	/** Constant for error code -6 */
 	public final static int FLOM_RC_OBJ_CORRUPTED = -6;
+	/** Constant for error code -7 */
 	public final static int FLOM_RC_OUT_OF_RANGE = -7;
+	/** Constant for error code -8 */
 	public final static int FLOM_RC_INVALID_PREFIX_SIZE = -8;
+	/** Constant for error code -9 */
 	public final static int FLOM_RC_BUFFER_OVERFLOW = -9;
+	/** Constant for error code -10 */
 	public final static int FLOM_RC_INVALID_MSG_LENGTH = -10;
+	/** Constant for error code -11 */
 	public final static int FLOM_RC_INVALID_PROPERTY_VALUE = -11;
+	/** Constant for error code -12 */
 	public final static int FLOM_RC_CONTAINER_FULL = -12;
+	/** Constant for error code -13 */
 	public final static int FLOM_RC_PROTOCOL_ERROR = -13;
+	/** Constant for error code -14 */
 	public final static int FLOM_RC_INVALID_RESOURCE_NAME = -14;
+	/** Constant for error code -15 */
 	public final static int FLOM_RC_PROTOCOL_LEVEL_MISMATCH = -15;
+	/** Constant for error code -16 */
 	public final static int FLOM_RC_MSG_DESERIALIZE_ERROR = -16;
+	/** Constant for error code -17 */
 	public final static int FLOM_RC_API_INVALID_SEQUENCE = -17;
+	/** Constant for error code -18 */
 	public final static int FLOM_RC_INVALID_AI_FAMILY_ERROR = -18;
+	/** Constant for error code -19 */
 	public final static int FLOM_RC_INVALID_IP_ADDRESS = -19;
+	/** Constant for error code -20 */
 	public final static int FLOM_RC_INVALID_IPV6_NETWORK_INTERFACE = -20;
+	/** Constant for error code -21 */
 	public final static int FLOM_RC_NEW_OBJ = -21;
+	/** Constant for error code -22 */
 	public final static int FLOM_RC_NO_CERTIFICATE = -22;
+	/** Constant for error code -23 */
 	public final static int FLOM_RC_UNIQUE_ID_DOES_NOT_MATCH = -23;
+	/** Constant for error code -24 */
 	public final static int FLOM_RC_NO_TLS_CONNECTION = -24;
+	/** Constant for error code -25 */
 	public final static int FLOM_RC_INVALID_TIMESTAMP_FORMAT = -25;
+	/** Constant for error code -26 */
 	public final static int FLOM_RC_RESOURCE_INIT_ERROR = -26;
+	/** Constant for error code -27 */
 	public final static int FLOM_RC_CONNECTION_CLOSED_BY_SERVER = -27;
+	/** Constant for error code -28 */
 	public final static int FLOM_RC_OBJ_NOT_FOUND_ERROR = -28;
+	/** Constant for error code -100 */
 	public final static int FLOM_RC_ACCEPT_ERROR = -100;
+	/** Constant for error code -101 */
 	public final static int FLOM_RC_BIND_ERROR = -101;
+	/** Constant for error code -102 */
 	public final static int FLOM_RC_CHDIR_ERROR = -102;
+	/** Constant for error code -103 */
 	public final static int FLOM_RC_CLOSE_ERROR = -103;
+	/** Constant for error code -104 */
 	public final static int FLOM_RC_CLOSEDIR_ERROR = -104;
+	/** Constant for error code -105 */
 	public final static int FLOM_RC_CONNECT_ERROR = -105;
+	/** Constant for error code -106 */
 	public final static int FLOM_RC_EXECVP_ERROR = -106;
+	/** Constant for error code -107 */
 	public final static int FLOM_RC_FCNTL_ERROR = -107;
+	/** Constant for error code -108 */
 	public final static int FLOM_RC_FLOCK_ERROR = -108;
+	/** Constant for error code -109 */
 	public final static int FLOM_RC_FORK_ERROR = -109;
+	/** Constant for error code -110 */
 	public final static int FLOM_RC_GETADDRINFO_ERROR = -110;
+	/** Constant for error code -111 */
 	public final static int FLOM_RC_GETIFADDRS_ERROR = -111;
+	/** Constant for error code -112 */
 	public final static int FLOM_RC_GETNAMEINFO_ERROR = -112;
+	/** Constant for error code -113 */
 	public final static int FLOM_RC_GETSOCKNAME_ERROR = -113;
+	/** Constant for error code -114 */
 	public final static int FLOM_RC_GETSOCKOPT_ERROR = -114;
+	/** Constant for error code -115 */
 	public final static int FLOM_RC_GETTIMEOFDAY_ERROR = -115;
+	/** Constant for error code -116 */
 	public final static int FLOM_RC_INET_NTOP_ERROR = -116;
+	/** Constant for error code -117 */
 	public final static int FLOM_RC_LISTEN_ERROR = -117;
+	/** Constant for error code -118 */
 	public final static int FLOM_RC_LOCALTIME_R_ERROR = -118;
+	/** Constant for error code -119 */
 	public final static int FLOM_RC_MALLOC_ERROR = -119;
+	/** Constant for error code -120 */
 	public final static int FLOM_RC_OPEN_ERROR = -120;
+	/** Constant for error code -121 */
 	public final static int FLOM_RC_OPENDIR_ERROR = -121;
+	/** Constant for error code -122 */
 	public final static int FLOM_RC_PIPE_ERROR = -122;
+	/** Constant for error code -123 */
 	public final static int FLOM_RC_POLL_ERROR = -123;
+	/** Constant for error code -124 */
 	public final static int FLOM_RC_READ_ERROR = -124;
+	/** Constant for error code -125 */
 	public final static int FLOM_RC_REALPATH_ERROR = -125;
+	/** Constant for error code -126 */
 	public final static int FLOM_RC_RECV_ERROR = -126;
+	/** Constant for error code -127 */
 	public final static int FLOM_RC_RECVFROM_ERROR = -127;
+	/** Constant for error code -128 */
 	public final static int FLOM_RC_REGCOMP_ERROR = -128;
+	/** Constant for error code -129 */
 	public final static int FLOM_RC_REGEXEC_ERROR = -129;
+	/** Constant for error code -130 */
 	public final static int FLOM_RC_SEND_ERROR = -130;
+	/** Constant for error code -131 */
 	public final static int FLOM_RC_SENDTO_ERROR = -131;
+	/** Constant for error code -132 */
 	public final static int FLOM_RC_SETSID_ERROR = -132;
+	/** Constant for error code -133 */
 	public final static int FLOM_RC_SETSOCKOPT_ERROR = -133;
+	/** Constant for error code -134 */
 	public final static int FLOM_RC_SIGACTION_ERROR = -134;
+	/** Constant for error code -135 */
 	public final static int FLOM_RC_SIGADDSET_ERROR = -135;
+	/** Constant for error code -136 */
 	public final static int FLOM_RC_SIGEMPTYSET_ERROR = -136;
+	/** Constant for error code -137 */
 	public final static int FLOM_RC_SIGNAL_ERROR = -137;
+	/** Constant for error code -138 */
 	public final static int FLOM_RC_SIGPROCMASK_ERROR = -138;
+	/** Constant for error code -139 */
 	public final static int FLOM_RC_SOCKET_ERROR = -139;
+	/** Constant for error code -140 */
 	public final static int FLOM_RC_SNPRINTF_ERROR = -140;
+	/** Constant for error code -141 */
 	public final static int FLOM_RC_UNLINK_ERROR = -141;
+	/** Constant for error code -142 */
 	public final static int FLOM_RC_WAIT_ERROR = -142;
+	/** Constant for error code -143 */
 	public final static int FLOM_RC_WRITE_ERROR = -143;
+	/** Constant for error code -200 */
 	public final static int FLOM_RC_G_ARRAY_NEW_ERROR = -200;
+	/** Constant for error code -201 */
 	public final static int FLOM_RC_G_BASE64_DECODE_ERROR = -201;
+	/** Constant for error code -202 */
 	public final static int FLOM_RC_G_BASE64_ENCODE_ERROR = -202;
+	/** Constant for error code -203 */
 	public final static int FLOM_RC_G_KEY_FILE_LOAD_FROM_FILE_ERROR = -203;
+	/** Constant for error code -204 */
 	public final static int FLOM_RC_G_KEY_FILE_NEW_ERROR = -204;
+	/** Constant for error code -205 */
 	public final static int FLOM_RC_G_MARKUP_PARSE_CONTEXT_NEW_ERROR = -205;
+	/** Constant for error code -206 */
 	public final static int FLOM_RC_G_MARKUP_PARSE_CONTEXT_PARSE_ERROR = -206;
+	/** Constant for error code -207 */
 	public final static int FLOM_RC_G_NODE_APPEND_DATA_ERROR = -207;
+	/** Constant for error code -208 */
 	public final static int FLOM_RC_G_NODE_NEW_ERROR = -208;
+	/** Constant for error code -209 */
 	public final static int FLOM_RC_G_NODE_PREPEND_DATA_ERROR = -209;
+	/** Constant for error code -210 */
 	public final static int FLOM_RC_G_PTR_ARRAY_REMOVE_INDEX_FAST_ERROR = -210;
+	/** Constant for error code -211 */
 	public final static int FLOM_RC_G_QUEUE_NEW_ERROR = -211;
+	/** Constant for error code -212 */
 	public final static int FLOM_RC_G_STRDUP_ERROR = -212;
+	/** Constant for error code -213 */
 	public final static int FLOM_RC_G_STRNDUP_ERROR = -213;
+	/** Constant for error code -214 */
 	public final static int FLOM_RC_G_STRSPLIT_ERROR = -214;
+	/** Constant for error code -215 */
 	public final static int FLOM_RC_G_THREAD_NEW_ERROR = -215;
+	/** Constant for error code -216 */
 	public final static int FLOM_RC_G_TRY_MALLOC_ERROR = -216;
+	/** Constant for error code -217 */
 	public final static int FLOM_RC_G_TRY_REALLOC_ERROR = -217;
+	/** Constant for error code -300 */
 	public final static int FLOM_RC_GET_FIELD_ID_ERROR = -300;
+	/** Constant for error code -301 */
 	public final static int FLOM_RC_GET_OBJECT_CLASS_ERROR = -301;
+	/** Constant for error code -302 */
 	public final static int FLOM_RC_NEW_DIRECT_BYTE_BUFFER_ERROR = -302;
+	/** Constant for error code -400 */
 	public final static int FLOM_RC_SSL_CTX_CHECK_PRIVATE_KEY_ERROR = -400;
+	/** Constant for error code -401 */
 	public final static int FLOM_RC_SSL_CTX_LOAD_VERIFY_LOCATIONS_ERROR = -401;
+	/** Constant for error code -402 */
 	public final static int FLOM_RC_SSL_CTX_NEW_ERROR = -402;
+	/** Constant for error code -403 */
 	public final static int FLOM_RC_SSL_CTX_USE_CERTIFICATE_FILE_ERROR = -403;
+	/** Constant for error code -404 */
 	public final static int FLOM_RC_SSL_CTX_USE_PRIVATEKEY_FILE_ERROR = -404;
+	/** Constant for error code -405 */
 	public final static int FLOM_RC_SSL_ACCEPT_ERROR = -405;
+	/** Constant for error code -406 */
 	public final static int FLOM_RC_SSL_CONNECT_ERROR = -406;
+	/** Constant for error code -407 */
 	public final static int FLOM_RC_SSL_GET_VERIFY_RESULT_ERROR = -407;
+	/** Constant for error code -408 */
 	public final static int FLOM_RC_SSL_NEW_ERROR = -408;
+	/** Constant for error code -409 */
 	public final static int FLOM_RC_SSL_READ_ERROR = -409;
+	/** Constant for error code -410 */
 	public final static int FLOM_RC_SSL_SET_EX_DATA_ERROR = -410;
+	/** Constant for error code -411 */
 	public final static int FLOM_RC_SSL_SET_FD_ERROR = -411;
+	/** Constant for error code -412 */
 	public final static int FLOM_RC_SSL_WRITE_ERROR = -412;
+	/** Constant for error code -413 */
 	public final static int FLOM_RC_TLS_NO_VALID_METHOD = -413;
 	/**
 	 * Retrieve the text associated to a FLoM code

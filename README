@@ -120,9 +120,11 @@ NOTE: if you are not interested in Python API library support, specify
       "--disable-python" at configure time; example:
       ./configure --disable-python
 
-Issues related to multicast and internal Linux firewalling:
-the easiest way is to completely disable the internal firewall with
-commands
+One of the most frequent issues related to IPv4 multicast and IPv6 features of
+FLoM depends on Linux firewalling; for the sake of testing, you can try to
+temporarely disable the firewall in a test environment and to restore it
+later on, with accurate configuration as required by your security needs.
+A couple of procedures to disable it, depending on the operating system:
 	systemctl stop firewalld 
 	systemctl disable firewalld 
 or alternatively
@@ -130,9 +132,8 @@ or alternatively
 	service iptables stop
 	chkconfig ipchains off
 	chkconfig iptables off
-If you cannot disable the firewall and you want to use FLoM autodiscovery
-feature (IP multicast based), you will have to configure the internal
-firewall allowing FLoM multicast packets.
+After you probed the environment, don't forget to secure it as required by your
+security policies.
 
 Issues related to FUSE Virtual File System activated with command option "-m"
 or "--mount-point-vfs":
@@ -174,6 +175,7 @@ Ubuntu	16.04	Java API	default-jdk (openjdk 8)
 Ubuntu	18.04	Java API	default-jdk (openjdk 10)
 Ubuntu	20.04	Java API	default-jdk (openjdk 11)
 Ubuntu	22.04	Java API	default-jdk (openjdk 11)
+
 CentOS		Basic		gcc glib2-devel dbus dbus-devel autoconf openssl-devel make
 CentOS	7.x	FUSE		fuse fuse-devel
 CentOS	8.x	FUSE3		fuse3 fuse3-devel
@@ -187,6 +189,15 @@ CentOS  8.x	Python 3 API	swig python3-devel
 CentOS	6.x	Java API	java-1.6.0-openjdk or java-1.7.0-openjdk
 CentOS	7.x	Java API	java-1.8.0-openjdk-devel or java-11-openjdk-devel
 CentOS	8.x	Java API	java-11-openjdk
+
+Rocky	9	Basic		gcc glib2-devel dbus dbus-devel autoconf openssl-devel make dbus-tools
+Rocky	9	FUSE3		fuse3 fuse3-devel
+Rocky 	9	C++ API		gcc-c++
+Rocky 	9	Perl API	swig perl-devel
+Rocky	9	PHP API		swig php-devel
+Rocky	9	Python 3 API	swig python3-devel
+Rocky	9	Java API	java-21-openjdk
+
 Debian	12	Basic		make gcc libglib2.0-dev dbus libdbus-1-dev libssl-dev pkg-config automake
 Debian 	12 	FUSE3		fuse3 libfuse3-dev  <-- use either FUSE or FUSE3
 Debian	12	c++ API		g++

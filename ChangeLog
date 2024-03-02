@@ -1,6 +1,6 @@
 LOG:
 
-	 - 1.7.2 Fix for https://github.com/tiian/flom/issues/31
+20240302 - 1.7.2 Fix for https://github.com/tiian/flom/issues/31
 	Fix for https://github.com/tiian/flom/issues/32
 	Fix of Python related bug in configure.ac
 	Support for PHP 8 and SWIG 4.1.0 (Debian 12)

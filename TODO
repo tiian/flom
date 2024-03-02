@@ -1,6 +1,3 @@
-PHP wrapper for Debian 12
-Support for Rocky 9
-
 
 To improve the quantity of data available in the VFS it's required to perform
 several changes that might be taken into consideration in the future if real
